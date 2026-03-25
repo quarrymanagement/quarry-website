@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Careers | The Quarry</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream:#F5F0E8; --cream-light:#FAF7F2; --brown-dark:#2C1A0E; --brown-mid:#5C3D2E;
+  --brown-warm:#8B5E3C; --brown-light:#C4956A; --gold:#B8933A; --gold-light:#D4AF6A;
+  --charcoal:#1A1A1A; --border-light:rgba(188,149,106,0.25); --border-mid:rgba(188,149,106,0.45);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Montserrat',sans-serif; background:var(--cream-light); color:var(--brown-dark); }
+
+header { background:rgba(26,26,26,0.97); border-bottom:1px solid var(--border-light); padding:0 2rem; }
+.header-inner { max-width:1200px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; height:80px; }
+.logo {
+  font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700;
+  letter-spacing:0.12em; color:#ffffff; text-transform:uppercase;
+  text-decoration:none; flex-shrink:0;
+}
+.logo span {
+  display:block; font-size:0.5rem; letter-spacing:0.3em;
+  color:rgba(255,255,255,0.6); margin-top:2px;
+  font-family:'Montserrat',sans-serif; font-weight:400;
+}
+.logo span { display:block; font-size:0.48rem; letter-spacing:0.28em; color:rgba(255,255,255,0.55); margin-top:2px; font-family:'Montserrat',sans-serif; font-weight:400; }
+.back-link { font-family:'Montserrat',sans-serif; font-size:0.62rem; font-weight:500; letter-spacing:0.15em; text-transform:uppercase; color:var(--gold-light); text-decoration:none; }
+.back-link:hover { color:#fff; }
+
+/* HERO */
+.page-hero {
+  background: linear-gradient(to bottom, rgba(26,14,8,0.75), rgba(26,14,8,0.95)),
+    url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1400&q=80') center/cover no-repeat;
+  padding:5.5rem 2rem; text-align:center;
+}
+.hero-eyebrow { font-family:'Montserrat',sans-serif; font-size:0.6rem; letter-spacing:0.4em; text-transform:uppercase; color:var(--gold); margin-bottom:1rem; }
+.hero-title { font-family:'Playfair Display',serif; font-size:clamp(2.5rem,6vw,4.5rem); font-weight:700; color:#fff; letter-spacing:0.06em; text-transform:uppercase; line-height:1; margin-bottom:0.5rem; }
+.hero-sub { font-family:'Cormorant Garamond',serif; font-size:1.2rem; font-style:italic; color:rgba(245,240,232,0.8); }
+.hero-divider { width:50px; height:1px; background:var(--gold); margin:1.25rem auto; }
+
+/* WHY WORK HERE */
+.why-section { background:var(--brown-dark); padding:4.5rem 2rem; }
+.why-inner { max-width:1100px; margin:0 auto; }
+.section-header { display:flex; align-items:center; gap:1rem; margin-bottom:2.5rem; }
+.section-header-line { flex:1; height:1px; background:var(--border-mid); }
+.section-title { font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:#fff; white-space:nowrap; }
+.perks-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; }
+.perk-card { padding:2rem 1.75rem; border:1px solid var(--border-light); }
+.perk-icon { font-size:1.75rem; margin-bottom:0.75rem; }
+.perk-title { font-family:'Playfair Display',serif; font-size:1rem; font-weight:600; color:var(--gold-light); margin-bottom:0.4rem; }
+.perk-desc { font-family:'Cormorant Garamond',serif; font-size:0.92rem; font-style:italic; color:rgba(245,240,232,0.7); line-height:1.6; }
+
+/* POSITIONS */
+.positions-section { padding:5rem 2rem; background:var(--cream-light); }
+.positions-inner { max-width:1000px; margin:0 auto; }
+.pos-header { text-align:center; margin-bottom:3.5rem; }
+.pos-header h2 { font-family:'Playfair Display',serif; font-size:2rem; font-weight:600; color:var(--brown-dark); margin-bottom:0.4rem; }
+.pos-header p { font-family:'Cormorant Garamond',serif; font-size:1rem; font-style:italic; color:var(--brown-warm); }
+
+.positions-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.5px; background:var(--border-mid); margin-bottom:2rem; }
+.position-card { background:#fff; padding:2rem; transition:background 0.2s; }
+.position-card:hover { background:var(--cream); }
+.pos-type { font-family:'Montserrat',sans-serif; font-size:0.52rem; font-weight:700; letter-spacing:0.25em; text-transform:uppercase; color:var(--gold); margin-bottom:0.4rem; }
+.pos-title { font-family:'Playfair Display',serif; font-size:1.2rem; font-weight:600; color:var(--brown-dark); margin-bottom:0.5rem; }
+.pos-desc { font-family:'Cormorant Garamond',serif; font-size:0.92rem; font-style:italic; color:var(--brown-warm); line-height:1.6; margin-bottom:1rem; }
+
+
+
+/* APPLY SECTION */
+.apply-section { background:var(--charcoal); padding:5rem 2rem; }
+.apply-inner { max-width:750px; margin:0 auto; }
+.apply-header { text-align:center; margin-bottom:3rem; }
+.apply-header h2 { font-family:'Playfair Display',serif; font-size:2rem; font-weight:600; color:#fff; margin-bottom:0.4rem; }
+.apply-header p { font-family:'Cormorant Garamond',serif; font-size:1rem; font-style:italic; color:rgba(245,240,232,0.65); }
+
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; }
+.form-full { grid-column:1/-1; }
+.form-group { display:flex; flex-direction:column; gap:0.4rem; }
+.form-label { font-family:'Montserrat',sans-serif; font-size:0.58rem; font-weight:600; letter-spacing:0.15em; text-transform:uppercase; color:rgba(245,240,232,0.6); }
+.form-label span { color:var(--gold); margin-left:2px; }
+
+input, select, textarea {
+  width:100%; padding:0.85rem 1rem;
+  border:1px solid var(--border-mid); background:rgba(255,255,255,0.05); color:var(--cream);
+  font-family:'Montserrat',sans-serif; font-size:0.72rem;
+  outline:none; transition:border-color 0.2s; -webkit-appearance:none; border-radius:0;
+}
+input::placeholder, textarea::placeholder { color:rgba(245,240,232,0.3); }
+input:focus, select:focus, textarea:focus { border-color:var(--gold); }
+select { cursor:pointer; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23D4AF6A' stroke-width='1.5' fill='none'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 1rem center; padding-right:2.5rem; }
+select option { background:var(--brown-dark); color:var(--cream); }
+textarea { resize:vertical; min-height:120px; }
+
+.form-divider { grid-column:1/-1; height:1px; background:var(--border-light); margin:0.5rem 0; }
+
+.submit-btn { display:block; width:100%; padding:1.1rem; background:var(--gold); color:var(--brown-dark); font-family:'Montserrat',sans-serif; font-size:0.7rem; font-weight:700; letter-spacing:0.25em; text-transform:uppercase; border:none; cursor:pointer; transition:background 0.2s; margin-top:0.5rem; }
+.submit-btn:hover { background:var(--gold-light); }
+
+.success-msg { display:none; text-align:center; padding:3.5rem 2rem; background:rgba(255,255,255,0.05); border:1px solid var(--gold); }
+.success-icon { font-size:2.5rem; margin-bottom:1rem; }
+.success-title { font-family:'Playfair Display',serif; font-size:1.75rem; color:#fff; margin-bottom:0.5rem; }
+.success-sub { font-family:'Cormorant Garamond',serif; font-size:1.05rem; font-style:italic; color:rgba(245,240,232,0.7); line-height:1.7; }
+
+footer { background:#0F0A07; padding:2.5rem 2rem; border-top:1px solid var(--border-light); text-align:center; }
+.footer-legal { font-family:'Montserrat',sans-serif; font-size:0.55rem; color:rgba(255,255,255,0.3); letter-spacing:0.08em; line-height:2; }
+
+@media (max-width:768px) {
+  .perks-grid { grid-template-columns:1fr; }
+  .positions-grid { grid-template-columns:1fr; }
+  .form-grid { grid-template-columns:1fr; }
+}
+
+header { background:rgba(26,26,26,0.97); border-bottom:1px solid var(--border-light); padding:0 2rem; position:sticky; top:0; z-index:1000; }
+.header-inner { max-width:1400px; margin:0 auto; padding:0 2rem; display:flex; align-items:center; justify-content:space-between; height:80px; }
+.logo {
+  font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700;
+  letter-spacing:0.12em; color:#ffffff; text-transform:uppercase;
+  text-decoration:none; flex-shrink:0;
+}
+.logo span {
+  display:block; font-size:0.5rem; letter-spacing:0.3em;
+  color:rgba(255,255,255,0.6); margin-top:2px;
+  font-family:'Montserrat',sans-serif; font-weight:400;
+}
+.logo span { display:block; font-size:0.48rem; letter-spacing:0.28em; color:rgba(255,255,255,0.55); margin-top:2px; font-family:'Montserrat',sans-serif; font-weight:400; }
+nav { display:flex; align-items:center; }
+.nav-item { position:relative; }
+.nav-link { font-family:'Montserrat',sans-serif; font-size:0.62rem; font-weight:500; letter-spacing:0.14em; text-transform:uppercase; color:var(--cream,#F5F0E8); text-decoration:none; padding:0.6rem 0.75rem; display:block; transition:color 0.2s; white-space:nowrap; }
+.nav-link:hover { color:var(--gold-light,#D4AF6A); }
+.dropdown { display:none; position:absolute; top:100%; left:0; background:var(--brown-dark,#2C1A0E); border:1px solid var(--border-mid,rgba(188,149,106,0.45)); min-width:200px; z-index:200; }
+.nav-item:hover .dropdown { display:block; }
+.dropdown a { display:block; padding:0.7rem 1.25rem; font-size:0.65rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--cream,#F5F0E8); text-decoration:none; border-bottom:1px solid var(--border-light,rgba(188,149,106,0.25)); font-family:'Montserrat',sans-serif; font-weight:400; transition:background 0.2s,color 0.2s; }
+.dropdown a:last-child { border-bottom:none; }
+.dropdown a:hover { background:var(--brown-mid,#5C3D2E); color:var(--gold-light,#D4AF6A); }
+.dropdown .dimmed { color:rgba(196,149,106,0.75); }
+.dropdown .dimmed:hover { background:transparent; }
+.cs-badge { display:inline-block; font-size:0.48rem; letter-spacing:0.08em; background:var(--gold,#B8933A); color:var(--brown-dark,#2C1A0E); padding:1px 5px; margin-left:4px; vertical-align:middle; font-weight:700; }
+.hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:0.5rem; }
+.hamburger span { display:block; width:24px; height:1.5px; background:#F5F0E8; }
+@media (max-width:1100px) {
+  nav { display:none; }
+  nav.open { display:flex; flex-direction:column; position:absolute; top:80px; left:0; right:0; background:#1a1a1a; padding:0.5rem 0; border-top:1px solid rgba(188,149,106,0.25); max-height:calc(100vh - 80px); overflow-y:auto; z-index:999; }
+  .hamburger { display:flex; }
+  .nav-item { width:100%; }
+  .nav-link { padding:0.85rem 1.5rem; font-size:0.7rem; border-bottom:1px solid rgba(255,255,255,0.06); }
+  .dropdown { position:static; display:none; border:none; background:rgba(0,0,0,0.3); }
+  .nav-item.open .dropdown { display:block; }
+  .dropdown a { padding:0.7rem 2.5rem; font-size:0.65rem; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="logo">The Quarry<span>New Melle, Missouri</span></a>
+    <nav id="mainNav">
+      <div class="nav-item">
+        <a href="#" class="nav-link">Menu ▾</a>
+        <div class="dropdown">
+          <a href="quarry-menu.html">Food Menu</a>
+          <a href="quarry-drinks.html">Drink Menu</a>
+          <a href="quarry-catering.html">Catering Menu</a>
+          <a href="quarry-brunch.html">Brunch Menu</a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <a href="quarry-golf.html" class="nav-link">Hole-In-One Golf</a>
+      </div>
+      <div class="nav-item">
+        <a href="#" class="nav-link">Entertainment ▾</a>
+        <div class="dropdown">
+          <a href="quarry-events.html">Events Calendar</a>
+          <a href="quarry-bands.html">Live Bands</a>
+          <a href="quarry-beergarden.html">Beer Garden <span class="cs-badge">Coming 2026</span></a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <a href="#" class="nav-link">Reservations ▾</a>
+        <div class="dropdown">
+          <a href="quarry-reservations.html">Book a Reservation</a>
+          <a href="http://thequarryweddings.com" target="_blank">Weddings</a>
+          <a href="quarry-private-events.html">Private Events</a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <a href="quarry-giftcards.html" class="nav-link">Gift Cards</a>
+      </div>
+      <div class="nav-item">
+        <a href="#" class="nav-link">Connect ▾</a>
+        <div class="dropdown">
+          <a href="quarry-ourstory.html">Our Story</a>
+          <a href="quarry-press.html">Press & Media</a>
+          <a href="quarry-careers.html">Careers</a>
+          <a href="quarry-contact.html">Contact Us</a>
+        </div>
+      </div>
+    </nav>
+    <div class="hamburger" id="hamburger" onclick="toggleNav()"><span></span><span></span><span></span></div>
+  </div>
+</header>
+
+<div class="page-hero">
+  <p class="hero-eyebrow">Join the Team</p>
+  <h1 class="hero-title">Careers</h1>
+  <p class="hero-sub">Be part of something special at The Quarry</p>
+  <div class="hero-divider"></div>
+</div>
+
+<!-- WHY WORK HERE -->
+<div class="why-section">
+  <div class="why-inner">
+    <div class="section-header"><div class="section-header-line"></div><h2 class="section-title">Why Work With Us</h2><div class="section-header-line"></div></div>
+    <div class="perks-grid">
+      <div class="perk-card">
+        <div class="perk-icon">🌟</div>
+        <h3 class="perk-title">Vibrant Atmosphere</h3>
+        <p class="perk-desc">Work in a one-of-a-kind venue with live music, great food, and an energy that keeps every shift exciting.</p>
+      </div>
+      <div class="perk-card">
+        <div class="perk-icon">🤝</div>
+        <h3 class="perk-title">Great Team Culture</h3>
+        <p class="perk-desc">We're a close-knit team that supports each other. Come as you are and grow with people who genuinely care.</p>
+      </div>
+      <div class="perk-card">
+        <div class="perk-icon">📈</div>
+        <h3 class="perk-title">Room to Grow</h3>
+        <p class="perk-desc">We invest in our people. Whether you're just starting out or building a career, there's opportunity here.</p>
+      </div>
+      <div class="perk-card">
+        <div class="perk-icon">🍽️</div>
+        <h3 class="perk-title">Employee Discounts</h3>
+        <p class="perk-desc">Enjoy perks on food and drinks. We want you to love what we serve as much as our guests do.</p>
+      </div>
+      <div class="perk-card">
+        <div class="perk-icon">🎵</div>
+        <h3 class="perk-title">Live Music & Events</h3>
+        <p class="perk-desc">Be part of the action — from signature events to live bands, every week brings something new.</p>
+      </div>
+      <div class="perk-card">
+        <div class="perk-icon">📍</div>
+        <h3 class="perk-title">Unique Setting</h3>
+        <p class="perk-desc">Nestled on a stunning quarry lake in New Melle — there's truly no workplace quite like ours.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- OPEN POSITIONS -->
+<div class="positions-section">
+  <div class="positions-inner">
+    <div class="pos-header">
+      <h2>Open Positions</h2>
+      <p>We're always looking for passionate, hardworking people to join our crew</p>
+    </div>
+    <div class="positions-grid">
+      <div class="position-card" style="cursor:pointer;" onclick="applyFor(this)">
+        <p class="pos-type">Front of House</p>
+        <h3 class="pos-title">Server</h3>
+        <p class="pos-desc">Deliver an exceptional dining experience to every guest. Knowledge of our menu, wine, and cocktails preferred.</p>
+        
+      </div>
+      <div class="position-card" style="cursor:pointer;" onclick="applyFor(this)">
+        <p class="pos-type">Front of House</p>
+        <h3 class="pos-title">Bartender</h3>
+        <p class="pos-desc">Craft cocktails, pour wines, and create memorable experiences at the bar. Experience preferred but not required.</p>
+        
+      </div>
+      <div class="position-card" style="cursor:pointer;" onclick="applyFor(this)">
+        <p class="pos-type">Front of House</p>
+        <h3 class="pos-title">Host / Hostess</h3>
+        <p class="pos-desc">Be the first face our guests see. Manage seating, greet with warmth, and set the tone for a great visit.</p>
+        
+      </div>
+      <div class="position-card" style="cursor:pointer;" onclick="applyFor(this)">
+        <p class="pos-type">Front of House</p>
+        <h3 class="pos-title">Busser / Food Runner</h3>
+        <p class="pos-desc">Keep the floor moving. Support servers and ensure guests always have what they need quickly.</p>
+        
+      </div>
+      <div class="position-card" style="cursor:pointer;" onclick="applyFor(this)">
+        <p class="pos-type">Back of House</p>
+        <h3 class="pos-title">Line Cook</h3>
+        <p class="pos-desc">Prepare quality dishes with consistency and speed. Kitchen experience required. Passion for food a must.</p>
+        
+      </div>
+      <div class="position-card" style="cursor:pointer;" onclick="applyFor(this)">
+        <p class="pos-type">Back of House</p>
+        <h3 class="pos-title">Dishwasher / Kitchen Support</h3>
+        <p class="pos-desc">Keep our kitchen clean and running smoothly. A critical role on the team — no experience necessary.</p>
+        
+      </div>
+    </div>
+    <p style="font-family:'Cormorant Garamond',serif;font-size:0.92rem;font-style:italic;color:var(--brown-warm);text-align:center;">Don't see your role listed? We'd still love to hear from you — apply below.</p>
+  </div>
+</div>
+
+<!-- APPLY -->
+<div class="apply-section">
+  <div class="apply-inner">
+    <div class="apply-header">
+      <h2>Apply Now</h2>
+      <p>Fill out the form and our team will be in touch soon</p>
+    </div>
+
+    <div class="success-msg" id="successMsg">
+      <div class="success-icon">🎉</div>
+      <h3 class="success-title">Application Received!</h3>
+      <p class="success-sub">Thank you for your interest in joining The Quarry team.<br>One of our managers will be in touch with you soon.</p>
+    </div>
+
+    <form id="careerForm">
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label class="form-label">First Name <span>*</span></label>
+          <input type="text" name="firstName" placeholder="Jane" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last Name <span>*</span></label>
+          <input type="text" name="lastName" placeholder="Smith" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address <span>*</span></label>
+          <input type="email" name="email" placeholder="jane@email.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone Number <span>*</span></label>
+          <input type="tel" name="phone" placeholder="(314) 555-0000" required>
+        </div>
+
+        <div class="form-group form-full">
+          <label class="form-label">Position Applying For <span>*</span></label>
+          <select name="position" required>
+            <option value="" disabled selected>Select a position</option>
+            <option>Server</option>
+            <option>Bartender</option>
+            <option>Host / Hostess</option>
+            <option>Busser / Food Runner</option>
+            <option>Line Cook</option>
+            <option>Dishwasher / Kitchen Support</option>
+            <option>Other / Open to Any</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Availability <span>*</span></label>
+          <select name="availability" required>
+            <option value="" disabled selected>Select availability</option>
+            <option>Full-Time</option>
+            <option>Part-Time</option>
+            <option>Weekends Only</option>
+            <option>Flexible</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Years of Experience</label>
+          <select name="experience">
+            <option value="" disabled selected>Select experience</option>
+            <option>No experience (entry level)</option>
+            <option>Less than 1 year</option>
+            <option>1 – 2 years</option>
+            <option>3 – 5 years</option>
+            <option>5+ years</option>
+          </select>
+        </div>
+
+        <div class="form-divider"></div>
+
+        <div class="form-group form-full">
+          <label class="form-label">Tell Us About Yourself</label>
+          <textarea name="bio" placeholder="Share a little about yourself, your experience, and why you'd love to work at The Quarry..."></textarea>
+        </div>
+
+        <div class="form-full">
+          <button type="submit" class="submit-btn">Submit Application →</button>
+        </div>
+
+      </div>
+    </form>
+  </div>
+</div>
+
+<footer>
+  <p class="footer-legal">
+    © 2026 The Quarry · 3960 Highway Z, New Melle, MO 63385 · 636-224-8257 · management@thequarrystl.com<br>
+    The Quarry is an equal opportunity employer
+  </p>
+</footer>
+
+<script>
+function applyFor(card) {
+  const title = card.querySelector('.pos-title').textContent;
+  const sel = document.querySelector('select[name="position"]');
+  if (sel) {
+    for (let opt of sel.options) {
+      if (opt.text === title || title.includes(opt.text) || opt.text.includes(title.split('/')[0].trim())) {
+        sel.value = opt.value || opt.text;
+        break;
+      }
+    }
+  }
+  document.querySelector('.apply-section').scrollIntoView({behavior:'smooth'});
+}
+document.getElementById('careerForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const data = new FormData(e.target);
+
+  const firstName    = data.get('firstName');
+  const lastName     = data.get('lastName');
+  const email        = data.get('email');
+  const phone        = data.get('phone');
+  const position     = data.get('position');
+  const availability = data.get('availability');
+  const experience   = data.get('experience') || 'Not specified';
+  const bio          = data.get('bio') || 'None';
+
+  const subject = encodeURIComponent(`Job Application – ${position} – ${firstName} ${lastName}`);
+  const body = encodeURIComponent(
+`NEW JOB APPLICATION
+====================
+
+Name:         ${firstName} ${lastName}
+Email:        ${email}
+Phone:        ${phone}
+
+Position:     ${position}
+Availability: ${availability}
+Experience:   ${experience}
+
+About the Applicant:
+${bio}
+
+---------------------------
+Submitted via thequarrystl.com`
+  );
+
+  window.location.href = `mailto:management@thequarrystl.com?subject=${subject}&body=${body}`;
+
+  e.target.style.display = 'none';
+  document.getElementById('successMsg').style.display = 'block';
+  window.scrollTo({ top: document.getElementById('successMsg').offsetTop - 100, behavior:'smooth' });
+});
+</script>
+
+
+<script>
+function toggleNav() {
+  document.getElementById('mainNav').classList.toggle('open');
+}
+document.querySelectorAll('.nav-link').forEach(link => {
+  link.addEventListener('click', function(e) {
+    const item = this.closest('.nav-item');
+    const dropdown = item && item.querySelector('.dropdown');
+    if (dropdown && window.innerWidth <= 1100) {
+      e.preventDefault();
+      item.classList.toggle('open');
+    }
+  });
+});
+document.addEventListener('click', function(e) {
+  const nav = document.getElementById('mainNav');
+  const hb = document.getElementById('hamburger');
+  if (nav && nav.classList.contains('open') && !nav.contains(e.target) && hb && !hb.contains(e.target)) {
+    nav.classList.remove('open');
+  }
+});
+</script>
+</body>
+</html>
