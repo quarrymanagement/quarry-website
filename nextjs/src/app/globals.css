@@ -1,0 +1,23 @@
+:root {
+  --cream: #F5F0E8;
+  --cream-light: #FAF7F2;
+  --brown-dark: #2C1A0E;
+  --brown-mid: #5C3D2E;
+  --brown-warm: #8B5E3C;
+  --brown-light: #C4956A;
+  --gold: #B8933A;
+  --gold-light: #D4AF6A;
+  --charcoal: #1A1A1A;
+  --border-light: rgba(188,149,106,0.25);
+  --border-mid: rgba(188,149,106,0.45);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Montserrat', sans-serif;
+  background: var(--charcoal);
+  color: var(--cream);
+}
+
+a { text-decoration: none; }
