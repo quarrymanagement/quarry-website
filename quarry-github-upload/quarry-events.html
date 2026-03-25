@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Events | The Quarry</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {--cream:#F5F0E8;--cream-light:#FAF7F2;--brown-dark:#2C1A0E;--brown-mid:#5C3D2E;--brown-warm:#8B5E3C;--brown-light:#C4956A;--gold:#B8933A;--gold-light:#D4AF6A;--charcoal:#1A1A1A;--border-light:rgba(188,149,106,0.25);--border-mid:rgba(188,149,106,0.45);}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Montserrat',sans-serif;background:var(--charcoal);color:var(--cream);}
+
+header { background:rgba(26,26,26,0.97); border-bottom:1px solid var(--border-light); padding:0 2rem; position:sticky; top:0; z-index:1000; }
+.header-inner { max-width:1400px; margin:0 auto; padding:0 2rem; display:flex; align-items:center; justify-content:space-between; height:80px; }
+.logo { font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:700; letter-spacing:0.12em; color:#fff; text-transform:uppercase; text-decoration:none; flex-shrink:0; }
+.logo span { display:block; font-size:0.48rem; letter-spacing:0.28em; color:rgba(255,255,255,0.55); margin-top:2px; font-family:'Montserrat',sans-serif; font-weight:400; }
+nav { display:flex; align-items:center; }
+.nav-item { position:relative; }
+.nav-link { font-family:'Montserrat',sans-serif; font-size:0.62rem; font-weight:500; letter-spacing:0.14em; text-transform:uppercase; color:var(--cream,#F5F0E8); text-decoration:none; padding:0.6rem 0.75rem; display:block; transition:color 0.2s; white-space:nowrap; }
+.nav-link:hover { color:var(--gold-light,#D4AF6A); }
+.dropdown { display:none; position:absolute; top:100%; left:0; background:var(--brown-dark,#2C1A0E); border:1px solid var(--border-mid,rgba(188,149,106,0.45)); min-width:200px; z-index:200; }
+.nav-item:hover .dropdown { display:block; }
+.dropdown a { display:block; padding:0.7rem 1.25rem; font-size:0.65rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--cream,#F5F0E8); text-decoration:none; border-bottom:1px solid var(--border-light,rgba(188,149,106,0.25)); font-family:'Montserrat',sans-serif; font-weight:400; transition:background 0.2s,color 0.2s; }
+.dropdown a:last-child { border-bottom:none; }
+.dropdown a:hover { background:var(--brown-mid,#5C3D2E); color:var(--gold-light,#D4AF6A); }
+.dropdown .dimmed { color:rgba(196,149,106,0.5); pointer-events:none; }
+.dropdown .dimmed:hover { background:transparent; }
+.cs-badge { display:inline-block; font-size:0.48rem; letter-spacing:0.08em; background:var(--gold,#B8933A); color:var(--brown-dark,#2C1A0E); padding:1px 5px; margin-left:4px; vertical-align:middle; font-weight:700; }
+.hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:0.5rem; }
+.hamburger span { display:block; width:24px; height:1.5px; background:#F5F0E8; }
+@media (max-width:1100px) {
+  nav { display:none; }
+  nav.open { display:flex; flex-direction:column; position:absolute; top:80px; left:0; right:0; background:#1a1a1a; padding:0.5rem 0; border-top:1px solid rgba(188,149,106,0.25); max-height:calc(100vh - 80px); overflow-y:auto; z-index:999; }
+  .hamburger { display:flex; }
+  .nav-item { width:100%; }
+  .nav-link { padding:0.85rem 1.5rem; font-size:0.7rem; border-bottom:1px solid rgba(255,255,255,0.06); }
+  .dropdown { position:static; display:none; border:none; background:rgba(0,0,0,0.3); }
+  .nav-item.open .dropdown { display:block; }
+  .dropdown a { padding:0.7rem 2.5rem; font-size:0.65rem; }
+}
+.hero{position:relative;height:45vh;min-height:320px;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.hero-bg{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(26,26,26,.5) 0%,rgba(26,26,26,.7) 55%,rgba(26,26,26,.95) 100%),url('https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=1400&q=80') center/cover no-repeat;}
+.hero-content{position:relative;z-index:2;text-align:center;padding:0 2rem;}
+.hero-eyebrow{font-family:'Montserrat',sans-serif;font-size:.6rem;letter-spacing:.4em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;}
+.hero-title{font-family:'Playfair Display',serif;font-size:clamp(2.5rem,6vw,4.5rem);font-weight:700;color:#fff;letter-spacing:.06em;text-transform:uppercase;line-height:1;}
+.hero-divider{width:50px;height:1px;background:var(--gold);margin:1.25rem auto;}
+.filter-bar{background:var(--brown-dark);border-bottom:1px solid var(--border-light);position:sticky;top:80px;z-index:50;}
+.filter-inner{max-width:1100px;margin:0 auto;display:flex;overflow-x:auto;}
+.ftab{font-family:'Montserrat',sans-serif;font-size:.58rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:rgba(245,240,232,.5);padding:.9rem 1.25rem;white-space:nowrap;border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;transition:all .2s;}
+.ftab:hover,.ftab.active{color:var(--gold-light);border-bottom-color:var(--gold);}
+.events-wrap{max-width:900px;margin:0 auto;padding:3.5rem 2rem 5rem;}
+.events-list{display:flex;flex-direction:column;gap:1.5px;background:var(--border-light);}
+.event-card{background:var(--brown-dark);display:grid;grid-template-columns:90px 1fr;transition:background .2s;}
+.event-card:hover{background:var(--brown-mid);}
+.card-left{background:rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;padding:1.5rem 1rem;border-right:1px solid var(--border-light);}
+.card-date-col{text-align:center;}
+.card-month{font-family:'Montserrat',sans-serif;font-size:.52rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);display:block;}
+.card-day{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:#fff;line-height:1;display:block;}
+.card-year{font-family:'Montserrat',sans-serif;font-size:.48rem;color:rgba(245,240,232,.4);letter-spacing:.08em;display:block;margin-top:2px;}
+.card-body{padding:1.75rem 2rem;display:flex;flex-direction:column;gap:.65rem;}
+.event-badge{font-family:'Montserrat',sans-serif;font-size:.5rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;padding:3px 10px;display:inline-block;width:fit-content;}
+.badge-ticketed{background:var(--gold);color:var(--brown-dark);}
+.badge-public{background:rgba(245,240,232,.12);color:rgba(245,240,232,.75);border:1px solid rgba(245,240,232,.2);}
+.badge-member{background:rgba(120,50,150,.4);color:rgba(210,170,255,.9);border:1px solid rgba(120,50,150,.5);}
+.badge-fundraiser{background:rgba(30,100,60,.4);color:rgba(150,220,170,.9);border:1px solid rgba(30,100,60,.5);}
+.event-name{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:600;color:#fff;line-height:1.2;}
+.event-meta{display:flex;flex-wrap:wrap;gap:.5rem;}
+.meta-pill{font-family:'Montserrat',sans-serif;font-size:.55rem;letter-spacing:.06em;color:rgba(245,240,232,.6);background:rgba(255,255,255,.06);padding:3px 8px;}
+.price-pill{color:var(--gold-light);background:rgba(184,147,58,.12);}
+.event-desc{font-family:'Cormorant Garamond',serif;font-size:.95rem;font-style:italic;color:rgba(245,240,232,.65);line-height:1.7;}
+.price-note{font-family:'Montserrat',sans-serif;font-size:.58rem;letter-spacing:.05em;color:rgba(245,240,232,.55);line-height:1.6;background:rgba(255,255,255,.04);padding:.5rem .75rem;border-left:2px solid var(--gold);}
+.cap-wrap{}
+.cap-labels{display:flex;justify-content:space-between;font-family:'Montserrat',sans-serif;font-size:.52rem;letter-spacing:.08em;margin-bottom:.4rem;}
+.cap-reg{color:var(--gold-light);}
+.cap-rem{color:rgba(245,240,232,.5);}
+.cap-sold{color:#e05555;}
+.cap-bar{height:3px;background:rgba(255,255,255,.1);}
+.cap-fill{height:100%;transition:width .5s;}
+.fill-ok{background:var(--gold);}
+.fill-low{background:#e07b39;}
+.fill-sold{background:#9b2226;}
+.wine-dates{display:flex;flex-direction:column;gap:.3rem;}
+.wine-row{font-family:'Montserrat',sans-serif;font-size:.58rem;letter-spacing:.06em;color:rgba(245,240,232,.6);padding:.3rem 0;border-bottom:1px solid var(--border-light);}
+.wine-row:last-child{border-bottom:none;}
+.event-btn{display:inline-block;padding:.65rem 1.5rem;font-family:'Montserrat',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;text-decoration:none;cursor:pointer;transition:all .2s;width:fit-content;margin-top:.25rem;}
+.cta-gold{background:var(--gold);color:var(--brown-dark);}
+.cta-gold:hover{background:var(--gold-light);}
+.cta-outline{border:1px solid var(--gold);color:var(--gold-light);}
+.cta-outline:hover{background:rgba(184,147,58,.12);}
+.cta-member{background:rgba(120,50,150,.5);color:rgba(220,180,255,.95);border:1px solid rgba(120,50,150,.6);}
+.cta-member:hover{background:rgba(120,50,150,.7);}
+.cta-fundraiser{border:1px solid rgba(30,100,60,.6);color:rgba(150,220,170,.9);}
+.cta-fundraiser:hover{background:rgba(30,100,60,.2);}
+.cta-sold{background:rgba(155,34,38,.4);color:rgba(255,200,200,.7);font-family:'Montserrat',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;padding:.65rem 1.5rem;cursor:not-allowed;display:inline-block;margin-top:.25rem;}
+.dual-btns{display:flex;gap:.75rem;flex-wrap:wrap;margin-top:.25rem;}
+.host-cta{background:var(--brown-dark);padding:2.5rem;text-align:center;border:1px solid var(--border-mid);margin-top:3rem;}
+.host-cta h3{font-family:'Playfair Display',serif;font-size:1.5rem;color:#fff;margin-bottom:.4rem;}
+.host-cta p{font-family:'Cormorant Garamond',serif;font-size:.95rem;font-style:italic;color:rgba(245,240,232,.6);margin-bottom:1.5rem;}
+.host-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;}
+.host-btn{display:inline-block;padding:.8rem 1.75rem;font-family:'Montserrat',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;text-decoration:none;transition:all .2s;}
+footer{background:#0F0A07;padding:2.5rem 2rem;border-top:1px solid var(--border-light);text-align:center;}
+.footer-legal{font-family:'Montserrat',sans-serif;font-size:.55rem;color:rgba(255,255,255,.3);letter-spacing:.08em;line-height:2;}
+@media(max-width:640px){.event-card{grid-template-columns:70px 1fr;}.card-body{padding:1.25rem;}.card-day{font-size:1.5rem;}.events-wrap{padding:2rem 1rem;}.dual-btns{flex-direction:column;}}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="logo">The Quarry<span>New Melle, Missouri</span></a>
+    <nav id="mainNav">
+      <div class="nav-item">
+        <a href="#" class="nav-link">Menu ▾</a>
+        <div class="dropdown">
+          <a href="quarry-menu.html">Food Menu</a>
+          <a href="quarry-drinks.html">Drink Menu</a>
+          <a href="quarry-catering.html">Catering Menu</a>
+          <a href="quarry-brunch.html">Brunch Menu</a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <a href="quarry-reservations.html" class="nav-link">Hole-In-One Golf</a>
+      </div>
+      <div class="nav-item">
+        <a href="#" class="nav-link">Entertainment ▾</a>
+        <div class="dropdown">
+          <a href="#">Events Calendar</a>
+          <a href="#">Live Bands</a>
+          <a class="dimmed" href="quarry-beergarden.html">Beer Garden <span class="cs-badge">Coming 2026</span></a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <a href="#" class="nav-link">Reservations ▾</a>
+        <div class="dropdown">
+          <a href="quarry-reservations.html">Book a Reservation</a>
+          <a href="quarry-reservations.html">Book a Golf Bay</a>
+          <a href="http://thequarryweddings.com">Weddings</a>
+          <a href="quarry-private-events.html">Private Events</a>
+          <a href="quarry-private-events.html">Corporate Events</a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <a href="quarry-giftcards.html" class="nav-link">Gift Cards</a>
+      </div>
+      <div class="nav-item">
+        <a href="#" class="nav-link">Connect ▾</a>
+        <div class="dropdown">
+          <a href="#">Our Story</a>
+          <a href="quarry-careers.html">Careers</a>
+          <a href="#">Contact Us</a>
+        </div>
+      </div>
+    </nav>
+    <div class="hamburger" id="hamburger" onclick="toggleNav()"><span></span><span></span><span></span></div>
+  </div>
+</header>
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <p class="hero-eyebrow">Always Something Happening</p>
+    <h1 class="hero-title">Events at The Quarry</h1>
+    <div class="hero-divider"></div>
+  </div>
+</section>
+<div class="filter-bar">
+  <div class="filter-inner">
+    <button class="ftab active" onclick="filterCards('all',this)">All Events</button>
+    <button class="ftab" onclick="filterCards('ticketed',this)">🎟 Ticketed</button>
+    <button class="ftab" onclick="filterCards('public',this)">🌐 Public</button>
+    <button class="ftab" onclick="filterCards('fundraiser',this)">🤝 Fundraisers</button>
+    <button class="ftab" onclick="filterCards('member',this)">🍷 Wine Club</button>
+  </div>
+</div>
+<div class="events-wrap">
+  <div class="events-list"><div class="event-card" data-type="ticketed">
+      <div class="card-left">
+        <div class="card-date-col">
+          <span class="card-month">APR</span>
+          <span class="card-day">3</span>
+          <span class="card-year">2026</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <span class="event-badge badge-ticketed">🎟 Ticketed Event</span>
+        <h3 class="event-name">80s Neon Music Bingo</h3>
+        <div class="event-meta">
+          <span class="meta-pill">🕐 6:00 PM – 10:00 PM</span>
+          <span class="meta-pill">📍 The Building · The Quarry</span>
+          <span class="meta-pill price-pill">💵 $25 / person</span>
+        </div>
+        <p class="event-desc">Grab your daubers and light up the night — 80s Neon Music Bingo is back! Sing along to your favorite 80s hits, play bingo for prizes, and enjoy a full evening at The Quarry. This event sells out fast.</p>
+        <div class="cap-wrap">
+      <div class="cap-labels">
+        <span class="cap-reg">144 / 144 Registered</span>
+        <span class="cap-rem cap-sold">Sold Out</span>
+      </div>
+      <div class="cap-bar"><div class="cap-fill fill-sold" style="width:100%"></div></div>
+    </div><span class="event-btn cta-sold">Sold Out</span>
+      </div>
+    </div>
+<div class="event-card" data-type="ticketed">
+      <div class="card-left">
+        <div class="card-date-col">
+          <span class="card-month">APR</span>
+          <span class="card-day">4</span>
+          <span class="card-year">2026</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <span class="event-badge badge-ticketed">🎟 Ticketed Event</span>
+        <h3 class="event-name">Fore the Girls Golf Event</h3>
+        <div class="event-meta">
+          <span class="meta-pill">🕐 10:00 AM – 12:00 PM</span>
+          <span class="meta-pill">📍 Surfside Golf Area · The Quarry</span>
+          <span class="meta-pill price-pill">💵 TBD</span>
+        </div>
+        <p class="event-desc">A ladies-only golf experience at our stunning Surfside Hole-In-One course. Enjoy a morning on the course with incredible quarry lake views. Perfect for a fun outing with your crew.</p>
+        <div class="cap-wrap">
+      <div class="cap-labels">
+        <span class="cap-reg">40 / 60 Registered</span>
+        <span class="cap-rem ">20 Remaining</span>
+      </div>
+      <div class="cap-bar"><div class="cap-fill fill-ok" style="width:67%"></div></div>
+    </div><a href="mailto:management@thequarrystl.com?subject=Fore The Girls Registration" class="event-btn cta-gold">Register Now →</a>
+      </div>
+    </div>
+<div class="event-card" data-type="ticketed">
+      <div class="card-left">
+        <div class="card-date-col">
+          <span class="card-month">APR</span>
+          <span class="card-day">4</span>
+          <span class="card-year">2026</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <span class="event-badge badge-ticketed">🎟 Ticketed Event</span>
+        <h3 class="event-name">80s Neon Music Bingo</h3>
+        <div class="event-meta">
+          <span class="meta-pill">🕐 6:00 PM – 10:00 PM</span>
+          <span class="meta-pill">📍 The Building · The Quarry</span>
+          <span class="meta-pill price-pill">💵 $25 / person</span>
+        </div>
+        <p class="event-desc">A second night of neon lights and 80s chaos. If Friday sold out before you could get in, this is your second chance — same great energy, same big fun.</p>
+        <div class="cap-wrap">
+      <div class="cap-labels">
+        <span class="cap-reg">144 / 144 Registered</span>
+        <span class="cap-rem cap-sold">Sold Out</span>
+      </div>
+      <div class="cap-bar"><div class="cap-fill fill-sold" style="width:100%"></div></div>
+    </div><span class="event-btn cta-sold">Sold Out</span>
+      </div>
+    </div>
+<div class="event-card" data-type="ticketed">
+      <div class="card-left">
+        <div class="card-date-col">
+          <span class="card-month">APR</span>
+          <span class="card-day">5</span>
+          <span class="card-year">2026</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <span class="event-badge badge-ticketed">🎟 Ticketed Event</span>
+        <h3 class="event-name">Easter Sunday Brunch</h3>
+        <div class="event-meta">
+          <span class="meta-pill">🕐 10:00 AM – 1:00 PM</span>
+          <span class="meta-pill">📍 The Quarry · Weather Dependent</span>
+          <span class="meta-pill price-pill">💵 $0.00 — No ticket charge</span>
+        </div>
+        <p class="event-desc">Celebrate Easter with family at The Quarry! Our Twisted Brunch menu is served all morning. No ticket charge — just register so we can prepare. You'll pay for your meals and drinks as normal.</p>
+        <p class="price-note">ℹ️ Guests pay for food & drinks as normal. RSVP required so we can prepare for the right number of guests.</p><div class="cap-wrap">
+      <div class="cap-labels">
+        <span class="cap-reg">79 Registered</span>
+        <span class="cap-rem ">79 Registered</span>
+      </div>
+      <div class="cap-bar"><div class="cap-fill fill-ok" style="width:60%"></div></div>
+    </div><a href="mailto:management@thequarrystl.com?subject=Easter Brunch RSVP" class="event-btn cta-gold">Register Now →</a>
+      </div>
+    </div>
+<div class="event-card" data-type="ticketed">
+      <div class="card-left">
+        <div class="card-date-col">
+          <span class="card-month">APR</span>
+          <span class="card-day">12</span>
+          <span class="card-year">2026</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <span class="event-badge badge-ticketed">🎟 Ticketed Event</span>
+        <h3 class="event-name">Ladies Galentines Singo-Bingo Brunch</h3>
+        <div class="event-meta">
+          <span class="meta-pill">🕐 10:00 AM – 12:00 PM</span>
+          <span class="meta-pill">📍 Indoors · The Quarry</span>
+          <span class="meta-pill price-pill">💵 TBD</span>
+        </div>
+        <p class="event-desc">The ladies-only Singo Bingo Brunch is back! Sing along, play bingo, sip mimosas, and celebrate your girls in style. Brunch included. Spots are limited — grab yours before they're gone.</p>
+        <div class="cap-wrap">
+      <div class="cap-labels">
+        <span class="cap-reg">98 / 135 Registered</span>
+        <span class="cap-rem ">37 Remaining</span>
+      </div>
+      <div class="cap-bar"><div class="cap-fill fill-ok" style="width:73%"></div></div>
+    </div><a href="mailto:management@thequarrystl.com?subject=Ladies Singo Bingo Brunch Registration" class="event-btn cta-gold">Register Now →</a>
+      </div>
+    </div>
+<div class="event-card" data-type="public">
+      <div class="card-left">
+        <div class="card-date-col">
+          <span class="card-month"></span>
+          <span class="card-day">—</span>
+          <span class="card-year"></span>
+        </div>
+      </div>
+      <div class="card-body">
+        <span class="event-badge badge-public">🌐 Public Event · Free</span>
+        <h3 class="event-name">The Quarry Car Show</h3>
+        <div class="event-meta">
+          <span class="meta-pill">🕐 TBD</span>
+          <span class="meta-pill">📍 The Quarry Grounds</span>
+          <span class="meta-pill price-pill">💵 Free</span>
+        </div>
+        <p class="event-desc">Come out and admire a stunning lineup of classic, custom, and vintage cars right here at The Quarry. Free admission for all — bring the whole family and enjoy food and drinks while you browse.</p>
+        <a href="mailto:management@thequarrystl.com?subject=Car Show Info Request" class="event-btn cta-outline">More Info →</a>
+      </div>
+    </div>
+<div class="event-card" data-type="ticketed">
+      <div class="card-left">
+        <div class="card-date-col">
+          <span class="card-month"></span>
+          <span class="card-day">—</span>
+          <span class="card-year"></span>
+        </div>
+      </div>
+      <div class="card-body">
+        <span class="event-badge badge-ticketed">🎟 Ticketed Event</span>
+        <h3 class="event-name">Boots & Bourbon</h3>
+        <div class="event-meta">
+          <span class="meta-pill">🕐 TBD</span>
+          <span class="meta-pill">📍 The Building · The Quarry</span>
+          <span class="meta-pill price-pill">💵 TBD</span>
+        </div>
+        <p class="event-desc">Line dancing, live music, and premium bourbon selections — one of The Quarry's most beloved signature nights. Dress the part and come ready to move. Date and ticket details coming soon.</p>
+        <a href="mailto:management@thequarrystl.com?subject=Boots and Bourbon - Notify Me" class="event-btn cta-gold">Register Now →</a>
+      </div>
+    </div>
+<div class="event-card" data-type="ticketed">
+      <div class="card-left">
+        <div class="card-date-col">
+          <span class="card-month"></span>
+          <span class="card-day">—</span>
+          <span class="card-year"></span>
+        </div>
+      </div>
+      <div class="card-body">
+        <span class="event-badge badge-ticketed">🎟 Ticketed Event</span>
+        <h3 class="event-name">Yoga at The Quarry</h3>
+        <div class="event-meta">
+          <span class="meta-pill">🕐 Morning Session · TBD</span>
+          <span class="meta-pill">📍 Outdoor · Quarry Lake View</span>
+          <span class="meta-pill price-pill">💵 TBD</span>
+        </div>
+        <p class="event-desc">Flow with the quarry lake as your backdrop. A peaceful morning yoga experience unlike anywhere else in the St. Louis area. Date and registration details coming soon.</p>
+        <a href="mailto:management@thequarrystl.com?subject=Yoga at The Quarry - Notify Me" class="event-btn cta-gold">Register Now →</a>
+      </div>
+    </div>
+<div class="event-card" data-type="ticketed">
+      <div class="card-left">
+        <div class="card-date-col">
+          <span class="card-month">AUG</span>
+          <span class="card-day">29</span>
+          <span class="card-year">2026</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <span class="event-badge badge-ticketed">🎟 Ticketed Event</span>
+        <h3 class="event-name">Wedding Vendor Show</h3>
+        <div class="event-meta">
+          <span class="meta-pill">🕐 11:00 AM – 3:00 PM</span>
+          <span class="meta-pill">📍 Indoors · The Quarry</span>
+          <span class="meta-pill price-pill">💵 Free for Attendees · Vendor fee TBD</span>
+        </div>
+        <p class="event-desc">Meet the best local wedding vendors all in one place. Whether you're a couple planning your big day or a vendor looking to connect with new clients — this is your event. Register as a guest or sign up as a vendor.</p>
+        <div class="dual-btns">
+          <a href="mailto:management@thequarrystl.com?subject=Wedding Vendor Show - Vendor Registration" class="event-btn cta-outline">Register as Vendor →</a>
+          <a href="mailto:management@thequarrystl.com?subject=Wedding Vendor Show - Guest Attendance" class="event-btn cta-gold">Attend as Guest →</a>
+        </div>
+      </div>
+    </div>
+<div class="event-card" data-type="fundraiser">
+      <div class="card-left">
+        <div class="card-date-col">
+          <span class="card-month">OCT</span>
+          <span class="card-day">17</span>
+          <span class="card-year">2026</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <span class="event-badge badge-fundraiser">🤝 Fundraiser</span>
+        <h3 class="event-name">THS Boot Scoot & Howlin' Fundraiser</h3>
+        <div class="event-meta">
+          <span class="meta-pill">🕐 TBD</span>
+          <span class="meta-pill">📍 The Building · The Quarry</span>
+          <span class="meta-pill price-pill">💵 TBD</span>
+        </div>
+        <p class="event-desc">Support Timberland High School at this fun community fundraiser hosted at The Quarry. Dancing, drinks, and good times for a great cause. Registration is managed by Timberland High School.</p>
+        <p class="price-note">🏫 Registration managed by Timberland High School</p><a href="mailto:management@thequarrystl.com?subject=THS Fundraiser Info" class="event-btn cta-fundraiser">More Info & Register →</a>
+      </div>
+    </div>
+<div class="event-card" data-type="member">
+      <div class="card-left">
+        <div class="card-date-col">
+          <span class="card-month"></span>
+          <span class="card-day">—</span>
+          <span class="card-year"></span>
+        </div>
+      </div>
+      <div class="card-body">
+        <span class="event-badge badge-member">🍷 Members Only</span>
+        <h3 class="event-name">Rock & Vine Wine Club</h3>
+        <div class="event-meta">
+          <span class="meta-pill">🕐 6:00 PM</span>
+          <span class="meta-pill">📍 The Building · The Quarry</span>
+          <span class="meta-pill price-pill">💵 Members Only</span>
+        </div>
+        <p class="event-desc">Exclusive curated wine tasting experiences throughout 2026 — featuring Gallo, Montelle, Trademark, and Chateau wineries. Reserved for Rock & Vine members. Each event features hand-selected wines, expert pairings, and an intimate evening at The Quarry.</p>
+        <div class="wine-dates"><div class="wine-row">🔒 March 26 — Gallo Wine Tasting</div><div class="wine-row">🔒 July 23 — Montelle Wine Experience</div><div class="wine-row">🔒 August 20 — Trademark Tasting</div><div class="wine-row">🔒 September 24 — Chateau Tasting</div><div class="wine-row">🔒 October 15 — Trademark Fall Experience</div><div class="wine-row">🔒 November 12 — Trademark Holiday Tasting</div><div class="wine-row">🔒 December 10 — Chateau Year-End Celebration</div></div><a href="mailto:management@thequarrystl.com?subject=Rock and Vine Wine Club Membership" class="event-btn cta-member">Become a Member →</a>
+      </div>
+    </div></div>
+  <div class="host-cta">
+    <h3>Host Your Event at The Quarry</h3>
+    <p>From birthday parties to corporate events — our team will make it unforgettable.</p>
+    <div class="host-btns">
+      <a href="quarry-reservations.html" class="host-btn" style="background:var(--gold);color:var(--brown-dark);">Reserve a Section →</a>
+      <a href="quarry-private-events.html" class="host-btn" style="border:1px solid var(--gold);color:var(--gold-light);">Private Events →</a>
+    </div>
+  </div>
+</div>
+<footer><p class="footer-legal">© 2026 The Quarry · 3960 Highway Z, New Melle, MO 63385 · 636-224-8257 · management@thequarrystl.com<br>Event details subject to change · Follow us on Instagram & Facebook for the latest updates</p></footer>
+
+<script>
+function toggleNav() {
+  document.getElementById('mainNav').classList.toggle('open');
+}
+document.querySelectorAll('.nav-link').forEach(link => {
+  link.addEventListener('click', function(e) {
+    const item = this.closest('.nav-item');
+    const dropdown = item && item.querySelector('.dropdown');
+    if (dropdown && window.innerWidth <= 1100) {
+      e.preventDefault();
+      item.classList.toggle('open');
+    }
+  });
+});
+document.addEventListener('click', function(e) {
+  const nav = document.getElementById('mainNav');
+  const hb = document.getElementById('hamburger');
+  if (nav && nav.classList.contains('open') && !nav.contains(e.target) && hb && !hb.contains(e.target)) {
+    nav.classList.remove('open');
+  }
+});
+</script>
+<script>
+function filterCards(type,btn){
+  document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.event-card').forEach(card=>{
+    card.style.display=(type==='all'||card.dataset.type===type)?'':'none';
+  });
+}
+</script>
+</body>
+</html>

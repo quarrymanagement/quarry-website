@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin | The Quarry</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#B8933A;--gold-light:#D4AF6A;--brown-dark:#2C1A0E;--brown-mid:#5C3D2E;--charcoal:#1A1A1A;--cream:#F5F0E8;--border:rgba(188,149,106,0.3);--red:#9b2226;--green:#2d6a4f;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Montserrat',sans-serif;background:#0f0a07;color:#fff;min-height:100vh;}
+
+/* LOGIN */
+#loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem;}
+.login-box{background:var(--brown-dark);border:1px solid var(--border);padding:3rem;width:100%;max-width:400px;text-align:center;}
+.login-logo{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:.25rem;}
+.login-sub{font-size:.55rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:2.5rem;}
+.login-box input{width:100%;padding:.85rem 1rem;border:1px solid var(--border);background:rgba(255,255,255,.05);color:#fff;font-family:'Montserrat',sans-serif;font-size:.75rem;outline:none;margin-bottom:.75rem;border-radius:0;-webkit-appearance:none;}
+.login-box input:focus{border-color:var(--gold);}
+.login-box input::placeholder{color:rgba(255,255,255,.3);}
+.login-btn{width:100%;padding:1rem;background:var(--gold);color:var(--brown-dark);font-family:'Montserrat',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;border:none;cursor:pointer;transition:background .2s;}
+.login-btn:hover{background:var(--gold-light);}
+.login-err{font-size:.6rem;color:#e05555;margin-top:.75rem;min-height:1.2em;}
+
+/* ADMIN SHELL */
+#adminShell{display:none;}
+.admin-header{background:var(--brown-dark);border-bottom:1px solid var(--border);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.admin-logo{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;}
+.admin-logo span{font-family:'Montserrat',sans-serif;font-size:.5rem;letter-spacing:.25em;color:var(--gold);display:block;margin-top:1px;}
+.logout-btn{font-family:'Montserrat',sans-serif;font-size:.58rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.5);background:none;border:1px solid rgba(255,255,255,.15);padding:.4rem .85rem;cursor:pointer;transition:all .2s;}
+.logout-btn:hover{color:#fff;border-color:rgba(255,255,255,.4);}
+.admin-layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 64px);}
+.sidebar{background:#0f0a07;border-right:1px solid var(--border);padding:1.5rem 0;}
+.sidebar-section{margin-bottom:.5rem;}
+.sidebar-label{font-size:.5rem;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:rgba(255,255,255,.3);padding:.5rem 1.5rem;display:block;}
+.sidebar-btn{display:block;width:100%;text-align:left;padding:.75rem 1.5rem;font-family:'Montserrat',sans-serif;font-size:.62rem;font-weight:500;letter-spacing:.08em;color:rgba(255,255,255,.6);background:none;border:none;cursor:pointer;transition:all .2s;border-left:2px solid transparent;}
+.sidebar-btn:hover{color:#fff;background:rgba(255,255,255,.04);}
+.sidebar-btn.active{color:var(--gold-light);border-left-color:var(--gold);background:rgba(184,147,58,.08);}
+.admin-content{padding:2.5rem;overflow-y:auto;}
+.panel{display:none;}
+.panel.active{display:block;}
+.panel-title{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:600;margin-bottom:.4rem;}
+.panel-sub{font-size:.6rem;letter-spacing:.08em;color:rgba(255,255,255,.4);margin-bottom:2rem;}
+
+/* CARDS / TABLES */
+.admin-card{background:var(--brown-dark);border:1px solid var(--border);padding:1.75rem;margin-bottom:1.5rem;}
+.card-title{font-size:.65rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:1.25rem;}
+.admin-table{width:100%;border-collapse:collapse;}
+.admin-table th{font-size:.52rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.4);padding:.6rem .75rem;text-align:left;border-bottom:1px solid var(--border);}
+.admin-table td{font-size:.68rem;padding:.8rem .75rem;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle;}
+.admin-table tr:last-child td{border-bottom:none;}
+.admin-table tr:hover td{background:rgba(255,255,255,.03);}
+.editable{background:rgba(255,255,255,.04);border:1px solid transparent;padding:.3rem .5rem;width:100%;color:#fff;font-family:'Montserrat',sans-serif;font-size:.68rem;outline:none;border-radius:0;}
+.editable:focus{border-color:var(--gold);background:rgba(184,147,58,.06);}
+select.editable{cursor:pointer;-webkit-appearance:none;appearance:none;}
+
+/* BUTTONS */
+.btn{font-family:'Montserrat',sans-serif;font-size:.58rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;padding:.5rem 1rem;border:none;cursor:pointer;transition:all .2s;display:inline-block;}
+.btn-gold{background:var(--gold);color:var(--brown-dark);}
+.btn-gold:hover{background:var(--gold-light);}
+.btn-outline{background:none;border:1px solid var(--border);color:rgba(255,255,255,.6);}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold-light);}
+.btn-danger{background:none;border:1px solid rgba(155,34,38,.5);color:rgba(220,100,100,.8);font-size:.52rem;padding:.35rem .7rem;}
+.btn-danger:hover{background:rgba(155,34,38,.2);}
+.btn-add{background:rgba(45,106,79,.3);border:1px solid rgba(45,106,79,.5);color:rgba(150,220,170,.9);}
+.btn-add:hover{background:rgba(45,106,79,.5);}
+.btn-row{display:flex;gap:.75rem;align-items:center;margin-top:1.25rem;flex-wrap:wrap;}
+
+/* FORM FIELDS */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;}
+.form-full{grid-column:1/-1;}
+.form-group{display:flex;flex-direction:column;gap:.35rem;}
+.form-label{font-size:.55rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.5);}
+.form-input{background:rgba(255,255,255,.05);border:1px solid var(--border);color:#fff;font-family:'Montserrat',sans-serif;font-size:.7rem;padding:.75rem 1rem;outline:none;border-radius:0;-webkit-appearance:none;}
+.form-input:focus{border-color:var(--gold);}
+.form-input::placeholder{color:rgba(255,255,255,.25);}
+select.form-input{cursor:pointer;}
+textarea.form-input{resize:vertical;min-height:90px;}
+
+/* BADGE PREVIEWS */
+.type-badge{font-size:.5rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:2px 8px;display:inline-block;}
+.t-ticketed{background:var(--gold);color:var(--brown-dark);}
+.t-public{background:rgba(245,240,232,.12);color:rgba(245,240,232,.75);border:1px solid rgba(245,240,232,.2);}
+.t-fundraiser{background:rgba(30,100,60,.4);color:rgba(150,220,170,.9);border:1px solid rgba(30,100,60,.5);}
+.t-member{background:rgba(120,50,150,.4);color:rgba(210,170,255,.9);border:1px solid rgba(120,50,150,.5);}
+
+/* TOAST */
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--green);color:#fff;font-family:'Montserrat',sans-serif;font-size:.62rem;font-weight:600;letter-spacing:.1em;padding:.85rem 1.5rem;transform:translateY(100px);opacity:0;transition:all .3s;z-index:999;}
+.toast.show{transform:translateY(0);opacity:1;}
+
+@media(max-width:900px){.admin-layout{grid-template-columns:1fr;}.sidebar{display:none;}}
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN ── -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">The Quarry</div>
+    <div class="login-sub">Staff Admin Portal</div>
+    <input type="text" id="loginUser" placeholder="Username" autocomplete="off">
+    <input type="password" id="loginPass" placeholder="Password" autocomplete="off">
+    <button class="login-btn" onclick="doLogin()">Sign In →</button>
+    <div class="login-err" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- ── ADMIN SHELL ── -->
+<div id="adminShell">
+  <header class="admin-header">
+    <div class="admin-logo">The Quarry <span>Staff Admin Portal</span></div>
+    <button class="logout-btn" onclick="doLogout()">Sign Out</button>
+  </header>
+  <div class="admin-layout">
+    <nav class="sidebar">
+      <div class="sidebar-section">
+        <span class="sidebar-label">Events</span>
+        <button class="sidebar-btn active" onclick="showPanel('events',this)">📅 Manage Events</button>
+        <button class="sidebar-btn" onclick="showPanel('addEvent',this)">➕ Add New Event</button>
+      </div>
+      <div class="sidebar-section">
+        <span class="sidebar-label">Live Music</span>
+        <button class="sidebar-btn" onclick="showPanel('bands',this)">🎵 Band Schedule</button>
+        <button class="sidebar-btn" onclick="showPanel('addBand',this)">➕ Add Band</button>
+      </div>
+      <div class="sidebar-section">
+        <span class="sidebar-label">Menu</span>
+        <button class="sidebar-btn" onclick="showPanel('menuFood',this)">🍽 Food Prices</button>
+        <button class="sidebar-btn" onclick="showPanel('menuDrinks',this)">🍷 Drink Prices</button>
+        <button class="sidebar-btn" onclick="showPanel('addMenuItem',this)">➕ Add Menu Item</button>
+      </div>
+      <div class="sidebar-section">
+        <span class="sidebar-label">Settings</span>
+        <button class="sidebar-btn" onclick="showPanel('hours',this)">🕐 Hours & Info</button>
+      </div>
+    </nav>
+
+    <main class="admin-content">
+
+      <!-- EVENTS LIST -->
+      <div class="panel active" id="panel-events">
+        <h2 class="panel-title">Manage Events</h2>
+        <p class="panel-sub">Edit event details inline · Changes generate an update email to management</p>
+        <div class="admin-card">
+          <div class="card-title">Upcoming Events</div>
+          <table class="admin-table" id="eventsTable">
+            <thead><tr>
+              <th>Event Name</th><th>Date</th><th>Type</th><th>Price</th><th>Registered</th><th>Capacity</th><th>Actions</th>
+            </tr></thead>
+            <tbody id="eventsBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ADD EVENT -->
+      <div class="panel" id="panel-addEvent">
+        <h2 class="panel-title">Add New Event</h2>
+        <p class="panel-sub">Fill in the details below · Generates an email to add to your site</p>
+        <div class="admin-card">
+          <div class="card-title">Event Details</div>
+          <div class="form-grid">
+            <div class="form-group form-full">
+              <label class="form-label">Event Name *</label>
+              <input type="text" class="form-input" id="ae-name" placeholder="e.g. 80s Neon Music Bingo">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Date *</label>
+              <input type="date" class="form-input" id="ae-date">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Time *</label>
+              <input type="text" class="form-input" id="ae-time" placeholder="e.g. 6:00 PM – 10:00 PM">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Location</label>
+              <input type="text" class="form-input" id="ae-location" placeholder="e.g. The Building · The Quarry">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Event Type *</label>
+              <select class="form-input" id="ae-type">
+                <option value="ticketed">🎟 Ticketed Event</option>
+                <option value="public">🌐 Public Event (Free)</option>
+                <option value="fundraiser">🤝 Fundraiser</option>
+                <option value="member">🍷 Members Only</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Price</label>
+              <input type="text" class="form-input" id="ae-price" placeholder="e.g. $25/person or Free or TBD">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Total Capacity</label>
+              <input type="number" class="form-input" id="ae-capacity" placeholder="e.g. 144 (leave blank if unlimited)">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Currently Registered</label>
+              <input type="number" class="form-input" id="ae-registered" placeholder="e.g. 0">
+            </div>
+            <div class="form-group form-full">
+              <label class="form-label">Description *</label>
+              <textarea class="form-input" id="ae-desc" placeholder="Describe the event for guests..."></textarea>
+            </div>
+            <div class="form-group form-full">
+              <label class="form-label">Registration / Info URL (optional)</label>
+              <input type="text" class="form-input" id="ae-url" placeholder="https://... or leave blank for email inquiry">
+            </div>
+            <div class="form-group form-full">
+              <label class="form-label">Notes (internal only)</label>
+              <input type="text" class="form-input" id="ae-notes" placeholder="Internal notes for staff — not shown publicly">
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-gold" onclick="submitNewEvent()">Submit Event via Email →</button>
+            <button class="btn btn-outline" onclick="clearEventForm()">Clear Form</button>
+          </div>
+          <p style="font-size:.55rem;color:rgba(255,255,255,.3);margin-top:.75rem;letter-spacing:.05em;">This will open your email client with full event details pre-filled. Send it to management@thequarrystl.com and Matt/Rob will update the live site.</p>
+        </div>
+      </div>
+
+      <!-- BANDS -->
+      <div class="panel" id="panel-bands">
+        <h2 class="panel-title">Band Schedule</h2>
+        <p class="panel-sub">Upcoming live performances · Edit inline</p>
+        <div class="admin-card">
+          <div class="card-title">Scheduled Performances</div>
+          <table class="admin-table" id="bandsTable">
+            <thead><tr><th>Band / Artist</th><th>Date</th><th>Time</th><th>Actions</th></tr></thead>
+            <tbody id="bandsBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ADD BAND -->
+      <div class="panel" id="panel-addBand">
+        <h2 class="panel-title">Add Band / Performance</h2>
+        <p class="panel-sub">Schedule a new live music performance</p>
+        <div class="admin-card">
+          <div class="card-title">Performance Details</div>
+          <div class="form-grid">
+            <div class="form-group form-full">
+              <label class="form-label">Band / Artist Name *</label>
+              <input type="text" class="form-input" id="ab-name" placeholder="e.g. Scott and Liz">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Date *</label>
+              <input type="date" class="form-input" id="ab-date">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Time *</label>
+              <input type="text" class="form-input" id="ab-time" placeholder="e.g. 7 PM – 10 PM">
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-gold" onclick="submitNewBand()">Submit via Email →</button>
+            <button class="btn btn-outline" onclick="clearBandForm()">Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- FOOD PRICES -->
+      <div class="panel" id="panel-menuFood">
+        <h2 class="panel-title">Food Menu Prices</h2>
+        <p class="panel-sub">Edit prices inline · Hit "Save Changes" to send update email</p>
+        <div class="admin-card">
+          <div class="card-title">Shareables</div>
+          <table class="admin-table"><thead><tr><th>Item</th><th>Price</th><th></th></tr></thead>
+          <tbody id="shareables-body"></tbody></table>
+        </div>
+        <div class="admin-card">
+          <div class="card-title">Sandwiches, Wraps & Sliders</div>
+          <table class="admin-table"><thead><tr><th>Item</th><th>Price</th><th></th></tr></thead>
+          <tbody id="sandwiches-body"></tbody></table>
+        </div>
+        <div class="admin-card">
+          <div class="card-title">Nachos</div>
+          <table class="admin-table"><thead><tr><th>Item</th><th>Price</th><th></th></tr></thead>
+          <tbody id="nachos-body"></tbody></table>
+        </div>
+        <div class="admin-card">
+          <div class="card-title">Soups & Salads</div>
+          <table class="admin-table"><thead><tr><th>Item</th><th>Price</th><th></th></tr></thead>
+          <tbody id="salads-body"></tbody></table>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-gold" onclick="saveMenuChanges()">Save & Send Update Email →</button>
+        </div>
+      </div>
+
+      <!-- DRINK PRICES -->
+      <div class="panel" id="panel-menuDrinks">
+        <h2 class="panel-title">Drink Menu</h2>
+        <p class="panel-sub">Edit drink prices inline</p>
+        <div class="admin-card">
+          <div class="card-title">Cocktails & Spirits</div>
+          <table class="admin-table"><thead><tr><th>Item</th><th>Price</th><th></th></tr></thead>
+          <tbody id="drinks-body"></tbody></table>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-gold" onclick="saveDrinkChanges()">Save & Send Update Email →</button>
+        </div>
+      </div>
+
+      <!-- ADD MENU ITEM -->
+      <div class="panel" id="panel-addMenuItem">
+        <h2 class="panel-title">Add Menu Item</h2>
+        <p class="panel-sub">Submit a new item to be added to the menu</p>
+        <div class="admin-card">
+          <div class="card-title">New Item Details</div>
+          <div class="form-grid">
+            <div class="form-group form-full">
+              <label class="form-label">Item Name *</label>
+              <input type="text" class="form-input" id="mi-name" placeholder="e.g. Quarry Nachos">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Section *</label>
+              <select class="form-input" id="mi-section">
+                <option>Shareables</option>
+                <option>Sandwiches, Wraps & Sliders</option>
+                <option>Nachos</option>
+                <option>Soups & Salads</option>
+                <option>Kids Menu</option>
+                <option>Heaven (Desserts)</option>
+                <option>Cocktails</option>
+                <option>Beer</option>
+                <option>Wine</option>
+                <option>Non-Alcoholic</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Price *</label>
+              <input type="text" class="form-input" id="mi-price" placeholder="e.g. $14.99">
+            </div>
+            <div class="form-group form-full">
+              <label class="form-label">Description</label>
+              <textarea class="form-input" id="mi-desc" placeholder="Describe the item..."></textarea>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-gold" onclick="submitNewMenuItem()">Submit via Email →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- HOURS & INFO -->
+      <div class="panel" id="panel-hours">
+        <h2 class="panel-title">Hours & Info</h2>
+        <p class="panel-sub">Edit operating hours and contact info</p>
+        <div class="admin-card">
+          <div class="card-title">Operating Hours</div>
+          <table class="admin-table" id="hoursTable">
+            <thead><tr><th>Day</th><th>Open</th><th>Close</th><th>Status</th></tr></thead>
+            <tbody id="hoursBody"></tbody>
+          </table>
+          <div class="btn-row" style="margin-top:1.25rem;">
+            <button class="btn btn-gold" onclick="saveHours()">Save & Send Update Email →</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── AUTH ──
+// Change these credentials for your staff
+const CREDENTIALS = {
+  'matt': 'quarry2026',
+  'rob': 'quarry2026',
+  'staff': 'quarry1234'
+};
+
+function doLogin() {
+  const u = document.getElementById('loginUser').value.trim().toLowerCase();
+  const p = document.getElementById('loginPass').value;
+  if (CREDENTIALS[u] && CREDENTIALS[u] === p) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminShell').style.display = 'block';
+    loadAllData();
+  } else {
+    document.getElementById('loginErr').textContent = 'Incorrect username or password.';
+  }
+}
+document.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+function doLogout() {
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('adminShell').style.display = 'none';
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+}
+
+// ── PANELS ──
+function showPanel(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── TOAST ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── DATA ──
+const DATA = {
+  events: [
+    { name: '80s Neon Music Bingo', date: '2026-04-03', type: 'ticketed', price: '$25/person', registered: 144, capacity: 144, soldOut: true },
+    { name: 'Fore the Girls Golf Event', date: '2026-04-04', type: 'ticketed', price: 'TBD', registered: 40, capacity: 60, soldOut: false },
+    { name: '80s Neon Music Bingo', date: '2026-04-04', type: 'ticketed', price: '$25/person', registered: 144, capacity: 144, soldOut: true },
+    { name: 'Easter Sunday Brunch', date: '2026-04-05', type: 'ticketed', price: '$0.00', registered: 79, capacity: null, soldOut: false },
+    { name: 'Ladies Singo Bingo Brunch', date: '2026-04-12', type: 'ticketed', price: 'TBD', registered: 98, capacity: 135, soldOut: false },
+    { name: 'Boots & Bourbon', date: '2026-05-15', type: 'ticketed', price: 'TBD', registered: null, capacity: null, soldOut: false },
+    { name: 'Wedding Vendor Show', date: '2026-08-29', type: 'ticketed', price: 'Free/Vendor TBD', registered: null, capacity: null, soldOut: false },
+    { name: 'THS Boot Scoot Fundraiser', date: '2026-10-17', type: 'fundraiser', price: 'TBD', registered: null, capacity: null, soldOut: false },
+    { name: 'Rock & Vine Wine Club', date: '2026-03-26', type: 'member', price: 'Members Only', registered: null, capacity: null, soldOut: false },
+  ],
+  bands: [
+    { name: 'Scott and Liz', date: '2026-03-27', time: '7 PM – 10 PM' },
+    { name: 'Janet Martin', date: '2026-03-28', time: '7 PM – 10 PM' },
+    { name: 'Ed Callison', date: '2026-03-28', time: '1 PM – 4 PM' },
+    { name: 'Mickey Scott', date: '2026-03-29', time: '1 PM – 4 PM' },
+    { name: 'Kelli Renee', date: '2026-04-03', time: '7 PM – 10 PM' },
+    { name: 'Ed Callison', date: '2026-04-04', time: '1 PM – 4 PM' },
+    { name: 'Stephen Jones', date: '2026-04-05', time: '1 PM – 4 PM' },
+    { name: 'The Velvet Devils', date: '2026-04-11', time: '1 PM – 4 PM' },
+    { name: 'Two Pedros', date: '2026-04-11', time: '7 PM – 10 PM' },
+    { name: 'Andrew Weber', date: '2026-04-12', time: '1 PM – 4 PM' },
+    { name: 'Janet and Scott', date: '2026-04-17', time: '7 PM – 10 PM' },
+    { name: 'Dave King', date: '2026-04-18', time: '1 PM – 4 PM' },
+    { name: 'Andrew Weber', date: '2026-04-18', time: '7 PM – 10 PM' },
+    { name: 'Mickey Scott', date: '2026-04-19', time: '1 PM – 4 PM' },
+    { name: 'Country Roads', date: '2026-04-24', time: '7 PM – 10 PM' },
+    { name: 'Stephen Jones', date: '2026-04-25', time: '1 PM – 4 PM' },
+    { name: 'Bob', date: '2026-04-25', time: '7 PM – 10 PM' },
+    { name: 'Janet and Darren', date: '2026-04-26', time: '1 PM – 4 PM' },
+  ],
+  menu: {
+    shareables: [
+      { name: "Devils in the Chicken", price: "$10.59" },
+      { name: "Adams Pickles", price: "$11.50" },
+      { name: "Pick Your Dip", price: "$15.99" },
+      { name: "Feathered Buffalo", price: "$14.05" },
+      { name: "Slider Flight", price: "$16.95" },
+      { name: "Fried Mac N' Jalapeño Bites", price: "$12.10" },
+      { name: "Buffalo Wings", price: "$16.95" },
+      { name: "Thaiyaki Chili Wings", price: "$16.35" },
+      { name: "Basket of Fries", price: "$6.99" },
+    ],
+    sandwiches: [
+      { name: "California Club Wrap", price: "$15.59" },
+      { name: "Caesar Wrap", price: "$13.59" },
+      { name: "4 Lotta Ham & Chz", price: "$16.89" },
+      { name: "BBQ Pulled Pork", price: "$15.95" },
+      { name: "BBQ Chopped Brisket", price: "$16.85" },
+      { name: "The Quarry French Dip", price: "$16.85" },
+      { name: "Roast Beef Sliders", price: "$15.90" },
+      { name: "Quarry Cheeseburger Sliders", price: "$16.89" },
+    ],
+    nachos: [
+      { name: "Pulled Pork Nachos", price: "$16.10" },
+      { name: "Farmhouse Nachos", price: "$15.25" },
+      { name: "The Nattypocalypse Platter", price: "$13.99" },
+    ],
+    salads: [
+      { name: "Chicken Caesar Salad (Full/Half)", price: "$14.50 / $10.15" },
+      { name: "Farmhouse Salad (Full/Half)", price: "$14.25 / $9.29" },
+      { name: "Southwest Salad (Full/Half)", price: "$14.25 / $10.29" },
+      { name: "Summer Salad (Full/Half)", price: "$14.25 / $10.49" },
+      { name: "Bowl of Soup", price: "$5.99" },
+    ],
+    drinks: [
+      { name: "House Wine (Glass)", price: "$9" },
+      { name: "Bottle of Wine", price: "$30–$45" },
+      { name: "Domestic Beer", price: "$5" },
+      { name: "Craft Beer", price: "$7" },
+      { name: "Cocktails", price: "$10–$14" },
+      { name: "Mimosa", price: "$8" },
+      { name: "Bloody Mary", price: "$10" },
+    ]
+  },
+  hours: [
+    { day: 'Monday', open: 'Closed', close: '' },
+    { day: 'Tuesday', open: 'Closed', close: '' },
+    { day: 'Wednesday', open: '11:00 AM', close: '9:00 PM' },
+    { day: 'Thursday', open: '11:00 AM', close: '9:00 PM' },
+    { day: 'Friday', open: '11:00 AM', close: '11:00 PM' },
+    { day: 'Saturday', open: '11:00 AM', close: '11:00 PM' },
+    { day: 'Sunday', open: '10:00 AM', close: '5:00 PM' },
+  ]
+};
+
+const TYPE_BADGE = {
+  ticketed: '<span class="type-badge t-ticketed">🎟 Ticketed</span>',
+  public: '<span class="type-badge t-public">🌐 Public</span>',
+  fundraiser: '<span class="type-badge t-fundraiser">🤝 Fundraiser</span>',
+  member: '<span class="type-badge t-member">🍷 Member</span>',
+};
+
+function loadAllData() {
+  loadEvents(); loadBands(); loadMenuSection('shareables','shareables-body');
+  loadMenuSection('sandwiches','sandwiches-body'); loadMenuSection('nachos','nachos-body');
+  loadMenuSection('salads','salads-body'); loadMenuSection('drinks','drinks-body');
+  loadHours();
+}
+
+// ── EVENTS TABLE ──
+function loadEvents() {
+  const tbody = document.getElementById('eventsBody');
+  tbody.innerHTML = DATA.events.map((ev, i) => `
+    <tr>
+      <td><input class="editable" value="${ev.name}" onchange="DATA.events[${i}].name=this.value"></td>
+      <td><input class="editable" type="date" value="${ev.date}" onchange="DATA.events[${i}].date=this.value" style="width:130px;"></td>
+      <td>
+        <select class="editable" onchange="DATA.events[${i}].type=this.value;loadEvents();" style="width:110px;">
+          ${['ticketed','public','fundraiser','member'].map(t=>`<option value="${t}" ${ev.type===t?'selected':''}>${t}</option>`).join('')}
+        </select>
+      </td>
+      <td><input class="editable" value="${ev.price||''}" onchange="DATA.events[${i}].price=this.value" style="width:100px;"></td>
+      <td><input class="editable" type="number" value="${ev.registered||''}" onchange="DATA.events[${i}].registered=+this.value" style="width:70px;"></td>
+      <td><input class="editable" type="number" value="${ev.capacity||''}" onchange="DATA.events[${i}].capacity=+this.value" style="width:70px;"></td>
+      <td><button class="btn btn-danger" onclick="removeEvent(${i})">Remove</button></td>
+    </tr>`).join('');
+}
+
+function removeEvent(i) {
+  if (!confirm('Remove this event?')) return;
+  DATA.events.splice(i, 1);
+  loadEvents();
+  showToast('Event removed');
+}
+
+// ── BANDS TABLE ──
+function loadBands() {
+  const tbody = document.getElementById('bandsBody');
+  tbody.innerHTML = DATA.bands.map((b, i) => `
+    <tr>
+      <td><input class="editable" value="${b.name}" onchange="DATA.bands[${i}].name=this.value"></td>
+      <td><input class="editable" type="date" value="${b.date}" onchange="DATA.bands[${i}].date=this.value" style="width:140px;"></td>
+      <td><input class="editable" value="${b.time}" onchange="DATA.bands[${i}].time=this.value" style="width:130px;"></td>
+      <td><button class="btn btn-danger" onclick="removeBand(${i})">Remove</button></td>
+    </tr>`).join('');
+}
+
+function removeBand(i) {
+  if (!confirm('Remove this performance?')) return;
+  DATA.bands.splice(i, 1);
+  loadBands();
+  showToast('Performance removed');
+}
+
+// ── MENU TABLES ──
+function loadMenuSection(section, bodyId) {
+  const items = DATA.menu[section] || [];
+  const tbody = document.getElementById(bodyId);
+  if (!tbody) return;
+  tbody.innerHTML = items.map((item, i) => `
+    <tr>
+      <td><input class="editable" value="${item.name}" onchange="DATA.menu['${section}'][${i}].name=this.value" style="width:280px;"></td>
+      <td><input class="editable" value="${item.price}" onchange="DATA.menu['${section}'][${i}].price=this.value" style="width:120px;"></td>
+      <td><button class="btn btn-danger" onclick="removeMenuItem('${section}',${i},'${bodyId}')">Remove</button></td>
+    </tr>`).join('');
+}
+
+function removeMenuItem(section, i, bodyId) {
+  if (!confirm('Remove this menu item?')) return;
+  DATA.menu[section].splice(i, 1);
+  loadMenuSection(section, bodyId);
+  showToast('Item removed');
+}
+
+// ── HOURS ──
+function loadHours() {
+  const tbody = document.getElementById('hoursBody');
+  tbody.innerHTML = DATA.hours.map((h, i) => `
+    <tr>
+      <td style="font-weight:600;">${h.day}</td>
+      <td><input class="editable" value="${h.open}" onchange="DATA.hours[${i}].open=this.value" style="width:110px;"></td>
+      <td><input class="editable" value="${h.close}" onchange="DATA.hours[${i}].close=this.value" style="width:110px;"></td>
+      <td>
+        <select class="editable" style="width:90px;">
+          <option>Open</option><option ${h.open==='Closed'?'selected':''}>Closed</option>
+        </select>
+      </td>
+    </tr>`).join('');
+}
+
+// ── SUBMIT HELPERS (all via email) ──
+function submitNewEvent() {
+  const name = document.getElementById('ae-name').value;
+  const date = document.getElementById('ae-date').value;
+  const time = document.getElementById('ae-time').value;
+  const loc  = document.getElementById('ae-location').value;
+  const type = document.getElementById('ae-type').value;
+  const price= document.getElementById('ae-price').value;
+  const cap  = document.getElementById('ae-capacity').value;
+  const reg  = document.getElementById('ae-registered').value;
+  const desc = document.getElementById('ae-desc').value;
+  const url  = document.getElementById('ae-url').value;
+  const notes= document.getElementById('ae-notes').value;
+  if (!name || !date || !time || !desc) { alert('Please fill in all required fields.'); return; }
+  const subject = encodeURIComponent(`[ADMIN] Add New Event: ${name}`);
+  const body = encodeURIComponent(`ADD NEW EVENT REQUEST\n====================\n\nEvent Name: ${name}\nDate: ${date}\nTime: ${time}\nLocation: ${loc}\nType: ${type}\nPrice: ${price}\nCapacity: ${cap||'Unlimited'}\nCurrently Registered: ${reg||'0'}\nRegistration URL: ${url||'Email inquiry'}\n\nDescription:\n${desc}\n\nInternal Notes:\n${notes||'None'}\n\n--\nSubmitted via Admin Portal`);
+  window.location.href = `mailto:management@thequarrystl.com?subject=${subject}&body=${body}`;
+  showToast('Email opened — send to complete!');
+}
+
+function clearEventForm() {
+  ['ae-name','ae-date','ae-time','ae-location','ae-price','ae-capacity','ae-registered','ae-desc','ae-url','ae-notes'].forEach(id => document.getElementById(id).value = '');
+}
+
+function submitNewBand() {
+  const name = document.getElementById('ab-name').value;
+  const date = document.getElementById('ab-date').value;
+  const time = document.getElementById('ab-time').value;
+  if (!name || !date || !time) { alert('Please fill in all fields.'); return; }
+  const subject = encodeURIComponent(`[ADMIN] Add Band: ${name} on ${date}`);
+  const body = encodeURIComponent(`ADD BAND / PERFORMANCE\n======================\n\nBand/Artist: ${name}\nDate: ${date}\nTime: ${time}\n\n--\nSubmitted via Admin Portal`);
+  window.location.href = `mailto:management@thequarrystl.com?subject=${subject}&body=${body}`;
+  showToast('Email opened — send to complete!');
+}
+
+function clearBandForm() {
+  ['ab-name','ab-date','ab-time'].forEach(id => document.getElementById(id).value = '');
+}
+
+function saveMenuChanges() {
+  let body = 'MENU PRICE UPDATE REQUEST\n=========================\n\n';
+  Object.entries(DATA.menu).forEach(([section, items]) => {
+    body += `\n${section.toUpperCase()}\n`;
+    items.forEach(item => body += `  ${item.name}: ${item.price}\n`);
+  });
+  body += '\n--\nSubmitted via Admin Portal';
+  window.location.href = `mailto:management@thequarrystl.com?subject=${encodeURIComponent('[ADMIN] Menu Price Update')}&body=${encodeURIComponent(body)}`;
+  showToast('Email opened — send to complete!');
+}
+
+function saveDrinkChanges() {
+  let body = 'DRINK MENU UPDATE\n=================\n\n';
+  DATA.menu.drinks.forEach(item => body += `${item.name}: ${item.price}\n`);
+  body += '\n--\nSubmitted via Admin Portal';
+  window.location.href = `mailto:management@thequarrystl.com?subject=${encodeURIComponent('[ADMIN] Drink Menu Update')}&body=${encodeURIComponent(body)}`;
+  showToast('Email opened — send to complete!');
+}
+
+function saveHours() {
+  let body = 'HOURS UPDATE REQUEST\n====================\n\n';
+  DATA.hours.forEach(h => body += `${h.day}: ${h.open}${h.close ? ' – ' + h.close : ''}\n`);
+  body += '\n--\nSubmitted via Admin Portal';
+  window.location.href = `mailto:management@thequarrystl.com?subject=${encodeURIComponent('[ADMIN] Hours Update')}&body=${encodeURIComponent(body)}`;
+  showToast('Email opened — send to complete!');
+}
+
+function submitNewMenuItem() {
+  const name = document.getElementById('mi-name').value;
+  const section = document.getElementById('mi-section').value;
+  const price = document.getElementById('mi-price').value;
+  const desc = document.getElementById('mi-desc').value;
+  if (!name || !price) { alert('Please fill in required fields.'); return; }
+  const subject = encodeURIComponent(`[ADMIN] Add Menu Item: ${name}`);
+  const body = encodeURIComponent(`ADD MENU ITEM\n=============\n\nItem: ${name}\nSection: ${section}\nPrice: ${price}\nDescription: ${desc||'N/A'}\n\n--\nSubmitted via Admin Portal`);
+  window.location.href = `mailto:management@thequarrystl.com?subject=${subject}&body=${body}`;
+  showToast('Email opened — send to complete!');
+}
+</script>
+</body>
+</html>
