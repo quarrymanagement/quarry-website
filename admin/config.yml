@@ -1,0 +1,108 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "images"
+public_folder: "/images"
+
+collections:
+  - name: "events"
+    label: "🎉 Events"
+    folder: "_data/events"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    fields:
+      - {label: "Event Name", name: "name", widget: "string"}
+      - {label: "Date", name: "date", widget: "date"}
+      - {label: "Time", name: "time", widget: "string", hint: "e.g. 6:00 PM – 10:00 PM"}
+      - {label: "Location", name: "location", widget: "string"}
+      - label: "Event Type"
+        name: "eventType"
+        widget: "select"
+        options:
+          - {label: "🎟 Ticketed Event", value: "ticketed"}
+          - {label: "🌐 Public Event (Free)", value: "public"}
+          - {label: "🤝 Fundraiser", value: "fundraiser"}
+          - {label: "🍷 Members Only", value: "member"}
+      - {label: "Price", name: "price", widget: "string"}
+      - {label: "Price Note", name: "priceNote", widget: "string", required: false}
+      - {label: "Capacity", name: "capacity", widget: "number", required: false}
+      - {label: "Registered", name: "registered", widget: "number", default: 0}
+      - {label: "Sold Out?", name: "soldOut", widget: "boolean", default: false}
+      - {label: "Description", name: "description", widget: "text"}
+      - {label: "Registration URL", name: "registerUrl", widget: "string", required: false}
+      - {label: "Show on Website", name: "active", widget: "boolean", default: true}
+
+  - name: "bands"
+    label: "🎵 Band Schedule"
+    folder: "_data/bands"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    fields:
+      - {label: "Band / Artist Name", name: "name", widget: "string"}
+      - {label: "Date", name: "date", widget: "date"}
+      - {label: "Time", name: "time", widget: "string"}
+      - {label: "Show on Website", name: "active", widget: "boolean", default: true}
+
+  - name: "menu"
+    label: "🍽 Food Menu"
+    folder: "_data/menu"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - {label: "Section Name", name: "section", widget: "string"}
+      - {label: "Display Order", name: "order", widget: "number", default: 1}
+      - label: "Items"
+        name: "items"
+        widget: "list"
+        fields:
+          - {label: "Item Name", name: "name", widget: "string"}
+          - {label: "Description", name: "description", widget: "string", required: false}
+          - {label: "Price", name: "price", widget: "string"}
+          - {label: "Available", name: "available", widget: "boolean", default: true}
+
+  - name: "press"
+    label: "📰 Press & Media"
+    folder: "_data/press"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - {label: "Publication", name: "outlet", widget: "string"}
+      - {label: "Headline", name: "headline", widget: "string"}
+      - {label: "Date", name: "date", widget: "date"}
+      - {label: "Article URL", name: "url", widget: "string"}
+      - {label: "Featured", name: "featured", widget: "boolean", default: false}
+      - {label: "Show on Website", name: "active", widget: "boolean", default: true}
+
+  - name: "jobs"
+    label: "💼 Job Postings"
+    folder: "_data/jobs"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - {label: "Position Title", name: "title", widget: "string"}
+      - label: "Department"
+        name: "department"
+        widget: "select"
+        options: ["Front of House", "Back of House", "Management", "Events", "Other"]
+      - {label: "Description", name: "description", widget: "text"}
+      - {label: "Currently Hiring", name: "active", widget: "boolean", default: true}
+
+  - name: "settings"
+    label: "⚙️ Site Settings"
+    files:
+      - label: "General Settings"
+        name: "general"
+        file: "_data/settings.yml"
+        fields:
+          - {label: "Phone", name: "phone", widget: "string"}
+          - {label: "Email", name: "email", widget: "string"}
+          - {label: "Address", name: "address", widget: "string"}
+          - {label: "Golf Bay Price", name: "golfPrice", widget: "string"}
+          - {label: "Hole-In-One Jackpot", name: "jackpot", widget: "string"}
+          - label: "Hours"
+            name: "hours"
+            widget: "list"
+            fields:
+              - {label: "Day", name: "day", widget: "string"}
+              - {label: "Hours", name: "hours", widget: "string"}
