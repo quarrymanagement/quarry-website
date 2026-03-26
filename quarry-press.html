@@ -72,6 +72,26 @@ nav { display:flex; align-items:center; }
 footer { background:#0F0A07; padding:2.5rem 2rem; border-top:1px solid var(--border-light); text-align:center; }
 .footer-legal { font-family:'Montserrat',sans-serif; font-size:0.55rem; color:rgba(255,255,255,0.3); letter-spacing:0.08em; line-height:2; }
 @media(max-width:640px) { .press-card,.voyage-card { grid-template-columns:1fr; } .press-arrow,.voyage-arrow { display:none; } .wrap { padding:2.5rem 1.25rem; } }
+
+/* ===MOBILE-FIX=== */
+@media (max-width:1100px) {
+  header { overflow:visible !important; }
+  .header-inner { overflow:visible !important; padding:0 1rem !important; flex-wrap:nowrap; }
+  .logo { font-size:1.05rem !important; flex-shrink:0; }
+  .logo span { font-size:0.38rem !important; }
+  .hamburger { display:flex !important; z-index:1002 !important; position:relative !important; touch-action:manipulation; -webkit-tap-highlight-color:transparent; cursor:pointer; }
+  nav { display:none !important; }
+  nav.open { display:flex !important; z-index:1001; }
+}
+@media (max-width:480px) {
+  .logo { font-size:0.95rem !important; }
+  .header-inner { padding:0 0.75rem !important; }
+}
+@media (max-width:768px) {
+  .hero-video { display:none !important; }
+  .hero { background-image: linear-gradient(to bottom, rgba(15,10,5,0.25) 0%, rgba(15,10,5,0.25) 50%, rgba(15,10,5,0.7) 100%), url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=900&q=80') !important; background-size:cover !important; background-position:center !important; }
+}
+/* ===END-MOBILE-FIX=== */
 </style>
 </head>
 <body>
