@@ -286,8 +286,10 @@ function toggleNav(){var n=document.getElementById('mainNav'),h=document.querySe
 function toggleDropdown(el){el.closest('.nav-item').classList.toggle('open');}
 document.addEventListener('click',function(e){var n=document.getElementById('mainNav'),h=document.querySelector('.hamburger');if(!n||!h)return;if(!n.contains(e.target)&&!h.contains(e.target)){n.classList.remove('open');if(h)h.classList.remove('active');document.querySelectorAll('.nav-item.open').forEach(function(i){i.classList.remove('open');});}});
 </script>
+<style id="qmobile">@media(max-width:1100px){header{z-index:9999!important;position:fixed!important;}.hamburger{display:flex!important;z-index:9999!important;position:relative!important;touch-action:manipulation;-webkit-tap-highlight-color:transparent;min-width:44px;min-height:44px;align-items:center;justify-content:center;}nav{display:none!important;}nav.open{display:flex!important;z-index:9998!important;position:fixed!important;top:80px!important;left:0!important;right:0!important;}.hero,.hero-bg,.hero-video{z-index:0!important;}}</style>
 </head>
 <body>
+<script id="qnav">(function(){function init(){var h=document.getElementById('hamburger')||document.querySelector('.hamburger');var n=document.getElementById('mainNav');if(!h||!n)return;h.removeAttribute('onclick');function toggle(e){if(e){e.preventDefault();e.stopPropagation();}n.classList.toggle('open');h.classList.toggle('active');}h.addEventListener('click',toggle,{passive:false});h.addEventListener('touchend',function(e){e.preventDefault();e.stopPropagation();n.classList.toggle('open');h.classList.toggle('active');},{passive:false});document.addEventListener('touchend',function(e){if(!n.contains(e.target)&&!h.contains(e.target)){n.classList.remove('open');h.classList.remove('active');}},{passive:true});window.toggleNav=toggle;}if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}else{init();}})();</script>
 
 <header>
   <div class="header-inner">
