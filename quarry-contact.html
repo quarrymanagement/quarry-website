@@ -226,7 +226,7 @@ document.addEventListener('click',function(e){var n=document.getElementById('mai
     <h2 class="form-title">Send Us a Message</h2>
     <p class="form-sub">Questions, feedback, or just want to say hello &mdash; we'll get back to you shortly.</p>
     <div class="success-msg" id="successMsg">
-      <div class="success-icon">ÃÂ¢ÃÂÃÂÃÂ¯ÃÂ¸ÃÂ</div>
+      <div class="success-icon">ÃÂ¢ÃÂÃÂÃÂ¯ÃÂ¸</div>
       <h3 class="success-title">Message Sent!</h3>
       <p class="success-sub">Thanks for reaching out. We'll be in touch with you soon.</p>
     </div>
@@ -253,7 +253,7 @@ document.addEventListener('click',function(e){var n=document.getElementById('mai
           </select>
         </div>
         <div class="form-group form-full"><label class="form-label">Message <span>*</span></label><textarea name="message" placeholder="How can we help?" required></textarea></div>
-        <div class="form-full"><button type="submit" class="submit-btn">Send Message ÃÂ¢ÃÂÃÂ</button></div>
+        <div class="form-full"><button type="submit" class="submit-btn">Send Message &#x2192;</button></div>
       </div>
     </form>
   </div>
@@ -297,7 +297,7 @@ document.getElementById('contactForm').addEventListener('submit', async function
       form.innerHTML = '<div style="text-align:center;padding:3rem 0;font-family:Cormorant Garamond,serif;font-size:1.4rem;color:var(--gold-light);">Thank you! We'll be in touch soon.</div>';
     } else { throw new Error(); }
   } catch {
-    btn.textContent = 'Send Message Ã¢ÂÂ';
+    btn.textContent = 'Send Message &#x2192;';
     btn.disabled = false;
     alert('Something went wrong. Please call us at 636-224-8257 or email management@thequarrystl.com');
   }
