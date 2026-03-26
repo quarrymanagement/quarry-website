@@ -280,6 +280,12 @@ nav { display:flex; align-items:center; }
 }
 /* ===END-MOBILE-FIX=== */
 </style>
+
+<script>
+function toggleNav(){var n=document.getElementById('mainNav'),h=document.querySelector('.hamburger');if(!n)return;n.classList.toggle('open');if(h)h.classList.toggle('active');}
+function toggleDropdown(el){el.closest('.nav-item').classList.toggle('open');}
+document.addEventListener('click',function(e){var n=document.getElementById('mainNav'),h=document.querySelector('.hamburger');if(!n||!h)return;if(!n.contains(e.target)&&!h.contains(e.target)){n.classList.remove('open');if(h)h.classList.remove('active');document.querySelectorAll('.nav-item.open').forEach(function(i){i.classList.remove('open');});}});
+</script>
 </head>
 <body>
 
