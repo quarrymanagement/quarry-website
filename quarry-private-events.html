@@ -179,7 +179,7 @@ nav { display:flex; align-items:center; }
     <a href="index.html" class="logo">The Quarry<span>New Melle, Missouri</span></a>
     <nav id="mainNav">
       <div class="nav-item">
-        <a href="#" class="nav-link">Menu ▾</a>
+        <a href="#" class="nav-link">Menu â¾</a>
         <div class="dropdown">
           <a href="quarry-menu.html">Food Menu</a>
           <a href="quarry-drinks.html">Drink Menu</a>
@@ -191,7 +191,7 @@ nav { display:flex; align-items:center; }
         <a href="quarry-golf.html" class="nav-link">Hole-In-One Golf</a>
       </div>
       <div class="nav-item">
-        <a href="#" class="nav-link">Entertainment ▾</a>
+        <a href="#" class="nav-link">Entertainment â¾</a>
         <div class="dropdown">
           <a href="quarry-events.html">Events Calendar</a>
           <a href="quarry-bands.html">Live Bands</a>
@@ -199,7 +199,7 @@ nav { display:flex; align-items:center; }
         </div>
       </div>
       <div class="nav-item">
-        <a href="#" class="nav-link">Reservations ▾</a>
+        <a href="#" class="nav-link">Reservations â¾</a>
         <div class="dropdown">
           <a href="quarry-reservations.html">Book a Reservation</a>
           <a href="http://thequarryweddings.com" target="_blank">Weddings</a>
@@ -210,7 +210,7 @@ nav { display:flex; align-items:center; }
         <a href="quarry-giftcards.html" class="nav-link">Gift Cards</a>
       </div>
       <div class="nav-item">
-        <a href="#" class="nav-link">Connect ▾</a>
+        <a href="#" class="nav-link">Connect â¾</a>
         <div class="dropdown">
           <a href="quarry-ourstory.html">Our Story</a>
           <a href="quarry-press.html">Press & Media</a>
@@ -231,24 +231,24 @@ nav { display:flex; align-items:center; }
 </div>
 
 <div class="reg-notice">
-  <p>Looking to reserve a section during regular hours? <a href="quarry-reservations.html">Visit our Reservations page →</a></p>
+  <p>Looking to reserve a section during regular hours? <a href="quarry-reservations.html">Visit our Reservations page â</a></p>
 </div>
 
 <!-- VENUE OPTIONS -->
 <div class="venues-strip">
   <div class="venues-inner">
     <div class="venue-card">
-      <div class="venue-icon">🏛️</div>
+      <div class="venue-icon">ðï¸</div>
       <p class="venue-name">The Building</p>
       <p class="venue-desc">Full indoor venue exclusive to your event</p>
     </div>
     <div class="venue-card">
-      <div class="venue-icon">🌿</div>
+      <div class="venue-icon">ð¿</div>
       <p class="venue-name">Building &amp; Patio</p>
       <p class="venue-desc">Indoor + outdoor space combined</p>
     </div>
     <div class="venue-card">
-      <div class="venue-icon">🏔️</div>
+      <div class="venue-icon">ðï¸</div>
       <p class="venue-name">Entire Venue</p>
       <p class="venue-desc">Complete buyout of The Quarry</p>
     </div>
@@ -263,12 +263,12 @@ nav { display:flex; align-items:center; }
   </div>
 
   <div class="success-msg" id="successMsg">
-    <div class="success-icon">🥂</div>
+    <div class="success-icon">ð¥</div>
     <h3 class="success-title">Inquiry Received!</h3>
     <p class="success-sub">Thank you for reaching out! One of our team members will be in touch with you soon to discuss your event.<br><br>We look forward to hosting you at The Quarry.</p>
   </div>
 
-  <form id="eventForm">
+  <form id="eventForm" name="private-events" method="POST" data-netlify="true" netlify-honeypot="bot-field"><input type="hidden" name="form-name" value="private-events"><p style="display:none"><input name="bot-field"></p>
     <div class="form-grid">
 
       <!-- NAME -->
@@ -342,10 +342,10 @@ nav { display:flex; align-items:center; }
         <label class="form-label">Estimated Guests <span class="req">*</span></label>
         <select name="guests" required>
           <option value="" disabled selected>Select group size</option>
-          <option>11 – 25</option>
-          <option>26 – 50</option>
-          <option>51 – 75</option>
-          <option>76 – 100</option>
+          <option>11 â 25</option>
+          <option>26 â 50</option>
+          <option>51 â 75</option>
+          <option>76 â 100</option>
           <option>100+</option>
         </select>
       </div>
@@ -463,12 +463,12 @@ nav { display:flex; align-items:center; }
       <!-- NOTES -->
       <div class="form-group form-full">
         <label class="form-label">Additional Notes</label>
-        <textarea name="notes" placeholder="Tell us more about your event — theme, special requests, entertainment needs, or anything else we should know..."></textarea>
+        <textarea name="notes" placeholder="Tell us more about your event â theme, special requests, entertainment needs, or anything else we should know..."></textarea>
       </div>
 
       <!-- SUBMIT -->
       <div class="form-full">
-        <button type="submit" class="submit-btn">Submit Event Inquiry →</button>
+        <button type="submit" class="submit-btn">Submit Event Inquiry â</button>
       </div>
 
     </div>
@@ -478,102 +478,30 @@ nav { display:flex; align-items:center; }
 
 <footer>
   <p class="footer-legal">
-    © 2026 The Quarry · 3960 Highway Z, New Melle, MO 63385 · 636-224-8257 · management@thequarrystl.com<br>
-    All inquiries are responded to within 24–48 hours
+    Â© 2026 The Quarry Â· 3960 Highway Z, New Melle, MO 63385 Â· 636-224-8257 Â· management@thequarrystl.com<br>
+    All inquiries are responded to within 24â48 hours
   </p>
 </footer>
 
 <script>
-// Track selections
-const selections = { eventType:'', venue:'', catering:'', drinks:'' };
-
-function selectBox(group, value, boxId) {
-  // Deselect all boxes in the group
-  const allBoxes = document.querySelectorAll(`[id^="${group === 'eventType' ? 'type' : group === 'venue' ? 'venue' : group === 'catering' ? 'catering' : 'drinks'}"]`);
-
-  // Map group to prefix
-  const prefixes = { eventType:'checkType', venue:'checkVenue', catering:'checkCatering', drinks:'checkDrinks' };
-  const boxPrefixes = { eventType:'type', venue:'venue', catering:'catering', drinks:'drinks' };
-  const prefix = prefixes[group];
-  const boxPrefix = boxPrefixes[group];
-
-  document.querySelectorAll(`[id^="${boxPrefix}"]`).forEach(el => {
-    if (el.tagName !== 'INPUT') {
-      el.classList.remove('selected');
-    }
-  });
-  document.querySelectorAll(`[id^="${prefix}"]`).forEach(el => {
-    el.classList.remove('active');
-  });
-
-  // Select clicked box
-  document.getElementById(boxId).classList.add('selected');
-  const checkId = 'check' + boxId.charAt(0).toUpperCase() + boxId.slice(1);
-  const checkEl = document.getElementById(checkId);
-  if (checkEl) checkEl.classList.add('active');
-
-  // Update hidden input
-  document.getElementById(group + 'Input').value = value;
-  selections[group] = value;
-}
-
-document.getElementById('eventForm').addEventListener('submit', function(e) {
+document.getElementById('eventForm').addEventListener('submit', async function(e) {
   e.preventDefault();
-  const data = new FormData(e.target);
-
-  const name     = data.get('name');
-  const email    = data.get('email');
-  const phone    = data.get('phone');
-  const company  = data.get('company') || 'N/A';
-  const type     = data.get('eventType') || 'Not selected';
-  const occasion = data.get('occasion');
-  const guests   = data.get('guests');
-  const date     = data.get('date');
-  const time     = data.get('time');
-  const venue    = data.get('venue') || 'Not selected';
-  const catering = data.get('catering') || 'Not selected';
-  const drinks   = data.get('drinks') || 'Not selected';
-  const notes    = data.get('notes') || 'None';
-
-  const dateFormatted = date ? new Date(date + 'T12:00:00').toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' }) : '';
-
-  const subject = encodeURIComponent(`Private Event Inquiry – ${occasion} – ${name}`);
-  const body = encodeURIComponent(
-`PRIVATE / CORPORATE EVENT INQUIRY
-===================================
-
-Name:             ${name}
-Email:            ${email}
-Phone:            ${phone}
-Company:          ${company}
-
-Reservation Type: ${type}
-Occasion:         ${occasion}
-Estimated Guests: ${guests}
-Preferred Date:   ${dateFormatted}
-Preferred Time:   ${time}
-Venue Space:      ${venue}
-
-Catering:         ${catering}
-Drink Package:    ${drinks}
-
-Additional Notes:
-${notes}
-
----------------------------
-Submitted via thequarrystl.com`
-  );
-
-  window.location.href = `mailto:management@thequarrystl.com?subject=${subject}&body=${body}`;
-
-  e.target.style.display = 'none';
-  document.getElementById('successMsg').style.display = 'block';
-  window.scrollTo({ top: document.getElementById('successMsg').offsetTop - 100, behavior:'smooth' });
+  const form = e.target;
+  const btn = form.querySelector('button[type="submit"]');
+  btn.textContent = 'Sending...';
+  btn.disabled = true;
+  try {
+    const data = new FormData(form);
+    const res = await fetch('/', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: new URLSearchParams(data).toString()});
+    if (res.ok) {
+      form.innerHTML = '<div style="text-align:center;padding:3rem 0;font-family:Cormorant Garamond,serif;font-size:1.4rem;color:var(--gold-light);">Inquiry received! Our events team will contact you within 24 hours.</div>';
+    } else { throw new Error(); }
+  } catch {
+    btn.textContent = 'Send Inquiry →';
+    btn.disabled = false;
+    alert('Something went wrong. Please call us at 636-224-8257 or email management@thequarrystl.com');
+  }
 });
-
-// Min date today
-const dateInput = document.querySelector('input[type="date"]');
-if (dateInput) dateInput.setAttribute('min', new Date().toISOString().split('T')[0]);
 </script>
 
 
