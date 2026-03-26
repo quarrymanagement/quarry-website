@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded',function(){
     if(btn){btn.textContent='Sending...';btn.disabled=true;}
     try{
       var body=new URLSearchParams(new FormData(form)).toString();
-      var res=await fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body});
+      var res=await fetch('/quarry-contact.html',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body});
       if(res.ok){
         form.innerHTML='<div style="text-align:center;padding:3rem 1rem;"><p style="font-family:Cormorant Garamond,serif;font-size:1.6rem;color:#b48c3c;margin-bottom:1rem;">Thank You!</p><p style="font-family:Montserrat,sans-serif;font-size:0.85rem;color:#555;line-height:1.6;">Your message has been received! We will be in touch shortly.<br><br>Questions? Call <a href="tel:6362248257" style="color:#b48c3c;">636-224-8257</a> or email <a href="mailto:management@thequarrystl.com" style="color:#b48c3c;">management@thequarrystl.com</a></p></div>';
       } else throw new Error('HTTP '+res.status);
@@ -234,7 +234,7 @@ document.addEventListener('DOMContentLoaded',function(){
     <h2 class="form-title">Send Us a Message</h2>
     <p class="form-sub">Questions, feedback, or just want to say hello &mdash; we'll get back to you shortly.</p>
     <div class="success-msg" id="successMsg">
-      <div class="success-icon">ÃÂ¢ÃÂÃÂ</div>
+      <div class="success-icon"></div>
       <h3 class="success-title">Message Sent!</h3>
       <p class="success-sub">Thanks for reaching out. We'll be in touch with you soon.</p>
     </div>
