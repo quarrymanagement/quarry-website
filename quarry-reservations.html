@@ -222,18 +222,9 @@ document.addEventListener('click',function(e){var n=document.getElementById('mai
 </script>
 <style id="qmobile">@media(max-width:1100px){header{z-index:9999!important;position:fixed!important;}.hamburger{display:flex!important;z-index:9999!important;position:relative!important;touch-action:manipulation;-webkit-tap-highlight-color:transparent;min-width:44px;min-height:44px;align-items:center;justify-content:center;}nav{display:none!important;}nav.open{display:flex!important;z-index:9998!important;position:fixed!important;top:80px!important;left:0!important;right:0!important;}.hero,.hero-bg,.hero-video{z-index:0!important;}}</style>
 
+
 <script>
-function selectBox(field, value, cardId) {
-  // Update hidden input
-  var input = document.getElementById(field + 'Input');
-  if (input) input.value = value;
-  // Remove selected class from all cards in same group
-  var allCards = document.querySelectorAll('[onclick*="selectBox('' + field + ''"]');
-  allCards.forEach(function(c) { c.classList.remove('selected'); });
-  // Add selected to clicked card
-  var card = document.getElementById(cardId);
-  if (card) card.classList.add('selected');
-}
+function selectBox(f,v,id){var i=document.getElementById(f+'Input');if(i)i.value=v;document.querySelectorAll('.select-box').forEach(function(c){if(c.getAttribute('onclick')&&c.getAttribute('onclick').indexOf("'"+f+"'")!==-1)c.classList.remove('selected');});var card=document.getElementById(id);if(card)card.classList.add('selected');}
 </script>
 </head>
 <body>
