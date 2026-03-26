@@ -197,36 +197,21 @@ footer { background:#0F0A07; padding:2.5rem 2rem; border-top:1px solid var(--bor
   .guest-grid { grid-template-columns:1fr; }
 }
 
-/* ===MOBILE-FIX=== */
-@media (max-width:1100px) {
-  header { overflow:visible !important; }
-  .header-inner { overflow:visible !important; padding:0 1rem !important; flex-wrap:nowrap; }
-  .logo { font-size:1.05rem !important; flex-shrink:0; }
-  .logo span { font-size:0.38rem !important; }
-  .hamburger { display:flex !important; z-index:1002 !important; position:relative !important; touch-action:manipulation; -webkit-tap-highlight-color:transparent; cursor:pointer; }
-  nav { display:none !important; }
-  nav.open { display:flex !important; z-index:1001; }
-}
-@media (max-width:480px) {
-  .logo { font-size:0.95rem !important; }
-  .header-inner { padding:0 0.75rem !important; }
-}
-@media (max-width:768px) {
-  .hero-video { display:none !important; }
-  .hero { background-image: linear-gradient(to bottom, rgba(15,10,5,0.25) 0%, rgba(15,10,5,0.25) 50%, rgba(15,10,5,0.7) 100%), url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=900&q=80') !important; background-size:cover !important; background-position:center !important; }
-}
-/* ===END-MOBILE-FIX=== */
+
 </style>
+
+
+<style id="qmobile">@media(max-width:1100px){header{z-index:9999!important;position:fixed!important;}.hamburger{display:flex!important;z-index:9999!important;position:relative!important;touch-action:manipulation;-webkit-tap-highlight-color:transparent;min-width:44px;min-height:44px;align-items:center;justify-content:center;}nav{display:none!important;}nav.open{display:flex!important;z-index:9998!important;position:fixed!important;top:80px!important;left:0!important;right:0!important;}.hero,.hero-bg,.hero-video{z-index:0!important;}}
+/* ===MOBILE-HEADER-FIX=== */
+@media (max-width:1100px){html,body{max-width:100%;overflow-x:hidden;}header{overflow:visible !important;width:100%;left:0;right:0;}.header-inner{display:flex !important;align-items:center !important;justify-content:space-between !important;padding:0 1rem !important;width:100% !important;box-sizing:border-box !important;overflow:visible !important;}.logo{font-size:1rem !important;flex-shrink:0;white-space:nowrap;}.logo span{font-size:0.38rem !important;display:block;}nav{display:none !important;}nav.open{display:flex !important;}.hamburger{display:flex !important;flex-shrink:0;z-index:1002 !important;position:relative !important;touch-action:manipulation;-webkit-tap-highlight-color:transparent;cursor:pointer;margin-left:auto;}}
+/* ===END-MOBILE-HEADER-FIX=== */
+</style>
+
+
 
 <script>
 function toggleNav(){var n=document.getElementById('mainNav'),h=document.querySelector('.hamburger');if(!n)return;n.classList.toggle('open');if(h)h.classList.toggle('active');}
-function toggleDropdown(el){el.closest('.nav-item').classList.toggle('open');}
-document.addEventListener('click',function(e){var n=document.getElementById('mainNav'),h=document.querySelector('.hamburger');if(!n||!h)return;if(!n.contains(e.target)&&!h.contains(e.target)){n.classList.remove('open');if(h)h.classList.remove('active');document.querySelectorAll('.nav-item.open').forEach(function(i){i.classList.remove('open');});}});
-</script>
-<style id="qmobile">@media(max-width:1100px){header{z-index:9999!important;position:fixed!important;}.hamburger{display:flex!important;z-index:9999!important;position:relative!important;touch-action:manipulation;-webkit-tap-highlight-color:transparent;min-width:44px;min-height:44px;align-items:center;justify-content:center;}nav{display:none!important;}nav.open{display:flex!important;z-index:9998!important;position:fixed!important;top:80px!important;left:0!important;right:0!important;}.hero,.hero-bg,.hero-video{z-index:0!important;}}</style>
-
-
-<script>
+document.addEventListener('click',function(e){var n=document.getElementById('mainNav'),h=document.querySelector('.hamburger');if(!n||!h)return;if(!n.contains(e.target)&&!h.contains(e.target)){n.classList.remove('open');}});
 function selectBox(f,v,id){var i=document.getElementById(f+'Input');if(i)i.value=v;document.querySelectorAll('.select-box').forEach(function(c){if(c.getAttribute('onclick')&&c.getAttribute('onclick').indexOf("'"+f+"'")!==-1)c.classList.remove('selected');});var card=document.getElementById(id);if(card)card.classList.add('selected');}
 </script>
 </head>
@@ -570,28 +555,7 @@ function selectBox(f,v,id){var i=document.getElementById(f+'Input');if(i)i.value
 <footer><p class="footer-legal">&#x201D;&copy; 2026 The Quarry &middot; 3960 Highway Z, New Melle, MO 63385 &middot; 636-224-8257 &middot; management@thequarrystl.com<br>Reservations are non-refundable within 24 hours of tee time &middot; Late arrivals do not extend reservation time</p></footer>
 
 
-<script>
-function toggleNav() {
-  document.getElementById('mainNav').classList.toggle('open');
-}
-document.querySelectorAll('.nav-link').forEach(link => {
-  link.addEventListener('click', function(e) {
-    const item = this.closest('.nav-item');
-    const dropdown = item && item.querySelector('.dropdown');
-    if (dropdown && window.innerWidth <= 1100) {
-      e.preventDefault();
-      item.classList.toggle('open');
-    }
-  });
-});
-document.addEventListener('click', function(e) {
-  const nav = document.getElementById('mainNav');
-  const hb = document.getElementById('hamburger');
-  if (nav && nav.classList.contains('open') && !nav.contains(e.target) && hb && !hb.contains(e.target)) {
-    nav.classList.remove('open');
-  }
-});
-</script>
+
 <script>
 // 
 // STRIPE CONFIGURATION
