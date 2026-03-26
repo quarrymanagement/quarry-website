@@ -427,7 +427,7 @@ function selectBox(f,v,id){var i=document.getElementById(f+'Input');if(i)i.value
               <span class="catering-option-sub">View our shareables menu for groups</span>
             </div>
           </div>
-          <div class="catering-option selected" id="cateringNo" onclick="selectCatering('No')">
+          <div class="catering-option" id="cateringNo" onclick="selectCatering('No')">
             <span class="catering-check active" id="checkNo"></span>
             <div>
               <span class="catering-option-title">No thanks</span>
@@ -435,7 +435,7 @@ function selectBox(f,v,id){var i=document.getElementById(f+'Input');if(i)i.value
             </div>
           </div>
         </div>
-        <input type="hidden" name="catering" id="cateringInput" value="No">
+        <input type="hidden" name="catering" id="cateringInput" value="">
         <div class="catering-reveal" id="cateringReveal">
           <p>Great! Our Event & Catering Shareables Menu is perfect for group celebrations. A 20% service charge applies to all catering orders.</p>
           <a href="quarry-catering.html" target="_blank">View Our Catering Menu &#x2192;</a>
@@ -466,26 +466,7 @@ function selectBox(f,v,id){var i=document.getElementById(f+'Input');if(i)i.value
   </p>
 </footer>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-document.getElementById('reservationForm').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  const form = e.target;
-  const btn = form.querySelector('button[type="submit"]');
-  btn.textContent = 'Sending...';
-  btn.disabled = true;
-  try {
-    const data = new FormData(form);
-    const res = await fetch('/', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: new URLSearchParams(data).toString()});
-    if (res.ok) {
-      form.innerHTML = '<div style="text-align:center;padding:3rem 0;font-family:Cormorant Garamond,serif;font-size:1.4rem;color:var(--gold-light);">Reservation request received! We'll confirm within 24 hours.</div>';
-    } else { throw new Error(); }
-  } catch {
-    btn.textContent = 'Request Reservation &#x2192;';
-    btn.disabled = false;
-    alert('Something went wrong. Please call us at 636-224-8257.');
-  }
-});
-</script>E html>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>E html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -813,7 +794,7 @@ nav { display:flex; align-items:center; }
     <p class="success-sub">Thank you! Our team will reach out within 24 hours to confirm your reservation.<br>We can't wait to celebrate with you.</p>
   </div>
 
-  <form id="reservationForm" name="reservations" method="POST" data-netlify="true" netlify-honeypot="bot-field"><input type="hidden" name="form-name" value="reservations"><p style="display:none"><input name="bot-field"></p>
+  
     <div class="form-grid">
 
       <!-- NAME -->
@@ -921,7 +902,7 @@ nav { display:flex; align-items:center; }
               <span class="catering-option-sub">View our shareables menu for groups</span>
             </div>
           </div>
-          <div class="catering-option selected" id="cateringNo" onclick="selectCatering('No')">
+          <div class="catering-option" id="cateringNo" onclick="selectCatering('No')">
             <span class="catering-check active" id="checkNo"></span>
             <div>
               <span class="catering-option-title">No thanks</span>
@@ -929,7 +910,7 @@ nav { display:flex; align-items:center; }
             </div>
           </div>
         </div>
-        <input type="hidden" name="catering" id="cateringInput" value="No">
+        <input type="hidden" name="catering" id="cateringInput" value="">
         <div class="catering-reveal" id="cateringReveal">
           <p>Great! Our Event & Catering Shareables Menu is perfect for group celebrations. A 20% service charge applies to all catering orders.</p>
           <a href="quarry-catering.html" target="_blank">View Our Catering Menu &#x2192;</a>
