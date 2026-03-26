@@ -216,34 +216,37 @@ nav { display:flex; align-items:center; }
 </style>
 
 
-<style id="qmobile">@media(max-width:1100px){header{z-index:9999!important;position:fixed!important;}.hamburger{display:flex!important;z-index:9999!important;position:relative!important;touch-action:manipulation;-webkit-tap-highlight-color:transparent;min-width:44px;min-height:44px;align-items:center;justify-content:center;}nav{display:none!important;}nav.open{display:flex!important;z-index:9998!important;position:fixed!important;top:80px!important;left:0!important;right:0!important;}.hero,.hero-bg,.hero-video{z-index:0!important;}}</style>
+<style id="qmobile">@media(max-width:1100px){header{z-index:9999!important;position:fixed!important;}.hamburger{display:flex!important;z-index:9999!important;position:relative!important;touch-action:manipulation;-webkit-tap-highlight-color:transparent;min-width:44px;min-height:44px;align-items:center;justify-content:center;}nav{display:none!important;}nav.open{display:flex!important;z-index:9998!important;position:fixed!important;top:80px!important;left:0!important;right:0!important;}.hero,.hero-bg,.hero-video{z-index:0!important;}}
+/* ===MOBILE-HEADER-FIX=== */
+@media (max-width:1100px){html,body{max-width:100%;overflow-x:hidden;}header{overflow:visible!important;width:100%!important;box-sizing:border-box!important;}.header-inner{display:flex!important;align-items:center!important;justify-content:space-between!important;padding:0 1rem!important;width:100%!important;box-sizing:border-box!important;overflow:visible!important;flex-wrap:nowrap!important;}.logo{font-size:1rem!important;flex-shrink:0!important;white-space:nowrap!important;max-width:60%!important;}.logo span{font-size:0.38rem!important;display:block!important;}nav{display:none!important;}nav.open{display:flex!important;}.hamburger{display:flex!important;flex-shrink:0!important;z-index:1002!important;position:relative!important;touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important;cursor:pointer!important;margin-left:auto!important;}}
+/* ===END-MOBILE-HEADER-FIX=== */
+</style>
+
 
 
 
 <script>
 function toggleNav(){var n=document.getElementById('mainNav'),h=document.querySelector('.hamburger');if(!n)return;n.classList.toggle('open');if(h)h.classList.toggle('active');}
-document.addEventListener('click',function(e){var n=document.getElementById('mainNav'),h=document.querySelector('.hamburger');if(!n||!h)return;if(!n.contains(e.target)&&!h.contains(e.target)){n.classList.remove('open');document.querySelectorAll('.nav-item.open').forEach(function(i){i.classList.remove('open');});}});
-function selectCatering(v){var i=document.getElementById('cateringInput');if(i)i.value=v;document.querySelectorAll('.catering-option').forEach(function(c){c.classList.remove('selected');if(c.getAttribute('onclick')&&c.getAttribute('onclick').indexOf("'"+v+"'")!==-1)c.classList.add('selected');});}
+document.addEventListener('click',function(e){var n=document.getElementById('mainNav'),h=document.querySelector('.hamburger');if(!n||!h)return;if(!n.contains(e.target)&&!h.contains(e.target)){n.classList.remove('open');}});
 function selectBox(f,v,id){var i=document.getElementById(f+'Input');if(i)i.value=v;document.querySelectorAll('.select-box').forEach(function(c){if(c.getAttribute('onclick')&&c.getAttribute('onclick').indexOf("'"+f+"'")!==-1)c.classList.remove('selected');});var card=document.getElementById(id);if(card)card.classList.add('selected');}
+function selectCatering(v){var i=document.getElementById('cateringInput');if(i)i.value=v;document.querySelectorAll('.catering-option').forEach(function(c){c.classList.remove('selected');if(c.getAttribute('onclick')&&c.getAttribute('onclick').indexOf("'"+v+"'")!==-1)c.classList.add('selected');});}
 document.addEventListener('DOMContentLoaded',function(){
   var form=document.getElementById('reservationForm');
   if(!form)return;
   form.addEventListener('submit',async function(e){
     e.preventDefault();
     var btn=form.querySelector('button[type="submit"]');
-    var orig=btn.textContent;
-    btn.textContent='Sending...';btn.disabled=true;
+    var orig=btn?btn.textContent:'';
+    if(btn){btn.textContent='Sending...';btn.disabled=true;}
     try{
       var body=new URLSearchParams(new FormData(form)).toString();
       var res=await fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body});
       if(res.ok){
-        form.innerHTML='<div style="text-align:center;padding:3rem 1rem;"><p style="font-family:Cormorant Garamond,serif;font-size:1.5rem;color:#b48c3c;margin-bottom:1rem;">Reservation Request Received!</p><p style="font-family:Montserrat,sans-serif;font-size:0.9rem;color:#666;">We will confirm your reservation within 24 hours.<br>Questions? Call us at 636-224-8257 or email management@thequarrystl.com</p></div>';
-      } else {
-        throw new Error('Server error: '+res.status);
-      }
+        form.innerHTML='<div style="text-align:center;padding:3rem 1rem;"><p style="font-family:Cormorant Garamond,serif;font-size:1.6rem;color:#b48c3c;margin-bottom:1rem;">Thank You!</p><p style="font-family:Montserrat,sans-serif;font-size:0.85rem;color:#555;line-height:1.6;">Your reservation request has been received! We will confirm within 24 hours.<br><br>Questions? Call <a href="tel:6362248257" style="color:#b48c3c;">636-224-8257</a> or email <a href="mailto:management@thequarrystl.com" style="color:#b48c3c;">management@thequarrystl.com</a></p></div>';
+      } else throw new Error('HTTP '+res.status);
     }catch(err){
-      btn.textContent=orig;btn.disabled=false;
-      alert('Submission failed. Please call us at 636-224-8257 or email management@thequarrystl.com');
+      if(btn){btn.textContent='Submit Reservation Request';btn.disabled=false;}
+      alert('Submission failed. Please call 636-224-8257 or email management@thequarrystl.com');
     }
   });
 });
