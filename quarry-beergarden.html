@@ -155,33 +155,38 @@ footer { background:#0F0A07; padding:2.5rem 2rem; border-top:1px solid var(--bor
   .notify-form input { border-right:1px solid var(--border-mid); border-bottom:none; }
 }
 
-/* ===MOBILE-FIX=== */
-@media (max-width:1100px) {
-  header { overflow:visible !important; }
-  .header-inner { overflow:visible !important; padding:0 1rem !important; flex-wrap:nowrap; }
-  .logo { font-size:1.05rem !important; flex-shrink:0; }
-  .logo span { font-size:0.38rem !important; }
-  .hamburger { display:flex !important; z-index:1002 !important; position:relative !important; touch-action:manipulation; -webkit-tap-highlight-color:transparent; cursor:pointer; }
-  nav { display:none !important; }
-  nav.open { display:flex !important; z-index:1001; }
-}
-@media (max-width:480px) {
-  .logo { font-size:0.95rem !important; }
-  .header-inner { padding:0 0.75rem !important; }
-}
-@media (max-width:768px) {
-  .hero-video { display:none !important; }
-  .hero { background-image: linear-gradient(to bottom, rgba(15,10,5,0.25) 0%, rgba(15,10,5,0.25) 50%, rgba(15,10,5,0.7) 100%), url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=900&q=80') !important; background-size:cover !important; background-position:center !important; }
-}
-/* ===END-MOBILE-FIX=== */
+
 </style>
 
+
+<style id="qmobile">@media(max-width:1100px){header{z-index:9999!important;position:fixed!important;}.hamburger{display:flex!important;z-index:9999!important;position:relative!important;touch-action:manipulation;-webkit-tap-highlight-color:transparent;min-width:44px;min-height:44px;align-items:center;justify-content:center;}nav{display:none!important;}nav.open{display:flex!important;z-index:9998!important;position:fixed!important;top:80px!important;left:0!important;right:0!important;}.hero,.hero-bg,.hero-video{z-index:0!important;}}
+/* ===MOBILE-HEADER-FIX=== */
+@media (max-width:1100px){html,body{max-width:100%;overflow-x:hidden;}header{overflow:visible !important;width:100%;left:0;right:0;}.header-inner{display:flex !important;align-items:center !important;justify-content:space-between !important;padding:0 1rem !important;width:100% !important;box-sizing:border-box !important;overflow:visible !important;}.logo{font-size:1rem !important;flex-shrink:0;white-space:nowrap;}.logo span{font-size:0.38rem !important;display:block;}nav{display:none !important;}nav.open{display:flex !important;}.hamburger{display:flex !important;flex-shrink:0;z-index:1002 !important;position:relative !important;touch-action:manipulation;-webkit-tap-highlight-color:transparent;cursor:pointer;margin-left:auto;}}
+/* ===END-MOBILE-HEADER-FIX=== */
+</style>
 <script>
 function toggleNav(){var n=document.getElementById('mainNav'),h=document.querySelector('.hamburger');if(!n)return;n.classList.toggle('open');if(h)h.classList.toggle('active');}
-function toggleDropdown(el){el.closest('.nav-item').classList.toggle('open');}
-document.addEventListener('click',function(e){var n=document.getElementById('mainNav'),h=document.querySelector('.hamburger');if(!n||!h)return;if(!n.contains(e.target)&&!h.contains(e.target)){n.classList.remove('open');if(h)h.classList.remove('active');document.querySelectorAll('.nav-item.open').forEach(function(i){i.classList.remove('open');});}});
+document.addEventListener('click',function(e){var n=document.getElementById('mainNav'),h=document.querySelector('.hamburger');if(!n||!h)return;if(!n.contains(e.target)&&!h.contains(e.target)){n.classList.remove('open');}});
+function selectBox(f,v,id){var i=document.getElementById(f+'Input');if(i)i.value=v;document.querySelectorAll('.select-box').forEach(function(c){if(c.getAttribute('onclick')&&c.getAttribute('onclick').indexOf("'"+f+"'")!==-1)c.classList.remove('selected');});var card=document.getElementById(id);if(card)card.classList.add('selected');}
+document.addEventListener('DOMContentLoaded',function(){
+  var form=document.getElementById('notifyForm');
+  if(!form)return;
+  form.addEventListener('submit',async function(e){
+    e.preventDefault();
+    var btn=form.querySelector('button[type="submit"]');
+    var orig=btn?btn.textContent:'';
+    if(btn){btn.textContent='Sending...';btn.disabled=true;}
+    try{
+      var res=await fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(new FormData(form)).toString()});
+      if(res.ok){form.innerHTML='<div style="text-align:center;padding:3rem 1rem;"><p style="font-family:Cormorant Garamond,serif;font-size:1.5rem;color:#b48c3c;margin-bottom:1rem;">Thank You!</p><p style="font-family:Montserrat,sans-serif;font-size:0.9rem;color:#555;">You are on the list! We will notify you when the Beer Garden opens.<br><br>Questions? Call 636-224-8257 or email management@thequarrystl.com</p></div>';}
+      else throw new Error('status '+res.status);
+    }catch(err){
+      if(btn){btn.textContent=orig;btn.disabled=false;}
+      alert('Submission failed. Please call us at 636-224-8257 or email management@thequarrystl.com');
+    }
+  });
+});
 </script>
-<style id="qmobile">@media(max-width:1100px){header{z-index:9999!important;position:fixed!important;}.hamburger{display:flex!important;z-index:9999!important;position:relative!important;touch-action:manipulation;-webkit-tap-highlight-color:transparent;min-width:44px;min-height:44px;align-items:center;justify-content:center;}nav{display:none!important;}nav.open{display:flex!important;z-index:9998!important;position:fixed!important;top:80px!important;left:0!important;right:0!important;}.hero,.hero-bg,.hero-video{z-index:0!important;}}</style>
 </head>
 <body>
 <script id="qnav">(function(){function init(){var h=document.getElementById('hamburger')||document.querySelector('.hamburger');var n=document.getElementById('mainNav');if(!h||!n)return;h.removeAttribute('onclick');function toggle(e){if(e){e.preventDefault();e.stopPropagation();}n.classList.toggle('open');h.classList.toggle('active');}h.addEventListener('click',toggle,{passive:false});h.addEventListener('touchend',function(e){e.preventDefault();e.stopPropagation();n.classList.toggle('open');h.classList.toggle('active');},{passive:false});document.addEventListener('touchend',function(e){if(!n.contains(e.target)&&!h.contains(e.target)){n.classList.remove('open');h.classList.remove('active');}},{passive:true});window.toggleNav=toggle;}if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}else{init();}})();</script>
@@ -385,28 +390,7 @@ document.addEventListener('click',function(e){var n=document.getElementById('mai
 </footer>
 
 
-<script>
-function toggleNav() {
-  document.getElementById('mainNav').classList.toggle('open');
-}
-document.querySelectorAll('.nav-link').forEach(link => {
-  link.addEventListener('click', function(e) {
-    const item = this.closest('.nav-item');
-    const dropdown = item && item.querySelector('.dropdown');
-    if (dropdown && window.innerWidth <= 1100) {
-      e.preventDefault();
-      item.classList.toggle('open');
-    }
-  });
-});
-document.addEventListener('click', function(e) {
-  const nav = document.getElementById('mainNav');
-  const hb = document.getElementById('hamburger');
-  if (nav && nav.classList.contains('open') && !nav.contains(e.target) && hb && !hb.contains(e.target)) {
-    nav.classList.remove('open');
-  }
-});
-</script>
+
 <script>
 function submitNotify(e) {
   e.preventDefault();
@@ -418,8 +402,6 @@ function submitNotify(e) {
   document.getElementById('notifySuccess').style.display = 'block';
 }
 </script>
-<script>
-document.getElementById("notifyForm").addEventListener("submit",async function(e){e.preventDefault();var form=e.target,btn=form.querySelector("button[type=\"submit\"]");btn.textContent="Sending...";btn.disabled=true;try{var res=await fetch("/",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams(new FormData(form)).toString()});if(res.ok){form.innerHTML="<div style=\"text-align:center;padding:3rem 0;font-family:Cormorant Garamond,serif;font-size:1.4rem;color:var(--gold-light);\">You are on the list! We will notify you when the Beer Garden opens.</div>";}else throw new Error();}catch(err){btn.textContent="Notify Me →";btn.disabled=false;alert("Something went wrong. Please call us at 636-224-8257.");}});
-</script>
+
 </body>
 </html>
