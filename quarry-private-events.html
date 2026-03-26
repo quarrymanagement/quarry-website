@@ -259,24 +259,24 @@ document.addEventListener('click',function(e){var n=document.getElementById('mai
 </div>
 
 <div class="reg-notice">
-  <p>Looking to reserve a section during regular hours? <a href="quarry-reservations.html">Visit our Reservations page ÃÂ¢ÃÂÃÂ</a></p>
+  <p>Looking to reserve a section during regular hours? <a href="quarry-reservations.html">Visit our Reservations page &#x2192;</a></p>
 </div>
 
 <!-- VENUE OPTIONS -->
 <div class="venues-strip">
   <div class="venues-inner">
     <div class="venue-card">
-      <div class="venue-icon">ÃÂ°ÃÂÃÂÃÂÃÂ¯ÃÂ¸ÃÂ</div>
+      <div class="venue-icon"></div>
       <p class="venue-name">The Building</p>
       <p class="venue-desc">Full indoor venue exclusive to your event</p>
     </div>
     <div class="venue-card">
-      <div class="venue-icon">ÃÂ°ÃÂÃÂÃÂ¿</div>
+      <div class="venue-icon"></div>
       <p class="venue-name">Building &amp; Patio</p>
       <p class="venue-desc">Indoor + outdoor space combined</p>
     </div>
     <div class="venue-card">
-      <div class="venue-icon">ÃÂ°ÃÂÃÂÃÂÃÂ¯ÃÂ¸ÃÂ</div>
+      <div class="venue-icon">ÃÂÃÂÃÂ¯ÃÂ¸</div>
       <p class="venue-name">Entire Venue</p>
       <p class="venue-desc">Complete buyout of The Quarry</p>
     </div>
@@ -291,7 +291,7 @@ document.addEventListener('click',function(e){var n=document.getElementById('mai
   </div>
 
   <div class="success-msg" id="successMsg">
-    <div class="success-icon">ÃÂ°ÃÂÃÂ¥ÃÂ</div>
+    <div class="success-icon"></div>
     <h3 class="success-title">Inquiry Received!</h3>
     <p class="success-sub">Thank you for reaching out! One of our team members will be in touch with you soon to discuss your event.<br><br>We look forward to hosting you at The Quarry.</p>
   </div>
@@ -496,7 +496,7 @@ document.addEventListener('click',function(e){var n=document.getElementById('mai
 
       <!-- SUBMIT -->
       <div class="form-full">
-        <button type="submit" class="submit-btn">Submit Event Inquiry ÃÂ¢ÃÂÃÂ</button>
+        <button type="submit" class="submit-btn">Submit Event Inquiry &#x2192;</button>
       </div>
 
     </div>
@@ -525,7 +525,7 @@ document.getElementById('eventForm').addEventListener('submit', async function(e
       form.innerHTML = '<div style="text-align:center;padding:3rem 0;font-family:Cormorant Garamond,serif;font-size:1.4rem;color:var(--gold-light);">Inquiry received! Our events team will contact you within 24 hours.</div>';
     } else { throw new Error(); }
   } catch {
-    btn.textContent = 'Send Inquiry Ã¢ÂÂ';
+    btn.textContent = 'Send Inquiry &#x2192;';
     btn.disabled = false;
     alert('Something went wrong. Please call us at 636-224-8257 or email management@thequarrystl.com');
   }
