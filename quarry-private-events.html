@@ -208,18 +208,9 @@ style.textContent = '.select-box { cursor:pointer; transition:all 0.2s; } .selec
 document.head.appendChild(style);
 </script>
 
+
 <script>
-function selectBox(field, value, cardId) {
-  // Update hidden input
-  var input = document.getElementById(field + 'Input');
-  if (input) input.value = value;
-  // Remove selected class from all cards in same group
-  var allCards = document.querySelectorAll('[onclick*="selectBox('' + field + ''"]');
-  allCards.forEach(function(c) { c.classList.remove('selected'); });
-  // Add selected to clicked card
-  var card = document.getElementById(cardId);
-  if (card) card.classList.add('selected');
-}
+function selectBox(f,v,id){var i=document.getElementById(f+'Input');if(i)i.value=v;document.querySelectorAll('.select-box').forEach(function(c){if(c.getAttribute('onclick')&&c.getAttribute('onclick').indexOf("'"+f+"'")!==-1)c.classList.remove('selected');});var card=document.getElementById(id);if(card)card.classList.add('selected');}
 </script>
 </head>
 <body>
