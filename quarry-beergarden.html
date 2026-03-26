@@ -418,5 +418,8 @@ function submitNotify(e) {
   document.getElementById('notifySuccess').style.display = 'block';
 }
 </script>
+<script>
+document.getElementById("notifyForm").addEventListener("submit",async function(e){e.preventDefault();var form=e.target,btn=form.querySelector("button[type=\"submit\"]");btn.textContent="Sending...";btn.disabled=true;try{var res=await fetch("/",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams(new FormData(form)).toString()});if(res.ok){form.innerHTML="<div style=\"text-align:center;padding:3rem 0;font-family:Cormorant Garamond,serif;font-size:1.4rem;color:var(--gold-light);\">You are on the list! We will notify you when the Beer Garden opens.</div>";}else throw new Error();}catch(err){btn.textContent="Notify Me →";btn.disabled=false;alert("Something went wrong. Please call us at 636-224-8257.");}});
+</script>
 </body>
 </html>
