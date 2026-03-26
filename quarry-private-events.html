@@ -201,42 +201,25 @@ document.addEventListener('click',function(e){var n=document.getElementById('mai
 
 <script>
 // Select box handler - highlights chosen card and sets hidden input
-function selectBox(fieldName, value, cardId) {
-  // Deselect all cards in same group
-  var allCards = document.querySelectorAll('[onclick*="selectBox(\'"+fieldName+"\'"+"']");
-  // Alternative approach - find cards with same field name in onclick
-  document.querySelectorAll('.select-box').forEach(function(card) {
-    var oc = card.getAttribute('onclick') || '';
-    if (oc.includes("'" + fieldName + "'")) {
-      card.classList.remove('selected');
-      var check = card.querySelector('.select-box-check');
-      if (check) check.style.display = 'none';
-    }
-  });
-  // Select clicked card
-  var card = document.getElementById(cardId);
-  if (card) {
-    card.classList.add('selected');
-    var check = card.querySelector('.select-box-check');
-    if (check) check.style.display = 'block';
-  }
-  // Set hidden input value
-  var input = document.querySelector('input[name="' + fieldName + '"]');
-  if (input) {
-    input.value = value;
-  } else {
-    // Create hidden input if it doesn't exist
-    var hidden = document.createElement('input');
-    hidden.type = 'hidden';
-    hidden.name = fieldName;
-    hidden.value = value;
-    document.querySelector('form').appendChild(hidden);
-  }
-}
+
 // Add selected styles dynamically
 var style = document.createElement('style');
 style.textContent = '.select-box { cursor:pointer; transition:all 0.2s; } .select-box:hover { border-color:var(--gold); } .select-box.selected { border-color:var(--gold); background:rgba(180,140,60,0.08); } .select-box-check { display:none; width:16px; height:16px; border-radius:50%; background:var(--gold); margin-bottom:0.5rem; }';
 document.head.appendChild(style);
+</script>
+
+<script>
+function selectBox(field, value, cardId) {
+  // Update hidden input
+  var input = document.getElementById(field + 'Input');
+  if (input) input.value = value;
+  // Remove selected class from all cards in same group
+  var allCards = document.querySelectorAll('[onclick*="selectBox('' + field + ''"]');
+  allCards.forEach(function(c) { c.classList.remove('selected'); });
+  // Add selected to clicked card
+  var card = document.getElementById(cardId);
+  if (card) card.classList.add('selected');
+}
 </script>
 </head>
 <body>
