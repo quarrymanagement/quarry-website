@@ -361,7 +361,7 @@ footer { background:#0F0A07; padding:2.5rem 2rem; border-top:1px solid var(--bor
         <p style="font-family:'Cormorant Garamond',serif;font-size:0.92rem;font-style:italic;color:var(--brown-warm);margin-bottom:1rem;">Your bay includes 75 balls. Add more to keep the fun going!</p>
         <div class="balls-options">
           <div class="ball-option selected" id="balls-0" onclick="selectBalls(0,0)">
-            <div class="ball-qty">ÃÂ¢ÃÂÃÂ</div>
+            <div class="ball-qty">&mdash;</div>
             <div class="ball-label">No Extra</div>
             <div class="ball-price">$0</div>
           </div>
@@ -534,7 +534,7 @@ footer { background:#0F0A07; padding:2.5rem 2rem; border-top:1px solid var(--bor
   </p>
 </div>
 
-<footer><p class="footer-legal">ÃÂ&copy; 2026 The Quarry &middot; 3960 Highway Z, New Melle, MO 63385 &middot; 636-224-8257 &middot; management@thequarrystl.com<br>Reservations are non-refundable within 24 hours of tee time &middot; Late arrivals do not extend reservation time</p></footer>
+<footer><p class="footer-legal">&#x201D;&copy; 2026 The Quarry &middot; 3960 Highway Z, New Melle, MO 63385 &middot; 636-224-8257 &middot; management@thequarrystl.com<br>Reservations are non-refundable within 24 hours of tee time &middot; Late arrivals do not extend reservation time</p></footer>
 
 
 <script>
@@ -729,7 +729,7 @@ document.getElementById('golfForm').addEventListener('submit', async function(e)
     const ballsText = state.extraBalls > 0 ? state.extraBalls + ' extra balls (+$' + state.extraBallsPrice + ')' : 'None';
 
     // Email to management
-    const mgmtSubject = encodeURIComponent('New Golf Reservation ÃÂ¢ÃÂÃÂ Bay ' + state.bay + ' ÃÂ¢ÃÂÃÂ ' + firstName + ' ' + lastName);
+    const mgmtSubject = encodeURIComponent('New Golf Reservation &#x201C; Bay ' + state.bay + ' &#x201C; ' + firstName + ' ' + lastName);
     const mgmtBody = encodeURIComponent(
 `NEW GOLF BAY RESERVATION
 ========================
@@ -750,7 +750,7 @@ Liability Waiver: AGREED & SIGNED ELECTRONICALLY
 
 --
 Submitted via thequarrystl.com
-ADD TO CALENDAR: ${dateFormatted} at ${state.time} ÃÂ¢ÃÂÃÂ Bay ${state.bay} ÃÂ¢ÃÂÃÂ ${firstName} ${lastName} (${phone})`
+ADD TO CALENDAR: ${dateFormatted} at ${state.time} &#x201C; Bay ${state.bay} &#x201C; ${firstName} ${lastName} (${phone})`
     );
 
     // Customer confirmation email
@@ -780,7 +780,7 @@ Questions? Call or text us at 636-224-8257
 or visit us at 3960 Highway Z, New Melle, MO 63385
 
 See you on the course!
-ÃÂ¢ÃÂÃÂ The Quarry Team`
+&mdash; The Quarry Team`
     );
 
     // Open management email
