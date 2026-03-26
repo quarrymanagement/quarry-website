@@ -525,26 +525,7 @@ function selectBox(f,v,id){var i=document.getElementById(f+'Input');if(i)i.value
   </p>
 </footer>
 
-<script>
-document.getElementById('eventForm').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  const form = e.target;
-  const btn = form.querySelector('button[type="submit"]');
-  btn.textContent = 'Sending...';
-  btn.disabled = true;
-  try {
-    const data = new FormData(form);
-    const res = await fetch('/', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: new URLSearchParams(data).toString()});
-    if (res.ok) {
-      form.innerHTML = '<div style="text-align:center;padding:3rem 0;font-family:Cormorant Garamond,serif;font-size:1.4rem;color:var(--gold-light);">Inquiry received! Our events team will contact you within 24 hours.</div>';
-    } else { throw new Error(); }
-  } catch {
-    btn.textContent = 'Send Inquiry &#x2192;';
-    btn.disabled = false;
-    alert('Something went wrong. Please call us at 636-224-8257 or email management@thequarrystl.com');
-  }
-});
-</script>
+
 
 
 <script>
@@ -568,6 +549,9 @@ document.addEventListener('click', function(e) {
     nav.classList.remove('open');
   }
 });
+</script>
+<script>
+document.getElementById("eventForm").addEventListener("submit",async function(e){e.preventDefault();var form=e.target,btn=form.querySelector("button[type=\"submit\"]");btn.textContent="Sending...";btn.disabled=true;try{var res=await fetch("/",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams(new FormData(form)).toString()});if(res.ok){form.innerHTML="<div style=\"text-align:center;padding:3rem 0;font-family:Cormorant Garamond,serif;font-size:1.4rem;color:var(--gold-light);\">Inquiry received! Events team will contact you within 24 hours.</div>";}else throw new Error();}catch(err){btn.textContent="Send Inquiry →";btn.disabled=false;alert("Something went wrong. Please call us at 636-224-8257.");}});
 </script>
 </body>
 </html>
