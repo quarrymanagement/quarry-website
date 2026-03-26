@@ -1,3 +1,1 @@
-404: Not Found<script>
-document.getElementById("contactForm").addEventListener("submit",async function(e){e.preventDefault();var form=e.target,btn=form.querySelector("button[type=\"submit\"]");btn.textContent="Sending...";btn.disabled=true;try{var res=await fetch("/",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams(new FormData(form)).toString()});if(res.ok){form.innerHTML="<div style=\"text-align:center;padding:3rem 0;font-family:Cormorant Garamond,serif;font-size:1.4rem;color:var(--gold-light);\">Thank you! We will be in touch soon.</div>";}else throw new Error();}catch(err){btn.textContent="Send Message →";btn.disabled=false;alert("Something went wrong. Please call us at 636-224-8257.");}});
-</script>
+404: Not Found
