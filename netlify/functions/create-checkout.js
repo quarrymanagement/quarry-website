@@ -65,14 +65,14 @@ exports.handler = async (event) => {
     if (amountCents === 0) {
       return {
         statusCode: 200,
-        body: JSON.stringify({ free: true, metadata: piParams.metadata }),
+        body: JSON.stringify({ free: true, metadata: piParams.metadata, publishableKey: process.env.STRIPE_PUBLISHABLE_KEY }),
       };
     }
 
     const pi = await stripe.paymentIntents.create(piParams);
     return {
       statusCode: 200,
-      body: JSON.stringify({ clientSecret: pi.client_secret, amount: amountCents }),
+      body: JSON.stringify({ clientSecret: pi.client_secret, amount: amountCents, publishableKey: process.env.STRIPE_PUBLISHABLE_KEY }),
     };
   } catch (err) {
     console.error('create-checkout error:', err);
