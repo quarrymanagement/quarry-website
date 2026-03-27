@@ -242,27 +242,56 @@ label.waiver-check {
 <script>
 
 function applyCoupon() {
-  var code = document.getElementById('couponCode')?.value?.trim().toUpperCase();
+  var code = document.getElementById('couponCode') ? document.getElementById('couponCode').value.trim().toUpperCase() : '';
   var msg = document.getElementById('couponMsg');
-  if (!code) return;
-  msg.style.display = 'block';
-  // Valid test codes — update these in the create-checkout function too
+  if (!msg) return;
+  if (!code) { msg.style.display='block'; msg.style.color='#c0392b'; msg.textContent='Please enter a coupon code.'; return; }
+
   var coupons = {
-    'QUARRY10': {label:'10% off'},
-    'QUARRY20': {label:'20% off'},
-    'GOLF50':   {label:'50% off'},
-    'TESTCODE': {label:'$5 off'},
-    'ADMIN100': {label:'100% off — Admin use only'},
+    'QUARRY10': {label:'10% off', percent:10},
+    'QUARRY20': {label:'20% off', percent:20},
+    'GOLF50':   {label:'50% off', percent:50},
+    'TESTCODE': {label:'$5 off', flat:5},
+    'ADMIN100': {label:'100% off — Admin use only', percent:100},
   };
-  if (coupons[code]) {
-    window._appliedCoupon = {code: code, ...coupons[code]};
-    msg.style.color = '#2d7a2d';
-    msg.textContent = '✓ Coupon applied: ' + coupons[code].label;
-  } else {
+
+  msg.style.display = 'block';
+  if (!coupons[code]) {
     window._appliedCoupon = null;
     msg.style.color = '#c0392b';
     msg.textContent = '✗ Invalid coupon code';
+    // Restore original total if previously discounted
+    refreshTotal();
+    return;
   }
+
+  window._appliedCoupon = {code: code, label: coupons[code].label, percent: coupons[code].percent||0, flat: coupons[code].flat||0};
+  msg.style.color = '#2d7a2d';
+  msg.textContent = '✓ Coupon applied: ' + coupons[code].label;
+  refreshTotal();
+}
+
+function refreshTotal() {
+  // Get the base total from updateTotal if it exists, or read from the DOM
+  var totalEl = document.querySelector('.summary-total-val');
+  if (!totalEl) return;
+
+  // Get base price from the booking state or re-run updateTotal
+  if (typeof updateTotal === 'function') updateTotal();
+
+  // After updateTotal runs, apply coupon discount to the displayed value
+  if (!window._appliedCoupon) return;
+
+  var raw = parseFloat((totalEl.textContent || '').replace(/[^0-9.]/g, '')) || 0;
+  if (raw === 0) return;
+
+  var discounted = raw;
+  if (window._appliedCoupon.percent) discounted = raw * (1 - window._appliedCoupon.percent / 100);
+  if (window._appliedCoupon.flat) discounted = Math.max(0, raw - window._appliedCoupon.flat);
+  discounted = Math.max(0, discounted);
+
+  // Show original crossed out + discounted price
+  totalEl.innerHTML = '<span style="text-decoration:line-through;opacity:0.45;font-size:1rem;margin-right:0.5rem;">$' + raw.toFixed(2) + '</span>$' + discounted.toFixed(2);
 }
 function toggleNav(){var n=document.getElementById('mainNav'),h=document.querySelector('.hamburger');if(!n)return;n.classList.toggle('open');if(h)h.classList.toggle('active');}
 document.addEventListener('click',function(e){var n=document.getElementById('mainNav'),h=document.querySelector('.hamburger');if(!n||!h)return;if(!n.contains(e.target)&&!h.contains(e.target)){n.classList.remove('open');}});
