@@ -973,7 +973,7 @@ See you on the course!
   
   1. Create a free Stripe account at https://stripe.com
   2. Go to https://dashboard.stripe.com/apikeys
-  3. Copy your "Publishable key" (starts with pk_live_)
+  3. Copy your "Publishable key" (fetched from server)
   4. Replace '__STRIPE_PK__' in the script above
   
   5. For the backend payment processing, you need a Netlify Function:
@@ -992,7 +992,7 @@ See you on the course!
 <script id="payment-override">
 document.addEventListener('DOMContentLoaded', function() {
   // Force live mode Stripe instance
-  stripe = Stripe('pk_live_51TEMcEKn5EeQg3CaVcmEZ9dqcgFc1kvKNRYQWCyUD79MW0YLPPVe0bybNwmDvUpPZ30VLi7L1mz4vI5buJDjMT7f00LECSO6l5');
+  stripe = Stripe('__STRIPE_PK__');
   var elements = stripe.elements();
   var style = { base: { fontSize: '16px', color: '#1A0E08', '::placeholder': { color: '#aab7c4' } } };
   cardElement = elements.create('card', { style: style });
