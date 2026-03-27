@@ -228,10 +228,11 @@ function applyCoupon() {
   msg.style.display = 'block';
   // Valid test codes — update these in the create-checkout function too
   var coupons = {
-    'QUARRY10': {label:'10% off', discount:0.10},
-    'QUARRY20': {label:'20% off', discount:0.20},
-    'GOLF50':   {label:'50% off', discount:0.50},
-    'TESTCODE': {label:'$5 off', flat:500},
+    'QUARRY10': {label:'10% off'},
+    'QUARRY20': {label:'20% off'},
+    'GOLF50':   {label:'50% off'},
+    'TESTCODE': {label:'$5 off'},
+    'ADMIN100': {label:'100% off — Admin use only'},
   };
   if (coupons[code]) {
     window._appliedCoupon = {code: code, ...coupons[code]};
