@@ -223,6 +223,9 @@ footer { background:#0F0A07; padding:2.5rem 2rem; border-top:1px solid var(--bor
   transition: background 0.2s, color 0.2s;
   white-space: nowrap;
   text-transform: uppercase;
+  flex-shrink: 0;
+  display: inline-block;
+  box-sizing: border-box;
 }
 .time-slot-btn:hover:not(:disabled) { background: #B8933A; color: #fff; }
 .time-slot-btn.selected { background: #B8933A; color: #fff; font-weight: bold; }
