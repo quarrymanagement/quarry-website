@@ -6,6 +6,11 @@ exports.handler = async (event) => {
     const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
     const body = JSON.parse(event.body);
 
+    // Short-circuit: just return the publishable key for Stripe init
+    if (body.getKeyOnly) {
+      return { statusCode: 200, body: JSON.stringify({ publishableKey: process.env.STRIPE_PUBLISHABLE_KEY }) };
+    }
+
     const COUPON_MAP = {
       'QUARRY10': 10, 'QUARRY20': 20, 'GOLF50': 50,
       'TESTCODE': null, 'ADMIN100': 100,
