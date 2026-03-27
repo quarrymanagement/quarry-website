@@ -1137,7 +1137,7 @@ document.addEventListener('DOMContentLoaded', function() {
   .then(function(r){return r.json();})
   .then(function(d){
     if (!d.publishableKey) return;
-    window.stripe = Stripe(d.publishableKey);
+    window.stripe = stripe = Stripe(d.publishableKey);
     var mount = document.getElementById('card-element');
     if (mount && window.stripe) {
       var els = window.stripe.elements();
