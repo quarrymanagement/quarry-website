@@ -167,10 +167,46 @@ nav { display:flex; align-items:center; }
 /* ===MOBILE-HEADER-FIX=== */
 @media (max-width:1100px){html,body{max-width:100%;overflow-x:hidden;}header{overflow:visible!important;width:100%!important;box-sizing:border-box!important;}.header-inner{display:flex!important;align-items:center!important;justify-content:space-between!important;padding:0 1rem!important;width:100%!important;box-sizing:border-box!important;overflow:visible!important;flex-wrap:nowrap!important;}.logo{font-size:1rem!important;flex-shrink:0!important;white-space:nowrap!important;}.logo span{font-size:0.38rem!important;display:block!important;}nav{display:none!important;}nav.open{display:flex!important;}.hamburger{display:flex!important;flex-shrink:0!important;z-index:1002!important;position:relative!important;touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important;cursor:pointer!important;margin-left:auto!important;}}
 /* ===END-MOBILE-HEADER-FIX=== */
+
+.position-card { transition:box-shadow 0.2s,transform 0.15s; }
+.position-card:hover { transform:translateY(-2px); box-shadow:0 6px 24px rgba(180,140,60,0.15); }
+.position-card:hover::after { content:'Apply for this position →'; display:block; margin-top:0.75rem; font-family:Montserrat,sans-serif; font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--gold,#b48c3c); }
+.position-card.selected { border-color:var(--gold,#b48c3c) !important; background:rgba(180,140,60,0.06) !important; }
+.position-card.selected::after { content:'Selected ✓'; display:block; margin-top:0.75rem; font-family:Montserrat,sans-serif; font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--gold,#b48c3c); }
 </style>
 
 
 <script>
+
+function applyForPosition(card) {
+  // Get the job title from the card
+  var titleEl = card.querySelector('.pos-title');
+  if (!titleEl) return;
+  var title = titleEl.textContent.trim();
+  // Set the position select
+  var sel = document.querySelector('[name="position"]');
+  if (sel) {
+    sel.value = title;
+    // Trigger change event for any listeners
+    sel.dispatchEvent(new Event('change'));
+  }
+  // Highlight this card, deselect others
+  document.querySelectorAll('.position-card').forEach(function(c){c.classList.remove('selected');});
+  card.classList.add('selected');
+  // Scroll to the form smoothly
+  var form = document.getElementById('careerForm');
+  if (form) {
+    setTimeout(function(){
+      form.scrollIntoView({behavior:'smooth', block:'start'});
+      // Flash the position field to draw attention
+      if (sel) {
+        sel.style.transition = 'box-shadow 0.3s';
+        sel.style.boxShadow = '0 0 0 3px rgba(180,140,60,0.4)';
+        setTimeout(function(){ sel.style.boxShadow = ''; }, 1500);
+      }
+    }, 100);
+  }
+}
 function toggleNav(){var n=document.getElementById('mainNav'),h=document.querySelector('.hamburger');if(!n)return;n.classList.toggle('open');if(h)h.classList.toggle('active');}
 document.addEventListener('click',function(e){var n=document.getElementById('mainNav'),h=document.querySelector('.hamburger');if(!n||!h)return;if(!n.contains(e.target)&&!h.contains(e.target)){n.classList.remove('open');}});
 function selectBox(f,v,id){var i=document.getElementById(f+'Input');if(i)i.value=v;document.querySelectorAll('.select-box').forEach(function(c){if(c.getAttribute('onclick')&&c.getAttribute('onclick').indexOf("'"+f+"'")!==-1)c.classList.remove('selected');});var card=document.getElementById(id);if(card)card.classList.add('selected');}
