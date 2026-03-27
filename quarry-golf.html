@@ -961,7 +961,7 @@ See you on the course!
     if(applyBtn) {
       applyBtn.addEventListener('click', function(){
         var code = (document.getElementById('couponCode').value||'').trim().toUpperCase();
-        var msg = document.getElementById('couponMessage');
+        var msg = document.getElementById('couponMsg');
         var c = COUPONS[code];
         if(!c){ appliedCoupon=null; if(msg){msg.textContent='Invalid coupon code.';msg.style.color='#c0392b';} }
         else { appliedCoupon={code:code,...c}; if(msg){msg.textContent='Coupon applied: '+c.label;msg.style.color='#27ae60';} }
@@ -1000,7 +1000,7 @@ See you on the course!
 
       try{
         var extra=parseInt(document.getElementById('extraBallsPrice')?.value||'0')||0;
-        var duration=document.getElementById('summaryDuration')?.textContent?.trim()||'50 Minutes';
+        var duration=document.getElementById('sum-duration')?.textContent?.trim()||'50 Minutes';
         var res=await fetch('/.netlify/functions/create-checkout',{
           method:'POST',headers:{'Content-Type':'application/json'},
           body:JSON.stringify({
@@ -1031,7 +1031,7 @@ See you on the course!
         else if(appliedCoupon.flat) disc=Math.min(base,appliedCoupon.flat);
       }
       var total=Math.max(0,base-disc);
-      var el=document.getElementById('summaryTotal');
+      var el=document.getElementById('sum-total');
       if(el){
         if(disc>0) el.innerHTML='<span style="text-decoration:line-through;color:#999">
 </html>+base+'.00</span> <span style="color:#B8933A;font-weight:bold">
