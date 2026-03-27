@@ -501,7 +501,7 @@ document.addEventListener('DOMContentLoaded',function(){
         </div>
         <label class="form-label" style="margin-bottom:0.6rem;display:block;">Available Times <span>*</span></label>
         <div id="timeSlots">
-  <div class="time-slot-btn" onclick="selectTime(this)" data-time="11:00 AM">11:00 AM</div>
+  <div class="time-slot" onclick="selectTime(this)" data-time="11:00 AM">11:00 AM</div>
   <div class="time-btn" onclick="selectTime(this)" data-time="12:00 PM">12:00 PM</div>
   <div class="time-btn" onclick="selectTime(this)" data-time="1:00 PM">1:00 PM</div>
   <div class="time-btn" onclick="selectTime(this)" data-time="2:00 PM">2:00 PM</div>
@@ -991,18 +991,18 @@ document.addEventListener('DOMContentLoaded',function(){
           </div>
         </div>
         <label class="form-label" style="margin-bottom:0.6rem;display:block;">Available Times <span>*</span></label>
-        <div id="timeSlots" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;margin-bottom:8px;">
-  <div class="time-slot-btn" onclick="selectTime(this)" data-time="11:00 AM" style="padding:10px 18px;border:2px solid #B8933A;border-radius:4px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:0.8rem;letter-spacing:0.05em;background:#fff;color:#2C1A0E;transition:background 0.2s,color 0.2s;white-space:nowrap;">11:00 AM</div>
-  <div class="time-slot-btn" onclick="selectTime(this)" data-time="12:00 PM" style="padding:10px 18px;border:2px solid #B8933A;border-radius:4px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:0.8rem;letter-spacing:0.05em;background:#fff;color:#2C1A0E;transition:background 0.2s,color 0.2s;white-space:nowrap;">12:00 PM</div>
-  <div class="time-slot-btn" onclick="selectTime(this)" data-time="1:00 PM" style="padding:10px 18px;border:2px solid #B8933A;border-radius:4px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:0.8rem;letter-spacing:0.05em;background:#fff;color:#2C1A0E;transition:background 0.2s,color 0.2s;white-space:nowrap;">1:00 PM</div>
-  <div class="time-slot-btn" onclick="selectTime(this)" data-time="2:00 PM" style="padding:10px 18px;border:2px solid #B8933A;border-radius:4px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:0.8rem;letter-spacing:0.05em;background:#fff;color:#2C1A0E;transition:background 0.2s,color 0.2s;white-space:nowrap;">2:00 PM</div>
-  <div class="time-slot-btn" onclick="selectTime(this)" data-time="3:00 PM" style="padding:10px 18px;border:2px solid #B8933A;border-radius:4px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:0.8rem;letter-spacing:0.05em;background:#fff;color:#2C1A0E;transition:background 0.2s,color 0.2s;white-space:nowrap;">3:00 PM</div>
-  <div class="time-slot-btn" onclick="selectTime(this)" data-time="4:00 PM" style="padding:10px 18px;border:2px solid #B8933A;border-radius:4px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:0.8rem;letter-spacing:0.05em;background:#fff;color:#2C1A0E;transition:background 0.2s,color 0.2s;white-space:nowrap;">4:00 PM</div>
-  <div class="time-slot-btn" onclick="selectTime(this)" data-time="5:00 PM" style="padding:10px 18px;border:2px solid #B8933A;border-radius:4px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:0.8rem;letter-spacing:0.05em;background:#fff;color:#2C1A0E;transition:background 0.2s,color 0.2s;white-space:nowrap;">5:00 PM</div>
-  <div class="time-slot-btn" onclick="selectTime(this)" data-time="6:00 PM" style="padding:10px 18px;border:2px solid #B8933A;border-radius:4px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:0.8rem;letter-spacing:0.05em;background:#fff;color:#2C1A0E;transition:background 0.2s,color 0.2s;white-space:nowrap;">6:00 PM</div>
-  <div class="time-slot-btn" onclick="selectTime(this)" data-time="7:00 PM" style="padding:10px 18px;border:2px solid #B8933A;border-radius:4px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:0.8rem;letter-spacing:0.05em;background:#fff;color:#2C1A0E;transition:background 0.2s,color 0.2s;white-space:nowrap;">7:00 PM</div>
-  <div class="time-slot-btn" onclick="selectTime(this)" data-time="8:00 PM" style="padding:10px 18px;border:2px solid #B8933A;border-radius:4px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:0.8rem;letter-spacing:0.05em;background:#fff;color:#2C1A0E;transition:background 0.2s,color 0.2s;white-space:nowrap;">8:00 PM</div>
-  <div class="time-slot-btn" onclick="selectTime(this)" data-time="9:00 PM" style="padding:10px 18px;border:2px solid #B8933A;border-radius:4px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:0.8rem;letter-spacing:0.05em;background:#fff;color:#2C1A0E;transition:background 0.2s,color 0.2s;white-space:nowrap;">9:00 PM</div>
+        <div id="timeSlots" class="time-slots">
+  <div class="time-slot" onclick="selectTime(this)" data-time="11:00 AM">11:00 AM</div>
+  <div class="time-slot" onclick="selectTime(this)" data-time="12:00 PM">12:00 PM</div>
+  <div class="time-slot" onclick="selectTime(this)" data-time="1:00 PM">1:00 PM</div>
+  <div class="time-slot" onclick="selectTime(this)" data-time="2:00 PM">2:00 PM</div>
+  <div class="time-slot" onclick="selectTime(this)" data-time="3:00 PM">3:00 PM</div>
+  <div class="time-slot" onclick="selectTime(this)" data-time="4:00 PM">4:00 PM</div>
+  <div class="time-slot" onclick="selectTime(this)" data-time="5:00 PM">5:00 PM</div>
+  <div class="time-slot" onclick="selectTime(this)" data-time="6:00 PM">6:00 PM</div>
+  <div class="time-slot" onclick="selectTime(this)" data-time="7:00 PM">7:00 PM</div>
+  <div class="time-slot" onclick="selectTime(this)" data-time="8:00 PM">8:00 PM</div>
+  <div class="time-slot" onclick="selectTime(this)" data-time="9:00 PM">9:00 PM</div>
 </div>
         <input type="hidden" id="selectedTime" name="time" required>
         <p style="font-family:'Cormorant Garamond',serif;font-size:0.82rem;font-style:italic;color:var(--brown-warm);margin-top:0.75rem;">
@@ -1246,13 +1246,8 @@ function updateTimeSlots() {
   state.time = '';
   document.getElementById('selectedTime').value = '';
   // Reset all slots to available (don't rebuild — just unmark)
-  document.querySelectorAll('.time-slot-btn').forEach(function(b){
-    b.disabled = false;
-    b.style.opacity = '';
-    b.style.textDecoration = '';
-    b.style.background = '#fff';
-    b.style.color = '#2C1A0E';
-    b.style.fontWeight = 'normal';
+  document.querySelectorAll('.time-slot').forEach(function(b){
+    b.classList.remove('taken','selected');
     b.title = '';
   });
   if (!date) { updateSummary(); return; }
@@ -1267,10 +1262,8 @@ function updateTimeSlots() {
           return bk.time === t && (!state.bay || bk.bay === state.bay);
         });
         if (isBooked) {
-          btn.disabled = true;
-          btn.style.opacity = '0.4';
-          btn.style.textDecoration = 'line-through';
-          btn.style.cursor = 'not-allowed';
+          btn.classList.add('taken');
+          btn.onclick = null;
           btn.title = 'Already booked';
         }
       });
