@@ -202,39 +202,13 @@ document.head.appendChild(style);
 
 
 
+
 <script>
 function toggleNav(){var n=document.getElementById('mainNav'),h=document.querySelector('.hamburger');if(!n)return;n.classList.toggle('open');if(h)h.classList.toggle('active');}
 document.addEventListener('click',function(e){var n=document.getElementById('mainNav'),h=document.querySelector('.hamburger');if(!n||!h)return;if(!n.contains(e.target)&&!h.contains(e.target)){n.classList.remove('open');}});
 function selectBox(f,v,id){var i=document.getElementById(f+'Input');if(i)i.value=v;document.querySelectorAll('.select-box').forEach(function(c){if(c.getAttribute('onclick')&&c.getAttribute('onclick').indexOf("'"+f+"'")!==-1)c.classList.remove('selected');});var card=document.getElementById(id);if(card)card.classList.add('selected');}
-function selectCatering(v){var i=document.getElementById('cateringInput');if(i)i.value=v;document.querySelectorAll('.catering-option').forEach(function(c){c.classList.remove('selected');var chk=c.querySelector('.catering-check');if(chk)chk.classList.remove('active');});document.querySelectorAll('.catering-option').forEach(function(c){if(c.getAttribute('onclick')&&c.getAttribute('onclick').indexOf("'"+v+"'")!==-1){c.classList.add('selected');var chk=c.querySelector('.catering-check');if(chk)chk.classList.add('active');}});});}
-document.addEventListener('DOMContentLoaded',function(){
-  var form=document.getElementById('eventForm');
-  if(!form)return;
-  form.addEventListener('submit',async function(e){
-    e.preventDefault();
-    var btn=form.querySelector('button[type="submit"]');
-    var orig=btn?btn.textContent:'Submit';
-    if(btn){btn.textContent='Sending...';btn.disabled=true;}
-    try{
-      var formData=new FormData(form);
-      var encoded=new URLSearchParams(formData).toString();
-      var res=await fetch(window.location.pathname,{
-        method:'POST',
-        headers:{'Content-Type':'application/x-www-form-urlencoded'},
-        body:encoded
-      });
-      if(res.ok){
-        form.innerHTML='<div style="text-align:center;padding:3rem 1rem;"><p style="font-family:Cormorant Garamond,serif;font-size:1.6rem;color:#b48c3c;margin-bottom:1rem;">Thank You!</p><p style="font-family:Montserrat,sans-serif;font-size:0.85rem;color:#555;line-height:1.7;">Your inquiry has been received!<br>Our events team will contact you within 24 hours.<br><br>Call <a href="tel:6362248257" style="color:#b48c3c;">636-224-8257</a> or email <a href="mailto:management@thequarrystl.com" style="color:#b48c3c;">management@thequarrystl.com</a></p></div>';
-      } else {
-        throw new Error('HTTP '+res.status);
-      }
-    }catch(err){
-      if(btn){btn.textContent=orig;btn.disabled=false;}
-      alert('Submission failed. Please call 636-224-8257 or email management@thequarrystl.com');
-      console.error('Form error:',err);
-    }
-  });
-});
+function selectCatering(v){var i=document.getElementById('cateringInput');if(i)i.value=v;document.querySelectorAll('.catering-option').forEach(function(c){c.classList.remove('selected');var k=c.querySelector('.catering-check');if(k)k.classList.remove('active');if(c.getAttribute('onclick')&&c.getAttribute('onclick').indexOf("'"+v+"'")!==-1){c.classList.add('selected');if(k)k.classList.add('active');}});}
+document.addEventListener('DOMContentLoaded',function(){var form=document.getElementById('eventForm');if(!form)return;form.addEventListener('submit',async function(e){e.preventDefault();var btn=form.querySelector('button[type="submit"]');var orig=btn?btn.textContent:'Submit';if(btn){btn.textContent='Sending...';btn.disabled=true;}try{var r=await fetch(window.location.pathname,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(new FormData(form)).toString()});if(r.ok){form.innerHTML='<div style="text-align:center;padding:3rem 1rem;"><p style="font-family:Cormorant Garamond,serif;font-size:1.6rem;color:#b48c3c;margin-bottom:1rem;">Thank You!</p><p style="font-family:Montserrat,sans-serif;font-size:0.85rem;color:#555;line-height:1.7;">Your inquiry has been received!<br>Our events team will contact you within 24 hours.<br><br>Call <a href="tel:6362248257" style="color:#b48c3c;">636-224-8257</a> or email <a href="mailto:management@thequarrystl.com" style="color:#b48c3c;">management@thequarrystl.com</a></p></div>';}else throw new Error();}catch(err){if(btn){btn.textContent=orig;btn.disabled=false;}alert('Submission failed. Please call 636-224-8257 or email management@thequarrystl.com');}});});
 </script>
 </head>
 <body>
