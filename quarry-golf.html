@@ -1051,7 +1051,17 @@ document.addEventListener('DOMContentLoaded', function() {
       }
 
       // Step 2: Confirm card payment with the real clientSecret
-      var stripeResult = await stripe.confirmCardPayment(data.clientSecret, {
+      // Re-initialize Stripe with the correct publishable key if needed
+      var stripeInstance = stripe;
+      if (data.publishableKey && stripe._apiKey !== data.publishableKey) {
+        stripeInstance = Stripe(data.publishableKey);
+        // Re-mount card element with new Stripe instance
+        cardElement = stripeInstance.elements().create('card', {style: cardElement._style||{}});
+        var cardMount = document.getElementById('card-element');
+        if (cardMount) { cardMount.innerHTML=''; cardElement.mount('#card-element'); }
+        await new Promise(r=>setTimeout(r,500)); // wait for mount
+      }
+      var stripeResult = await stripeInstance.confirmCardPayment(data.clientSecret, {
         payment_method: { card: cardElement }
       });
 
