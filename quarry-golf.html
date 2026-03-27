@@ -1,69 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script>
-// Deferred Stripe initialization — fetches live publishable key from server
-(function(){
-  var _stripeInitQueue = [];
-  var _realPK = null;
 
-  // Override Stripe() so any call with __STRIPE_PK__ gets deferred
-  var _OrigStripe = window.Stripe;
-  window.Stripe = function(pk, opts) {
-    if (!pk || pk === '__STRIPE_PK__') {
-      // Queue this call until we have the real key
-      var instance = {};
-      _stripeInitQueue.push(function(realPK) {
-        var real = _OrigStripe(realPK, opts);
-        Object.assign(instance, real);
-        window.stripe = real;
-        // Re-mount card element
-        if (document.getElementById('card-element')) {
-          var elements = real.elements();
-          window.cardElement = elements.create('card', {
-            style: { base: { fontSize: '16px', color: '#2C1A0E', fontFamily: 'Montserrat, sans-serif', '::placeholder': { color: '#aab7c4' } } }
-          });
-          document.getElementById('card-element').innerHTML = '';
-          window.cardElement.mount('#card-element');
-        }
-      });
-      return instance;
-    }
-    return _OrigStripe(pk, opts);
-  };
-
-  // Fetch the real key and initialize Stripe properly
-  document.addEventListener('DOMContentLoaded', function() {
-    fetch('/.netlify/functions/create-checkout', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({getKeyOnly: true, amount: 0, metadata: {}})
-    })
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-      _realPK = d.publishableKey;
-      if (!_realPK) { console.error('No publishableKey returned'); return; }
-      // Flush the queue — initialize Stripe for real
-      _stripeInitQueue.forEach(function(fn){ fn(_realPK); });
-      _stripeInitQueue = [];
-      // If stripe was already initialized with placeholder, re-init now
-      if (window.stripe && typeof window.stripe.confirmCardPayment !== 'function') {
-        var real = _OrigStripe(_realPK);
-        window.stripe = real;
-        if (document.getElementById('card-element')) {
-          var elements = real.elements();
-          window.cardElement = elements.create('card', {
-            style: { base: { fontSize: '16px', color: '#2C1A0E', fontFamily: 'Montserrat, sans-serif', '::placeholder': { color: '#aab7c4' } } }
-          });
-          document.getElementById('card-element').innerHTML = '';
-          window.cardElement.mount('#card-element');
-        }
-      }
-    })
-    .catch(function(e){ console.error('Stripe init error:', e); });
-  });
-})();
-</script>
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1167,6 +1105,27 @@ document.addEventListener('DOMContentLoaded', function() {
         'Please arrive 10 minutes early. Questions? Call <a href="tel:6362248257" style="color:#B8933A;">636-224-8257</a></p></div>';
     }
   }
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  fetch('/.netlify/functions/create-checkout', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({getKeyOnly:true, amount:0, metadata:{}})
+  })
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if (!d.publishableKey) return;
+    window.stripe = Stripe(d.publishableKey);
+    var mount = document.getElementById('card-element');
+    if (mount && window.stripe) {
+      var els = window.stripe.elements();
+      window.cardElement = els.create('card',{style:{base:{fontSize:'16px',color:'#2C1A0E',fontFamily:'Montserrat,sans-serif','::placeholder':{color:'#aab7c4'}},invalid:{color:'#c0392b'}}});
+      mount.innerHTML='';
+      window.cardElement.mount('#card-element');
+    }
+  })
+  .catch(function(e){console.error('Stripe init:',e);});
 });
 </script>
 </body>
