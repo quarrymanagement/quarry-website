@@ -289,7 +289,7 @@ function renderSlots(){
   });
 }
 
-function parseHr(t){var m=t.match(/(d+):(d+) ([AP]M)/);var h=parseInt(m[1]);if(m[3]==='PM'&&h!==12)h+=12;if(m[3]==='AM'&&h===12)h=0;return h;}
+function parseHr(t){if(!t||typeof t!=='string')return 99;var m=t.match(/(\d+):(\d+) ([AP]M)/);if(!m)return 99;var h=parseInt(m[1]);if(m[3]==='PM'&&h!==12)h+=12;if(m[3]==='AM'&&h===12)h=0;return h;}
 
 function onDateChange(){
   var v=document.getElementById('bookingDate').value;
