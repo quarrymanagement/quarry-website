@@ -5,37 +5,77 @@ exports.handler = async (event) => {
   try {
     const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
     const body = JSON.parse(event.body);
+
     const COUPON_MAP = {
-      'QUARRY10':'9kWg5Hm0','QUARRY20':'GsFyRnI1','GOLF50':'27Onighg',
-      'TESTCODE':'HN3UXdpJ','ADMIN100':'TPMD4tKc',
+      'QUARRY10': 10, 'QUARRY20': 20, 'GOLF50': 50,
+      'TESTCODE': null, 'ADMIN100': 100,
     };
-    const sessionParams = {
-      payment_method_types: ['card'],
-      line_items: body.lineItems || [],
-      mode: 'payment',
-      success_url: body.successUrl || 'https://roaring-pegasus-444826.netlify.app/quarry-golf?success=true',
-      cancel_url: body.cancelUrl || 'https://roaring-pegasus-444826.netlify.app/quarry-golf?canceled=true',
-      // Store all booking details in metadata so webhook can access them
+    const COUPON_FLAT = { 'TESTCODE': 500 }; // cents
+
+    // Calculate amount from line items
+    let amountCents = 0;
+    if (body.lineItems && body.lineItems.length > 0) {
+      const li = body.lineItems[0];
+      const unitAmount = li.price_data?.unit_amount || li.amount || 6000;
+      const qty = li.quantity || 1;
+      amountCents = unitAmount * qty;
+      // Add extra balls if any
+      if (body.lineItems[1]) {
+        const extra = body.lineItems[1];
+        amountCents += (extra.price_data?.unit_amount || extra.amount || 0) * (extra.quantity || 1);
+      }
+    } else {
+      amountCents = body.amount || 6000;
+    }
+
+    // Apply coupon
+    if (body.coupon) {
+      const code = body.coupon.toUpperCase().trim();
+      if (COUPON_MAP[code] !== undefined) {
+        if (COUPON_MAP[code] !== null) {
+          amountCents = Math.round(amountCents * (1 - COUPON_MAP[code] / 100));
+        } else if (COUPON_FLAT[code]) {
+          amountCents = Math.max(0, amountCents - COUPON_FLAT[code]);
+        }
+      }
+    }
+
+    // Ensure minimum charge (Stripe requires at least 50 cents, or 0 for free)
+    if (amountCents > 0 && amountCents < 50) amountCents = 50;
+
+    const m = body.metadata || {};
+    const piParams = {
+      amount: amountCents,
+      currency: 'usd',
       metadata: {
-        customerName: body.metadata?.customerName || '',
-        customerEmail: body.metadata?.customerEmail || '',
-        bay: body.metadata?.bay || '',
-        date: body.metadata?.date || '',
-        time: body.metadata?.time || '',
-        duration: body.metadata?.duration || '',
-        players: body.metadata?.players || '',
+        customerName: m.customerName || '',
+        customerEmail: m.customerEmail || '',
+        bay: m.bay || '',
+        date: m.date || '',
+        time: m.time || '',
+        duration: m.duration || '',
+        players: m.players || '',
         coupon: body.coupon || '',
       },
-      customer_email: body.metadata?.customerEmail || undefined,
+      receipt_email: m.customerEmail || undefined,
+      description: 'Surfside Hole-In-One Golf — ' + (m.bay||'') + ' on ' + (m.date||'') + ' at ' + (m.time||''),
     };
-    if (body.coupon) {
-      const stripeId = COUPON_MAP[body.coupon.toUpperCase().trim()];
-      if (stripeId) sessionParams.discounts = [{ coupon: stripeId }];
+
+    // For $0 (100% coupon), return success immediately without charging
+    if (amountCents === 0) {
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ free: true, metadata: piParams.metadata }),
+      };
     }
-    const session = await stripe.checkout.sessions.create(sessionParams);
-    return { statusCode: 200, body: JSON.stringify({ sessionId: session.id, url: session.url }) };
+
+    const pi = await stripe.paymentIntents.create(piParams);
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ clientSecret: pi.client_secret, amount: amountCents }),
+    };
   } catch (err) {
-    console.error('Checkout error:', err);
+    console.error('create-checkout error:', err);
     return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
   }
 };
