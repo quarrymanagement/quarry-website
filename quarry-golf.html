@@ -1222,42 +1222,37 @@ function updateTimeSlots() {
   state.date = date;
   state.time = '';
   document.getElementById('selectedTime').value = '';
-  var container = document.getElementById('timeSlots');
-  if (!container) return;
-  container.innerHTML = '';
-  if (!date) return;
-  // Fetch booked slots for this date
+  // Reset all slots to available (don't rebuild — just unmark)
+  document.querySelectorAll('.time-slot-btn').forEach(function(b){
+    b.disabled = false;
+    b.style.opacity = '';
+    b.style.textDecoration = '';
+    b.style.background = '#fff';
+    b.style.color = '#2C1A0E';
+    b.style.fontWeight = 'normal';
+    b.title = '';
+  });
+  if (!date) { updateSummary(); return; }
+  // Fetch booked slots and mark them crossed out
   fetch('/.netlify/functions/get-bookings?date='+date)
     .then(function(r){ return r.json(); })
     .then(function(data){
-      var booked = (data.booked || []).map(function(b){ return b.bay+'|'+b.time; });
-      TIME_SLOTS.forEach(function(t){
-        var isBooked = booked.indexOf((state.bay||'')+' | '+t) > -1 || booked.indexOf((state.bay||'')+'|'+t) > -1;
-        var btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'time-btn' + (isBooked ? ' booked' : '');
-        btn.textContent = t;
+      var booked = (data.booked || []);
+      document.querySelectorAll('.time-slot-btn').forEach(function(btn){
+        var t = btn.getAttribute('data-time') || btn.textContent.trim();
+        var isBooked = booked.some(function(bk){
+          return bk.time === t && (!state.bay || bk.bay === state.bay);
+        });
         if (isBooked) {
           btn.disabled = true;
           btn.style.opacity = '0.4';
           btn.style.textDecoration = 'line-through';
+          btn.style.cursor = 'not-allowed';
           btn.title = 'Already booked';
-        } else {
-          btn.onclick = function(){ selectTime(t); };
         }
-        container.appendChild(btn);
       });
     })
-    .catch(function(){
-      TIME_SLOTS.forEach(function(t){
-        var btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'time-btn';
-        btn.textContent = t;
-        btn.onclick = function(){ selectTime(t); };
-        container.appendChild(btn);
-      });
-    });
+    .catch(function(){ /* slots stay available if fetch fails */ });
   updateSummary();
 }
 
