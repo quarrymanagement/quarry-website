@@ -705,27 +705,8 @@ document.addEventListener('DOMContentLoaded',function(){
 // STRIPE CONFIGURATION
 // Replace with your actual Stripe publishable key from https://dashboard.stripe.com/apikeys
 // 
-const STRIPE_KEY = window.__STRIPE_PK__ || '';
-let stripe, elements, cardElement;
-
-try {
-  stripe = Stripe(STRIPE_KEY);
-  elements = stripe.elements();
-  cardElement = elements.create('card', {
-    style: {
-      base: {
-        fontFamily: 'Montserrat, sans-serif',
-        fontSize: '14px',
-        color: '#2C1A0E',
-        '::placeholder': { color: '#C4956A' }
-      }
-    }
-  });
-  cardElement.mount('#card-element');
-  cardElement.on('change', function(e) {
-    document.getElementById('card-errors').textContent = e.error ? e.error.message : '';
-  });
-} catch(e) {
+let STRIPE_KEY = '', stripe, elements, cardElement;
+// Stripe initialized via DOMContentLoaded fetch below catch(e) {
   document.getElementById('card-element').innerHTML = '<p style="font-family:Montserrat,sans-serif;font-size:0.7rem;color:#9b2226;padding:1rem;"> Payment system not yet configured. Please contact us at 636-224-8257 to complete your booking.</p>';
 }
 
