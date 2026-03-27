@@ -280,7 +280,7 @@ function renderSlots(){
       // Block current hour and all past hours (e.g. if it's 4:50pm, block 4pm and earlier)
       isPast=slotHour<=centralNow.getHours();
     }
-    var isTaken=booked.some(function(b){return b.time===t&&(!S.bay||b.bay===S.bay);});
+    var isTaken=booked.some(function(bk){return bk.time===t&&(!S.bay||bk.bay===S.bay);});
     if(isPast){btn.classList.add('past');btn.disabled=true;btn.title='Time has passed';}
     else if(isTaken){btn.classList.add('taken');btn.disabled=true;btn.title='Already booked';}
     else{btn.onclick=function(){selectTime(t,btn);};}
@@ -306,7 +306,7 @@ function fmtDate(v){var p=v.split('-');var mo=['Jan','Feb','Mar','Apr','May','Ju
 function fetchBooked(date){
   fetch('/.netlify/functions/get-bookings?date='+date)
     .then(function(r){return r.json();})
-    .then(function(d){booked=d.booked||[];renderSlots();})
+    .then(function(data){booked=data.booked||[];renderSlots();})
     .catch(function(){});
 }
 
