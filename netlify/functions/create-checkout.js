@@ -12,9 +12,13 @@ exports.handler = async (event) => {
     }
 
     const COUPON_MAP = {
-      'QUARRY10': 10, 'QUARRY20': 20, 'GOLF50': 50,
-      'TESTCODE': null, 'ADMIN100': 100,
-    };
+    'QUARRY10': { id: '9kWg5Hm0', pct: 10 },
+    'QUARRY20': { id: 'GsFyRnI1', pct: 20 },
+    'GOLF50':   { id: '27Onighg', pct: 50 },
+    'TESTCODE': { id: 'HN3UXdpJ', flat: 500 },
+    'TEST1':    { id: 'AQU9NHcu', flat: 5900 },
+    'ADMIN100': { id: 'TPMD4tKc', pct: 100 },
+  };
     const COUPON_FLAT = { 'TESTCODE': 500 }; // cents
 
     // Calculate amount from line items
@@ -36,15 +40,17 @@ exports.handler = async (event) => {
     // Apply coupon
     if (body.coupon) {
       const code = body.coupon.toUpperCase().trim();
-      if (COUPON_MAP[code] !== undefined) {
-        if (COUPON_MAP[code] !== null) {
-          amountCents = Math.round(amountCents * (1 - COUPON_MAP[code] / 100));
-        } else if (COUPON_FLAT[code]) {
-          amountCents = Math.max(0, amountCents - COUPON_FLAT[code]);
+      const coupon = COUPON_MAP[code];
+      if (coupon) {
+        if (coupon.pct !== undefined) {
+          amountCents = Math.round(amountCents * (1 - coupon.pct / 100));
+        } else if (coupon.flat !== undefined) {
+          amountCents = Math.max(0, amountCents - coupon.flat);
         }
+      } else {
+        return { statusCode: 400, body: JSON.stringify({ error: 'Coupon code not found: ' + code }) };
       }
     }
-
     // Ensure minimum charge (Stripe requires at least 50 cents, or 0 for free)
     if (amountCents > 0 && amountCents < 50) amountCents = 50;
 
