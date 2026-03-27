@@ -477,20 +477,18 @@ document.addEventListener('DOMContentLoaded',function(){
           </div>
         </div>
         <label class="form-label" style="margin-bottom:0.6rem;display:block;">Available Times <span>*</span></label>
-        <div id="timeSlots" class="time-slots-grid">
-  <div class="time-slot-btn" onclick="selectTime(this)" data-time="11:00 AM">11:00 AM</div>
-  <div class="time-slot-btn" onclick="selectTime(this)" data-time="11:50 AM">11:50 AM</div>
-  <div class="time-slot-btn" onclick="selectTime(this)" data-time="12:40 PM">12:40 PM</div>
-  <div class="time-slot-btn" onclick="selectTime(this)" data-time="1:30 PM">1:30 PM</div>
-  <div class="time-slot-btn" onclick="selectTime(this)" data-time="2:20 PM">2:20 PM</div>
-  <div class="time-slot-btn" onclick="selectTime(this)" data-time="3:10 PM">3:10 PM</div>
-  <div class="time-slot-btn" onclick="selectTime(this)" data-time="4:00 PM">4:00 PM</div>
-  <div class="time-slot-btn" onclick="selectTime(this)" data-time="4:50 PM">4:50 PM</div>
-  <div class="time-slot-btn" onclick="selectTime(this)" data-time="5:40 PM">5:40 PM</div>
-  <div class="time-slot-btn" onclick="selectTime(this)" data-time="6:30 PM">6:30 PM</div>
-  <div class="time-slot-btn" onclick="selectTime(this)" data-time="7:20 PM">7:20 PM</div>
-  <div class="time-slot-btn" onclick="selectTime(this)" data-time="8:10 PM">8:10 PM</div>
-  <div class="time-slot-btn" onclick="selectTime(this)" data-time="9:00 PM">9:00 PM</div>
+        <div id="timeSlots" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;">
+  <div class="time-slot-btn" onclick="selectTime(this)" data-time="11:00 AM" style="display:inline-block;padding:10px 16px;margin:4px;border:1px solid #B8933A;border-radius:4px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:0.8rem;letter-spacing:0.05em;background:#fff;color:#2C1A0E;transition:all 0.2s;">11:00 AM</div>
+  <div class="time-slot-btn" onclick="selectTime(this)" data-time="12:00 PM" style="display:inline-block;padding:10px 16px;margin:4px;border:1px solid #B8933A;border-radius:4px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:0.8rem;letter-spacing:0.05em;background:#fff;color:#2C1A0E;transition:all 0.2s;">12:00 PM</div>
+  <div class="time-slot-btn" onclick="selectTime(this)" data-time="1:00 PM" style="display:inline-block;padding:10px 16px;margin:4px;border:1px solid #B8933A;border-radius:4px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:0.8rem;letter-spacing:0.05em;background:#fff;color:#2C1A0E;transition:all 0.2s;">1:00 PM</div>
+  <div class="time-slot-btn" onclick="selectTime(this)" data-time="2:00 PM" style="display:inline-block;padding:10px 16px;margin:4px;border:1px solid #B8933A;border-radius:4px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:0.8rem;letter-spacing:0.05em;background:#fff;color:#2C1A0E;transition:all 0.2s;">2:00 PM</div>
+  <div class="time-slot-btn" onclick="selectTime(this)" data-time="3:00 PM" style="display:inline-block;padding:10px 16px;margin:4px;border:1px solid #B8933A;border-radius:4px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:0.8rem;letter-spacing:0.05em;background:#fff;color:#2C1A0E;transition:all 0.2s;">3:00 PM</div>
+  <div class="time-slot-btn" onclick="selectTime(this)" data-time="4:00 PM" style="display:inline-block;padding:10px 16px;margin:4px;border:1px solid #B8933A;border-radius:4px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:0.8rem;letter-spacing:0.05em;background:#fff;color:#2C1A0E;transition:all 0.2s;">4:00 PM</div>
+  <div class="time-slot-btn" onclick="selectTime(this)" data-time="5:00 PM" style="display:inline-block;padding:10px 16px;margin:4px;border:1px solid #B8933A;border-radius:4px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:0.8rem;letter-spacing:0.05em;background:#fff;color:#2C1A0E;transition:all 0.2s;">5:00 PM</div>
+  <div class="time-slot-btn" onclick="selectTime(this)" data-time="6:00 PM" style="display:inline-block;padding:10px 16px;margin:4px;border:1px solid #B8933A;border-radius:4px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:0.8rem;letter-spacing:0.05em;background:#fff;color:#2C1A0E;transition:all 0.2s;">6:00 PM</div>
+  <div class="time-slot-btn" onclick="selectTime(this)" data-time="7:00 PM" style="display:inline-block;padding:10px 16px;margin:4px;border:1px solid #B8933A;border-radius:4px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:0.8rem;letter-spacing:0.05em;background:#fff;color:#2C1A0E;transition:all 0.2s;">7:00 PM</div>
+  <div class="time-slot-btn" onclick="selectTime(this)" data-time="8:00 PM" style="display:inline-block;padding:10px 16px;margin:4px;border:1px solid #B8933A;border-radius:4px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:0.8rem;letter-spacing:0.05em;background:#fff;color:#2C1A0E;transition:all 0.2s;">8:00 PM</div>
+  <div class="time-slot-btn" onclick="selectTime(this)" data-time="9:00 PM" style="display:inline-block;padding:10px 16px;margin:4px;border:1px solid #B8933A;border-radius:4px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:0.8rem;letter-spacing:0.05em;background:#fff;color:#2C1A0E;transition:all 0.2s;">9:00 PM</div>
 </div>
         <input type="hidden" id="selectedTime" name="time" required>
         <p style="font-family:'Cormorant Garamond',serif;font-size:0.82rem;font-style:italic;color:var(--brown-warm);margin-top:0.75rem;">
@@ -700,11 +698,7 @@ var state = { bay: null, date: '', time: '', extraBalls: 0, extraBallsPrice: 0 }
 const BAY_PRICE = 60;
 
 // ── TIME SLOTS (50-min increments, 11am-9pm) ───────────────────────
-const TIME_SLOTS = [
-  '11:00 AM','11:50 AM','12:40 PM','1:30 PM','2:20 PM',
-  '3:10 PM','4:00 PM','4:50 PM','5:40 PM','6:30 PM',
-  '7:20 PM','8:10 PM','9:00 PM'
-];
+const TIME_SLOTS = ['11:00 AM','12:00 PM','1:00 PM','2:00 PM','3:00 PM','4:00 PM','5:00 PM','6:00 PM','7:00 PM','8:00 PM','9:00 PM'];
 
 // ── DATE: prevent past dates ────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
@@ -776,10 +770,14 @@ function updateTimeSlots() {
   updateSummary();
 }
 
-function selectTime(t) {
-  document.querySelectorAll('.time-btn').forEach(function(b){ b.classList.remove('selected'); });
-  var btns = document.querySelectorAll('.time-btn');
-  btns.forEach(function(b){ if(b.textContent===t) b.classList.add('selected'); });
+function selectTime(elOrStr) {
+  var t = typeof elOrStr === 'string' ? elOrStr : (elOrStr.getAttribute('data-time') || elOrStr.textContent.trim());
+  document.querySelectorAll('.time-slot-btn, .time-btn').forEach(function(b){
+    b.style.background='#fff'; b.style.color='#2C1A0E'; b.style.fontWeight='normal';
+  });
+  if(typeof elOrStr !== 'string' && elOrStr.style) {
+    elOrStr.style.background='#B8933A'; elOrStr.style.color='#fff'; elOrStr.style.fontWeight='bold';
+  }
   state.time = t;
   document.getElementById('selectedTime').value = t;
   updateSummary();
