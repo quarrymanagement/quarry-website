@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Book a Golf Bay | Surfside Hole-In-One | The Quarry</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://js.stripe.com/v3/"></script>
+
 <style>
 :root {
   --cream:#F5F0E8; --cream-light:#FAF7F2; --brown-dark:#2C1A0E; --brown-mid:#5C3D2E;
@@ -611,7 +611,7 @@ document.addEventListener('DOMContentLoaded',function(){
              Get your key at: https://dashboard.stripe.com/apikeys
              You will also need a backend/serverless function to create PaymentIntents.
              See README comments below for Netlify Functions setup. -->
-        <div id="card-element"></div>
+        
         <div id="card-errors"></div>
 
         <p style="font-family:'Montserrat',sans-serif;font-size:0.55rem;color:var(--brown-warm);letter-spacing:0.08em;margin-top:0.5rem;">
@@ -997,136 +997,112 @@ See you on the course!
   Contact: management@thequarrystl.com &middot; 636-224-8257
  -->
 
-<script id="payment-override">
-document.addEventListener('DOMContentLoaded', function() {
-  // Force live mode Stripe instance
-  stripe = Stripe('__STRIPE_PK__');
-  var elements = stripe.elements();
-  var style = { base: { fontSize: '16px', color: '#1A0E08', '::placeholder': { color: '#aab7c4' } } };
-  cardElement = elements.create('card', { style: style });
-  var cardMount = document.getElementById('card-element');
-  if (cardMount) { cardMount.innerHTML = ''; cardElement.mount('#card-element'); }
 
+
+<script id="payment-handler">
+document.addEventListener('DOMContentLoaded', function() {
   var btn = document.getElementById('submitBtn');
   if (!btn) return;
 
-  // Clone button to remove ALL existing event listeners
+  // Clone to remove any old listeners
   var newBtn = btn.cloneNode(true);
   btn.parentNode.replaceChild(newBtn, btn);
   btn = newBtn;
 
-  btn.addEventListener('click', async function() {
-    var bay = document.getElementById('selectedBay')?.value;
-    var date = document.getElementById('bookingDate')?.value;
-    var time = document.getElementById('selectedTime')?.value;
-    var firstName = (document.getElementById('firstName')?.value||'').trim();
-    var lastName = (document.getElementById('lastName')?.value||'').trim();
-    var email = (document.getElementById('email')?.value||'').trim();
-    var phone = (document.getElementById('phone')?.value||'').trim();
-    var players = document.getElementById('players')?.value;
-    var waiverChecked = document.getElementById('waiverCheck')?.checked;
+  // Handle success/cancel redirects from Stripe
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('success')) {
+    var section = document.querySelector('.booking-form-section') || document.querySelector('form');
+    if (section) section.innerHTML =
+      '<div style="text-align:center;padding:4rem 2rem;max-width:600px;margin:0 auto">' +
+      '<p style="font-family:Cormorant Garamond,serif;font-size:2.5rem;color:#B8933A;margin-bottom:1rem">Booking Confirmed!</p>' +
+      '<p style="font-family:Montserrat,sans-serif;font-size:0.85rem;color:#555;line-height:1.8">' +
+      'Your payment was successful and your bay is reserved.<br><br>' +
+      'A confirmation email has been sent to you.<br><br>' +
+      'Please arrive 10 minutes early. Questions? <a href="tel:6362248257" style="color:#B8933A">636-224-8257</a></p></div>';
+    history.replaceState({}, '', '/quarry-golf');
+    return;
+  }
+  if (params.get('canceled')) {
+    alert('Payment canceled — your bay has not been booked. Please try again.');
+    history.replaceState({}, '', '/quarry-golf');
+  }
 
-    if (!bay) { alert('Please select a bay.'); return; }
-    if (!date) { alert('Please select a date.'); return; }
-    if (!time) { alert('Please select a time.'); return; }
-    if (!firstName || !lastName) { alert('Please enter your full name.'); return; }
+  btn.addEventListener('click', async function() {
+    var bay     = document.getElementById('selectedBay')?.value;
+    var date    = document.getElementById('bookingDate')?.value;
+    var time    = document.getElementById('selectedTime')?.value;
+    var first   = (document.getElementById('firstName')?.value||'').trim();
+    var last    = (document.getElementById('lastName')?.value||'').trim();
+    var email   = (document.getElementById('email')?.value||'').trim();
+    var phone   = (document.getElementById('phone')?.value||'').trim();
+    var players = document.getElementById('players')?.value;
+    var waiver  = document.getElementById('waiverCheck')?.checked;
+    var coupon  = (document.getElementById('couponCode')?.value||'').trim();
+    var extra   = parseInt(document.getElementById('extraBallsPrice')?.value||'0')||0;
+
+    if (!bay)    { alert('Please select a bay.'); return; }
+    if (!date)   { alert('Please select a date.'); return; }
+    if (!time)   { alert('Please select a time.'); return; }
+    if (!first || !last) { alert('Please enter your full name.'); return; }
     if (!email || !email.includes('@')) { alert('Please enter a valid email.'); return; }
     if (!players) { alert('Please select number of players.'); return; }
-    if (!waiverChecked) { alert('Please agree to the liability waiver to continue.'); return; }
+    if (!waiver)  { alert('Please agree to the liability waiver.'); return; }
 
-    btn.textContent = 'Processing...';
+    btn.textContent = 'Redirecting to payment...';
     btn.disabled = true;
 
     try {
-      var extraBalls = parseInt(document.getElementById('extraBalls')?.value||'0')||0;
-      var extraPrice = parseInt(document.getElementById('extraBallsPrice')?.value||'0')||0;
-      var duration = document.querySelector('[id*="summaryDuration"], .summary-duration')?.textContent?.trim() || '50 Minutes';
+      var amount = 6000 + extra;
+      var duration = document.querySelector('[id*="summaryDuration"]')?.textContent?.trim() || '50 Minutes';
 
-      var lineItems = [{
-        price_data:{unit_amount:6000, currency:'usd', product_data:{name:'Surfside Golf Bay - '+bay}},
-        quantity: 1
-      }];
-      if (extraBalls > 0 && extraPrice > 0) {
-        lineItems.push({
-          price_data:{unit_amount:extraPrice, currency:'usd', product_data:{name:'Extra Golf Balls'}},
-          quantity: 1
-        });
-      }
-
-      // Step 1: Get PaymentIntent clientSecret from our function
       var res = await fetch('/.netlify/functions/create-checkout', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          lineItems: lineItems,
-          coupon: window._appliedCoupon ? window._appliedCoupon.code : null,
+          amount: amount,
+          coupon: coupon || null,
           metadata: {
-            customerName: firstName + ' ' + lastName,
+            customerName:  (first + ' ' + last).trim(),
             customerEmail: email,
-            bay: bay,
-            date: date,
-            time: time,
+            bay:      bay,
+            date:     date,
+            time:     time,
             duration: duration,
-            players: players
+            players:  players,
           }
         })
       });
 
       var data = await res.json();
-      if (!res.ok || data.error) throw new Error(data.error || 'Could not create payment');
 
-      // Handle 100% coupon — no charge needed
-      if (data.free) {
-        showSuccess(bay, date, time, email, '$0.00');
+      if (!res.ok || data.error) {
+        alert(data.error || 'Booking failed. Please try again.');
+        btn.textContent = 'Complete Reservation →';
+        btn.disabled = false;
         return;
       }
 
-      // Step 2: Confirm card payment with the real clientSecret
-      // Re-initialize Stripe with the correct publishable key if needed
-      var stripeInstance = stripe;
-      if (data.publishableKey && stripe._apiKey !== data.publishableKey) {
-        stripeInstance = Stripe(data.publishableKey);
-        // Re-mount card element with new Stripe instance
-        cardElement = stripeInstance.elements().create('card', {style: cardElement._style||{}});
-        var cardMount = document.getElementById('card-element');
-        if (cardMount) { cardMount.innerHTML=''; cardElement.mount('#card-element'); }
-        await new Promise(r=>setTimeout(r,500)); // wait for mount
+      // Free booking (100% coupon)
+      if (data.free) {
+        var section = document.querySelector('.booking-form-section') || document.querySelector('form');
+        if (section) section.innerHTML =
+          '<div style="text-align:center;padding:4rem 2rem;max-width:600px;margin:0 auto">' +
+          '<p style="font-family:Cormorant Garamond,serif;font-size:2.5rem;color:#B8933A;margin-bottom:1rem">Booking Confirmed!</p>' +
+          '<p style="font-family:Montserrat,sans-serif;font-size:0.85rem;color:#555">Your bay is reserved. A confirmation email has been sent.</p></div>';
+        return;
       }
-      var stripeResult = await stripeInstance.confirmCardPayment(data.clientSecret, {
-        payment_method: { card: cardElement }
-      });
 
-      if (stripeResult.error) throw new Error(stripeResult.error.message);
-
-      if (stripeResult.paymentIntent?.status === 'succeeded') {
-        var amount = '$' + (stripeResult.paymentIntent.amount / 100).toFixed(2);
-        showSuccess(bay, date, time, email, amount);
-      }
+      // Redirect to Stripe Checkout
+      window.location.href = data.url;
 
     } catch(err) {
-      console.error('Payment error:', err);
-      alert('Payment failed: ' + err.message + '\nPlease try again or call 636-224-8257.');
-      btn.textContent = 'Complete Reservation \u2192';
+      console.error('Booking error:', err);
+      alert('Something went wrong. Please call 636-224-8257 to book.');
+      btn.textContent = 'Complete Reservation →';
       btn.disabled = false;
     }
   });
-
-  function showSuccess(bay, date, time, email, amount) {
-    var section = document.querySelector('.booking-form-section, .booking-form, form');
-    if (section) {
-      section.innerHTML = '<div style="text-align:center;padding:4rem 2rem;max-width:600px;margin:0 auto;">' +
-        '<p style="font-family:Cormorant Garamond,serif;font-size:2rem;color:#B8933A;margin-bottom:1rem;">Booking Confirmed!</p>' +
-        '<div style="background:#FAF7F2;border-left:4px solid #B8933A;padding:1.5rem 2rem;text-align:left;margin:1.5rem 0;">' +
-        '<p style="margin:4px 0;font-family:Montserrat,sans-serif;font-size:0.8rem;"><b>Bay:</b> '+bay+'</p>' +
-        '<p style="margin:4px 0;font-family:Montserrat,sans-serif;font-size:0.8rem;"><b>Date:</b> '+date+'</p>' +
-        '<p style="margin:4px 0;font-family:Montserrat,sans-serif;font-size:0.8rem;"><b>Time:</b> '+time+'</p>' +
-        '<p style="margin:4px 0;font-family:Montserrat,sans-serif;font-size:0.8rem;color:#B8933A;"><b>Amount charged:</b> '+amount+'</p>' +
-        '</div>' +
-        '<p style="font-family:Montserrat,sans-serif;font-size:0.8rem;color:#555;">A confirmation email has been sent to <b>'+email+'</b><br><br>' +
-        'Please arrive 10 minutes early. Questions? Call <a href="tel:6362248257" style="color:#B8933A;">636-224-8257</a></p></div>';
-    }
-  }
 });
 </script>
-
 </body>
