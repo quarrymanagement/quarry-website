@@ -1129,7 +1129,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+(function initStripe() {
   fetch('/.netlify/functions/create-checkout', {
     method:'POST', headers:{'Content-Type':'application/json'},
     body:JSON.stringify({getKeyOnly:true, amount:0, metadata:{}})
