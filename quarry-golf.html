@@ -976,6 +976,14 @@ See you on the course!
 
 <script id="payment-override">
 document.addEventListener('DOMContentLoaded', function() {
+  // Force live mode Stripe instance
+  stripe = Stripe('pk_live_51TEMcEKn5EeQg3CaVcmEZ9dqcgFc1kvKNRYQWCyUD79MW0YLPPVe0bybNwmDvUpPZ30VLi7L1mz4vI5buJDjMT7f00LECSO6l5');
+  var elements = stripe.elements();
+  var style = { base: { fontSize: '16px', color: '#1A0E08', '::placeholder': { color: '#aab7c4' } } };
+  cardElement = elements.create('card', { style: style });
+  var cardMount = document.getElementById('card-element');
+  if (cardMount) { cardMount.innerHTML = ''; cardElement.mount('#card-element'); }
+
   var btn = document.getElementById('submitBtn');
   if (!btn) return;
 
