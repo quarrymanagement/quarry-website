@@ -1128,25 +1128,5 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 </script>
-<script>
-(function initStripe() {
-  fetch('/.netlify/functions/create-checkout', {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({getKeyOnly:true, amount:0, metadata:{}})
-  })
-  .then(function(r){return r.json();})
-  .then(function(d){
-    if (!d.publishableKey) return;
-    window.stripe = stripe = Stripe(d.publishableKey);
-    var mount = document.getElementById('card-element');
-    if (mount && window.stripe) {
-      var els = window.stripe.elements();
-      window.cardElement = els.create('card',{style:{base:{fontSize:'16px',color:'#2C1A0E',fontFamily:'Montserrat,sans-serif','::placeholder':{color:'#aab7c4'}},invalid:{color:'#c0392b'}}});
-      mount.innerHTML='';
-      window.cardElement.mount('#card-element');
-    }
-  })
-  .catch(function(e){console.error('Stripe init:',e);});
-});
-</script>
+
 </body>
