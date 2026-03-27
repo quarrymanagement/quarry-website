@@ -702,276 +702,169 @@ document.addEventListener('DOMContentLoaded',function(){
 
 
 <script>
-// 
-// STRIPE CONFIGURATION
-// Replace with your actual Stripe publishable key from https://dashboard.stripe.com/apikeys
-// 
-let STRIPE_KEY = '', stripe, elements, cardElement;
-// Stripe initialized via DOMContentLoaded fetch below
-
-function selectBay(bayNum) {
-  document.getElementById('selectedBay').value = 'Bay ' + bayNum;
-  document.querySelectorAll('.bay-card').forEach(function(c){c.classList.remove('selected');});
-  var cards = document.querySelectorAll('.bay-card');
-  if (cards[bayNum-1]) cards[bayNum-1].classList.add('selected');
-  var summaryBay = document.querySelector('.summary-bay, [data-summary="bay"]');
-  if (summaryBay) summaryBay.textContent = 'Bay ' + bayNum;
-  updateTotal();
-}
-function selectTime(el) {
-  if (el.getAttribute('data-booked')==='true') return;
-  document.getElementById('selectedTime').value = el.textContent.trim();
-  document.querySelectorAll('.time-btn').forEach(function(b){b.classList.remove('selected');});
-  el.classList.add('selected');
-  var summaryTime = document.querySelector('.summary-time, [data-summary="time"]');
-  if (summaryTime) summaryTime.textContent = el.textContent.trim();
-}
-function selectBalls(qty, price) {
-  document.getElementById('extraBalls').value = qty;
-  document.getElementById('extraBallsPrice').value = price * 100;
-  document.querySelectorAll('.balls-card').forEach(function(c){c.classList.remove('selected');});
-  if (event && event.currentTarget) event.currentTarget.classList.add('selected');
-  updateTotal();
-}
-function updateTotal() {
-  var base = 6000;
-  var extra = parseInt(document.getElementById('extraBallsPrice')?.value||'0')||0;
-  var subtotal = base + extra;
-  var pct = window._appliedCoupon ? (window._appliedCoupon.percent||0) : 0;
-  var flat = window._appliedCoupon ? (window._appliedCoupon.amount||0) : 0;
-  var total = Math.max(0, subtotal * (1 - pct/100) - flat);
-  var els = document.querySelectorAll('.summary-total-val, .total-price, [data-summary="total"]');
-  els.forEach(function(el) {
-    if (pct > 0 || flat > 0) {
-      el.innerHTML = '<span style="text-decoration:line-through;color:#999;margin-right:6px">$'+(subtotal/100).toFixed(2)+'</span>$'+(total/100).toFixed(2);
-    } else {
-      el.textContent = '$'+(total/100).toFixed(2);
-    }
-  });
-}
-  document.getElementById('card-element').innerHTML = '<p style="font-family:Montserrat,sans-serif;font-size:0.7rem;color:#9b2226;padding:1rem;"> Payment system not yet configured. Please contact us at 636-224-8257 to complete your booking.</p>';
-
-// 
-// STATE
-// 
-let state = { bay: null, date: '', time: '', extraBalls: 0, extraBallsPrice: 0 };
+// ── STATE ──────────────────────────────────────────────────────────
+var state = { bay: null, date: '', time: '', extraBalls: 0, extraBallsPrice: 0 };
 const BAY_PRICE = 60;
 
-// 
-// BAY SELECTION
-// 
-function selectBay(num) {
-  document.querySelectorAll('.bay-option').forEach(b => b.classList.remove('selected'));
-  document.querySelectorAll('[id^="check-bay"]').forEach(c => c.classList.remove('active'));
-  document.getElementById('bay' + num).classList.add('selected');
-  state.bay = num;
-  document.getElementById('selectedBay').value = num;
-  document.getElementById('sum-bay').innerHTML = 'Bay ' + num;
-  updateTotal();
-}
+// ── TIME SLOTS (50-min increments, 11am-9pm) ───────────────────────
+const TIME_SLOTS = [
+  '11:00 AM','11:50 AM','12:40 PM','1:30 PM','2:20 PM',
+  '3:10 PM','4:00 PM','4:50 PM','5:40 PM','6:30 PM',
+  '7:20 PM','8:10 PM','9:00 PM'
+];
 
-// 
-// TIME SELECTION
-// 
-function selectTime(el) {
-  if (el.classList.contains('taken')) return;
-  document.querySelectorAll('.time-slot').forEach(t => t.classList.remove('selected'));
-  el.classList.add('selected');
-  state.time = el.dataset.time;
-  document.getElementById('selectedTime').value = state.time;
-  document.getElementById('sum-time').innerHTML = state.time;
-}
-
-function updateTimeSlots() {
-  const dateVal = document.getElementById('bookingDate').value;
-  if (!dateVal) return;
-  const d = new Date(dateVal + 'T12:00:00');
-  const day = d.getDay(); // 0=Sun, 6=Sat
-  state.date = d.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
-  document.getElementById('sum-date').innerHTML = d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
-
-  // Adjust available times by day
-  const slots = document.querySelectorAll('.time-slot');
-  slots.forEach(s => {
-    s.classList.remove('taken');
-    const time = s.dataset.time;
-    // Sun closes at 5pm - hide evening slots
-    if (day === 0 && ['5:00 PM','5:30 PM','6:00 PM','6:30 PM','7:00 PM','7:30 PM','8:00 PM','8:30 PM'].includes(time)) {
-      s.classList.add('taken');
-    }
-    // Wed/Thu close at 9pm
-    if ((day === 3 || day === 4) && ['9:00 PM'].includes(time)) {
-      s.classList.add('taken');
-    }
-  });
-}
-
-// 
-// EXTRA BALLS
-// 
-function selectBalls(qty, price) {
-  document.querySelectorAll('.ball-option').forEach(b => b.classList.remove('selected'));
-  document.getElementById('balls-' + qty).classList.add('selected');
-  state.extraBalls = qty;
-  state.extraBallsPrice = price;
-  document.getElementById('extraBalls').value = qty;
-  document.getElementById('extraBallsPrice').value = price;
-  document.getElementById('sum-balls').innerHTML = qty > 0 ? qty + ' balls (+$' + price + ')' : '<span class="empty">None</span>';
-  updateTotal();
-}
-
-// 
-// TOTAL
-// 
-function updateTotal() {
-  const total = BAY_PRICE + state.extraBallsPrice;
-  document.getElementById('sum-total').textContent = '$' + total.toFixed(2);
-}
-
-// 
-// MIN DATE = TODAY
-// 
-const today = new Date().toISOString().split('T')[0];
-document.getElementById('bookingDate').setAttribute('min', today);
-
-// 
-// FORM SUBMISSION
-// 
-document.getElementById('golfForm').addEventListener('submit', async function(e) {
-  e.preventDefault();
-
-  if (!state.bay) { alert('Please select a bay.'); return; }
-  if (!document.getElementById('bookingDate').value) { alert('Please select a date.'); return; }
-  if (!state.time) { alert('Please select a time slot.'); return; }
-  if (!document.getElementById('waiverCheck').checked) { alert('Please read and agree to the Liability Waiver to continue.'); return; }
-
-  const btn = document.getElementById('submitBtn');
-  btn.disabled = true;
-  btn.textContent = 'Processing...';
-
-  const firstName = document.getElementById('firstName').value;
-  const lastName = document.getElementById('lastName').value;
-  const email = document.getElementById('email').value;
-  const phone = document.getElementById('phone').value;
-  const players = document.getElementById('players').value;
-  const total = BAY_PRICE + state.extraBallsPrice;
-
-  //  PAYMENT via Stripe 
-  // NOTE: For real payments, you need a backend endpoint to create a PaymentIntent.
-  // Until Stripe is configured, we fall back to email confirmation only.
-  let paymentSuccess = false;
-
-  if (stripe && cardElement && STRIPE_KEY !== '__STRIPE_PK__') {
-    try {
-      // Call your backend to create PaymentIntent
-      // const response = await fetch('/.netlify/functions/create-payment-intent', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ amount: total * 100, currency: 'usd' , coupon: window._appliedCoupon?.code || null})
-      // });
-      // const { clientSecret } = await response.json();
-      // const result = await stripe.confirmCardPayment(clientSecret, {
-      //   payment_method: { card: cardElement, billing_details: { name: firstName + ' ' + lastName, email } }
-      // });
-      // if (result.error) throw new Error(result.error.message);
-      paymentSuccess = true;
-    } catch(err) {
-      document.getElementById('card-errors').textContent = err.message;
-      btn.disabled = false;
-      btn.textContent = 'Complete Reservation &#x2192;';
-      return;
-    }
-  } else {
-    // Stripe not yet configured - proceed with email confirmation
-    paymentSuccess = true;
-  }
-
-  if (paymentSuccess) {
-    //  SEND CONFIRMATION EMAIL (via mailto - opens email client) 
-    const dateFormatted = state.date;
-    const ballsText = state.extraBalls > 0 ? state.extraBalls + ' extra balls (+$' + state.extraBallsPrice + ')' : 'None';
-
-    // Email to management
-    const mgmtSubject = encodeURIComponent('New Golf Reservation &#x201C; Bay ' + state.bay + ' &#x201C; ' + firstName + ' ' + lastName);
-    const mgmtBody = encodeURIComponent(
-`NEW GOLF BAY RESERVATION
-========================
-Name:          ${firstName} ${lastName}
-Email:         ${email}
-Phone:         ${phone}
-Players:       ${players}
-
-Bay:           Bay ${state.bay}
-Date:          ${dateFormatted}
-Time:          ${state.time}
-Duration:      50 Minutes
-Balls:         75 included + ${ballsText}
-
-Total Charged: $${total.toFixed(2)}
-
-Liability Waiver: AGREED & SIGNED ELECTRONICALLY
-
---
-Submitted via thequarrystl.com
-ADD TO CALENDAR: ${dateFormatted} at ${state.time} &#x201C; Bay ${state.bay} &#x201C; ${firstName} ${lastName} (${phone})`
-    );
-
-    // Customer confirmation email
-    const custSubject = encodeURIComponent('Your Quarry Golf Reservation is Confirmed! ');
-    const custBody = encodeURIComponent(
-`Hi ${firstName},
-
-Your Surfside Hole-In-One Golf bay at The Quarry is confirmed!
-
-RESERVATION DETAILS
-===================
-Bay:      Bay ${state.bay}
-Date:     ${dateFormatted}
-Time:     ${state.time}
-Duration: 50 Minutes
-Balls:    75 included${state.extraBalls > 0 ? ' + ' + state.extraBalls + ' extra' : ''}
-Total:    $${total.toFixed(2)}
-
-IMPORTANT REMINDERS
-===================
- Please arrive 10 minutes before your tee time to check in
- Late arrivals do not extend reservation time
- Food & drinks are available and can be enjoyed at your bay
- A hole-in-one wins $3,000 CASH!
-
-Questions? Call or text us at 636-224-8257
-or visit us at 3960 Highway Z, New Melle, MO 63385
-
-See you on the course!
-&mdash; The Quarry Team`
-    );
-
-    // Open management email
-    window.open('mailto:management@thequarrystl.com?subject=' + mgmtSubject + '&body=' + mgmtBody);
-
-    // Show success
-    document.getElementById('bookingSection').style.display = 'none';
-    const successScreen = document.getElementById('successScreen');
-    successScreen.style.display = 'block';
-    successScreen.innerHTML = `
-      <div class="success-icon"></div>
-      <h2 class="success-title">You're Booked!</h2>
-      <p class="success-sub">Your bay is reserved! A confirmation has been sent. Please arrive 10 minutes early to check in.</p>
-      <div class="success-details">
-        <div class="success-detail-row"><span class="success-detail-label">Name</span><span class="success-detail-val">${firstName} ${lastName}</span></div>
-        <div class="success-detail-row"><span class="success-detail-label">Bay</span><span class="success-detail-val">Bay ${state.bay}</span></div>
-        <div class="success-detail-row"><span class="success-detail-label">Date</span><span class="success-detail-val">${dateFormatted}</span></div>
-        <div class="success-detail-row"><span class="success-detail-label">Time</span><span class="success-detail-val">${state.time}</span></div>
-        <div class="success-detail-row"><span class="success-detail-label">Balls</span><span class="success-detail-val">75 included${state.extraBalls > 0 ? ' + ' + state.extraBalls + ' extra' : ''}</span></div>
-        <div class="success-detail-row"><span class="success-detail-label">Total</span><span class="success-detail-val">$${total.toFixed(2)}</span></div>
-      </div>
-      <p style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-style:italic;color:var(--brown-warm);">
-        Questions? Call or text <a href="tel:6362248257" style="color:var(--gold);">636-224-8257</a>
-      </p>
-    `;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+// ── DATE: prevent past dates ────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  var dateInput = document.getElementById('bookingDate');
+  if (dateInput) {
+    var today = new Date();
+    var yyyy = today.getFullYear();
+    var mm = String(today.getMonth()+1).padStart(2,'0');
+    var dd = String(today.getDate()).padStart(2,'0');
+    dateInput.min = yyyy+'-'+mm+'-'+dd;
   }
 });
+
+// ── BAY SELECTION ───────────────────────────────────────────────────
+function selectBay(num) {
+  document.querySelectorAll('.bay-option').forEach(function(el){ el.classList.remove('selected'); });
+  document.querySelectorAll('[id^="check-bay"]').forEach(function(el){ el.classList.remove('active'); });
+  var card = document.querySelectorAll('.bay-option')[num-1];
+  if (card) card.classList.add('selected');
+  var check = document.getElementById('check-bay-'+num);
+  if (check) check.classList.add('active');
+  state.bay = 'Bay '+num;
+  document.getElementById('selectedBay').value = 'Bay '+num;
+  updateSummary();
+}
+
+// ── DATE + TIME SLOTS ───────────────────────────────────────────────
+function updateTimeSlots() {
+  var date = document.getElementById('bookingDate').value;
+  state.date = date;
+  state.time = '';
+  document.getElementById('selectedTime').value = '';
+  var container = document.getElementById('timeSlots');
+  if (!container) return;
+  container.innerHTML = '';
+  if (!date) return;
+  // Fetch booked slots for this date
+  fetch('/.netlify/functions/get-bookings?date='+date)
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      var booked = (data.booked || []).map(function(b){ return b.bay+'|'+b.time; });
+      TIME_SLOTS.forEach(function(t){
+        var isBooked = booked.indexOf((state.bay||'')+' | '+t) > -1 || booked.indexOf((state.bay||'')+'|'+t) > -1;
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'time-btn' + (isBooked ? ' booked' : '');
+        btn.textContent = t;
+        if (isBooked) {
+          btn.disabled = true;
+          btn.style.opacity = '0.4';
+          btn.style.textDecoration = 'line-through';
+          btn.title = 'Already booked';
+        } else {
+          btn.onclick = function(){ selectTime(t); };
+        }
+        container.appendChild(btn);
+      });
+    })
+    .catch(function(){
+      TIME_SLOTS.forEach(function(t){
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'time-btn';
+        btn.textContent = t;
+        btn.onclick = function(){ selectTime(t); };
+        container.appendChild(btn);
+      });
+    });
+  updateSummary();
+}
+
+function selectTime(t) {
+  document.querySelectorAll('.time-btn').forEach(function(b){ b.classList.remove('selected'); });
+  var btns = document.querySelectorAll('.time-btn');
+  btns.forEach(function(b){ if(b.textContent===t) b.classList.add('selected'); });
+  state.time = t;
+  document.getElementById('selectedTime').value = t;
+  updateSummary();
+}
+
+// ── EXTRA BALLS ─────────────────────────────────────────────────────
+function selectBalls(option) {
+  document.querySelectorAll('.balls-option').forEach(function(el){ el.classList.remove('selected'); });
+  var el = document.getElementById('balls-'+option);
+  if (el) el.classList.add('selected');
+  if (option === 'none') {
+    state.extraBalls = 0; state.extraBallsPrice = 0;
+  } else if (option === '50') {
+    state.extraBalls = 50; state.extraBallsPrice = 10;
+  } else if (option === '100') {
+    state.extraBalls = 100; state.extraBallsPrice = 18;
+  }
+  document.getElementById('extraBalls').value = state.extraBalls;
+  document.getElementById('extraBallsPrice').value = state.extraBallsPrice * 100;
+  updateSummary();
+}
+
+// ── COUPON ──────────────────────────────────────────────────────────
+var appliedCoupon = null;
+var COUPONS = {
+  'QUARRY10': { label:'10% off', pct:10 },
+  'QUARRY20': { label:'20% off', pct:20 },
+  'GOLF50':   { label:'50% off', pct:50 },
+  'TESTCODE': { label:'$5 off',  flat:5 },
+  'TEST1':    { label:'$59 off', flat:59 },
+  'ADMIN100': { label:'100% off - Admin only', pct:100 },
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+  var applyBtn = document.getElementById('applyCouponBtn');
+  if (!applyBtn) return;
+  applyBtn.addEventListener('click', function() {
+    var code = (document.getElementById('couponCode').value||'').trim().toUpperCase();
+    var msgEl = document.getElementById('couponMessage');
+    if (!code) return;
+    var c = COUPONS[code];
+    if (!c) {
+      if (msgEl) { msgEl.textContent = 'Invalid coupon code.'; msgEl.style.color='#c0392b'; }
+      appliedCoupon = null;
+    } else {
+      appliedCoupon = { code, ...c };
+      if (msgEl) { msgEl.textContent = 'Coupon applied: ' + c.label; msgEl.style.color='#27ae60'; }
+    }
+    updateSummary();
+  });
+});
+
+// ── SUMMARY ─────────────────────────────────────────────────────────
+function updateSummary() {
+  var summBay  = document.getElementById('summaryBay');
+  var summDate = document.getElementById('summaryDate');
+  var summTime = document.getElementById('summaryTime');
+  var summExtra= document.getElementById('summaryExtra');
+  var summTotal= document.getElementById('summaryTotal');
+  if (summBay)  summBay.textContent  = state.bay  || 'Not selected';
+  if (summDate) summDate.textContent = state.date || 'Not selected';
+  if (summTime) summTime.textContent = state.time || 'Not selected';
+  if (summExtra)summExtra.textContent= state.extraBalls > 0 ? state.extraBalls+' balls (+$'+state.extraBallsPrice+')' : 'None';
+  var base = BAY_PRICE + state.extraBallsPrice;
+  var disc = 0;
+  if (appliedCoupon) {
+    if (appliedCoupon.pct) disc = Math.round(base * appliedCoupon.pct / 100);
+    else if (appliedCoupon.flat) disc = Math.min(base, appliedCoupon.flat);
+  }
+  var total = Math.max(0, base - disc);
+  if (summTotal) {
+    if (disc > 0) {
+      summTotal.innerHTML = '<span style="text-decoration:line-through;color:#999">$'+base+'.00</span> <span style="color:#B8933A">$'+total+'.00</span>';
+    } else {
+      summTotal.textContent = '$'+total+'.00';
+    }
+  }
+}
 </script>
 
 <!-- 
