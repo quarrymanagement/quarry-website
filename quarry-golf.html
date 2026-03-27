@@ -1,4 +1,5 @@
 <div id="timeSlots" class="time-slots">
+    'TEST1':    {label:'$59 off', flat:59},
   <div class="time-slot" onclick="selectTime(this)" data-time="11:00 AM">11:00 AM</div>
   <div class="time-slot" onclick="selectTime(this)" data-time="12:00 PM">12:00 PM</div>
   <div class="time-slot" onclick="selectTime(this)" data-time="1:00 PM">1:00 PM</div>
@@ -246,7 +247,7 @@
         </div>
         <div id="couponMsg" style="font-family:'Montserrat',sans-serif;font-size:0.72rem;margin-top:0.5rem;display:none;"></div>
       </div>
-      <button type="button" class="submit-btn" id="submitBtn" type="button">
+      <button type="submit" class="submit-btn" id="submitBtn">
           Complete Reservation &#x2192;
         </button>
       </div>
@@ -593,115 +594,69 @@ See you on the course!
 
 <script id="payment-handler">
 (function(){
-  // Coupon map for frontend display
-  var COUPONS = {
-    'QUARRY10':{label:'10% off',pct:10},
-    'QUARRY20':{label:'20% off',pct:20},
-    'GOLF50':{label:'50% off',pct:50},
-    'TESTCODE':{label:'$5 off',flat:5},
-    'TEST1':{label:'$59 off',flat:59},
-    'ADMIN100':{label:'100% off',pct:100}
-  };
-  var appliedCoupon = null;
-
-  // Handle success/cancel return from Stripe
-  var params = new URLSearchParams(window.location.search);
-  if(params.get('success')) {
-    window.addEventListener('DOMContentLoaded', function(){
-      var form = document.querySelector('.booking-form-section, #golfForm, .booking-steps');
-      if(form) form.innerHTML = '<div style="text-align:center;padding:4rem 2rem"><p style="font-family:Cormorant Garamond,serif;font-size:2.5rem;color:#B8933A;margin-bottom:1rem">Booking Confirmed!</p><p style="font-family:Montserrat,sans-serif;font-size:0.85rem;color:#555;line-height:1.8">Payment successful. A confirmation email has been sent to you.<br><br>Please arrive 10 minutes early.<br><br>Questions? <a href="tel:6362248257" style="color:#B8933A">636-224-8257</a></p></div>';
+  var COUPONS={'QUARRY10':{label:'10% off',pct:10},'QUARRY20':{label:'20% off',pct:20},'GOLF50':{label:'50% off',pct:50},'TESTCODE':{label:'$5 off',flat:5},'TEST1':{label:'$59 off',flat:59},'ADMIN100':{label:'100% off',pct:100}};
+  var appliedCoupon=null;
+  var params=new URLSearchParams(window.location.search);
+  if(params.get('success')){
+    window.addEventListener('DOMContentLoaded',function(){
+      var steps=document.querySelector('.booking-steps');
+      if(steps)steps.innerHTML='<div style="text-align:center;padding:4rem 2rem;max-width:600px;margin:0 auto"><p style="font-family:Cormorant Garamond,serif;font-size:2.5rem;color:#B8933A;margin-bottom:1rem">Booking Confirmed!</p><p style="font-family:Montserrat,sans-serif;font-size:0.85rem;color:#555;line-height:1.8">Payment successful. Your bay is reserved.<br><br>A confirmation email has been sent to you.<br><br>Arrive 10 minutes early. Questions? <a href="tel:6362248257" style="color:#B8933A">636-224-8257</a></p></div>';
     });
-    history.replaceState({},'',' /quarry-golf');
-  }
-  if(params.get('canceled')) {
-    alert('Payment canceled. Your bay has not been booked.');
     history.replaceState({},'','/quarry-golf');
   }
-
-  window.addEventListener('DOMContentLoaded', function(){
-    // Coupon Apply button
-    var applyBtn = document.getElementById('applyCouponBtn');
-    if(applyBtn) {
-      applyBtn.addEventListener('click', function(){
-        var code = (document.getElementById('couponCode').value||'').trim().toUpperCase();
-        var msg = document.getElementById('couponMsg');
-        var c = COUPONS[code];
-        if(!c){ appliedCoupon=null; if(msg){msg.textContent='Invalid coupon code.';msg.style.color='#c0392b';} }
-        else { appliedCoupon={code:code,...c}; if(msg){msg.textContent='Coupon applied: '+c.label;msg.style.color='#27ae60';} }
+  if(params.get('canceled')){alert('Payment canceled. Your bay has not been booked.');history.replaceState({},'','/quarry-golf');}
+  window.addEventListener('DOMContentLoaded',function(){
+    var applyBtn=document.getElementById('applyCouponBtn');
+    if(applyBtn){
+      applyBtn.addEventListener('click',function(){
+        var code=(document.getElementById('couponCode').value||'').trim().toUpperCase();
+        var msg=document.getElementById('couponMsg');
+        var c=COUPONS[code];
+        if(!c){appliedCoupon=null;if(msg){msg.textContent='✗ Invalid coupon code';msg.style.color='#c0392b';}}
+        else{appliedCoupon={code:code,label:c.label,pct:c.pct,flat:c.flat};if(msg){msg.textContent='✓ Coupon applied: '+c.label;msg.style.color='#27ae60';}}
         refreshTotal();
       });
     }
-
-    // Override submit button
-    var btn = document.getElementById('submitBtn');
-    if(!btn) return;
-    var newBtn = btn.cloneNode(true);
-    newBtn.type = 'button';
-    btn.parentNode.replaceChild(newBtn, btn);
-
-    newBtn.addEventListener('click', async function(e){
+    var btn=document.getElementById('submitBtn');
+    if(!btn)return;
+    var nb=btn.cloneNode(true);nb.type='button';btn.parentNode.replaceChild(nb,btn);
+    nb.addEventListener('click',async function(e){
       e.preventDefault();
       var bay=document.getElementById('selectedBay')?.value;
       var date=document.getElementById('bookingDate')?.value;
       var time=document.getElementById('selectedTime')?.value;
-      var firstName=(document.getElementById('firstName')?.value||'').trim();
-      var lastName=(document.getElementById('lastName')?.value||'').trim();
+      var first=(document.getElementById('firstName')?.value||'').trim();
+      var last=(document.getElementById('lastName')?.value||'').trim();
       var email=(document.getElementById('email')?.value||'').trim();
       var players=document.getElementById('players')?.value;
       var waiver=document.getElementById('waiverCheck')?.checked;
-
       if(!bay){alert('Please select a bay.');return;}
       if(!date){alert('Please select a date.');return;}
-      if(!time){alert('Please select a time.');return;}
-      if(!firstName||!lastName){alert('Please enter your full name.');return;}
+      if(!time){alert('Please select a time slot.');return;}
+      if(!first||!last){alert('Please enter your full name.');return;}
       if(!email||!email.includes('@')){alert('Please enter a valid email.');return;}
       if(!players){alert('Please select number of players.');return;}
       if(!waiver){alert('Please agree to the liability waiver.');return;}
-
-      newBtn.textContent='Redirecting to payment...';
-      newBtn.disabled=true;
-
+      nb.textContent='Redirecting to payment...';nb.disabled=true;
       try{
         var extra=parseInt(document.getElementById('extraBallsPrice')?.value||'0')||0;
-        var duration=document.getElementById('sum-duration')?.textContent?.trim()||'50 Minutes';
-        var res=await fetch('/.netlify/functions/create-checkout',{
-          method:'POST',headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({
-            amount: 6000+extra,
-            coupon: appliedCoupon?appliedCoupon.code:null,
-            metadata:{customerName:firstName+' '+lastName,customerEmail:email,bay:bay,date:date,time:time,duration:duration,players:players}
-          })
-        });
+        var res=await fetch('/.netlify/functions/create-checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:6000+extra,coupon:appliedCoupon?appliedCoupon.code:null,metadata:{customerName:first+' '+last,customerEmail:email,bay:bay,date:date,time:time,duration:'50 Minutes',players:players}})});
         var data=await res.json();
-        if(data.error){alert('Error: '+data.error);newBtn.textContent='Complete Reservation →';newBtn.disabled=false;return;}
-        if(data.free){
-          document.querySelector('.booking-steps, #golfForm').innerHTML='<div style="text-align:center;padding:4rem 2rem"><p style="font-family:Cormorant Garamond,serif;font-size:2.5rem;color:#B8933A;margin-bottom:1rem">Booking Confirmed!</p><p style="font-family:Montserrat,sans-serif;font-size:0.85rem;color:#555">Your bay is reserved. A confirmation email has been sent.</p></div>';
-          return;
-        }
+        if(data.error){alert('Error: '+data.error);nb.textContent='Complete Reservation →';nb.disabled=false;return;}
+        if(data.free){document.querySelector('.booking-steps').innerHTML='<div style="text-align:center;padding:4rem 2rem"><p style="font-family:Cormorant Garamond,serif;font-size:2.5rem;color:#B8933A">Booking Confirmed!</p><p style="font-family:Montserrat,sans-serif;font-size:0.85rem;color:#555">Your bay is reserved. A confirmation email has been sent.</p></div>';return;}
         window.location.href=data.url;
-      }catch(err){
-        alert('Something went wrong. Please call 636-224-8257 to book.');
-        newBtn.textContent='Complete Reservation →';
-        newBtn.disabled=false;
-      }
+      }catch(err){alert('Something went wrong. Please call 636-224-8257.');nb.textContent='Complete Reservation →';nb.disabled=false;}
     });
-
     function refreshTotal(){
       var base=60+(parseInt(document.getElementById('extraBallsPrice')?.value||'0')/100||0);
       var disc=0;
-      if(appliedCoupon){
-        if(appliedCoupon.pct) disc=Math.round(base*appliedCoupon.pct/100);
-        else if(appliedCoupon.flat) disc=Math.min(base,appliedCoupon.flat);
-      }
+      if(appliedCoupon){if(appliedCoupon.pct)disc=Math.round(base*appliedCoupon.pct/100);else if(appliedCoupon.flat)disc=Math.min(base,appliedCoupon.flat);}
       var total=Math.max(0,base-disc);
       var el=document.getElementById('sum-total');
-      if(el){
-        if(disc>0) el.innerHTML='<span style="text-decoration:line-through;color:#999">
+      if(el){if(disc>0)el.innerHTML='<span style="text-decoration:line-through;color:#999">
 </html>+base+'.00</span> <span style="color:#B8933A;font-weight:bold">
-</html>+total+'.00</span>';
-        else el.textContent='
-</html>+total+'.00';
-      }
+</html>+total+'.00</span>';else el.textContent='
+</html>+total+'.00';}
     }
   });
 })();
