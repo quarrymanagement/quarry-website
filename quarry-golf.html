@@ -605,7 +605,7 @@ document.addEventListener('DOMContentLoaded',function(){
         <p class="stripe-note">Secure payment processed by Stripe. Your card information is never stored on our servers.</p>
 
         <!--  STRIPE SETUP REQUIRED 
-             Replace 'pk_live_51TEMcEKn5EeQg3CaVcmEZ9dqcgFc1kvKNRYQWCyUD79MW0YLPPVe0bybNwmDvUpPZ30VLi7L1mz4vI5buJDjMT7f00LECSO6l5' with your actual Stripe publishable key.
+             Replace 'STRIPE_PK_PLACEHOLDER' with your actual Stripe publishable key.
              Get your key at: https://dashboard.stripe.com/apikeys
              You will also need a backend/serverless function to create PaymentIntents.
              See README comments below for Netlify Functions setup. -->
@@ -703,7 +703,7 @@ document.addEventListener('DOMContentLoaded',function(){
 // STRIPE CONFIGURATION
 // Replace with your actual Stripe publishable key from https://dashboard.stripe.com/apikeys
 // 
-const STRIPE_KEY = 'pk_live_51TEMcEKn5EeQg3CaVcmEZ9dqcgFc1kvKNRYQWCyUD79MW0YLPPVe0bybNwmDvUpPZ30VLi7L1mz4vI5buJDjMT7f00LECSO6l5';
+const STRIPE_KEY = 'STRIPE_PK_PLACEHOLDER';
 let stripe, elements, cardElement;
 
 try {
@@ -837,7 +837,7 @@ document.getElementById('golfForm').addEventListener('submit', async function(e)
   // Until Stripe is configured, we fall back to email confirmation only.
   let paymentSuccess = false;
 
-  if (stripe && cardElement && STRIPE_KEY !== 'pk_live_51TEMcEKn5EeQg3CaVcmEZ9dqcgFc1kvKNRYQWCyUD79MW0YLPPVe0bybNwmDvUpPZ30VLi7L1mz4vI5buJDjMT7f00LECSO6l5') {
+  if (stripe && cardElement && STRIPE_KEY !== 'STRIPE_PK_PLACEHOLDER') {
     try {
       // Call your backend to create PaymentIntent
       // const response = await fetch('/.netlify/functions/create-payment-intent', {
@@ -959,7 +959,7 @@ See you on the course!
   1. Create a free Stripe account at https://stripe.com
   2. Go to https://dashboard.stripe.com/apikeys
   3. Copy your "Publishable key" (starts with pk_live_)
-  4. Replace 'pk_live_51TEMcEKn5EeQg3CaVcmEZ9dqcgFc1kvKNRYQWCyUD79MW0YLPPVe0bybNwmDvUpPZ30VLi7L1mz4vI5buJDjMT7f00LECSO6l5' in the script above
+  4. Replace 'STRIPE_PK_PLACEHOLDER' in the script above
   
   5. For the backend payment processing, you need a Netlify Function:
      - Create file: netlify/functions/create-payment-intent.js
