@@ -1,13 +1,12 @@
 [build]
   publish = "."
+  command = "sed -i 's/__STRIPE_PK__/'"$STRIPE_PUBLISHABLE_KEY"'/g' quarry-golf.html"
 
 [build.processing]
   skip_processing = false
 
 [build.processing.html]
   pretty_urls = true
-
-# Redeploy 2026-03-27T00:42:41.424Z - form detection enabled
 
 [[plugins]]
   package = "@netlify/plugin-functions-install-core"
