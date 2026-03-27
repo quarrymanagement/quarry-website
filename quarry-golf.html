@@ -235,8 +235,7 @@ var HOURS=['11:00 AM','12:00 PM','1:00 PM','2:00 PM','3:00 PM','4:00 PM','5:00 P
 var booked=[];
 
 document.addEventListener('DOMContentLoaded',function(){
-  var today=new Date();
-  var min=today.getFullYear()+'-'+pad(today.getMonth()+1)+'-'+pad(today.getDate());
+  var min=getTodayStrCentral();
   document.getElementById('bookingDate').min=min;
   var p=new URLSearchParams(window.location.search);
   if(p.get('success')){showSuccess();history.replaceState({},'','/quarry-golf');}
@@ -256,17 +255,31 @@ function selectBay(n){
   if(S.date)fetchBooked(S.date);
 }
 
+function getCentralNow(){
+  // Always compute current time in US Central (handles CST/CDT automatically)
+  var now=new Date();
+  var centralStr=now.toLocaleString('en-US',{timeZone:'America/Chicago'});
+  return new Date(centralStr);
+}
+function getTodayStrCentral(){
+  var c=getCentralNow();
+  return c.getFullYear()+'-'+pad(c.getMonth()+1)+'-'+pad(c.getDate());
+}
 function renderSlots(){
   var grid=document.getElementById('timeGrid');
-  var now=new Date();
-  var todayStr=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
+  var centralNow=getCentralNow();
+  var todayStr=getTodayStrCentral();
   var isToday=S.date===todayStr;
   grid.innerHTML='';
   HOURS.forEach(function(t){
     var btn=document.createElement('button');
     btn.type='button';btn.className='tb';btn.textContent=t;
     var isPast=false;
-    if(isToday){var h=parseHr(t);isPast=h<=now.getHours();}
+    if(isToday){
+      var slotHour=parseHr(t);
+      // Block current hour and all past hours (e.g. if it's 4:50pm, block 4pm and earlier)
+      isPast=slotHour<=centralNow.getHours();
+    }
     var isTaken=booked.some(function(b){return b.time===t&&(!S.bay||b.bay===S.bay);});
     if(isPast){btn.classList.add('past');btn.disabled=true;btn.title='Time has passed';}
     else if(isTaken){btn.classList.add('taken');btn.disabled=true;btn.title='Already booked';}
