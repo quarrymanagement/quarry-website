@@ -215,6 +215,26 @@ footer { background:#0F0A07; padding:2.5rem 2rem; border-top:1px solid var(--bor
 
 .coupon-section { margin-bottom:1rem; }
 .coupon-row { display:flex; gap:0.5rem; align-items:stretch; }
+
+/* WAIVER CHECKBOX FIX */
+label.waiver-check {
+  display:flex !important; align-items:flex-start !important; gap:1rem !important;
+  cursor:pointer !important; padding:1.25rem 1.5rem !important;
+  background:rgba(26,14,8,0.9) !important; border:1.5px solid rgba(180,140,60,0.5) !important;
+  border-radius:2px !important;
+}
+#waiverCheck {
+  -webkit-appearance:checkbox !important;
+  appearance:checkbox !important;
+  width:22px !important; height:22px !important; min-width:22px !important;
+  flex-shrink:0 !important; margin-top:2px !important;
+  cursor:pointer !important; accent-color:#B8933A !important;
+  pointer-events:auto !important; opacity:1 !important;
+}
+.waiver-check-label {
+  font-family:'Montserrat',sans-serif !important; font-size:0.73rem !important;
+  line-height:1.65 !important; color:#F5F0E8 !important; cursor:pointer !important;
+}
 </style>
 
 
