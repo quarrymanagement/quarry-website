@@ -207,6 +207,26 @@ footer { background:#0F0A07; padding:2.5rem 2rem; border-top:1px solid var(--bor
 }
 
 
+
+/* Time slot buttons */
+#timeSlots { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.time-slot-btn {
+  padding: 10px 18px;
+  border: 2px solid #B8933A;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  background: #fff;
+  color: #2C1A0E;
+  transition: background 0.2s, color 0.2s;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+.time-slot-btn:hover:not(:disabled) { background: #B8933A; color: #fff; }
+.time-slot-btn.selected { background: #B8933A; color: #fff; font-weight: bold; }
+.time-slot-btn:disabled { opacity: 0.35; cursor: not-allowed; text-decoration: line-through; }
 </style>
 
 
@@ -478,7 +498,7 @@ document.addEventListener('DOMContentLoaded',function(){
         </div>
         <label class="form-label" style="margin-bottom:0.6rem;display:block;">Available Times <span>*</span></label>
         <div id="timeSlots">
-  <div class="time-btn" onclick="selectTime(this)" data-time="11:00 AM">11:00 AM</div>
+  <div class="time-slot-btn" onclick="selectTime(this)" data-time="11:00 AM">11:00 AM</div>
   <div class="time-btn" onclick="selectTime(this)" data-time="12:00 PM">12:00 PM</div>
   <div class="time-btn" onclick="selectTime(this)" data-time="1:00 PM">1:00 PM</div>
   <div class="time-btn" onclick="selectTime(this)" data-time="2:00 PM">2:00 PM</div>
