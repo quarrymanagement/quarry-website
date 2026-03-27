@@ -140,9 +140,16 @@ select { cursor:pointer; background-image:url("data:image/svg+xml,%3Csvg xmlns='
 .waiver-text { font-family:'Montserrat',sans-serif; font-size:0.58rem; line-height:1.9; color:rgba(245,240,232,0.75); letter-spacing:0.03em; }
 .waiver-text h4 { color:var(--gold-light); font-size:0.62rem; letter-spacing:0.15em; text-transform:uppercase; margin-bottom:0.5rem; margin-top:1rem; }
 .waiver-text h4:first-child { margin-top:0; }
-.waiver-check { display:flex; align-items:flex-start; gap:0.75rem; cursor:pointer; }
+.waiver-check {
+  display:flex; align-items:flex-start; gap:0.75rem; cursor:pointer;
+  background:rgba(26,14,8,0.85); border:1.5px solid rgba(180,140,60,0.4);
+  padding:1.25rem 1.5rem; border-radius:0;
+}
 .waiver-check input[type=checkbox] { width:18px; height:18px; flex-shrink:0; margin-top:2px; accent-color:var(--gold); cursor:pointer; }
-.waiver-check-label { font-family:'Montserrat',sans-serif; font-size:0.62rem; font-weight:600; color:var(--cream); line-height:1.6; letter-spacing:0.04em; }
+.waiver-check-label {
+  font-family:'Montserrat',sans-serif; font-size:0.72rem; line-height:1.6;
+  color:#F5F0E8 !important; cursor:pointer;
+}
 
 /* PAYMENT */
 .payment-section { }
@@ -205,11 +212,37 @@ footer { background:#0F0A07; padding:2.5rem 2rem; border-top:1px solid var(--bor
 /* ===MOBILE-HEADER-FIX=== */
 @media (max-width:1100px){html,body{max-width:100%;overflow-x:hidden;}header{overflow:visible !important;width:100%;left:0;right:0;}.header-inner{display:flex !important;align-items:center !important;justify-content:space-between !important;padding:0 1rem !important;width:100% !important;box-sizing:border-box !important;overflow:visible !important;}.logo{font-size:1rem !important;flex-shrink:0;white-space:nowrap;}.logo span{font-size:0.38rem !important;display:block;}nav{display:none !important;}nav.open{display:flex !important;}.hamburger{display:flex !important;flex-shrink:0;z-index:1002 !important;position:relative !important;touch-action:manipulation;-webkit-tap-highlight-color:transparent;cursor:pointer;margin-left:auto;}}
 /* ===END-MOBILE-HEADER-FIX=== */
+
+.coupon-section { margin-bottom:1rem; }
+.coupon-row { display:flex; gap:0.5rem; align-items:stretch; }
 </style>
 
 
 
 <script>
+
+function applyCoupon() {
+  var code = document.getElementById('couponCode')?.value?.trim().toUpperCase();
+  var msg = document.getElementById('couponMsg');
+  if (!code) return;
+  msg.style.display = 'block';
+  // Valid test codes — update these in the create-checkout function too
+  var coupons = {
+    'QUARRY10': {label:'10% off', discount:0.10},
+    'QUARRY20': {label:'20% off', discount:0.20},
+    'GOLF50':   {label:'50% off', discount:0.50},
+    'TESTCODE': {label:'$5 off', flat:500},
+  };
+  if (coupons[code]) {
+    window._appliedCoupon = {code: code, ...coupons[code]};
+    msg.style.color = '#2d7a2d';
+    msg.textContent = '✓ Coupon applied: ' + coupons[code].label;
+  } else {
+    window._appliedCoupon = null;
+    msg.style.color = '#c0392b';
+    msg.textContent = '✗ Invalid coupon code';
+  }
+}
 function toggleNav(){var n=document.getElementById('mainNav'),h=document.querySelector('.hamburger');if(!n)return;n.classList.toggle('open');if(h)h.classList.toggle('active');}
 document.addEventListener('click',function(e){var n=document.getElementById('mainNav'),h=document.querySelector('.hamburger');if(!n||!h)return;if(!n.contains(e.target)&&!h.contains(e.target)){n.classList.remove('open');}});
 function selectBox(f,v,id){var i=document.getElementById(f+'Input');if(i)i.value=v;document.querySelectorAll('.select-box').forEach(function(c){if(c.getAttribute('onclick')&&c.getAttribute('onclick').indexOf("'"+f+"'")!==-1)c.classList.remove('selected');});var card=document.getElementById(id);if(card)card.classList.add('selected');}
@@ -487,7 +520,20 @@ function selectBox(f,v,id){var i=document.getElementById(f+'Input');if(i)i.value
            256-bit SSL encrypted &middot; Powered by Stripe
         </p>
 
-        <button type="submit" class="submit-btn" id="submitBtn">
+        
+      <!-- COUPON CODE -->
+      <div class="coupon-section" id="couponSection">
+        <div class="coupon-row">
+          <input type="text" id="couponCode" placeholder="Promo / coupon code" autocomplete="off"
+            style="flex:1;padding:0.75rem 1rem;background:#fff;border:1.5px solid #ccc;font-family:'Montserrat',sans-serif;font-size:0.75rem;outline:none;">
+          <button type="button" id="applyCouponBtn" onclick="applyCoupon()"
+            style="padding:0.75rem 1.25rem;background:var(--gold,#B8933A);color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;white-space:nowrap;">
+            Apply
+          </button>
+        </div>
+        <div id="couponMsg" style="font-family:'Montserrat',sans-serif;font-size:0.72rem;margin-top:0.5rem;display:none;"></div>
+      </div>
+      <button type="submit" class="submit-btn" id="submitBtn">
           Complete Reservation &#x2192;
         </button>
       </div>
@@ -701,7 +747,7 @@ document.getElementById('golfForm').addEventListener('submit', async function(e)
       // const response = await fetch('/.netlify/functions/create-payment-intent', {
       //   method: 'POST',
       //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ amount: total * 100, currency: 'usd' })
+      //   body: JSON.stringify({ amount: total * 100, currency: 'usd' , coupon: window._appliedCoupon?.code || null})
       // });
       // const { clientSecret } = await response.json();
       // const result = await stripe.confirmCardPayment(clientSecret, {
