@@ -432,7 +432,7 @@ document.addEventListener('DOMContentLoaded',function(){
       <h2 class="step-title">Reserve Your Bay</h2>
     </div>
 
-    <form id="golfForm">
+    <form id="golfForm" onsubmit="return false">
 
       <!-- STEP 1: BAY -->
       <div class="step-section">
@@ -631,7 +631,7 @@ document.addEventListener('DOMContentLoaded',function(){
         </div>
         <div id="couponMsg" style="font-family:'Montserrat',sans-serif;font-size:0.72rem;margin-top:0.5rem;display:none;"></div>
       </div>
-      <button type="submit" class="submit-btn" id="submitBtn">
+      <button  class="submit-btn" id="submitBtn" type="button">
           Complete Reservation &#x2192;
         </button>
       </div>
@@ -1028,7 +1028,8 @@ document.addEventListener('DOMContentLoaded', function() {
     history.replaceState({}, '', '/quarry-golf');
   }
 
-  btn.addEventListener('click', async function() {
+  btn.addEventListener('click', async function(e) {
+    e.preventDefault();
     var bay     = document.getElementById('selectedBay')?.value;
     var date    = document.getElementById('bookingDate')?.value;
     var time    = document.getElementById('selectedTime')?.value;
