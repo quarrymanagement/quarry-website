@@ -705,7 +705,7 @@ document.addEventListener('DOMContentLoaded',function(){
 // STRIPE CONFIGURATION
 // Replace with your actual Stripe publishable key from https://dashboard.stripe.com/apikeys
 // 
-const STRIPE_KEY = '__STRIPE_PK__';
+const STRIPE_KEY = window.__STRIPE_PK__ || '';
 let stripe, elements, cardElement;
 
 try {
