@@ -232,39 +232,13 @@ nav { display:flex; align-items:center; }
 
 
 
+
 <script>
 function toggleNav(){var n=document.getElementById('mainNav'),h=document.querySelector('.hamburger');if(!n)return;n.classList.toggle('open');if(h)h.classList.toggle('active');}
 document.addEventListener('click',function(e){var n=document.getElementById('mainNav'),h=document.querySelector('.hamburger');if(!n||!h)return;if(!n.contains(e.target)&&!h.contains(e.target)){n.classList.remove('open');}});
 function selectBox(f,v,id){var i=document.getElementById(f+'Input');if(i)i.value=v;document.querySelectorAll('.select-box').forEach(function(c){if(c.getAttribute('onclick')&&c.getAttribute('onclick').indexOf("'"+f+"'")!==-1)c.classList.remove('selected');});var card=document.getElementById(id);if(card)card.classList.add('selected');}
-function selectCatering(v){var i=document.getElementById('cateringInput');if(i)i.value=v;document.querySelectorAll('.catering-option').forEach(function(c){c.classList.remove('selected');var chk=c.querySelector('.catering-check');if(chk)chk.classList.remove('active');});document.querySelectorAll('.catering-option').forEach(function(c){if(c.getAttribute('onclick')&&c.getAttribute('onclick').indexOf("'"+v+"'")!==-1){c.classList.add('selected');var chk=c.querySelector('.catering-check');if(chk)chk.classList.add('active');}});});}
-document.addEventListener('DOMContentLoaded',function(){
-  var form=document.getElementById('reservationForm');
-  if(!form)return;
-  form.addEventListener('submit',async function(e){
-    e.preventDefault();
-    var btn=form.querySelector('button[type="submit"]');
-    var orig=btn?btn.textContent:'Submit';
-    if(btn){btn.textContent='Sending...';btn.disabled=true;}
-    try{
-      var formData=new FormData(form);
-      var encoded=new URLSearchParams(formData).toString();
-      var res=await fetch(window.location.pathname,{
-        method:'POST',
-        headers:{'Content-Type':'application/x-www-form-urlencoded'},
-        body:encoded
-      });
-      if(res.ok){
-        form.innerHTML='<div style="text-align:center;padding:3rem 1rem;"><p style="font-family:Cormorant Garamond,serif;font-size:1.6rem;color:#b48c3c;margin-bottom:1rem;">Thank You!</p><p style="font-family:Montserrat,sans-serif;font-size:0.85rem;color:#555;line-height:1.7;">Your reservation request has been received!<br>We will confirm within 24 hours.<br><br>Questions? Call <a href="tel:6362248&ndash;57" style="color:#b48c3c;">636-2&ndash;4-8&ndash;57</a> or email <a href="mailto:management@thequarrystl.com" style="color:#b48c3c;">management@thequarrystl.com</a></p></div>';
-      } else {
-        throw new Error('HTTP '+res.status);
-      }
-    }catch(err){
-      if(btn){btn.textContent=orig;btn.disabled=false;}
-      alert('Submission failed. Please call 636-2&ndash;4-8&ndash;57 or email management@thequarrystl.com');
-      console.error('Form error:',err);
-    }
-  });
-});
+function selectCatering(v){var i=document.getElementById('cateringInput');if(i)i.value=v;document.querySelectorAll('.catering-option').forEach(function(c){c.classList.remove('selected');var k=c.querySelector('.catering-check');if(k)k.classList.remove('active');if(c.getAttribute('onclick')&&c.getAttribute('onclick').indexOf("'"+v+"'")!==-1){c.classList.add('selected');if(k)k.classList.add('active');}});}
+document.addEventListener('DOMContentLoaded',function(){var form=document.getElementById('reservationForm');if(!form)return;form.addEventListener('submit',async function(e){e.preventDefault();var btn=form.querySelector('button[type="submit"]');var orig=btn?btn.textContent:'Submit';if(btn){btn.textContent='Sending...';btn.disabled=true;}try{var r=await fetch(window.location.pathname,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(new FormData(form)).toString()});if(r.ok){form.innerHTML='<div style="text-align:center;padding:3rem 1rem;"><p style="font-family:Cormorant Garamond,serif;font-size:1.6rem;color:#b48c3c;margin-bottom:1rem;">Thank You!</p><p style="font-family:Montserrat,sans-serif;font-size:0.85rem;color:#555;line-height:1.7;">Your reservation request has been received!<br>We will confirm within 24 hours.<br><br>Call <a href="tel:6362248257" style="color:#b48c3c;">636-224-8257</a> or email <a href="mailto:management@thequarrystl.com" style="color:#b48c3c;">management@thequarrystl.com</a></p></div>';}else throw new Error();}catch(err){if(btn){btn.textContent=orig;btn.disabled=false;}alert('Submission failed. Please call 636-224-8257 or email management@thequarrystl.com');}});});
 </script>
 </head>
 <body>
@@ -328,20 +302,20 @@ document.addEventListener('DOMContentLoaded',function(){
 </div>
 
 <div class="private-notice">
-  <p>Planning a private or corporate event? <a href="#">Visit our Private Events page &#x2&ndash;92;</a></p>
+  <p>Planning a private or corporate event? <a href="#">Visit our Private Events page &ndash;92;</a></p>
 </div>
 
 <div class="hours-bar">
   <div class="hours-inner">
-    <div class="hours-item"><p class="hours-day">Wed &#x2&ndash;1C; Thu</p><p class="hours-time">11AM &#x2&ndash;1C; 9PM</p></div>
+    <div class="hours-item"><p class="hours-day">Wed &ndash;1C; Thu</p><p class="hours-time">11AM &ndash; 9PM</p></div>
     <div class="hours-divider"></div>
-    <div class="hours-item"><p class="hours-day">Friday</p><p class="hours-time">11AM &#x2&ndash;1C; 11PM</p></div>
+    <div class="hours-item"><p class="hours-day">Friday</p><p class="hours-time">11AM &ndash; 11PM</p></div>
     <div class="hours-divider"></div>
-    <div class="hours-item"><p class="hours-day">Saturday</p><p class="hours-time">11AM &#x2&ndash;1C; 11PM</p></div>
+    <div class="hours-item"><p class="hours-day">Saturday</p><p class="hours-time">11AM &ndash; 11PM</p></div>
     <div class="hours-divider"></div>
-    <div class="hours-item"><p class="hours-day">Sunday</p><p class="hours-time">10AM &#x2&ndash;1C; 5PM</p></div>
+    <div class="hours-item"><p class="hours-day">Sunday</p><p class="hours-time">10AM &ndash; 5PM</p></div>
     <div class="hours-divider"></div>
-    <div class="hours-item"><p class="hours-day">Mon &#x2&ndash;1C; Tue</p><p class="hours-time">Closed</p></div>
+    <div class="hours-item"><p class="hours-day">Mon &ndash;1C; Tue</p><p class="hours-time">Closed</p></div>
   </div>
 </div>
 
@@ -478,7 +452,7 @@ document.addEventListener('DOMContentLoaded',function(){
         <input type="hidden" name="catering" id="cateringInput" value="">
         <div class="catering-reveal" id="cateringReveal">
           <p>Great! Our Event & Catering Shareables Menu is perfect for group celebrations. A 20% service charge applies to all catering orders.</p>
-          <a href="quarry-catering.html" target="_blank">View Our Catering Menu &#x2&ndash;92;</a>
+          <a href="quarry-catering.html" target="_blank">View Our Catering Menu &ndash;92;</a>
         </div>
       </div>
 
@@ -490,7 +464,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
       <!-- SUBMIT -->
       <div class="form-full">
-        <button type="submit" class="submit-btn">Submit Reservation Request &#x2&ndash;92;</button>
+        <button type="submit" class="submit-btn">Submit Reservation Request &ndash;92;</button>
       </div>
 
     </div>
@@ -500,7 +474,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
 <footer>
   <p class="footer-legal">
-    &#x2&ndash;1D;&copy; 20&ndash;6 The Quarry &middot; 3960 Highway Z, New Melle, MO 63385 &middot; 636-2&ndash;4-8&ndash;57 &middot;
+    &ndash;1D;&copy; 20&ndash;6 The Quarry &middot; 3960 Highway Z, New Melle, MO 63385 &middot; 636-2&ndash;4-8&ndash;57 &middot;
     <a href="mailto:management@thequarrystl.com" style="color:var(--gold-light);text-decoration:none;">management@thequarrystl.com</a><br>
     Reservations are subject to availability and confirmed by our team within 24 hours
   </p>
