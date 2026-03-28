@@ -88,6 +88,19 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.65re
 </style>
 </head>
 <body>
+<!-- Netlify form for golf booking notifications -->
+<form name="golf-booking" netlify netlify-honeypot="bot-field" hidden>
+  <input type="hidden" name="form-name" value="golf-booking"/>
+  <input name="bot-field"/>
+  <input name="customerName"/>
+  <input name="customerEmail"/>
+  <input name="customerPhone"/>
+  <input name="bay"/>
+  <input name="date"/>
+  <input name="time"/>
+  <input name="players"/>
+  <input name="amount"/>
+</form>
 
 <div id="qnav">
   <a href="/" class="logo"><span>THE QUARRY</span><small>New Melle, Missouri</small></a>
