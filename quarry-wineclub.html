@@ -425,7 +425,7 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
   <div class="hero-eye">The Quarry Presents</div>
   <h1>Rock &amp; Vine<br><em>Wine Club</em></h1>
   <p>Your key to exclusive wine tastings, member events, and priority access at The Quarry — every month, by the lake.</p>
-  <div><a href="https://buy.stripe.com/7sY00kfiD7qv12i7jvds400" class="btn-g">Join the Club — $29.99/mo</a><a href="#how" class="btn-o">Learn More</a></div>
+  <div><a href="#member-form" class="btn-g" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">Get Started — $29.99/mo</a><a href="#how" class="btn-o">Learn More</a></div>
 </div>
 <div class="vine-bar">
   <span><b>Members Only</b> Wine Tastings</span>
@@ -446,7 +446,7 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
         <li>Digital membership card linked to your account for seamless check-in</li>
         <li>First access to new events, entertainment announcements, and The Quarry news</li>
       </ul>
-      <a href="https://buy.stripe.com/7sY00kfiD7qv12i7jvds400" class="btn-g">Start Your Membership</a>
+      <a href="#member-form" class="btn-g" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">Start Your Membership</a>
     </div>
     <div>
       <div class="img-ph"><span>Wine &amp; Lake Views</span>
@@ -471,13 +471,24 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
       <li>First access to new events &amp; announcements</li>
       <li>Cancel anytime online</li>
     </ul>
-    <a href="https://buy.stripe.com/7sY00kfiD7qv12i7jvds400" class="plan-btn">Join Now — $29.99/month</a>
+    <a href="#member-form" class="plan-btn" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">Complete Your Profile First</a>
   </div>
 </div>
 
-<div style="background:#fff;border:1px solid rgba(0,0,0,0.08);max-width:580px;margin:0 auto 5rem;padding:2.5rem;">
+<div id="member-form" style="background:#fff;border:1px solid rgba(0,0,0,0.08);max-width:580px;margin:0 auto 5rem;padding:2.5rem;scroll-margin-top:80px;">
   <div style="text-align:center;margin-bottom:1.75rem;">
     <div class="slabel">Member Registration</div>
+    <div style="display:flex;gap:1rem;justify-content:center;margin-bottom:1.25rem;">
+      <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.72rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#B8933A;">
+        <span style="width:24px;height:24px;border-radius:50%;background:#B8933A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.7rem;flex-shrink:0;">1</span>
+        Complete Your Profile
+      </div>
+      <div style="color:#ccc;font-size:1rem;line-height:24px;">&rarr;</div>
+      <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.72rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#aaa;">
+        <span style="width:24px;height:24px;border-radius:50%;border:2px solid #ccc;color:#ccc;display:flex;align-items:center;justify-content:center;font-size:0.7rem;flex-shrink:0;">2</span>
+        Complete Payment
+      </div>
+    </div>
     <h2 class="stitle" style="font-size:2rem;">Complete Your Profile</h2>
     <p style="font-size:0.78rem;color:#888;line-height:1.7;">After subscribing, complete your member profile so we can link your subscription and get you set up.</p>
   </div>
@@ -506,8 +517,8 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
     </div>
     <div style="margin-bottom:1.5rem;"><label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">Birthdate *</label>
       <input type="date" name="birthdate" required style="width:100%;padding:0.65rem 0.75rem;border:2px solid #e0d9d0;font-family:Montserrat,sans-serif;font-size:0.85rem;"/></div>
-    <button type="submit" style="width:100%;padding:1rem;background:#2C1A0E;color:#fff;border:none;font-family:Montserrat,sans-serif;font-size:0.72rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;">Submit Member Profile</button>
-    <div id="member-success" style="display:none;text-align:center;color:#27ae60;font-size:0.8rem;margin-top:0.75rem;">&#10003; Profile received! We'll activate your membership within 24 hours.</div>
+    <button type="submit" style="width:100%;padding:1rem;background:#2C1A0E;color:#fff;border:none;font-family:Montserrat,sans-serif;font-size:0.72rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;">Next: Proceed to Payment &rarr;</button>
+    <div id="member-success" style="display:none;text-align:center;color:#27ae60;font-size:0.85rem;margin-top:0.75rem;font-weight:600;">&#10003; Profile received! Redirecting you to complete payment...</div>
   </form>
 </div>
 <script>
@@ -516,7 +527,14 @@ function handleMemberForm(e){
   var form=e.target;
   var data=new FormData(form);
   fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(data).toString()})
-    .then(function(){form.querySelectorAll('input,button').forEach(function(el){el.disabled=true;});document.getElementById('member-success').style.display='block';})
+    .then(function(){
+      form.querySelectorAll('input,button').forEach(function(el){el.disabled=true;});
+      document.getElementById('member-success').style.display='block';
+      // Redirect to Stripe payment after 2 seconds
+      setTimeout(function(){
+        window.location.href='https://buy.stripe.com/7sY00kfiD7qv12i7jvds400';
+      }, 2000);
+    })
     .catch(function(){alert('Something went wrong. Please email management@thequarrystl.com to complete your registration.');});
 }
 </script><div class="how" id="how">
@@ -669,7 +687,7 @@ function handleMemberForm(e){
 <div class="cta-s">
   <h2>Ready to Join?</h2>
   <p>Join the Rock &amp; Vine Wine Club today and start enjoying exclusive access to wine tastings, member events, and more at The Quarry.</p>
-  <a href="https://buy.stripe.com/7sY00kfiD7qv12i7jvds400" class="btn-g">Join Now — $29.99/month</a>
+  <a href="#member-form" class="btn-g" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">Get Started — $29.99/mo</a>
 </div>
 <section style="background:#1A0E08;padding:3rem 1.5rem;text-align:center;border-top:1px solid rgba(184,147,58,0.2);">
   <p style="font-size:0.62rem;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;color:#B8933A;margin-bottom:0.5rem;">Stay in the Loop</p>
