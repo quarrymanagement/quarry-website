@@ -628,5 +628,17 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
 </div>
 <footer>&copy; 2026 The Quarry &nbsp;&middot;&nbsp; 3960 Highway Z, New Melle, MO 63385 &nbsp;&middot;&nbsp; 636-224-8257 &nbsp;&middot;&nbsp; management@thequarrystl.com</footer>
 <script>function faq(el){var i=el.parentElement;var o=i.classList.contains('open');document.querySelectorAll('.faq-item').forEach(function(x){x.classList.remove('open');});if(!o)i.classList.add('open');}</script>
-</body>
+<script>
+function handleWineSignup(e){
+  e.preventDefault();
+  var form=e.target;
+  fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:new URLSearchParams(new FormData(form)).toString()})
+    .then(function(){
+      form.style.display='none';
+      document.getElementById('wine-signup-success').style.display='block';
+    })
+    .catch(function(){alert('Something went wrong. Please email management@thequarrystl.com');});
+}
+</script></body>
 </html>
