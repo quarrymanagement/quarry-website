@@ -336,7 +336,7 @@ footer { background:#0F0A07; padding:4.5rem 2rem 2rem; border-top:1px solid var(
 .plan-price sub{font-size:1rem;color:rgba(255,255,255,0.4);}
 .plan-desc{font-size:0.75rem;color:rgba(255,255,255,0.5);margin-bottom:1.5rem;line-height:1.7;}
 .plan-feats{list-style:none;margin-bottom:1.75rem;}
-.plan-feats li{font-size:0.77rem;padding:0.45rem 0;border-bottom:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.8);display:flex;gap:0.5rem;}
+.plan-feats li{font-size:0.77rem;padding:0.45rem 0;border-bottom:1px solid rgba(255,255,255,0.12);color:#fff;display:flex;gap:0.5rem;}
 .plan-feats li::before{content:'✓';color:var(--gold);font-weight:700;flex-shrink:0;}
 .plan-btn{display:block;padding:0.9rem;background:var(--gold);color:var(--black);text-decoration:none;font-size:0.7rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;text-align:center;transition:background 0.2s;}
 .plan-btn:hover{background:var(--gold2);}
@@ -349,7 +349,7 @@ footer { background:#0F0A07; padding:4.5rem 2rem 2rem; border-top:1px solid var(
 .step{text-align:center;}
 .step-n{width:52px;height:52px;border-radius:50%;border:2px solid var(--gold);color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;}
 .step h4{font-size:0.75rem;font-weight:700;letter-spacing:0.08em;color:#fff;margin-bottom:0.4rem;}
-.step p{font-size:0.68rem;color:rgba(255,255,255,0.4);line-height:1.7;}
+.step p{font-size:0.68rem;color:rgba(255,255,255,0.75);line-height:1.7;}
 .events-s{padding:5rem 1.5rem;background:var(--cream);}
 .ev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.25rem;margin-top:2.5rem;max-width:1100px;margin-left:auto;margin-right:auto;}
 .ev-card{background:#fff;border:1px solid rgba(0,0,0,0.07);overflow:hidden;}
@@ -369,7 +369,7 @@ footer { background:#0F0A07; padding:4.5rem 2rem 2rem; border-top:1px solid var(
 .faq-item.open .faq-a{max-height:300px;margin-top:0.75rem;}
 .cta-s{background:linear-gradient(135deg,var(--burg),#1A0A10);padding:5rem 2rem;text-align:center;}
 .cta-s h2{font-family:'Cormorant Garamond',serif;font-size:2.8rem;color:#fff;margin-bottom:0.5rem;}
-.cta-s p{color:rgba(255,255,255,0.55);font-size:0.82rem;margin-bottom:2rem;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.8;}
+.cta-s p{color:rgba(255,255,255,0.85);font-size:0.82rem;margin-bottom:2rem;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.8;}
 footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62rem;color:rgba(255,255,255,0.3);letter-spacing:0.05em;}
 </style>
 </head>
@@ -474,7 +474,52 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
     <a href="https://buy.stripe.com/7sY00kfiD7qv12i7jvds400" class="plan-btn">Join Now — $29.99/month</a>
   </div>
 </div>
-<div class="how" id="how">
+
+<div style="background:#fff;border:1px solid rgba(0,0,0,0.08);max-width:580px;margin:0 auto 5rem;padding:2.5rem;">
+  <div style="text-align:center;margin-bottom:1.75rem;">
+    <div class="slabel">Member Registration</div>
+    <h2 class="stitle" style="font-size:2rem;">Complete Your Profile</h2>
+    <p style="font-size:0.78rem;color:#888;line-height:1.7;">After subscribing, complete your member profile so we can link your subscription and get you set up.</p>
+  </div>
+  <form name="wine-club-registration" netlify netlify-honeypot="bot-field" onsubmit="handleMemberForm(event)">
+    <input type="hidden" name="form-name" value="wine-club-registration"/>
+    <input name="bot-field" style="display:none"/>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;">
+      <div><label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">First Name *</label>
+        <input type="text" name="firstName" required placeholder="Jane" style="width:100%;padding:0.65rem 0.75rem;border:2px solid #e0d9d0;font-family:Montserrat,sans-serif;font-size:0.85rem;"/></div>
+      <div><label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">Last Name *</label>
+        <input type="text" name="lastName" required placeholder="Smith" style="width:100%;padding:0.65rem 0.75rem;border:2px solid #e0d9d0;font-family:Montserrat,sans-serif;font-size:0.85rem;"/></div>
+    </div>
+    <div style="margin-bottom:0.75rem;"><label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">Email Address *</label>
+      <input type="email" name="email" required placeholder="jane@email.com" style="width:100%;padding:0.65rem 0.75rem;border:2px solid #e0d9d0;font-family:Montserrat,sans-serif;font-size:0.85rem;"/></div>
+    <div style="margin-bottom:0.75rem;"><label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">Phone *</label>
+      <input type="tel" name="phone" required placeholder="(314) 555-0000" style="width:100%;padding:0.65rem 0.75rem;border:2px solid #e0d9d0;font-family:Montserrat,sans-serif;font-size:0.85rem;"/></div>
+    <div style="margin-bottom:0.75rem;"><label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">Street Address *</label>
+      <input type="text" name="street" required placeholder="123 Main St" style="width:100%;padding:0.65rem 0.75rem;border:2px solid #e0d9d0;font-family:Montserrat,sans-serif;font-size:0.85rem;"/></div>
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;">
+      <div><label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">City *</label>
+        <input type="text" name="city" required placeholder="St. Louis" style="width:100%;padding:0.65rem 0.75rem;border:2px solid #e0d9d0;font-family:Montserrat,sans-serif;font-size:0.85rem;"/></div>
+      <div><label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">State *</label>
+        <input type="text" name="state" required placeholder="MO" maxlength="2" style="width:100%;padding:0.65rem 0.75rem;border:2px solid #e0d9d0;font-family:Montserrat,sans-serif;font-size:0.85rem;"/></div>
+      <div><label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">Zip *</label>
+        <input type="text" name="zip" required placeholder="63385" style="width:100%;padding:0.65rem 0.75rem;border:2px solid #e0d9d0;font-family:Montserrat,sans-serif;font-size:0.85rem;"/></div>
+    </div>
+    <div style="margin-bottom:1.5rem;"><label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">Birthdate *</label>
+      <input type="date" name="birthdate" required style="width:100%;padding:0.65rem 0.75rem;border:2px solid #e0d9d0;font-family:Montserrat,sans-serif;font-size:0.85rem;"/></div>
+    <button type="submit" style="width:100%;padding:1rem;background:#2C1A0E;color:#fff;border:none;font-family:Montserrat,sans-serif;font-size:0.72rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;">Submit Member Profile</button>
+    <div id="member-success" style="display:none;text-align:center;color:#27ae60;font-size:0.8rem;margin-top:0.75rem;">&#10003; Profile received! We'll activate your membership within 24 hours.</div>
+  </form>
+</div>
+<script>
+function handleMemberForm(e){
+  e.preventDefault();
+  var form=e.target;
+  var data=new FormData(form);
+  fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(data).toString()})
+    .then(function(){form.querySelectorAll('input,button').forEach(function(el){el.disabled=true;});document.getElementById('member-success').style.display='block';})
+    .catch(function(){alert('Something went wrong. Please email management@thequarrystl.com to complete your registration.');});
+}
+</script><div class="how" id="how">
   <div class="slabel">Getting Started</div>
   <h2 class="stitle">How It Works</h2>
   <p class="ssub">Four simple steps to start enjoying all the benefits of Rock &amp; Vine membership.</p>
@@ -617,7 +662,7 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
   <div style="text-align:center;margin-bottom:2.5rem;"><div class="slabel">FAQ</div><h2 class="stitle">Common Questions</h2></div>
   <div class="faq-item"><div class="faq-q" onclick="faq(this)">How much does membership cost?</div><div class="faq-a">Rock &amp; Vine membership is $29.99 per month. No setup fees, no annual commitments, cancel anytime.</div></div>
   <div class="faq-item"><div class="faq-q" onclick="faq(this)">How do I RSVP for wine tasting events?</div><div class="faq-a">Once you subscribe and link your membership to your account, you'll see a member portal where active members can RSVP for upcoming events before they open to the public.</div></div>
-  <div class="faq-item"><div class="faq-q" onclick="faq(this)">Can I cancel anytime?</div><div class="faq-a">Yes — cancel anytime from your Stripe customer portal or by emailing management@thequarrystl.com. Your access continues through the end of the billing period.</div></div>
+  <div class="faq-item"><div class="faq-q" onclick="faq(this)">Can I cancel anytime?</div><div class="faq-a">Yes — cancel anytime. You have two options:<br><br><strong>1. Self-service:</strong> Log in to your Stripe customer portal at <a href="https://billing.stripe.com" style="color:#B8933A">billing.stripe.com</a> — enter your email and Stripe will send you a magic link to manage or cancel your subscription instantly.<br><br><strong>2. Email us:</strong> Email <a href="mailto:management@thequarrystl.com" style="color:#B8933A">management@thequarrystl.com</a> and we'll cancel it for you within 24 hours.<br><br>Your member access continues until the end of the current billing period.</div></div>
   <div class="faq-item"><div class="faq-q" onclick="faq(this)">How do I link my subscription to my account?</div><div class="faq-a">After subscribing, you'll receive an email with instructions to create or link your account on our site. Once linked, your membership status is verified automatically.</div></div>
   <div class="faq-item"><div class="faq-q" onclick="faq(this)">What happens if my payment fails?</div><div class="faq-a">Stripe will automatically retry failed payments. If payment cannot be collected, your membership access will be paused until resolved. You'll receive email notifications throughout.</div></div>
 </div>
@@ -626,6 +671,19 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
   <p>Join the Rock &amp; Vine Wine Club today and start enjoying exclusive access to wine tastings, member events, and more at The Quarry.</p>
   <a href="https://buy.stripe.com/7sY00kfiD7qv12i7jvds400" class="btn-g">Join Now — $29.99/month</a>
 </div>
+<section style="background:#1A0E08;padding:3rem 1.5rem;text-align:center;border-top:1px solid rgba(184,147,58,0.2);">
+  <p style="font-size:0.62rem;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;color:#B8933A;margin-bottom:0.5rem;">Stay in the Loop</p>
+  <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:#fff;margin-bottom:0.5rem;">Join Our Mailing List</h3>
+  <p style="font-size:0.78rem;color:rgba(255,255,255,0.55);margin-bottom:1.5rem;max-width:400px;margin-left:auto;margin-right:auto;line-height:1.7;">Be first to hear about wine tastings, events, live music, and specials at The Quarry.</p>
+  <form name="mailing-list" netlify netlify-honeypot="bot-field" style="display:flex;gap:0;max-width:420px;margin:0 auto;" onsubmit="handleMail(event)">
+    <input type="hidden" name="form-name" value="mailing-list"/>
+    <input name="bot-field" style="display:none"/>
+    <input type="email" name="email" placeholder="Your email address" required style="flex:1;padding:0.8rem 1rem;border:1px solid rgba(184,147,58,0.4);background:rgba(255,255,255,0.07);color:#fff;font-family:Montserrat,sans-serif;font-size:0.8rem;outline:none;"/>
+    <button type="submit" style="background:#B8933A;color:#0D0D0D;border:none;padding:0.8rem 1.5rem;font-family:Montserrat,sans-serif;font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;white-space:nowrap;">Subscribe</button>
+  </form>
+  <div id="mail-ok" style="display:none;color:#B8933A;font-size:0.8rem;margin-top:0.75rem;">&#10003; You're on the list!</div>
+</section>
+<script>function handleMail(e){e.preventDefault();var f=e.target;fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(new FormData(f)).toString()}).then(function(){f.style.display='none';document.getElementById('mail-ok').style.display='block';}).catch(function(){alert('Something went wrong. Please try again.');});}</script>
 <footer>&copy; 2026 The Quarry &nbsp;&middot;&nbsp; 3960 Highway Z, New Melle, MO 63385 &nbsp;&middot;&nbsp; 636-224-8257 &nbsp;&middot;&nbsp; management@thequarrystl.com</footer>
 <script>function faq(el){var i=el.parentElement;var o=i.classList.contains('open');document.querySelectorAll('.faq-item').forEach(function(x){x.classList.remove('open');});if(!o)i.classList.add('open');}</script>
 <script>
