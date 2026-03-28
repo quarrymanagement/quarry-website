@@ -315,10 +315,10 @@ footer { background:#0F0A07; padding:4.5rem 2rem 2rem; border-top:1px solid var(
 .vine-bar{background:var(--burg);padding:0.9rem 2rem;display:flex;justify-content:center;gap:3rem;flex-wrap:wrap;}
 .vine-bar span{font-size:0.62rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.85);}
 .vine-bar span b{color:#D4AC55;}
-.wrap{max-width:1100px;margin:0 auto;padding:5rem 1.5rem;}
+.wrap{max-width:1100px;margin:0 auto;padding:5rem 1.5rem;background:var(--cream);}
 .slabel{font-size:0.62rem;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);}
-.stitle{font-family:'Cormorant Garamond',serif;font-size:2.6rem;font-weight:600;color:var(--brown);margin:0.4rem 0 0.75rem;line-height:1.15;}
-.ssub{font-size:0.82rem;color:#777;line-height:1.9;max-width:580px;}
+.stitle{font-family:'Cormorant Garamond',serif;font-size:2.6rem;font-weight:600;color:#2C1A0E;margin:0.4rem 0 0.75rem;line-height:1.15;}
+.ssub{font-size:0.82rem;color:#555;line-height:1.9;max-width:580px;}
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;margin-bottom:6rem;}
 @media(max-width:768px){.two-col{grid-template-columns:1fr;gap:2.5rem;}}
 .img-ph{width:100%;aspect-ratio:4/3;background:linear-gradient(135deg,var(--burg),#2C0A1A);display:flex;align-items:center;justify-content:center;position:relative;}
@@ -327,7 +327,7 @@ footer { background:#0F0A07; padding:4.5rem 2rem 2rem; border-top:1px solid var(
 .img-badge .big{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:700;line-height:1;}
 .img-badge .sm{font-size:0.55rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;}
 .perks{list-style:none;margin:1.5rem 0 2rem;}
-.perks li{display:flex;align-items:flex-start;gap:0.75rem;margin-bottom:0.9rem;font-size:0.82rem;color:#555;line-height:1.7;}
+.perks li{display:flex;align-items:flex-start;gap:0.75rem;margin-bottom:0.9rem;font-size:0.82rem;color:#333;line-height:1.7;}
 .perks li::before{content:'✦';color:var(--gold);flex-shrink:0;margin-top:3px;font-size:0.65rem;}
 .plan-box{border:2px solid var(--gold);background:var(--brown);padding:2.5rem;max-width:480px;margin:0 auto 5rem;}
 .plan-name{font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--gold);margin-bottom:0.25rem;}
@@ -496,6 +496,122 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
       <div class="ev-card"><div class="ev-img"><span>Summer Series</span></div><div class="ev-body"><div class="ev-tag">Summer Series</div><div class="ev-title">Summer Wine &amp; Music Night</div><div class="ev-meta">Coming Soon &middot; Beer Garden</div><div class="ev-lock">&#9670; Early access for members</div></div></div>
     </div>
   </div>
+</div>
+
+<div style="background:#fff;padding:5rem 1.5rem;">
+<div style="max-width:700px;margin:0 auto;">
+  <div class="slabel">Join Today</div>
+  <h2 class="stitle">Complete Your Membership</h2>
+  <p class="ssub" style="margin-bottom:2rem;">Fill out your details below and subscribe to activate your Rock &amp; Vine membership. Your information helps us personalize your member experience.</p>
+
+  <form name="wine-club-signup" netlify netlify-honeypot="bot-field" onsubmit="handleWineSignup(event)"
+    style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+    <input type="hidden" name="form-name" value="wine-club-signup"/>
+    <input name="bot-field" style="display:none"/>
+
+    <div style="grid-column:1/-1;font-size:0.62rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#B8933A;padding-top:0.5rem;border-top:1px solid #e0d9d0;">Personal Information</div>
+
+    <div>
+      <label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">First Name *</label>
+      <input type="text" name="firstName" required placeholder="Jane"
+        style="width:100%;padding:0.7rem;border:2px solid #e0d9d0;font-family:'Montserrat',sans-serif;font-size:0.85rem;color:#2C1A0E;outline:none;"
+        onfocus="this.style.borderColor='#B8933A'" onblur="this.style.borderColor='#e0d9d0'"/>
+    </div>
+    <div>
+      <label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">Last Name *</label>
+      <input type="text" name="lastName" required placeholder="Smith"
+        style="width:100%;padding:0.7rem;border:2px solid #e0d9d0;font-family:'Montserrat',sans-serif;font-size:0.85rem;color:#2C1A0E;outline:none;"
+        onfocus="this.style.borderColor='#B8933A'" onblur="this.style.borderColor='#e0d9d0'"/>
+    </div>
+    <div>
+      <label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">Email Address *</label>
+      <input type="email" name="email" required placeholder="jane@email.com"
+        style="width:100%;padding:0.7rem;border:2px solid #e0d9d0;font-family:'Montserrat',sans-serif;font-size:0.85rem;color:#2C1A0E;outline:none;"
+        onfocus="this.style.borderColor='#B8933A'" onblur="this.style.borderColor='#e0d9d0'"/>
+    </div>
+    <div>
+      <label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">Phone Number *</label>
+      <input type="tel" name="phone" required placeholder="(314) 555-0000"
+        style="width:100%;padding:0.7rem;border:2px solid #e0d9d0;font-family:'Montserrat',sans-serif;font-size:0.85rem;color:#2C1A0E;outline:none;"
+        onfocus="this.style.borderColor='#B8933A'" onblur="this.style.borderColor='#e0d9d0'"/>
+    </div>
+    <div>
+      <label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">Date of Birth *</label>
+      <input type="date" name="birthdate" required
+        style="width:100%;padding:0.7rem;border:2px solid #e0d9d0;font-family:'Montserrat',sans-serif;font-size:0.85rem;color:#2C1A0E;outline:none;"
+        onfocus="this.style.borderColor='#B8933A'" onblur="this.style.borderColor='#e0d9d0'"/>
+    </div>
+    <div></div>
+
+    <div style="grid-column:1/-1;font-size:0.62rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#B8933A;padding-top:0.5rem;border-top:1px solid #e0d9d0;">Home Address</div>
+
+    <div style="grid-column:1/-1;">
+      <label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">Street Address *</label>
+      <input type="text" name="street" required placeholder="123 Main Street"
+        style="width:100%;padding:0.7rem;border:2px solid #e0d9d0;font-family:'Montserrat',sans-serif;font-size:0.85rem;color:#2C1A0E;outline:none;"
+        onfocus="this.style.borderColor='#B8933A'" onblur="this.style.borderColor='#e0d9d0'"/>
+    </div>
+    <div>
+      <label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">City *</label>
+      <input type="text" name="city" required placeholder="St. Louis"
+        style="width:100%;padding:0.7rem;border:2px solid #e0d9d0;font-family:'Montserrat',sans-serif;font-size:0.85rem;color:#2C1A0E;outline:none;"
+        onfocus="this.style.borderColor='#B8933A'" onblur="this.style.borderColor='#e0d9d0'"/>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+      <div>
+        <label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">State *</label>
+        <input type="text" name="state" required placeholder="MO" maxlength="2"
+          style="width:100%;padding:0.7rem;border:2px solid #e0d9d0;font-family:'Montserrat',sans-serif;font-size:0.85rem;color:#2C1A0E;outline:none;text-transform:uppercase;"
+          onfocus="this.style.borderColor='#B8933A'" onblur="this.style.borderColor='#e0d9d0'"/>
+      </div>
+      <div>
+        <label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">ZIP Code *</label>
+        <input type="text" name="zip" required placeholder="63385" maxlength="5"
+          style="width:100%;padding:0.7rem;border:2px solid #e0d9d0;font-family:'Montserrat',sans-serif;font-size:0.85rem;color:#2C1A0E;outline:none;"
+          onfocus="this.style.borderColor='#B8933A'" onblur="this.style.borderColor='#e0d9d0'"/>
+      </div>
+    </div>
+
+    <div style="grid-column:1/-1;margin-top:0.5rem;">
+      <button type="submit"
+        style="width:100%;padding:1rem;background:#2C1A0E;color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:0.75rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;transition:background 0.2s;"
+        onmouseover="this.style.background='#B8933A';this.style.color='#000'"
+        onmouseout="this.style.background='#2C1A0E';this.style.color='#fff'">
+        Submit My Information &rarr;
+      </button>
+      <p style="font-size:0.68rem;color:#aaa;text-align:center;margin-top:0.5rem;">After submitting, click <strong>Join Now</strong> above to complete your $29.99/month subscription via Stripe.</p>
+    </div>
+    <div id="wine-signup-success" style="display:none;grid-column:1/-1;text-align:center;padding:1.5rem;background:#FAF7F2;border-left:4px solid #B8933A;">
+      <p style="color:#2C1A0E;font-weight:600;font-size:0.85rem;">&#10003; Information received! Now click <a href="https://buy.stripe.com/7sY00kfiD7qv12i7jvds400" style="color:#B8933A;font-weight:700;">Join Now</a> to activate your membership.</p>
+    </div>
+  </form>
+</div>
+</div>
+
+<div style="background:#FAF7F2;padding:3rem 1.5rem;">
+<div style="max-width:700px;margin:0 auto;display:flex;gap:2rem;align-items:flex-start;flex-wrap:wrap;">
+  <div style="flex:1;min-width:260px;">
+    <div class="slabel">Cancellation</div>
+    <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;color:#2C1A0E;margin:0.3rem 0 0.75rem;">Cancel Anytime</h3>
+    <p style="font-size:0.8rem;color:#555;line-height:1.8;">No contracts. No cancellation fees. To cancel your membership:</p>
+    <ol style="margin:0.75rem 0 0 1.2rem;font-size:0.8rem;color:#555;line-height:2;">
+      <li>Email <a href="mailto:management@thequarrystl.com" style="color:#B8933A;">management@thequarrystl.com</a></li>
+      <li>Or call us at <a href="tel:6362248257" style="color:#B8933A;">636-224-8257</a></li>
+      <li>Your access continues through your current billing period</li>
+    </ol>
+  </div>
+  <div style="flex:1;min-width:260px;">
+    <div class="slabel">Membership Status</div>
+    <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;color:#2C1A0E;margin:0.3rem 0 0.75rem;">How to See Members</h3>
+    <p style="font-size:0.8rem;color:#555;line-height:1.8;">As the owner, you can view all active members at any time:</p>
+    <ol style="margin:0.75rem 0 0 1.2rem;font-size:0.8rem;color:#555;line-height:2;">
+      <li>Go to <a href="https://dashboard.stripe.com" target="_blank" style="color:#B8933A;">dashboard.stripe.com</a></li>
+      <li>Click <strong>Customers</strong> or <strong>Subscriptions</strong></li>
+      <li>Active members show status <strong>"Active"</strong></li>
+      <li>You also get an email when anyone subscribes or cancels</li>
+    </ol>
+  </div>
+</div>
 </div>
 <div class="faq">
   <div style="text-align:center;margin-bottom:2.5rem;"><div class="slabel">FAQ</div><h2 class="stitle">Common Questions</h2></div>
