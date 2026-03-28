@@ -1,149 +1,208 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Live Music | The Quarry</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Live Music & Bands | The Quarry</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"/>
 <style>
-:root{--charcoal:#1A1A1A;--brown-dark:#2C1A0E;--gold:#B8933A;--gold-light:#D4AF6A;--cream:#F5F0E8;--border-light:rgba(184,147,58,.2);--border-mid:rgba(184,147,58,.35)}
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--charcoal);color:var(--cream);font-family:'Montserrat',sans-serif}
-nav{background:rgba(26,26,26,.97);border-bottom:1px solid var(--border-light);padding:0 2rem;position:sticky;top:0;z-index:1000}
-.nav-inner{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:80px}
-.nav-logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;letter-spacing:.12em;color:#fff;text-transform:uppercase;text-decoration:none}
-.nav-logo span{display:block;font-size:.5rem;letter-spacing:.3em;color:rgba(255,255,255,.6);font-family:'Montserrat',sans-serif}
-.nav-links{display:flex;align-items:center;gap:2rem;list-style:none}
-.nav-links a{font-family:'Montserrat',sans-serif;font-size:.6rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.75);text-decoration:none;transition:color .2s}
-.nav-links a:hover{color:var(--gold-light)}
-.dropdown{position:relative}
-.dropdown-menu{display:none;position:absolute;top:100%;left:50%;transform:translateX(-50%);background:rgba(26,26,26,.98);border:1px solid var(--border-mid);min-width:180px;padding:.5rem 0}
-.dropdown:hover .dropdown-menu{display:block}
-.dropdown-menu a{display:block;padding:.6rem 1.2rem;font-size:.58rem;white-space:nowrap}
-.page-hero{background:var(--brown-dark);padding:5rem 2rem;text-align:center;border-bottom:1px solid var(--border-light)}
-.page-hero .eyebrow{font-family:'Montserrat',sans-serif;font-size:.6rem;letter-spacing:.4em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem}
-.page-hero h1{font-family:'Playfair Display',serif;font-size:clamp(2.5rem,6vw,4.5rem);font-weight:700;color:#fff;letter-spacing:.06em;text-transform:uppercase}
-.page-hero .divider{width:50px;height:1px;background:var(--gold);margin:1.25rem auto}
-.page-hero p{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-style:italic;color:rgba(245,240,232,.7)}
-.bands-container{max-width:900px;margin:0 auto;padding:4rem 2rem 6rem}
-.month-group{margin-bottom:3rem}
-.month-header{font-family:'Montserrat',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);border-bottom:1px solid var(--border-light);padding-bottom:.75rem;margin-bottom:1.5rem}
-.band-row{display:grid;grid-template-columns:140px 1fr auto;align-items:center;gap:2rem;padding:1.5rem 0;border-bottom:1px solid rgba(255,255,255,.05);transition:background .2s}
-.band-row:hover{background:rgba(255,255,255,.02);padding-left:.75rem;margin-left:-.75rem}
-.band-date{font-family:'Montserrat',sans-serif}
-.band-date .day-num{font-size:2rem;font-weight:700;color:#fff;line-height:1}
-.band-date .day-name{font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-top:.2rem}
-.band-date .month-name{font-size:.55rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-top:.1rem}
-.band-info h3{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:600;color:#fff;margin-bottom:.35rem}
-.band-info .band-time{font-family:'Montserrat',sans-serif;font-size:.6rem;letter-spacing:.15em;color:rgba(245,240,232,.5)}
-.band-dot{width:8px;height:8px;background:var(--gold);border-radius:50%;opacity:.6}
-.loading{text-align:center;padding:5rem 2rem;color:rgba(255,255,255,.4);font-family:'Montserrat',sans-serif;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase}
-.no-bands{text-align:center;padding:4rem 2rem}
-.no-bands p{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-style:italic;color:rgba(255,255,255,.4)}
-footer{background:#0F0A07;padding:3rem 2rem;border-top:1px solid var(--border-light);text-align:center}
-footer p{font-family:'Montserrat',sans-serif;font-size:.55rem;color:rgba(255,255,255,.3);letter-spacing:.08em}
-
-/* ===MOBILE-HEADER-FIX=== */
-@media (max-width:1100px){html,body{max-width:100%;overflow-x:hidden;}header{overflow:visible !important;width:100%;left:0;right:0;}.header-inner{display:flex !important;align-items:center !important;justify-content:space-between !important;padding:0 1rem !important;width:100% !important;box-sizing:border-box !important;overflow:visible !important;}.logo{font-size:1rem !important;flex-shrink:0;white-space:nowrap;}.logo span{font-size:0.38rem !important;display:block;}nav{display:none !important;}nav.open{display:flex !important;}.hamburger{display:flex !important;flex-shrink:0;z-index:1002 !important;position:relative !important;touch-action:manipulation;-webkit-tap-highlight-color:transparent;cursor:pointer;margin-left:auto;}}
-/* ===END-MOBILE-HEADER-FIX=== */
+:root{--black:#0D0D0D;--brown:#2C1A0E;--gold:#B8933A;--gold2:#D4AC55;--cream:#FAF7F2;--white:#FFF;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Montserrat',sans-serif;background:var(--cream);color:var(--brown);}
+#qnav{position:sticky;top:0;z-index:100;background:var(--black);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:60px;}
+#qnav a.logo{text-decoration:none;}
+#qnav .logo span{font-family:'Playfair Display',serif;font-size:1.2rem;color:#fff;letter-spacing:0.08em;}
+#qnav .logo small{display:block;font-size:0.55rem;color:rgba(255,255,255,0.45);letter-spacing:0.2em;text-transform:uppercase;}
+#qnav nav{display:flex;gap:1.5rem;align-items:center;}
+#qnav nav a{color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.7rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;transition:color 0.2s;}
+#qnav nav a:hover,#qnav nav a.act{color:var(--gold);}
+.hero{position:relative;height:420px;background:linear-gradient(rgba(13,13,13,0.6),rgba(13,13,13,0.6)),url('images/bands-hero.jpg') center/cover no-repeat;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem;}
+.hero h1{font-size:clamp(2.5rem,6vw,4rem);font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:0.04em;}
+.hero p{font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:rgba(255,255,255,0.8);margin-top:0.75rem;font-style:italic;}
+.infobar{background:var(--brown);display:flex;justify-content:center;gap:3rem;padding:0.9rem 2rem;flex-wrap:wrap;}
+.infobar span{font-size:0.65rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.65);}
+.infobar span b{color:var(--gold);}
+.page-wrap{max-width:1100px;margin:0 auto;padding:3rem 1.5rem 5rem;}
+.section-label{font-size:0.65rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem;}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:600;color:var(--brown);margin-bottom:0.5rem;}
+.section-sub{font-size:0.8rem;color:#888;margin-bottom:2.5rem;line-height:1.7;}
+.filter-bar{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:2.5rem;}
+.filter-btn{padding:0.5rem 1.2rem;border:1.5px solid #e0d9d0;background:#fff;font-family:'Montserrat',sans-serif;font-size:0.68rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--brown);cursor:pointer;transition:all 0.2s;}
+.filter-btn:hover,.filter-btn.active{border-color:var(--gold);background:var(--gold);color:#fff;}
+.calendar-grid{display:grid;gap:2.5rem;}
+.month-block{margin-bottom:0.5rem;}
+.month-label{font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:var(--brown);border-bottom:1px solid rgba(184,147,58,0.3);padding-bottom:0.5rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:0.75rem;}
+.month-label::before{content:'';display:inline-block;width:24px;height:2px;background:var(--gold);}
+.shows-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem;}
+.show-card{background:#fff;border:1px solid rgba(0,0,0,0.07);display:flex;overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;}
+.show-card:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,0.1);}
+.show-date-block{background:var(--brown);color:#fff;padding:1.2rem 1rem;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:72px;text-align:center;flex-shrink:0;}
+.show-date-block .day-num{font-family:'Playfair Display',serif;font-size:2rem;line-height:1;color:var(--gold);}
+.show-date-block .day-name{font-size:0.55rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.6);margin-top:2px;}
+.show-date-block .month-abbr{font-size:0.6rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-top:4px;}
+.show-info{padding:1.1rem 1.25rem;display:flex;flex-direction:column;justify-content:center;gap:0.3rem;}
+.show-artist{font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:600;color:var(--brown);line-height:1.2;}
+.show-time{font-size:0.68rem;font-weight:600;letter-spacing:0.08em;color:var(--gold);text-transform:uppercase;}
+.show-type{font-size:0.62rem;color:#aaa;letter-spacing:0.06em;text-transform:uppercase;}
+.no-shows{text-align:center;padding:3rem;color:#aaa;font-size:0.85rem;}
+.cta-strip{background:var(--brown);padding:3rem 2rem;text-align:center;margin-top:4rem;}
+.cta-strip h2{font-family:'Cormorant Garamond',serif;font-size:2rem;color:#fff;margin-bottom:0.5rem;}
+.cta-strip p{color:rgba(255,255,255,0.6);font-size:0.8rem;margin-bottom:1.5rem;}
+.cta-strip a{display:inline-block;background:var(--gold);color:var(--black);font-size:0.7rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;padding:0.85rem 2.5rem;text-decoration:none;transition:background 0.2s;}
+.cta-strip a:hover{background:var(--gold2);}
+footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.65rem;color:rgba(255,255,255,0.3);letter-spacing:0.05em;}
+@media(max-width:600px){.shows-grid{grid-template-columns:1fr;}#qnav nav{display:none;}}
 </style>
-<script>
-function toggleNav(){var n=document.getElementById('mainNav'),h=document.querySelector('.hamburger');if(!n)return;n.classList.toggle('open');if(h)h.classList.toggle('active');}
-document.addEventListener('click',function(e){var n=document.getElementById('mainNav'),h=document.querySelector('.hamburger');if(!n||!h)return;if(!n.contains(e.target)&&!h.contains(e.target)){n.classList.remove('open');}});
-function selectBox(f,v,id){var i=document.getElementById(f+'Input');if(i)i.value=v;document.querySelectorAll('.select-box').forEach(function(c){if(c.getAttribute('onclick')&&c.getAttribute('onclick').indexOf("'"+f+"'")!==-1)c.classList.remove('selected');});var card=document.getElementById(id);if(card)card.classList.add('selected');}
-</script>
 </head>
 <body>
-<nav>
-  <div class="nav-inner">
-    <a href="index.html" class="nav-logo">The Quarry<span>New Melle, Missouri</span></a>
-    <ul class="nav-links">
-      <li class="dropdown"><a href="#">Menu ▾</a>
-        <div class="dropdown-menu">
-          <a href="quarry-menu.html">Food Menu</a>
-          <a href="quarry-drinks.html">Drink Menu</a>
-          <a href="quarry-catering.html">Catering</a>
-          <a href="quarry-brunch.html">Brunch</a>
-        </div>
-      </li>
-      <li><a href="quarry-golf.html">Hole-In-One Golf</a></li>
-      <li class="dropdown"><a href="#">Entertainment ▾</a>
-        <div class="dropdown-menu">
-          <a href="quarry-events.html">Events Calendar</a>
-          <a href="quarry-bands.html">Live Bands</a>
-          <a href="quarry-beergarden.html">Beer Garden</a>
-        </div>
-      </li>
-      <li class="dropdown"><a href="#">Reservations ▾</a>
-        <div class="dropdown-menu">
-          <a href="quarry-reservations.html">Book a Reservation</a>
-          <a href="weddings/index.html">Weddings</a>
-          <a href="quarry-private-events.html">Private Events</a>
-        </div>
-      </li>
-      <li><a href="quarry-giftcards.html">Gift Cards</a></li>
-      <li class="dropdown"><a href="#">Connect ▾</a>
-        <div class="dropdown-menu">
-          <a href="quarry-ourstory.html">Our Story</a>
-          <a href="quarry-press.html">Press & Media</a>
-          <a href="quarry-careers.html">Careers</a>
-          <a href="quarry-contact.html">Contact Us</a>
-        </div>
-      </li>
-    </ul>
-  </div>
-</nav>
 
-<section class="page-hero">
-  <p class="eyebrow">Live Entertainment</p>
+<div id="qnav">
+  <a href="/" class="logo"><span>THE QUARRY</span><small>New Melle, Missouri</small></a>
+  <nav>
+    <a href="/quarry-menu.html">Menu</a>
+    <a href="/quarry-golf.html">Hole-In-One Golf</a>
+    <a href="/quarry-bands.html" class="act">Live Music</a>
+    <a href="/quarry-events.html">Events</a>
+    <a href="/quarry-reservations.html">Reservations</a>
+    <a href="/quarry-giftcards.html">Gift Cards</a>
+    <a href="/quarry-contact.html">Connect</a>
+  </nav>
+</div>
+
+<div class="hero">
   <h1>Live Music</h1>
-  <div class="divider"></div>
-  <p>Your soundtrack to a great night out</p>
-</section>
+  <p>Live entertainment every weekend at the lake</p>
+</div>
 
-<div class="bands-container" id="bandsContainer">
-  <div class="loading">Loading schedule</div>
+<div class="infobar">
+  <span><b>Live Music</b> Every Weekend</span>
+  <span><b>Afternoon</b> 1 PM – 4 PM</span>
+  <span><b>Evening</b> 7 PM – 10 PM</span>
+  <span><b>Food &amp; Drinks</b> Available</span>
+</div>
+
+<div class="page-wrap">
+  <div class="section-label">Upcoming Shows</div>
+  <h2 class="section-title">Band Schedule</h2>
+  <p class="section-sub">Join us for live music at The Quarry. All shows are free with your visit — enjoy great food, drinks, and entertainment by the lake.</p>
+
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="filterShows('all')">All Shows</button>
+    <button class="filter-btn" onclick="filterShows('afternoon')">Afternoon (1–4 PM)</button>
+    <button class="filter-btn" onclick="filterShows('evening')">Evening (7–10 PM)</button>
+  </div>
+
+  <div class="calendar-grid" id="scheduleGrid"></div>
+</div>
+
+<div class="cta-strip">
+  <h2>Make a Night of It</h2>
+  <p>Reserve your table or book a golf bay before the show</p>
+  <a href="/quarry-reservations.html">Make a Reservation</a>
 </div>
 
 <footer>
-  <p>© 2026 The Quarry · 3960 Highway Z, New Melle, MO 63385 · (636) 224-8257</p>
+  &copy; 2026 The Quarry &nbsp;&middot;&nbsp; 3960 Highway Z, New Melle, MO 63385 &nbsp;&middot;&nbsp; 636-224-8257 &nbsp;&middot;&nbsp; management@thequarrystl.com
 </footer>
 
 <script>
-const SANITY_PROJECT = '4t94f56h';
-const SANITY_DATASET = 'production';
-const SANITY_API = `https://${SANITY_PROJECT}.api.sanity.io/v2024-01-01/data/query/${SANITY_DATASET}`;
+var SHOWS = [
+  {artist:'Scott and Liz',    date:'2026-03-27', time:'7 PM - 10 PM', type:'evening'},
+  {artist:'Ed Callison',      date:'2026-03-28', time:'1 PM - 4 PM',  type:'afternoon'},
+  {artist:'Janet Martin',     date:'2026-03-28', time:'7 PM - 10 PM', type:'evening'},
+  {artist:'Mickey Scott',     date:'2026-03-29', time:'1 PM - 4 PM',  type:'afternoon'},
+  {artist:'Kelli Renee',      date:'2026-04-03', time:'7 PM - 10 PM', type:'evening'},
+  {artist:'Ed Callison',      date:'2026-04-04', time:'1 PM - 4 PM',  type:'afternoon'},
+  {artist:'Stephen Jones',    date:'2026-04-05', time:'1 PM - 4 PM',  type:'afternoon'},
+  {artist:'The Velvet Devils', date:'2026-04-11', time:'1 PM - 4 PM', type:'afternoon'},
+  {artist:'Two Pedros',       date:'2026-04-11', time:'7 PM - 10 PM', type:'evening'},
+  {artist:'Andrew Weber',     date:'2026-04-12', time:'1 PM - 4 PM',  type:'afternoon'},
+  {artist:'Janet and Scott',  date:'2026-04-17', time:'7 PM - 10 PM', type:'evening'},
+  {artist:'Dave King',        date:'2026-04-18', time:'1 PM - 4 PM',  type:'afternoon'},
+  {artist:'Andrew Weber',     date:'2026-04-18', time:'7 PM - 10 PM', type:'evening'},
+  {artist:'Mickey Scott',     date:'2026-04-19', time:'1 PM - 4 PM',  type:'afternoon'},
+  {artist:'Country Roads',    date:'2026-04-24', time:'7 PM - 10 PM', type:'evening'},
+  {artist:'Bob',              date:'2026-04-25', time:'7 PM - 10 PM', type:'evening'},
+  {artist:'Stephen Jones',    date:'2026-04-25', time:'1 PM - 4 PM',  type:'afternoon'},
+  {artist:'Janet and Darren', date:'2026-04-26', time:'1 PM - 4 PM',  type:'afternoon'},
+];
 
-async function loadBands() {
-  const query = encodeURIComponent(`*[_type == "band" && active == true] | order(date asc) { _id, name, date, time }`);
-  try {
-    const res = await fetch(`${SANITY_API}?query=${query}`);
-    const data = await res.json();
-    renderBands(data.result || []);
-  } catch (err) {
-    document.getElementById('bandsContainer').innerHTML = '<div class="no-bands"><p>Unable to load schedule. Please check back soon.</p></div>';
-  }
+var DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+var MONTHS_FULL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+var MONTHS_ABR  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function filterShows(filter) {
+  document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
+  event.target.classList.add('active');
+  renderSchedule(filter);
 }
 
-function renderBands(bands) {
-  const container = document.getElementById('bandsContainer');
-  if (!bands.length) {
-    container.innerHTML = '<div class="no-bands"><p>Schedule coming soon — follow us on social media for updates!</p></div>';
+function renderSchedule(filter) {
+  filter = filter || 'all';
+  var shows = SHOWS.filter(function(s){
+    return filter === 'all' || s.type === filter;
+  });
+
+  // Group by month
+  var byMonth = {};
+  shows.forEach(function(s){
+    var d = new Date(s.date + 'T12:00:00');
+    var key = d.getFullYear() + '-' + d.getMonth();
+    if (!byMonth[key]) byMonth[key] = { label: MONTHS_FULL[d.getMonth()] + ' ' + d.getFullYear(), shows: [] };
+    byMonth[key].shows.push(s);
+  });
+
+  var grid = document.getElementById('scheduleGrid');
+  grid.innerHTML = '';
+
+  var keys = Object.keys(byMonth).sort();
+  if (keys.length === 0) {
+    grid.innerHTML = '<div class="no-shows">No shows match this filter.</div>';
     return;
   }
-  const months = {};
-  bands.forEach(b => {
-    if (!b.date) return;
-    const d = new Date(b.date + 'T12:00:00');
-    const key = d.toLocaleDateString('en-US', { month:'long', year:'numeric' });
-    if (!months[key]) months[key] = [];
-    months[key].push({ ...b, _date: d });
+
+  keys.forEach(function(key){
+    var block = document.createElement('div');
+    block.className = 'month-block';
+    var label = document.createElement('div');
+    label.className = 'month-label';
+    label.textContent = byMonth[key].label;
+    block.appendChild(label);
+
+    var showsGrid = document.createElement('div');
+    showsGrid.className = 'shows-grid';
+
+    // Sort by date then time
+    var sorted = byMonth[key].shows.slice().sort(function(a,b){
+      return a.date.localeCompare(b.date) || a.time.localeCompare(b.time);
+    });
+
+    sorted.forEach(function(s){
+      var d = new Date(s.date + 'T12:00:00');
+      var card = document.createElement('div');
+      card.className = 'show-card';
+      card.innerHTML =
+        '<div class="show-date-block">' +
+          '<div class="day-num">' + d.getDate() + '</div>' +
+          '<div class="day-name">' + DAYS[d.getDay()] + '</div>' +
+          '<div class="month-abbr">' + MONTHS_ABR[d.getMonth()] + '</div>' +
+        '</div>' +
+        '<div class="show-info">' +
+          '<div class="show-artist">' + s.artist + '</div>' +
+          '<div class="show-time">' + s.time + '</div>' +
+          '<div class="show-type">' + (s.type === 'evening' ? 'Evening Show' : 'Afternoon Show') + '</div>' +
+        '</div>';
+      showsGrid.appendChild(card);
+    });
+
+    block.appendChild(showsGrid);
+    grid.appendChild(block);
   });
-  container.innerHTML = Object.entries(months).map(([month, shows]) => `<div class="month-group"><div class="month-header">${month}</div>${shows.map(s => `<div class="band-row"><div class="band-date"><div class="day-num">${s._date.getDate()}</div><div class="day-name">${s._date.toLocaleDateString('en-US',{weekday:'short'})}</div><div class="month-name">${s._date.toLocaleDateString('en-US',{month:'short'})}</div></div><div class="band-info"><h3>${s.name}</h3><div class="band-time">${s.time||'Time TBA'} · The Quarry, New Melle</div></div><div class="band-dot"></div></div>`).join('')}</div>`).join('');
 }
 
-loadBands();
+renderSchedule('all');
 </script>
 </body>
 </html>
