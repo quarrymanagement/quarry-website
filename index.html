@@ -444,7 +444,30 @@ footer { background:#0F0A07; padding:4.5rem 2rem 2rem; border-top:1px solid var(
   </div>
 </div>
 
-<footer>
+
+<section class="mailing-list" style="background:#1A0E08;padding:3rem 1.5rem;text-align:center;border-top:1px solid rgba(184,147,58,0.2);">
+  <p style="font-size:0.62rem;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;color:#B8933A;margin-bottom:0.5rem;">Stay in the Loop</p>
+  <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:#fff;margin-bottom:0.5rem;">Join Our Mailing List</h3>
+  <p style="font-size:0.78rem;color:rgba(255,255,255,0.5);margin-bottom:1.5rem;max-width:400px;margin-left:auto;margin-right:auto;">Be first to hear about events, live music, wine tastings, and specials at The Quarry.</p>
+  <form name="mailing-list" netlify netlify-honeypot="bot-field" style="display:flex;gap:0;max-width:420px;margin:0 auto;" onsubmit="handleMailingList(event)">
+    <input type="hidden" name="form-name" value="mailing-list"/>
+    <input name="bot-field" style="display:none"/>
+    <input type="email" name="email" placeholder="Enter your email address" required
+      style="flex:1;padding:0.8rem 1rem;border:1px solid rgba(184,147,58,0.4);background:rgba(255,255,255,0.05);color:#fff;font-family:'Montserrat',sans-serif;font-size:0.8rem;outline:none;"/>
+    <button type="submit" style="background:#B8933A;color:#0D0D0D;border:none;padding:0.8rem 1.5rem;font-family:'Montserrat',sans-serif;font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;">Subscribe</button>
+  </form>
+  <div id="mailing-success" style="display:none;color:#B8933A;font-size:0.8rem;margin-top:0.75rem;">✓ You're on the list! We'll be in touch.</div>
+</section>
+<script>
+function handleMailingList(e){
+  e.preventDefault();
+  var form=e.target;
+  var data=new FormData(form);
+  fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(data).toString()})
+    .then(function(){form.style.display='none';document.getElementById('mailing-success').style.display='block';})
+    .catch(function(){alert('Something went wrong. Please try again.');});
+}
+</script><footer>
   <div class="footer-inner">
     <div class="footer-top">
       <div>
