@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Rock & Vine Wine Club | The Quarry</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --cream: #F5F0E8;
+  --brown-dark: #2C1A0E;
+  --brown-mid: #5C3D2E;
+  --brown-warm: #8B5E3C;
+  --brown-light: #C4956A;
+  --gold: #B8933A;
+  --gold-light: #D4AF6A;
+  --charcoal: #1A1A1A;
+  --white: #FFFFFF;
+  --border-light: rgba(188,149,106,0.25);
+  --border-mid: rgba(188,149,106,0.5);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Montserrat',sans-serif; background:var(--charcoal); color:var(--cream); overflow-x:hidden; }
+
+/* HEADER */
+header {
+  position:fixed; top:0; left:0; right:0; z-index:1000;
+  background:rgba(26,26,26,0.97);
+  border-bottom:1px solid var(--border-light);
+  backdrop-filter:blur(8px);
+}
+.header-inner {
+  max-width:1400px; margin:0 auto; padding:0 2rem;
+  display:flex; align-items:center; justify-content:space-between; height:80px;
+}
+.logo {
+  font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700;
+  letter-spacing:0.12em; color:#ffffff; text-transform:uppercase;
+  text-decoration:none; flex-shrink:0;
+}
+.logo span {
+  display:block; font-size:0.5rem; letter-spacing:0.3em;
+  color:rgba(255,255,255,0.6); margin-top:2px;
+  font-family:'Montserrat',sans-serif; font-weight:400;
+}
+
+nav { display:flex; align-items:center; }
+.nav-item { position:relative; }
+.nav-link {
+  font-family:'Montserrat',sans-serif; font-size:0.62rem; font-weight:500;
+  letter-spacing:0.14em; text-transform:uppercase;
+  color:var(--cream); text-decoration:none;
+  padding:0.6rem 0.75rem; display:block; transition:color 0.2s; white-space:nowrap;
+}
+.nav-link:hover { color:var(--gold-light); }
+.dropdown {
+  display:none; position:absolute; top:100%; left:0;
+  background:var(--brown-dark); border:1px solid var(--border-mid);
+  min-width:200px; z-index:200;
+}
+.nav-item:hover .dropdown { display:block; }
+.dropdown a {
+  display:block; padding:0.7rem 1.25rem;
+  font-size:0.65rem; letter-spacing:0.1em; text-transform:uppercase;
+  color:var(--cream); text-decoration:none;
+  border-bottom:1px solid var(--border-light);
+  font-family:'Montserrat',sans-serif; font-weight:400;
+  transition:background 0.2s, color 0.2s;
+}
+.dropdown a:last-child { border-bottom:none; }
+.dropdown a:hover { background:var(--brown-mid); color:var(--gold-light); }
+.dropdown .dimmed { color:rgba(196,149,106,0.75); }
+.cs-badge {
+  display:inline-block; font-size:0.48rem; letter-spacing:0.08em;
+  background:var(--gold); color:var(--brown-dark);
+  padding:1px 5px; margin-left:4px; vertical-align:middle; font-weight:700;
+}
+.hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:0.5rem; }
+.hamburger span { display:block; width:24px; height:1.5px; background:var(--cream); }
+
+/* HERO VIDEO */
+.hero-video {
+  position:absolute; inset:0; z-index:0;
+  overflow:hidden; pointer-events:none;
+}
+.hero-video iframe {
+  position:absolute;
+  top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  width:56.25vh;
+  height:100vh;
+  min-width:100vw;
+  min-height:177.78vw;
+}
+/* HERO */
+.hero {
+  position:relative; height:100vh; min-height:650px;
+  display:flex; align-items:center; justify-content:center; overflow:hidden;
+}
+.hero-bg {
+  position:absolute; inset:0;
+  background:
+    linear-gradient(to bottom, rgba(15,10,5,0.15) 0%, rgba(15,10,5,0.2) 50%, rgba(15,10,5,0.65) 100%),
+    url('https://static.wixstatic.com/media/f1c1b8_c5a995404a4c4e20aa35de83c9c26bfa~mv2.jpg/v1/fill/w_1400,h_900,al_c,q_85/f1c1b8_c5a995404a4c4e20aa35de83c9c26bfa~mv2.jpg') center/cover no-repeat;
+}
+.hero-content { position:relative; z-index:2; text-align:center; padding:0 2rem; }
+.hero-eyebrow {
+  font-family:'Montserrat',sans-serif; font-size:0.62rem;
+  letter-spacing:0.45em; text-transform:uppercase; color:var(--gold-light); margin-bottom:1.25rem;
+}
+.hero-title {
+  font-family:'Playfair Display',serif;
+  font-size:clamp(4.5rem,10vw,9rem); font-weight:700;
+  line-height:0.88; color:var(--white);
+  letter-spacing:0.06em; text-transform:uppercase; margin-bottom:0.6rem;
+}
+.hero-sub {
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(1rem,2.2vw,1.4rem); font-style:italic; font-weight:300;
+  color:var(--cream); letter-spacing:0.12em; opacity:0.85; margin-bottom:2.5rem;
+}
+.hero-divider { width:50px; height:1px; background:var(--gold); margin:0 auto 2.5rem; }
+.hero-cta {
+  display:inline-block; padding:0.9rem 2.8rem;
+  border:1px solid var(--gold); color:var(--gold-light);
+  font-family:'Montserrat',sans-serif; font-size:0.65rem; font-weight:600;
+  letter-spacing:0.28em; text-transform:uppercase; text-decoration:none;
+  transition:all 0.3s; position:relative; overflow:hidden; z-index:0;
+}
+.hero-cta::before {
+  content:''; position:absolute; inset:0; background:var(--gold);
+  transform:translateX(-100%); transition:transform 0.3s; z-index:-1;
+}
+.hero-cta:hover { color:var(--brown-dark); }
+.hero-cta:hover::before { transform:translateX(0); }
+.hero-scroll {
+  position:absolute; bottom:2rem; left:50%; transform:translateX(-50%);
+  display:flex; flex-direction:column; align-items:center; gap:0.4rem;
+  color:rgba(255,255,255,0.4); font-size:0.5rem; letter-spacing:0.3em; text-transform:uppercase;
+}
+.scroll-line { width:1px; height:36px; background:rgba(255,255,255,0.3); animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:0.3} 50%{opacity:1} }
+
+/* 4 QUAD BOXES */
+.quad-grid { display:grid; grid-template-columns:repeat(4,1fr); border:2px solid rgba(255,255,255,0.35); }
+.quad-box {
+  position:relative; height:500px; overflow:hidden;
+  text-decoration:none; display:flex; flex-direction:column; justify-content:center;
+  border-bottom:2px solid rgba(255,255,255,0.35);
+  border-top:2px solid rgba(255,255,255,0.35);
+}
+.quad-box+.quad-box { border-left:2px solid rgba(255,255,255,0.35); }
+.quad-bg {
+  position:absolute; inset:0; background-size:cover; background-position:center;
+  transition:transform 0.7s ease; filter:brightness(0.85);
+}
+.quad-box:hover .quad-bg { transform:scale(1.06); filter:brightness(0.7); }
+.quad-overlay {
+  position:absolute; inset:0;
+  background:linear-gradient(to top, rgba(20,10,4,0.9) 0%, rgba(20,10,4,0.3) 50%, rgba(20,10,4,0.1) 100%);
+}
+.quad-content { position:relative; z-index:2; padding:2rem 1.75rem 2.25rem; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; height:100%; }
+.quad-label { display:none; }
+.quad-title {
+  font-family:'Montserrat',sans-serif; font-size:1.4rem; font-weight:700;
+  color:var(--white); line-height:1.1; margin-bottom:1.25rem; text-transform:uppercase;
+  letter-spacing:0.04em;
+}
+.quad-desc { display:none; }
+.quad-arrow {
+  display:inline-block;
+  font-family:'Montserrat',sans-serif; font-size:0.62rem; font-weight:600;
+  letter-spacing:0.22em; text-transform:uppercase; color:var(--white);
+  border:1px solid rgba(255,255,255,0.6); padding:0.55rem 1.5rem;
+  transition:all 0.3s;
+}
+.quad-box:hover .quad-arrow { background:var(--gold); border-color:var(--gold); color:var(--brown-dark); }
+
+/* QUICK LINKS */
+.quick-links-wrap { background:var(--charcoal); }
+.quick-links { display:flex; flex-direction:column; }
+.qlink {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:1.75rem 3rem; text-decoration:none;
+  border-top:1px solid rgba(255,255,255,0.15);
+  transition:background 0.2s;
+}
+.qlink:hover { background:rgba(255,255,255,0.04); }
+.qlink.disabled { pointer-events:none; opacity:0.5; }
+.qlink-title {
+  font-family:'Montserrat',sans-serif; font-size:1.3rem; font-weight:700;
+  letter-spacing:0.14em; text-transform:uppercase; color:#ffffff;
+}
+.qlink-badge {
+  display:inline-block; font-size:0.48rem; font-weight:700;
+  letter-spacing:0.08em; background:var(--gold); color:var(--brown-dark);
+  padding:3px 10px; font-family:'Montserrat',sans-serif; margin-left:1rem; vertical-align:middle;
+}
+.qlink-arrow {
+  font-size:1.8rem; color:#ffffff; transition:transform 0.2s; flex-shrink:0;
+}
+.qlink:hover .qlink-arrow { transform:translateX(6px); }
+
+/* FOOTER */
+footer { background:#0F0A07; padding:4.5rem 2rem 2rem; border-top:1px solid var(--border-light); }
+.footer-inner { max-width:1200px; margin:0 auto; }
+.footer-top {
+  display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:3rem;
+  margin-bottom:3.5rem; padding-bottom:3rem; border-bottom:1px solid var(--border-light);
+}
+.footer-logo {
+  font-family:'Playfair Display',serif; font-size:1.4rem;
+  letter-spacing:0.12em; color:#ffffff; text-transform:uppercase;
+}
+.footer-logo span {
+  display:block; font-size:0.48rem; letter-spacing:0.28em; color:rgba(255,255,255,0.55);
+  margin-top:2px; font-family:'Montserrat',sans-serif; font-weight:400;
+}
+.footer-tagline {
+  font-family:'Cormorant Garamond',serif; font-size:0.92rem; font-style:italic;
+  color:rgba(255,255,255,0.7); margin-top:0.75rem; line-height:1.65;
+}
+.footer-address {
+  font-family:'Montserrat',sans-serif; font-size:0.62rem;
+  color:rgba(255,255,255,0.65); line-height:2; margin-top:1.25rem; letter-spacing:0.04em;
+}
+.footer-address a { color:rgba(255,255,255,0.65); text-decoration:none; }
+.footer-address a:hover { color:#fff; }
+.social-row { display:flex; gap:0.6rem; margin-top:1.25rem; }
+.social-btn {
+  width:34px; height:34px; border:1px solid var(--border-mid);
+  display:flex; align-items:center; justify-content:center;
+  text-decoration:none; color:rgba(255,255,255,0.65); font-size:0.62rem;
+  font-weight:600; font-family:'Montserrat',sans-serif;
+  transition:border-color 0.2s, color 0.2s;
+}
+.social-btn:hover { border-color:var(--gold); color:var(--gold-light); }
+.footer-col-title {
+  font-family:'Montserrat',sans-serif; font-size:0.58rem; font-weight:600;
+  letter-spacing:0.28em; text-transform:uppercase; color:var(--gold); margin-bottom:1.1rem;
+}
+.footer-col ul { list-style:none; }
+.footer-col ul li { margin-bottom:0.45rem; }
+.footer-col ul li a {
+  font-family:'Montserrat',sans-serif; font-size:0.65rem;
+  color:rgba(255,255,255,0.65); text-decoration:none; letter-spacing:0.04em; transition:color 0.2s;
+}
+.footer-col ul li a:hover { color:#fff; }
+.footer-col .dim { font-family:'Montserrat',sans-serif; font-size:0.65rem; color:rgba(255,255,255,0.3); }
+.footer-bottom {
+  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;
+}
+.footer-legal {
+  font-family:'Montserrat',sans-serif; font-size:0.55rem;
+  color:rgba(255,255,255,0.3); letter-spacing:0.06em; line-height:1.9;
+}
+.footer-legal a { color:rgba(255,255,255,0.3); text-decoration:none; }
+.footer-legal a:hover { color:rgba(255,255,255,0.7); }
+
+/* RESPONSIVE */
+@media (max-width:1100px) {
+  nav { display:none; }
+  nav.open {
+    display:flex; flex-direction:column; position:absolute;
+    top:80px; left:0; right:0; background:#1a1a1a;
+    padding:0.5rem 0; border-top:1px solid var(--border-light);
+    max-height:calc(100vh - 80px); overflow-y:auto; z-index:999;
+  }
+  .hamburger { display:flex; }
+  .nav-item { width:100%; }
+  .nav-link { padding:0.85rem 1.5rem; font-size:0.7rem; border-bottom:1px solid rgba(255,255,255,0.06); }
+  .dropdown { position:static; display:none; border:none; background:rgba(0,0,0,0.3); }
+  .nav-item.open .dropdown { display:block; }
+  .dropdown a { padding:0.7rem 2.5rem; font-size:0.65rem; }
+  .quad-grid { grid-template-columns:1fr 1fr; }
+  .quad-box { height:380px; }
+  .quad-box+.quad-box { border-left:none; }
+  .qlink { padding:1.5rem 2rem; }
+  .qlink-title { font-size:1rem; }
+  .footer-top { grid-template-columns:1fr 1fr; gap:2rem; }
+}
+@media (max-width:640px) {
+  .header-inner { padding:0 1rem; height:70px; }
+  .logo { font-size:1.1rem; }
+  .hero-title { font-size:3.8rem; }
+  .hero-sub { font-size:0.9rem; }
+  .hero-cta { padding:0.75rem 2rem; font-size:0.6rem; }
+  .quad-grid { grid-template-columns:1fr; }
+  .quad-box { height:260px; }
+  .quad-box+.quad-box { border-left:none; border-top:1px solid rgba(255,255,255,0.15); }
+  .qlink { padding:1.25rem 1.5rem; }
+  .qlink-title { font-size:0.85rem; }
+  .qlink-arrow { font-size:1.3rem; }
+  .footer-top { grid-template-columns:1fr; gap:2rem; }
+  footer { padding:3rem 1.5rem 1.5rem; }
+  .footer-bottom { flex-direction:column; }
+  .footer-legal { text-align:center !important; }
+}
+
+
+</style>
+<style>
+.wine-hero{position:relative;height:480px;background:linear-gradient(rgba(13,13,13,0.65),rgba(13,13,13,0.65)),url('images/wine-hero.jpg') center/cover no-repeat;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem;}
+.wine-hero .eyebrow{font-size:0.65rem;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;}
+.wine-hero h1{font-family:'Playfair Display',serif;font-size:clamp(2.5rem,6vw,4.5rem);color:#fff;line-height:1.1;margin-bottom:1rem;}
+.wine-hero p{font-family:'Cormorant Garamond',serif;font-size:1.35rem;color:rgba(255,255,255,0.8);font-style:italic;max-width:560px;}
+.wine-hero .hero-cta{margin-top:2rem;display:inline-block;background:var(--gold);color:#000;font-size:0.7rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;padding:0.9rem 2.5rem;text-decoration:none;transition:background 0.2s;}
+.wine-hero .hero-cta:hover{background:#D4AC55;}
+.page-wrap{max-width:1100px;margin:0 auto;padding:0 1.5rem;}
+
+/* What You Get */
+.benefits-section{padding:5rem 0;background:#fff;}
+.section-eyebrow{font-size:0.65rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem;text-align:center;}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:2.8rem;font-weight:600;color:var(--brown-dark);text-align:center;margin-bottom:0.5rem;}
+.section-sub{font-size:0.85rem;color:#888;text-align:center;max-width:560px;margin:0 auto 3.5rem;line-height:1.7;}
+.benefits-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;}
+@media(max-width:768px){.benefits-grid{grid-template-columns:1fr;}}
+.benefit-card{text-align:center;padding:2rem 1.5rem;}
+.benefit-icon{width:56px;height:56px;margin:0 auto 1.25rem;background:rgba(184,147,58,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;}
+.benefit-card h3{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;color:var(--brown-dark);margin-bottom:0.5rem;}
+.benefit-card p{font-size:0.78rem;color:#777;line-height:1.7;}
+
+/* Tiers */
+.tiers-section{padding:5rem 0;background:var(--cream);}
+.tiers-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3rem;}
+@media(max-width:768px){.tiers-grid{grid-template-columns:1fr;}}
+.tier-card{background:#fff;border:1px solid #e8e0d5;padding:2.5rem 2rem;position:relative;transition:transform 0.2s,box-shadow 0.2s;}
+.tier-card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,0.1);}
+.tier-card.featured{border:2px solid var(--gold);background:#fff;}
+.tier-card.featured::before{content:'MOST POPULAR';position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--gold);color:#000;font-size:0.55rem;font-weight:700;letter-spacing:0.15em;padding:3px 12px;}
+.tier-name{font-size:0.65rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem;}
+.tier-price{font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:600;color:var(--brown-dark);line-height:1;}
+.tier-price sup{font-size:1.2rem;vertical-align:super;}
+.tier-price sub{font-size:0.9rem;color:#999;font-family:'Montserrat',sans-serif;font-weight:400;}
+.tier-desc{font-size:0.75rem;color:#888;margin:0.75rem 0 1.5rem;line-height:1.6;}
+.tier-features{list-style:none;margin:0 0 2rem;}
+.tier-features li{font-size:0.78rem;color:#555;padding:0.5rem 0;border-bottom:1px solid #f0ebe3;display:flex;align-items:center;gap:0.6rem;}
+.tier-features li::before{content:'✓';color:var(--gold);font-weight:700;flex-shrink:0;}
+.tier-cta{display:block;text-align:center;padding:0.85rem;font-size:0.7rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;text-decoration:none;transition:all 0.2s;}
+.tier-cta.primary{background:var(--gold);color:#000;}
+.tier-cta.primary:hover{background:#D4AC55;}
+.tier-cta.secondary{border:2px solid var(--brown-dark);color:var(--brown-dark);}
+.tier-cta.secondary:hover{background:var(--brown-dark);color:#fff;}
+
+/* How It Works */
+.how-section{padding:5rem 0;background:#fff;}
+.steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2rem;margin-top:3rem;position:relative;}
+@media(max-width:768px){.steps-grid{grid-template-columns:1fr 1fr;}}
+.step-card{text-align:center;}
+.step-num{width:48px;height:48px;border-radius:50%;background:var(--brown-dark);color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;}
+.step-card h4{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:600;color:var(--brown-dark);margin-bottom:0.4rem;}
+.step-card p{font-size:0.75rem;color:#888;line-height:1.7;}
+
+/* Member Login CTA */
+.login-section{background:var(--brown-dark);padding:4rem 2rem;text-align:center;}
+.login-section h2{font-family:'Cormorant Garamond',serif;font-size:2.2rem;color:#fff;margin-bottom:0.75rem;}
+.login-section p{color:rgba(255,255,255,0.6);font-size:0.85rem;margin-bottom:2rem;max-width:500px;margin-left:auto;margin-right:auto;}
+.login-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;}
+.btn-gold{background:var(--gold);color:#000;border:none;padding:0.85rem 2rem;font-family:'Montserrat',sans-serif;font-size:0.7rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;text-decoration:none;cursor:pointer;transition:background 0.2s;}
+.btn-gold:hover{background:#D4AC55;}
+.btn-outline{background:transparent;color:#fff;border:2px solid rgba(255,255,255,0.4);padding:0.85rem 2rem;font-family:'Montserrat',sans-serif;font-size:0.7rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;text-decoration:none;cursor:pointer;transition:all 0.2s;}
+.btn-outline:hover{border-color:#fff;color:#fff;}
+
+/* Events preview */
+.events-section{padding:5rem 0;background:var(--cream);}
+.event-preview{background:#fff;border:1px solid #e8e0d5;padding:2rem;display:flex;gap:1.5rem;align-items:flex-start;margin-bottom:1rem;}
+.event-date-block{background:var(--brown-dark);color:#fff;padding:1rem;text-align:center;min-width:64px;flex-shrink:0;}
+.event-date-block .day{font-family:'Playfair Display',serif;font-size:1.8rem;line-height:1;color:var(--gold);}
+.event-date-block .mo{font-size:0.55rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-top:2px;}
+.event-info h4{font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--brown-dark);margin-bottom:0.3rem;}
+.event-info p{font-size:0.75rem;color:#888;line-height:1.6;}
+.member-badge{display:inline-block;background:rgba(184,147,58,0.12);color:var(--gold);font-size:0.58rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:2px 8px;border:1px solid rgba(184,147,58,0.3);margin-bottom:0.5rem;}
+
+footer{background:#0D0D0D;text-align:center;padding:1.5rem;font-size:0.65rem;color:rgba(255,255,255,0.3);letter-spacing:0.05em;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="logo">The Quarry<span>New Melle, Missouri</span></a>
+    <nav id="mainNav">
+      <div class="nav-item">
+        <a href="#" class="nav-link">Menu &#x25BE;</a>
+        <div class="dropdown">
+          <a href="quarry-menu.html">Food Menu</a>
+          <a href="quarry-drinks.html">Drink Menu</a>
+          <a href="quarry-catering.html">Catering Menu</a>
+          <a href="quarry-brunch.html">Brunch Menu</a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <a href="quarry-golf.html" class="nav-link">Hole-In-One Golf</a>
+      </div>
+      <div class="nav-item">
+        <a href="#" class="nav-link">Entertainment &#x25BE;</a>
+        <div class="dropdown">
+          <a href="quarry-events.html">Events Calendar</a>
+          <a href="quarry-bands.html">Live Bands</a>
+          <a href="quarry-beergarden.html">Beer Garden <span class="cs-badge">Coming 2026</span></a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <a href="#" class="nav-link">Reservations &#x25BE;</a>
+        <div class="dropdown">
+          <a href="quarry-reservations.html">Book a Reservation</a>
+          <a href="weddings/index.html">Weddings</a>
+          <a href="quarry-private-events.html">Private Events</a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <a href="quarry-giftcards.html" class="nav-link">Gift Cards</a>
+      </div>
+      <div class="nav-item">
+        <a href="#" class="nav-link">Connect &#x25BE;</a>
+        <div class="dropdown">
+          <a href="quarry-ourstory.html">Our Story</a>
+          <a href="quarry-press.html">Press & Media</a>
+          <a href="quarry-careers.html">Careers</a>
+          <a href="quarry-contact.html">Contact Us</a>
+        </div>
+      </div>
+    </nav>
+    <div class="hamburger" id="hamburger" onclick="toggleNav()"><span></span><span></span><span></span></div>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="wine-hero">
+  <div class="eyebrow">The Quarry Membership</div>
+  <h1>Rock &amp; Vine<br>Wine Club</h1>
+  <p>Uncork something extraordinary. Join our wine community and experience the lake like never before.</p>
+  <a href="https://buy.stripe.com/cNidRa9YjeSX8uKbzLds401" class="hero-cta">Join the Club &rarr;</a>
+</div>
+
+<!-- BENEFITS -->
+<div class="benefits-section">
+  <div class="page-wrap">
+    <div class="section-eyebrow">Member Perks</div>
+    <h2 class="section-title">Why Join Rock &amp; Vine?</h2>
+    <p class="section-sub">Exclusive access, curated experiences, and the best seat in the house — right by the lake.</p>
+    <div class="benefits-grid">
+      <div class="benefit-card">
+        <div class="benefit-icon">🍷</div>
+        <h3>Priority Wine Tastings</h3>
+        <p>Members get first access to register for exclusive wine tasting events before they open to the public.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">🎫</div>
+        <h3>RSVP Access</h3>
+        <p>Log in to your member account and RSVP directly for upcoming tasting events, special dinners, and private pours.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">💰</div>
+        <h3>Member Discounts</h3>
+        <p>Enjoy 10% off food &amp; beverages every visit, plus exclusive pricing on wine bottles to take home.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">🌊</div>
+        <h3>Lakeside Experiences</h3>
+        <p>Invitations to member-only events at the quarry lake — sunset tastings, live music pairings, and more.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">📦</div>
+        <h3>Curated Selections</h3>
+        <p>Quarterly wine recommendations hand-picked by our team, tailored to your palate and the season.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">🏆</div>
+        <h3>Members Community</h3>
+        <p>Join a community of wine lovers in New Melle. Connect, share, and celebrate together at The Quarry.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TIERS -->
+<div class="tiers-section">
+  <div class="page-wrap">
+    <div class="section-eyebrow">Membership Plans</div>
+    <h2 class="section-title">Choose Your Pour</h2>
+    <p class="section-sub">Flexible membership options to fit your lifestyle. Cancel or upgrade anytime.</p>
+    <div class="tiers-grid">
+      <div class="tier-card">
+        <div class="tier-name">Sip</div>
+        <div class="tier-price"><sup>$</sup>19<sub>/mo</sub></div>
+        <div class="tier-desc">Perfect for casual wine lovers who want in on the fun.</div>
+        <ul class="tier-features">
+          <li>Access to member RSVP portal</li>
+          <li>Early access to tasting events</li>
+          <li>5% off food &amp; beverages</li>
+          <li>Monthly newsletter &amp; picks</li>
+        </ul>
+        <a href="https://buy.stripe.com/cNidRa9YjeSX8uKbzLds401" class="tier-cta secondary">Get Started</a>
+      </div>
+      <div class="tier-card featured">
+        <div class="tier-name">Savor</div>
+        <div class="tier-price"><sup>$</sup>29<sub>/mo</sub></div>
+        <div class="tier-desc">Our most popular tier — the full Rock &amp; Vine experience.</div>
+        <ul class="tier-features">
+          <li>Everything in Sip</li>
+          <li>Priority RSVP for all tastings</li>
+          <li>10% off food &amp; beverages</li>
+          <li>1 complimentary tasting/month</li>
+          <li>Quarterly curated wine picks</li>
+        </ul>
+        <a href="https://buy.stripe.com/cNidRa9YjeSX8uKbzLds401" class="tier-cta primary">Join Now &rarr;</a>
+      </div>
+      <div class="tier-card">
+        <div class="tier-name">Cellar</div>
+        <div class="tier-price"><sup>$</sup>59<sub>/mo</sub></div>
+        <div class="tier-desc">For the true connoisseur — maximum access and VIP treatment.</div>
+        <ul class="tier-features">
+          <li>Everything in Savor</li>
+          <li>VIP seating at all events</li>
+          <li>15% off food &amp; beverages</li>
+          <li>2 complimentary tastings/month</li>
+          <li>Private cellar dinner invitations</li>
+          <li>Annual member gift</li>
+        </ul>
+        <a href="https://buy.stripe.com/cNidRa9YjeSX8uKbzLds401" class="tier-cta secondary">Go Cellar</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="how-section">
+  <div class="page-wrap">
+    <div class="section-eyebrow">Getting Started</div>
+    <h2 class="section-title">How It Works</h2>
+    <p class="section-sub">Four simple steps to your first pour.</p>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">1</div>
+        <h4>Choose Your Tier</h4>
+        <p>Pick the membership that fits your lifestyle and subscribe in minutes.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">2</div>
+        <h4>Create Your Account</h4>
+        <p>Set up your member login and link your active subscription to unlock perks.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">3</div>
+        <h4>Browse &amp; RSVP</h4>
+        <p>Log in to see upcoming wine tasting events and reserve your spot with one click.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">4</div>
+        <h4>Show Up &amp; Sip</h4>
+        <p>Arrive at The Quarry, enjoy the view, and let the evening pour itself.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- UPCOMING EVENTS PREVIEW -->
+<div class="events-section">
+  <div class="page-wrap">
+    <div class="section-eyebrow">Exclusive Events</div>
+    <h2 class="section-title">Upcoming Tastings</h2>
+    <p class="section-sub">Members get first access to reserve these experiences.</p>
+    <div class="event-preview">
+      <div class="event-date-block"><div class="day">12</div><div class="mo">Apr</div></div>
+      <div class="event-info">
+        <div class="member-badge">Members Only</div>
+        <h4>Spring Red Wine Tasting</h4>
+        <p>An intimate evening curated around bold reds. Five wines, lakeside views, and expert tasting notes. Limited to 24 guests.<br><strong>6:30 PM – 8:30 PM &nbsp;·&nbsp; The Quarry Lakeside Terrace</strong></p>
+      </div>
+    </div>
+    <div class="event-preview">
+      <div class="event-date-block"><div class="day">26</div><div class="mo">Apr</div></div>
+      <div class="event-info">
+        <div class="member-badge">Members Only</div>
+        <h4>Rosé &amp; Live Music Sunset</h4>
+        <p>Rosé pairings timed to the sunset over the quarry lake. Live acoustic sets, charcuterie, and good company.<br><strong>5:00 PM – 7:30 PM &nbsp;·&nbsp; Outdoor Deck</strong></p>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:2rem;">
+      <a href="https://buy.stripe.com/cNidRa9YjeSX8uKbzLds401" style="display:inline-block;background:var(--gold);color:#000;font-size:0.7rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:0.85rem 2rem;text-decoration:none;">Join to RSVP for Events &rarr;</a>
+    </div>
+  </div>
+</div>
+
+<!-- MEMBER LOGIN / PORTAL CTA -->
+<div class="login-section">
+  <h2>Already a Member?</h2>
+  <p>Log in to your account to manage your subscription, view your member benefits, and RSVP for upcoming wine tasting events.</p>
+  <div class="login-btns">
+    <a href="/quarry-login" class="btn-gold">Member Login</a>
+    <a href="https://buy.stripe.com/cNidRa9YjeSX8uKbzLds401" class="btn-outline">Join the Club</a>
+  </div>
+</div>
+
+<footer>
+  &copy; 2026 The Quarry &nbsp;&middot;&nbsp; 3960 Highway Z, New Melle, MO 63385 &nbsp;&middot;&nbsp; 636-224-8257 &nbsp;&middot;&nbsp; management@thequarrystl.com
+</footer>
+
+</body>
+</html>
