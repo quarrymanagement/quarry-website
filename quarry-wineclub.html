@@ -300,6 +300,24 @@ footer { background:#0F0A07; padding:4.5rem 2rem 2rem; border-top:1px solid var(
 }
 
 
+
+/* Tastings */
+.tastings-s{padding:5rem 1.5rem;background:var(--cream);}
+.tastings-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.25rem;margin-top:2.5rem;max-width:1100px;margin-left:auto;margin-right:auto;}
+.tasting-card{background:#fff;border:1px solid rgba(0,0,0,0.07);border-left:4px solid var(--burg);display:flex;flex-direction:column;transition:transform 0.2s,box-shadow 0.2s;cursor:pointer;text-decoration:none;color:inherit;}
+.tasting-card:hover{transform:translateY(-3px);box-shadow:0 8px 30px rgba(0,0,0,0.1);border-left-color:var(--gold);}
+.tasting-card-body{padding:1.5rem;}
+.tasting-date-row{display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;}
+.tasting-month{background:var(--burg);color:#fff;font-size:0.6rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:0.25rem 0.6rem;}
+.tasting-day{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:var(--brown);line-height:1;}
+.tasting-year{font-size:0.65rem;color:#aaa;font-weight:600;}
+.tasting-winery{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;color:var(--brown);margin-bottom:0.25rem;line-height:1.2;}
+.tasting-time{font-size:0.68rem;font-weight:700;letter-spacing:0.08em;color:var(--gold);text-transform:uppercase;margin-bottom:0.75rem;}
+.tasting-cta{display:inline-flex;align-items:center;gap:0.4rem;font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--burg);margin-top:auto;}
+.tasting-cta::after{content:'→';transition:transform 0.2s;}
+.tasting-card:hover .tasting-cta{color:var(--gold);}
+.tasting-card:hover .tasting-cta::after{transform:translateX(4px);}
+.tasting-type{font-size:0.6rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.8);background:var(--gold);padding:0.2rem 0.6rem;display:inline-block;margin-bottom:0.5rem;}
 </style>
 <style>
 :root{--black:#0D0D0D;--brown:#2C1A0E;--gold:#B8933A;--gold2:#D4AC55;--cream:#FAF7F2;--burg:#5C1A2E;}
@@ -494,24 +512,154 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
   </div>
 
   <!-- PLAN -->
-  <div style="text-align:center;margin-bottom:2rem;">
-    <div class="slabel">Membership</div>
-    <h2 class="stitle" style="margin:0.4rem auto;">One Simple Plan</h2>
-    <p class="ssub" style="margin:0 auto 2rem;">Everything included. No contracts. Cancel anytime.</p>
-  </div>
-  <div class="plan-box">
-    <div class="plan-name">Rock &amp; Vine Member</div>
-    <div class="plan-price"><sup>$</sup>29<span style="font-size:1.1rem;">.99</span><sub>/month</sub></div>
-    <p class="plan-desc">Full access to all member benefits. Cancel anytime — no contracts, no commitment.</p>
-    <ul class="plan-feats">
-      <li>Priority RSVP for all wine tasting events</li>
-      <li>Member-only pricing on wines &amp; tastings</li>
-      <li>Exclusive private member events</li>
-      <li>Digital membership card &amp; account access</li>
-      <li>First access to new events &amp; announcements</li>
-      <li>Cancel anytime — no commitment</li>
-    </ul>
-    <button class="plan-btn" onclick="document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">Complete Your Profile First &rarr;</button>
+  
+</div>
+
+
+<!-- UPCOMING TASTINGS -->
+<div class="tastings-s">
+  <div style="max-width:1100px;margin:0 auto;">
+    <div class="slabel">Upcoming Events</div>
+    <h2 class="stitle">Wine Tasting Schedule</h2>
+    <p class="ssub">Members get priority RSVP access to all tastings. Click any event below to sign up for membership and secure your spot.</p>
+    <div class="tastings-grid">
+      <a class="tasting-card" href="#member-form" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">
+        <div class="tasting-card-body">
+          <span class="tasting-type">Wine Tasting</span>
+          <div class="tasting-date-row">
+            <div>
+              <div style="display:flex;align-items:baseline;gap:0.35rem;">
+                <span class="tasting-day">23</span>
+                <span class="tasting-month" style="font-size:0.55rem;padding:0.15rem 0.5rem;">APR</span>
+              </div>
+              <div class="tasting-year">2026</div>
+            </div>
+          </div>
+          <div class="tasting-winery">Chateau Winery</div>
+          <div class="tasting-time">&#128341; 6:00 PM &nbsp;&middot;&nbsp; Wine Club Building</div>
+          <div class="tasting-cta">Reserve Your Spot</div>
+        </div>
+      </a>
+      <a class="tasting-card" href="#member-form" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">
+        <div class="tasting-card-body">
+          <span class="tasting-type">Wine Tasting</span>
+          <div class="tasting-date-row">
+            <div>
+              <div style="display:flex;align-items:baseline;gap:0.35rem;">
+                <span class="tasting-day">21</span>
+                <span class="tasting-month" style="font-size:0.55rem;padding:0.15rem 0.5rem;">MAY</span>
+              </div>
+              <div class="tasting-year">2026</div>
+            </div>
+          </div>
+          <div class="tasting-winery">Augusta Winery</div>
+          <div class="tasting-time">&#128341; 6:00 PM &nbsp;&middot;&nbsp; Wine Club Building</div>
+          <div class="tasting-cta">Reserve Your Spot</div>
+        </div>
+      </a>
+      <a class="tasting-card" href="#member-form" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">
+        <div class="tasting-card-body">
+          <span class="tasting-type">Wine Tasting</span>
+          <div class="tasting-date-row">
+            <div>
+              <div style="display:flex;align-items:baseline;gap:0.35rem;">
+                <span class="tasting-day">23</span>
+                <span class="tasting-month" style="font-size:0.55rem;padding:0.15rem 0.5rem;">JUL</span>
+              </div>
+              <div class="tasting-year">2026</div>
+            </div>
+          </div>
+          <div class="tasting-winery">Montelle Winery</div>
+          <div class="tasting-time">&#128341; 6:00 PM &nbsp;&middot;&nbsp; Wine Club Building</div>
+          <div class="tasting-cta">Reserve Your Spot</div>
+        </div>
+      </a>
+      <a class="tasting-card" href="#member-form" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">
+        <div class="tasting-card-body">
+          <span class="tasting-type">Wine Tasting</span>
+          <div class="tasting-date-row">
+            <div>
+              <div style="display:flex;align-items:baseline;gap:0.35rem;">
+                <span class="tasting-day">20</span>
+                <span class="tasting-month" style="font-size:0.55rem;padding:0.15rem 0.5rem;">AUG</span>
+              </div>
+              <div class="tasting-year">2026</div>
+            </div>
+          </div>
+          <div class="tasting-winery">Trademark Winery</div>
+          <div class="tasting-time">&#128341; 6:00 PM &nbsp;&middot;&nbsp; Wine Club Building</div>
+          <div class="tasting-cta">Reserve Your Spot</div>
+        </div>
+      </a>
+      <a class="tasting-card" href="#member-form" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">
+        <div class="tasting-card-body">
+          <span class="tasting-type">Wine Tasting</span>
+          <div class="tasting-date-row">
+            <div>
+              <div style="display:flex;align-items:baseline;gap:0.35rem;">
+                <span class="tasting-day">24</span>
+                <span class="tasting-month" style="font-size:0.55rem;padding:0.15rem 0.5rem;">SEP</span>
+              </div>
+              <div class="tasting-year">2026</div>
+            </div>
+          </div>
+          <div class="tasting-winery">Chateau Winery</div>
+          <div class="tasting-time">&#128341; 6:00 PM &nbsp;&middot;&nbsp; Wine Club Building</div>
+          <div class="tasting-cta">Reserve Your Spot</div>
+        </div>
+      </a>
+      <a class="tasting-card" href="#member-form" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">
+        <div class="tasting-card-body">
+          <span class="tasting-type">Wine Tasting</span>
+          <div class="tasting-date-row">
+            <div>
+              <div style="display:flex;align-items:baseline;gap:0.35rem;">
+                <span class="tasting-day">15</span>
+                <span class="tasting-month" style="font-size:0.55rem;padding:0.15rem 0.5rem;">OCT</span>
+              </div>
+              <div class="tasting-year">2026</div>
+            </div>
+          </div>
+          <div class="tasting-winery">Trademark Winery</div>
+          <div class="tasting-time">&#128341; 6:00 PM &nbsp;&middot;&nbsp; Wine Club Building</div>
+          <div class="tasting-cta">Reserve Your Spot</div>
+        </div>
+      </a>
+      <a class="tasting-card" href="#member-form" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">
+        <div class="tasting-card-body">
+          <span class="tasting-type">Wine Tasting</span>
+          <div class="tasting-date-row">
+            <div>
+              <div style="display:flex;align-items:baseline;gap:0.35rem;">
+                <span class="tasting-day">12</span>
+                <span class="tasting-month" style="font-size:0.55rem;padding:0.15rem 0.5rem;">NOV</span>
+              </div>
+              <div class="tasting-year">2026</div>
+            </div>
+          </div>
+          <div class="tasting-winery">Trademark Winery</div>
+          <div class="tasting-time">&#128341; 6:00 PM &nbsp;&middot;&nbsp; Wine Club Building</div>
+          <div class="tasting-cta">Reserve Your Spot</div>
+        </div>
+      </a>
+      <a class="tasting-card" href="#member-form" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">
+        <div class="tasting-card-body">
+          <span class="tasting-type">Wine Tasting</span>
+          <div class="tasting-date-row">
+            <div>
+              <div style="display:flex;align-items:baseline;gap:0.35rem;">
+                <span class="tasting-day">10</span>
+                <span class="tasting-month" style="font-size:0.55rem;padding:0.15rem 0.5rem;">DEC</span>
+              </div>
+              <div class="tasting-year">2026</div>
+            </div>
+          </div>
+          <div class="tasting-winery">Chateau Winery</div>
+          <div class="tasting-time">&#128341; 6:00 PM &nbsp;&middot;&nbsp; Wine Club Building</div>
+          <div class="tasting-cta">Reserve Your Spot</div>
+        </div>
+      </a>
+    </div>
   </div>
 </div>
 
