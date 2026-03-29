@@ -260,11 +260,7 @@ nav { display:flex; align-items:center; }
 @media (max-width:1100px){html,body{max-width:100%;overflow-x:hidden;}header{overflow:visible !important;width:100%;left:0;right:0;}.header-inner{display:flex !important;align-items:center !important;justify-content:space-between !important;padding:0 1rem !important;width:100% !important;box-sizing:border-box !important;overflow:visible !important;}.logo{font-size:1rem !important;flex-shrink:0;white-space:nowrap;}.logo span{font-size:0.38rem !important;display:block;}nav{display:none !important;}nav.open{display:flex !important;}.hamburger{display:flex !important;flex-shrink:0;z-index:1002 !important;position:relative !important;touch-action:manipulation;-webkit-tap-highlight-color:transparent;cursor:pointer;margin-left:auto;}}
 /* ===END-MOBILE-HEADER-FIX=== */
 </style>
-<script>
-function toggleNav(){var n=document.getElementById('mainNav'),h=document.querySelector('.hamburger');if(!n)return;n.classList.toggle('open');if(h)h.classList.toggle('active');}
-document.addEventListener('click',function(e){var n=document.getElementById('mainNav'),h=document.querySelector('.hamburger');if(!n||!h)return;if(!n.contains(e.target)&&!h.contains(e.target)){n.classList.remove('open');}});
-function selectBox(f,v,id){var i=document.getElementById(f+'Input');if(i)i.value=v;document.querySelectorAll('.select-box').forEach(function(c){if(c.getAttribute('onclick')&&c.getAttribute('onclick').indexOf("'"+f+"'")!==-1)c.classList.remove('selected');});var card=document.getElementById(id);if(card)card.classList.add('selected');}
-</script>
+
 </head>
 <body>
 <script id="qnav">(function(){function init(){var h=document.getElementById('hamburger')||document.querySelector('.hamburger');var n=document.getElementById('mainNav');if(!h||!n)return;h.removeAttribute('onclick');function toggle(e){if(e){e.preventDefault();e.stopPropagation();}n.classList.toggle('open');h.classList.toggle('active');}h.addEventListener('click',toggle,{passive:false});h.addEventListener('touchend',function(e){e.preventDefault();e.stopPropagation();n.classList.toggle('open');h.classList.toggle('active');},{passive:false});document.addEventListener('touchend',function(e){if(!n.contains(e.target)&&!h.contains(e.target)){n.classList.remove('open');h.classList.remove('active');}},{passive:true});window.toggleNav=toggle;}if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}else{init();}})();</script>
