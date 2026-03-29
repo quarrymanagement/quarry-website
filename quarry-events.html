@@ -116,45 +116,55 @@ function selectBox(f,v,id){var i=document.getElementById(f+'Input');if(i)i.value
 </head>
 <body>
 
-<nav>
-  <div class="nav-inner">
-    <a href="index.html" class="nav-logo">The Quarry<span>New Melle, Missouri</span></a>
-    <ul class="nav-links">
-      <li class="dropdown"><a href="#">Menu ▾</a>
-        <div class="dropdown-menu">
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="logo">The Quarry<span>New Melle, Missouri</span></a>
+    <nav id="mainNav">
+      <div class="nav-item">
+        <a href="#" class="nav-link">Menu &#x25BE;</a>
+        <div class="dropdown">
           <a href="quarry-menu.html">Food Menu</a>
           <a href="quarry-drinks.html">Drink Menu</a>
-          <a href="quarry-catering.html">Catering</a>
-          <a href="quarry-brunch.html">Brunch</a>
+          <a href="quarry-catering.html">Catering Menu</a>
+          <a href="quarry-brunch.html">Brunch Menu</a>
         </div>
-      </li>
-      <li><a href="quarry-golf.html">Hole-In-One Golf</a></li>
-      <li class="dropdown"><a href="#">Entertainment ▾</a>
-        <div class="dropdown-menu">
+      </div>
+      <div class="nav-item">
+        <a href="quarry-golf.html" class="nav-link">Hole-In-One Golf</a>
+      </div>
+      <div class="nav-item">
+        <a href="#" class="nav-link">Entertainment &#x25BE;</a>
+        <div class="dropdown">
           <a href="quarry-events.html">Events Calendar</a>
           <a href="quarry-bands.html">Live Bands</a>
-          <a href="quarry-beergarden.html">Beer Garden</a>
+          <a href="/quarry-wineclub">Rock &amp; Vine Wine Club</a>
+          <a href="quarry-beergarden.html">Beer Garden <span class="cs-badge">Coming 2026</span></a>
         </div>
-      </li>
-      <li class="dropdown"><a href="#">Reservations ▾</a>
-        <div class="dropdown-menu">
+      </div>
+      <div class="nav-item">
+        <a href="#" class="nav-link">Reservations &#x25BE;</a>
+        <div class="dropdown">
           <a href="quarry-reservations.html">Book a Reservation</a>
           <a href="weddings/index.html">Weddings</a>
           <a href="quarry-private-events.html">Private Events</a>
         </div>
-      </li>
-      <li><a href="quarry-giftcards.html">Gift Cards</a></li>
-      <li class="dropdown"><a href="#">Connect ▾</a>
-        <div class="dropdown-menu">
+      </div>
+      <div class="nav-item">
+        <a href="quarry-giftcards.html" class="nav-link">Gift Cards</a>
+      </div>
+      <div class="nav-item">
+        <a href="#" class="nav-link">Connect &#x25BE;</a>
+        <div class="dropdown">
           <a href="quarry-ourstory.html">Our Story</a>
           <a href="quarry-press.html">Press & Media</a>
           <a href="quarry-careers.html">Careers</a>
           <a href="quarry-contact.html">Contact Us</a>
         </div>
-      </li>
-    </ul>
+      </div>
+    </nav>
+    <div class="hamburger" id="hamburger" onclick="toggleNav()"><span></span><span></span><span></span></div>
   </div>
-</nav>
+</header>
 
 <section class="page-hero">
   <p class="eyebrow">What's Happening</p>
