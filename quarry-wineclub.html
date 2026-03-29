@@ -318,6 +318,30 @@ footer { background:#0F0A07; padding:4.5rem 2rem 2rem; border-top:1px solid var(
 .tasting-card:hover .tasting-cta{color:var(--gold);}
 .tasting-card:hover .tasting-cta::after{transform:translateX(4px);}
 .tasting-type{font-size:0.6rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.8);background:var(--gold);padding:0.2rem 0.6rem;display:inline-block;margin-bottom:0.5rem;}
+
+/* RSVP Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center;padding:1rem;}
+.modal-overlay.open{display:flex;}
+.modal{background:#fff;max-width:480px;width:100%;padding:2.5rem;position:relative;animation:slideUp 0.25s ease;}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+.modal-close{position:absolute;top:1rem;right:1.25rem;background:none;border:none;font-size:1.5rem;cursor:pointer;color:#aaa;line-height:1;}
+.modal-close:hover{color:var(--brown);}
+.modal h3{font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--brown);margin-bottom:0.25rem;}
+.modal .event-info{background:#FAF7F2;border-left:3px solid var(--gold);padding:0.75rem 1rem;margin:1rem 0 1.5rem;font-size:0.8rem;color:#555;}
+.modal .event-info strong{color:var(--brown);}
+.modal-field{margin-bottom:0.85rem;}
+.modal-field label{display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;}
+.modal-field input{width:100%;padding:0.7rem 0.85rem;border:2px solid #e0d9d0;font-family:'Montserrat',sans-serif;font-size:0.85rem;color:var(--brown);transition:border 0.2s;}
+.modal-field input:focus{outline:none;border-color:var(--gold);}
+.modal-submit{width:100%;padding:1rem;background:var(--burg);color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:0.72rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;margin-top:0.5rem;transition:background 0.2s;}
+.modal-submit:hover:not(:disabled){background:var(--gold);color:var(--black);}
+.modal-submit:disabled{opacity:0.6;cursor:not-allowed;}
+.modal-result{display:none;text-align:center;padding:1.5rem 0;}
+.modal-result.success h4{font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--gold);margin-bottom:0.5rem;}
+.modal-result.success p{font-size:0.8rem;color:#555;line-height:1.7;}
+.modal-result.error h4{font-size:1rem;color:var(--burg);margin-bottom:0.5rem;}
+.modal-result.error p{font-size:0.8rem;color:#555;line-height:1.7;}
+.modal-result.error a{color:var(--gold);font-weight:700;}
 </style>
 <style>
 :root{--black:#0D0D0D;--brown:#2C1A0E;--gold:#B8933A;--gold2:#D4AC55;--cream:#FAF7F2;--burg:#5C1A2E;}
@@ -523,7 +547,7 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
     <h2 class="stitle">Wine Tasting Schedule</h2>
     <p class="ssub">Members get priority RSVP access to all tastings. Click any event below to sign up for membership and secure your spot.</p>
     <div class="tastings-grid">
-      <a class="tasting-card" href="#member-form" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">
+      <a class="tasting-card" href="#" onclick="event.preventDefault();openRsvp('','','')">
         <div class="tasting-card-body">
           <span class="tasting-type">Wine Tasting</span>
           <div class="tasting-date-row">
@@ -540,7 +564,7 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
           <div class="tasting-cta">Reserve Your Spot</div>
         </div>
       </a>
-      <a class="tasting-card" href="#member-form" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">
+      <a class="tasting-card" href="#" onclick="event.preventDefault();openRsvp('','','')">
         <div class="tasting-card-body">
           <span class="tasting-type">Wine Tasting</span>
           <div class="tasting-date-row">
@@ -557,7 +581,7 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
           <div class="tasting-cta">Reserve Your Spot</div>
         </div>
       </a>
-      <a class="tasting-card" href="#member-form" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">
+      <a class="tasting-card" href="#" onclick="event.preventDefault();openRsvp('','','')">
         <div class="tasting-card-body">
           <span class="tasting-type">Wine Tasting</span>
           <div class="tasting-date-row">
@@ -574,7 +598,7 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
           <div class="tasting-cta">Reserve Your Spot</div>
         </div>
       </a>
-      <a class="tasting-card" href="#member-form" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">
+      <a class="tasting-card" href="#" onclick="event.preventDefault();openRsvp('','','')">
         <div class="tasting-card-body">
           <span class="tasting-type">Wine Tasting</span>
           <div class="tasting-date-row">
@@ -591,7 +615,7 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
           <div class="tasting-cta">Reserve Your Spot</div>
         </div>
       </a>
-      <a class="tasting-card" href="#member-form" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">
+      <a class="tasting-card" href="#" onclick="event.preventDefault();openRsvp('','','')">
         <div class="tasting-card-body">
           <span class="tasting-type">Wine Tasting</span>
           <div class="tasting-date-row">
@@ -608,7 +632,7 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
           <div class="tasting-cta">Reserve Your Spot</div>
         </div>
       </a>
-      <a class="tasting-card" href="#member-form" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">
+      <a class="tasting-card" href="#" onclick="event.preventDefault();openRsvp('','','')">
         <div class="tasting-card-body">
           <span class="tasting-type">Wine Tasting</span>
           <div class="tasting-date-row">
@@ -625,7 +649,7 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
           <div class="tasting-cta">Reserve Your Spot</div>
         </div>
       </a>
-      <a class="tasting-card" href="#member-form" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">
+      <a class="tasting-card" href="#" onclick="event.preventDefault();openRsvp('','','')">
         <div class="tasting-card-body">
           <span class="tasting-type">Wine Tasting</span>
           <div class="tasting-date-row">
@@ -642,7 +666,7 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
           <div class="tasting-cta">Reserve Your Spot</div>
         </div>
       </a>
-      <a class="tasting-card" href="#member-form" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">
+      <a class="tasting-card" href="#" onclick="event.preventDefault();openRsvp('','','')">
         <div class="tasting-card-body">
           <span class="tasting-type">Wine Tasting</span>
           <div class="tasting-date-row">
@@ -788,6 +812,118 @@ function handleMail(e){
   fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(new FormData(f)).toString()})
     .then(function(){f.style.display='none';document.getElementById('mail-ok').style.display='block';})
     .catch(function(){alert('Something went wrong. Please try again.');});
+}
+</script>
+
+<!-- RSVP Modal -->
+<div class="modal-overlay" id="rsvpModal" onclick="if(event.target===this)closeRsvp()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeRsvp()">&#x2715;</button>
+    <div id="rsvpForm">
+      <h3>Reserve Your Spot</h3>
+      <p style="font-size:0.78rem;color:#888;margin-bottom:0.5rem;">Enter the email address you used to subscribe. We'll verify your active membership instantly.</p>
+      <div class="event-info" id="rsvpEventInfo"></div>
+      <div class="modal-field">
+        <label>Your Name *</label>
+        <input type="text" id="rsvpName" placeholder="Jane Smith" required/>
+      </div>
+      <div class="modal-field">
+        <label>Member Email *</label>
+        <input type="email" id="rsvpEmail" placeholder="jane@email.com" required/>
+      </div>
+      <button class="modal-submit" id="rsvpSubmitBtn" onclick="submitRsvp()">Confirm My RSVP &rarr;</button>
+    </div>
+    <div class="modal-result success" id="rsvpSuccess">
+      <div style="font-size:2.5rem;margin-bottom:0.75rem;">&#127942;</div>
+      <h4>You're In!</h4>
+      <p id="rsvpSuccessMsg">Your RSVP has been confirmed. We'll see you at the tasting!</p>
+    </div>
+    <div class="modal-result error" id="rsvpError">
+      <h4 id="rsvpErrorTitle">Membership Required</h4>
+      <p id="rsvpErrorMsg">We couldn't find an active Rock &amp; Vine membership for that email. <a href="#member-form" onclick="closeRsvp();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">Join the wine club</a> to RSVP for tastings.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+var currentTasting = {};
+
+function openRsvp(winery, date, time) {
+  currentTasting = { winery: winery, date: date, time: time };
+  document.getElementById('rsvpEventInfo').innerHTML =
+    '<strong>' + winery + ' Winery</strong><br>' + date + ' &nbsp;&middot;&nbsp; ' + time + ' &nbsp;&middot;&nbsp; Wine Club Building';
+  document.getElementById('rsvpForm').style.display = 'block';
+  document.getElementById('rsvpSuccess').style.display = 'none';
+  document.getElementById('rsvpError').style.display = 'none';
+  document.getElementById('rsvpName').value = '';
+  document.getElementById('rsvpEmail').value = '';
+  document.getElementById('rsvpSubmitBtn').disabled = false;
+  document.getElementById('rsvpSubmitBtn').textContent = 'Confirm My RSVP →';
+  document.getElementById('rsvpModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeRsvp() {
+  document.getElementById('rsvpModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+async function submitRsvp() {
+  var name = document.getElementById('rsvpName').value.trim();
+  var email = document.getElementById('rsvpEmail').value.trim();
+  if (!name) { alert('Please enter your name.'); return; }
+  if (!email || !email.includes('@')) { alert('Please enter a valid email address.'); return; }
+
+  var btn = document.getElementById('rsvpSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Checking membership...';
+
+  try {
+    var res = await fetch('/.netlify/functions/wine-rsvp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: name,
+        email: email,
+        tasting: currentTasting.winery + ' Winery',
+        date: currentTasting.date,
+        time: currentTasting.time
+      })
+    });
+    var data = await res.json();
+
+    document.getElementById('rsvpForm').style.display = 'none';
+
+    if (data.authorized) {
+      if (data.alreadyRsvp) {
+        document.getElementById('rsvpSuccessMsg').textContent =
+          'You already have an RSVP for this tasting, ' + name.split(' ')[0] + '! We\'ll see you there.';
+      } else {
+        document.getElementById('rsvpSuccessMsg').textContent =
+          'Your RSVP for ' + currentTasting.winery + ' Winery on ' + currentTasting.date +
+          ' at ' + currentTasting.time + ' is confirmed, ' + name.split(' ')[0] + '! We\'ll see you there.';
+      }
+      document.getElementById('rsvpSuccess').style.display = 'block';
+    } else {
+      if (data.reason === 'no_account') {
+        document.getElementById('rsvpErrorTitle').textContent = 'Email Not Found';
+        document.getElementById('rsvpErrorMsg').innerHTML =
+          'We couldn\'t find a Rock &amp; Vine membership for <strong>' + email + '</strong>. ' +
+          'Make sure you\'re using the same email you subscribed with, or ' +
+          '<a href=\"#member-form\" onclick=\"closeRsvp();document.getElementById(\'member-form\').scrollIntoView({behavior:\'smooth\'})\">join the wine club</a> to get access.';
+      } else {
+        document.getElementById('rsvpErrorTitle').textContent = 'No Active Membership';
+        document.getElementById('rsvpErrorMsg').innerHTML =
+          'Your membership may have expired or been cancelled. ' +
+          '<a href=\"#member-form\" onclick=\"closeRsvp();document.getElementById(\'member-form\').scrollIntoView({behavior:\'smooth\'})\">Reactivate here</a>.';
+      }
+      document.getElementById('rsvpError').style.display = 'block';
+    }
+  } catch(err) {
+    alert('Something went wrong. Please try again or email management@thequarrystl.com.');
+    btn.disabled = false;
+    btn.textContent = 'Confirm My RSVP →';
+  }
 }
 </script>
 </body>
