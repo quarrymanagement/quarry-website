@@ -138,7 +138,7 @@ nav { display:flex; align-items:center; }
 .hero-scroll {
   position:absolute; bottom:2rem; left:50%; transform:translateX(-50%);
   display:flex; flex-direction:column; align-items:center; gap:0.4rem;
-  color:rgba(255,255,255,0.85); font-size:0.5rem; letter-spacing:0.3em; text-transform:uppercase;
+  color:rgba(255,255,255,0.4); font-size:0.5rem; letter-spacing:0.3em; text-transform:uppercase;
 }
 .scroll-line { width:1px; height:36px; background:rgba(255,255,255,0.3); animation:pulse 2s infinite; }
 @keyframes pulse { 0%,100%{opacity:0.3} 50%{opacity:1} }
@@ -248,15 +248,15 @@ footer { background:#0F0A07; padding:4.5rem 2rem 2rem; border-top:1px solid var(
   color:rgba(255,255,255,0.65); text-decoration:none; letter-spacing:0.04em; transition:color 0.2s;
 }
 .footer-col ul li a:hover { color:#fff; }
-.footer-col .dim { font-family:'Montserrat',sans-serif; font-size:0.65rem; color:rgba(255,255,255,0.85); }
+.footer-col .dim { font-family:'Montserrat',sans-serif; font-size:0.65rem; color:rgba(255,255,255,0.3); }
 .footer-bottom {
   display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;
 }
 .footer-legal {
   font-family:'Montserrat',sans-serif; font-size:0.55rem;
-  color:rgba(255,255,255,0.85); letter-spacing:0.06em; line-height:1.9;
+  color:rgba(255,255,255,0.3); letter-spacing:0.06em; line-height:1.9;
 }
-.footer-legal a { color:rgba(255,255,255,0.85); text-decoration:none; }
+.footer-legal a { color:rgba(255,255,255,0.3); text-decoration:none; }
 .footer-legal a:hover { color:rgba(255,255,255,0.7); }
 
 /* RESPONSIVE */
@@ -303,74 +303,101 @@ footer { background:#0F0A07; padding:4.5rem 2rem 2rem; border-top:1px solid var(
 </style>
 <style>
 :root{--black:#0D0D0D;--brown:#2C1A0E;--gold:#B8933A;--gold2:#D4AC55;--cream:#FAF7F2;--burg:#5C1A2E;}
-.hero{position:relative;min-height:520px;background:linear-gradient(135deg,rgba(92,26,46,0.88),rgba(13,13,13,0.92)),url('images/wine-club-hero.jpg') center/cover no-repeat;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:4rem 2rem;}
+body{font-family:'Montserrat',sans-serif;background:var(--cream);color:var(--brown);}
+/* HERO */
+.hero{min-height:520px;background:linear-gradient(135deg,rgba(92,26,46,0.9),rgba(13,13,13,0.95)),url('images/wine-club-hero.jpg') center/cover no-repeat;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:4rem 2rem;}
 .hero-eye{font-size:0.65rem;font-weight:700;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;}
 .hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(3rem,7vw,5rem);font-weight:600;color:#fff;line-height:1.05;margin-bottom:0.75rem;}
 .hero h1 em{color:var(--gold);font-style:italic;}
-.hero p{font-size:0.88rem;color:rgba(255,255,255,0.75);max-width:500px;line-height:1.8;margin-bottom:2rem;}
+.hero p{font-size:0.88rem;color:rgba(255,255,255,0.9);max-width:500px;line-height:1.8;margin-bottom:2rem;}
 .btn-g{display:inline-block;background:var(--gold);color:var(--black);font-size:0.7rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;padding:1rem 2.5rem;text-decoration:none;transition:background 0.2s;}
 .btn-g:hover{background:var(--gold2);}
-.btn-o{display:inline-block;border:2px solid rgba(255,255,255,0.35);color:#fff;font-size:0.7rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;padding:0.9rem 2rem;text-decoration:none;margin-left:1rem;transition:all 0.2s;}
+.btn-o{display:inline-block;border:2px solid rgba(255,255,255,0.5);color:#fff;font-size:0.7rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;padding:0.9rem 2rem;text-decoration:none;margin-left:1rem;transition:all 0.2s;}
 .btn-o:hover{border-color:var(--gold);color:var(--gold);}
+/* INFO BAR */
 .vine-bar{background:var(--burg);padding:0.9rem 2rem;display:flex;justify-content:center;gap:3rem;flex-wrap:wrap;}
-.vine-bar span{font-size:0.62rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.85);}
+.vine-bar span{font-size:0.62rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#fff;}
 .vine-bar span b{color:#D4AC55;}
-.wrap{max-width:1100px;margin:0 auto;padding:5rem 1.5rem;background:var(--cream);}
+/* LAYOUT */
+.wrap{max-width:1100px;margin:0 auto;padding:5rem 1.5rem;}
 .slabel{font-size:0.62rem;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);}
-.stitle{font-family:'Cormorant Garamond',serif;font-size:2.6rem;font-weight:600;color:#2C1A0E;margin:0.4rem 0 0.75rem;line-height:1.15;}
-.ssub{font-size:0.82rem;color:#555;line-height:1.9;max-width:580px;}
-.two-col{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;margin-bottom:6rem;}
-@media(max-width:768px){.two-col{grid-template-columns:1fr;gap:2.5rem;}}
+.stitle{font-family:'Cormorant Garamond',serif;font-size:2.6rem;font-weight:600;color:var(--brown);margin:0.4rem 0 0.75rem;line-height:1.15;}
+.ssub{font-size:0.82rem;color:#666;line-height:1.9;max-width:580px;}
+/* TWO COL */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;margin-bottom:5rem;}
+@media(max-width:768px){.two-col{grid-template-columns:1fr;gap:2rem;}}
 .img-ph{width:100%;aspect-ratio:4/3;background:linear-gradient(135deg,var(--burg),#2C0A1A);display:flex;align-items:center;justify-content:center;position:relative;}
-.img-ph span{font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:rgba(255,255,255,0.85);font-style:italic;}
+.img-ph-text{font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:rgba(255,255,255,0.25);font-style:italic;}
 .img-badge{position:absolute;bottom:-1.5rem;right:-1.5rem;background:var(--gold);color:var(--black);width:96px;height:96px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
 .img-badge .big{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:700;line-height:1;}
 .img-badge .sm{font-size:0.55rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;}
 .perks{list-style:none;margin:1.5rem 0 2rem;}
-.perks li{display:flex;align-items:flex-start;gap:0.75rem;margin-bottom:0.9rem;font-size:0.82rem;color:#333;line-height:1.7;}
+.perks li{display:flex;align-items:flex-start;gap:0.75rem;margin-bottom:0.9rem;font-size:0.82rem;color:#444;line-height:1.7;}
 .perks li::before{content:'✦';color:var(--gold);flex-shrink:0;margin-top:3px;font-size:0.65rem;}
+/* PLAN BOX */
 .plan-box{border:2px solid var(--gold);background:var(--brown);padding:2.5rem;max-width:480px;margin:0 auto 5rem;}
 .plan-name{font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--gold);margin-bottom:0.25rem;}
 .plan-price{font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:700;color:var(--gold);line-height:1;margin:0.4rem 0;}
 .plan-price sup{font-size:1.3rem;vertical-align:super;}
-.plan-price sub{font-size:1rem;color:rgba(255,255,255,0.85);}
-.plan-desc{font-size:0.75rem;color:rgba(255,255,255,0.5);margin-bottom:1.5rem;line-height:1.7;}
+.plan-price sub{font-size:1rem;color:rgba(255,255,255,0.5);}
+.plan-desc{font-size:0.78rem;color:rgba(255,255,255,0.75);margin-bottom:1.5rem;line-height:1.7;}
 .plan-feats{list-style:none;margin-bottom:1.75rem;}
 .plan-feats li{font-size:0.77rem;padding:0.45rem 0;border-bottom:1px solid rgba(255,255,255,0.12);color:#fff;display:flex;gap:0.5rem;}
 .plan-feats li::before{content:'✓';color:var(--gold);font-weight:700;flex-shrink:0;}
-.plan-btn{display:block;padding:0.9rem;background:var(--gold);color:var(--black);text-decoration:none;font-size:0.7rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;text-align:center;transition:background 0.2s;}
+.plan-btn{display:block;padding:0.9rem;background:var(--gold);color:var(--black);text-decoration:none;font-size:0.7rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;text-align:center;transition:background 0.2s;cursor:pointer;border:none;width:100%;font-family:'Montserrat',sans-serif;}
 .plan-btn:hover{background:var(--gold2);}
+/* HOW IT WORKS */
 .how{background:var(--brown);padding:5rem 1.5rem;text-align:center;}
 .how .slabel{color:var(--gold);}
 .how .stitle{color:#fff;margin:0.4rem auto 0.75rem;}
-.how .ssub{color:rgba(255,255,255,0.5);margin:0 auto 3rem;}
+.how .ssub{color:rgba(255,255,255,0.7);margin:0 auto 3rem;}
 .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:2rem;max-width:900px;margin:0 auto;}
 @media(max-width:700px){.steps{grid-template-columns:1fr 1fr;}}
-.step{text-align:center;}
 .step-n{width:52px;height:52px;border-radius:50%;border:2px solid var(--gold);color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;}
 .step h4{font-size:0.75rem;font-weight:700;letter-spacing:0.08em;color:#fff;margin-bottom:0.4rem;}
-.step p{font-size:0.68rem;color:rgba(255,255,255,0.75);line-height:1.7;}
-.events-s{padding:5rem 1.5rem;background:var(--cream);}
-.ev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.25rem;margin-top:2.5rem;max-width:1100px;margin-left:auto;margin-right:auto;}
-.ev-card{background:#fff;border:1px solid rgba(0,0,0,0.07);overflow:hidden;}
-.ev-img{height:150px;background:linear-gradient(135deg,var(--burg),#4A1525);display:flex;align-items:center;justify-content:center;}
-.ev-img span{font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:rgba(255,255,255,0.25);font-style:italic;}
-.ev-body{padding:1.25rem;}
-.ev-tag{font-size:0.58rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:0.4rem;}
-.ev-title{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:600;margin-bottom:0.3rem;}
-.ev-meta{font-size:0.68rem;color:#aaa;}
-.ev-lock{display:inline-flex;align-items:center;gap:0.3rem;font-size:0.62rem;color:var(--gold);font-weight:600;letter-spacing:0.06em;margin-top:0.6rem;}
-.faq{max-width:740px;margin:5rem auto;padding:0 1.5rem;}
-.faq-item{border-bottom:1px solid rgba(0,0,0,0.08);padding:1.25rem 0;}
-.faq-q{font-size:0.85rem;font-weight:700;color:#1a0a05;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:1rem;}
+.step p{font-size:0.68rem;color:rgba(255,255,255,0.7);line-height:1.7;}
+/* MEMBER FORM */
+.form-section{background:#fff;border:1px solid rgba(0,0,0,0.08);max-width:680px;margin:5rem auto;padding:3rem;}
+@media(max-width:600px){.form-section{padding:2rem 1.25rem;}}
+.step-indicators{display:flex;align-items:center;justify-content:center;gap:1rem;margin-bottom:2rem;}
+.si{display:flex;align-items:center;gap:0.5rem;font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;}
+.si-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;flex-shrink:0;}
+.si-active .si-num{background:var(--gold);color:#fff;}
+.si-inactive .si-num{border:2px solid #ccc;color:#ccc;}
+.si-active{color:var(--gold);}
+.si-inactive{color:#ccc;}
+.si-arrow{color:#ccc;font-size:1rem;}
+.fl{margin-bottom:0.85rem;}
+.fl label{display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;}
+.fl input{width:100%;padding:0.7rem 0.85rem;border:2px solid #e0d9d0;font-family:'Montserrat',sans-serif;font-size:0.85rem;color:var(--brown);transition:border 0.2s;}
+.fl input:focus{outline:none;border-color:var(--gold);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:0.85rem;}
+@media(max-width:500px){.form-row{grid-template-columns:1fr;}}
+.form-row-3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:0.85rem;}
+@media(max-width:500px){.form-row-3{grid-template-columns:1fr;}}
+.submit-btn{width:100%;padding:1.1rem;background:var(--brown);color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:0.75rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;margin-top:1rem;transition:background 0.2s;}
+.submit-btn:hover:not(:disabled){background:var(--gold);color:var(--black);}
+.submit-btn:disabled{opacity:0.6;cursor:not-allowed;}
+/* FAQ */
+.faq-wrap{max-width:740px;margin:5rem auto;padding:0 1.5rem;}
+.faq-item{border-bottom:1px solid #e0d9d0;}
+.faq-q{font-size:0.85rem;font-weight:700;color:var(--brown);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:1.25rem 0;}
 .faq-q::after{content:'+';font-size:1.2rem;color:var(--gold);font-weight:300;flex-shrink:0;transition:transform 0.2s;}
 .faq-item.open .faq-q::after{transform:rotate(45deg);}
-.faq-a{font-size:0.78rem;color:#444;line-height:1.8;max-height:0;overflow:hidden;transition:max-height 0.3s ease,margin 0.2s;}
-.faq-item.open .faq-a{max-height:300px;margin-top:0.75rem;}
+.faq-a{font-size:0.78rem;color:#444;line-height:1.8;max-height:0;overflow:hidden;transition:max-height 0.3s ease,padding 0.2s;}
+.faq-item.open .faq-a{max-height:400px;padding-bottom:1.25rem;}
+/* CTA */
 .cta-s{background:linear-gradient(135deg,var(--burg),#1A0A10);padding:5rem 2rem;text-align:center;}
 .cta-s h2{font-family:'Cormorant Garamond',serif;font-size:2.8rem;color:#fff;margin-bottom:0.5rem;}
-.cta-s p{color:rgba(255,255,255,0.85);font-size:0.82rem;margin-bottom:2rem;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.8;}
-footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62rem;color:rgba(255,255,255,0.85);letter-spacing:0.05em;}
+.cta-s p{color:rgba(255,255,255,0.8);font-size:0.82rem;margin-bottom:2rem;max-width:440px;margin-left:auto;margin-right:auto;line-height:1.8;}
+/* MAILING */
+.mail-s{background:#1A0E08;padding:3rem 1.5rem;text-align:center;border-top:1px solid rgba(184,147,58,0.2);}
+.mail-row{display:flex;gap:0;max-width:420px;margin:1.25rem auto 0;}
+.mail-row input{flex:1;padding:0.8rem 1rem;border:1px solid rgba(184,147,58,0.4);background:rgba(255,255,255,0.07);color:#fff;font-family:'Montserrat',sans-serif;font-size:0.8rem;outline:none;}
+.mail-row input::placeholder{color:rgba(255,255,255,0.4);}
+.mail-row button{background:var(--gold);color:var(--black);border:none;padding:0.8rem 1.5rem;font-family:'Montserrat',sans-serif;font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+/* FOOTER */
+footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62rem;color:rgba(255,255,255,0.3);letter-spacing:0.05em;}
 </style>
 </head>
 <body><header>
@@ -394,6 +421,7 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
         <div class="dropdown">
           <a href="quarry-events.html">Events Calendar</a>
           <a href="quarry-bands.html">Live Bands</a>
+          <a href="/quarry-wineclub">Rock &amp; Vine Wine Club</a>
           <a href="quarry-beergarden.html">Beer Garden <span class="cs-badge">Coming 2026</span></a>
         </div>
       </div>
@@ -421,52 +449,58 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
     <div class="hamburger" id="hamburger" onclick="toggleNav()"><span></span><span></span><span></span></div>
   </div>
 </header>
+
+<!-- HERO -->
 <div class="hero">
   <div class="hero-eye">The Quarry Presents</div>
   <h1>Rock &amp; Vine<br><em>Wine Club</em></h1>
   <p>Your key to exclusive wine tastings, member events, and priority access at The Quarry — every month, by the lake.</p>
-  <div><a href="#member-form" class="btn-g" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">Get Started — $29.99/mo</a><a href="#how" class="btn-o">Learn More</a></div>
+  <div>
+    <a href="#member-form" class="btn-g" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">Get Started — $29.99/mo</a>
+    <a href="#how" class="btn-o">Learn More</a>
+  </div>
 </div>
+
+<!-- INFO BAR -->
 <div class="vine-bar">
   <span><b>Members Only</b> Wine Tastings</span>
   <span><b>Priority</b> Event RSVP</span>
   <span><b>Monthly</b> Subscription</span>
   <span><b>Cancel</b> Anytime</span>
 </div>
+
+<!-- WHY JOIN -->
 <div class="wrap">
   <div class="two-col">
     <div>
       <div class="slabel">Why Join</div>
       <h2 class="stitle">More Than a Wine Club.<br>It's a Community.</h2>
-      <p class="ssub">The Rock &amp; Vine Wine Club gives you exclusive access to curated wine tasting events hosted right here at The Quarry overlooking our stunning quarry lake. Your active membership unlocks a world of member-only perks.</p>
+      <p class="ssub">The Rock &amp; Vine Wine Club gives you exclusive access to curated wine tasting events hosted right here at The Quarry overlooking our stunning quarry lake.</p>
       <ul class="perks">
         <li>Priority RSVP access to all wine tasting events before they open to the public</li>
         <li>Member-only pricing on select wines and tastings throughout the year</li>
-        <li>Exclusive invitations to private member events, seasonal releases, and special dinners</li>
+        <li>Exclusive invitations to private member events and special dinners</li>
         <li>Digital membership card linked to your account for seamless check-in</li>
-        <li>First access to new events, entertainment announcements, and The Quarry news</li>
+        <li>First access to new events and The Quarry announcements</li>
       </ul>
       <a href="#member-form" class="btn-g" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">Start Your Membership</a>
     </div>
     <div>
-      <div class="img-ph" style="background:linear-gradient(135deg,#5C1A2E,#2C0A1A);min-height:340px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;">
-  <div style="text-align:center;padding:2rem;">
-    <p style="font-family:'Cormorant Garamond',serif;font-size:0.8rem;letter-spacing:0.3em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:0.5rem;">Membership Card</p>
-    <div style="border:2px solid rgba(184,147,58,0.5);padding:2rem 2.5rem;display:inline-block;background:rgba(0,0,0,0.3);">
-      <p style="font-family:'Cormorant Garamond',serif;font-size:2rem;color:#B8933A;line-height:1;margin-bottom:0.25rem;">Rock &amp; Vine</p>
-      <p style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:rgba(255,255,255,0.7);font-style:italic;margin-bottom:1rem;">Wine Club Member</p>
-      <div style="border-top:1px solid rgba(184,147,58,0.3);padding-top:0.75rem;margin-top:0.25rem;">
-        <p style="font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.4);">The Quarry &middot; New Melle, MO</p>
-      </div>
-    </div>
-    <p style="font-family:'Cormorant Garamond',serif;font-size:1rem;color:rgba(255,255,255,0.5);margin-top:1.25rem;font-style:italic;">Active members get priority access<br>to all wine tasting events</p>
-  </div>
-  <span style="display:none;">Wine &amp; Lake Views</span>
+      <div class="img-ph">
+        <span class="img-ph-text">Wine &amp; Lake Views</span>
         <div class="img-badge"><span class="big">$29</span><span class="sm">/month</span></div>
       </div>
     </div>
   </div>
-  
+
+  <!-- PLAN -->
+  <div style="text-align:center;margin-bottom:2rem;">
+    <div class="slabel">Membership</div>
+    <h2 class="stitle" style="margin:0.4rem auto;">One Simple Plan</h2>
+    <p class="ssub" style="margin:0 auto 2rem;">Everything included. No contracts. Cancel anytime.</p>
+  </div>
+  <div class="plan-box">
+    <div class="plan-name">Rock &amp; Vine Member</div>
     <div class="plan-price"><sup>$</sup>29<span style="font-size:1.1rem;">.99</span><sub>/month</sub></div>
     <p class="plan-desc">Full access to all member benefits. Cancel anytime — no contracts, no commitment.</p>
     <ul class="plan-feats">
@@ -475,338 +509,138 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
       <li>Exclusive private member events</li>
       <li>Digital membership card &amp; account access</li>
       <li>First access to new events &amp; announcements</li>
-      <li>Cancel anytime online</li>
+      <li>Cancel anytime — no commitment</li>
     </ul>
-    <a href="#member-form" class="plan-btn" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">Complete Your Profile First</a>
+    <button class="plan-btn" onclick="document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">Complete Your Profile First &rarr;</button>
   </div>
 </div>
 
-<div id="member-form" style="background:#fff;border:1px solid rgba(0,0,0,0.08);max-width:580px;margin:0 auto 5rem;padding:2.5rem;scroll-margin-top:80px;">
-  <div style="text-align:center;margin-bottom:1.75rem;">
-    <div class="slabel">Member Registration</div>
-    <div style="display:flex;gap:1rem;justify-content:center;margin-bottom:1.25rem;">
-      <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.72rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#B8933A;">
-        <span style="width:24px;height:24px;border-radius:50%;background:#B8933A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.7rem;flex-shrink:0;">1</span>
-        Complete Your Profile
-      </div>
-      <div style="color:#ccc;font-size:1rem;line-height:24px;">&rarr;</div>
-      <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.72rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#aaa;">
-        <span style="width:24px;height:24px;border-radius:50%;border:2px solid #ccc;color:#ccc;display:flex;align-items:center;justify-content:center;font-size:0.7rem;flex-shrink:0;">2</span>
-        Complete Payment
-      </div>
-    </div>
+<!-- HOW IT WORKS -->
+<div class="how" id="how">
+  <div class="slabel">Getting Started</div>
+  <h2 class="stitle">How It Works</h2>
+  <p class="ssub">Two simple steps to start enjoying all the benefits of Rock &amp; Vine membership.</p>
+  <div class="steps" style="grid-template-columns:repeat(2,1fr);max-width:600px;">
+    <div class="step"><div class="step-n">1</div><h4>Complete Your Profile</h4><p>Fill out the member registration form below with your contact information.</p></div>
+    <div class="step"><div class="step-n">2</div><h4>Complete Payment</h4><p>After submitting, you'll be redirected to our secure Stripe checkout to start your $29.99/month subscription.</p></div>
+  </div>
+</div>
+
+<!-- MEMBER REGISTRATION FORM -->
+<div id="member-form" class="form-section">
+  <div class="step-indicators">
+    <div class="si si-active"><span class="si-num">1</span>Your Profile</div>
+    <div class="si-arrow">&rarr;</div>
+    <div class="si si-inactive"><span class="si-num">2</span>Payment</div>
+  </div>
+  <div style="text-align:center;margin-bottom:2rem;">
+    <div class="slabel">Step 1 of 2</div>
     <h2 class="stitle" style="font-size:2rem;">Complete Your Profile</h2>
-    <p style="font-size:0.78rem;color:#888;line-height:1.7;">After subscribing, complete your member profile so we can link your subscription and get you set up.</p>
+    <p style="font-size:0.78rem;color:#888;line-height:1.7;max-width:460px;margin:0 auto;">Tell us a bit about yourself so we can get your membership set up. After submitting, you'll be taken to complete payment.</p>
   </div>
   <form name="wine-club-registration" netlify netlify-honeypot="bot-field" onsubmit="handleMemberForm(event)">
     <input type="hidden" name="form-name" value="wine-club-registration"/>
     <input name="bot-field" style="display:none"/>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;">
-      <div><label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">First Name *</label>
-        <input type="text" name="firstName" required placeholder="Jane" style="width:100%;padding:0.65rem 0.75rem;border:2px solid #e0d9d0;font-family:Montserrat,sans-serif;font-size:0.85rem;"/></div>
-      <div><label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">Last Name *</label>
-        <input type="text" name="lastName" required placeholder="Smith" style="width:100%;padding:0.65rem 0.75rem;border:2px solid #e0d9d0;font-family:Montserrat,sans-serif;font-size:0.85rem;"/></div>
+    <div class="form-row">
+      <div class="fl"><label>First Name *</label><input type="text" name="firstName" required placeholder="Jane"/></div>
+      <div class="fl"><label>Last Name *</label><input type="text" name="lastName" required placeholder="Smith"/></div>
     </div>
-    <div style="margin-bottom:0.75rem;"><label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">Email Address *</label>
-      <input type="email" name="email" required placeholder="jane@email.com" style="width:100%;padding:0.65rem 0.75rem;border:2px solid #e0d9d0;font-family:Montserrat,sans-serif;font-size:0.85rem;"/></div>
-    <div style="margin-bottom:0.75rem;"><label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">Phone *</label>
-      <input type="tel" name="phone" required placeholder="(314) 555-0000" style="width:100%;padding:0.65rem 0.75rem;border:2px solid #e0d9d0;font-family:Montserrat,sans-serif;font-size:0.85rem;"/></div>
-    <div style="margin-bottom:0.75rem;"><label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">Street Address *</label>
-      <input type="text" name="street" required placeholder="123 Main St" style="width:100%;padding:0.65rem 0.75rem;border:2px solid #e0d9d0;font-family:Montserrat,sans-serif;font-size:0.85rem;"/></div>
-    <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;">
-      <div><label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">City *</label>
-        <input type="text" name="city" required placeholder="St. Louis" style="width:100%;padding:0.65rem 0.75rem;border:2px solid #e0d9d0;font-family:Montserrat,sans-serif;font-size:0.85rem;"/></div>
-      <div><label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">State *</label>
-        <input type="text" name="state" required placeholder="MO" maxlength="2" style="width:100%;padding:0.65rem 0.75rem;border:2px solid #e0d9d0;font-family:Montserrat,sans-serif;font-size:0.85rem;"/></div>
-      <div><label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">Zip *</label>
-        <input type="text" name="zip" required placeholder="63385" style="width:100%;padding:0.65rem 0.75rem;border:2px solid #e0d9d0;font-family:Montserrat,sans-serif;font-size:0.85rem;"/></div>
+    <div class="form-row">
+      <div class="fl"><label>Email Address *</label><input type="email" name="email" required placeholder="jane@email.com"/></div>
+      <div class="fl"><label>Phone Number *</label><input type="tel" name="phone" required placeholder="(314) 555-0000"/></div>
     </div>
-    <div style="margin-bottom:1.5rem;"><label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">Birthdate *</label>
-      <input type="date" name="birthdate" required style="width:100%;padding:0.65rem 0.75rem;border:2px solid #e0d9d0;font-family:Montserrat,sans-serif;font-size:0.85rem;"/></div>
-    <button type="submit" style="width:100%;padding:1rem;background:#2C1A0E;color:#fff;border:none;font-family:Montserrat,sans-serif;font-size:0.72rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;">Next: Proceed to Payment &rarr;</button>
-    <div id="member-success" style="display:none;text-align:center;color:#27ae60;font-size:0.85rem;margin-top:0.75rem;font-weight:600;">&#10003; Profile received! Redirecting you to complete payment...</div>
-  </form>
-</div>
-<script>
-function handleMemberForm(e){
-  e.preventDefault();
-  var form=e.target;
-  var data=new FormData(form);
-  fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(data).toString()})
-    .then(function(){
-      form.querySelectorAll('input,button').forEach(function(el){el.disabled=true;});
-      document.getElementById('member-success').style.display='block';
-      // Redirect to Stripe payment after 2 seconds
-      setTimeout(function(){
-        window.location.href='https://buy.stripe.com/7sY00kfiD7qv12i7jvds400';
-      }, 2000);
-    })
-    .catch(function(){alert('Something went wrong. Please email management@thequarrystl.com to complete your registration.');});
-}
-</script><div class="how" id="how">
-  <div class="slabel">Getting Started</div>
-  <h2 class="stitle">How It Works</h2>
-  <p class="ssub">Four simple steps to start enjoying all the benefits of Rock &amp; Vine membership.</p>
-  <div class="steps">
-    <div class="step"><div class="step-n">1</div><h4>Subscribe</h4><p>Sign up for $29.99/month via our secure Stripe checkout. Cancel anytime.</p></div>
-    <div class="step"><div class="step-n">2</div><h4>Create Account</h4><p>Set up your member profile on our site and link your active subscription.</p></div>
-    <div class="step"><div class="step-n">3</div><h4>Get Access</h4><p>Your membership unlocks priority RSVP for wine tastings and member events.</p></div>
-    <div class="step"><div class="step-n">4</div><h4>Enjoy</h4><p>Check in with your digital membership card. Sip, relax, repeat.</p></div>
-  </div>
-</div>
-<div class="events-s">
-  <div style="max-width:1100px;margin:0 auto;">
-    <div class="slabel">Member Events</div>
-    <h2 class="stitle">Exclusive Tasting Experiences</h2>
-    <p class="ssub">Members get first access to RSVP for these events before they open to the public.</p>
-    <div class="ev-grid" id="tastingGrid">
-<div class="ev-card" data-date="2026-04-23" onclick="scrollToForm()" style="cursor:pointer;">
-  <div class="ev-img"><span>Chateau Winery</span></div>
-  <div class="ev-body">
-    <div class="ev-tag">Rock &amp; Vine Wine Club</div>
-    <div class="ev-title">Chateau Winery Tasting</div>
-    <div class="ev-meta">Apr 23, 2026 &middot; 6:00 PM &middot; The Quarry</div>
-    <div class="ev-lock">&#9670; Members get priority RSVP — click to register</div>
-  </div>
-</div>
-<div class="ev-card" data-date="2026-05-21" onclick="scrollToForm()" style="cursor:pointer;">
-  <div class="ev-img"><span>Augusta Winery</span></div>
-  <div class="ev-body">
-    <div class="ev-tag">Rock &amp; Vine Wine Club</div>
-    <div class="ev-title">Augusta Winery Tasting</div>
-    <div class="ev-meta">May 21, 2026 &middot; 6:00 PM &middot; The Quarry</div>
-    <div class="ev-lock">&#9670; Members get priority RSVP — click to register</div>
-  </div>
-</div>
-<div class="ev-card" data-date="2026-07-23" onclick="scrollToForm()" style="cursor:pointer;">
-  <div class="ev-img"><span>Montelle Winery</span></div>
-  <div class="ev-body">
-    <div class="ev-tag">Rock &amp; Vine Wine Club</div>
-    <div class="ev-title">Montelle Winery Tasting</div>
-    <div class="ev-meta">Jul 23, 2026 &middot; 6:00 PM &middot; The Quarry</div>
-    <div class="ev-lock">&#9670; Members get priority RSVP — click to register</div>
-  </div>
-</div>
-<div class="ev-card" data-date="2026-08-20" onclick="scrollToForm()" style="cursor:pointer;">
-  <div class="ev-img"><span>Trademark</span></div>
-  <div class="ev-body">
-    <div class="ev-tag">Rock &amp; Vine Wine Club</div>
-    <div class="ev-title">Trademark Tasting</div>
-    <div class="ev-meta">Aug 20, 2026 &middot; 6:00 PM &middot; The Quarry</div>
-    <div class="ev-lock">&#9670; Members get priority RSVP — click to register</div>
-  </div>
-</div>
-<div class="ev-card" data-date="2026-09-24" onclick="scrollToForm()" style="cursor:pointer;">
-  <div class="ev-img"><span>Chateau Winery</span></div>
-  <div class="ev-body">
-    <div class="ev-tag">Rock &amp; Vine Wine Club</div>
-    <div class="ev-title">Chateau Winery Tasting</div>
-    <div class="ev-meta">Sep 24, 2026 &middot; 6:00 PM &middot; The Quarry</div>
-    <div class="ev-lock">&#9670; Members get priority RSVP — click to register</div>
-  </div>
-</div>
-<div class="ev-card" data-date="2026-10-15" onclick="scrollToForm()" style="cursor:pointer;">
-  <div class="ev-img"><span>Trademark</span></div>
-  <div class="ev-body">
-    <div class="ev-tag">Rock &amp; Vine Wine Club</div>
-    <div class="ev-title">Trademark Tasting</div>
-    <div class="ev-meta">Oct 15, 2026 &middot; 6:00 PM &middot; The Quarry</div>
-    <div class="ev-lock">&#9670; Members get priority RSVP — click to register</div>
-  </div>
-</div>
-<div class="ev-card" data-date="2026-11-12" onclick="scrollToForm()" style="cursor:pointer;">
-  <div class="ev-img"><span>Trademark</span></div>
-  <div class="ev-body">
-    <div class="ev-tag">Rock &amp; Vine Wine Club</div>
-    <div class="ev-title">Trademark Tasting</div>
-    <div class="ev-meta">Nov 12, 2026 &middot; 6:00 PM &middot; The Quarry</div>
-    <div class="ev-lock">&#9670; Members get priority RSVP — click to register</div>
-  </div>
-</div>
-<div class="ev-card" data-date="2026-12-10" onclick="scrollToForm()" style="cursor:pointer;">
-  <div class="ev-img"><span>Chateau Winery</span></div>
-  <div class="ev-body">
-    <div class="ev-tag">Rock &amp; Vine Wine Club</div>
-    <div class="ev-title">Chateau Winery Tasting</div>
-    <div class="ev-meta">Dec 10, 2026 &middot; 6:00 PM &middot; The Quarry</div>
-    <div class="ev-lock">&#9670; Members get priority RSVP — click to register</div>
-  </div>
-</div>
-</div><div class="ev-meta">Coming Soon &middot; The Quarry Lakeside</div><div class="ev-lock">&#9670; Members get priority RSVP</div></div></div>
-      <div class="ev-card"><div class="ev-img"><span>Private Dinner</span></div><div class="ev-body"><div class="ev-tag">Private Member Dinner</div><div class="ev-title">Vineyard Dinner by the Lake</div><div class="ev-meta">Coming Soon &middot; The Quarry</div><div class="ev-lock">&#9670; Members only event</div></div></div>
-      <div class="ev-card"><div class="ev-img"><span>Summer Series</span></div><div class="ev-body"><div class="ev-tag">Summer Series</div><div class="ev-title">Summer Wine &amp; Music Night</div><div class="ev-meta">Coming Soon &middot; Beer Garden</div><div class="ev-lock">&#9670; Early access for members</div></div></div>
+    <div class="fl"><label>Street Address *</label><input type="text" name="street" required placeholder="123 Main St"/></div>
+    <div class="form-row-3">
+      <div class="fl"><label>City *</label><input type="text" name="city" required placeholder="St. Louis"/></div>
+      <div class="fl"><label>State *</label><input type="text" name="state" required placeholder="MO" maxlength="2"/></div>
+      <div class="fl"><label>Zip *</label><input type="text" name="zip" required placeholder="63385"/></div>
     </div>
-  </div>
-</div>
-
-<div style="background:#fff;padding:5rem 1.5rem;">
-<div style="max-width:700px;margin:0 auto;">
-  <div class="slabel">Join Today</div>
-  <h2 class="stitle">Complete Your Membership</h2>
-  <p class="ssub" style="margin-bottom:2rem;">Fill out your details below and subscribe to activate your Rock &amp; Vine membership. Your information helps us personalize your member experience.</p>
-
-  <form name="wine-club-signup" netlify netlify-honeypot="bot-field" onsubmit="handleWineSignup(event)"
-    style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-    <input type="hidden" name="form-name" value="wine-club-signup"/>
-    <input name="bot-field" style="display:none"/>
-
-    <div style="grid-column:1/-1;font-size:0.62rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#B8933A;padding-top:0.5rem;border-top:1px solid #e0d9d0;">Personal Information</div>
-
-    <div>
-      <label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">First Name *</label>
-      <input type="text" name="firstName" required placeholder="Jane"
-        style="width:100%;padding:0.7rem;border:2px solid #e0d9d0;font-family:'Montserrat',sans-serif;font-size:0.85rem;color:#2C1A0E;outline:none;"
-        onfocus="this.style.borderColor='#B8933A'" onblur="this.style.borderColor='#e0d9d0'"/>
-    </div>
-    <div>
-      <label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">Last Name *</label>
-      <input type="text" name="lastName" required placeholder="Smith"
-        style="width:100%;padding:0.7rem;border:2px solid #e0d9d0;font-family:'Montserrat',sans-serif;font-size:0.85rem;color:#2C1A0E;outline:none;"
-        onfocus="this.style.borderColor='#B8933A'" onblur="this.style.borderColor='#e0d9d0'"/>
-    </div>
-    <div>
-      <label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">Email Address *</label>
-      <input type="email" name="email" required placeholder="jane@email.com"
-        style="width:100%;padding:0.7rem;border:2px solid #e0d9d0;font-family:'Montserrat',sans-serif;font-size:0.85rem;color:#2C1A0E;outline:none;"
-        onfocus="this.style.borderColor='#B8933A'" onblur="this.style.borderColor='#e0d9d0'"/>
-    </div>
-    <div>
-      <label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">Phone Number *</label>
-      <input type="tel" name="phone" required placeholder="(314) 555-0000"
-        style="width:100%;padding:0.7rem;border:2px solid #e0d9d0;font-family:'Montserrat',sans-serif;font-size:0.85rem;color:#2C1A0E;outline:none;"
-        onfocus="this.style.borderColor='#B8933A'" onblur="this.style.borderColor='#e0d9d0'"/>
-    </div>
-    <div>
-      <label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">Date of Birth *</label>
-      <input type="date" name="birthdate" required
-        style="width:100%;padding:0.7rem;border:2px solid #e0d9d0;font-family:'Montserrat',sans-serif;font-size:0.85rem;color:#2C1A0E;outline:none;"
-        onfocus="this.style.borderColor='#B8933A'" onblur="this.style.borderColor='#e0d9d0'"/>
-    </div>
-    <div></div>
-
-    <div style="grid-column:1/-1;font-size:0.62rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#B8933A;padding-top:0.5rem;border-top:1px solid #e0d9d0;">Home Address</div>
-
-    <div style="grid-column:1/-1;">
-      <label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">Street Address *</label>
-      <input type="text" name="street" required placeholder="123 Main Street"
-        style="width:100%;padding:0.7rem;border:2px solid #e0d9d0;font-family:'Montserrat',sans-serif;font-size:0.85rem;color:#2C1A0E;outline:none;"
-        onfocus="this.style.borderColor='#B8933A'" onblur="this.style.borderColor='#e0d9d0'"/>
-    </div>
-    <div>
-      <label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">City *</label>
-      <input type="text" name="city" required placeholder="St. Louis"
-        style="width:100%;padding:0.7rem;border:2px solid #e0d9d0;font-family:'Montserrat',sans-serif;font-size:0.85rem;color:#2C1A0E;outline:none;"
-        onfocus="this.style.borderColor='#B8933A'" onblur="this.style.borderColor='#e0d9d0'"/>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
-      <div>
-        <label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">State *</label>
-        <input type="text" name="state" required placeholder="MO" maxlength="2"
-          style="width:100%;padding:0.7rem;border:2px solid #e0d9d0;font-family:'Montserrat',sans-serif;font-size:0.85rem;color:#2C1A0E;outline:none;text-transform:uppercase;"
-          onfocus="this.style.borderColor='#B8933A'" onblur="this.style.borderColor='#e0d9d0'"/>
-      </div>
-      <div>
-        <label style="display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;">ZIP Code *</label>
-        <input type="text" name="zip" required placeholder="63385" maxlength="5"
-          style="width:100%;padding:0.7rem;border:2px solid #e0d9d0;font-family:'Montserrat',sans-serif;font-size:0.85rem;color:#2C1A0E;outline:none;"
-          onfocus="this.style.borderColor='#B8933A'" onblur="this.style.borderColor='#e0d9d0'"/>
-      </div>
-    </div>
-
-    <div style="grid-column:1/-1;margin-top:0.5rem;">
-      <button type="submit"
-        style="width:100%;padding:1rem;background:#2C1A0E;color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:0.75rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;transition:background 0.2s;"
-        onmouseover="this.style.background='#B8933A';this.style.color='#000'"
-        onmouseout="this.style.background='#2C1A0E';this.style.color='#fff'">
-        Submit My Information &rarr;
-      </button>
-      <p style="font-size:0.68rem;color:#aaa;text-align:center;margin-top:0.5rem;">After submitting, click <strong>Join Now</strong> above to complete your $29.99/month subscription via Stripe.</p>
-    </div>
-    <div id="wine-signup-success" style="display:none;grid-column:1/-1;text-align:center;padding:1.5rem;background:#FAF7F2;border-left:4px solid #B8933A;">
-      <p style="color:#2C1A0E;font-weight:600;font-size:0.85rem;">&#10003; Information received! Now click <a href="https://buy.stripe.com/7sY00kfiD7qv12i7jvds400" style="color:#B8933A;font-weight:700;">Join Now</a> to activate your membership.</p>
+    <div class="fl"><label>Birthdate *</label><input type="date" name="birthdate" required/></div>
+    <button type="submit" class="submit-btn" id="memberSubmitBtn">Next: Proceed to Payment &rarr;</button>
+    <div id="member-success" style="display:none;text-align:center;padding:1rem;background:#f0faf0;border:1px solid #27ae60;margin-top:1rem;">
+      <p style="color:#27ae60;font-weight:700;font-size:0.85rem;">&#10003; Profile received! Redirecting you to payment...</p>
     </div>
   </form>
 </div>
+
+<!-- FAQ -->
+<div class="faq-wrap">
+  <div style="text-align:center;margin-bottom:2.5rem;">
+    <div class="slabel">FAQ</div>
+    <h2 class="stitle">Common Questions</h2>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="faq(this)">How much does membership cost?</div>
+    <div class="faq-a">Rock &amp; Vine membership is $29.99 per month. No setup fees, no annual commitments — cancel anytime.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="faq(this)">How do I RSVP for wine tasting events?</div>
+    <div class="faq-a">Once your profile is submitted and payment is complete, your membership is active. You'll receive a member confirmation email with instructions on how to RSVP for upcoming wine tasting events — members always get access before the general public.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="faq(this)">How do I cancel my membership?</div>
+    <div class="faq-a">You can cancel anytime — two easy options:<br><br><strong>Option 1 — Self-service:</strong> Go to <a href="https://billing.stripe.com" style="color:var(--gold)">billing.stripe.com</a>, enter the email you used to sign up, and Stripe will send you a secure link to manage or cancel your subscription instantly.<br><br><strong>Option 2 — Email us:</strong> Send an email to <a href="mailto:management@thequarrystl.com" style="color:var(--gold)">management@thequarrystl.com</a> and we'll cancel it for you within 24 hours.<br><br>Your member access continues until the end of the current billing period.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="faq(this)">What happens after I submit the form?</div>
+    <div class="faq-a">After submitting your profile, you'll be automatically redirected to our secure Stripe checkout page to complete your $29.99/month subscription payment. Once payment is confirmed, your membership is active immediately.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="faq(this)">What if my payment fails?</div>
+    <div class="faq-a">Stripe will automatically retry failed payments. If payment cannot be collected, your membership access will be paused. You'll receive email notifications and can update your payment method at <a href="https://billing.stripe.com" style="color:var(--gold)">billing.stripe.com</a>.</div>
+  </div>
 </div>
 
-<div style="background:#FAF7F2;padding:3rem 1.5rem;">
-<div style="max-width:700px;margin:0 auto;display:flex;gap:2rem;align-items:flex-start;flex-wrap:wrap;">
-  <div style="flex:1;min-width:260px;">
-    <div class="slabel">Cancellation</div>
-    <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;color:#2C1A0E;margin:0.3rem 0 0.75rem;">Cancel Anytime</h3>
-    <p style="font-size:0.8rem;color:#555;line-height:1.8;">No contracts. No cancellation fees. To cancel your membership:</p>
-    <ol style="margin:0.75rem 0 0 1.2rem;font-size:0.8rem;color:#555;line-height:2;">
-      <li>Email <a href="mailto:management@thequarrystl.com" style="color:#B8933A;">management@thequarrystl.com</a></li>
-      <li>Or call us at <a href="tel:6362248257" style="color:#B8933A;">636-224-8257</a></li>
-      <li>Your access continues through your current billing period</li>
-    </ol>
-  </div>
-  <div style="flex:1;min-width:260px;">
-    <div class="slabel">Membership Status</div>
-    <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;color:#2C1A0E;margin:0.3rem 0 0.75rem;">How to See Members</h3>
-    <p style="font-size:0.8rem;color:#555;line-height:1.8;">As the owner, you can view all active members at any time:</p>
-    <ol style="margin:0.75rem 0 0 1.2rem;font-size:0.8rem;color:#555;line-height:2;">
-      <li>Go to <a href="https://dashboard.stripe.com" target="_blank" style="color:#B8933A;">dashboard.stripe.com</a></li>
-      <li>Click <strong>Customers</strong> or <strong>Subscriptions</strong></li>
-      <li>Active members show status <strong>"Active"</strong></li>
-      <li>You also get an email when anyone subscribes or cancels</li>
-    </ol>
-  </div>
-</div>
-</div>
-<div class="faq">
-  <div style="text-align:center;margin-bottom:2.5rem;"><div class="slabel">FAQ</div><h2 class="stitle">Common Questions</h2></div>
-  <div class="faq-item"><div class="faq-q" onclick="faq(this)">How much does membership cost?</div><div class="faq-a">Rock &amp; Vine membership is $29.99 per month. No setup fees, no annual commitments, cancel anytime.</div></div>
-  <div class="faq-item"><div class="faq-q" onclick="faq(this)">How do I RSVP for wine tasting events?</div><div class="faq-a">Once you subscribe and link your membership to your account, you'll see a member portal where active members can RSVP for upcoming events before they open to the public.</div></div>
-  <div class="faq-item"><div class="faq-q" onclick="faq(this)">Can I cancel anytime?</div><div class="faq-a">Yes — cancel anytime. You have two options:<br><br><strong>1. Self-service:</strong> Log in to your Stripe customer portal at <a href="https://billing.stripe.com" style="color:#B8933A">billing.stripe.com</a> — enter your email and Stripe will send you a magic link to manage or cancel your subscription instantly.<br><br><strong>2. Email us:</strong> Email <a href="mailto:management@thequarrystl.com" style="color:#B8933A">management@thequarrystl.com</a> and we'll cancel it for you within 24 hours.<br><br>Your member access continues until the end of the current billing period.</div></div>
-  <div class="faq-item"><div class="faq-q" onclick="faq(this)">How do I link my subscription to my account?</div><div class="faq-a">After subscribing, you'll receive an email with instructions to create or link your account on our site. Once linked, your membership status is verified automatically.</div></div>
-  <div class="faq-item"><div class="faq-q" onclick="faq(this)">What happens if my payment fails?</div><div class="faq-a">Stripe will automatically retry failed payments. If payment cannot be collected, your membership access will be paused until resolved. You'll receive email notifications throughout.</div></div>
-</div>
+<!-- CTA -->
 <div class="cta-s">
   <h2>Ready to Join?</h2>
-  <p>Join the Rock &amp; Vine Wine Club today and start enjoying exclusive access to wine tastings, member events, and more at The Quarry.</p>
-  <a href="#member-form" class="btn-g" onclick="event.preventDefault();scrollToForm()">Get Started — $29.99/mo</a>
+  <p>Fill out your member profile above and complete payment to start enjoying exclusive access to wine tastings and member events at The Quarry.</p>
+  <a href="#member-form" class="btn-g" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">Get Started — $29.99/mo</a>
 </div>
-<section style="background:#1A0E08;padding:3rem 1.5rem;text-align:center;border-top:1px solid rgba(184,147,58,0.2);">
-  <p style="font-size:0.62rem;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;color:#B8933A;margin-bottom:0.5rem;">Stay in the Loop</p>
-  <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:#fff;margin-bottom:0.5rem;">Join Our Mailing List</h3>
-  <p style="font-size:0.78rem;color:rgba(255,255,255,0.55);margin-bottom:1.5rem;max-width:400px;margin-left:auto;margin-right:auto;line-height:1.7;">Be first to hear about wine tastings, events, live music, and specials at The Quarry.</p>
-  <form name="mailing-list" netlify netlify-honeypot="bot-field" style="display:flex;gap:0;max-width:420px;margin:0 auto;" onsubmit="handleMail(event)">
+
+<!-- MAILING LIST -->
+<div class="mail-s">
+  <p style="font-size:0.62rem;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem;">Stay in the Loop</p>
+  <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:#fff;margin-bottom:0.25rem;">Join Our Mailing List</h3>
+  <p style="font-size:0.78rem;color:rgba(255,255,255,0.6);max-width:380px;margin:0 auto;line-height:1.7;">Be first to hear about wine tastings, events, live music, and specials at The Quarry.</p>
+  <form name="mailing-list" netlify netlify-honeypot="bot-field" class="mail-row" onsubmit="handleMail(event)">
     <input type="hidden" name="form-name" value="mailing-list"/>
     <input name="bot-field" style="display:none"/>
-    <input type="email" name="email" placeholder="Your email address" required style="flex:1;padding:0.8rem 1rem;border:1px solid rgba(184,147,58,0.4);background:rgba(255,255,255,0.07);color:#fff;font-family:Montserrat,sans-serif;font-size:0.8rem;outline:none;"/>
-    <button type="submit" style="background:#B8933A;color:#0D0D0D;border:none;padding:0.8rem 1.5rem;font-family:Montserrat,sans-serif;font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;white-space:nowrap;">Subscribe</button>
+    <input type="email" name="email" placeholder="Your email address" required/>
+    <button type="submit">Subscribe</button>
   </form>
-  <div id="mail-ok" style="display:none;color:#B8933A;font-size:0.8rem;margin-top:0.75rem;">&#10003; You're on the list!</div>
-</section>
-<script>function handleMail(e){e.preventDefault();var f=e.target;fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(new FormData(f)).toString()}).then(function(){f.style.display='none';document.getElementById('mail-ok').style.display='block';}).catch(function(){alert('Something went wrong. Please try again.');});}</script>
+  <div id="mail-ok" style="display:none;color:var(--gold);font-size:0.8rem;margin-top:0.75rem;">&#10003; You're on the list!</div>
+</div>
+
 <footer>&copy; 2026 The Quarry &nbsp;&middot;&nbsp; 3960 Highway Z, New Melle, MO 63385 &nbsp;&middot;&nbsp; 636-224-8257 &nbsp;&middot;&nbsp; management@thequarrystl.com</footer>
-<script>function scrollToForm(){
-  document.getElementById('member-form').scrollIntoView({behavior:'smooth'});
-}
-// Hide past tasting events automatically
-document.addEventListener('DOMContentLoaded',function(){
-  var today=new Date(); today.setHours(0,0,0,0);
-  document.querySelectorAll('#tastingGrid .ev-card[data-date]').forEach(function(card){
-    var d=new Date(card.getAttribute('data-date')+'T00:00:00');
-    if(d<today) card.style.display='none';
-  });
-  // Hide grid if no upcoming events
-  var visible=[...document.querySelectorAll('#tastingGrid .ev-card')].filter(function(c){return c.style.display!=='none';});
-  if(!visible.length) document.querySelector('.events-s').style.display='none';
-});
-function faq(el){var i=el.parentElement;var o=i.classList.contains('open');document.querySelectorAll('.faq-item').forEach(function(x){x.classList.remove('open');});if(!o)i.classList.add('open');}</script>
+
 <script>
-function handleWineSignup(e){
+function faq(el){var i=el.parentElement;var o=i.classList.contains('open');document.querySelectorAll('.faq-item').forEach(function(x){x.classList.remove('open');});if(!o)i.classList.add('open');}
+
+function handleMemberForm(e){
   e.preventDefault();
-  var form=e.target;
-  fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
-    body:new URLSearchParams(new FormData(form)).toString()})
+  var btn=document.getElementById('memberSubmitBtn');
+  btn.disabled=true;btn.textContent='Submitting...';
+  var data=new FormData(e.target);
+  fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(data).toString()})
     .then(function(){
-      form.style.display='none';
-      document.getElementById('wine-signup-success').style.display='block';
+      document.getElementById('member-success').style.display='block';
+      btn.textContent='Redirecting to payment...';
+      setTimeout(function(){window.location.href='https://buy.stripe.com/7sY00kfiD7qv12i7jvds400';},2000);
     })
-    .catch(function(){alert('Something went wrong. Please email management@thequarrystl.com');});
+    .catch(function(){
+      alert('Something went wrong. Please email management@thequarrystl.com to complete registration.');
+      btn.disabled=false;btn.textContent='Next: Proceed to Payment →';
+    });
 }
-</script></body>
+
+function handleMail(e){
+  e.preventDefault();
+  var f=e.target;
+  fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(new FormData(f)).toString()})
+    .then(function(){f.style.display='none';document.getElementById('mail-ok').style.display='block';})
+    .catch(function(){alert('Something went wrong. Please try again.');});
+}
+</script>
+</body>
 </html>
