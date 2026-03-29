@@ -360,6 +360,21 @@ footer { background:#0F0A07; padding:4.5rem 2rem 2rem; border-top:1px solid var(
     <div class="hamburger" id="hamburger" onclick="toggleNav()"><span></span><span></span><span></span></div>
   </div>
 </header>
+<style id="qmobile">
+@media(max-width:768px){
+  .video-container, .hero-video, [class*="video-wrap"], [class*="video-bg"]{
+    position:relative; overflow:hidden;
+    padding-bottom:56.25%; height:0 !important; max-height:56vw !important;
+  }
+  .video-container iframe, .hero-video iframe, [class*="video-wrap"] iframe, [class*="video-bg"] iframe{
+    position:absolute; top:0; left:0; width:100% !important; height:100% !important;
+  }
+  /* Hamburger menu */
+  .nav-toggle, .hamburger, .mobile-menu-btn, button[aria-label*="menu"], button[aria-label*="Menu"]{
+    display:flex !important;
+  }
+}
+</style>
 
 <section class="hero">
   <div class="hero-bg"></div>
@@ -367,7 +382,7 @@ footer { background:#0F0A07; padding:4.5rem 2rem 2rem; border-top:1px solid var(
   <iframe id="heroVideo"
     src="https://www.youtube.com/embed/NHSx9ZNQCMM?autoplay=1&mute=1&loop=1&playlist=NHSx9ZNQCMM&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&playsinline=1&enablejsapi=1"
     frameborder="0"
-    allow="autoplay; fullscreen"
+    allow="autoplay; muted; fullscreen; picture-in-picture" allowfullscreen
     allowfullscreen>
   </iframe>
 </div>
