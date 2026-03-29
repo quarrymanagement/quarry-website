@@ -477,5 +477,33 @@ function renderSchedule(filter){
 }
 renderSchedule('all');
 </script>
+
+<script>
+function toggleNav(){
+  var nav = document.getElementById('mainNav');
+  if(!nav) return;
+  nav.classList.toggle('open');
+  nav.style.display = nav.classList.contains('open') ? 'flex' : '';
+}
+// Close nav when clicking outside
+document.addEventListener('click', function(e){
+  var nav = document.getElementById('mainNav');
+  var ham = document.querySelector('.hamburger');
+  if(nav && ham && !nav.contains(e.target) && !ham.contains(e.target)){
+    nav.classList.remove('open');
+    nav.style.display = '';
+  }
+});
+</script>
+<style>
+@media(max-width:768px){
+  #mainNav{display:none;flex-direction:column;position:absolute;top:64px;left:0;right:0;background:#0D0D0D;padding:1rem 0;z-index:200;}
+  #mainNav.open{display:flex !important;}
+  #mainNav .nav-link{line-height:1;padding:0.9rem 1.5rem;display:block;border-bottom:1px solid rgba(255,255,255,0.06);}
+  #mainNav .dropdown{display:block !important;position:static;background:rgba(255,255,255,0.04);padding-left:1rem;}
+  #mainNav .dropdown a{padding:0.6rem 1.5rem;display:block;}
+  #mainNav .nav-item{position:static;}
+}
+</style>
 </body>
 </html>
