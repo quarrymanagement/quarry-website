@@ -1,6 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Events | The Quarry</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --charcoal:#1A1A1A; --brown-dark:#2C1A0E; --brown-warm:#4A2C1A;
+  --gold:#B8933A; --gold-light:#D4AF6A; --cream:#F5F0E8;
+  --border-light:rgba(184,147,58,0.2); --border-mid:rgba(184,147,58,0.35);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--charcoal);color:var(--cream);font-family:'Montserrat',sans-serif;min-height:100vh}
+
+/* NAV */
+nav{background:rgba(26,26,26,0.97);border-bottom:1px solid var(--border-light);padding:0 2rem;position:sticky;top:0;z-index:1000}
+.nav-inner{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:80px}
+.nav-logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;letter-spacing:.12em;color:#fff;text-transform:uppercase;text-decoration:none}
+.nav-logo span{display:block;font-size:.5rem;letter-spacing:.3em;color:rgba(255,255,255,.6);font-family:'Montserrat',sans-serif}
+.nav-links{display:flex;align-items:center;gap:2rem;list-style:none}
+.nav-links a{font-family:'Montserrat',sans-serif;font-size:.6rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.75);text-decoration:none;transition:color .2s}
+.nav-links a:hover{color:var(--gold-light)}
+.dropdown{position:relative}
+.dropdown-menu{display:none;position:absolute;top:100%;left:50%;transform:translateX(-50%);background:rgba(26,26,26,.98);border:1px solid var(--border-mid);min-width:180px;padding:.5rem 0}
+.dropdown:hover .dropdown-menu{display:block}
+.dropdown-menu a{display:block;padding:.6rem 1.2rem;font-size:.58rem;white-space:nowrap}
+
+/* HERO */
+.page-hero{background:var(--brown-dark);padding:5rem 2rem;text-align:center;border-bottom:1px solid var(--border-light)}
+.page-hero .eyebrow{font-family:'Montserrat',sans-serif;font-size:.6rem;letter-spacing:.4em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem}
+.page-hero h1{font-family:'Playfair Display',serif;font-size:clamp(2.5rem,6vw,4.5rem);font-weight:700;color:#fff;letter-spacing:.06em;text-transform:uppercase}
+.page-hero .divider{width:50px;height:1px;background:var(--gold);margin:1.25rem auto}
+.page-hero p{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-style:italic;color:rgba(245,240,232,.7)}
+
+/* FILTERS */
+.filters{max-width:1200px;margin:3rem auto 1rem;padding:0 2rem;display:flex;gap:.75rem;flex-wrap:wrap;align-items:center}
+.filter-btn{font-family:'Montserrat',sans-serif;font-size:.58rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;padding:.55rem 1.2rem;border:1px solid var(--border-mid);background:transparent;color:rgba(255,255,255,.6);cursor:pointer;transition:all .2s}
+.filter-btn:hover,.filter-btn.active{background:var(--gold);border-color:var(--gold);color:var(--brown-dark)}
+
+/* EVENTS GRID */
+.events-container{max-width:1200px;margin:0 auto;padding:2rem 2rem 5rem}
+.events-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:2px;background:var(--border-light)}
+.event-card{background:var(--charcoal);padding:2.5rem;position:relative;transition:background .2s}
+.event-card:hover{background:#222}
+.badge{display:inline-flex;align-items:center;gap:.4rem;font-family:'Montserrat',sans-serif;font-size:.52rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;padding:.3rem .8rem;margin-bottom:1.25rem}
+.badge-ticketed{background:rgba(184,147,58,.15);color:var(--gold);border:1px solid var(--border-mid)}
+.badge-public{background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.12)}
+.badge-fundraiser{background:rgba(52,168,83,.12);color:#5cb85c;border:1px solid rgba(52,168,83,.25)}
+.badge-member{background:rgba(138,43,226,.12);color:#b57bee;border:1px solid rgba(138,43,226,.25)}
+.event-date-display{font-family:'Montserrat',sans-serif;font-size:.58rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-light);margin-bottom:.6rem}
+.event-title{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:#fff;margin-bottom:.75rem;line-height:1.2}
+.event-meta{font-family:'Montserrat',sans-serif;font-size:.6rem;letter-spacing:.08em;color:rgba(245,240,232,.5);margin-bottom:1rem}
+.event-desc{font-family:'Cormorant Garamond',serif;font-size:.95rem;font-style:italic;color:rgba(245,240,232,.7);line-height:1.6;margin-bottom:1.5rem}
+.event-price{font-family:'Montserrat',sans-serif;font-size:.9rem;font-weight:700;letter-spacing:.08em;color:var(--gold);margin-bottom:1.25rem}
+.event-price span{font-size:.6rem;font-weight:400;color:rgba(245,240,232,.5);margin-left:.4rem}
+.capacity-bar{margin-bottom:1.5rem}
+.capacity-label{font-family:'Montserrat',sans-serif;font-size:.55rem;letter-spacing:.12em;color:rgba(245,240,232,.45);margin-bottom:.4rem;display:flex;justify-content:space-between}
+.capacity-track{height:3px;background:rgba(255,255,255,.1);border-radius:2px}
+.capacity-fill{height:100%;background:var(--gold);border-radius:2px;transition:width .6s ease}
+.btn-register{width:100%;padding:1rem;font-family:'Montserrat',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:.25em;text-transform:uppercase;border:none;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:.5rem}
+.btn-register.gold{background:var(--gold);color:var(--brown-dark)}
+.btn-register.gold:hover{background:var(--gold-light)}
+.btn-register.outline{background:transparent;border:1px solid var(--border-mid);color:rgba(255,255,255,.7)}
+.btn-register.outline:hover{border-color:var(--gold);color:var(--gold)}
+.btn-register.sold-out{background:rgba(255,255,255,.06);color:rgba(255,255,255,.3);cursor:not-allowed}
+.btn-register.green{background:#2d6a35;color:#fff}
+.btn-register.green:hover{background:#3a8a44}
+.btn-register.purple{background:rgba(138,43,226,.25);border:1px solid rgba(138,43,226,.4);color:#b57bee}
+.btn-register.purple:hover{background:rgba(138,43,226,.4)}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:2000;align-items:center;justify-content:center;padding:2rem}
+.modal-overlay.open{display:flex}
+.modal{background:var(--charcoal);border:1px solid var(--border-mid);max-width:480px;width:100%;padding:3rem;position:relative}
+.modal-close{position:absolute;top:1rem;right:1.25rem;background:none;border:none;color:rgba(255,255,255,.4);font-size:1.5rem;cursor:pointer;line-height:1}
+.modal-close:hover{color:#fff}
+.modal h2{font-family:'Playfair Display',serif;font-size:1.6rem;color:#fff;margin-bottom:.4rem}
+.modal .modal-event-date{font-family:'Montserrat',sans-serif;font-size:.6rem;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;margin-bottom:1.5rem}
+.modal label{font-family:'Montserrat',sans-serif;font-size:.58rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:rgba(245,240,232,.55);display:block;margin-bottom:.4rem;margin-top:1.1rem}
+.modal input,.modal select{width:100%;padding:.85rem 1rem;background:rgba(255,255,255,.05);border:1px solid var(--border-mid);color:var(--cream);font-family:'Montserrat',sans-serif;font-size:.75rem;outline:none}
+.modal input:focus,.modal select:focus{border-color:var(--gold)}
+.modal select option{background:var(--brown-dark)}
+.modal-price{font-family:'Montserrat',sans-serif;font-size:1.1rem;font-weight:700;color:var(--gold);margin:1.5rem 0 .75rem;text-align:center}
+.modal-submit{width:100%;padding:1.1rem;background:var(--gold);color:var(--brown-dark);font-family:'Montserrat',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.25em;text-transform:uppercase;border:none;cursor:pointer;margin-top:.5rem}
+.modal-submit:hover{background:var(--gold-light)}
+.modal-submit:disabled{opacity:.5;cursor:not-allowed}
+
+/* TOAST */
+.toast{position:fixed;bottom:2rem;right:2rem;padding:1rem 1.5rem;font-family:'Montserrat',sans-serif;font-size:.7rem;letter-spacing:.08em;z-index:3000;transform:translateY(100px);opacity:0;transition:all .3s;max-width:320px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{background:#1a3a1e;border:1px solid #3a8a44;color:#7ec983}
+.toast.error{background:#3a1a1a;border:1px solid #8a3a3a;color:#e07070}
+
+/* LOADING */
+.loading{text-align:center;padding:5rem 2rem;color:rgba(255,255,255,.4);font-family:'Montserrat',sans-serif;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase}
+.loading::after{content:'...';animation:dots 1.5s infinite}
+@keyframes dots{0%,20%{content:'...'}40%{content:'.'}60%,80%{content:'..'}100%{content:'...'}}
+.no-events{text-align:center;padding:4rem 2rem;grid-column:1/-1}
+.no-events p{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-style:italic;color:rgba(255,255,255,.4)}
+
+footer{background:#0F0A07;padding:3rem 2rem;border-top:1px solid var(--border-light);text-align:center}
+footer p{font-family:'Montserrat',sans-serif;font-size:.55rem;color:rgba(255,255,255,.3);letter-spacing:.08em}
+</style>
 <style>
 :root {
   --cream: #F5F0E8;
@@ -295,36 +398,9 @@ footer { background:#0F0A07; padding:4.5rem 2rem 2rem; border-top:1px solid var(
 
 
 </style>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Events | The Quarry</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-<script>
-function toggleNav(){var n=document.getElementById('mainNav'),h=document.querySelector('.hamburger');if(!n)return;n.classList.toggle('open');if(h)h.classList.toggle('active');}
-document.addEventListener('click',function(e){var n=document.getElementById('mainNav'),h=document.querySelector('.hamburger');if(!n||!h)return;if(!n.contains(e.target)&&!h.contains(e.target)){n.classList.remove('open');}});
-function selectBox(f,v,id){var i=document.getElementById(f+'Input');if(i)i.value=v;document.querySelectorAll('.select-box').forEach(function(c){if(c.getAttribute('onclick')&&c.getAttribute('onclick').indexOf("'"+f+"'")!==-1)c.classList.remove('selected');});var card=document.getElementById(id);if(card)card.classList.add('selected');}
-</script>
-
-<style>
-/* Nav override fixes for events page */
-header { position:sticky!important; top:0!important; z-index:100!important; background:#0D0D0D!important; display:block!important; width:100%!important; }
-.header-inner { display:flex!important; align-items:center!important; justify-content:space-between!important; padding:0 2rem!important; height:64px!important; max-width:1400px!important; margin:0 auto!important; }
-a.logo { text-decoration:none!important; display:flex!important; flex-direction:column!important; }
-.logo .site-name { font-family:'Playfair Display',serif!important; font-size:1.3rem!important; color:#fff!important; letter-spacing:0.08em!important; line-height:1!important; display:block!important; }
-.logo .site-tagline { font-size:0.55rem!important; color:rgba(255,255,255,0.4)!important; letter-spacing:0.2em!important; text-transform:uppercase!important; display:block!important; }
-nav#mainNav { display:flex!important; gap:0!important; align-items:center!important; }
-.nav-item { position:relative!important; }
-.nav-link { color:rgba(255,255,255,0.75)!important; text-decoration:none!important; font-size:0.7rem!important; font-weight:600!important; letter-spacing:0.1em!important; text-transform:uppercase!important; padding:0 1rem!important; display:block!important; line-height:64px!important; white-space:nowrap!important; background:none!important; border:none!important; cursor:pointer!important; font-family:'Montserrat',sans-serif!important; }
-.nav-link:hover { color:#B8933A!important; }
-.dropdown { display:none!important; position:absolute!important; top:100%!important; left:0!important; background:#1a1a1a!important; min-width:200px!important; z-index:200!important; }
-.nav-item:hover .dropdown { display:block!important; }
-.dropdown a { display:block!important; padding:0.6rem 1.2rem!important; color:rgba(255,255,255,0.75)!important; text-decoration:none!important; font-size:0.7rem!important; font-weight:500!important; letter-spacing:0.06em!important; white-space:nowrap!important; }
-.dropdown a:hover { color:#B8933A!important; background:rgba(255,255,255,0.05)!important; }
-</style>
 </head>
 <body>
+
 <header>
   <div class="header-inner">
     <a href="index.html" class="logo">The Quarry<span>New Melle, Missouri</span></a>
@@ -374,8 +450,6 @@ nav#mainNav { display:flex!important; gap:0!important; align-items:center!import
     <div class="hamburger" id="hamburger" onclick="toggleNav()"><span></span><span></span><span></span></div>
   </div>
 </header>
-
-
 
 <section class="page-hero">
   <p class="eyebrow">What's Happening</p>
