@@ -138,7 +138,7 @@ nav { display:flex; align-items:center; }
 .hero-scroll {
   position:absolute; bottom:2rem; left:50%; transform:translateX(-50%);
   display:flex; flex-direction:column; align-items:center; gap:0.4rem;
-  color:rgba(255,255,255,0.4); font-size:0.5rem; letter-spacing:0.3em; text-transform:uppercase;
+  color:rgba(255,255,255,0.85); font-size:0.5rem; letter-spacing:0.3em; text-transform:uppercase;
 }
 .scroll-line { width:1px; height:36px; background:rgba(255,255,255,0.3); animation:pulse 2s infinite; }
 @keyframes pulse { 0%,100%{opacity:0.3} 50%{opacity:1} }
@@ -248,15 +248,15 @@ footer { background:#0F0A07; padding:4.5rem 2rem 2rem; border-top:1px solid var(
   color:rgba(255,255,255,0.65); text-decoration:none; letter-spacing:0.04em; transition:color 0.2s;
 }
 .footer-col ul li a:hover { color:#fff; }
-.footer-col .dim { font-family:'Montserrat',sans-serif; font-size:0.65rem; color:rgba(255,255,255,0.3); }
+.footer-col .dim { font-family:'Montserrat',sans-serif; font-size:0.65rem; color:rgba(255,255,255,0.85); }
 .footer-bottom {
   display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;
 }
 .footer-legal {
   font-family:'Montserrat',sans-serif; font-size:0.55rem;
-  color:rgba(255,255,255,0.3); letter-spacing:0.06em; line-height:1.9;
+  color:rgba(255,255,255,0.85); letter-spacing:0.06em; line-height:1.9;
 }
-.footer-legal a { color:rgba(255,255,255,0.3); text-decoration:none; }
+.footer-legal a { color:rgba(255,255,255,0.85); text-decoration:none; }
 .footer-legal a:hover { color:rgba(255,255,255,0.7); }
 
 /* RESPONSIVE */
@@ -322,7 +322,7 @@ footer { background:#0F0A07; padding:4.5rem 2rem 2rem; border-top:1px solid var(
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;margin-bottom:6rem;}
 @media(max-width:768px){.two-col{grid-template-columns:1fr;gap:2.5rem;}}
 .img-ph{width:100%;aspect-ratio:4/3;background:linear-gradient(135deg,var(--burg),#2C0A1A);display:flex;align-items:center;justify-content:center;position:relative;}
-.img-ph span{font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:rgba(255,255,255,0.2);font-style:italic;}
+.img-ph span{font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:rgba(255,255,255,0.85);font-style:italic;}
 .img-badge{position:absolute;bottom:-1.5rem;right:-1.5rem;background:var(--gold);color:var(--black);width:96px;height:96px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
 .img-badge .big{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:700;line-height:1;}
 .img-badge .sm{font-size:0.55rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;}
@@ -333,7 +333,7 @@ footer { background:#0F0A07; padding:4.5rem 2rem 2rem; border-top:1px solid var(
 .plan-name{font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--gold);margin-bottom:0.25rem;}
 .plan-price{font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:700;color:var(--gold);line-height:1;margin:0.4rem 0;}
 .plan-price sup{font-size:1.3rem;vertical-align:super;}
-.plan-price sub{font-size:1rem;color:rgba(255,255,255,0.4);}
+.plan-price sub{font-size:1rem;color:rgba(255,255,255,0.85);}
 .plan-desc{font-size:0.75rem;color:rgba(255,255,255,0.5);margin-bottom:1.5rem;line-height:1.7;}
 .plan-feats{list-style:none;margin-bottom:1.75rem;}
 .plan-feats li{font-size:0.77rem;padding:0.45rem 0;border-bottom:1px solid rgba(255,255,255,0.12);color:#fff;display:flex;gap:0.5rem;}
@@ -362,15 +362,15 @@ footer { background:#0F0A07; padding:4.5rem 2rem 2rem; border-top:1px solid var(
 .ev-lock{display:inline-flex;align-items:center;gap:0.3rem;font-size:0.62rem;color:var(--gold);font-weight:600;letter-spacing:0.06em;margin-top:0.6rem;}
 .faq{max-width:740px;margin:5rem auto;padding:0 1.5rem;}
 .faq-item{border-bottom:1px solid rgba(0,0,0,0.08);padding:1.25rem 0;}
-.faq-q{font-size:0.85rem;font-weight:700;color:var(--brown);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:1rem;}
+.faq-q{font-size:0.85rem;font-weight:700;color:#1a0a05;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:1rem;}
 .faq-q::after{content:'+';font-size:1.2rem;color:var(--gold);font-weight:300;flex-shrink:0;transition:transform 0.2s;}
 .faq-item.open .faq-q::after{transform:rotate(45deg);}
-.faq-a{font-size:0.78rem;color:#666;line-height:1.8;max-height:0;overflow:hidden;transition:max-height 0.3s ease,margin 0.2s;}
+.faq-a{font-size:0.78rem;color:#444;line-height:1.8;max-height:0;overflow:hidden;transition:max-height 0.3s ease,margin 0.2s;}
 .faq-item.open .faq-a{max-height:300px;margin-top:0.75rem;}
 .cta-s{background:linear-gradient(135deg,var(--burg),#1A0A10);padding:5rem 2rem;text-align:center;}
 .cta-s h2{font-family:'Cormorant Garamond',serif;font-size:2.8rem;color:#fff;margin-bottom:0.5rem;}
 .cta-s p{color:rgba(255,255,255,0.85);font-size:0.82rem;margin-bottom:2rem;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.8;}
-footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62rem;color:rgba(255,255,255,0.3);letter-spacing:0.05em;}
+footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62rem;color:rgba(255,255,255,0.85);letter-spacing:0.05em;}
 </style>
 </head>
 <body><header>
@@ -449,18 +449,24 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
       <a href="#member-form" class="btn-g" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">Start Your Membership</a>
     </div>
     <div>
-      <div class="img-ph"><span>Wine &amp; Lake Views</span>
+      <div class="img-ph" style="background:linear-gradient(135deg,#5C1A2E,#2C0A1A);min-height:340px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;">
+  <div style="text-align:center;padding:2rem;">
+    <p style="font-family:'Cormorant Garamond',serif;font-size:0.8rem;letter-spacing:0.3em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:0.5rem;">Membership Card</p>
+    <div style="border:2px solid rgba(184,147,58,0.5);padding:2rem 2.5rem;display:inline-block;background:rgba(0,0,0,0.3);">
+      <p style="font-family:'Cormorant Garamond',serif;font-size:2rem;color:#B8933A;line-height:1;margin-bottom:0.25rem;">Rock &amp; Vine</p>
+      <p style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:rgba(255,255,255,0.7);font-style:italic;margin-bottom:1rem;">Wine Club Member</p>
+      <div style="border-top:1px solid rgba(184,147,58,0.3);padding-top:0.75rem;margin-top:0.25rem;">
+        <p style="font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.4);">The Quarry &middot; New Melle, MO</p>
+      </div>
+    </div>
+    <p style="font-family:'Cormorant Garamond',serif;font-size:1rem;color:rgba(255,255,255,0.5);margin-top:1.25rem;font-style:italic;">Active members get priority access<br>to all wine tasting events</p>
+  </div>
+  <span style="display:none;">Wine &amp; Lake Views</span>
         <div class="img-badge"><span class="big">$29</span><span class="sm">/month</span></div>
       </div>
     </div>
   </div>
-  <div style="text-align:center;margin-bottom:2rem;">
-    <div class="slabel">Membership</div>
-    <h2 class="stitle" style="margin:0.4rem auto;">One Simple Plan</h2>
-    <p class="ssub" style="margin:0 auto 2rem;">Everything included. No contracts. Cancel anytime.</p>
-  </div>
-  <div class="plan-box">
-    <div class="plan-name">Rock &amp; Vine Member</div>
+  
     <div class="plan-price"><sup>$</sup>29<span style="font-size:1.1rem;">.99</span><sub>/month</sub></div>
     <p class="plan-desc">Full access to all member benefits. Cancel anytime — no contracts, no commitment.</p>
     <ul class="plan-feats">
@@ -553,8 +559,80 @@ function handleMemberForm(e){
     <div class="slabel">Member Events</div>
     <h2 class="stitle">Exclusive Tasting Experiences</h2>
     <p class="ssub">Members get first access to RSVP for these events before they open to the public.</p>
-    <div class="ev-grid">
-      <div class="ev-card"><div class="ev-img"><span>Spring Tasting</span></div><div class="ev-body"><div class="ev-tag">Member Event</div><div class="ev-title">Spring Wine Tasting</div><div class="ev-meta">Coming Soon &middot; The Quarry Lakeside</div><div class="ev-lock">&#9670; Members get priority RSVP</div></div></div>
+    <div class="ev-grid" id="tastingGrid">
+<div class="ev-card" data-date="2026-04-23" onclick="scrollToForm()" style="cursor:pointer;">
+  <div class="ev-img"><span>Chateau Winery</span></div>
+  <div class="ev-body">
+    <div class="ev-tag">Rock &amp; Vine Wine Club</div>
+    <div class="ev-title">Chateau Winery Tasting</div>
+    <div class="ev-meta">Apr 23, 2026 &middot; 6:00 PM &middot; The Quarry</div>
+    <div class="ev-lock">&#9670; Members get priority RSVP — click to register</div>
+  </div>
+</div>
+<div class="ev-card" data-date="2026-05-21" onclick="scrollToForm()" style="cursor:pointer;">
+  <div class="ev-img"><span>Augusta Winery</span></div>
+  <div class="ev-body">
+    <div class="ev-tag">Rock &amp; Vine Wine Club</div>
+    <div class="ev-title">Augusta Winery Tasting</div>
+    <div class="ev-meta">May 21, 2026 &middot; 6:00 PM &middot; The Quarry</div>
+    <div class="ev-lock">&#9670; Members get priority RSVP — click to register</div>
+  </div>
+</div>
+<div class="ev-card" data-date="2026-07-23" onclick="scrollToForm()" style="cursor:pointer;">
+  <div class="ev-img"><span>Montelle Winery</span></div>
+  <div class="ev-body">
+    <div class="ev-tag">Rock &amp; Vine Wine Club</div>
+    <div class="ev-title">Montelle Winery Tasting</div>
+    <div class="ev-meta">Jul 23, 2026 &middot; 6:00 PM &middot; The Quarry</div>
+    <div class="ev-lock">&#9670; Members get priority RSVP — click to register</div>
+  </div>
+</div>
+<div class="ev-card" data-date="2026-08-20" onclick="scrollToForm()" style="cursor:pointer;">
+  <div class="ev-img"><span>Trademark</span></div>
+  <div class="ev-body">
+    <div class="ev-tag">Rock &amp; Vine Wine Club</div>
+    <div class="ev-title">Trademark Tasting</div>
+    <div class="ev-meta">Aug 20, 2026 &middot; 6:00 PM &middot; The Quarry</div>
+    <div class="ev-lock">&#9670; Members get priority RSVP — click to register</div>
+  </div>
+</div>
+<div class="ev-card" data-date="2026-09-24" onclick="scrollToForm()" style="cursor:pointer;">
+  <div class="ev-img"><span>Chateau Winery</span></div>
+  <div class="ev-body">
+    <div class="ev-tag">Rock &amp; Vine Wine Club</div>
+    <div class="ev-title">Chateau Winery Tasting</div>
+    <div class="ev-meta">Sep 24, 2026 &middot; 6:00 PM &middot; The Quarry</div>
+    <div class="ev-lock">&#9670; Members get priority RSVP — click to register</div>
+  </div>
+</div>
+<div class="ev-card" data-date="2026-10-15" onclick="scrollToForm()" style="cursor:pointer;">
+  <div class="ev-img"><span>Trademark</span></div>
+  <div class="ev-body">
+    <div class="ev-tag">Rock &amp; Vine Wine Club</div>
+    <div class="ev-title">Trademark Tasting</div>
+    <div class="ev-meta">Oct 15, 2026 &middot; 6:00 PM &middot; The Quarry</div>
+    <div class="ev-lock">&#9670; Members get priority RSVP — click to register</div>
+  </div>
+</div>
+<div class="ev-card" data-date="2026-11-12" onclick="scrollToForm()" style="cursor:pointer;">
+  <div class="ev-img"><span>Trademark</span></div>
+  <div class="ev-body">
+    <div class="ev-tag">Rock &amp; Vine Wine Club</div>
+    <div class="ev-title">Trademark Tasting</div>
+    <div class="ev-meta">Nov 12, 2026 &middot; 6:00 PM &middot; The Quarry</div>
+    <div class="ev-lock">&#9670; Members get priority RSVP — click to register</div>
+  </div>
+</div>
+<div class="ev-card" data-date="2026-12-10" onclick="scrollToForm()" style="cursor:pointer;">
+  <div class="ev-img"><span>Chateau Winery</span></div>
+  <div class="ev-body">
+    <div class="ev-tag">Rock &amp; Vine Wine Club</div>
+    <div class="ev-title">Chateau Winery Tasting</div>
+    <div class="ev-meta">Dec 10, 2026 &middot; 6:00 PM &middot; The Quarry</div>
+    <div class="ev-lock">&#9670; Members get priority RSVP — click to register</div>
+  </div>
+</div>
+</div><div class="ev-meta">Coming Soon &middot; The Quarry Lakeside</div><div class="ev-lock">&#9670; Members get priority RSVP</div></div></div>
       <div class="ev-card"><div class="ev-img"><span>Private Dinner</span></div><div class="ev-body"><div class="ev-tag">Private Member Dinner</div><div class="ev-title">Vineyard Dinner by the Lake</div><div class="ev-meta">Coming Soon &middot; The Quarry</div><div class="ev-lock">&#9670; Members only event</div></div></div>
       <div class="ev-card"><div class="ev-img"><span>Summer Series</span></div><div class="ev-body"><div class="ev-tag">Summer Series</div><div class="ev-title">Summer Wine &amp; Music Night</div><div class="ev-meta">Coming Soon &middot; Beer Garden</div><div class="ev-lock">&#9670; Early access for members</div></div></div>
     </div>
@@ -687,7 +765,7 @@ function handleMemberForm(e){
 <div class="cta-s">
   <h2>Ready to Join?</h2>
   <p>Join the Rock &amp; Vine Wine Club today and start enjoying exclusive access to wine tastings, member events, and more at The Quarry.</p>
-  <a href="#member-form" class="btn-g" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">Get Started — $29.99/mo</a>
+  <a href="#member-form" class="btn-g" onclick="event.preventDefault();scrollToForm()">Get Started — $29.99/mo</a>
 </div>
 <section style="background:#1A0E08;padding:3rem 1.5rem;text-align:center;border-top:1px solid rgba(184,147,58,0.2);">
   <p style="font-size:0.62rem;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;color:#B8933A;margin-bottom:0.5rem;">Stay in the Loop</p>
@@ -703,7 +781,21 @@ function handleMemberForm(e){
 </section>
 <script>function handleMail(e){e.preventDefault();var f=e.target;fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(new FormData(f)).toString()}).then(function(){f.style.display='none';document.getElementById('mail-ok').style.display='block';}).catch(function(){alert('Something went wrong. Please try again.');});}</script>
 <footer>&copy; 2026 The Quarry &nbsp;&middot;&nbsp; 3960 Highway Z, New Melle, MO 63385 &nbsp;&middot;&nbsp; 636-224-8257 &nbsp;&middot;&nbsp; management@thequarrystl.com</footer>
-<script>function faq(el){var i=el.parentElement;var o=i.classList.contains('open');document.querySelectorAll('.faq-item').forEach(function(x){x.classList.remove('open');});if(!o)i.classList.add('open');}</script>
+<script>function scrollToForm(){
+  document.getElementById('member-form').scrollIntoView({behavior:'smooth'});
+}
+// Hide past tasting events automatically
+document.addEventListener('DOMContentLoaded',function(){
+  var today=new Date(); today.setHours(0,0,0,0);
+  document.querySelectorAll('#tastingGrid .ev-card[data-date]').forEach(function(card){
+    var d=new Date(card.getAttribute('data-date')+'T00:00:00');
+    if(d<today) card.style.display='none';
+  });
+  // Hide grid if no upcoming events
+  var visible=[...document.querySelectorAll('#tastingGrid .ev-card')].filter(function(c){return c.style.display!=='none';});
+  if(!visible.length) document.querySelector('.events-s').style.display='none';
+});
+function faq(el){var i=el.parentElement;var o=i.classList.contains('open');document.querySelectorAll('.faq-item').forEach(function(x){x.classList.remove('open');});if(!o)i.classList.add('open');}</script>
 <script>
 function handleWineSignup(e){
   e.preventDefault();
