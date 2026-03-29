@@ -270,6 +270,12 @@ nav { display:flex; align-items:center; }
 /* ===END-MOBILE-HEADER-FIX=== */
 </style>
 
+<style id="nav-body-fix">
+@media(max-width:768px){
+  header{position:fixed !important;top:0 !important;z-index:999 !important;width:100% !important;}
+  body{padding-top:64px !important;}
+}
+</style>
 </head>
 <body>
 <script id="qnav">(function(){function init(){var h=document.getElementById('hamburger')||document.querySelector('.hamburger');var n=document.getElementById('mainNav');if(!h||!n)return;h.removeAttribute('onclick');function toggle(e){if(e){e.preventDefault();e.stopPropagation();}n.classList.toggle('open');h.classList.toggle('active');}h.addEventListener('click',toggle,{passive:false});h.addEventListener('touchend',function(e){e.preventDefault();e.stopPropagation();n.classList.toggle('open');h.classList.toggle('active');},{passive:false});document.addEventListener('touchend',function(e){if(!n.contains(e.target)&&!h.contains(e.target)){n.classList.remove('open');h.classList.remove('active');}},{passive:true});window.toggleNav=toggle;}if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}else{init();}})();</script>
