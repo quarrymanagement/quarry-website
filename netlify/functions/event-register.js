@@ -7,7 +7,7 @@ exports.handler=async(event)=>{
     const{eventId,firstName,lastName,email,phone,seatType,tableId,seatIds,partySize,ticketType}=JSON.parse(event.body||'{}');
     if(!eventId||!firstName||!email||!seatType)return{statusCode:400,headers:h,body:JSON.stringify({error:'Missing required fields'})};
     const token=process.env.NETLIFY_AUTH_TOKEN;
-    const site='roaring-pegasus-444826';
+    const site=process.env.SITE_ID||'d9496ae2-2b01-4229-b6d2-9203c3be7acb';
     const stripe=Stripe(process.env.STRIPE_SECRET_KEY);
     const evRes=await fetch('https://api.netlify.com/api/v1/blobs/'+site+'/quarry-events/'+eventId,{headers:{Authorization:'Bearer '+token}});
     if(!evRes.ok)return{statusCode:404,headers:h,body:JSON.stringify({error:'Event not found'})};
