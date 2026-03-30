@@ -1407,7 +1407,8 @@
 
         function handleNavigation(e) {
             const section = e.target.dataset.section;
-            if (!section || section === 'sign-out') return handleSignOut ? handleSignOut() : null;
+            if (!section) return; // No section = dropdown parent or non-nav button, ignore
+            if (section === 'sign-out') return handleSignOut ? handleSignOut() : null;
 
             // Close payments dropdown
             const dd = document.getElementById('paymentsDropdown');
