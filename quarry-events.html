@@ -518,115 +518,149 @@ body{font-family:'Montserrat',sans-serif;background:var(--cream);color:var(--bro
   </div>
   <div class="modal-footer">
     <div class="modal-total"><span>Total</span><span id="modalTotalAmt">$0.00</span></div>
-    <button class="btn-submit" id="btnSubmit" onclick="submitRegistration()" style="display:none;">Complete Registration &rarr;</button>
+    <button class="btn-submit" id="btnSubmit" onclick="submitReg()" style="display:none;">Complete Registration &rarr;</button>
   </div>
 </div>
 </div><script>
-var currentEvent=null,selectedSeatType='table',selectedTableId=null,selectedBarSeats=[];
-var EVENTS=[{id:'evt-singo-bingo-001',name:'Neon 80s Singo-Bingo Ladies Brunch',date:'Saturday, May 10, 2026',time:'11:00 AM - 2:00 PM',description:'Put on your neon and join us for the ultimate ladies brunch! Singo-Bingo is the game where YOU sing the songs to win. Featuring 80s hits, mimosa service, brunch bites, and amazing prizes.',pricePerSeat:4500,tableCount:8,tableSeats:4,barSeatCount:12,totalCapacity:44,category:'Brunch',active:true,imageColor:'linear-gradient(135deg,#1a0050,#8B008B)',emoji:''}];
+var currentEvent=null,selectedSeatType="table",selectedTableId=null,selectedBarSeats=[];
+var EVENTS=[{id:"evt-singo-bingo-001",name:"Neon 80s Singo-Bingo Ladies Brunch",date:"Saturday, May 10, 2026",time:"11:00 AM - 2:00 PM",description:"Put on your neon and join us for the ultimate ladies brunch! Singo-Bingo is the game where YOU sing the songs to win. Featuring 80s hits, mimosa service, brunch bites, and amazing prizes.",pricePerSeat:4500,tableCount:8,tableSeats:4,barSeatCount:12,totalCapacity:44,category:"Brunch",active:true,imageColor:"linear-gradient(135deg,#1a0050,#8B008B)"}];
 var EVENT_REGISTRATIONS={};
-async function loadEvents(filter){
-  var grid=document.getElementById('eventsGrid');
-  var evs=filter&&filter!=='all'?EVENTS.filter(function(e){return e.category===filter;}):EVENTS;
-  if(!evs.length){grid.innerHTML='<div class="empty-state"><h3>No Events Found</h3><p>Check back soon.</p></div>';return;}
-  var html='';
+function loadEvents(filter){
+  var grid=document.getElementById("eventsGrid");
+  var evs=filter&&filter!=="all"?EVENTS.filter(function(e){return e.category===filter;}):EVENTS;
+  if(!evs.length){grid.innerHTML="<div class=\"empty-state\"><h3>No Events Found</h3><p>Check back soon.</p></div>";return;}
+  var html="";
   for(var i=0;i<evs.length;i++){
     var ev=evs[i];
-    var regs=EVENT_REGISTRATIONS[ev.id]||{tablesTaken:[],barSeatsTaken:[],registrationCount:0};
+    var regs=EVENT_REGISTRATIONS[ev.id]||{tablesTaken:[],barSeatsTaken:[]};
     var taken=regs.tablesTaken.length*ev.tableSeats+regs.barSeatsTaken.length;
-    var total=ev.totalCapacity;var available=total-taken;var pct=Math.round((taken/total)*100);
-    var sc=available===0?'sold':available<8?'low':'ok';
-    var st=available===0?'SOLD OUT':available<8?available+' seats left!':available+' seats available';
-    var price=ev.pricePerSeat===0?'Free':'$'+(ev.pricePerSeat/100).toFixed(2);
-    html+='<div class="event-card" onclick="openModal(''+ev.id+'')"><div class="event-card-img" style="background:'+ev.imageColor+'">';
-    html+='<div style="font-size:3rem;">'+ev.emoji+'</div>';
-    html+='<div class="event-date-badge">'+ev.date.split(',').slice(0,2).join(',')+'</div>';
-    html+='<div class="event-category">'+ev.category+'</div></div>';
-    html+='<div class="seats-bar"><div class="seats-bar-fill'+(pct>80?' urgent':'')+'" style="width:'+pct+'%"></div></div>';
-    html+='<div class="event-card-body"><div class="event-title">'+ev.name+'</div>';
-    html+='<div class="event-meta"><span> '+ev.date+'</span><span> '+ev.time+'</span></div>';
-    html+='<div class="event-desc">'+ev.description+'</div>';
-    html+='<div class="event-footer"><div><div class="event-price">'+price+(ev.pricePerSeat>0?' <span>per seat</span>':'')+'</div>';
-    html+='<div class="event-seats-left '+sc+'">'+st+'</div></div>';
-    html+='<button class="btn-register"'+(available===0?' disabled':'')+'>'+(available===0?'Sold Out':'Register')+'</button></div></div></div>';
+    var total=ev.totalCapacity;var avail=total-taken;var pct=Math.round((taken/total)*100);
+    var sc=avail===0?"sold":avail<8?"low":"ok";
+    var st=avail===0?"SOLD OUT":avail<8?avail+" seats left!":avail+" seats available";
+    var price=ev.pricePerSeat===0?"Free":"$"+(ev.pricePerSeat/100).toFixed(2);
+    html+="<div class=\"event-card\" onclick=\"openModal('"+ev.id+"')\">";
+    html+="<div class=\"event-card-img\" style=\"background:"+ev.imageColor+"\"><div style=\"font-size:2.5rem;color:rgba(255,255,255,0.5);padding:1rem\">*</div>";
+    html+="<div class=\"event-date-badge\">"+ev.date.split(",")[0]+"</div>";
+    html+="<div class=\"event-category\">"+ev.category+"</div></div>";
+    html+="<div class=\"seats-bar\"><div class=\"seats-bar-fill"+(pct>80?" urgent":"")+"" style=\"width:"+pct+"%\"></div></div>";
+    html+="<div class=\"event-card-body\"><div class=\"event-title\">"+ev.name+"</div>";
+    html+="<div class=\"event-meta\"><span>"+ev.date+"</span><span>"+ev.time+"</span></div>";
+    html+="<div class=\"event-desc\">"+ev.description+"</div>";
+    html+="<div class=\"event-footer\"><div><div class=\"event-price\">"+price+(ev.pricePerSeat>0?" <span>per seat</span>":"")+"</div>";
+    html+="<div class=\"event-seats-left "+sc+"\">"+st+"</div></div>";
+    html+="<button class=\"btn-register\""+(avail===0?" disabled":"")+">"+(avail===0?"Sold Out":"Register")+"</button></div></div></div>";
   }
   grid.innerHTML=html;
-  evs.forEach(function(ev){fetchEventAvailability(ev.id);});
+  evs.forEach(function(ev){fetchAvail(ev.id);});
 }
-function fetchEventAvailability(eventId){
-  fetch('/.netlify/functions/get-event?eventId='+eventId).then(function(r){return r.json();}).then(function(d){if(d.event){EVENT_REGISTRATIONS[eventId]=d;loadEvents(window._currentFilter);}}).catch(function(){});
+function fetchAvail(id){
+  fetch("/.netlify/functions/get-event?eventId="+id).then(function(r){return r.json();}).then(function(d){if(d.event){EVENT_REGISTRATIONS[id]=d;loadEvents(window._cf);}}).catch(function(){});
 }
-function filterEvents(cat,btn){window._currentFilter=cat;document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');loadEvents(cat);}
+function filterEvents(cat,btn){
+  window._cf=cat;
+  document.querySelectorAll(".filter-btn").forEach(function(b){b.classList.remove("active");});
+  btn.classList.add("active");
+  loadEvents(cat);
+}
 function openModal(eventId){
   currentEvent=EVENTS.find(function(e){return e.id===eventId;})||null;
   if(!currentEvent)return;
-  document.getElementById('modalTitle').textContent=currentEvent.name;
-  document.getElementById('modalDate').textContent=currentEvent.date;
-  document.getElementById('modalTime').textContent=currentEvent.time;
-  selectedTableId=null;selectedBarSeats=[];selectedSeatType='table';
-  renderVenueMap();
-  document.getElementById('step1').style.display='';document.getElementById('step2').style.display='none';
-  document.getElementById('btnSubmit').style.display='none';document.getElementById('btnToStep2').style.display='';
-  document.getElementById('btnToStep2').disabled=true;document.getElementById('selectionInfo').style.display='none';
-  document.getElementById('btnTable').classList.add('active');document.getElementById('btnBar').classList.remove('active');
-  updateTotal();document.getElementById('regModal').classList.add('open');document.body.style.overflow='hidden';
+  document.getElementById("modalTitle").textContent=currentEvent.name;
+  document.getElementById("modalDate").textContent=currentEvent.date;
+  document.getElementById("modalTime").textContent=currentEvent.time;
+  selectedTableId=null;selectedBarSeats=[];selectedSeatType="table";
+  renderMap();
+  document.getElementById("step1").style.display="";
+  document.getElementById("step2").style.display="none";
+  document.getElementById("btnSubmit").style.display="none";
+  document.getElementById("btnToStep2").style.display="";
+  document.getElementById("btnToStep2").disabled=true;
+  document.getElementById("selectionInfo").style.display="none";
+  document.getElementById("btnTable").classList.add("active");
+  document.getElementById("btnBar").classList.remove("active");
+  updateTotal();
+  document.getElementById("regModal").classList.add("open");
+  document.body.style.overflow="hidden";
 }
-function closeModal(){document.getElementById('regModal').classList.remove('open');document.body.style.overflow='';}
-function setSeatType(type){selectedSeatType=type;selectedTableId=null;selectedBarSeats=[];document.getElementById('btnTable').classList.toggle('active',type==='table');document.getElementById('btnBar').classList.toggle('active',type==='bar');renderVenueMap();updateTotal();document.getElementById('btnToStep2').disabled=true;document.getElementById('selectionInfo').style.display='none';}
-function renderVenueMap(){
+function closeModal(){
+  document.getElementById("regModal").classList.remove("open");
+  document.body.style.overflow="";
+}
+function setSeatType(type){
+  selectedSeatType=type;selectedTableId=null;selectedBarSeats=[];
+  document.getElementById("btnTable").classList.toggle("active",type==="table");
+  document.getElementById("btnBar").classList.toggle("active",type==="bar");
+  renderMap();updateTotal();
+  document.getElementById("btnToStep2").disabled=true;
+  document.getElementById("selectionInfo").style.display="none";
+}
+function renderMap(){
   if(!currentEvent)return;
   var regs=EVENT_REGISTRATIONS[currentEvent.id]||{tablesTaken:[],barSeatsTaken:[]};
-  var takenTables=regs.tablesTaken||[];var takenBar=regs.barSeatsTaken||[];
-  var tHtml='';
+  var tt=regs.tablesTaken||[];var tb=regs.barSeatsTaken||[];
+  var tH="";
   for(var i=1;i<=currentEvent.tableCount;i++){
-    var tid='T'+i;var isTaken=takenTables.includes(tid);var isSel=selectedTableId===tid;
-    var cls='table-seat'+(isTaken?' taken':'')+(isSel?' selected':'');
-    var oc=isTaken?'':' onclick="selectTable(''+tid+'')"';
-    tHtml+='<div class="'+cls+'"'+oc+'><span class="tnum">'+tid+'</span><span class="tcap">'+currentEvent.tableSeats+' seats</span></div>';
+    var tid="T"+i;var isTk=tt.includes(tid);var isSel=selectedTableId===tid;
+    var cls="table-seat"+(isTk?" taken":"")+(isSel?" selected":"");
+    var oc=isTk?"":(" onclick=\"selectTable('"+tid+"')\"");
+    tH+="<div class=\""+cls+"\""+oc+"><span class=\"tnum\">"+tid+"</span><span class=\"tcap\">"+currentEvent.tableSeats+" seats</span></div>";
   }
-  document.getElementById('tablesGrid').innerHTML=tHtml;
-  var bHtml='';
+  document.getElementById("tablesGrid").innerHTML=tH;
+  var bH="";
   for(var j=1;j<=currentEvent.barSeatCount;j++){
-    var bid='B'+j;var isBT=takenBar.includes(bid);var isBSel=selectedBarSeats.includes(bid);
-    var bcls='bar-seat'+(isBT?' taken':'')+(isBSel?' selected':'');
-    var boc=isBT?'':' onclick="toggleBarSeat(''+bid+'')"';
-    bHtml+='<div class="'+bcls+'"'+boc+'>'+j+'</div>';
+    var bid="B"+j;var isBT=tb.includes(bid);var isBSel=selectedBarSeats.includes(bid);
+    var bc="bar-seat"+(isBT?" taken":"")+(isBSel?" selected":"");
+    var boc=isBT?"":(" onclick=\"toggleBar('"+bid+"')\"");
+    bH+="<div class=\""+bc+"\""+boc+">"+j+"</div>";
   }
-  document.getElementById('barSeatsRow').innerHTML=bHtml;
+  document.getElementById("barSeatsRow").innerHTML=bH;
 }
 function selectTable(tid){
   if(!currentEvent)return;
-  selectedTableId=selectedTableId===tid?null:tid;renderVenueMap();
-  var info=document.getElementById('selectionInfo');
-  if(selectedTableId){info.textContent=' Table '+selectedTableId+' selected ('+currentEvent.tableSeats+' seats) -- $'+((currentEvent.pricePerSeat*currentEvent.tableSeats)/100).toFixed(2)+' total';info.style.display='block';document.getElementById('btnToStep2').disabled=false;}
-  else{info.style.display='none';document.getElementById('btnToStep2').disabled=true;}
+  selectedTableId=selectedTableId===tid?null:tid;
+  renderMap();
+  var info=document.getElementById("selectionInfo");
+  if(selectedTableId){
+    info.textContent="Table "+selectedTableId+" selected ("+currentEvent.tableSeats+" seats) - $"+((currentEvent.pricePerSeat*currentEvent.tableSeats)/100).toFixed(2)+" total";
+    info.style.display="block";document.getElementById("btnToStep2").disabled=false;
+  }else{info.style.display="none";document.getElementById("btnToStep2").disabled=true;}
   updateTotal();
 }
-function toggleBarSeat(bid){
+function toggleBar(bid){
   var idx=selectedBarSeats.indexOf(bid);
   if(idx>-1)selectedBarSeats.splice(idx,1);else selectedBarSeats.push(bid);
-  renderVenueMap();
-  var info=document.getElementById('selectionInfo');
-  if(selectedBarSeats.length){info.textContent=' '+selectedBarSeats.length+' bar seat(s): '+selectedBarSeats.join(', ')+' -- $'+((currentEvent.pricePerSeat*selectedBarSeats.length)/100).toFixed(2)+' total';info.style.display='block';document.getElementById('btnToStep2').disabled=false;}
-  else{info.style.display='none';document.getElementById('btnToStep2').disabled=true;}
+  renderMap();
+  var info=document.getElementById("selectionInfo");
+  if(selectedBarSeats.length){
+    info.textContent=selectedBarSeats.length+" bar seat(s): "+selectedBarSeats.join(", ")+" - $"+((currentEvent.pricePerSeat*selectedBarSeats.length)/100).toFixed(2)+" total";
+    info.style.display="block";document.getElementById("btnToStep2").disabled=false;
+  }else{info.style.display="none";document.getElementById("btnToStep2").disabled=true;}
   updateTotal();
 }
-function updateTotal(){if(!currentEvent)return;var qty=selectedSeatType==='table'?(selectedTableId?currentEvent.tableSeats:0):selectedBarSeats.length;document.getElementById('modalTotalAmt').textContent='$'+((currentEvent.pricePerSeat*qty)/100).toFixed(2);}
-function goToStep2(){document.getElementById('step1').style.display='none';document.getElementById('step2').style.display='';document.getElementById('btnToStep2').style.display='none';document.getElementById('btnSubmit').style.display='';}
-function backToStep1(){document.getElementById('step1').style.display='';document.getElementById('step2').style.display='none';document.getElementById('btnToStep2').style.display='';document.getElementById('btnSubmit').style.display='none';}
-async function submitRegistration(){
-  var first=document.getElementById('regFirst').value.trim();var last=document.getElementById('regLast').value.trim();var email=document.getElementById('regEmail').value.trim();
-  if(!first||!last||!email){alert('Please fill in your name and email.');return;}
-  var btn=document.getElementById('btnSubmit');btn.disabled=true;btn.textContent='Processing...';
+function updateTotal(){
+  if(!currentEvent)return;
+  var qty=selectedSeatType==="table"?(selectedTableId?currentEvent.tableSeats:0):selectedBarSeats.length;
+  document.getElementById("modalTotalAmt").textContent="$"+((currentEvent.pricePerSeat*qty)/100).toFixed(2);
+}
+function goToStep2(){document.getElementById("step1").style.display="none";document.getElementById("step2").style.display="";document.getElementById("btnToStep2").style.display="none";document.getElementById("btnSubmit").style.display="";}
+function backToStep1(){document.getElementById("step1").style.display="";document.getElementById("step2").style.display="none";document.getElementById("btnToStep2").style.display="";document.getElementById("btnSubmit").style.display="none";}
+async function submitReg(){
+  var first=document.getElementById("regFirst").value.trim();
+  var last=document.getElementById("regLast").value.trim();
+  var email=document.getElementById("regEmail").value.trim();
+  if(!first||!last||!email){alert("Please fill in your name and email.");return;}
+  var btn=document.getElementById("btnSubmit");btn.disabled=true;btn.textContent="Processing...";
   try{
-    var res=await fetch('/.netlify/functions/event-register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({eventId:currentEvent.id,name:first+' '+last,email:email,phone:document.getElementById('regPhone').value,partySize:document.getElementById('regPartySize').value,seatType:selectedSeatType,tableId:selectedTableId,barSeats:selectedBarSeats,successUrl:window.location.origin+'/quarry-events',cancelUrl:window.location.origin+'/quarry-events'})});
+    var res=await fetch("/.netlify/functions/event-register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({eventId:currentEvent.id,name:first+" "+last,email:email,phone:document.getElementById("regPhone").value,partySize:document.getElementById("regPartySize").value,seatType:selectedSeatType,tableId:selectedTableId,barSeats:selectedBarSeats,successUrl:window.location.origin+"/quarry-events",cancelUrl:window.location.origin+"/quarry-events"})});
     var data=await res.json();
     if(data.checkoutUrl){window.location.href=data.checkoutUrl;}
-    else if(data.success&&data.free){closeModal();var b=document.getElementById('successBanner');b.textContent=' You're registered for '+currentEvent.name+'! See you there.';b.style.display='block';setTimeout(function(){b.style.display='none';},6000);fetchEventAvailability(currentEvent.id);}
-    else{alert(data.error||'Something went wrong.');btn.disabled=false;btn.textContent='Complete Registration ->';}
-  }catch(e){alert('Connection error. Please try again.');btn.disabled=false;btn.textContent='Complete Registration ->';}
+    else if(data.success&&data.free){closeModal();var b=document.getElementById("successBanner");b.textContent="Registered for "+currentEvent.name+"! See you there.";b.style.display="block";setTimeout(function(){b.style.display="none";},6000);fetchAvail(currentEvent.id);}
+    else{alert(data.error||"Something went wrong.");btn.disabled=false;btn.textContent="Complete Registration";}
+  }catch(e){alert("Connection error. Try again.");btn.disabled=false;btn.textContent="Complete Registration";}
 }
-(function(){var p=new URLSearchParams(window.location.search);if(p.get('registered')){var b=document.getElementById('successBanner');b.textContent=' Registration confirmed for '+decodeURIComponent(p.get('event')||'your event')+'! Check your email.';b.style.display='block';setTimeout(function(){b.style.display='none';},8000);history.replaceState({},'','/quarry-events');}})();
-window._currentFilter='all';loadEvents('all');
+(function(){var p=new URLSearchParams(window.location.search);if(p.get("registered")){var b=document.getElementById("successBanner");b.textContent="Registration confirmed for "+decodeURIComponent(p.get("event")||"your event")+"! Check your email.";b.style.display="block";setTimeout(function(){b.style.display="none";},8000);history.replaceState({},"","/quarry-events");}})();
+window._cf="all";
+loadEvents("all");
 </script>
-</body></html>
+</body>
+</html>
