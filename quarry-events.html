@@ -541,7 +541,7 @@ function loadEvents(filter){
     var dis=avail===0?' disabled=""':'';
     var btn=avail===0?"Sold Out":"Register";
     html+='<div class="event-card" onclick="openModal(''+ev.id+'')"><div class="event-card-img" style="background:'+ev.imageColor+'"><div style="font-size:2.5rem;color:rgba(255,255,255,0.4);padding:1rem">'+ev.name.charAt(0)+'</div><div class="event-date-badge">'+ev.date.split(",")[0]+'</div><div class="event-category">'+ev.category+'</div></div>';
-    html+='<div class="seats-bar"><div class="seats-bar-fill'+(pct>80?" urgent":"")+('" style="width:')+pct+'%"></div></div>';
+    html+='<div class="seats-bar"><div class="seats-bar-fill'+(pct>80?' urgent':'')+'" style="width:'+pct+'%"></div></div>';
     html+='<div class="event-card-body"><div class="event-title">'+ev.name+'</div>';
     html+='<div class="event-meta"><span>'+ev.date+'</span><span>'+ev.time+'</span></div>';
     html+='<div class="event-desc">'+ev.description+'</div>';
