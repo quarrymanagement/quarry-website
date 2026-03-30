@@ -1,0 +1,10 @@
+exports.handler=async(event)=>{
+  return{statusCode:200,headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    siteId:process.env.SITE_ID,
+    netlifyLocal:process.env.NETLIFY_LOCAL,
+    hasToken:!!process.env.NETLIFY_AUTH_TOKEN,
+    tokenLength:process.env.NETLIFY_AUTH_TOKEN?.length,
+    deployId:process.env.DEPLOY_ID,
+    context:process.env.CONTEXT
+  })};
+};
