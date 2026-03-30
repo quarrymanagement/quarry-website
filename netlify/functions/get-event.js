@@ -1,18 +1,19 @@
-const{getStore}=require('@netlify/blobs');
-exports.handler=async(event,context)=>{
+exports.handler=async(event)=>{
   const h={'Access-Control-Allow-Origin':'*','Content-Type':'application/json'};
   if(event.httpMethod==='OPTIONS')return{statusCode:200,headers:h,body:''};
   const{eventId}=(event.queryStringParameters||{});
   if(!eventId)return{statusCode:400,headers:h,body:JSON.stringify({error:'eventId required'})};
+  const token=process.env.NETLIFY_AUTH_TOKEN;
+  const site='roaring-pegasus-444826';
   try{
-    const evStore=getStore({name:'quarry-events',consistency:'strong'});
-    const ev=await evStore.get(eventId,{type:'json'});
-    if(!ev)return{statusCode:404,headers:h,body:JSON.stringify({error:'Event not found'})};
-    const regStore=getStore({name:'event-registrations',consistency:'strong'});
+    const evRes=await fetch('https://api.netlify.com/api/v1/blobs/'+site+'/quarry-events/'+eventId,{headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'}});
+    if(!evRes.ok){const t=await evRes.text();return{statusCode:404,headers:h,body:JSON.stringify({error:'Event not found',detail:t})};}
+    const ev=await evRes.json();
+    const regRes=await fetch('https://api.netlify.com/api/v1/blobs/'+site+'/event-registrations/'+eventId,{headers:{Authorization:'Bearer '+token}});
     let regs=[];
-    try{const r=await regStore.get(eventId,{type:'json'});if(r)regs=r.registrations||[];}catch(e){}
+    if(regRes.ok){try{const d=await regRes.json();regs=d.registrations||[];}catch(e){}}
     const takenTables=regs.filter(r=>r.seatType==='table').map(r=>r.tableId);
     const takenBarSeats=regs.filter(r=>r.seatType==='bar').flatMap(r=>r.seatIds||[]);
     return{statusCode:200,headers:h,body:JSON.stringify({...ev,takenTables,takenBarSeats,totalRegistered:regs.reduce((s,r)=>s+(r.partySize||1),0),registrationCount:regs.length,registrations:regs})};
-  }catch(err){return{statusCode:500,headers:h,body:JSON.stringify({error:err.message,stack:err.stack})};}
+  }catch(err){return{statusCode:500,headers:h,body:JSON.stringify({error:err.message})};}
 };
