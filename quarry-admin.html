@@ -1275,7 +1275,7 @@
         }
 
         // DATA LOADING
-        function loadData() {
+        async function loadData() {
             showLoadingIndicator(true);
             try {
                 const resp = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${DATA_FILE}`, {
