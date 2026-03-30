@@ -1,34 +1,31 @@
 const Stripe=require('stripe');
 exports.handler=async(event)=>{
-  const h={'Access-Control-Allow-Origin':'*','Content-Type':'application/json'};
-  if(event.httpMethod==='OPTIONS')return{statusCode:200,headers:h,body:''};
-  if(event.httpMethod!=='POST')return{statusCode:405,headers:h,body:'Method not allowed'};
+  const headers={'Access-Control-Allow-Origin':'*','Content-Type':'application/json'};
+  if(event.httpMethod==='OPTIONS')return{statusCode:200,headers,body:''};
+  if(event.httpMethod!=='POST')return{statusCode:405,headers,body:'Method not allowed'};
   try{
-    const{eventId,firstName,lastName,email,phone,seatType,tableId,seatIds,partySize,ticketType}=JSON.parse(event.body||'{}');
-    if(!eventId||!firstName||!email||!seatType)return{statusCode:400,headers:h,body:JSON.stringify({error:'Missing required fields'})};
+    const{eventId,name,email,phone,partySize,seatType,tableId,barSeats,successUrl,cancelUrl}=JSON.parse(event.body||'{}');
+    if(!eventId||!name||!email||!seatType)return{statusCode:400,headers,body:JSON.stringify({error:'Missing required fields'})};
     const token=process.env.NETLIFY_AUTH_TOKEN;
-    const site=process.env.SITE_ID||'d9496ae2-2b01-4229-b6d2-9203c3be7acb';
+    const siteId='roaring-pegasus-444826';
+    const evRes=await fetch(`https://api.netlify.com/api/v1/blobs/${siteId}/quarry-events/event-${eventId}`,{headers:{Authorization:'Bearer '+token}});
+    if(!evRes.ok)return{statusCode:404,headers,body:JSON.stringify({error:'Event not found'})};
+    const evData=await evRes.json();
+    let registrations=[];
+    try{const regRes=await fetch(`https://api.netlify.com/api/v1/blobs/${siteId}/quarry-registrations/event-${eventId}`,{headers:{Authorization:'Bearer '+token}});if(regRes.ok){const d=await regRes.json();registrations=d.registrations||[];}}catch(e){}
+    const takenTables=registrations.filter(r=>r.seatType==='table').map(r=>r.tableId);
+    const takenBar=[];registrations.filter(r=>r.seatType==='bar').forEach(r=>(r.barSeats||[]).forEach(s=>takenBar.push(s)));
+    if(seatType==='table'&&takenTables.includes(tableId))return{statusCode:409,headers,body:JSON.stringify({error:'Table already reserved'})};
+    if(seatType==='bar'&&(barSeats||[]).some(s=>takenBar.includes(s)))return{statusCode:409,headers,body:JSON.stringify({error:'Bar seat already taken'})};
+    const qty=seatType==='table'?(evData.tableSeats||4):(barSeats?.length||1);
+    const totalCents=evData.pricePerSeat*qty;
+    if(totalCents===0){
+      registrations.push({name,email,phone,partySize,seatType,tableId,barSeats,registeredAt:new Date().toISOString(),free:true});
+      await fetch(`https://api.netlify.com/api/v1/blobs/${siteId}/quarry-registrations/event-${eventId}`,{method:'PUT',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({registrations})});
+      return{statusCode:200,headers,body:JSON.stringify({success:true,free:true})};
+    }
     const stripe=Stripe(process.env.STRIPE_SECRET_KEY);
-    const evRes=await fetch('https://api.netlify.com/api/v1/blobs/'+site+'/quarry-events/'+eventId,{headers:{Authorization:'Bearer '+token}});
-    if(!evRes.ok)return{statusCode:404,headers:h,body:JSON.stringify({error:'Event not found'})};
-    const ev=await evRes.json();
-    const regRes=await fetch('https://api.netlify.com/api/v1/blobs/'+site+'/event-registrations/'+eventId,{headers:{Authorization:'Bearer '+token}});
-    let regs=[];
-    if(regRes.ok){try{const d=await regRes.json();regs=d.registrations||[];}catch(e){}}
-    const takenTables=regs.filter(r=>r.seatType==='table').map(r=>r.tableId);
-    const takenBarSeats=regs.filter(r=>r.seatType==='bar').flatMap(r=>r.seatIds||[]);
-    if(seatType==='table'&&takenTables.includes(tableId))return{statusCode:409,headers:h,body:JSON.stringify({error:'Table already reserved. Please choose another.'})};
-    if(seatType==='bar'&&(seatIds||[]).some(s=>takenBarSeats.includes(s)))return{statusCode:409,headers:h,body:JSON.stringify({error:'One or more bar seats already taken.'})};
-    const qty=seatType==='table'?(ev.tableSize||6):(parseInt(partySize)||1);
-    const pricePerSeat=ticketType==='premium'?ev.pricePremium:ev.priceBase;
-    const session=await stripe.checkout.sessions.create({
-      payment_method_types:['card'],mode:'payment',allow_promotion_codes:true,
-      line_items:[{price_data:{currency:'usd',product_data:{name:ev.title+(seatType==='table'?' — Table '+tableId:' — Bar Seat(s)'),description:ticketType==='premium'?'Bottomless Mimosas/Bloody Marys + Brunch + Bingo':'Brunch + Bingo'},unit_amount:Math.round(pricePerSeat*100)},quantity:qty}],
-      customer_email:email,
-      metadata:{eventId,firstName,lastName:lastName||'',phone:phone||'',seatType,tableId:tableId||'',seatIds:(seatIds||[]).join(','),partySize:String(qty),ticketType:ticketType||'base'},
-      success_url:'https://roaring-pegasus-444826.netlify.app/quarry-events?registered=1',
-      cancel_url:'https://roaring-pegasus-444826.netlify.app/quarry-events'
-    });
-    return{statusCode:200,headers:h,body:JSON.stringify({checkoutUrl:session.url})};
-  }catch(err){return{statusCode:500,headers:h,body:JSON.stringify({error:err.message})};}
+    const session=await stripe.checkout.sessions.create({mode:'payment',allow_promotion_codes:true,line_items:[{price_data:{currency:'usd',unit_amount:evData.pricePerSeat,product_data:{name:`${evData.name} — ${seatType==='table'?'Full Table':barSeats?.length+' Bar Seat(s)'}`,description:`${evData.date} at ${evData.time} | The Quarry`}},quantity:qty}],metadata:{eventId,name,email,phone:phone||'',partySize:String(partySize||1),seatType,tableId:tableId||'',barSeats:(barSeats||[]).join(',')},customer_email:email,success_url:(successUrl||'https://roaring-pegasus-444826.netlify.app/quarry-events')+'?registered=1&event='+encodeURIComponent(evData.name),cancel_url:cancelUrl||'https://roaring-pegasus-444826.netlify.app/quarry-events'});
+    return{statusCode:200,headers,body:JSON.stringify({checkoutUrl:session.url})};
+  }catch(err){return{statusCode:500,headers,body:JSON.stringify({error:err.message})};}
 };
