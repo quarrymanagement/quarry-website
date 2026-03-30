@@ -1,0 +1,81 @@
+{
+  "events": [
+    {
+      "id": "evt-80s-apr3",
+      "name": "80s Neon Music Bingo",
+      "date": "Friday, April 3, 2026",
+      "time": "7:00 PM",
+      "location": "The Quarry, New Melle MO",
+      "description": "A night of 80s hits, neon lights, music bingo and great drinks. This event is fully sold out.",
+      "category": "Ticketed",
+      "pricePerSeat": 3500,
+      "totalCapacity": 44,
+      "registeredCount": 44,
+      "tiers": [
+        { "name": "General Admission", "description": "Entry + music bingo all night", "pricePerPerson": 3500, "priceLabel": "$35" }
+      ],
+      "seatingOptions": null,
+      "imageGradient": "neon-80s",
+      "imageText": "80s",
+      "status": "sold-out",
+      "floorPlan": null,
+      "bookedTableIds": []
+    },
+    {
+      "id": "evt-80s-apr4",
+      "name": "80s Neon Music Bingo",
+      "date": "Saturday, April 4, 2026",
+      "time": "7:00 PM",
+      "location": "The Quarry, New Melle MO",
+      "description": "Last chance! Dress in your brightest neon and get ready to sing 80s hits and win prizes.",
+      "category": "Ticketed",
+      "pricePerSeat": 3500,
+      "totalCapacity": 44,
+      "registeredCount": 42,
+      "tiers": [
+        { "name": "General Admission", "description": "Entry + music bingo all night", "pricePerPerson": 3500, "priceLabel": "$35" }
+      ],
+      "seatingOptions": null,
+      "imageGradient": "neon-80s",
+      "imageText": "80s",
+      "status": "low",
+      "floorPlan": null,
+      "bookedTableIds": []
+    },
+    {
+      "id": "evt-brunch-apr12",
+      "name": "Ladies Neon Singo Bingo Brunch",
+      "date": "Sunday, April 12, 2026",
+      "time": "11:00 AM – 2:00 PM",
+      "location": "The Quarry, New Melle MO",
+      "description": "The ultimate ladies brunch! Neon attire, Singo-Bingo, prizes and amazing food. Single seats and full tables available.",
+      "category": "Ticketed",
+      "pricePerSeat": 3500,
+      "totalCapacity": 31,
+      "registeredCount": 0,
+      "tiers": [
+        { "name": "Bingo + Brunch", "description": "Bingo games + full brunch menu", "pricePerPerson": 3500, "priceLabel": "$35" },
+        { "name": "VIP Bottomless", "description": "Bottomless bloodys + mimosas, bingo + brunch", "pricePerPerson": 4500, "priceLabel": "$45" }
+      ],
+      "seatingOptions": [
+        { "name": "Single Seat", "seats": 1, "available": 8 },
+        { "name": "5-Top Table", "seats": 5, "available": 1 },
+        { "name": "8-Top Table", "seats": 8, "available": 1 },
+        { "name": "10-Top Table", "seats": 10, "available": 1 }
+      ],
+      "imageGradient": "neon-brunch",
+      "imageText": "Brunch",
+      "status": "available",
+      "floorPlan": null,
+      "bookedTableIds": ["t31", "t33", "bar-3", "bar-5"]
+    }
+  ],
+  "bands": [
+    { "id": "1", "name": "Scott and Liz", "date": "2026-03-28", "timeSlot": "7 PM - 10 PM" },
+    { "id": "2", "name": "Ed Callison", "date": "2026-03-29", "timeSlot": "1 PM - 4 PM" },
+    { "id": "3", "name": "Kelli Renee", "date": "2026-04-04", "timeSlot": "7 PM - 10 PM" },
+    { "id": "4", "name": "The Velvet Devils", "date": "2026-04-12", "timeSlot": "1 PM - 4 PM" }
+  ],
+  "floorPlan": null,
+  "registrations": {}
+}
