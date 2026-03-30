@@ -733,7 +733,10 @@
             <div class="topnav">
                 <h1>The Quarry Admin</h1>
                 <div class="nav-items">
-                    <button id="navDashboard" class="nav-btn active" data-section="dashboard">Dashboard</button>
+                    <button class="nav-btn" onclick="openTokenSettings()" style="margin-right: auto; background: none; border: none; color: var(--gold); font-size: 1.5rem; cursor: pointer; padding: 0.5rem;" title="GitHub Settings">
+            ⚙️ <span id="tokenStatus" style="font-size: 0.7rem; margin-left: 0.25rem;">●</span>
+        </button>
+        <button id="navDashboard" class="nav-btn active" data-section="dashboard">Dashboard</button>
                     <button id="navEvents" class="nav-btn" data-section="events">Events</button>
                     <button id="navBands" class="nav-btn" data-section="bands">Bands</button>
                     <button id="navTableMaps" class="nav-btn" data-section="tableMap">Table Maps</button>
@@ -937,15 +940,37 @@
                     </div>
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Total Capacity</label>
-                            <input type="number" id="eventCapacity" min="1" required>
+                            <label>Image Gradient</label>
+                            <select id="eventImageGradient" required>
+                                <option value="general">General</option>
+                                <option value="neon-80s">Neon 80s</option>
+                                <option value="neon-brunch">Neon Brunch</option>
+                                <option value="live-music">Live Music</option>
+                                <option value="comedy">Comedy</option>
+                                <option value="wine-tasting">Wine Tasting</option>
+                            </select>
                         </div>
+                        <div class="form-group">
+                            <label>Image Text</label>
+                            <input type="text" id="eventImageText" placeholder="Text for event card">
+                        </div>
+                    </div>
+                    <div class="form-row">
                         <div class="form-group">
                             <label>Status</label>
                             <select id="eventStatus" required>
                                 <option value="Active">Active</option>
                                 <option value="Inactive">Inactive</option>
                             </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label><input type="checkbox" id="eventUseSeating"> Enable Seating Options</label>
+                    </div>
+                    <div id="seatingOptionsDiv" style="display: none;">
+                        <div class="form-group">
+                            <label>Single Seats Available</label>
+                            <input type="number" id="eventSingleSeats" min="0" value="0">
                         </div>
                     </div>
                 </form>
@@ -1092,8 +1117,15 @@
             floorPlan: null,
             selectedTableId: null,
             nextEventId: 1,
-            nextBandId: 5
+            nextBandId: 5,
+            dataSha: null,
+            registrations: {}
         };
+
+
+        // GITHUB CONFIGURATION
+        const GITHUB_REPO = 'quarrymanagement/quarry-website';
+        const DATA_FILE = 'events.json';
 
         // DEFAULT FLOOR PLAN
         const defaultFloorPlan = {
@@ -1186,7 +1218,7 @@
 
         function checkSessionStorage() {
             const password = sessionStorage.getItem('quarryAdminPassword');
-            if (password) {
+            if (password && password === 'quarry2026') {
                 state.password = password;
                 state.authenticated = true;
                 showAdminPanel();
@@ -1197,13 +1229,13 @@
         function handleLogin(e) {
             e.preventDefault();
             const password = document.getElementById('password').value;
-
-            // In a real app, this would verify against backend
-            // For now, accept any password
+            if (password !== 'quarry2026') {
+                showToast('Invalid password', 'error');
+                return;
+            }
             state.password = password;
             state.authenticated = true;
             sessionStorage.setItem('quarryAdminPassword', password);
-
             showAdminPanel();
             loadData();
         }
@@ -1244,12 +1276,46 @@
 
         // DATA LOADING
         function loadData() {
-            loadEvents();
-            loadBands();
+            showLoadingIndicator(true);
+            try {
+                const resp = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${DATA_FILE}`, {
+                    headers: { 'Accept': 'application/vnd.github.v3+json' }
+                });
+                
+                if (!resp.ok) {
+                    throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
+                }
+                
+                const fileInfo = await resp.json();
+                state.dataSha = fileInfo.sha;
+                const content = JSON.parse(atob(fileInfo.content));
+                state.events = content.events || [];
+                state.bands = content.bands || [];
+                state.floorPlan = content.floorPlan || JSON.parse(JSON.stringify(defaultFloorPlan));
+                state.registrations = content.registrations || {};
+                
+                // Set next IDs
+                state.nextEventId = Math.max(...state.events.map(e => parseInt(e.id.replace(/\D/g,'')) || 0), 0) + 1;
+                state.nextBandId = Math.max(...state.bands.map(b => parseInt(b.id) || 0), 0) + 1;
+                
+                showLoadingIndicator(false);
+            } catch (err) {
+                console.error('Failed to load data:', err);
+                showToast('Failed to load data from GitHub: ' + err.message, 'error');
+                showLoadingIndicator(false);
+                // Fall back to defaults
+                state.events = [];
+                state.bands = [];
+                state.floorPlan = JSON.parse(JSON.stringify(defaultFloorPlan));
+                state.registrations = {};
+            }
+            
+            renderEventsTable();
+            renderBandsTable();
             loadFloorPlan();
             updateDashboard();
+            initGitHubToken();
         }
-
         function loadEvents() {
             // In a real app, this would call the Netlify function
             // For now, use sample data
@@ -1329,36 +1395,193 @@
             openModal('eventModal');
         }
 
-        function handleEventSubmit() {
+
+        // GITHUB TOKEN MANAGEMENT
+        function initGitHubToken() {
+            const token = sessionStorage.getItem('quarryGithubToken');
+            if (token) {
+                document.getElementById('tokenStatus').textContent = '✓ Token set';
+                document.getElementById('tokenStatus').style.color = 'var(--success)';
+            } else {
+                document.getElementById('tokenStatus').textContent = '✗ Not set';
+                document.getElementById('tokenStatus').style.color = 'var(--danger)';
+            }
+        }
+
+        function openTokenSettings() {
+            document.getElementById('tokenSettingsModal').style.display = 'flex';
+            const savedToken = sessionStorage.getItem('quarryGithubToken');
+            if (savedToken) {
+                document.getElementById('githubTokenInput').value = '••••••' + savedToken.slice(-4);
+            } else {
+                document.getElementById('githubTokenInput').value = '';
+            }
+        }
+
+        function closeTokenSettings() {
+            document.getElementById('tokenSettingsModal').style.display = 'none';
+            document.getElementById('githubTokenInput').value = '';
+        }
+
+        function saveGitHubToken() {
+            const token = document.getElementById('githubTokenInput').value.trim();
+            if (!token) {
+                showToast('Please enter a GitHub token', 'warning');
+                return;
+            }
+            if (token.startsWith('••••••')) {
+                showToast('Token already saved', 'info');
+                closeTokenSettings();
+                return;
+            }
+            sessionStorage.setItem('quarryGithubToken', token);
+            document.getElementById('githubTokenInput').value = '••••••' + token.slice(-4);
+            showToast('GitHub token saved', 'success');
+            initGitHubToken();
+            closeTokenSettings();
+        }
+
+        // GITHUB SAVE FUNCTION
+        async function saveToGitHub(message) {
+            const token = sessionStorage.getItem('quarryGithubToken');
+            if (!token) {
+                showToast('Please set your GitHub token in Settings first', 'warning');
+                return false;
+            }
+            
+            const data = {
+                events: state.events,
+                bands: state.bands,
+                floorPlan: state.floorPlan,
+                registrations: state.registrations || {}
+            };
+            
+            const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+            
+            showSavingIndicator(true);
+            try {
+                const resp = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${DATA_FILE}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': 'token ' + token,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/vnd.github.v3+json'
+                    },
+                    body: JSON.stringify({
+                        message: message || 'Update events data',
+                        content: content,
+                        sha: state.dataSha
+                    })
+                });
+                
+                const result = await resp.json();
+                if (!resp.ok) throw new Error(result.message || 'GitHub API error');
+                
+                state.dataSha = result.content.sha;
+                showSavingIndicator(false);
+                return true;
+            } catch (err) {
+                console.error('Save failed:', err);
+                showToast('Failed to save: ' + err.message, 'error');
+                showSavingIndicator(false);
+                return false;
+            }
+        }
+
+        function showLoadingIndicator(show) {
+            let loader = document.getElementById('loadingIndicator');
+            if (!loader) {
+                loader = document.createElement('div');
+                loader.id = 'loadingIndicator';
+                loader.innerHTML = '<div style="text-align: center; padding: 2rem; color: white; font-size: 1.2rem;">Loading...</div>';
+                loader.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 10000;';
+                document.body.appendChild(loader);
+            }
+            loader.style.display = show ? 'flex' : 'none';
+        }
+
+        function showSavingIndicator(show) {
+            // Disable submit buttons temporarily
+            document.querySelectorAll('.btn-primary').forEach(btn => {
+                btn.disabled = show;
+            });
+        }
+
+
+        async function handleEventSubmit() {
             const form = document.getElementById('eventForm');
             const mode = form.dataset.mode;
             const eventId = form.dataset.eventId;
 
+            const dateStr = document.getElementById('eventDate').value;
+            const dateObj = new Date(dateStr + 'T00:00:00');
+            const options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
+            const humanDate = dateObj.toLocaleDateString('en-US', options);
+
             const eventData = {
                 id: mode === 'create' ? String(state.nextEventId++) : eventId,
                 name: document.getElementById('eventName').value,
-                date: document.getElementById('eventDate').value,
+                date: humanDate,
                 time: document.getElementById('eventTime').value,
                 description: document.getElementById('eventDescription').value,
                 category: document.getElementById('eventCategory').value,
-                price: Math.round(parseFloat(document.getElementById('eventPrice').value) * 100),
-                capacity: parseInt(document.getElementById('eventCapacity').value),
-                registered: mode === 'create' ? 0 : state.events.find(e => e.id === eventId).registered,
-                status: document.getElementById('eventStatus').value
+                pricePerSeat: Math.round(parseFloat(document.getElementById('eventPrice').value) * 100),
+                totalCapacity: parseInt(document.getElementById('eventCapacity').value),
+                registeredCount: mode === 'create' ? 0 : (state.events.find(e => e.id === eventId)?.registeredCount || 0),
+                status: document.getElementById('eventStatus').value,
+                imageGradient: document.getElementById('eventImageGradient')?.value || 'general',
+                imageText: document.getElementById('eventImageText')?.value || '',
+                tiers: parseEventTiers(),
+                seatingOptions: parseSeatingOptions(),
+                floorPlan: null,
+                bookedTableIds: []
             };
 
             if (mode === 'create') {
                 state.events.push(eventData);
-                showToast('Event created successfully', 'success');
             } else {
                 const idx = state.events.findIndex(e => e.id === eventId);
                 state.events[idx] = eventData;
-                showToast('Event updated successfully', 'success');
             }
 
-            renderEventsTable();
-            updateDashboard();
-            closeModal('eventModal');
+            const saved = await saveToGitHub(mode === 'create' ? `Add event: ${eventData.name}` : `Update event: ${eventData.name}`);
+            if (saved) {
+                showToast(mode === 'create' ? 'Event created and published!' : 'Event updated and published!', 'success');
+                renderEventsTable();
+                updateDashboard();
+                closeModal('eventModal');
+            }
+        }
+
+        function parseEventTiers() {
+            const tiers = [];
+            const tierElements = document.querySelectorAll('.tier-row');
+            tierElements.forEach(el => {
+                const name = el.querySelector('.tier-name')?.value;
+                const price = el.querySelector('.tier-price')?.value;
+                if (name && price) {
+                    tiers.push({ name, price: Math.round(parseFloat(price) * 100), description: '' });
+                }
+            });
+            if (tiers.length === 0) {
+                const price = Math.round(parseFloat(document.getElementById('eventPrice').value) * 100);
+                tiers.push({ name: 'Standard', price, description: '' });
+            }
+            return tiers;
+        }
+
+        function parseSeatingOptions() {
+            const useSeating = document.getElementById('eventUseSeating')?.checked;
+            if (!useSeating) return null;
+            
+            return {
+                singleSeats: parseInt(document.getElementById('eventSingleSeats')?.value || 0),
+                tableOptions: [
+                    { name: 'Table for 2', seats: 2 },
+                    { name: 'Table for 4', seats: 4 },
+                    { name: 'Table for 6', seats: 6 }
+                ]
+            };
         }
 
         function viewRegistrations(eventId) {
@@ -1469,17 +1692,22 @@
 
             if (mode === 'create') {
                 state.bands.push(bandData);
-                showToast('Band added successfully', 'success');
             } else {
                 const idx = state.bands.findIndex(b => b.id === bandId);
                 state.bands[idx] = bandData;
-                showToast('Band updated successfully', 'success');
             }
 
+            // Save to GitHub (no await here for bands)
+            saveToGitHub(mode === 'create' ? `Add band: ${bandData.name}` : `Update band: ${bandData.name}`).then(saved => {
+                if (saved) {
+                    showToast(mode === 'create' ? 'Band added and published!' : 'Band updated and published!', 'success');
+                }
+            });
+
             renderBandsTable();
+            updateDashboard();
             closeModal('bandModal');
         }
-
         function saveBands() {
             // Stub for future Netlify function call
             // POST to /.netlify/functions/admin-bands

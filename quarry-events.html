@@ -412,6 +412,22 @@
             background: linear-gradient(135deg, #5C1A2E 0%, #8B0050 100%);
         }
 
+        .event-image.live-music {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        }
+
+        .event-image.comedy {
+            background: linear-gradient(135deg, #2d1b69 0%, #6b21a8 100%);
+        }
+
+        .event-image.wine-tasting {
+            background: linear-gradient(135deg, #4a1c1c 0%, #8B2252 100%);
+        }
+
+        .event-image.general {
+            background: linear-gradient(135deg, #2C1A0E 0%, #5C3D2E 50%, #8B5E3C 100%);
+        }
+
         .event-image-text {
             font-family: 'Playfair Display', serif;
             font-size: 80px;
@@ -1613,74 +1629,46 @@
     </footer>
 
     <script>
-        // Hardcoded Events Data
-        const allEvents = [
-            {
-                id: 'evt-80s-apr3',
-                name: "80s Neon Music Bingo",
-                date: "Friday, April 3, 2026",
-                time: "7:00 PM",
-                location: "The Quarry, New Melle MO",
-                description: "A night of 80s hits, neon lights, music bingo and great drinks. This event is fully sold out.",
-                category: "Ticketed",
-                pricePerSeat: 3500,
-                totalCapacity: 44,
-                registeredCount: 44,
-                tiers: [
-                    { name: "General Admission", description: "Entry + music bingo all night", pricePerPerson: 3500, priceLabel: "$35" }
-                ],
-                seatingOptions: null,
-                imageGradient: "neon-80s",
-                imageText: "80s",
-                status: "sold-out"
-            },
-            {
-                id: 'evt-80s-apr4',
-                name: "80s Neon Music Bingo",
-                date: "Saturday, April 4, 2026",
-                time: "7:00 PM",
-                location: "The Quarry, New Melle MO",
-                description: "Last chance! Dress in your brightest neon and get ready to sing 80s hits and win prizes.",
-                category: "Ticketed",
-                pricePerSeat: 3500,
-                totalCapacity: 44,
-                registeredCount: 42,
-                tiers: [
-                    { name: "General Admission", description: "Entry + music bingo all night", pricePerPerson: 3500, priceLabel: "$35" }
-                ],
-                seatingOptions: null,
-                imageGradient: "neon-80s",
-                imageText: "80s",
-                status: "low"
-            },
-            {
-                id: 'evt-brunch-apr12',
-                name: "Ladies Neon Singo Bingo Brunch",
-                date: "Sunday, April 12, 2026",
-                time: "11:00 AM – 2:00 PM",
-                location: "The Quarry, New Melle MO",
-                description: "The ultimate ladies brunch! Neon attire, Singo-Bingo, prizes and amazing food. Single seats and full tables available.",
-                category: "Ticketed",
-                pricePerSeat: 3500,
-                totalCapacity: 31,
-                registeredCount: 0,
-                tiers: [
-                    { name: "Bingo + Brunch", description: "Bingo games + full brunch menu", pricePerPerson: 3500, priceLabel: "$35" },
-                    { name: "VIP Bottomless", description: "Bottomless bloodys + mimosas, bingo + brunch", pricePerPerson: 4500, priceLabel: "$45" }
-                ],
-                seatingOptions: [
-                    { name: "Single Seat", seats: 1, available: 8 },
-                    { name: "5-Top Table", seats: 5, available: 1 },
-                    { name: "8-Top Table", seats: 8, available: 1 },
-                    { name: "10-Top Table", seats: 10, available: 1 }
-                ],
-                imageGradient: "neon-brunch",
-                imageText: "Brunch",
-                status: "available",
-                floorPlan: null,  // uses defaultFloorPlan
-                bookedTableIds: ['t31', 't33', 'bar-3', 'bar-5']  // example booked tables
+        // Dynamic Events Data — loaded from events.json on GitHub
+        const GITHUB_REPO = 'quarrymanagement/quarry-website';
+        const DATA_FILE = 'events.json';
+        let allEvents = [];
+
+        /**
+         * Load events from GitHub-hosted events.json
+         */
+        async function loadEventsFromGitHub() {
+            try {
+                // Use raw.githubusercontent for fast, no-auth reads (cache busted with timestamp)
+                const cacheBust = '?t=' + Date.now();
+                const resp = await fetch(`https://raw.githubusercontent.com/${GITHUB_REPO}/main/${DATA_FILE}${cacheBust}`);
+                if (!resp.ok) throw new Error('Failed to fetch events data');
+                const data = await resp.json();
+                allEvents = (data.events || []).map(evt => {
+                    // Auto-calculate status from capacity
+                    const remaining = evt.totalCapacity - evt.registeredCount;
+                    if (remaining <= 0) evt.status = 'sold-out';
+                    else if (remaining <= 5) evt.status = 'low';
+                    else evt.status = 'available';
+                    // Ensure defaults
+                    evt.tiers = evt.tiers || [{ name: 'General Admission', description: 'Event entry', pricePerPerson: evt.pricePerSeat || 0, priceLabel: '$' + ((evt.pricePerSeat || 0) / 100).toFixed(0) }];
+                    evt.imageGradient = evt.imageGradient || 'general';
+                    evt.imageText = evt.imageText || evt.name.split(' ')[0];
+                    evt.floorPlan = evt.floorPlan || null;
+                    evt.bookedTableIds = evt.bookedTableIds || [];
+                    return evt;
+                });
+                // Filter to only Active events (admin can set Inactive to hide)
+                allEvents = allEvents.filter(evt => evt.status !== 'inactive' && evt.adminStatus !== 'Inactive');
+            } catch (err) {
+                console.error('Could not load events from GitHub:', err);
+                // Show a user-friendly message
+                const grid = document.getElementById("eventsGrid");
+                if (grid) {
+                    grid.innerHTML = '<div style="text-align:center;padding:3rem;color:#888;grid-column:1/-1;"><p style="font-size:1.2rem;">Events are loading... Please refresh the page.</p></div>';
+                }
             }
-        ];
+        }
 
         let currentFilter = "all";
         let currentEventForModal = null;
@@ -2000,6 +1988,10 @@
          */
         function renderEvents() {
             const grid = document.getElementById("eventsGrid");
+            if (allEvents.length === 0) {
+                grid.innerHTML = '<div style="text-align:center;padding:3rem;color:#888;grid-column:1/-1;"><p style="font-size:1.2rem;">No upcoming events at this time. Check back soon!</p></div>';
+                return;
+            }
             grid.innerHTML = allEvents.map(createEventCard).join("");
             filterEvents(currentFilter);
         }
@@ -2357,7 +2349,7 @@
         /**
          * Initialize on page load
          */
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", async function() {
             // Check for registration success parameter
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get("registered") === "1") {
@@ -2397,15 +2389,13 @@
                 }
             });
 
-            // Render events
-            renderEvents();
+            // Show loading state
+            const grid = document.getElementById("eventsGrid");
+            grid.innerHTML = '<div style="text-align:center;padding:3rem;color:#888;grid-column:1/-1;"><p style="font-size:1.2rem;">Loading events...</p></div>';
 
-            // Fetch availability for each event
-            allEvents.forEach(event => {
-                if (event.id) {
-                    fetchEventAvailability(event.id);
-                }
-            });
+            // Load events from GitHub, then render
+            await loadEventsFromGitHub();
+            renderEvents();
         });
     </script>
 </body>
