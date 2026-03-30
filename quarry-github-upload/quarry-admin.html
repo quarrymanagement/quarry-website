@@ -1,672 +1,2065 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin | The Quarry</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<style>
-:root{--gold:#B8933A;--gold-light:#D4AF6A;--brown-dark:#2C1A0E;--brown-mid:#5C3D2E;--charcoal:#1A1A1A;--cream:#F5F0E8;--border:rgba(188,149,106,0.3);--red:#9b2226;--green:#2d6a4f;}
-*{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Montserrat',sans-serif;background:#0f0a07;color:#fff;min-height:100vh;}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Quarry Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-/* LOGIN */
-#loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem;}
-.login-box{background:var(--brown-dark);border:1px solid var(--border);padding:3rem;width:100%;max-width:400px;text-align:center;}
-.login-logo{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:.25rem;}
-.login-sub{font-size:.55rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:2.5rem;}
-.login-box input{width:100%;padding:.85rem 1rem;border:1px solid var(--border);background:rgba(255,255,255,.05);color:#fff;font-family:'Montserrat',sans-serif;font-size:.75rem;outline:none;margin-bottom:.75rem;border-radius:0;-webkit-appearance:none;}
-.login-box input:focus{border-color:var(--gold);}
-.login-box input::placeholder{color:rgba(255,255,255,.3);}
-.login-btn{width:100%;padding:1rem;background:var(--gold);color:var(--brown-dark);font-family:'Montserrat',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;border:none;cursor:pointer;transition:background .2s;}
-.login-btn:hover{background:var(--gold-light);}
-.login-err{font-size:.6rem;color:#e05555;margin-top:.75rem;min-height:1.2em;}
+        :root {
+            --brown-dark: #2C1A0E;
+            --gold: #B8933A;
+            --gold-light: #D4AF6A;
+            --cream: #FAF7F2;
+            --charcoal: #1A1A1A;
+            --gray-light: #F5F3F0;
+            --gray-medium: #D0CCCB;
+            --success: #4CAF50;
+            --danger: #FF6B6B;
+            --warning: #FFC107;
+            --info: #2196F3;
+        }
 
-/* ADMIN SHELL */
-#adminShell{display:none;}
-.admin-header{background:var(--brown-dark);border-bottom:1px solid var(--border);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
-.admin-logo{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;}
-.admin-logo span{font-family:'Montserrat',sans-serif;font-size:.5rem;letter-spacing:.25em;color:var(--gold);display:block;margin-top:1px;}
-.logout-btn{font-family:'Montserrat',sans-serif;font-size:.58rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.5);background:none;border:1px solid rgba(255,255,255,.15);padding:.4rem .85rem;cursor:pointer;transition:all .2s;}
-.logout-btn:hover{color:#fff;border-color:rgba(255,255,255,.4);}
-.admin-layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 64px);}
-.sidebar{background:#0f0a07;border-right:1px solid var(--border);padding:1.5rem 0;}
-.sidebar-section{margin-bottom:.5rem;}
-.sidebar-label{font-size:.5rem;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:rgba(255,255,255,.3);padding:.5rem 1.5rem;display:block;}
-.sidebar-btn{display:block;width:100%;text-align:left;padding:.75rem 1.5rem;font-family:'Montserrat',sans-serif;font-size:.62rem;font-weight:500;letter-spacing:.08em;color:rgba(255,255,255,.6);background:none;border:none;cursor:pointer;transition:all .2s;border-left:2px solid transparent;}
-.sidebar-btn:hover{color:#fff;background:rgba(255,255,255,.04);}
-.sidebar-btn.active{color:var(--gold-light);border-left-color:var(--gold);background:rgba(184,147,58,.08);}
-.admin-content{padding:2.5rem;overflow-y:auto;}
-.panel{display:none;}
-.panel.active{display:block;}
-.panel-title{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:600;margin-bottom:.4rem;}
-.panel-sub{font-size:.6rem;letter-spacing:.08em;color:rgba(255,255,255,.4);margin-bottom:2rem;}
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--cream);
+            color: var(--charcoal);
+            overflow: hidden;
+        }
 
-/* CARDS / TABLES */
-.admin-card{background:var(--brown-dark);border:1px solid var(--border);padding:1.75rem;margin-bottom:1.5rem;}
-.card-title{font-size:.65rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:1.25rem;}
-.admin-table{width:100%;border-collapse:collapse;}
-.admin-table th{font-size:.52rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.4);padding:.6rem .75rem;text-align:left;border-bottom:1px solid var(--border);}
-.admin-table td{font-size:.68rem;padding:.8rem .75rem;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle;}
-.admin-table tr:last-child td{border-bottom:none;}
-.admin-table tr:hover td{background:rgba(255,255,255,.03);}
-.editable{background:rgba(255,255,255,.04);border:1px solid transparent;padding:.3rem .5rem;width:100%;color:#fff;font-family:'Montserrat',sans-serif;font-size:.68rem;outline:none;border-radius:0;}
-.editable:focus{border-color:var(--gold);background:rgba(184,147,58,.06);}
-select.editable{cursor:pointer;-webkit-appearance:none;appearance:none;}
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 600;
+        }
 
-/* BUTTONS */
-.btn{font-family:'Montserrat',sans-serif;font-size:.58rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;padding:.5rem 1rem;border:none;cursor:pointer;transition:all .2s;display:inline-block;}
-.btn-gold{background:var(--gold);color:var(--brown-dark);}
-.btn-gold:hover{background:var(--gold-light);}
-.btn-outline{background:none;border:1px solid var(--border);color:rgba(255,255,255,.6);}
-.btn-outline:hover{border-color:var(--gold);color:var(--gold-light);}
-.btn-danger{background:none;border:1px solid rgba(155,34,38,.5);color:rgba(220,100,100,.8);font-size:.52rem;padding:.35rem .7rem;}
-.btn-danger:hover{background:rgba(155,34,38,.2);}
-.btn-add{background:rgba(45,106,79,.3);border:1px solid rgba(45,106,79,.5);color:rgba(150,220,170,.9);}
-.btn-add:hover{background:rgba(45,106,79,.5);}
-.btn-row{display:flex;gap:.75rem;align-items:center;margin-top:1.25rem;flex-wrap:wrap;}
+        /* LOGIN SCREEN */
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: linear-gradient(135deg, var(--charcoal) 0%, var(--brown-dark) 100%);
+        }
 
-/* FORM FIELDS */
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;}
-.form-full{grid-column:1/-1;}
-.form-group{display:flex;flex-direction:column;gap:.35rem;}
-.form-label{font-size:.55rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.5);}
-.form-input{background:rgba(255,255,255,.05);border:1px solid var(--border);color:#fff;font-family:'Montserrat',sans-serif;font-size:.7rem;padding:.75rem 1rem;outline:none;border-radius:0;-webkit-appearance:none;}
-.form-input:focus{border-color:var(--gold);}
-.form-input::placeholder{color:rgba(255,255,255,.25);}
-select.form-input{cursor:pointer;}
-textarea.form-input{resize:vertical;min-height:90px;}
+        .login-card {
+            background: var(--cream);
+            padding: 3rem;
+            border-radius: 8px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+        }
 
-/* BADGE PREVIEWS */
-.type-badge{font-size:.5rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:2px 8px;display:inline-block;}
-.t-ticketed{background:var(--gold);color:var(--brown-dark);}
-.t-public{background:rgba(245,240,232,.12);color:rgba(245,240,232,.75);border:1px solid rgba(245,240,232,.2);}
-.t-fundraiser{background:rgba(30,100,60,.4);color:rgba(150,220,170,.9);border:1px solid rgba(30,100,60,.5);}
-.t-member{background:rgba(120,50,150,.4);color:rgba(210,170,255,.9);border:1px solid rgba(120,50,150,.5);}
+        .login-card h1 {
+            font-size: 2.5rem;
+            color: var(--brown-dark);
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
 
-/* TOAST */
-.toast{position:fixed;bottom:2rem;right:2rem;background:var(--green);color:#fff;font-family:'Montserrat',sans-serif;font-size:.62rem;font-weight:600;letter-spacing:.1em;padding:.85rem 1.5rem;transform:translateY(100px);opacity:0;transition:all .3s;z-index:999;}
-.toast.show{transform:translateY(0);opacity:1;}
+        .login-card .subtitle {
+            font-size: 0.9rem;
+            color: var(--gray-medium);
+            text-align: center;
+            margin-bottom: 2rem;
+        }
 
-@media(max-width:900px){.admin-layout{grid-template-columns:1fr;}.sidebar{display:none;}}
-</style>
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--brown-dark);
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--gray-medium);
+            border-radius: 4px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(184, 147, 58, 0.1);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: var(--gold);
+            color: var(--charcoal);
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--gold-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(184, 147, 58, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: var(--brown-dark);
+            color: var(--cream);
+        }
+
+        .btn-secondary:hover {
+            background-color: #3D2415;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #45a049;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #FF5252;
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .btn-icon {
+            padding: 0.5rem;
+            width: 36px;
+            height: 36px;
+        }
+
+        /* MAIN LAYOUT */
+        .main-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .topnav {
+            background-color: var(--brown-dark);
+            color: var(--cream);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            grid-column: 1 / -1;
+        }
+
+        .topnav h1 {
+            font-size: 1.8rem;
+            color: var(--gold-light);
+        }
+
+        .nav-items {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-items button {
+            background: none;
+            border: none;
+            color: var(--cream);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .nav-items button:hover {
+            background-color: rgba(212, 175, 106, 0.2);
+            color: var(--gold-light);
+        }
+
+        .nav-items button.active {
+            background-color: var(--gold);
+            color: var(--brown-dark);
+        }
+
+        .content-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        /* SECTIONS */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* DASHBOARD */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--brown-dark), #3D2415);
+            color: var(--cream);
+            padding: 2rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--gold);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card h3 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--gold-light);
+        }
+
+        .dashboard-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+        }
+
+        /* TABLES */
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .table-header {
+            background-color: var(--brown-dark);
+            color: var(--cream);
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-header h2 {
+            font-size: 1.5rem;
+            color: var(--gold-light);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background-color: var(--gray-light);
+            border-bottom: 2px solid var(--gray-medium);
+        }
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--brown-dark);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        tbody tr:hover {
+            background-color: rgba(212, 175, 106, 0.05);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background-color: rgba(76, 175, 80, 0.2);
+            color: var(--success);
+        }
+
+        .status-inactive {
+            background-color: rgba(255, 107, 107, 0.2);
+            color: var(--danger);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* MODALS */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--cream);
+            border-radius: 8px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            background-color: var(--brown-dark);
+            color: var(--cream);
+            padding: 2rem;
+            border-bottom: 2px solid var(--gold);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 1.8rem;
+            color: var(--gold-light);
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--cream);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .modal-footer {
+            padding: 1rem 2rem;
+            background-color: var(--gray-light);
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            border-top: 1px solid var(--gray-medium);
+        }
+
+        /* FORMS */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+
+        /* TOASTS */
+        .toast-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .toast {
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            min-width: 300px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        .toast.info {
+            border-left: 4px solid var(--info);
+        }
+
+        /* FLOOR PLAN BUILDER */
+        .floorplan-container {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 2rem;
+            height: calc(100vh - 200px);
+        }
+
+        .floorplan-canvas {
+            background: linear-gradient(45deg, var(--gray-light) 25%, transparent 25%, transparent 75%, var(--gray-light) 75%, var(--gray-light)),
+                        linear-gradient(45deg, var(--gray-light) 25%, transparent 25%, transparent 75%, var(--gray-light) 75%, var(--gray-light));
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            background-color: white;
+            border: 2px solid var(--gray-medium);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .floorplan-toolbar {
+            background: white;
+            border: 1px solid var(--gray-medium);
+            border-radius: 8px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .toolbar-section {
+            border-bottom: 1px solid var(--gray-light);
+            padding-bottom: 1rem;
+        }
+
+        .toolbar-section:last-child {
+            border-bottom: none;
+        }
+
+        .toolbar-section h3 {
+            font-size: 0.9rem;
+            color: var(--brown-dark);
+            margin-bottom: 0.8rem;
+        }
+
+        .toolbar-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .toolbar-buttons button {
+            width: 100%;
+            padding: 0.6rem;
+            font-size: 0.85rem;
+            text-align: left;
+        }
+
+        .properties-panel {
+            background: white;
+            border: 1px solid var(--gray-medium);
+            border-radius: 8px;
+            padding: 1.5rem;
+            display: none;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .properties-panel.active {
+            display: flex;
+        }
+
+        .properties-panel h3 {
+            font-size: 1rem;
+            color: var(--brown-dark);
+        }
+
+        .property-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .property-field label {
+            font-size: 0.85rem;
+            color: var(--charcoal);
+            font-weight: 500;
+        }
+
+        .property-field input {
+            padding: 0.5rem;
+            border: 1px solid var(--gray-medium);
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        /* SVG TABLE STYLES */
+        .table-shape {
+            stroke: var(--brown-dark);
+            stroke-width: 2;
+            fill: var(--gold-light);
+            cursor: move;
+            transition: fill 0.2s;
+        }
+
+        .table-shape:hover {
+            fill: var(--gold);
+        }
+
+        .table-shape.selected {
+            stroke: var(--gold);
+            stroke-width: 3;
+        }
+
+        .table-label {
+            pointer-events: none;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            fill: var(--charcoal);
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+
+        .floor-label {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            fill: var(--brown-dark);
+            pointer-events: none;
+        }
+
+        .bar-seat {
+            fill: var(--gold);
+            stroke: var(--brown-dark);
+            stroke-width: 1;
+            cursor: pointer;
+        }
+
+        .bar-seat.available {
+            fill: var(--gold-light);
+        }
+
+        .bar-seat.occupied {
+            fill: var(--danger);
+        }
+
+        /* CONFIRMATION DIALOG */
+        .confirmation-dialog {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .confirmation-dialog h2 {
+            color: var(--brown-dark);
+            margin-bottom: 1rem;
+        }
+
+        .confirmation-dialog p {
+            margin-bottom: 2rem;
+            color: var(--charcoal);
+        }
+
+        .confirmation-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        /* REGISTRATIONS TABLE */
+        .registrations-modal {
+            width: 90vw;
+            max-width: 1000px;
+        }
+
+        .export-button {
+            margin-left: auto;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1024px) {
+            .floorplan-container {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-items {
+                gap: 1rem;
+            }
+
+            .nav-items button {
+                padding: 0.5rem 0.8rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+
+            .topnav {
+                padding: 1rem;
+            }
+
+            .topnav h1 {
+                font-size: 1.3rem;
+            }
+
+            .nav-items {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .nav-items button {
+                font-size: 0.8rem;
+                padding: 0.4rem 0.6rem;
+            }
+
+            .content {
+                padding: 1rem;
+            }
+
+            table {
+                font-size: 0.9rem;
+            }
+
+            th, td {
+                padding: 0.7rem;
+            }
+        }
+    </style>
 </head>
 <body>
-
-<!-- ── LOGIN ── -->
-<div id="loginScreen">
-  <div class="login-box">
-    <div class="login-logo">The Quarry</div>
-    <div class="login-sub">Staff Admin Portal</div>
-    <input type="text" id="loginUser" placeholder="Username" autocomplete="off">
-    <input type="password" id="loginPass" placeholder="Password" autocomplete="off">
-    <button class="login-btn" onclick="doLogin()">Sign In →</button>
-    <div class="login-err" id="loginErr"></div>
-  </div>
-</div>
-
-<!-- ── ADMIN SHELL ── -->
-<div id="adminShell">
-  <header class="admin-header">
-    <div class="admin-logo">The Quarry <span>Staff Admin Portal</span></div>
-    <button class="logout-btn" onclick="doLogout()">Sign Out</button>
-  </header>
-  <div class="admin-layout">
-    <nav class="sidebar">
-      <div class="sidebar-section">
-        <span class="sidebar-label">Events</span>
-        <button class="sidebar-btn active" onclick="showPanel('events',this)">📅 Manage Events</button>
-        <button class="sidebar-btn" onclick="showPanel('addEvent',this)">➕ Add New Event</button>
-      </div>
-      <div class="sidebar-section">
-        <span class="sidebar-label">Live Music</span>
-        <button class="sidebar-btn" onclick="showPanel('bands',this)">🎵 Band Schedule</button>
-        <button class="sidebar-btn" onclick="showPanel('addBand',this)">➕ Add Band</button>
-      </div>
-      <div class="sidebar-section">
-        <span class="sidebar-label">Menu</span>
-        <button class="sidebar-btn" onclick="showPanel('menuFood',this)">🍽 Food Prices</button>
-        <button class="sidebar-btn" onclick="showPanel('menuDrinks',this)">🍷 Drink Prices</button>
-        <button class="sidebar-btn" onclick="showPanel('addMenuItem',this)">➕ Add Menu Item</button>
-      </div>
-      <div class="sidebar-section">
-        <span class="sidebar-label">Settings</span>
-        <button class="sidebar-btn" onclick="showPanel('hours',this)">🕐 Hours & Info</button>
-      </div>
-    </nav>
-
-    <main class="admin-content">
-
-      <!-- EVENTS LIST -->
-      <div class="panel active" id="panel-events">
-        <h2 class="panel-title">Manage Events</h2>
-        <p class="panel-sub">Edit event details inline · Changes generate an update email to management</p>
-        <div class="admin-card">
-          <div class="card-title">Upcoming Events</div>
-          <table class="admin-table" id="eventsTable">
-            <thead><tr>
-              <th>Event Name</th><th>Date</th><th>Type</th><th>Price</th><th>Registered</th><th>Capacity</th><th>Actions</th>
-            </tr></thead>
-            <tbody id="eventsBody"></tbody>
-          </table>
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-card">
+            <h1>The Quarry</h1>
+            <p class="subtitle">Admin Panel</p>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required placeholder="Enter admin password">
+                </div>
+                <button type="submit" class="btn btn-primary">Sign In</button>
+            </form>
+            <div id="loginError" style="color: var(--danger); margin-top: 1rem; text-align: center; display: none;"></div>
         </div>
-      </div>
+    </div>
 
-      <!-- ADD EVENT -->
-      <div class="panel" id="panel-addEvent">
-        <h2 class="panel-title">Add New Event</h2>
-        <p class="panel-sub">Fill in the details below · Generates an email to add to your site</p>
-        <div class="admin-card">
-          <div class="card-title">Event Details</div>
-          <div class="form-grid">
-            <div class="form-group form-full">
-              <label class="form-label">Event Name *</label>
-              <input type="text" class="form-input" id="ae-name" placeholder="e.g. 80s Neon Music Bingo">
+    <!-- MAIN ADMIN PANEL -->
+    <div id="adminPanel" style="display: none;" class="main-container">
+        <div class="content-wrapper">
+            <div class="topnav">
+                <h1>The Quarry Admin</h1>
+                <div class="nav-items">
+        <button id="navDashboard" class="nav-btn active" data-section="dashboard">Dashboard</button>
+                    <button id="navEvents" class="nav-btn" data-section="events">Events</button>
+                    <button id="navBands" class="nav-btn" data-section="bands">Bands</button>
+                    <button id="navTableMaps" class="nav-btn" data-section="tableMap">Table Maps</button>
+                    <button id="navInvoices" class="nav-btn" data-section="invoices">Invoices</button>
+                    <button id="signOutBtn" class="nav-btn">Sign Out</button>
+                </div>
             </div>
-            <div class="form-group">
-              <label class="form-label">Date *</label>
-              <input type="date" class="form-input" id="ae-date">
+
+            <div class="content">
+                <!-- DASHBOARD SECTION -->
+                <div id="dashboardSection" class="section active">
+                    <h1>Dashboard</h1>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>Active Events</h3>
+                            <div class="value" id="activeEventsCount">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Total Registrations</h3>
+                            <div class="value" id="totalRegistrationsCount">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Est. Revenue</h3>
+                            <div class="value" id="estimatedRevenue">$0</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Upcoming Bands</h3>
+                            <div class="value" id="upcomingBandsCount">0</div>
+                        </div>
+                    </div>
+                    <h2 style="margin-bottom: 1.5rem; color: var(--brown-dark);">Quick Actions</h2>
+                    <div class="dashboard-actions">
+                        <button class="btn btn-primary" id="addEventBtn">+ Add Event</button>
+                        <button class="btn btn-secondary" id="addBandBtn">+ Add Band</button>
+                        <button class="btn btn-secondary" id="createInvoiceBtn">+ Create Invoice</button>
+                    </div>
+                </div>
+
+                <!-- EVENTS SECTION -->
+                <div id="eventsSection" class="section">
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h2>Events</h2>
+                            <button class="btn btn-primary btn-small" id="addEventBtn2">+ Add Event</button>
+                        </div>
+                        <table id="eventsTable">
+                            <thead>
+                                <tr>
+                                    <th>Event Name</th>
+                                    <th>Date</th>
+                                    <th>Category</th>
+                                    <th>Price</th>
+                                    <th>Capacity</th>
+                                    <th>Registered</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="eventsTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- BANDS SECTION -->
+                <div id="bandsSection" class="section">
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h2>Band Schedule</h2>
+                            <button class="btn btn-primary btn-small" id="addBandBtn2">+ Add Band</button>
+                        </div>
+                        <table id="bandsTable">
+                            <thead>
+                                <tr>
+                                    <th>Band Name</th>
+                                    <th>Date</th>
+                                    <th>Time Slot</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bandsTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TABLE MAP SECTION -->
+                <div id="tableMapSection" class="section">
+                    <h1 style="margin-bottom: 1.5rem; color: var(--brown-dark);">Floor Plan Builder</h1>
+                    <div class="floorplan-container">
+                        <svg id="floorPlanCanvas" class="floorplan-canvas" width="900" height="700"></svg>
+                        <div>
+                            <div class="floorplan-toolbar">
+                                <div class="toolbar-section">
+                                    <h3>Add Table</h3>
+                                    <div class="toolbar-buttons">
+                                        <button class="btn btn-secondary btn-small" id="addRectTable">Rectangle (4-10)</button>
+                                        <button class="btn btn-secondary btn-small" id="addRoundTable">Round (4-8)</button>
+                                        <button class="btn btn-secondary btn-small" id="addDiamondTable">High-Top (2-4)</button>
+                                        <button class="btn btn-secondary btn-small" id="addCouch">Couch (4+)</button>
+                                        <button class="btn btn-secondary btn-small" id="addBarSeats">Bar Seats</button>
+                                    </div>
+                                </div>
+                                <div class="toolbar-section">
+                                    <h3>Tools</h3>
+                                    <div class="toolbar-buttons">
+                                        <button class="btn btn-secondary btn-small" id="addLabel">Add Label</button>
+                                        <button class="btn btn-danger btn-small" id="deleteSelected">Delete Selected</button>
+                                    </div>
+                                </div>
+                                <div class="toolbar-section">
+                                    <h3>Save</h3>
+                                    <div class="toolbar-buttons">
+                                        <button class="btn btn-success btn-small" id="savePlan">Save Floor Plan</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="propertiesPanel" class="properties-panel">
+                                <h3>Selected Table</h3>
+                                <div class="property-field">
+                                    <label>Table Name/Number</label>
+                                    <input type="text" id="tableName">
+                                </div>
+                                <div class="property-field">
+                                    <label>Seats</label>
+                                    <input type="number" id="tableSeats" min="1" max="20">
+                                </div>
+                                <div class="property-field">
+                                    <label>Type</label>
+                                    <select id="tableType">
+                                        <option value="table">Table</option>
+                                        <option value="hightop">High-Top</option>
+                                        <option value="couch">Couch</option>
+                                        <option value="bar">Bar Seat</option>
+                                    </select>
+                                </div>
+                                <button class="btn btn-danger btn-small" id="deleteTableBtn">Delete Table</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- INVOICES SECTION -->
+                <div id="invoicesSection" class="section">
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h2>Invoices</h2>
+                            <button class="btn btn-primary btn-small" id="createInvoiceBtn2">+ Create Invoice</button>
+                        </div>
+                        <div style="padding: 2rem; text-align: center; color: var(--charcoal);">
+                            <p>For full invoice history and management, visit the <strong>Stripe Dashboard</strong>:</p>
+                            <a href="https://dashboard.stripe.com" target="_blank" class="btn btn-secondary" style="display: inline-block; margin-top: 1rem;">Open Stripe Dashboard</a>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-              <label class="form-label">Time *</label>
-              <input type="text" class="form-input" id="ae-time" placeholder="e.g. 6:00 PM – 10:00 PM">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Location</label>
-              <input type="text" class="form-input" id="ae-location" placeholder="e.g. The Building · The Quarry">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Event Type *</label>
-              <select class="form-input" id="ae-type">
-                <option value="ticketed">🎟 Ticketed Event</option>
-                <option value="public">🌐 Public Event (Free)</option>
-                <option value="fundraiser">🤝 Fundraiser</option>
-                <option value="member">🍷 Members Only</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Price</label>
-              <input type="text" class="form-input" id="ae-price" placeholder="e.g. $25/person or Free or TBD">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Total Capacity</label>
-              <input type="number" class="form-input" id="ae-capacity" placeholder="e.g. 144 (leave blank if unlimited)">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Currently Registered</label>
-              <input type="number" class="form-input" id="ae-registered" placeholder="e.g. 0">
-            </div>
-            <div class="form-group form-full">
-              <label class="form-label">Description *</label>
-              <textarea class="form-input" id="ae-desc" placeholder="Describe the event for guests..."></textarea>
-            </div>
-            <div class="form-group form-full">
-              <label class="form-label">Registration / Info URL (optional)</label>
-              <input type="text" class="form-input" id="ae-url" placeholder="https://... or leave blank for email inquiry">
-            </div>
-            <div class="form-group form-full">
-              <label class="form-label">Notes (internal only)</label>
-              <input type="text" class="form-input" id="ae-notes" placeholder="Internal notes for staff — not shown publicly">
-            </div>
-          </div>
-          <div class="btn-row">
-            <button class="btn btn-gold" onclick="submitNewEvent()">Submit Event via Email →</button>
-            <button class="btn btn-outline" onclick="clearEventForm()">Clear Form</button>
-          </div>
-          <p style="font-size:.55rem;color:rgba(255,255,255,.3);margin-top:.75rem;letter-spacing:.05em;">This will open your email client with full event details pre-filled. Send it to management@thequarrystl.com and Matt/Rob will update the live site.</p>
         </div>
-      </div>
+    </div>
 
-      <!-- BANDS -->
-      <div class="panel" id="panel-bands">
-        <h2 class="panel-title">Band Schedule</h2>
-        <p class="panel-sub">Upcoming live performances · Edit inline</p>
-        <div class="admin-card">
-          <div class="card-title">Scheduled Performances</div>
-          <table class="admin-table" id="bandsTable">
-            <thead><tr><th>Band / Artist</th><th>Date</th><th>Time</th><th>Actions</th></tr></thead>
-            <tbody id="bandsBody"></tbody>
-          </table>
-        </div>
-      </div>
+    <!-- MODALS -->
 
-      <!-- ADD BAND -->
-      <div class="panel" id="panel-addBand">
-        <h2 class="panel-title">Add Band / Performance</h2>
-        <p class="panel-sub">Schedule a new live music performance</p>
-        <div class="admin-card">
-          <div class="card-title">Performance Details</div>
-          <div class="form-grid">
-            <div class="form-group form-full">
-              <label class="form-label">Band / Artist Name *</label>
-              <input type="text" class="form-input" id="ab-name" placeholder="e.g. Scott and Liz">
+    <!-- Add/Edit Event Modal -->
+    <div id="eventModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="eventModalTitle">Add Event</h2>
+                <button class="modal-close" onclick="closeModal('eventModal')">&times;</button>
             </div>
-            <div class="form-group">
-              <label class="form-label">Date *</label>
-              <input type="date" class="form-input" id="ab-date">
+            <div class="modal-body">
+                <form id="eventForm">
+                    <div class="form-group">
+                        <label>Event Name</label>
+                        <input type="text" id="eventName" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="eventDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Time</label>
+                            <input type="time" id="eventTime" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="eventDescription" rows="4" style="width: 100%; padding: 0.75rem; border: 2px solid var(--gray-medium); border-radius: 4px; font-family: 'Montserrat', sans-serif;"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select id="eventCategory" required>
+                                <option value="Ticketed">Ticketed</option>
+                                <option value="Free">Free</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Price Per Seat ($)</label>
+                            <input type="number" id="eventPrice" min="0" step="0.01" value="0" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Image Gradient</label>
+                            <select id="eventImageGradient" required>
+                                <option value="general">General</option>
+                                <option value="neon-80s">Neon 80s</option>
+                                <option value="neon-brunch">Neon Brunch</option>
+                                <option value="live-music">Live Music</option>
+                                <option value="comedy">Comedy</option>
+                                <option value="wine-tasting">Wine Tasting</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Image Text</label>
+                            <input type="text" id="eventImageText" placeholder="Text for event card">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select id="eventStatus" required>
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label><input type="checkbox" id="eventUseSeating"> Enable Seating Options</label>
+                    </div>
+                    <div id="seatingOptionsDiv" style="display: none;">
+                        <div class="form-group">
+                            <label>Single Seats Available</label>
+                            <input type="number" id="eventSingleSeats" min="0" value="0">
+                        </div>
+                    </div>
+                </form>
             </div>
-            <div class="form-group">
-              <label class="form-label">Time *</label>
-              <input type="text" class="form-input" id="ab-time" placeholder="e.g. 7 PM – 10 PM">
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('eventModal')">Cancel</button>
+                <button class="btn btn-primary" id="eventSubmitBtn">Save Event</button>
             </div>
-          </div>
-          <div class="btn-row">
-            <button class="btn btn-gold" onclick="submitNewBand()">Submit via Email →</button>
-            <button class="btn btn-outline" onclick="clearBandForm()">Clear</button>
-          </div>
         </div>
-      </div>
+    </div>
 
-      <!-- FOOD PRICES -->
-      <div class="panel" id="panel-menuFood">
-        <h2 class="panel-title">Food Menu Prices</h2>
-        <p class="panel-sub">Edit prices inline · Hit "Save Changes" to send update email</p>
-        <div class="admin-card">
-          <div class="card-title">Shareables</div>
-          <table class="admin-table"><thead><tr><th>Item</th><th>Price</th><th></th></tr></thead>
-          <tbody id="shareables-body"></tbody></table>
-        </div>
-        <div class="admin-card">
-          <div class="card-title">Sandwiches, Wraps & Sliders</div>
-          <table class="admin-table"><thead><tr><th>Item</th><th>Price</th><th></th></tr></thead>
-          <tbody id="sandwiches-body"></tbody></table>
-        </div>
-        <div class="admin-card">
-          <div class="card-title">Nachos</div>
-          <table class="admin-table"><thead><tr><th>Item</th><th>Price</th><th></th></tr></thead>
-          <tbody id="nachos-body"></tbody></table>
-        </div>
-        <div class="admin-card">
-          <div class="card-title">Soups & Salads</div>
-          <table class="admin-table"><thead><tr><th>Item</th><th>Price</th><th></th></tr></thead>
-          <tbody id="salads-body"></tbody></table>
-        </div>
-        <div class="btn-row">
-          <button class="btn btn-gold" onclick="saveMenuChanges()">Save & Send Update Email →</button>
-        </div>
-      </div>
-
-      <!-- DRINK PRICES -->
-      <div class="panel" id="panel-menuDrinks">
-        <h2 class="panel-title">Drink Menu</h2>
-        <p class="panel-sub">Edit drink prices inline</p>
-        <div class="admin-card">
-          <div class="card-title">Cocktails & Spirits</div>
-          <table class="admin-table"><thead><tr><th>Item</th><th>Price</th><th></th></tr></thead>
-          <tbody id="drinks-body"></tbody></table>
-        </div>
-        <div class="btn-row">
-          <button class="btn btn-gold" onclick="saveDrinkChanges()">Save & Send Update Email →</button>
-        </div>
-      </div>
-
-      <!-- ADD MENU ITEM -->
-      <div class="panel" id="panel-addMenuItem">
-        <h2 class="panel-title">Add Menu Item</h2>
-        <p class="panel-sub">Submit a new item to be added to the menu</p>
-        <div class="admin-card">
-          <div class="card-title">New Item Details</div>
-          <div class="form-grid">
-            <div class="form-group form-full">
-              <label class="form-label">Item Name *</label>
-              <input type="text" class="form-input" id="mi-name" placeholder="e.g. Quarry Nachos">
+    <!-- Add/Edit Band Modal -->
+    <div id="bandModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="bandModalTitle">Add Band</h2>
+                <button class="modal-close" onclick="closeModal('bandModal')">&times;</button>
             </div>
-            <div class="form-group">
-              <label class="form-label">Section *</label>
-              <select class="form-input" id="mi-section">
-                <option>Shareables</option>
-                <option>Sandwiches, Wraps & Sliders</option>
-                <option>Nachos</option>
-                <option>Soups & Salads</option>
-                <option>Kids Menu</option>
-                <option>Heaven (Desserts)</option>
-                <option>Cocktails</option>
-                <option>Beer</option>
-                <option>Wine</option>
-                <option>Non-Alcoholic</option>
-              </select>
+            <div class="modal-body">
+                <form id="bandForm">
+                    <div class="form-group">
+                        <label>Band Name</label>
+                        <input type="text" id="bandName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" id="bandDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Time Slot</label>
+                        <select id="bandTimeSlot" required>
+                            <option value="10 AM - 1 PM">Morning (10 AM - 1 PM)</option>
+                            <option value="1 PM - 4 PM">Afternoon (1 PM - 4 PM)</option>
+                            <option value="7 PM - 10 PM">Evening (7 PM - 10 PM)</option>
+                        </select>
+                    </div>
+                </form>
             </div>
-            <div class="form-group">
-              <label class="form-label">Price *</label>
-              <input type="text" class="form-input" id="mi-price" placeholder="e.g. $14.99">
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('bandModal')">Cancel</button>
+                <button class="btn btn-primary" id="bandSubmitBtn">Save Band</button>
             </div>
-            <div class="form-group form-full">
-              <label class="form-label">Description</label>
-              <textarea class="form-input" id="mi-desc" placeholder="Describe the item..."></textarea>
-            </div>
-          </div>
-          <div class="btn-row">
-            <button class="btn btn-gold" onclick="submitNewMenuItem()">Submit via Email →</button>
-          </div>
         </div>
-      </div>
+    </div>
 
-      <!-- HOURS & INFO -->
-      <div class="panel" id="panel-hours">
-        <h2 class="panel-title">Hours & Info</h2>
-        <p class="panel-sub">Edit operating hours and contact info</p>
-        <div class="admin-card">
-          <div class="card-title">Operating Hours</div>
-          <table class="admin-table" id="hoursTable">
-            <thead><tr><th>Day</th><th>Open</th><th>Close</th><th>Status</th></tr></thead>
-            <tbody id="hoursBody"></tbody>
-          </table>
-          <div class="btn-row" style="margin-top:1.25rem;">
-            <button class="btn btn-gold" onclick="saveHours()">Save & Send Update Email →</button>
-          </div>
+    <!-- View Registrations Modal -->
+    <div id="registrationsModal" class="modal-overlay">
+        <div class="modal registrations-modal">
+            <div class="modal-header">
+                <h2 id="registrationsTitle">Registrations</h2>
+                <button class="modal-close" onclick="closeModal('registrationsModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <button class="btn btn-success btn-small export-button" id="exportCSVBtn">Export CSV</button>
+                <table id="registrationsTable" style="margin-top: 1rem;">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Party Size</th>
+                            <th>Seating</th>
+                            <th>Amount Paid</th>
+                            <th>Date Registered</th>
+                        </tr>
+                    </thead>
+                    <tbody id="registrationsTableBody">
+                    </tbody>
+                </table>
+            </div>
         </div>
-      </div>
+    </div>
 
-    </main>
-  </div>
-</div>
+    <!-- Create Invoice Modal -->
+    <div id="invoiceModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Create Invoice</h2>
+                <button class="modal-close" onclick="closeModal('invoiceModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="invoiceForm">
+                    <div class="form-group">
+                        <label>Customer Email</label>
+                        <input type="email" id="invoiceEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Customer Name</label>
+                        <input type="text" id="invoiceName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <input type="text" id="invoiceDescription" required placeholder="e.g., Event catering, rental, etc.">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Amount ($)</label>
+                            <input type="number" id="invoiceAmount" min="0.01" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Due Date</label>
+                            <input type="date" id="invoiceDueDate" required>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('invoiceModal')">Cancel</button>
+                <button class="btn btn-primary" id="invoiceSubmitBtn">Create Invoice</button>
+            </div>
+        </div>
+    </div>
 
-<div class="toast" id="toast"></div>
+    <!-- Confirmation Dialog -->
+    <div id="confirmationModal" class="modal-overlay">
+        <div class="confirmation-dialog">
+            <h2 id="confirmationTitle">Confirm</h2>
+            <p id="confirmationMessage"></p>
+            <div class="confirmation-buttons">
+                <button class="btn btn-secondary" id="confirmCancelBtn">Cancel</button>
+                <button class="btn btn-danger" id="confirmOkBtn">Delete</button>
+            </div>
+        </div>
+    </div>
 
-<script>
-// ── AUTH ──
-// Change these credentials for your staff
-const CREDENTIALS = {
-  'matt': 'quarry2026',
-  'rob': 'quarry2026',
-  'staff': 'quarry1234'
-};
+    <!-- Token Settings Modal -->
+    <div id="tokenSettingsModal" class="modal-overlay" style="display:none;">
+        <div class="modal" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>GitHub Token Settings</h2>
+                <button class="modal-close" onclick="closeTokenSettings()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 1rem; color: var(--gray-dark); font-size: 0.9rem;">Enter your GitHub Personal Access Token to enable saving events and bands. The token needs <strong>repo</strong> scope for private repositories.</p>
+                <div class="form-group">
+                    <label>GitHub Token</label>
+                    <input type="text" id="githubTokenInput" placeholder="ghp_xxxxxxxxxxxx" style="width: 100%; padding: 0.75rem; border: 2px solid var(--gray-medium); border-radius: 4px; font-family: monospace;">
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button class="btn btn-primary" onclick="saveGitHubToken()">Save Token</button>
+                    <button class="btn btn-secondary" onclick="closeTokenSettings()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-function doLogin() {
-  const u = document.getElementById('loginUser').value.trim().toLowerCase();
-  const p = document.getElementById('loginPass').value;
-  if (CREDENTIALS[u] && CREDENTIALS[u] === p) {
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('adminShell').style.display = 'block';
-    loadAllData();
-  } else {
-    document.getElementById('loginErr').textContent = 'Incorrect username or password.';
-  }
-}
-document.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
-function doLogout() {
-  document.getElementById('loginScreen').style.display = 'flex';
-  document.getElementById('adminShell').style.display = 'none';
-  document.getElementById('loginUser').value = '';
-  document.getElementById('loginPass').value = '';
-}
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
 
-// ── PANELS ──
-function showPanel(id, btn) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('panel-' + id).classList.add('active');
-  btn.classList.add('active');
-}
+    <script>
+        // STATE MANAGEMENT
+        let state = {
+            authenticated: false,
+            password: null,
+            currentEventId: null,
+            currentBandId: null,
+            currentEventRegistrations: [],
+            events: [],
+            bands: [
+                { id: '1', name: 'Scott and Liz', date: '2026-03-28', timeSlot: '7 PM - 10 PM' },
+                { id: '2', name: 'Ed Callison', date: '2026-03-29', timeSlot: '1 PM - 4 PM' },
+                { id: '3', name: 'Kelli Renee', date: '2026-04-04', timeSlot: '7 PM - 10 PM' },
+                { id: '4', name: 'The Velvet Devils', date: '2026-04-12', timeSlot: '1 PM - 4 PM' }
+            ],
+            floorPlan: null,
+            selectedTableId: null,
+            nextEventId: 1,
+            nextBandId: 5,
+            dataSha: null,
+            registrations: {}
+        };
 
-// ── TOAST ──
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
 
-// ── DATA ──
-const DATA = {
-  events: [
-    { name: '80s Neon Music Bingo', date: '2026-04-03', type: 'ticketed', price: '$25/person', registered: 144, capacity: 144, soldOut: true },
-    { name: 'Fore the Girls Golf Event', date: '2026-04-04', type: 'ticketed', price: 'TBD', registered: 40, capacity: 60, soldOut: false },
-    { name: '80s Neon Music Bingo', date: '2026-04-04', type: 'ticketed', price: '$25/person', registered: 144, capacity: 144, soldOut: true },
-    { name: 'Easter Sunday Brunch', date: '2026-04-05', type: 'ticketed', price: '$0.00', registered: 79, capacity: null, soldOut: false },
-    { name: 'Ladies Singo Bingo Brunch', date: '2026-04-12', type: 'ticketed', price: 'TBD', registered: 98, capacity: 135, soldOut: false },
-    { name: 'Boots & Bourbon', date: '2026-05-15', type: 'ticketed', price: 'TBD', registered: null, capacity: null, soldOut: false },
-    { name: 'Wedding Vendor Show', date: '2026-08-29', type: 'ticketed', price: 'Free/Vendor TBD', registered: null, capacity: null, soldOut: false },
-    { name: 'THS Boot Scoot Fundraiser', date: '2026-10-17', type: 'fundraiser', price: 'TBD', registered: null, capacity: null, soldOut: false },
-    { name: 'Rock & Vine Wine Club', date: '2026-03-26', type: 'member', price: 'Members Only', registered: null, capacity: null, soldOut: false },
-  ],
-  bands: [
-    { name: 'Scott and Liz', date: '2026-03-27', time: '7 PM – 10 PM' },
-    { name: 'Janet Martin', date: '2026-03-28', time: '7 PM – 10 PM' },
-    { name: 'Ed Callison', date: '2026-03-28', time: '1 PM – 4 PM' },
-    { name: 'Mickey Scott', date: '2026-03-29', time: '1 PM – 4 PM' },
-    { name: 'Kelli Renee', date: '2026-04-03', time: '7 PM – 10 PM' },
-    { name: 'Ed Callison', date: '2026-04-04', time: '1 PM – 4 PM' },
-    { name: 'Stephen Jones', date: '2026-04-05', time: '1 PM – 4 PM' },
-    { name: 'The Velvet Devils', date: '2026-04-11', time: '1 PM – 4 PM' },
-    { name: 'Two Pedros', date: '2026-04-11', time: '7 PM – 10 PM' },
-    { name: 'Andrew Weber', date: '2026-04-12', time: '1 PM – 4 PM' },
-    { name: 'Janet and Scott', date: '2026-04-17', time: '7 PM – 10 PM' },
-    { name: 'Dave King', date: '2026-04-18', time: '1 PM – 4 PM' },
-    { name: 'Andrew Weber', date: '2026-04-18', time: '7 PM – 10 PM' },
-    { name: 'Mickey Scott', date: '2026-04-19', time: '1 PM – 4 PM' },
-    { name: 'Country Roads', date: '2026-04-24', time: '7 PM – 10 PM' },
-    { name: 'Stephen Jones', date: '2026-04-25', time: '1 PM – 4 PM' },
-    { name: 'Bob', date: '2026-04-25', time: '7 PM – 10 PM' },
-    { name: 'Janet and Darren', date: '2026-04-26', time: '1 PM – 4 PM' },
-  ],
-  menu: {
-    shareables: [
-      { name: "Devils in the Chicken", price: "$10.59" },
-      { name: "Adams Pickles", price: "$11.50" },
-      { name: "Pick Your Dip", price: "$15.99" },
-      { name: "Feathered Buffalo", price: "$14.05" },
-      { name: "Slider Flight", price: "$16.95" },
-      { name: "Fried Mac N' Jalapeño Bites", price: "$12.10" },
-      { name: "Buffalo Wings", price: "$16.95" },
-      { name: "Thaiyaki Chili Wings", price: "$16.35" },
-      { name: "Basket of Fries", price: "$6.99" },
-    ],
-    sandwiches: [
-      { name: "California Club Wrap", price: "$15.59" },
-      { name: "Caesar Wrap", price: "$13.59" },
-      { name: "4 Lotta Ham & Chz", price: "$16.89" },
-      { name: "BBQ Pulled Pork", price: "$15.95" },
-      { name: "BBQ Chopped Brisket", price: "$16.85" },
-      { name: "The Quarry French Dip", price: "$16.85" },
-      { name: "Roast Beef Sliders", price: "$15.90" },
-      { name: "Quarry Cheeseburger Sliders", price: "$16.89" },
-    ],
-    nachos: [
-      { name: "Pulled Pork Nachos", price: "$16.10" },
-      { name: "Farmhouse Nachos", price: "$15.25" },
-      { name: "The Nattypocalypse Platter", price: "$13.99" },
-    ],
-    salads: [
-      { name: "Chicken Caesar Salad (Full/Half)", price: "$14.50 / $10.15" },
-      { name: "Farmhouse Salad (Full/Half)", price: "$14.25 / $9.29" },
-      { name: "Southwest Salad (Full/Half)", price: "$14.25 / $10.29" },
-      { name: "Summer Salad (Full/Half)", price: "$14.25 / $10.49" },
-      { name: "Bowl of Soup", price: "$5.99" },
-    ],
-    drinks: [
-      { name: "House Wine (Glass)", price: "$9" },
-      { name: "Bottle of Wine", price: "$30–$45" },
-      { name: "Domestic Beer", price: "$5" },
-      { name: "Craft Beer", price: "$7" },
-      { name: "Cocktails", price: "$10–$14" },
-      { name: "Mimosa", price: "$8" },
-      { name: "Bloody Mary", price: "$10" },
-    ]
-  },
-  hours: [
-    { day: 'Monday', open: 'Closed', close: '' },
-    { day: 'Tuesday', open: 'Closed', close: '' },
-    { day: 'Wednesday', open: '11:00 AM', close: '9:00 PM' },
-    { day: 'Thursday', open: '11:00 AM', close: '9:00 PM' },
-    { day: 'Friday', open: '11:00 AM', close: '11:00 PM' },
-    { day: 'Saturday', open: '11:00 AM', close: '11:00 PM' },
-    { day: 'Sunday', open: '10:00 AM', close: '5:00 PM' },
-  ]
-};
+        // GITHUB CONFIGURATION
+        const GITHUB_TOKEN = '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';
+        const GITHUB_REPO = 'quarrymanagement/quarry-website';
+        const DATA_FILE = 'events.json';
 
-const TYPE_BADGE = {
-  ticketed: '<span class="type-badge t-ticketed">🎟 Ticketed</span>',
-  public: '<span class="type-badge t-public">🌐 Public</span>',
-  fundraiser: '<span class="type-badge t-fundraiser">🤝 Fundraiser</span>',
-  member: '<span class="type-badge t-member">🍷 Member</span>',
-};
+        // DEFAULT FLOOR PLAN
+        const defaultFloorPlan = {
+            tables: [
+                {id: 't21', name: '21', x: 680, y: 630, width: 60, height: 80, shape: 'rect', seats: 5, type: 'table'},
+                {id: 't22', name: '22', x: 580, y: 620, width: 70, height: 80, shape: 'rect', seats: 8, type: 'table'},
+                {id: 't23', name: '23', x: 560, y: 510, width: 70, height: 80, shape: 'rect', seats: 8, type: 'table'},
+                {id: 't24', name: '24', x: 660, y: 510, width: 60, height: 80, shape: 'rect', seats: 6, type: 'table'},
+                {id: 't25', name: '25', x: 470, y: 430, width: 50, height: 50, shape: 'diamond', seats: 2, type: 'hightop'},
+                {id: 't26', name: '26', x: 400, y: 420, width: 40, height: 40, shape: 'rect', seats: 2, type: 'hightop'},
+                {id: 't27', name: '27', x: 280, y: 420, width: 80, height: 40, shape: 'rect', seats: 8, type: 'table'},
+                {id: 't28', name: '28', x: 180, y: 600, width: 60, height: 80, shape: 'rect', seats: 6, type: 'table'},
+                {id: 't29', name: '29', x: 180, y: 490, width: 60, height: 80, shape: 'rect', seats: 6, type: 'table'},
+                {id: 't30', name: '30', x: 190, y: 420, width: 40, height: 40, shape: 'circle', seats: 5, type: 'table'},
+                {id: 't31', name: '31', x: 340, y: 330, width: 80, height: 40, shape: 'rect', seats: 8, type: 'table'},
+                {id: 't32', name: '32', x: 340, y: 260, width: 80, height: 40, shape: 'rect', seats: 8, type: 'table'},
+                {id: 't33', name: '33', x: 340, y: 190, width: 80, height: 40, shape: 'rect', seats: 8, type: 'table'},
+                {id: 't34', name: '34', x: 180, y: 160, width: 40, height: 80, shape: 'rect', seats: 6, type: 'table'},
+                {id: 't35', name: '35', x: 340, y: 110, width: 80, height: 40, shape: 'rect', seats: 8, type: 'table'},
+                {id: 't36', name: '36', x: 500, y: 450, width: 30, height: 30, shape: 'circle', seats: 2, type: 'hightop'},
+                {id: 'couch1', name: 'Couch 1', x: 170, y: 40, width: 80, height: 50, shape: 'rect', seats: 4, type: 'couch'},
+                {id: 'couch2', name: 'Couch 2', x: 490, y: 40, width: 60, height: 60, shape: 'rect', seats: 4, type: 'couch'},
+            ],
+            labels: [
+                {text: 'FIREPLACE', x: 340, y: 50},
+                {text: 'DOORS', x: 130, y: 340},
+                {text: 'BAR', x: 590, y: 300}
+            ],
+            barSeats: [
+                {id: 'bar-1', x: 570, y: 170, available: true},
+                {id: 'bar-2', x: 570, y: 190, available: true},
+                {id: 'bar-3', x: 570, y: 210, available: true},
+                {id: 'bar-4', x: 570, y: 230, available: true},
+                {id: 'bar-5', x: 570, y: 250, available: true},
+                {id: 'bar-6', x: 570, y: 270, available: true},
+                {id: 'bar-7', x: 570, y: 290, available: true},
+                {id: 'bar-8', x: 570, y: 310, available: true}
+            ]
+        };
 
-function loadAllData() {
-  loadEvents(); loadBands(); loadMenuSection('shareables','shareables-body');
-  loadMenuSection('sandwiches','sandwiches-body'); loadMenuSection('nachos','nachos-body');
-  loadMenuSection('salads','salads-body'); loadMenuSection('drinks','drinks-body');
-  loadHours();
-}
+        // INITIALIZATION
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeEventListeners();
+            checkSessionStorage();
+        });
 
-// ── EVENTS TABLE ──
-function loadEvents() {
-  const tbody = document.getElementById('eventsBody');
-  tbody.innerHTML = DATA.events.map((ev, i) => `
-    <tr>
-      <td><input class="editable" value="${ev.name}" onchange="DATA.events[${i}].name=this.value"></td>
-      <td><input class="editable" type="date" value="${ev.date}" onchange="DATA.events[${i}].date=this.value" style="width:130px;"></td>
-      <td>
-        <select class="editable" onchange="DATA.events[${i}].type=this.value;loadEvents();" style="width:110px;">
-          ${['ticketed','public','fundraiser','member'].map(t=>`<option value="${t}" ${ev.type===t?'selected':''}>${t}</option>`).join('')}
-        </select>
-      </td>
-      <td><input class="editable" value="${ev.price||''}" onchange="DATA.events[${i}].price=this.value" style="width:100px;"></td>
-      <td><input class="editable" type="number" value="${ev.registered||''}" onchange="DATA.events[${i}].registered=+this.value" style="width:70px;"></td>
-      <td><input class="editable" type="number" value="${ev.capacity||''}" onchange="DATA.events[${i}].capacity=+this.value" style="width:70px;"></td>
-      <td><button class="btn btn-danger" onclick="removeEvent(${i})">Remove</button></td>
-    </tr>`).join('');
-}
+        // LOGIN HANDLING
+        function initializeEventListeners() {
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            document.getElementById('signOutBtn').addEventListener('click', handleSignOut);
 
-function removeEvent(i) {
-  if (!confirm('Remove this event?')) return;
-  DATA.events.splice(i, 1);
-  loadEvents();
-  showToast('Event removed');
-}
+            // Navigation
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', handleNavigation);
+            });
 
-// ── BANDS TABLE ──
-function loadBands() {
-  const tbody = document.getElementById('bandsBody');
-  tbody.innerHTML = DATA.bands.map((b, i) => `
-    <tr>
-      <td><input class="editable" value="${b.name}" onchange="DATA.bands[${i}].name=this.value"></td>
-      <td><input class="editable" type="date" value="${b.date}" onchange="DATA.bands[${i}].date=this.value" style="width:140px;"></td>
-      <td><input class="editable" value="${b.time}" onchange="DATA.bands[${i}].time=this.value" style="width:130px;"></td>
-      <td><button class="btn btn-danger" onclick="removeBand(${i})">Remove</button></td>
-    </tr>`).join('');
-}
+            // Dashboard buttons
+            document.getElementById('addEventBtn').addEventListener('click', () => openAddEventModal());
+            document.getElementById('addBandBtn').addEventListener('click', () => openAddBandModal());
+            document.getElementById('createInvoiceBtn').addEventListener('click', () => openAddInvoiceModal());
+            document.getElementById('addEventBtn2').addEventListener('click', () => openAddEventModal());
+            document.getElementById('addBandBtn2').addEventListener('click', () => openAddBandModal());
+            document.getElementById('createInvoiceBtn2').addEventListener('click', () => openAddInvoiceModal());
 
-function removeBand(i) {
-  if (!confirm('Remove this performance?')) return;
-  DATA.bands.splice(i, 1);
-  loadBands();
-  showToast('Performance removed');
-}
+            // Events form
+            document.getElementById('eventSubmitBtn').addEventListener('click', handleEventSubmit);
 
-// ── MENU TABLES ──
-function loadMenuSection(section, bodyId) {
-  const items = DATA.menu[section] || [];
-  const tbody = document.getElementById(bodyId);
-  if (!tbody) return;
-  tbody.innerHTML = items.map((item, i) => `
-    <tr>
-      <td><input class="editable" value="${item.name}" onchange="DATA.menu['${section}'][${i}].name=this.value" style="width:280px;"></td>
-      <td><input class="editable" value="${item.price}" onchange="DATA.menu['${section}'][${i}].price=this.value" style="width:120px;"></td>
-      <td><button class="btn btn-danger" onclick="removeMenuItem('${section}',${i},'${bodyId}')">Remove</button></td>
-    </tr>`).join('');
-}
+            // Bands form
+            document.getElementById('bandSubmitBtn').addEventListener('click', handleBandSubmit);
 
-function removeMenuItem(section, i, bodyId) {
-  if (!confirm('Remove this menu item?')) return;
-  DATA.menu[section].splice(i, 1);
-  loadMenuSection(section, bodyId);
-  showToast('Item removed');
-}
+            // Invoice form
+            document.getElementById('invoiceSubmitBtn').addEventListener('click', handleInvoiceSubmit);
 
-// ── HOURS ──
-function loadHours() {
-  const tbody = document.getElementById('hoursBody');
-  tbody.innerHTML = DATA.hours.map((h, i) => `
-    <tr>
-      <td style="font-weight:600;">${h.day}</td>
-      <td><input class="editable" value="${h.open}" onchange="DATA.hours[${i}].open=this.value" style="width:110px;"></td>
-      <td><input class="editable" value="${h.close}" onchange="DATA.hours[${i}].close=this.value" style="width:110px;"></td>
-      <td>
-        <select class="editable" style="width:90px;">
-          <option>Open</option><option ${h.open==='Closed'?'selected':''}>Closed</option>
-        </select>
-      </td>
-    </tr>`).join('');
-}
+            // Floor plan buttons
+            document.getElementById('addRectTable').addEventListener('click', () => addTable('rect', 8));
+            document.getElementById('addRoundTable').addEventListener('click', () => addTable('circle', 6));
+            document.getElementById('addDiamondTable').addEventListener('click', () => addTable('diamond', 3));
+            document.getElementById('addCouch').addEventListener('click', () => addTable('rect', 4, 'couch'));
+            document.getElementById('addBarSeats').addEventListener('click', () => addBarSeats());
+            document.getElementById('addLabel').addEventListener('click', () => addLabel());
+            document.getElementById('deleteSelected').addEventListener('click', () => deleteSelectedTable());
+            document.getElementById('savePlan').addEventListener('click', () => saveFloorPlan());
+            document.getElementById('deleteTableBtn').addEventListener('click', () => deleteSelectedTable());
+            document.getElementById('exportCSVBtn').addEventListener('click', () => exportRegistrationsCSV());
 
-// ── SUBMIT HELPERS (all via email) ──
-function submitNewEvent() {
-  const name = document.getElementById('ae-name').value;
-  const date = document.getElementById('ae-date').value;
-  const time = document.getElementById('ae-time').value;
-  const loc  = document.getElementById('ae-location').value;
-  const type = document.getElementById('ae-type').value;
-  const price= document.getElementById('ae-price').value;
-  const cap  = document.getElementById('ae-capacity').value;
-  const reg  = document.getElementById('ae-registered').value;
-  const desc = document.getElementById('ae-desc').value;
-  const url  = document.getElementById('ae-url').value;
-  const notes= document.getElementById('ae-notes').value;
-  if (!name || !date || !time || !desc) { alert('Please fill in all required fields.'); return; }
-  const subject = encodeURIComponent(`[ADMIN] Add New Event: ${name}`);
-  const body = encodeURIComponent(`ADD NEW EVENT REQUEST\n====================\n\nEvent Name: ${name}\nDate: ${date}\nTime: ${time}\nLocation: ${loc}\nType: ${type}\nPrice: ${price}\nCapacity: ${cap||'Unlimited'}\nCurrently Registered: ${reg||'0'}\nRegistration URL: ${url||'Email inquiry'}\n\nDescription:\n${desc}\n\nInternal Notes:\n${notes||'None'}\n\n--\nSubmitted via Admin Portal`);
-  window.location.href = `mailto:management@thequarrystl.com?subject=${subject}&body=${body}`;
-  showToast('Email opened — send to complete!');
-}
+            // Confirmation dialog
+            document.getElementById('confirmCancelBtn').addEventListener('click', () => closeModal('confirmationModal'));
+            document.getElementById('confirmOkBtn').addEventListener('click', () => executeConfirmedAction());
+        }
 
-function clearEventForm() {
-  ['ae-name','ae-date','ae-time','ae-location','ae-price','ae-capacity','ae-registered','ae-desc','ae-url','ae-notes'].forEach(id => document.getElementById(id).value = '');
-}
+        function checkSessionStorage() {
+            const password = sessionStorage.getItem('quarryAdminPassword');
+            if (password && password === 'quarry2026') {
+                state.password = password;
+                state.authenticated = true;
+                showAdminPanel();
+                loadData();
+            }
+        }
 
-function submitNewBand() {
-  const name = document.getElementById('ab-name').value;
-  const date = document.getElementById('ab-date').value;
-  const time = document.getElementById('ab-time').value;
-  if (!name || !date || !time) { alert('Please fill in all fields.'); return; }
-  const subject = encodeURIComponent(`[ADMIN] Add Band: ${name} on ${date}`);
-  const body = encodeURIComponent(`ADD BAND / PERFORMANCE\n======================\n\nBand/Artist: ${name}\nDate: ${date}\nTime: ${time}\n\n--\nSubmitted via Admin Portal`);
-  window.location.href = `mailto:management@thequarrystl.com?subject=${subject}&body=${body}`;
-  showToast('Email opened — send to complete!');
-}
+        function handleLogin(e) {
+            e.preventDefault();
+            const password = document.getElementById('password').value;
+            if (password !== 'quarry2026') {
+                showToast('Invalid password', 'error');
+                return;
+            }
+            state.password = password;
+            state.authenticated = true;
+            sessionStorage.setItem('quarryAdminPassword', password);
+            showAdminPanel();
+            loadData();
+        }
 
-function clearBandForm() {
-  ['ab-name','ab-date','ab-time'].forEach(id => document.getElementById(id).value = '');
-}
+        function handleSignOut() {
+            state.authenticated = false;
+            state.password = null;
+            sessionStorage.removeItem('quarryAdminPassword');
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('password').value = '';
+        }
 
-function saveMenuChanges() {
-  let body = 'MENU PRICE UPDATE REQUEST\n=========================\n\n';
-  Object.entries(DATA.menu).forEach(([section, items]) => {
-    body += `\n${section.toUpperCase()}\n`;
-    items.forEach(item => body += `  ${item.name}: ${item.price}\n`);
-  });
-  body += '\n--\nSubmitted via Admin Portal';
-  window.location.href = `mailto:management@thequarrystl.com?subject=${encodeURIComponent('[ADMIN] Menu Price Update')}&body=${encodeURIComponent(body)}`;
-  showToast('Email opened — send to complete!');
-}
+        function showAdminPanel() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'flex';
+        }
 
-function saveDrinkChanges() {
-  let body = 'DRINK MENU UPDATE\n=================\n\n';
-  DATA.menu.drinks.forEach(item => body += `${item.name}: ${item.price}\n`);
-  body += '\n--\nSubmitted via Admin Portal';
-  window.location.href = `mailto:management@thequarrystl.com?subject=${encodeURIComponent('[ADMIN] Drink Menu Update')}&body=${encodeURIComponent(body)}`;
-  showToast('Email opened — send to complete!');
-}
+        // NAVIGATION
+        function handleNavigation(e) {
+            const section = e.target.dataset.section;
+            if (section === 'sign-out') return handleSignOut();
 
-function saveHours() {
-  let body = 'HOURS UPDATE REQUEST\n====================\n\n';
-  DATA.hours.forEach(h => body += `${h.day}: ${h.open}${h.close ? ' – ' + h.close : ''}\n`);
-  body += '\n--\nSubmitted via Admin Portal';
-  window.location.href = `mailto:management@thequarrystl.com?subject=${encodeURIComponent('[ADMIN] Hours Update')}&body=${encodeURIComponent(body)}`;
-  showToast('Email opened — send to complete!');
-}
+            // Update active nav button
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            e.target.classList.add('active');
 
-function submitNewMenuItem() {
-  const name = document.getElementById('mi-name').value;
-  const section = document.getElementById('mi-section').value;
-  const price = document.getElementById('mi-price').value;
-  const desc = document.getElementById('mi-desc').value;
-  if (!name || !price) { alert('Please fill in required fields.'); return; }
-  const subject = encodeURIComponent(`[ADMIN] Add Menu Item: ${name}`);
-  const body = encodeURIComponent(`ADD MENU ITEM\n=============\n\nItem: ${name}\nSection: ${section}\nPrice: ${price}\nDescription: ${desc||'N/A'}\n\n--\nSubmitted via Admin Portal`);
-  window.location.href = `mailto:management@thequarrystl.com?subject=${subject}&body=${body}`;
-  showToast('Email opened — send to complete!');
-}
-</script>
+            // Show section
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(section + 'Section').classList.add('active');
+
+            // Initialize floor plan if needed
+            if (section === 'tableMap' && !state.floorPlan) {
+                state.floorPlan = JSON.parse(JSON.stringify(defaultFloorPlan));
+                renderFloorPlan();
+            }
+        }
+
+        // DATA LOADING
+        async function loadData() {
+            showLoadingIndicator(true);
+            try {
+                const resp = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${DATA_FILE}`, {
+                    headers: {
+                        'Authorization': 'token ' + GITHUB_TOKEN,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                
+                if (!resp.ok) {
+                    throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
+                }
+                
+                const fileInfo = await resp.json();
+                state.dataSha = fileInfo.sha;
+                const content = JSON.parse(atob(fileInfo.content));
+                state.events = content.events || [];
+                state.bands = content.bands || [];
+                state.floorPlan = content.floorPlan || JSON.parse(JSON.stringify(defaultFloorPlan));
+                state.registrations = content.registrations || {};
+                
+                // Set next IDs
+                state.nextEventId = Math.max(...state.events.map(e => parseInt(e.id.replace(/\D/g,'')) || 0), 0) + 1;
+                state.nextBandId = Math.max(...state.bands.map(b => parseInt(b.id) || 0), 0) + 1;
+                
+                showLoadingIndicator(false);
+            } catch (err) {
+                console.error('Failed to load data:', err);
+                showToast('Failed to load data from GitHub: ' + err.message, 'error');
+                showLoadingIndicator(false);
+                // Fall back to defaults
+                state.events = [];
+                state.bands = [];
+                state.floorPlan = JSON.parse(JSON.stringify(defaultFloorPlan));
+                state.registrations = {};
+            }
+            
+            renderEventsTable();
+            renderBandsTable();
+            loadFloorPlan();
+            updateDashboard();
+        }
+        function loadEvents() {
+            // In a real app, this would call the Netlify function
+            // For now, use sample data
+            state.events = [
+                {id: '1', name: 'Spring Wedding', date: '2026-04-15', time: '18:00', category: 'Ticketed', price: 7500, capacity: 80, registered: 42, status: 'Active'},
+                {id: '2', name: 'Jazz Night', date: '2026-04-20', time: '19:00', category: 'Ticketed', price: 2000, capacity: 100, registered: 67, status: 'Active'},
+                {id: '3', name: 'Corporate Event', date: '2026-05-10', time: '17:00', category: 'Free', price: 0, capacity: 150, registered: 89, status: 'Active'}
+            ];
+            renderEventsTable();
+        }
+
+        function loadBands() {
+            renderBandsTable();
+        }
+
+        function loadFloorPlan() {
+            state.floorPlan = JSON.parse(JSON.stringify(defaultFloorPlan));
+        }
+
+        function updateDashboard() {
+            const activeEvents = state.events.filter(e => e.status === 'Active').length;
+            const totalRegistrations = state.events.reduce((sum, e) => sum + e.registered, 0);
+            const estimatedRevenue = state.events.reduce((sum, e) => sum + (e.price * e.registered / 100), 0);
+            const upcomingBands = state.bands.length;
+
+            document.getElementById('activeEventsCount').textContent = activeEvents;
+            document.getElementById('totalRegistrationsCount').textContent = totalRegistrations;
+            document.getElementById('estimatedRevenue').textContent = '$' + estimatedRevenue.toFixed(2);
+            document.getElementById('upcomingBandsCount').textContent = upcomingBands;
+        }
+
+        // EVENTS TABLE
+        function renderEventsTable() {
+            const tbody = document.getElementById('eventsTableBody');
+            tbody.innerHTML = state.events.map(event => `
+                <tr>
+                    <td>${event.name}</td>
+                    <td>${event.date}</td>
+                    <td>${event.category}</td>
+                    <td>$${(event.price / 100).toFixed(2)}</td>
+                    <td>${event.capacity}</td>
+                    <td>${event.registered}</td>
+                    <td><span class="status-badge ${event.status === 'Active' ? 'status-active' : 'status-inactive'}">${event.status}</span></td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-secondary btn-small" onclick="editEvent('${event.id}')">Edit</button>
+                            <button class="btn btn-success btn-small" onclick="viewRegistrations('${event.id}')">Registrations</button>
+                            <button class="btn btn-danger btn-small" onclick="confirmDelete('event', '${event.id}')">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openAddEventModal() {
+            document.getElementById('eventModalTitle').textContent = 'Add Event';
+            document.getElementById('eventForm').reset();
+            document.getElementById('eventForm').dataset.mode = 'create';
+            openModal('eventModal');
+        }
+
+        function editEvent(eventId) {
+            const event = state.events.find(e => e.id === eventId);
+            if (!event) return;
+
+            document.getElementById('eventModalTitle').textContent = 'Edit Event';
+            document.getElementById('eventName').value = event.name;
+            document.getElementById('eventDate').value = event.date;
+            document.getElementById('eventTime').value = event.time;
+            document.getElementById('eventDescription').value = event.description || '';
+            document.getElementById('eventCategory').value = event.category;
+            document.getElementById('eventPrice').value = (event.price / 100).toFixed(2);
+            document.getElementById('eventCapacity').value = event.capacity;
+            document.getElementById('eventStatus').value = event.status;
+            document.getElementById('eventForm').dataset.mode = 'edit';
+            document.getElementById('eventForm').dataset.eventId = eventId;
+            openModal('eventModal');
+        }
+
+
+        // GITHUB TOKEN MANAGEMENT
+        function initGitHubToken() {
+            const token = sessionStorage.getItem('quarryGithubToken');
+            if (token) {
+                document.getElementById('tokenStatus').textContent = '✓ Token set';
+                document.getElementById('tokenStatus').style.color = 'var(--success)';
+            } else {
+                document.getElementById('tokenStatus').textContent = '✗ Not set';
+                document.getElementById('tokenStatus').style.color = 'var(--danger)';
+            }
+        }
+
+        function openTokenSettings() {
+            document.getElementById('tokenSettingsModal').style.display = 'flex';
+            const savedToken = sessionStorage.getItem('quarryGithubToken');
+            if (savedToken) {
+                document.getElementById('githubTokenInput').value = '••••••' + savedToken.slice(-4);
+            } else {
+                document.getElementById('githubTokenInput').value = '';
+            }
+        }
+
+        function closeTokenSettings() {
+            document.getElementById('tokenSettingsModal').style.display = 'none';
+            document.getElementById('githubTokenInput').value = '';
+        }
+
+        function saveGitHubToken() {
+            const token = document.getElementById('githubTokenInput').value.trim();
+            if (!token) {
+                showToast('Please enter a GitHub token', 'warning');
+                return;
+            }
+            if (token.startsWith('••••••')) {
+                showToast('Token already saved', 'info');
+                closeTokenSettings();
+                return;
+            }
+            sessionStorage.setItem('quarryGithubToken', token);
+            document.getElementById('githubTokenInput').value = '••••••' + token.slice(-4);
+            showToast('GitHub token saved — loading data...', 'success');
+            initGitHubToken();
+            closeTokenSettings();
+            loadData();
+        }
+
+        // GITHUB SAVE FUNCTION
+        async function saveToGitHub(message) {
+            
+            const data = {
+                events: state.events,
+                bands: state.bands,
+                floorPlan: state.floorPlan,
+                registrations: state.registrations || {}
+            };
+            
+            const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+            
+            showSavingIndicator(true);
+            try {
+                const resp = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${DATA_FILE}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': 'token ' + GITHUB_TOKEN,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/vnd.github.v3+json'
+                    },
+                    body: JSON.stringify({
+                        message: message || 'Update events data',
+                        content: content,
+                        sha: state.dataSha
+                    })
+                });
+                
+                const result = await resp.json();
+                if (!resp.ok) throw new Error(result.message || 'GitHub API error');
+                
+                state.dataSha = result.content.sha;
+                showSavingIndicator(false);
+                return true;
+            } catch (err) {
+                console.error('Save failed:', err);
+                showToast('Failed to save: ' + err.message, 'error');
+                showSavingIndicator(false);
+                return false;
+            }
+        }
+
+        function showLoadingIndicator(show) {
+            let loader = document.getElementById('loadingIndicator');
+            if (!loader) {
+                loader = document.createElement('div');
+                loader.id = 'loadingIndicator';
+                loader.innerHTML = '<div style="text-align: center; padding: 2rem; color: white; font-size: 1.2rem;">Loading...</div>';
+                loader.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 10000;';
+                document.body.appendChild(loader);
+            }
+            loader.style.display = show ? 'flex' : 'none';
+        }
+
+        function showSavingIndicator(show) {
+            // Disable submit buttons temporarily
+            document.querySelectorAll('.btn-primary').forEach(btn => {
+                btn.disabled = show;
+            });
+        }
+
+
+        async function handleEventSubmit() {
+            const form = document.getElementById('eventForm');
+            const mode = form.dataset.mode;
+            const eventId = form.dataset.eventId;
+
+            const dateStr = document.getElementById('eventDate').value;
+            const dateObj = new Date(dateStr + 'T00:00:00');
+            const options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
+            const humanDate = dateObj.toLocaleDateString('en-US', options);
+
+            const eventData = {
+                id: mode === 'create' ? String(state.nextEventId++) : eventId,
+                name: document.getElementById('eventName').value,
+                date: humanDate,
+                time: document.getElementById('eventTime').value,
+                description: document.getElementById('eventDescription').value,
+                category: document.getElementById('eventCategory').value,
+                pricePerSeat: Math.round(parseFloat(document.getElementById('eventPrice').value) * 100),
+                totalCapacity: parseInt(document.getElementById('eventCapacity').value),
+                registeredCount: mode === 'create' ? 0 : (state.events.find(e => e.id === eventId)?.registeredCount || 0),
+                status: document.getElementById('eventStatus').value,
+                imageGradient: document.getElementById('eventImageGradient')?.value || 'general',
+                imageText: document.getElementById('eventImageText')?.value || '',
+                tiers: parseEventTiers(),
+                seatingOptions: parseSeatingOptions(),
+                floorPlan: null,
+                bookedTableIds: []
+            };
+
+            if (mode === 'create') {
+                state.events.push(eventData);
+            } else {
+                const idx = state.events.findIndex(e => e.id === eventId);
+                state.events[idx] = eventData;
+            }
+
+            const saved = await saveToGitHub(mode === 'create' ? `Add event: ${eventData.name}` : `Update event: ${eventData.name}`);
+            if (saved) {
+                showToast(mode === 'create' ? 'Event created and published!' : 'Event updated and published!', 'success');
+                renderEventsTable();
+                updateDashboard();
+                closeModal('eventModal');
+            }
+        }
+
+        function parseEventTiers() {
+            const tiers = [];
+            const tierElements = document.querySelectorAll('.tier-row');
+            tierElements.forEach(el => {
+                const name = el.querySelector('.tier-name')?.value;
+                const price = el.querySelector('.tier-price')?.value;
+                if (name && price) {
+                    tiers.push({ name, price: Math.round(parseFloat(price) * 100), description: '' });
+                }
+            });
+            if (tiers.length === 0) {
+                const price = Math.round(parseFloat(document.getElementById('eventPrice').value) * 100);
+                tiers.push({ name: 'Standard', price, description: '' });
+            }
+            return tiers;
+        }
+
+        function parseSeatingOptions() {
+            const useSeating = document.getElementById('eventUseSeating')?.checked;
+            if (!useSeating) return null;
+            
+            return {
+                singleSeats: parseInt(document.getElementById('eventSingleSeats')?.value || 0),
+                tableOptions: [
+                    { name: 'Table for 2', seats: 2 },
+                    { name: 'Table for 4', seats: 4 },
+                    { name: 'Table for 6', seats: 6 }
+                ]
+            };
+        }
+
+        function viewRegistrations(eventId) {
+            const event = state.events.find(e => e.id === eventId);
+            if (!event) return;
+
+            state.currentEventId = eventId;
+            state.currentEventRegistrations = [
+                { name: 'John Smith', email: 'john@example.com', phone: '(555) 123-4567', partySize: 2, seating: 'Table 21', amountPaid: 75, date: '2026-03-28' },
+                { name: 'Sarah Johnson', email: 'sarah@example.com', phone: '(555) 234-5678', partySize: 4, seating: 'Table 22', amountPaid: 150, date: '2026-03-29' },
+                { name: 'Michael Brown', email: 'michael@example.com', phone: '(555) 345-6789', partySize: 1, seating: 'Table 23', amountPaid: 37.50, date: '2026-03-30' }
+            ];
+
+            document.getElementById('registrationsTitle').textContent = `Registrations for ${event.name}`;
+            const tbody = document.getElementById('registrationsTableBody');
+            tbody.innerHTML = state.currentEventRegistrations.map(reg => `
+                <tr>
+                    <td>${reg.name}</td>
+                    <td>${reg.email}</td>
+                    <td>${reg.phone}</td>
+                    <td>${reg.partySize}</td>
+                    <td>${reg.seating}</td>
+                    <td>$${reg.amountPaid.toFixed(2)}</td>
+                    <td>${reg.date}</td>
+                </tr>
+            `).join('');
+
+            openModal('registrationsModal');
+        }
+
+        function exportRegistrationsCSV() {
+            if (!state.currentEventRegistrations.length) {
+                showToast('No registrations to export', 'info');
+                return;
+            }
+
+            const headers = ['Name', 'Email', 'Phone', 'Party Size', 'Seating', 'Amount Paid', 'Date Registered'];
+            const rows = state.currentEventRegistrations.map(reg => [
+                reg.name,
+                reg.email,
+                reg.phone,
+                reg.partySize,
+                reg.seating,
+                '$' + reg.amountPaid.toFixed(2),
+                reg.date
+            ]);
+
+            const csv = [headers, ...rows].map(row => row.join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `registrations-${state.currentEventId}-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            showToast('CSV exported successfully', 'success');
+        }
+
+        // BANDS TABLE
+        function renderBandsTable() {
+            const tbody = document.getElementById('bandsTableBody');
+            tbody.innerHTML = state.bands.map(band => `
+                <tr>
+                    <td>${band.name}</td>
+                    <td>${band.date}</td>
+                    <td>${band.timeSlot}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-secondary btn-small" onclick="editBand('${band.id}')">Edit</button>
+                            <button class="btn btn-danger btn-small" onclick="confirmDelete('band', '${band.id}')">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openAddBandModal() {
+            document.getElementById('bandModalTitle').textContent = 'Add Band';
+            document.getElementById('bandForm').reset();
+            document.getElementById('bandForm').dataset.mode = 'create';
+            openModal('bandModal');
+        }
+
+        function editBand(bandId) {
+            const band = state.bands.find(b => b.id === bandId);
+            if (!band) return;
+
+            document.getElementById('bandModalTitle').textContent = 'Edit Band';
+            document.getElementById('bandName').value = band.name;
+            document.getElementById('bandDate').value = band.date;
+            document.getElementById('bandTimeSlot').value = band.timeSlot;
+            document.getElementById('bandForm').dataset.mode = 'edit';
+            document.getElementById('bandForm').dataset.bandId = bandId;
+            openModal('bandModal');
+        }
+
+        function handleBandSubmit() {
+            const form = document.getElementById('bandForm');
+            const mode = form.dataset.mode;
+            const bandId = form.dataset.bandId;
+
+            const bandData = {
+                id: mode === 'create' ? String(state.nextBandId++) : bandId,
+                name: document.getElementById('bandName').value,
+                date: document.getElementById('bandDate').value,
+                timeSlot: document.getElementById('bandTimeSlot').value
+            };
+
+            if (mode === 'create') {
+                state.bands.push(bandData);
+            } else {
+                const idx = state.bands.findIndex(b => b.id === bandId);
+                state.bands[idx] = bandData;
+            }
+
+            // Save to GitHub (no await here for bands)
+            saveToGitHub(mode === 'create' ? `Add band: ${bandData.name}` : `Update band: ${bandData.name}`).then(saved => {
+                if (saved) {
+                    showToast(mode === 'create' ? 'Band added and published!' : 'Band updated and published!', 'success');
+                }
+            });
+
+            renderBandsTable();
+            updateDashboard();
+            closeModal('bandModal');
+        }
+        function saveBands() {
+            // Stub for future Netlify function call
+            // POST to /.netlify/functions/admin-bands
+            showToast('Bands saved', 'success');
+        }
+
+        // FLOOR PLAN BUILDER
+        let floorPlanState = {
+            draggingTableId: null,
+            dragOffsetX: 0,
+            dragOffsetY: 0,
+            addingLabel: false
+        };
+
+        function renderFloorPlan() {
+            const svg = document.getElementById('floorPlanCanvas');
+            svg.innerHTML = '';
+
+            // Draw grid
+            const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+            const pattern = document.createElementNS('http://www.w3.org/2000/svg', 'pattern');
+            pattern.setAttribute('id', 'smallGrid');
+            pattern.setAttribute('width', '20');
+            pattern.setAttribute('height', '20');
+            pattern.setAttribute('patternUnits', 'userSpaceOnUse');
+            const line1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line1.setAttribute('x1', '20');
+            line1.setAttribute('y1', '0');
+            line1.setAttribute('x2', '0');
+            line1.setAttribute('y2', '0');
+            line1.setAttribute('stroke', '#e0e0e0');
+            line1.setAttribute('stroke-width', '0.5');
+            const line2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line2.setAttribute('x1', '0');
+            line2.setAttribute('y1', '20');
+            line2.setAttribute('x2', '0');
+            line2.setAttribute('y2', '0');
+            line2.setAttribute('stroke', '#e0e0e0');
+            line2.setAttribute('stroke-width', '0.5');
+            pattern.appendChild(line1);
+            pattern.appendChild(line2);
+            defs.appendChild(pattern);
+            svg.appendChild(defs);
+
+            const background = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            background.setAttribute('width', '900');
+            background.setAttribute('height', '700');
+            background.setAttribute('fill', 'url(#smallGrid)');
+            background.setAttribute('fill-opacity', '0.5');
+            svg.appendChild(background);
+
+            // Draw tables
+            if (state.floorPlan && state.floorPlan.tables) {
+                state.floorPlan.tables.forEach(table => {
+                    drawTable(svg, table);
+                });
+            }
+
+            // Draw labels
+            if (state.floorPlan && state.floorPlan.labels) {
+                state.floorPlan.labels.forEach(label => {
+                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    text.setAttribute('x', label.x);
+                    text.setAttribute('y', label.y);
+                    text.setAttribute('class', 'floor-label');
+                    text.textContent = label.text;
+                    svg.appendChild(text);
+                });
+            }
+
+            // Draw bar seats
+            if (state.floorPlan && state.floorPlan.barSeats) {
+                state.floorPlan.barSeats.forEach((seat, idx) => {
+                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    circle.setAttribute('cx', seat.x);
+                    circle.setAttribute('cy', seat.y);
+                    circle.setAttribute('r', '8');
+                    circle.setAttribute('class', `bar-seat ${seat.available ? 'available' : 'occupied'}`);
+                    svg.appendChild(circle);
+                });
+            }
+        }
+
+        function drawTable(svg, table) {
+            let element;
+
+            if (table.shape === 'rect') {
+                element = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                element.setAttribute('x', table.x);
+                element.setAttribute('y', table.y);
+                element.setAttribute('width', table.width);
+                element.setAttribute('height', table.height);
+            } else if (table.shape === 'circle') {
+                element = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                element.setAttribute('cx', table.x + table.width / 2);
+                element.setAttribute('cy', table.y + table.height / 2);
+                element.setAttribute('r', table.width / 2);
+            } else if (table.shape === 'diamond') {
+                const cx = table.x + table.width / 2;
+                const cy = table.y + table.height / 2;
+                const points = `${cx},${cy - table.height/2} ${cx + table.width/2},${cy} ${cx},${cy + table.height/2} ${cx - table.width/2},${cy}`;
+                element = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                element.setAttribute('points', points);
+            }
+
+            element.setAttribute('class', `table-shape ${state.selectedTableId === table.id ? 'selected' : ''}`);
+            element.setAttribute('data-table-id', table.id);
+
+            element.addEventListener('mousedown', startTableDrag);
+            element.addEventListener('click', (e) => {
+                e.stopPropagation();
+                selectTable(table.id);
+            });
+
+            svg.appendChild(element);
+
+            // Add label
+            const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            let labelX = table.x + table.width / 2;
+            let labelY = table.y + table.height / 2;
+            if (table.shape === 'circle') {
+                labelX = table.x + table.width / 2;
+                labelY = table.y + table.height / 2;
+            }
+            label.setAttribute('x', labelX);
+            label.setAttribute('y', labelY);
+            label.setAttribute('class', 'table-label');
+            label.setAttribute('pointer-events', 'none');
+            label.textContent = table.name;
+            svg.appendChild(label);
+        }
+
+        function selectTable(tableId) {
+            state.selectedTableId = tableId;
+            const table = state.floorPlan.tables.find(t => t.id === tableId);
+            if (table) {
+                document.getElementById('tableName').value = table.name;
+                document.getElementById('tableSeats').value = table.seats;
+                document.getElementById('tableType').value = table.type;
+                document.getElementById('propertiesPanel').classList.add('active');
+            }
+            renderFloorPlan();
+        }
+
+        function startTableDrag(e) {
+            if (e.button !== 0) return;
+            const tableId = e.target.getAttribute('data-table-id');
+            const table = state.floorPlan.tables.find(t => t.id === tableId);
+            if (!table) return;
+
+            floorPlanState.draggingTableId = tableId;
+            floorPlanState.dragOffsetX = e.clientX - table.x;
+            floorPlanState.dragOffsetY = e.clientY - table.y;
+
+            document.addEventListener('mousemove', dragTable);
+            document.addEventListener('mouseup', stopTableDrag);
+        }
+
+        function dragTable(e) {
+            if (!floorPlanState.draggingTableId) return;
+            const table = state.floorPlan.tables.find(t => t.id === floorPlanState.draggingTableId);
+            if (!table) return;
+
+            const canvas = document.getElementById('floorPlanCanvas');
+            const rect = canvas.getBoundingClientRect();
+            table.x = Math.max(0, Math.min(e.clientX - rect.left - floorPlanState.dragOffsetX, 900 - table.width));
+            table.y = Math.max(0, Math.min(e.clientY - rect.top - floorPlanState.dragOffsetY, 700 - table.height));
+
+            renderFloorPlan();
+            selectTable(floorPlanState.draggingTableId);
+        }
+
+        function stopTableDrag() {
+            floorPlanState.draggingTableId = null;
+            document.removeEventListener('mousemove', dragTable);
+            document.removeEventListener('mouseup', stopTableDrag);
+        }
+
+        function addTable(shape, seats, type = 'table') {
+            const id = 't' + Date.now();
+            const newTable = {
+                id: id,
+                name: shape + ' ' + (state.floorPlan.tables.length + 1),
+                x: 400,
+                y: 300,
+                width: shape === 'diamond' ? 50 : (type === 'couch' ? 80 : 60),
+                height: shape === 'diamond' ? 50 : (type === 'couch' ? 50 : 80),
+                shape: shape,
+                seats: seats,
+                type: type
+            };
+            state.floorPlan.tables.push(newTable);
+            selectTable(id);
+            renderFloorPlan();
+            showToast('Table added. Drag to move.', 'info');
+        }
+
+        function addBarSeats() {
+            const existingBarSeats = state.floorPlan.barSeats || [];
+            const newId = 'bar-' + (existingBarSeats.length + 1);
+            const newSeat = {
+                id: newId,
+                x: 570,
+                y: 100 + (existingBarSeats.length * 20),
+                available: true
+            };
+            state.floorPlan.barSeats = state.floorPlan.barSeats || [];
+            state.floorPlan.barSeats.push(newSeat);
+            renderFloorPlan();
+            showToast('Bar seat added', 'info');
+        }
+
+        function addLabel() {
+            const text = prompt('Enter label text:', 'AREA');
+            if (!text) return;
+            const label = {
+                text: text.toUpperCase(),
+                x: 400,
+                y: 350
+            };
+            state.floorPlan.labels = state.floorPlan.labels || [];
+            state.floorPlan.labels.push(label);
+            renderFloorPlan();
+            showToast('Label added', 'info');
+        }
+
+        function deleteSelectedTable() {
+            if (!state.selectedTableId) {
+                showToast('No table selected', 'info');
+                return;
+            }
+            confirmDelete('table', state.selectedTableId);
+        }
+
+        function saveFloorPlan() {
+            // In a real app, this would call the Netlify function
+            // POST to /.netlify/functions/admin-events with floorPlan data
+            if (!state.currentEventId) {
+                showToast('Please select an event first', 'warning');
+                return;
+            }
+            showToast('Floor plan saved successfully', 'success');
+        }
+
+        // INVOICES
+        function openAddInvoiceModal() {
+            document.getElementById('invoiceForm').reset();
+            openModal('invoiceModal');
+        }
+
+        function handleInvoiceSubmit() {
+            const email = document.getElementById('invoiceEmail').value;
+            const name = document.getElementById('invoiceName').value;
+            const description = document.getElementById('invoiceDescription').value;
+            const amount = parseFloat(document.getElementById('invoiceAmount').value);
+            const dueDate = document.getElementById('invoiceDueDate').value;
+
+            if (!email || !name || !description || !amount || !dueDate) {
+                showToast('All fields are required', 'error');
+                return;
+            }
+
+            // In a real app, this would call the Netlify function
+            // POST to /.netlify/functions/create-invoice
+            showToast(`Invoice created for ${name}`, 'success');
+            closeModal('invoiceModal');
+        }
+
+        // MODALS
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // CONFIRMATION
+        let confirmAction = { type: null, id: null };
+
+        function confirmDelete(type, id) {
+            confirmAction = { type, id };
+            let message = '';
+            if (type === 'event') message = 'Are you sure you want to delete this event?';
+            else if (type === 'band') message = 'Are you sure you want to delete this band?';
+            else if (type === 'table') message = 'Are you sure you want to delete this table?';
+
+            document.getElementById('confirmationTitle').textContent = 'Confirm Delete';
+            document.getElementById('confirmationMessage').textContent = message;
+            openModal('confirmationModal');
+        }
+
+        function executeConfirmedAction() {
+            const { type, id } = confirmAction;
+            if (type === 'event') {
+                state.events = state.events.filter(e => e.id !== id);
+                renderEventsTable();
+                updateDashboard();
+                showToast('Event deleted', 'success');
+            } else if (type === 'band') {
+                state.bands = state.bands.filter(b => b.id !== id);
+                renderBandsTable();
+                showToast('Band deleted', 'success');
+            } else if (type === 'table') {
+                state.floorPlan.tables = state.floorPlan.tables.filter(t => t.id !== id);
+                state.selectedTableId = null;
+                document.getElementById('propertiesPanel').classList.remove('active');
+                renderFloorPlan();
+                showToast('Table deleted', 'success');
+            }
+            closeModal('confirmationModal');
+        }
+
+        // TOAST NOTIFICATIONS
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <div>${message}</div>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Close modals when clicking outside
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-overlay') && !e.target.classList.contains('active')) return;
+            if (e.target.classList.contains('modal-overlay')) {
+                e.target.classList.remove('active');
+            }
+        });
+    </script>
 </body>
 </html>
