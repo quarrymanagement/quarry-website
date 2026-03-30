@@ -5,8 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Events | The Quarry</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
 :root {
   --cream: #F5F0E8;
@@ -302,45 +301,62 @@ footer { background:#0F0A07; padding:4.5rem 2rem 2rem; border-top:1px solid var(
 
 </style>
 <style>
-:root{--black:#0D0D0D;--brown:#2C1A0E;--gold:#B8933A;--gold2:#D4AC55;--cream:#FAF7F2;--burg:#5C1A2E;}
+:root{--gold:#B8933A;--brown:#2C1A0E;--black:#0D0D0D;--cream:#FAF7F2;--burg:#5C1A2E;}
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Montserrat',sans-serif;background:var(--cream);color:var(--brown);}
-.page-hero{background:linear-gradient(135deg,rgba(44,26,14,0.92),rgba(13,13,13,0.97));padding:6rem 2rem 4rem;text-align:center;}
-.page-hero .eyebrow{font-size:0.62rem;font-weight:700;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:0.75rem;}
-.page-hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,6vw,4.5rem);color:#fff;font-weight:600;}
-.page-hero p{font-size:0.85rem;color:rgba(255,255,255,0.65);margin-top:0.75rem;max-width:480px;margin-left:auto;margin-right:auto;line-height:1.8;}
-.filter-strip{background:var(--brown);display:flex;gap:0.5rem;padding:1rem 2rem;flex-wrap:wrap;justify-content:center;}
-.fbtn{padding:0.45rem 1.2rem;border:1px solid rgba(255,255,255,0.2);background:transparent;color:rgba(255,255,255,0.65);font-family:'Montserrat',sans-serif;font-size:0.65rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
-.fbtn:hover,.fbtn.on{background:var(--gold);border-color:var(--gold);color:var(--black);}
-.wrap{max-width:1100px;margin:0 auto;padding:3rem 1.5rem 5rem;}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.5rem;}
-.card{background:#fff;border:1px solid rgba(0,0,0,0.07);overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;}
-.card:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,0.12);}
-.card-img{height:200px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--burg),#2C0A1A);}
-.card-img img{width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;}
-.card-img .dbadge{position:absolute;top:1rem;left:1rem;background:var(--gold);color:var(--black);padding:0.4rem 0.75rem;font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;z-index:1;}
-.card-img .cbadge{position:absolute;top:1rem;right:1rem;background:rgba(13,13,13,0.8);color:#fff;padding:0.3rem 0.65rem;font-size:0.6rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;z-index:1;}
-.card-img .sold-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:2;}
-.card-img .sold-overlay span{background:#c0392b;color:#fff;font-size:0.75rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;padding:0.5rem 1.5rem;}
-.card-body{padding:1.5rem;}
-.card-title{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;margin-bottom:0.4rem;line-height:1.2;}
-.card-meta{display:flex;gap:1rem;font-size:0.68rem;color:#888;margin-bottom:0.75rem;flex-wrap:wrap;}
-.card-desc{font-size:0.78rem;color:#666;line-height:1.7;margin-bottom:1rem;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
-.card-foot{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;}
-.card-price{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:700;color:var(--brown);}
-.card-price small{font-size:0.7rem;font-weight:400;color:#aaa;font-family:'Montserrat',sans-serif;}
-.btn-reg{background:var(--brown);color:#fff;border:none;padding:0.7rem 1.5rem;font-family:'Montserrat',sans-serif;font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;text-decoration:none;display:inline-block;transition:background 0.2s;}
-.btn-reg:hover{background:var(--gold);color:var(--black);}
-.btn-reg.sold{background:#aaa;cursor:not-allowed;}
-.status-badge{display:inline-block;font-size:0.62rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:0.2rem 0.6rem;}
-.status-badge.open{background:#e8f8ed;color:#27ae60;}
-.status-badge.sold{background:#fde8e8;color:#c0392b;}
-.status-badge.closed{background:#f5f5f5;color:#888;}
-.loading{text-align:center;padding:4rem;color:#aaa;}
-.loading h3{font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:#ccc;margin-bottom:0.5rem;}
-.empty{text-align:center;padding:4rem;color:#aaa;}
-.empty h3{font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:#ccc;margin-bottom:0.5rem;}
-@media(max-width:600px){.grid{grid-template-columns:1fr;}}
+body{font-family:Montserrat,sans-serif;background:var(--cream);color:var(--brown);}
+.page-hero{background:linear-gradient(135deg,rgba(44,26,14,0.94),rgba(13,13,13,0.98));padding:6rem 2rem 4rem;text-align:center;}
+.page-hero .ey{font-size:0.62rem;font-weight:700;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:0.75rem;}
+.page-hero h1{font-family:Cormorant Garamond,serif;font-size:clamp(2.5rem,6vw,4.5rem);color:#fff;font-weight:600;}
+.page-hero p{font-size:0.85rem;color:rgba(255,255,255,0.6);margin-top:0.75rem;max-width:480px;margin-left:auto;margin-right:auto;line-height:1.8;}
+.ewrap{max-width:1100px;margin:0 auto;padding:3rem 1.5rem 5rem;}
+.egrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:2rem;}
+.ecard{background:#fff;border:1px solid rgba(0,0,0,0.07);overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;}
+.ecard:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,0,0,0.12);}
+.ecard-img{height:210px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.dbadge{position:absolute;top:1rem;left:1rem;background:var(--gold);color:var(--black);padding:0.4rem 0.8rem;font-size:0.62rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;z-index:2;}
+.sbadge{position:absolute;top:1rem;right:1rem;padding:0.3rem 0.7rem;font-size:0.58rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;z-index:2;}
+.s-open{background:#27ae60;color:#fff;}.s-low{background:#e67e22;color:#fff;}.s-sold{background:#c0392b;color:#fff;}
+.sovl{position:absolute;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1;}
+.sovl span{background:#c0392b;color:#fff;padding:0.5rem 2rem;font-size:0.75rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;}
+.ebody{padding:1.5rem;}
+.etitle{font-family:Cormorant Garamond,serif;font-size:1.45rem;font-weight:700;margin-bottom:0.35rem;line-height:1.2;}
+.emeta{font-size:0.68rem;color:#888;margin-bottom:0.75rem;display:flex;flex-wrap:wrap;gap:0.75rem;}
+.edesc{font-size:0.78rem;color:#666;line-height:1.7;margin-bottom:1rem;}
+.trows{display:flex;flex-direction:column;gap:0.4rem;margin-bottom:1rem;}
+.trow{display:flex;align-items:center;justify-content:space-between;padding:0.6rem 0.85rem;border:1.5px solid #e0d9d0;background:#faf8f5;}
+.trow .tn{font-size:0.72rem;font-weight:600;color:var(--brown);}.trow .td{font-size:0.62rem;color:#888;margin-top:0.1rem;}.trow .tp{font-family:Cormorant Garamond,serif;font-size:1.3rem;font-weight:700;color:var(--brown);}
+.efoot{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;}
+.sleft{font-size:0.65rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;}
+.sl-ok{color:#27ae60;}.sl-low{color:#e67e22;}.sl-no{color:#c0392b;}
+.btnr{background:var(--burg);color:#fff;border:none;padding:0.8rem 1.6rem;font-family:Montserrat,sans-serif;font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;transition:background 0.2s;text-decoration:none;}
+.btnr:hover{background:var(--gold);color:var(--black);}.btnr.dis{background:#bbb;cursor:not-allowed;pointer-events:none;}
+.mov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:500;overflow-y:auto;padding:2rem 1rem;}
+.mov.open{display:flex;align-items:flex-start;justify-content:center;}
+.mbox{background:#fff;max-width:600px;width:100%;margin:auto;animation:su 0.22s ease;}
+@keyframes su{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+.mhd{background:linear-gradient(135deg,var(--brown),#110804);padding:1.75rem 2rem;color:#fff;position:relative;}
+.mhd .ey{font-size:0.58rem;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:var(--gold);margin-bottom:0.35rem;}
+.mhd h2{font-family:Cormorant Garamond,serif;font-size:1.65rem;font-weight:600;}.mhd .sub{font-size:0.68rem;color:rgba(255,255,255,0.55);margin-top:0.3rem;}
+.mclose{position:absolute;top:0.9rem;right:1.1rem;background:none;border:none;color:rgba(255,255,255,0.4);font-size:1.4rem;cursor:pointer;line-height:1;}
+.mclose:hover{color:#fff;}
+.mbd{padding:1.75rem 2rem;}
+.mbd h3{font-family:Cormorant Garamond,serif;font-size:1.1rem;color:var(--brown);margin-bottom:0.8rem;}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:0.7rem;margin-bottom:0.7rem;}
+.frow.one{grid-template-columns:1fr;}
+.fl label{display:block;font-size:0.58rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#999;margin-bottom:0.25rem;}
+.fl input,.fl select{width:100%;padding:0.6rem 0.8rem;border:2px solid #e0d9d0;font-family:Montserrat,sans-serif;font-size:0.82rem;color:var(--brown);outline:none;background:#fff;}
+.fl input:focus,.fl select:focus{border-color:var(--gold);}
+.topts{display:flex;flex-direction:column;gap:0.45rem;margin-bottom:1.1rem;}
+.topt{display:flex;align-items:center;gap:0.7rem;padding:0.85rem 1rem;border:2px solid #e0d9d0;cursor:pointer;transition:border 0.15s;}
+.topt:hover{border-color:var(--gold);}.topt.sel{border-color:var(--gold);background:#fdf8f0;}
+.topt input[type="radio"]{accent-color:var(--gold);width:16px;height:16px;flex-shrink:0;}
+.topt .oi{flex:1;}.topt .on{font-size:0.8rem;font-weight:700;color:var(--brown);}.topt .od{font-size:0.65rem;color:#888;margin-top:0.1rem;}.topt .op{font-family:Cormorant Garamond,serif;font-size:1.3rem;font-weight:700;color:var(--brown);}
+.mft{padding:0 2rem 1.75rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+.tot{font-family:Cormorant Garamond,serif;font-size:1.35rem;color:var(--brown);}.tot small{display:block;font-family:Montserrat,sans-serif;font-size:0.6rem;color:#999;}
+.bsub{background:var(--brown);color:#fff;border:none;padding:0.85rem 2rem;font-family:Montserrat,sans-serif;font-size:0.7rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;cursor:pointer;transition:background 0.2s;}
+.bsub:hover:not([disabled]){background:var(--gold);color:var(--black);}.bsub[disabled]{opacity:0.55;cursor:not-allowed;}
+@media(max-width:580px){.mhd,.mbd,.mft{padding-left:1.25rem;padding-right:1.25rem;}.frow{grid-template-columns:1fr;}}
+@media(max-width:480px){.egrid{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
@@ -393,149 +409,116 @@ body{font-family:'Montserrat',sans-serif;background:var(--cream);color:var(--bro
     <div class="hamburger" id="hamburger" onclick="toggleNav()"><span></span><span></span><span></span></div>
   </div>
 </header>
-<div class="page-hero">
-  <div class="eyebrow">What's Happening</div>
-  <h1>Events Calendar</h1>
-  <p>Live music, ticketed events, fundraisers and more at The Quarry</p>
+<div class="page-hero"><div class="ey">Upcoming Events</div><h1>Events Calendar</h1><p>Live music, ticketed events, fundraisers and more at The Quarry in New Melle, MO</p></div>
+<div class="ewrap"><div class="egrid">
+<div class="ecard">
+<div class="ecard-img" style="background:linear-gradient(135deg,#0d0050,#4a0080);">
+<div style="font-size:4rem;font-family:Cormorant Garamond,serif;color:rgba(255,255,255,0.2);font-weight:700;">80s</div>
+<div class="dbadge">Fri, Apr 3</div><div class="sbadge s-sold">Sold Out</div>
+<div class="sovl"><span>Sold Out</span></div></div>
+<div class="ebody">
+<div class="etitle">80s Neon Music Bingo</div>
+<div class="emeta"><span>Friday, April 3, 2026</span><span>The Quarry, New Melle MO</span></div>
+<div class="edesc">Put on your neon and join us for a night of 80s hits, music bingo, prizes and great drinks. This event is sold out!</div>
+<div class="efoot"><span class="sleft sl-no">Sold Out</span><a class="btnr dis">Sold Out</a></div>
+</div></div>
+<div class="ecard">
+<div class="ecard-img" style="background:linear-gradient(135deg,#0d0050,#4a0080);">
+<div style="font-size:4rem;font-family:Cormorant Garamond,serif;color:rgba(255,255,255,0.2);font-weight:700;">80s</div>
+<div class="dbadge">Sat, Apr 4</div><div class="sbadge s-low">2 Left!</div></div>
+<div class="ebody">
+<div class="etitle">80s Neon Music Bingo</div>
+<div class="emeta"><span>Saturday, April 4, 2026</span><span>The Quarry, New Melle MO</span></div>
+<div class="edesc">Last chance! Only 2 registrations remaining for our Saturday night 80s Neon Music Bingo. Dress in your brightest neon and sing your heart out to 80s classics.</div>
+<div class="trows"><div class="trow"><div><div class="tn">General Admission</div><div class="td">Entry + music bingo + prizes</div></div><div class="tp">$35</div></div></div>
+<div class="efoot"><span class="sleft sl-low">Only 2 seats left!</span><button class="btnr" onclick="openM('m-apr4')">Register Now</button></div>
+</div></div>
+<div class="ecard">
+<div class="ecard-img" style="background:linear-gradient(135deg,#5C1A2E,#8B0050);">
+<div style="font-size:2.8rem;font-family:Cormorant Garamond,serif;color:rgba(255,255,255,0.2);font-weight:700;">Brunch</div>
+<div class="dbadge">Sun, Apr 12</div><div class="sbadge s-open">Tickets Available</div></div>
+<div class="ebody">
+<div class="etitle">Ladies Neon Singo Bingo Brunch</div>
+<div class="emeta"><span>Sunday, April 12, 2026</span><span>The Quarry, New Melle MO</span></div>
+<div class="edesc">The ultimate ladies brunch experience! Neon attire, Singo Bingo, amazing prizes and the best brunch in the area. Two ticket tiers with seating options.</div>
+<div class="trows">
+<div class="trow"><div><div class="tn">Bingo + Brunch</div><div class="td">Bingo games + full brunch menu</div></div><div class="tp">$35</div></div>
+<div class="trow"><div><div class="tn">VIP Bottomless</div><div class="td">Bottomless bloody marys and mimosas + bingo + brunch</div></div><div class="tp">$45</div></div>
 </div>
-<div class="filter-strip">
-  <button class="fbtn on" onclick="doFilter('all',this)">All Events</button>
-  <button class="fbtn" onclick="doFilter('UPCOMING',this)">Upcoming</button>
-  <button class="fbtn" onclick="doFilter('TICKETING',this)">Ticketed</button>
+<div class="efoot"><span class="sleft sl-ok">Tables + bar seats available</span><button class="btnr" onclick="openM('m-apr12')">Register Now</button></div>
+</div></div>
+</div></div>
+<div class="mov" id="m-apr4"><div class="mbox">
+<div class="mhd"><div class="ey">Event Registration</div><h2>80s Neon Music Bingo</h2><div class="sub">Saturday, April 4, 2026 &bull; The Quarry, New Melle MO &bull; Only 2 spots left!</div><button class="mclose" onclick="closeM('m-apr4')">&times;</button></div>
+<div class="mbd">
+<h3>Your Information</h3>
+<div class="frow"><div class="fl"><label>First Name</label><input type="text" id="a4-fn" placeholder="Jane"/></div><div class="fl"><label>Last Name</label><input type="text" id="a4-ln" placeholder="Smith"/></div></div>
+<div class="frow"><div class="fl"><label>Email Address</label><input type="email" id="a4-em" placeholder="jane@email.com"/></div><div class="fl"><label>Phone Number</label><input type="tel" id="a4-ph" placeholder="(314) 555-0000"/></div></div>
+<div class="frow one"><div class="fl"><label>Number of Tickets</label><select id="a4-qty" onchange="updT4()"><option value="1">1 ticket - $35.00</option><option value="2">2 tickets - $70.00 (Last 2!)</option></select></div></div>
+<div class="frow one"><div class="fl"><label>Special Requests</label><input type="text" id="a4-nr" placeholder="Dietary needs, birthday, accessibility..."/></div></div>
 </div>
-<div class="wrap">
-  <div id="grid" class="grid">
-    <div class="loading"><h3>Loading Events...</h3><p>Just a moment</p></div>
-  </div>
+<div class="mft"><div class="tot"><small>Total</small><span id="a4-tot">$35.00</span></div><button class="bsub" onclick="subA4()">Proceed to Payment &rarr;</button></div>
+</div></div>
+<div class="mov" id="m-apr12"><div class="mbox">
+<div class="mhd"><div class="ey">Event Registration</div><h2>Ladies Neon Singo Bingo Brunch</h2><div class="sub">Sunday, April 12, 2026 &bull; The Quarry, New Melle MO</div><button class="mclose" onclick="closeM('m-apr12')">&times;</button></div>
+<div class="mbd">
+<h3>Choose Your Ticket</h3>
+<div class="topts" id="topts12">
+<div class="topt sel" data-price="35" onclick="selTkt(this,35)"><input type="radio" name="t12" value="35" checked/><div class="oi"><div class="on">Bingo + Brunch</div><div class="od">Bingo games + full brunch menu</div></div><div class="op">$35</div></div>
+<div class="topt" data-price="45" onclick="selTkt(this,45)"><input type="radio" name="t12" value="45"/><div class="oi"><div class="on">VIP Bottomless</div><div class="od">Bottomless bloody marys + mimosas + bingo + brunch</div></div><div class="op">$45</div></div>
 </div>
+<h3>Seating Preference</h3>
+<div class="frow one" style="margin-bottom:1rem;"><div class="fl"><label>Table or Bar Seat</label><select id="a12-seat"><option value="5top">5-Top Table</option><option value="8top">8-Top Table</option><option value="10top">10-Top Table</option><option value="bar">Individual Bar Seat (8 available)</option></select></div></div>
+<h3>Your Information</h3>
+<div class="frow"><div class="fl"><label>First Name</label><input type="text" id="a12-fn" placeholder="Jane"/></div><div class="fl"><label>Last Name</label><input type="text" id="a12-ln" placeholder="Smith"/></div></div>
+<div class="frow"><div class="fl"><label>Email Address</label><input type="email" id="a12-em" placeholder="jane@email.com"/></div><div class="fl"><label>Phone Number</label><input type="tel" id="a12-ph" placeholder="(314) 555-0000"/></div></div>
+<div class="frow one"><div class="fl"><label>Party Size</label><select id="a12-ps"><option value="1">1 person</option><option value="2">2 people</option><option value="3">3 people</option><option value="4">4 people</option><option value="5">5 people</option><option value="6">6 people</option><option value="7">7 people</option><option value="8">8 people</option><option value="9">9 people</option><option value="10">10 people</option></select></div></div>
+<div class="frow one"><div class="fl"><label>Special Requests</label><input type="text" id="a12-nr" placeholder="Dietary needs, birthday, accessibility..."/></div></div>
+</div>
+<div class="mft"><div class="tot"><small>Total (per person)</small><span id="a12-tot">$35.00</span></div><button class="bsub" onclick="subA12()">Proceed to Payment &rarr;</button></div>
+</div></div>
 <script>
-var allEvents = [];
-var currentFilter = "all";
-
-function doFilter(f, btn) {
-  currentFilter = f;
-  document.querySelectorAll(".fbtn").forEach(function(b) { b.classList.remove("on"); });
-  btn.classList.add("on");
-  renderEvents();
+var L35="https://buy.stripe.com/00w28s0nJ127aCS9rDds407";
+var L45="https://buy.stripe.com/3cIfZi2vR5in3aq0V7ds408";
+var LA4="https://buy.stripe.com/5kQ4gA5I3fX13aqgU5ds406";
+var cur12=35;
+function openM(id){document.getElementById(id).classList.add("open");document.body.style.overflow="hidden";}
+function closeM(id){document.getElementById(id).classList.remove("open");document.body.style.overflow="";}
+document.addEventListener("click",function(e){if(e.target.classList.contains("mov")){var id=e.target.id;closeM(id);}});
+function updT4(){var q=parseInt(document.getElementById("a4-qty").value);document.getElementById("a4-tot").textContent="$"+(35*q)+".00";}
+function selTkt(el,price){
+  cur12=price;
+  document.querySelectorAll("#topts12 .topt").forEach(function(t){t.classList.remove("sel");});
+  el.classList.add("sel");
+  el.querySelector("input[type=radio]").checked=true;
+  document.getElementById("a12-tot").textContent="$"+price+".00";
 }
-
-function formatDate(isoStr) {
-  if (!isoStr) return "";
-  var d = new Date(isoStr);
-  var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  var days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-  return days[d.getDay()] + ", " + months[d.getMonth()] + " " + d.getDate() + ", " + d.getFullYear();
+function subA4(){
+  var fn=document.getElementById("a4-fn").value.trim();
+  var ln=document.getElementById("a4-ln").value.trim();
+  var em=document.getElementById("a4-em").value.trim();
+  if(!fn||!ln||!em){alert("Please fill in your name and email address.");return;}
+  var btn=document.querySelector("#m-apr4 .bsub");
+  btn.disabled=true;btn.textContent="Redirecting...";
+  var p=new URLSearchParams({prefilled_email:em,client_reference_id:"apr4_"+Date.now()});
+  window.location.href=LA4+"?"+p.toString();
 }
-
-function formatTime(isoStr) {
-  if (!isoStr) return "";
-  var d = new Date(isoStr);
-  var h = d.getHours();
-  var m = d.getMinutes();
-  var ampm = h >= 12 ? "PM" : "AM";
-  h = h % 12 || 12;
-  return h + ":" + (m < 10 ? "0" : "") + m + " " + ampm;
+function subA12(){
+  var fn=document.getElementById("a12-fn").value.trim();
+  var ln=document.getElementById("a12-ln").value.trim();
+  var em=document.getElementById("a12-em").value.trim();
+  if(!fn||!ln||!em){alert("Please fill in your name and email address.");return;}
+  var seat=document.getElementById("a12-seat").value;
+  var ps=document.getElementById("a12-ps").value;
+  var btn=document.querySelector("#m-apr12 .bsub");
+  btn.disabled=true;btn.textContent="Redirecting...";
+  var ref="apr12_"+seat+"_p"+ps+"_"+Date.now();
+  var p=new URLSearchParams({prefilled_email:em,client_reference_id:ref});
+  var link=cur12===45?L45:L35;
+  window.location.href=link+"?"+p.toString();
 }
-
-function getStatus(ev) {
-  var s = ev.status;
-  var reg = ev.registration || {};
-  if (s === "ENDED") return "ended";
-  if (reg.tickets && reg.tickets.soldOut) return "sold";
-  if (reg.status === "CLOSED_AUTOMATICALLY" || reg.status === "CLOSED_MANUALLY") return "closed";
-  if (s === "SCHEDULED" || s === "STARTED") return "open";
-  return "closed";
-}
-
-function getPrice(ev) {
-  var reg = ev.registration || {};
-  if (reg.type === "RSVP") return "Free";
-  return "View Tickets";
-}
-
-function renderEvents() {
-  var grid = document.getElementById("grid");
-  var now = new Date();
-  var filtered = allEvents.filter(function(ev) {
-    var start = new Date(ev.dateAndTimeSettings && ev.dateAndTimeSettings.startDate || "");
-    if (currentFilter === "UPCOMING") return start >= now;
-    if (currentFilter === "TICKETING") return (ev.registration || {}).type === "TICKETING";
-    return true;
-  });
-
-  // Sort by start date ascending
-  filtered.sort(function(a, b) {
-    var da = new Date((a.dateAndTimeSettings || {}).startDate || "");
-    var db = new Date((b.dateAndTimeSettings || {}).startDate || "");
-    return da - db;
-  });
-
-  if (!filtered.length) {
-    grid.innerHTML = "<div class=\"empty\"><h3>No Events Found</h3><p>Check back soon for upcoming events.</p></div>";
-    return;
-  }
-
-  var html = "";
-  for (var i = 0; i < filtered.length; i++) {
-    var ev = filtered[i];
-    var dt = ev.dateAndTimeSettings || {};
-    var start = dt.startDate || "";
-    var end = dt.endDate || "";
-    var title = ev.title || "Event";
-    var desc = ev.shortDescription || "";
-    var img = ev.mainImage ? ev.mainImage.url : "";
-    var wixUrl = ev.eventPageUrl ? (ev.eventPageUrl.base + ev.eventPageUrl.path) : "https://www.thequarrystl.com";
-    var status = getStatus(ev);
-    var price = getPrice(ev);
-    var dateStr = formatDate(start);
-    var timeStr = formatTime(start);
-    var endTime = formatTime(end);
-    if (endTime) timeStr += " - " + endTime;
-
-    var imgHtml = img
-      ? "<img src=\"" + img + "\" alt=\"" + title + "\" loading=\"lazy\"/>"
-      : "<div style=\"color:rgba(255,255,255,0.2);font-size:2rem;font-family:Cormorant Garamond,serif\">" + title.charAt(0) + "</div>";
-
-    var soldOverlay = (status === "sold" || status === "ended" || status === "closed")
-      ? "<div class=\"sold-overlay\"><span>" + (status === "sold" ? "Sold Out" : status === "ended" ? "Event Ended" : "Registration Closed") + "</span></div>"
-      : "";
-
-    var statusBadge = status === "open"
-      ? "<span class=\"status-badge open\">Open</span>"
-      : status === "sold"
-      ? "<span class=\"status-badge sold\">Sold Out</span>"
-      : "<span class=\"status-badge closed\">" + (status === "ended" ? "Ended" : "Closed") + "</span>";
-
-    var btnHtml = (status === "open")
-      ? "<a href=\"" + wixUrl + "\" target=\"_blank\" class=\"btn-reg\">Get Tickets</a>"
-      : "<a href=\"" + wixUrl + "\" target=\"_blank\" class=\"btn-reg sold\">View Event</a>";
-
-    html += "<div class=\"card\">";
-    html += "<div class=\"card-img\">" + imgHtml + soldOverlay;
-    html += "<div class=\"dbadge\">" + dateStr + "</div></div>";
-    html += "<div class=\"card-body\">";
-    html += "<div class=\"card-title\">" + title + "</div>";
-    html += "<div class=\"card-meta\"><span>" + timeStr + "</span><span>The Quarry, New Melle MO</span>" + statusBadge + "</div>";
-    html += "<div class=\"card-desc\">" + desc + "</div>";
-    html += "<div class=\"card-foot\"><div class=\"card-price\">" + price + "</div>" + btnHtml + "</div>";
-    html += "</div></div>";
-  }
-  grid.innerHTML = html;
-}
-
-async function loadEvents() {
-  try {
-    var res = await fetch("/.netlify/functions/get-wix-events");
-    var data = await res.json();
-    allEvents = data.events || [];
-    renderEvents();
-  } catch(e) {
-    // Fallback: show "check our Wix site" message
-    document.getElementById("grid").innerHTML = "<div class=\"empty\"><h3>Events Calendar</h3><p>View our full events calendar at <a href=\"https://www.thequarrystl.com/events\" style=\"color:var(--gold)\">thequarrystl.com/events</a></p></div>";
-  }
-}
-
-loadEvents();
+function toggleNav(){var n=document.getElementById("mainNav");if(!n)return;n.classList.toggle("open");n.style.display=n.classList.contains("open")?"flex":"";}
+document.addEventListener("click",function(e){var n=document.getElementById("mainNav");var h=document.querySelector(".hamburger");if(n&&h&&!n.contains(e.target)&&!h.contains(e.target)){n.classList.remove("open");n.style.display="";}});
 </script>
 </body>
 </html>
