@@ -1096,6 +1096,27 @@
         </div>
     </div>
 
+    <!-- Token Settings Modal -->
+    <div id="tokenSettingsModal" class="modal-overlay" style="display:none;">
+        <div class="modal" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>GitHub Token Settings</h2>
+                <button class="modal-close" onclick="closeTokenSettings()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 1rem; color: var(--gray-dark); font-size: 0.9rem;">Enter your GitHub Personal Access Token to enable saving events and bands. The token needs <strong>repo</strong> scope for private repositories.</p>
+                <div class="form-group">
+                    <label>GitHub Token</label>
+                    <input type="text" id="githubTokenInput" placeholder="ghp_xxxxxxxxxxxx" style="width: 100%; padding: 0.75rem; border: 2px solid var(--gray-medium); border-radius: 4px; font-family: monospace;">
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button class="btn btn-primary" onclick="saveGitHubToken()">Save Token</button>
+                    <button class="btn btn-secondary" onclick="closeTokenSettings()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
@@ -1277,9 +1298,20 @@
         // DATA LOADING
         async function loadData() {
             showLoadingIndicator(true);
+            const token = sessionStorage.getItem('quarryGithubToken');
+            if (!token) {
+                showLoadingIndicator(false);
+                showToast('Please set your GitHub token first (click the ⚙️ icon)', 'warning');
+                initGitHubToken();
+                openTokenSettings();
+                return;
+            }
             try {
                 const resp = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${DATA_FILE}`, {
-                    headers: { 'Accept': 'application/vnd.github.v3+json' }
+                    headers: {
+                        'Authorization': 'token ' + token,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
                 });
                 
                 if (!resp.ok) {
@@ -1436,9 +1468,10 @@
             }
             sessionStorage.setItem('quarryGithubToken', token);
             document.getElementById('githubTokenInput').value = '••••••' + token.slice(-4);
-            showToast('GitHub token saved', 'success');
+            showToast('GitHub token saved — loading data...', 'success');
             initGitHubToken();
             closeTokenSettings();
+            loadData();
         }
 
         // GITHUB SAVE FUNCTION
