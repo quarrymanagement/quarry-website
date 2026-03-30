@@ -1,448 +1,2412 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Events | The Quarry</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-<style>
-:root {
-  --cream: #F5F0E8;
-  --brown-dark: #2C1A0E;
-  --brown-mid: #5C3D2E;
-  --brown-warm: #8B5E3C;
-  --brown-light: #C4956A;
-  --gold: #B8933A;
-  --gold-light: #D4AF6A;
-  --charcoal: #1A1A1A;
-  --white: #FFFFFF;
-  --border-light: rgba(188,149,106,0.25);
-  --border-mid: rgba(188,149,106,0.5);
-}
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:'Montserrat',sans-serif; background:var(--charcoal); color:var(--cream); overflow-x:hidden; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Events Calendar - The Quarry | New Melle, Missouri</title>
+    <meta name="description" content="Discover upcoming events at The Quarry - live music, bingo nights, brunches, and more in New Melle, Missouri.">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 
-/* HEADER */
-header {
-  position:fixed; top:0; left:0; right:0; z-index:1000;
-  background:rgba(26,26,26,0.97);
-  border-bottom:1px solid var(--border-light);
-  backdrop-filter:blur(8px);
-}
-.header-inner {
-  max-width:1400px; margin:0 auto; padding:0 2rem;
-  display:flex; align-items:center; justify-content:space-between; height:80px;
-}
-.logo {
-  font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700;
-  letter-spacing:0.12em; color:#ffffff; text-transform:uppercase;
-  text-decoration:none; flex-shrink:0;
-}
-.logo span {
-  display:block; font-size:0.5rem; letter-spacing:0.3em;
-  color:rgba(255,255,255,0.6); margin-top:2px;
-  font-family:'Montserrat',sans-serif; font-weight:400;
-}
+    <style>
+        /* CSS Variables */
+        :root {
+            --cream: #F5F0E8;
+            --brown-dark: #2C1A0E;
+            --brown-mid: #5C3D2E;
+            --brown-warm: #8B5E3C;
+            --brown-light: #C4956A;
+            --gold: #B8933A;
+            --gold-light: #D4AF6A;
+            --charcoal: #1A1A1A;
+            --white: #FFFFFF;
+            --green: #4CAF50;
+            --orange: #FF9800;
+            --red: #F44336;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-nav { display:flex; align-items:center; }
-.nav-item { position:relative; }
-.nav-link {
-  font-family:'Montserrat',sans-serif; font-size:0.62rem; font-weight:500;
-  letter-spacing:0.14em; text-transform:uppercase;
-  color:var(--cream); text-decoration:none;
-  padding:0.6rem 0.75rem; display:block; transition:color 0.2s; white-space:nowrap;
-}
-.nav-link:hover { color:var(--gold-light); }
-.dropdown {
-  display:none; position:absolute; top:100%; left:0;
-  background:var(--brown-dark); border:1px solid var(--border-mid);
-  min-width:200px; z-index:200;
-}
-.nav-item:hover .dropdown { display:block; }
-.dropdown a {
-  display:block; padding:0.7rem 1.25rem;
-  font-size:0.65rem; letter-spacing:0.1em; text-transform:uppercase;
-  color:var(--cream); text-decoration:none;
-  border-bottom:1px solid var(--border-light);
-  font-family:'Montserrat',sans-serif; font-weight:400;
-  transition:background 0.2s, color 0.2s;
-}
-.dropdown a:last-child { border-bottom:none; }
-.dropdown a:hover { background:var(--brown-mid); color:var(--gold-light); }
-.dropdown .dimmed { color:rgba(196,149,106,0.75); }
-.cs-badge {
-  display:inline-block; font-size:0.48rem; letter-spacing:0.08em;
-  background:var(--gold); color:var(--brown-dark);
-  padding:1px 5px; margin-left:4px; vertical-align:middle; font-weight:700;
-}
-.hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:0.5rem; }
-.hamburger span { display:block; width:24px; height:1.5px; background:var(--cream); }
+        /* Reset & Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-/* HERO VIDEO */
-.hero-video {
-  position:absolute; inset:0; z-index:0;
-  overflow:hidden; pointer-events:none;
-}
-.hero-video iframe {
-  position:absolute;
-  top:50%; left:50%;
-  transform:translate(-50%,-50%);
-  width:56.25vh;
-  height:100vh;
-  min-width:100vw;
-  min-height:177.78vw;
-}
-/* HERO */
-.hero {
-  position:relative; height:100vh; min-height:650px;
-  display:flex; align-items:center; justify-content:center; overflow:hidden;
-}
-.hero-bg {
-  position:absolute; inset:0;
-  background:
-    linear-gradient(to bottom, rgba(15,10,5,0.15) 0%, rgba(15,10,5,0.2) 50%, rgba(15,10,5,0.65) 100%),
-    url('https://static.wixstatic.com/media/f1c1b8_c5a995404a4c4e20aa35de83c9c26bfa~mv2.jpg/v1/fill/w_1400,h_900,al_c,q_85/f1c1b8_c5a995404a4c4e20aa35de83c9c26bfa~mv2.jpg') center/cover no-repeat;
-}
-.hero-content { position:relative; z-index:2; text-align:center; padding:0 2rem; }
-.hero-eyebrow {
-  font-family:'Montserrat',sans-serif; font-size:0.62rem;
-  letter-spacing:0.45em; text-transform:uppercase; color:var(--gold-light); margin-bottom:1.25rem;
-}
-.hero-title {
-  font-family:'Playfair Display',serif;
-  font-size:clamp(4.5rem,10vw,9rem); font-weight:700;
-  line-height:0.88; color:var(--white);
-  letter-spacing:0.06em; text-transform:uppercase; margin-bottom:0.6rem;
-}
-.hero-sub {
-  font-family:'Cormorant Garamond',serif;
-  font-size:clamp(1rem,2.2vw,1.4rem); font-style:italic; font-weight:300;
-  color:var(--cream); letter-spacing:0.12em; opacity:0.85; margin-bottom:2.5rem;
-}
-.hero-divider { width:50px; height:1px; background:var(--gold); margin:0 auto 2.5rem; }
-.hero-cta {
-  display:inline-block; padding:0.9rem 2.8rem;
-  border:1px solid var(--gold); color:var(--gold-light);
-  font-family:'Montserrat',sans-serif; font-size:0.65rem; font-weight:600;
-  letter-spacing:0.28em; text-transform:uppercase; text-decoration:none;
-  transition:all 0.3s; position:relative; overflow:hidden; z-index:0;
-}
-.hero-cta::before {
-  content:''; position:absolute; inset:0; background:var(--gold);
-  transform:translateX(-100%); transition:transform 0.3s; z-index:-1;
-}
-.hero-cta:hover { color:var(--brown-dark); }
-.hero-cta:hover::before { transform:translateX(0); }
-.hero-scroll {
-  position:absolute; bottom:2rem; left:50%; transform:translateX(-50%);
-  display:flex; flex-direction:column; align-items:center; gap:0.4rem;
-  color:rgba(255,255,255,0.4); font-size:0.5rem; letter-spacing:0.3em; text-transform:uppercase;
-}
-.scroll-line { width:1px; height:36px; background:rgba(255,255,255,0.3); animation:pulse 2s infinite; }
-@keyframes pulse { 0%,100%{opacity:0.3} 50%{opacity:1} }
+        html {
+            scroll-behavior: smooth;
+        }
 
-/* 4 QUAD BOXES */
-.quad-grid { display:grid; grid-template-columns:repeat(4,1fr); border:2px solid rgba(255,255,255,0.35); }
-.quad-box {
-  position:relative; height:500px; overflow:hidden;
-  text-decoration:none; display:flex; flex-direction:column; justify-content:center;
-  border-bottom:2px solid rgba(255,255,255,0.35);
-  border-top:2px solid rgba(255,255,255,0.35);
-}
-.quad-box+.quad-box { border-left:2px solid rgba(255,255,255,0.35); }
-.quad-bg {
-  position:absolute; inset:0; background-size:cover; background-position:center;
-  transition:transform 0.7s ease; filter:brightness(0.85);
-}
-.quad-box:hover .quad-bg { transform:scale(1.06); filter:brightness(0.7); }
-.quad-overlay {
-  position:absolute; inset:0;
-  background:linear-gradient(to top, rgba(20,10,4,0.9) 0%, rgba(20,10,4,0.3) 50%, rgba(20,10,4,0.1) 100%);
-}
-.quad-content { position:relative; z-index:2; padding:2rem 1.75rem 2.25rem; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; height:100%; }
-.quad-label { display:none; }
-.quad-title {
-  font-family:'Montserrat',sans-serif; font-size:1.4rem; font-weight:700;
-  color:var(--white); line-height:1.1; margin-bottom:1.25rem; text-transform:uppercase;
-  letter-spacing:0.04em;
-}
-.quad-desc { display:none; }
-.quad-arrow {
-  display:inline-block;
-  font-family:'Montserrat',sans-serif; font-size:0.62rem; font-weight:600;
-  letter-spacing:0.22em; text-transform:uppercase; color:var(--white);
-  border:1px solid rgba(255,255,255,0.6); padding:0.55rem 1.5rem;
-  transition:all 0.3s;
-}
-.quad-box:hover .quad-arrow { background:var(--gold); border-color:var(--gold); color:var(--brown-dark); }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            color: var(--charcoal);
+            background-color: var(--white);
+            line-height: 1.6;
+        }
 
-/* QUICK LINKS */
-.quick-links-wrap { background:var(--charcoal); }
-.quick-links { display:flex; flex-direction:column; }
-.qlink {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:1.75rem 3rem; text-decoration:none;
-  border-top:1px solid rgba(255,255,255,0.15);
-  transition:background 0.2s;
-}
-.qlink:hover { background:rgba(255,255,255,0.04); }
-.qlink.disabled { pointer-events:none; opacity:0.5; }
-.qlink-title {
-  font-family:'Montserrat',sans-serif; font-size:1.3rem; font-weight:700;
-  letter-spacing:0.14em; text-transform:uppercase; color:#ffffff;
-}
-.qlink-badge {
-  display:inline-block; font-size:0.48rem; font-weight:700;
-  letter-spacing:0.08em; background:var(--gold); color:var(--brown-dark);
-  padding:3px 10px; font-family:'Montserrat',sans-serif; margin-left:1rem; vertical-align:middle;
-}
-.qlink-arrow {
-  font-size:1.8rem; color:#ffffff; transition:transform 0.2s; flex-shrink:0;
-}
-.qlink:hover .qlink-arrow { transform:translateX(6px); }
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
 
-/* FOOTER */
-footer { background:#0F0A07; padding:4.5rem 2rem 2rem; border-top:1px solid var(--border-light); }
-.footer-inner { max-width:1200px; margin:0 auto; }
-.footer-top {
-  display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:3rem;
-  margin-bottom:3.5rem; padding-bottom:3rem; border-bottom:1px solid var(--border-light);
-}
-.footer-logo {
-  font-family:'Playfair Display',serif; font-size:1.4rem;
-  letter-spacing:0.12em; color:#ffffff; text-transform:uppercase;
-}
-.footer-logo span {
-  display:block; font-size:0.48rem; letter-spacing:0.28em; color:rgba(255,255,255,0.55);
-  margin-top:2px; font-family:'Montserrat',sans-serif; font-weight:400;
-}
-.footer-tagline {
-  font-family:'Cormorant Garamond',serif; font-size:0.92rem; font-style:italic;
-  color:rgba(255,255,255,0.7); margin-top:0.75rem; line-height:1.65;
-}
-.footer-address {
-  font-family:'Montserrat',sans-serif; font-size:0.62rem;
-  color:rgba(255,255,255,0.65); line-height:2; margin-top:1.25rem; letter-spacing:0.04em;
-}
-.footer-address a { color:rgba(255,255,255,0.65); text-decoration:none; }
-.footer-address a:hover { color:#fff; }
-.social-row { display:flex; gap:0.6rem; margin-top:1.25rem; }
-.social-btn {
-  width:34px; height:34px; border:1px solid var(--border-mid);
-  display:flex; align-items:center; justify-content:center;
-  text-decoration:none; color:rgba(255,255,255,0.65); font-size:0.62rem;
-  font-weight:600; font-family:'Montserrat',sans-serif;
-  transition:border-color 0.2s, color 0.2s;
-}
-.social-btn:hover { border-color:var(--gold); color:var(--gold-light); }
-.footer-col-title {
-  font-family:'Montserrat',sans-serif; font-size:0.58rem; font-weight:600;
-  letter-spacing:0.28em; text-transform:uppercase; color:var(--gold); margin-bottom:1.1rem;
-}
-.footer-col ul { list-style:none; }
-.footer-col ul li { margin-bottom:0.45rem; }
-.footer-col ul li a {
-  font-family:'Montserrat',sans-serif; font-size:0.65rem;
-  color:rgba(255,255,255,0.65); text-decoration:none; letter-spacing:0.04em; transition:color 0.2s;
-}
-.footer-col ul li a:hover { color:#fff; }
-.footer-col .dim { font-family:'Montserrat',sans-serif; font-size:0.65rem; color:rgba(255,255,255,0.3); }
-.footer-bottom {
-  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;
-}
-.footer-legal {
-  font-family:'Montserrat',sans-serif; font-size:0.55rem;
-  color:rgba(255,255,255,0.3); letter-spacing:0.06em; line-height:1.9;
-}
-.footer-legal a { color:rgba(255,255,255,0.3); text-decoration:none; }
-.footer-legal a:hover { color:rgba(255,255,255,0.7); }
+        button, input, textarea, select {
+            font-family: 'Montserrat', sans-serif;
+        }
 
-/* RESPONSIVE */
-@media (max-width:1100px) {
-  nav { display:none; }
-  nav.open {
-    display:flex; flex-direction:column; position:absolute;
-    top:80px; left:0; right:0; background:#1a1a1a;
-    padding:0.5rem 0; border-top:1px solid var(--border-light);
-    max-height:calc(100vh - 80px); overflow-y:auto; z-index:999;
-  }
-  .hamburger { display:flex; }
-  .nav-item { width:100%; }
-  .nav-link { padding:0.85rem 1.5rem; font-size:0.7rem; border-bottom:1px solid rgba(255,255,255,0.06); }
-  .dropdown { position:static; display:none; border:none; background:rgba(0,0,0,0.3); }
-  .nav-item.open .dropdown { display:block; }
-  .dropdown a { padding:0.7rem 2.5rem; font-size:0.65rem; }
-  .quad-grid { grid-template-columns:1fr 1fr; }
-  .quad-box { height:380px; }
-  .quad-box+.quad-box { border-left:none; }
-  .qlink { padding:1.5rem 2rem; }
-  .qlink-title { font-size:1rem; }
-  .footer-top { grid-template-columns:1fr 1fr; gap:2rem; }
-}
-@media (max-width:640px) {
-  .header-inner { padding:0 1rem; height:70px; }
-  .logo { font-size:1.1rem; }
-  .hero-title { font-size:3.8rem; }
-  .hero-sub { font-size:0.9rem; }
-  .hero-cta { padding:0.75rem 2rem; font-size:0.6rem; }
-  .quad-grid { grid-template-columns:1fr; }
-  .quad-box { height:260px; }
-  .quad-box+.quad-box { border-left:none; border-top:1px solid rgba(255,255,255,0.15); }
-  .qlink { padding:1.25rem 1.5rem; }
-  .qlink-title { font-size:0.85rem; }
-  .qlink-arrow { font-size:1.3rem; }
-  .footer-top { grid-template-columns:1fr; gap:2rem; }
-  footer { padding:3rem 1.5rem 1.5rem; }
-  .footer-bottom { flex-direction:column; }
-  .footer-legal { text-align:center !important; }
-}
+        /* Header */
+        header {
+            background: rgba(26,26,26,0.97);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(188,149,106,0.25);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: none;
+        }
 
+        .header-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 80px;
+        }
 
-</style>
-<style>
-:root{--gold:#B8933A;--brown:#2C1A0E;--black:#0D0D0D;--cream:#FAF7F2;--burg:#5C1A2E;}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:Montserrat,sans-serif;background:var(--cream);color:var(--brown);}
-.hero{background:linear-gradient(135deg,rgba(44,26,14,0.94),rgba(13,13,13,0.98));padding:6rem 2rem 4rem;text-align:center;}
-.hero .ey{font-size:0.62rem;font-weight:700;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:0.75rem;}
-.hero h1{font-family:"Cormorant Garamond",serif;font-size:clamp(2.5rem,6vw,4.5rem);color:#fff;font-weight:600;line-height:1.05;}
-.hero p{font-size:0.85rem;color:rgba(255,255,255,0.6);margin-top:0.75rem;max-width:480px;margin-left:auto;margin-right:auto;line-height:1.8;}
-.wrap{max-width:1100px;margin:0 auto;padding:3rem 1.5rem 5rem;}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:2rem;}
-.card{background:#fff;border:1px solid rgba(0,0,0,0.07);overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;}
-.card:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,0,0,0.12);}
-.cimg{height:210px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;}
-.db{position:absolute;top:1rem;left:1rem;background:var(--gold);color:var(--black);padding:0.4rem 0.8rem;font-size:0.62rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;z-index:2;}
-.sb{position:absolute;top:1rem;right:1rem;padding:0.3rem 0.7rem;font-size:0.58rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;z-index:2;}
-.s-open{background:#27ae60;color:#fff;}
-.s-low{background:#e67e22;color:#fff;}
-.s-sold{background:#c0392b;color:#fff;}
-.sold-ov{position:absolute;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:1;}
-.sold-ov span{background:#c0392b;color:#fff;padding:0.5rem 2rem;font-size:0.75rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;}
-.cbody{padding:1.5rem;}
-.ctitle{font-family:"Cormorant Garamond",serif;font-size:1.45rem;font-weight:700;margin-bottom:0.35rem;line-height:1.2;}
-.cmeta{font-size:0.68rem;color:#888;margin-bottom:0.75rem;display:flex;flex-wrap:wrap;gap:0.5rem;}
-.cdesc{font-size:0.78rem;color:#666;line-height:1.7;margin-bottom:1.1rem;}
-.tiers{display:flex;flex-direction:column;gap:0.4rem;margin-bottom:1.1rem;}
-.tier{display:flex;align-items:center;justify-content:space-between;padding:0.6rem 0.85rem;border:1.5px solid #e0d9d0;background:#faf8f5;}
-.tn{font-size:0.72rem;font-weight:700;color:var(--brown);}
-.td{font-size:0.62rem;color:#888;margin-top:0.1rem;}
-.tp{font-family:"Cormorant Garamond",serif;font-size:1.3rem;font-weight:700;color:var(--brown);}
-.cfoot{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;}
-.seats{font-size:0.65rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;}
-.seats.ok{color:#27ae60;}.seats.low{color:#e67e22;}.seats.no{color:#c0392b;}
-.btn{display:inline-block;padding:0.8rem 1.8rem;font-family:Montserrat,sans-serif;font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;text-decoration:none;cursor:pointer;transition:background 0.2s;}
-.btn-go{background:var(--brown);color:#fff;}
-.btn-go:hover{background:var(--gold);color:var(--black);}
-.btn-off{background:#ccc;color:#888;cursor:not-allowed;pointer-events:none;}
-@media(max-width:500px){.grid{grid-template-columns:1fr;}}
-</style>
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
+            transition: var(--transition);
+        }
+
+        .logo span {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            color: rgba(255,255,255,0.6);
+            margin-top: 2px;
+        }
+
+        .logo:hover {
+            color: var(--gold-light);
+        }
+
+        nav#mainNav {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .nav-item {
+            position: relative;
+        }
+
+        .nav-link {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--cream);
+            padding: 8px 0;
+            display: block;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .nav-link:hover {
+            color: var(--gold-light);
+        }
+
+        .nav-item .dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: var(--brown-dark);
+            min-width: 200px;
+            padding: 12px 0;
+            border-radius: 4px;
+            border: 1px solid rgba(188,149,106,0.5);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-8px);
+            transition: var(--transition);
+            margin-top: 8px;
+        }
+
+        .nav-item:hover .dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown a {
+            display: block;
+            padding: 10px 20px;
+            font-size: 13px;
+            color: var(--cream);
+            border-bottom: 1px solid rgba(188,149,106,0.25);
+            transition: var(--transition);
+        }
+
+        .dropdown a:hover {
+            background-color: var(--brown-mid);
+            color: var(--gold-light);
+        }
+
+        .cs-badge {
+            display: inline-block;
+            background: var(--gold);
+            color: var(--brown-dark);
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 2px;
+            margin-left: 6px;
+        }
+
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            width: 28px;
+            height: 24px;
+            justify-content: center;
+        }
+
+        .hamburger span {
+            display: block;
+            width: 100%;
+            height: 2px;
+            background: var(--cream);
+            border-radius: 1px;
+            transition: var(--transition);
+        }
+
+        /* Hero Section */
+        .hero {
+            position: relative;
+            height: 600px;
+            background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+                        url('https://static.wixstatic.com/media/f1c1b8_c5a995404a4c4e20aa35de83c9c26bfa~mv2.jpg/v1/fill/w_1400,h_900,al_c,q_85/f1c1b8_c5a995404a4c4e20aa35de83c9c26bfa~mv2.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--white);
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(44, 26, 14, 0.5) 0%, rgba(139, 94, 60, 0.3) 100%);
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            padding: 0 2rem;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-eyebrow {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--gold-light);
+            margin-bottom: 12px;
+        }
+
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 72px;
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero-subtitle {
+            font-size: 18px;
+            font-weight: 300;
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 3;
+            animation: bounce 2s infinite;
+        }
+
+        .scroll-indicator svg {
+            width: 24px;
+            height: 24px;
+            stroke: var(--white);
+            stroke-width: 2;
+            fill: none;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            50% {
+                transform: translateX(-50%) translateY(8px);
+            }
+        }
+
+        /* Success Banner */
+        .success-banner {
+            position: fixed;
+            top: 80px;
+            left: 0;
+            right: 0;
+            background: var(--green);
+            color: var(--white);
+            padding: 16px 2rem;
+            text-align: center;
+            font-weight: 600;
+            z-index: 950;
+            animation: slideDown 0.4s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Filter Bar */
+        .filter-bar {
+            position: sticky;
+            top: 80px;
+            background: #F5F0E8;
+            border-bottom: 1px solid rgba(44, 26, 14, 0.1);
+            padding: 2rem;
+            z-index: 900;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+        }
+
+        .filter-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .filter-pill {
+            padding: 10px 24px;
+            border: 2px solid rgba(44, 26, 14, 0.3);
+            background: transparent;
+            color: var(--charcoal);
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .filter-pill:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        .filter-pill.active {
+            background: var(--gold);
+            color: var(--brown-dark);
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(184, 147, 58, 0.1);
+        }
+
+        /* Events Container */
+        .events-section {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        /* Event Card */
+        .event-card {
+            background: var(--white);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .event-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+        }
+
+        .event-card.hidden {
+            display: none;
+        }
+
+        .event-image {
+            position: relative;
+            height: 220px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #2C1A0E 0%, #5C3D2E 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .event-image.neon-80s {
+            background: linear-gradient(135deg, #0a003a 0%, #4a0080 100%);
+        }
+
+        .event-image.neon-brunch {
+            background: linear-gradient(135deg, #5C1A2E 0%, #8B0050 100%);
+        }
+
+        .event-image-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 80px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.15);
+            text-align: center;
+            line-height: 1;
+            pointer-events: none;
+        }
+
+        .date-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: var(--gold);
+            color: var(--white);
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            z-index: 10;
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            z-index: 10;
+        }
+
+        .status-badge.available {
+            background: var(--green);
+            color: var(--white);
+        }
+
+        .status-badge.low {
+            background: var(--orange);
+            color: var(--white);
+        }
+
+        .status-badge.sold-out {
+            background: var(--red);
+            color: var(--white);
+        }
+
+        .sold-out-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+        }
+
+        .sold-out-banner {
+            background: var(--red);
+            color: var(--white);
+            padding: 12px 24px;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            transform: rotate(-15deg);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .event-body {
+            padding: 24px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .event-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--charcoal);
+            margin-bottom: 8px;
+            line-height: 1.2;
+        }
+
+        .event-meta {
+            font-size: 13px;
+            color: var(--brown-warm);
+            margin-bottom: 16px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .event-meta span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .event-description {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            flex: 1;
+        }
+
+        .event-tiers {
+            margin-bottom: 20px;
+            padding: 16px 0;
+            border-top: 1px solid rgba(44, 26, 14, 0.1);
+            border-bottom: 1px solid rgba(44, 26, 14, 0.1);
+        }
+
+        .tier {
+            margin-bottom: 12px;
+        }
+
+        .tier:last-child {
+            margin-bottom: 0;
+        }
+
+        .tier-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--charcoal);
+        }
+
+        .tier-price {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--gold);
+            margin-top: 4px;
+        }
+
+        .event-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+        }
+
+        .availability-text {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .availability-text.sold-out {
+            color: var(--red);
+        }
+
+        .availability-text.low {
+            color: var(--orange);
+        }
+
+        .availability-text.available {
+            color: var(--green);
+        }
+
+        .event-button {
+            padding: 10px 20px;
+            background: var(--brown-dark);
+            color: var(--white);
+            border: none;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .event-button:hover:not(:disabled) {
+            background: var(--gold);
+            color: var(--brown-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(184, 147, 58, 0.3);
+        }
+
+        .event-button:disabled {
+            background: #999;
+            color: #666;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-card {
+            background: var(--white);
+            border-radius: 8px;
+            max-width: 550px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease-out;
+            transition: max-width 0.3s ease;
+        }
+
+        .modal-card.wide {
+            max-width: 780px;
+        }
+
+        .btn-secondary {
+            padding: 12px 24px;
+            border: 2px solid #e0d9d0;
+            background: var(--white);
+            color: var(--brown-dark);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-secondary:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        /* Customer Floor Map Styles */
+        .map-table {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .map-table:hover {
+            filter: brightness(1.15);
+        }
+        .map-table.selected {
+            stroke: var(--gold) !important;
+            stroke-width: 3px;
+            filter: drop-shadow(0 0 8px rgba(184,147,58,0.5));
+        }
+        .map-table.booked {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .map-table-label {
+            pointer-events: none;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            fill: white;
+        }
+        .map-label {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            fill: #999;
+        }
+        .map-seat {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .map-seat:hover {
+            filter: brightness(1.2);
+        }
+        .map-seat.booked {
+            cursor: not-allowed;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(40px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid rgba(44, 26, 14, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .modal-header-content h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--charcoal);
+            margin-bottom: 4px;
+        }
+
+        .modal-header-content p {
+            font-size: 14px;
+            color: var(--brown-warm);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--charcoal);
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            color: var(--gold);
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--brown-dark);
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e0d9d0;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(184, 147, 58, 0.1);
+        }
+
+        .form-group input::placeholder {
+            color: #999;
+        }
+
+        .seating-note {
+            font-size: 12px;
+            color: #666;
+            font-style: italic;
+            margin-top: 16px;
+            padding: 12px;
+            background: rgba(184, 147, 58, 0.05);
+            border-left: 3px solid var(--gold);
+            border-radius: 2px;
+        }
+
+        .modal-footer {
+            padding: 24px;
+            border-top: 1px solid rgba(44, 26, 14, 0.1);
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .modal-footer button {
+            padding: 12px 32px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-footer .btn-primary {
+            background: var(--brown-dark);
+            color: var(--white);
+        }
+
+        .modal-footer .btn-primary:hover:not(:disabled) {
+            background: var(--gold);
+            color: var(--brown-dark);
+        }
+
+        .modal-footer .btn-primary:disabled {
+            background: #999;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .form-error {
+            color: var(--red);
+            font-size: 13px;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .form-error.show {
+            display: block;
+        }
+
+        .modal-success {
+            text-align: center;
+            padding: 40px 24px;
+        }
+
+        .modal-success-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .modal-success h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--charcoal);
+            margin-bottom: 8px;
+        }
+
+        .modal-success p {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* Coming Soon Section */
+        .coming-soon {
+            background: var(--brown-dark);
+            padding: 4rem 2rem;
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .coming-soon-content {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .coming-soon-eyebrow {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--gold-light);
+            margin-bottom: 12px;
+        }
+
+        .coming-soon h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 44px;
+            color: var(--white);
+            margin-bottom: 16px;
+        }
+
+        .coming-soon-text {
+            font-size: 16px;
+            color: var(--cream);
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .social-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            background: transparent;
+            color: var(--gold-light);
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.6);
+            font-weight: 700;
+            transition: var(--transition);
+            font-size: 20px;
+        }
+
+        .social-links a:hover {
+            background: transparent;
+            color: var(--gold-light);
+            border-color: var(--gold-light);
+            transform: translateY(-4px);
+        }
+
+        /* Mailing List Section */
+        .mailing-list {
+            background: linear-gradient(135deg, rgba(44,26,14,0.94), rgba(13,13,13,0.98));
+            padding: 4rem 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .mailing-list-content {
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .mailing-list-eyebrow {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--gold-light);
+            margin-bottom: 12px;
+        }
+
+        .mailing-list h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 44px;
+            color: var(--white);
+            margin-bottom: 16px;
+        }
+
+        .mailing-list-text {
+            font-size: 16px;
+            color: rgba(255,255,255,0.75);
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+
+        .mailing-form {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .mailing-form input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.1);
+            color: var(--white);
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .mailing-form input::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+
+        .mailing-form button {
+            padding: 12px 32px;
+            background: var(--gold);
+            color: var(--brown-dark);
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .mailing-form button:hover {
+            background: var(--gold-light);
+        }
+
+        .mailing-success {
+            display: none;
+            color: var(--green);
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        /* Footer */
+        footer {
+            background: #0F0A07;
+            color: rgba(255,255,255,0.65);
+            padding: 4.5rem 2rem 2rem;
+            border-top: 1px solid rgba(188,149,106,0.25);
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-section h3 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.58rem;
+            font-weight: 600;
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+            color: var(--gold);
+        }
+
+        .footer-section p {
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 8px;
+            color: rgba(255,255,255,0.65);
+        }
+
+        .footer-section a {
+            display: block;
+            font-size: 14px;
+            color: rgba(255,255,255,0.65);
+            transition: var(--transition);
+            margin-bottom: 8px;
+        }
+
+        .footer-section a:hover {
+            color: var(--white);
+        }
+
+        .footer-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--white);
+            margin-bottom: 8px;
+        }
+
+        .footer-tagline {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 13px;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 16px;
+        }
+
+        .footer-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 14px;
+            color: rgba(255,255,255,0.65);
+        }
+
+        .footer-divider {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 2rem;
+            margin-top: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .footer-copyright {
+            font-size: 0.55rem;
+            color: rgba(255,255,255,0.3);
+        }
+
+        .footer-socials {
+            display: flex;
+            gap: 16px;
+        }
+
+        .footer-socials a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            background: transparent;
+            color: rgba(255,255,255,0.65);
+            border: 1px solid rgba(188,149,106,0.5);
+            border-radius: 50%;
+            transition: var(--transition);
+            font-size: 16px;
+            margin: 0;
+        }
+
+        .footer-socials a:hover {
+            background: transparent;
+            color: var(--gold-light);
+            border-color: var(--gold-light);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .header-inner {
+                padding: 0 1.5rem;
+            }
+
+            nav#mainNav {
+                gap: 1rem;
+            }
+
+            .hero h1 {
+                font-size: 48px;
+            }
+
+            .events-grid {
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                gap: 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hamburger {
+                display: flex;
+            }
+
+            nav#mainNav {
+                position: absolute;
+                top: 80px;
+                left: 0;
+                right: 0;
+                flex-direction: column;
+                background: #1a1a1a;
+                max-height: 0;
+                overflow: hidden;
+                transition: var(--transition);
+                padding: 0;
+                gap: 0;
+                border-bottom: 1px solid rgba(188,149,106,0.25);
+            }
+
+            nav#mainNav.active {
+                max-height: 600px;
+                padding: 1rem 0;
+            }
+
+            .nav-item {
+                width: 100%;
+                padding: 0 2rem;
+            }
+
+            .nav-link {
+                padding: 12px 0;
+                border-bottom: 1px solid rgba(255,255,255,0.06);
+            }
+
+            .nav-item .dropdown {
+                position: static;
+                max-height: 0;
+                overflow: hidden;
+                opacity: 1;
+                visibility: visible;
+                transform: none;
+                box-shadow: none;
+                background: rgba(0,0,0,0.3);
+                margin-top: 0;
+                transition: var(--transition);
+                padding: 0;
+            }
+
+            .nav-item.open .dropdown {
+                max-height: 400px;
+                padding: 12px 0;
+            }
+
+            .dropdown a {
+                padding: 8px 16px;
+                margin-left: 16px;
+                font-size: 12px;
+            }
+
+            .hero {
+                height: 400px;
+            }
+
+            .hero h1 {
+                font-size: 36px;
+            }
+
+            .hero-subtitle {
+                font-size: 16px;
+            }
+
+            .events-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-container {
+                gap: 0.5rem;
+            }
+
+            .filter-pill {
+                padding: 8px 16px;
+                font-size: 12px;
+            }
+
+            .coming-soon h2,
+            .mailing-list h2 {
+                font-size: 32px;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .footer-divider {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .modal-card {
+                width: 95%;
+                max-height: 95vh;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-inner {
+                padding: 0 1rem;
+                height: 70px;
+            }
+
+            .logo {
+                font-size: 20px;
+            }
+
+            .hero {
+                height: 300px;
+            }
+
+            .hero h1 {
+                font-size: 28px;
+            }
+
+            .hero-subtitle {
+                font-size: 14px;
+                margin-bottom: 24px;
+            }
+
+            .hero-eyebrow {
+                font-size: 10px;
+            }
+
+            .event-image {
+                height: 180px;
+            }
+
+            .event-image-text {
+                font-size: 60px;
+            }
+
+            .event-name {
+                font-size: 22px;
+            }
+
+            .event-body {
+                padding: 16px;
+            }
+
+            .filter-bar {
+                padding: 1rem;
+                top: 70px;
+            }
+
+            .events-section {
+                padding: 2rem 1rem;
+            }
+
+            .coming-soon,
+            .mailing-list {
+                padding: 2rem 1rem;
+            }
+
+            .mailing-form {
+                flex-direction: column;
+            }
+
+            .mailing-form button {
+                width: 100%;
+            }
+
+            .modal-header {
+                padding: 16px;
+            }
+
+            .modal-header-content h2 {
+                font-size: 22px;
+            }
+
+            .modal-body {
+                padding: 16px;
+            }
+
+            .modal-footer {
+                padding: 16px;
+                flex-direction: column-reverse;
+            }
+
+            .modal-footer button {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
-<header>
-  <div class="header-inner">
-    <a href="index.html" class="logo">The Quarry<span>New Melle, Missouri</span></a>
-    <nav id="mainNav">
-      <div class="nav-item">
-        <a href="#" class="nav-link">Menu &#x25BE;</a>
-        <div class="dropdown">
-          <a href="quarry-menu.html">Food Menu</a>
-          <a href="quarry-drinks.html">Drink Menu</a>
-          <a href="quarry-catering.html">Catering Menu</a>
-          <a href="quarry-brunch.html">Brunch Menu</a>
+    <!-- Header -->
+    <header>
+        <div class="header-inner">
+            <a href="/" class="logo">The Quarry<span>New Melle, Missouri</span></a>
+            <nav id="mainNav">
+                <div class="nav-item">
+                    <a href="#" class="nav-link">Menu ▾</a>
+                    <div class="dropdown">
+                        <a href="/quarry-menu">Food Menu</a>
+                        <a href="/quarry-drinks">Drink Menu</a>
+                        <a href="/quarry-catering">Catering Menu</a>
+                        <a href="/quarry-brunch">Brunch Menu</a>
+                    </div>
+                </div>
+                <div class="nav-item"><a href="/quarry-golf" class="nav-link">Hole-In-One Golf</a></div>
+                <div class="nav-item">
+                    <a href="#" class="nav-link">Entertainment ▾</a>
+                    <div class="dropdown">
+                        <a href="/quarry-events">Events Calendar</a>
+                        <a href="/quarry-bands">Live Bands</a>
+                        <a href="/quarry-wineclub">Rock &amp; Vine Wine Club</a>
+                        <a href="/quarry-beergarden">Beer Garden <span class="cs-badge">Coming 2026</span></a>
+                    </div>
+                </div>
+                <div class="nav-item">
+                    <a href="#" class="nav-link">Reservations ▾</a>
+                    <div class="dropdown">
+                        <a href="/quarry-reservations">Book a Reservation</a>
+                        <a href="/weddings/">Weddings</a>
+                        <a href="/quarry-private-events">Private Events</a>
+                    </div>
+                </div>
+                <div class="nav-item"><a href="/quarry-giftcards" class="nav-link">Gift Cards</a></div>
+                <div class="nav-item">
+                    <a href="#" class="nav-link">Connect ▾</a>
+                    <div class="dropdown">
+                        <a href="/quarry-ourstory">Our Story</a>
+                        <a href="/quarry-press">Press &amp; Media</a>
+                        <a href="/quarry-careers">Careers</a>
+                        <a href="/quarry-contact">Contact Us</a>
+                    </div>
+                </div>
+            </nav>
+            <div class="hamburger" id="hamburger" onclick="toggleNav()"><span></span><span></span><span></span></div>
         </div>
-      </div>
-      <div class="nav-item">
-        <a href="quarry-golf.html" class="nav-link">Hole-In-One Golf</a>
-      </div>
-      <div class="nav-item">
-        <a href="#" class="nav-link">Entertainment &#x25BE;</a>
-        <div class="dropdown">
-          <a href="quarry-events.html">Events Calendar</a>
-          <a href="quarry-bands.html">Live Bands</a>
-          <a href="/quarry-wineclub">Rock &amp; Vine Wine Club</a>
-          <a href="quarry-beergarden.html">Beer Garden <span class="cs-badge">Coming 2026</span></a>
+    </header>
+
+    <!-- Success Banner -->
+    <div class="success-banner" id="successBanner" style="display: none;">
+        ✓ Registration confirmed! Check your email for details.
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-eyebrow">Discover What's On</div>
+            <h1>Events Calendar</h1>
+            <p class="hero-subtitle">Live music, bingo nights, wine tastings, and more at The Quarry</p>
         </div>
-      </div>
-      <div class="nav-item">
-        <a href="#" class="nav-link">Reservations &#x25BE;</a>
-        <div class="dropdown">
-          <a href="quarry-reservations.html">Book a Reservation</a>
-          <a href="weddings/index.html">Weddings</a>
-          <a href="quarry-private-events.html">Private Events</a>
+        <div class="scroll-indicator">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 5v14M19 12l-7 7-7-7" />
+            </svg>
         </div>
-      </div>
-      <div class="nav-item">
-        <a href="quarry-giftcards.html" class="nav-link">Gift Cards</a>
-      </div>
-      <div class="nav-item">
-        <a href="#" class="nav-link">Connect &#x25BE;</a>
-        <div class="dropdown">
-          <a href="quarry-ourstory.html">Our Story</a>
-          <a href="quarry-press.html">Press & Media</a>
-          <a href="quarry-careers.html">Careers</a>
-          <a href="quarry-contact.html">Contact Us</a>
+    </section>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+        <div class="filter-container">
+            <button class="filter-pill active" onclick="filterEvents('all')">All Events</button>
+            <button class="filter-pill" onclick="filterEvents('Ticketed')">Ticketed</button>
+            <button class="filter-pill" onclick="filterEvents('Free')">Free</button>
         </div>
-      </div>
-    </nav>
-    <div class="hamburger" id="hamburger" onclick="toggleNav()"><span></span><span></span><span></span></div>
-  </div>
-</header>
-<div class="hero">
-<div class="ey">Upcoming Events</div>
-<h1>Events Calendar</h1>
-<p>Live music, ticketed events and more at The Quarry in New Melle, MO</p>
-</div>
-<div class="wrap"><div class="grid">
-<div class="card">
-<div class="cimg" style="background:linear-gradient(135deg,#0a003a,#4a0080);">
-<div style="font-family:'Cormorant Garamond',serif;font-size:3rem;color:rgba(255,255,255,0.15);font-weight:700;">80s</div>
-<div class="db">Fri, Apr 3</div>
-<div class="sb s-sold">Sold Out</div>
-<div class="sold-ov"><span>Sold Out</span></div>
-</div>
-<div class="cbody">
-<div class="ctitle">80s Neon Music Bingo</div>
-<div class="cmeta"><span>Friday, April 3, 2026</span><span>The Quarry, New Melle MO</span></div>
-<div class="cdesc">A night of 80s hits, neon lights, music bingo and great drinks. This event is fully sold out.</div>
-<div class="cfoot"><span class="seats no">Sold Out</span><span class="btn btn-off">Sold Out</span></div>
-</div></div>
-<div class="card">
-<div class="cimg" style="background:linear-gradient(135deg,#0a003a,#4a0080);">
-<div style="font-family:'Cormorant Garamond',serif;font-size:3rem;color:rgba(255,255,255,0.15);font-weight:700;">80s</div>
-<div class="db">Sat, Apr 4</div>
-<div class="sb s-low">2 Spots Left!</div>
-</div>
-<div class="cbody">
-<div class="ctitle">80s Neon Music Bingo</div>
-<div class="cmeta"><span>Saturday, April 4, 2026</span><span>The Quarry, New Melle MO</span></div>
-<div class="cdesc">Last chance! Only 2 spots left for Saturday night. Dress in your brightest neon and get ready to sing 80s hits and win prizes.</div>
-<div class="tiers"><div class="tier"><div><div class="tn">General Admission</div><div class="td">Entry + music bingo all night</div></div><div class="tp">$35</div></div></div>
-<div class="cfoot"><span class="seats low">Only 2 spots left!</span>
-<a href="https://www.thequarrystl.com/events" target="_blank" class="btn btn-go">Register Now</a>
-</div></div></div>
-<div class="card">
-<div class="cimg" style="background:linear-gradient(135deg,#5C1A2E,#8B0050);">
-<div style="font-family:'Cormorant Garamond',serif;font-size:2.5rem;color:rgba(255,255,255,0.15);font-weight:700;">Brunch</div>
-<div class="db">Sun, Apr 12</div>
-<div class="sb s-open">Tickets Available</div>
-</div>
-<div class="cbody">
-<div class="ctitle">Ladies Neon Singo Bingo Brunch</div>
-<div class="cmeta"><span>Sunday, April 12, 2026</span><span>The Quarry, New Melle MO</span></div>
-<div class="cdesc">The ultimate ladies brunch! Neon attire, Singo-Bingo, prizes and amazing food. Tables and bar seats available. Two ticket tiers to choose from.</div>
-<div class="tiers">
-<div class="tier"><div><div class="tn">Bingo + Brunch</div><div class="td">Bingo games + full brunch menu</div></div><div class="tp">$35</div></div>
-<div class="tier"><div><div class="tn">VIP Bottomless</div><div class="td">Bottomless bloodys + mimosas, bingo + brunch</div></div><div class="tp">$45</div></div>
-</div>
-<div class="cfoot"><span class="seats ok">Tables + bar seats open</span>
-<a href="https://www.thequarrystl.com/event-details/ladies-neon-singo-bingo-brunch" target="_blank" class="btn btn-go">Get Tickets</a>
-</div></div></div>
-</div></div>
-<script>
-function toggleNav(){var n=document.getElementById("mainNav");if(!n)return;n.classList.toggle("open");n.style.display=n.classList.contains("open")?"flex":"";}
-document.addEventListener("click",function(e){var n=document.getElementById("mainNav");var h=document.querySelector(".hamburger");if(n&&h&&!n.contains(e.target)&&!h.contains(e.target)){n.classList.remove("open");n.style.display="";}});
-</script>
-</body></html>
+    </div>
+
+    <!-- Events Grid -->
+    <section class="events-section">
+        <div class="events-grid" id="eventsGrid">
+            <!-- Events will be rendered here by JavaScript -->
+        </div>
+    </section>
+
+    <!-- Registration Modal -->
+    <div class="modal-overlay" id="registrationModal">
+        <div class="modal-card" id="modalCard">
+            <div class="modal-header">
+                <div class="modal-header-content">
+                    <h2 id="modalEventName"></h2>
+                    <p id="modalEventDate"></p>
+                </div>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+
+            <!-- STEP 1: Table Map Selection -->
+            <div class="modal-body" id="tableMapStep" style="display:none;">
+                <div style="text-align:center;margin-bottom:16px;">
+                    <div style="font-size:12px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);margin-bottom:4px;">Step 1 of 2</div>
+                    <p style="font-size:14px;color:#666;">Select your table or seating on the map below. Green = available, Red = booked.</p>
+                </div>
+                <div id="tableMapContainer" style="width:100%;overflow-x:auto;border:2px solid #e0d9d0;background:#f8f6f3;">
+                    <svg id="customerFloorMap" width="700" height="550" viewBox="0 0 700 550" style="display:block;margin:0 auto;">
+                        <!-- Floor plan rendered by JS -->
+                    </svg>
+                </div>
+                <div id="selectedTableInfo" style="display:none;margin-top:12px;padding:12px 16px;background:#faf7f2;border:2px solid var(--gold);text-align:center;">
+                    <span style="font-size:13px;font-weight:700;color:var(--brown-dark);" id="selectedTableText"></span>
+                </div>
+            </div>
+
+            <!-- STEP 2: Registration Form -->
+            <div class="modal-body" id="modalFormContent">
+                <div id="formStepLabel" style="display:none;text-align:center;margin-bottom:12px;">
+                    <div style="font-size:12px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);margin-bottom:4px;">Step 2 of 2</div>
+                    <p style="font-size:14px;color:#666;">Complete your registration details.</p>
+                </div>
+                <form id="registrationForm" onsubmit="handleFormSubmit(event)">
+                    <div class="form-group">
+                        <label for="fullName">Full Name *</label>
+                        <input type="text" id="fullName" name="fullName" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ticketTier">Ticket Tier *</label>
+                        <select id="ticketTier" name="ticketTier" required onchange="updateOrderSummary()"></select>
+                    </div>
+
+                    <div class="form-group" id="seatingGroup" style="display:none;">
+                        <label for="seatingOption">Seating Option *</label>
+                        <select id="seatingOption" name="seatingOption" required onchange="updateOrderSummary()"></select>
+                    </div>
+
+                    <div class="form-group" id="partySizeGroup" style="display:none;">
+                        <label for="partySize">Number of Tickets *</label>
+                        <input type="number" id="partySize" name="partySize" min="1" max="10" value="1" required onchange="updateOrderSummary()">
+                    </div>
+
+                    <input type="hidden" id="selectedTableId" name="selectedTableId" value="">
+
+                    <div id="orderSummary" style="display:none;background:#faf7f2;border:2px solid #e0d9d0;padding:16px;margin-top:8px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                            <span style="font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;">Order Summary</span>
+                        </div>
+                        <div id="summaryDetails" style="font-size:14px;color:#333;line-height:1.8;"></div>
+                        <div style="border-top:2px solid #e0d9d0;margin-top:12px;padding-top:12px;display:flex;justify-content:space-between;align-items:center;">
+                            <span style="font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">Total</span>
+                            <span id="summaryTotal" style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;color:#2C1A0E;"></span>
+                        </div>
+                    </div>
+
+                    <div class="seating-note">
+                        One person can register and pay for their entire table.
+                    </div>
+
+                    <div class="form-error" id="formError"></div>
+                </form>
+            </div>
+            <div class="modal-footer" id="modalFooter">
+                <button type="button" class="btn-primary" id="selectTableBtn" style="display:none;" onclick="confirmTableSelection()">Continue with Selected Table →</button>
+                <button type="button" class="btn-secondary" id="backToMapBtn" style="display:none;" onclick="goBackToMap()">← Back to Map</button>
+                <button type="submit" form="registrationForm" class="btn-primary" id="submitBtn">Proceed to Payment</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Coming Soon Section -->
+    <section class="coming-soon">
+        <div class="coming-soon-content">
+            <div class="coming-soon-eyebrow">What's Next</div>
+            <h2>More Events Coming Soon</h2>
+            <p class="coming-soon-text">We're constantly adding exciting new events to the calendar. From intimate wine tastings and live music performances to special brunches and themed celebrations, there's always something happening at The Quarry. Follow us on social media to stay in the loop about announcements and early-bird ticket releases.</p>
+            <div class="social-links">
+                <a href="https://www.instagram.com/thequarrystl" target="_blank" title="Instagram">
+                    <span style="font-size: 24px;">📷</span>
+                </a>
+                <a href="https://www.facebook.com/profile.php?id=61581374159536" target="_blank" title="Facebook">
+                    <span style="font-size: 24px;">f</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mailing List Section -->
+    <section class="mailing-list">
+        <div class="mailing-list-content">
+            <div class="mailing-list-eyebrow">Stay in the Loop</div>
+            <h2>Join Our Mailing List</h2>
+            <p class="mailing-list-text">Be first to hear about events, live music, wine tastings, and specials at The Quarry.</p>
+            <form name="mailing-list" method="POST" netlify class="mailing-form" onsubmit="handleMailingListSubmit(event)">
+                <input type="email" name="email" placeholder="Enter your email address" required>
+                <button type="submit">Subscribe</button>
+            </form>
+            <div class="mailing-success" id="mailingSuccess">✓ You're on the list! We'll be in touch.</div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <div class="footer-logo">The Quarry</div>
+                <div class="footer-tagline">Wine • Bites • Live Music • Golf</div>
+                <div class="footer-info">
+                    <div>3960 Highway Z</div>
+                    <div>New Melle, MO 63385</div>
+                    <a href="tel:6362248257">(636) 224-8257</a>
+                    <a href="mailto:management@thequarrystl.com">management@thequarrystl.com</a>
+                </div>
+            </div>
+
+            <div class="footer-section">
+                <h3>Menus</h3>
+                <a href="/quarry-menu">Food Menu</a>
+                <a href="/quarry-drinks">Drink Menu</a>
+                <a href="/quarry-catering">Catering Menu</a>
+                <a href="/quarry-brunch">Brunch Menu</a>
+            </div>
+
+            <div class="footer-section">
+                <h3>Entertainment</h3>
+                <a href="/quarry-events">Events Calendar</a>
+                <a href="/quarry-bands">Live Bands</a>
+                <a href="/quarry-wineclub">Rock &amp; Vine Wine Club</a>
+                <a href="/quarry-beergarden">Beer Garden</a>
+            </div>
+
+            <div class="footer-section">
+                <h3>Visit Us</h3>
+                <a href="/quarry-reservations">Book a Reservation</a>
+                <a href="/quarry-private-events">Private Events</a>
+                <a href="/weddings/">Weddings</a>
+                <a href="/quarry-contact">Contact Us</a>
+            </div>
+        </div>
+
+        <div class="footer-divider">
+            <div>
+                <div class="footer-copyright">&copy; 2026 The Quarry. All rights reserved.</div>
+                <div style="font-size: 12px; color: var(--brown-light); margin-top: 4px;">Wed–Thu 11AM–9PM • Fri–Sat 11AM–11PM • Sun 10AM–5PM • Mon–Tue Closed</div>
+            </div>
+            <div class="footer-socials">
+                <a href="https://www.instagram.com/thequarrystl" target="_blank" title="Instagram">📷</a>
+                <a href="https://www.facebook.com/profile.php?id=61581374159536" target="_blank" title="Facebook">f</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Hardcoded Events Data
+        const allEvents = [
+            {
+                id: 'evt-80s-apr3',
+                name: "80s Neon Music Bingo",
+                date: "Friday, April 3, 2026",
+                time: "7:00 PM",
+                location: "The Quarry, New Melle MO",
+                description: "A night of 80s hits, neon lights, music bingo and great drinks. This event is fully sold out.",
+                category: "Ticketed",
+                pricePerSeat: 3500,
+                totalCapacity: 44,
+                registeredCount: 44,
+                tiers: [
+                    { name: "General Admission", description: "Entry + music bingo all night", pricePerPerson: 3500, priceLabel: "$35" }
+                ],
+                seatingOptions: null,
+                imageGradient: "neon-80s",
+                imageText: "80s",
+                status: "sold-out"
+            },
+            {
+                id: 'evt-80s-apr4',
+                name: "80s Neon Music Bingo",
+                date: "Saturday, April 4, 2026",
+                time: "7:00 PM",
+                location: "The Quarry, New Melle MO",
+                description: "Last chance! Dress in your brightest neon and get ready to sing 80s hits and win prizes.",
+                category: "Ticketed",
+                pricePerSeat: 3500,
+                totalCapacity: 44,
+                registeredCount: 42,
+                tiers: [
+                    { name: "General Admission", description: "Entry + music bingo all night", pricePerPerson: 3500, priceLabel: "$35" }
+                ],
+                seatingOptions: null,
+                imageGradient: "neon-80s",
+                imageText: "80s",
+                status: "low"
+            },
+            {
+                id: 'evt-brunch-apr12',
+                name: "Ladies Neon Singo Bingo Brunch",
+                date: "Sunday, April 12, 2026",
+                time: "11:00 AM – 2:00 PM",
+                location: "The Quarry, New Melle MO",
+                description: "The ultimate ladies brunch! Neon attire, Singo-Bingo, prizes and amazing food. Single seats and full tables available.",
+                category: "Ticketed",
+                pricePerSeat: 3500,
+                totalCapacity: 31,
+                registeredCount: 0,
+                tiers: [
+                    { name: "Bingo + Brunch", description: "Bingo games + full brunch menu", pricePerPerson: 3500, priceLabel: "$35" },
+                    { name: "VIP Bottomless", description: "Bottomless bloodys + mimosas, bingo + brunch", pricePerPerson: 4500, priceLabel: "$45" }
+                ],
+                seatingOptions: [
+                    { name: "Single Seat", seats: 1, available: 8 },
+                    { name: "5-Top Table", seats: 5, available: 1 },
+                    { name: "8-Top Table", seats: 8, available: 1 },
+                    { name: "10-Top Table", seats: 10, available: 1 }
+                ],
+                imageGradient: "neon-brunch",
+                imageText: "Brunch",
+                status: "available",
+                floorPlan: null,  // uses defaultFloorPlan
+                bookedTableIds: ['t31', 't33', 'bar-3', 'bar-5']  // example booked tables
+            }
+        ];
+
+        let currentFilter = "all";
+        let currentEventForModal = null;
+        let selectedMapTable = null;
+
+        // Default floor plan for The Quarry
+        const defaultFloorPlan = {
+            tables: [
+                {id:'t35', name:'35', x:280, y:30, w:100, h:45, shape:'rect', seats:8, type:'table'},
+                {id:'t34', name:'34', x:140, y:80, w:45, h:90, shape:'rect', seats:6, type:'table'},
+                {id:'t33', name:'33', x:280, y:110, w:100, h:45, shape:'rect', seats:8, type:'table'},
+                {id:'t32', name:'32', x:280, y:195, w:100, h:45, shape:'rect', seats:8, type:'table'},
+                {id:'t31', name:'31', x:280, y:275, w:100, h:45, shape:'rect', seats:8, type:'table'},
+                {id:'t30', name:'30', x:145, y:345, w:50, h:50, shape:'circle', seats:5, type:'table'},
+                {id:'t27', name:'27', x:250, y:350, w:100, h:45, shape:'rect', seats:8, type:'table'},
+                {id:'t26', name:'26', x:375, y:355, w:40, h:40, shape:'rect', seats:2, type:'hightop'},
+                {id:'t25', name:'25', x:430, y:345, w:45, h:45, shape:'diamond', seats:2, type:'hightop'},
+                {id:'t36', name:'36', x:455, y:400, w:35, h:35, shape:'circle', seats:2, type:'hightop'},
+                {id:'t29', name:'29', x:130, y:420, w:55, h:85, shape:'rect', seats:6, type:'table'},
+                {id:'t23', name:'23', x:430, y:420, w:70, h:85, shape:'rect', seats:8, type:'table'},
+                {id:'t24', name:'24', x:520, y:420, w:60, h:85, shape:'rect', seats:6, type:'table'},
+                {id:'t28', name:'28', x:130, y:530, w:55, h:85, shape:'rect', seats:6, type:'table'},
+                {id:'t22', name:'22', x:430, y:530, w:70, h:85, shape:'rect', seats:8, type:'table'},
+                {id:'t21', name:'21', x:520, y:530, w:60, h:85, shape:'rect', seats:5, type:'table'},
+                {id:'couch1', name:'Couch 1', x:100, y:10, w:90, h:50, shape:'rect', seats:4, type:'couch'},
+                {id:'couch2', name:'Couch 2', x:460, y:20, w:60, h:65, shape:'rect', seats:4, type:'couch'},
+            ],
+            labels: [
+                {text:'FIREPLACE', x:280, y:18},
+                {text:'DOORS', x:60, y:290},
+                {text:'BAR SEATS', x:560, y:140}
+            ],
+            barSeats: [
+                {id:'bar-1', x:580, y:100},{id:'bar-2', x:580, y:125},
+                {id:'bar-3', x:580, y:150},{id:'bar-4', x:580, y:175},
+                {id:'bar-5', x:580, y:200},{id:'bar-6', x:580, y:225},
+                {id:'bar-7', x:580, y:250},{id:'bar-8', x:580, y:275}
+            ]
+        };
+
+        /**
+         * Render the customer-facing floor map in SVG
+         */
+        function renderCustomerFloorMap(floorPlan, bookedTableIds) {
+            const svg = document.getElementById('customerFloorMap');
+            if (!svg) return;
+            const booked = bookedTableIds || [];
+            selectedMapTable = null;
+
+            let html = '';
+            // Grid background
+            html += '<defs><pattern id="grid" width="25" height="25" patternUnits="userSpaceOnUse"><path d="M 25 0 L 0 0 0 25" fill="none" stroke="#e0dcd6" stroke-width="0.5"/></pattern></defs>';
+            html += '<rect width="700" height="550" fill="url(#grid)"/>';
+
+            // Labels
+            (floorPlan.labels || []).forEach(lbl => {
+                html += `<text x="${lbl.x}" y="${lbl.y}" class="map-label" text-anchor="middle">${lbl.text}</text>`;
+            });
+
+            // Tables
+            (floorPlan.tables || []).forEach(t => {
+                const isBooked = booked.includes(t.id);
+                const fill = isBooked ? '#c0392b' : '#4CAF50';
+                const cls = `map-table${isBooked ? ' booked' : ''}`;
+                const onclick = isBooked ? '' : `onclick="selectMapTable('${t.id}','${t.name}',${t.seats},'${t.type}')"`;
+
+                if (t.shape === 'circle') {
+                    const r = t.w / 2;
+                    html += `<circle cx="${t.x + r}" cy="${t.y + r}" r="${r}" fill="${fill}" stroke="#fff" stroke-width="2" class="${cls}" id="maptable-${t.id}" ${onclick}/>`;
+                    html += `<text x="${t.x + r}" y="${t.y + r + 4}" text-anchor="middle" class="map-table-label" font-size="11">${t.name}</text>`;
+                } else if (t.shape === 'diamond') {
+                    const cx = t.x + t.w/2, cy = t.y + t.h/2, hw = t.w/2, hh = t.h/2;
+                    html += `<polygon points="${cx},${cy-hh} ${cx+hw},${cy} ${cx},${cy+hh} ${cx-hw},${cy}" fill="${fill}" stroke="#fff" stroke-width="2" class="${cls}" id="maptable-${t.id}" ${onclick}/>`;
+                    html += `<text x="${cx}" y="${cy+4}" text-anchor="middle" class="map-table-label" font-size="11">${t.name}</text>`;
+                } else {
+                    // rect (tables and couches)
+                    const fillColor = t.type === 'couch' ? (isBooked ? '#c0392b' : '#8B7355') : fill;
+                    html += `<rect x="${t.x}" y="${t.y}" width="${t.w}" height="${t.h}" rx="4" fill="${fillColor}" stroke="#fff" stroke-width="2" class="${cls}" id="maptable-${t.id}" ${onclick}/>`;
+                    html += `<text x="${t.x + t.w/2}" y="${t.y + t.h/2 + 4}" text-anchor="middle" class="map-table-label" font-size="${t.name.length > 3 ? 9 : 12}">${t.name}</text>`;
+                }
+
+                // Seat indicator dots around tables
+                if (!isBooked && t.type !== 'couch') {
+                    const seatPositions = getTableSeatPositions(t);
+                    seatPositions.forEach((pos, i) => {
+                        html += `<circle cx="${pos.x}" cy="${pos.y}" r="5" fill="#e0d9d0" stroke="#fff" stroke-width="1"/>`;
+                        html += `<text x="${pos.x}" y="${pos.y + 3}" text-anchor="middle" font-size="6" fill="#666" style="pointer-events:none">${i+1}</text>`;
+                    });
+                }
+                // Person icons for booked tables
+                if (isBooked) {
+                    html += `<text x="${t.x + t.w/2}" y="${t.y - 8}" text-anchor="middle" font-size="14" style="pointer-events:none">👤</text>`;
+                }
+            });
+
+            // Bar seats
+            (floorPlan.barSeats || []).forEach(bs => {
+                const isBooked = booked.includes(bs.id);
+                const fill = isBooked ? '#c0392b' : '#4CAF50';
+                const cls = `map-seat${isBooked ? ' booked' : ''}`;
+                const onclick = isBooked ? '' : `onclick="selectMapTable('${bs.id}','Bar Seat',1,'bar')"`;
+                html += `<circle cx="${bs.x}" cy="${bs.y}" r="10" fill="${fill}" stroke="#fff" stroke-width="1.5" class="${cls}" id="maptable-${bs.id}" ${onclick}/>`;
+                html += `<text x="${bs.x}" y="${bs.y + 3}" text-anchor="middle" font-size="7" fill="white" style="pointer-events:none">${bs.id.split('-')[1]}</text>`;
+            });
+
+            // Legend
+            html += `<rect x="10" y="520" width="12" height="12" rx="2" fill="#4CAF50"/>`;
+            html += `<text x="28" y="530" font-size="10" fill="#666" font-family="Montserrat,sans-serif">Available</text>`;
+            html += `<rect x="95" y="520" width="12" height="12" rx="2" fill="#c0392b"/>`;
+            html += `<text x="113" y="530" font-size="10" fill="#666" font-family="Montserrat,sans-serif">Booked</text>`;
+            html += `<rect x="175" y="520" width="12" height="12" rx="2" fill="#8B7355"/>`;
+            html += `<text x="193" y="530" font-size="10" fill="#666" font-family="Montserrat,sans-serif">Couch/Lounge</text>`;
+
+            svg.innerHTML = html;
+        }
+
+        /**
+         * Calculate seat positions around a table
+         */
+        function getTableSeatPositions(t) {
+            const positions = [];
+            const seats = t.seats || 4;
+            if (t.shape === 'circle') {
+                const cx = t.x + t.w/2, cy = t.y + t.h/2, r = t.w/2 + 12;
+                for (let i = 0; i < seats; i++) {
+                    const angle = (2 * Math.PI * i / seats) - Math.PI/2;
+                    positions.push({x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle)});
+                }
+            } else {
+                // Rectangle: distribute seats evenly around perimeter
+                const cx = t.x + t.w/2, cy = t.y + t.h/2;
+                const top = Math.ceil(seats * t.w / (2*(t.w+t.h)));
+                const side = Math.ceil((seats - top*2) / 2);
+                let idx = 0;
+                // Top
+                for (let i = 0; i < Math.min(top, seats - idx); i++) {
+                    positions.push({x: t.x + t.w * (i+1)/(top+1), y: t.y - 10});
+                    idx++;
+                }
+                // Bottom
+                for (let i = 0; i < Math.min(top, seats - idx); i++) {
+                    positions.push({x: t.x + t.w * (i+1)/(top+1), y: t.y + t.h + 10});
+                    idx++;
+                }
+                // Left
+                for (let i = 0; i < Math.min(side, seats - idx); i++) {
+                    positions.push({x: t.x - 10, y: t.y + t.h * (i+1)/(side+1)});
+                    idx++;
+                }
+                // Right
+                for (let i = 0; i < Math.min(side + 2, seats - idx); i++) {
+                    positions.push({x: t.x + t.w + 10, y: t.y + t.h * (i+1)/(Math.max(side,1)+1)});
+                    idx++;
+                }
+            }
+            return positions.slice(0, t.seats);
+        }
+
+        /**
+         * Handle table selection on the map
+         */
+        function selectMapTable(tableId, tableName, seats, type) {
+            // Deselect previous
+            document.querySelectorAll('.map-table.selected, .map-seat.selected').forEach(el => el.classList.remove('selected'));
+
+            // Select new
+            const el = document.getElementById('maptable-' + tableId);
+            if (el) el.classList.add('selected');
+
+            selectedMapTable = {id: tableId, name: tableName, seats: seats, type: type};
+
+            const info = document.getElementById('selectedTableInfo');
+            const text = document.getElementById('selectedTableText');
+            info.style.display = 'block';
+            text.textContent = `✓ Selected: ${tableName} (${seats} ${seats === 1 ? 'seat' : 'seats'})`;
+
+            // Enable continue button
+            document.getElementById('selectTableBtn').style.display = 'inline-block';
+        }
+
+        /**
+         * Move from table map (step 1) to registration form (step 2)
+         */
+        function confirmTableSelection() {
+            if (!selectedMapTable) return;
+
+            document.getElementById('tableMapStep').style.display = 'none';
+            document.getElementById('modalFormContent').style.display = 'block';
+            document.getElementById('formStepLabel').style.display = 'block';
+            document.getElementById('selectTableBtn').style.display = 'none';
+            document.getElementById('backToMapBtn').style.display = 'inline-block';
+            document.getElementById('submitBtn').style.display = 'inline-block';
+
+            // Set the hidden field
+            document.getElementById('selectedTableId').value = selectedMapTable.id;
+
+            // Make modal narrower for form
+            document.getElementById('modalCard').classList.remove('wide');
+
+            // Auto-set seating based on table selection
+            if (currentEventForModal && currentEventForModal.seatingOptions) {
+                const seatingSelect = document.getElementById('seatingOption');
+                // Find matching option by seat count
+                for (let i = 0; i < seatingSelect.options.length; i++) {
+                    if (parseInt(seatingSelect.options[i].dataset.seats) === selectedMapTable.seats) {
+                        seatingSelect.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+
+            // Set party size for simple events
+            document.getElementById('partySize').value = selectedMapTable.seats;
+
+            updateOrderSummary();
+        }
+
+        /**
+         * Go back to table map from form
+         */
+        function goBackToMap() {
+            document.getElementById('tableMapStep').style.display = 'block';
+            document.getElementById('modalFormContent').style.display = 'none';
+            document.getElementById('selectTableBtn').style.display = selectedMapTable ? 'inline-block' : 'none';
+            document.getElementById('backToMapBtn').style.display = 'none';
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('modalCard').classList.add('wide');
+        }
+
+        /**
+         * Format date string for display
+         */
+        function formatDate(dateString) {
+            return dateString;
+        }
+
+        /**
+         * Get status badge info
+         */
+        function getStatusInfo(event) {
+            const remaining = event.totalCapacity - event.registeredCount;
+            if (event.status === "sold-out" || remaining <= 0) {
+                return { class: "sold-out", text: "Sold Out" };
+            } else if (remaining <= 5) {
+                return { class: "low", text: `Only ${remaining} spot${remaining !== 1 ? 's' : ''} left!` };
+            }
+            return { class: "available", text: `${remaining} of ${event.totalCapacity} seats remaining` };
+        }
+
+        /**
+         * Get availability text with color class
+         */
+        function getAvailabilityText(event) {
+            const remaining = event.totalCapacity - event.registeredCount;
+            if (event.status === "sold-out" || remaining <= 0) {
+                return { text: "Sold Out", class: "sold-out" };
+            } else if (remaining <= 5) {
+                return { text: `Only ${remaining} spot${remaining !== 1 ? 's' : ''} left!`, class: "low" };
+            }
+            return { text: `${remaining} of ${event.totalCapacity} seats remaining`, class: "available" };
+        }
+
+        /**
+         * Create event card HTML
+         */
+        function createEventCard(event) {
+            const statusInfo = getStatusInfo(event);
+            const availabilityInfo = getAvailabilityText(event);
+
+            return `
+                <div class="event-card" data-category="${event.category}">
+                    <div class="event-image ${event.imageGradient}">
+                        <div class="event-image-text">${event.imageText}</div>
+                        <div class="date-badge">${event.date.split(',')[0]}</div>
+                        <div class="status-badge ${statusInfo.class}">${statusInfo.text}</div>
+                        ${event.status === "sold-out" ? `
+                            <div class="sold-out-overlay">
+                                <div class="sold-out-banner">SOLD OUT</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="event-body">
+                        <h3 class="event-name">${event.name}</h3>
+                        <div class="event-meta">
+                            <span>📅 ${formatDate(event.date)}</span>
+                            <span>🕖 ${event.time}</span>
+                        </div>
+                        <p class="event-description">${event.description}</p>
+                        <div class="event-tiers">
+                            ${event.tiers.map(tier => `
+                                <div class="tier">
+                                    <div class="tier-name">${tier.name}</div>
+                                    <div class="tier-price">${tier.priceLabel}/person</div>
+                                </div>
+                            `).join('')}
+                            ${event.seatingOptions ? `
+                                <div style="margin-top:8px;font-size:12px;color:#888;font-style:italic;">
+                                    Seating: Single Seats, 5-Top, 8-Top & 10-Top Tables
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div class="event-footer">
+                            <span class="availability-text ${availabilityInfo.class}">${availabilityInfo.text}</span>
+                            ${event.status === "sold-out" ? `
+                                <button class="event-button" disabled>Sold Out</button>
+                            ` : `
+                                <button class="event-button" onclick="openModal(${allEvents.indexOf(event)})">Get Tickets</button>
+                            `}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        /**
+         * Render events to the grid
+         */
+        function renderEvents() {
+            const grid = document.getElementById("eventsGrid");
+            grid.innerHTML = allEvents.map(createEventCard).join("");
+            filterEvents(currentFilter);
+        }
+
+        /**
+         * Filter events by category
+         */
+        function filterEvents(category) {
+            currentFilter = category;
+            const cards = document.querySelectorAll(".event-card");
+            const pills = document.querySelectorAll(".filter-pill");
+
+            // Update active pill
+            pills.forEach(pill => {
+                pill.classList.remove("active");
+                if (pill.textContent.trim() === (category === 'all' ? 'All Events' : category)) {
+                    pill.classList.add("active");
+                }
+            });
+
+            // Filter cards
+            cards.forEach(card => {
+                if (category === "all" || card.getAttribute("data-category") === category) {
+                    card.classList.remove("hidden");
+                } else {
+                    card.classList.add("hidden");
+                }
+            });
+        }
+
+        /**
+         * Open registration modal
+         */
+        function openModal(eventIndex) {
+            currentEventForModal = allEvents[eventIndex];
+            const modal = document.getElementById("registrationModal");
+            const form = document.getElementById("registrationForm");
+
+            // Set modal header
+            document.getElementById("modalEventName").textContent = currentEventForModal.name;
+            document.getElementById("modalEventDate").textContent = currentEventForModal.date;
+
+            // Populate ticket tier dropdown
+            const tierSelect = document.getElementById("ticketTier");
+            tierSelect.innerHTML = currentEventForModal.tiers.map(tier =>
+                `<option value="${tier.name}" data-price="${tier.pricePerPerson}">${tier.name} — ${tier.priceLabel}/person</option>`
+            ).join("");
+
+            // Show seating options if event has them, otherwise show simple quantity
+            const seatingGroup = document.getElementById("seatingGroup");
+            const partySizeGroup = document.getElementById("partySizeGroup");
+            const seatingSelect = document.getElementById("seatingOption");
+            const partySizeInput = document.getElementById("partySize");
+
+            if (currentEventForModal.seatingOptions) {
+                // Event has specific seating options (tables, single seats)
+                seatingGroup.style.display = "block";
+                partySizeGroup.style.display = "none";
+                seatingSelect.required = true;
+                partySizeInput.required = false;
+
+                seatingSelect.innerHTML = currentEventForModal.seatingOptions.map(opt =>
+                    `<option value="${opt.name}" data-seats="${opt.seats}" data-available="${opt.available}">${opt.name} (${opt.seats} ${opt.seats === 1 ? 'person' : 'people'})${opt.available <= 2 ? ' — ' + opt.available + ' left!' : ''}</option>`
+                ).join("");
+            } else {
+                // Simple event — just pick quantity
+                seatingGroup.style.display = "none";
+                partySizeGroup.style.display = "block";
+                seatingSelect.required = false;
+                partySizeInput.required = true;
+                partySizeInput.value = 1;
+            }
+
+            // Reset form and show order summary
+            form.reset();
+            // Re-set the tier select after reset
+            tierSelect.selectedIndex = 0;
+            if (currentEventForModal.seatingOptions) {
+                seatingSelect.selectedIndex = 0;
+            } else {
+                partySizeInput.value = 1;
+            }
+
+            document.getElementById("formError").classList.remove("show");
+            document.getElementById("submitBtn").disabled = false;
+            document.getElementById("submitBtn").textContent = "Proceed to Payment";
+
+            // Restore modal body if it was replaced by success message
+            const modalBody = document.getElementById("modalFormContent");
+            if (!modalBody.querySelector("form")) {
+                location.reload();
+                return;
+            }
+            document.getElementById("modalFooter").style.display = "flex";
+
+            // Check if this event has a floor plan — show table map step first
+            const hasFloorPlan = currentEventForModal.floorPlan || currentEventForModal.seatingOptions;
+            const tableMapStep = document.getElementById("tableMapStep");
+            const formStepLabel = document.getElementById("formStepLabel");
+            const selectTableBtn = document.getElementById("selectTableBtn");
+            const backToMapBtn = document.getElementById("backToMapBtn");
+            const submitBtn = document.getElementById("submitBtn");
+            const modalCard = document.getElementById("modalCard");
+
+            if (hasFloorPlan) {
+                // Show table map (step 1)
+                tableMapStep.style.display = "block";
+                modalFormContent.style.display = "none";
+                formStepLabel.style.display = "block";
+                selectTableBtn.style.display = "none"; // shown after table is selected
+                backToMapBtn.style.display = "none";
+                submitBtn.style.display = "none";
+                modalCard.classList.add("wide");
+
+                // Render the floor plan
+                const plan = currentEventForModal.floorPlan || defaultFloorPlan;
+                const bookedIds = currentEventForModal.bookedTableIds || [];
+                renderCustomerFloorMap(plan, bookedIds);
+
+                // Reset selection
+                selectedMapTable = null;
+                document.getElementById("selectedTableInfo").style.display = "none";
+            } else {
+                // No floor plan — go straight to form
+                tableMapStep.style.display = "none";
+                modalFormContent.style.display = "block";
+                formStepLabel.style.display = "none";
+                selectTableBtn.style.display = "none";
+                backToMapBtn.style.display = "none";
+                submitBtn.style.display = "inline-block";
+                modalCard.classList.remove("wide");
+            }
+
+            updateOrderSummary();
+            modal.classList.add("active");
+        }
+
+        /**
+         * Update order summary based on selections
+         */
+        function updateOrderSummary() {
+            if (!currentEventForModal) return;
+
+            const summaryDiv = document.getElementById("orderSummary");
+            const detailsDiv = document.getElementById("summaryDetails");
+            const totalDiv = document.getElementById("summaryTotal");
+
+            const tierSelect = document.getElementById("ticketTier");
+            const selectedTier = tierSelect.options[tierSelect.selectedIndex];
+            const pricePerPerson = parseInt(selectedTier.dataset.price) || 0;
+            const tierName = selectedTier.value;
+
+            let numPeople = 1;
+            let seatingLabel = "";
+
+            if (currentEventForModal.seatingOptions) {
+                const seatingSelect = document.getElementById("seatingOption");
+                const selectedSeating = seatingSelect.options[seatingSelect.selectedIndex];
+                numPeople = parseInt(selectedSeating.dataset.seats) || 1;
+                seatingLabel = selectedSeating.value;
+            } else {
+                numPeople = parseInt(document.getElementById("partySize").value) || 1;
+                seatingLabel = numPeople === 1 ? "1 ticket" : numPeople + " tickets";
+            }
+
+            const totalCents = pricePerPerson * numPeople;
+            const totalDollars = (totalCents / 100).toFixed(2);
+
+            detailsDiv.innerHTML = `
+                <div style="display:flex;justify-content:space-between;">
+                    <span>${tierName}</span>
+                    <span>$${(pricePerPerson/100).toFixed(2)}/ea</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;">
+                    <span>${seatingLabel}${currentEventForModal.seatingOptions ? ' (' + numPeople + ' people)' : ''}</span>
+                    <span>× ${numPeople}</span>
+                </div>
+            `;
+            totalDiv.textContent = "$" + totalDollars;
+            summaryDiv.style.display = "block";
+        }
+
+        /**
+         * Close registration modal
+         */
+        function closeModal() {
+            const modal = document.getElementById("registrationModal");
+            modal.classList.remove("active");
+            currentEventForModal = null;
+        }
+
+        /**
+         * Handle registration form submission
+         */
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+
+            if (!currentEventForModal) return;
+
+            const form = document.getElementById("registrationForm");
+            const submitBtn = document.getElementById("submitBtn");
+            const errorDiv = document.getElementById("formError");
+
+            // Disable submit button
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Processing...";
+
+            try {
+                const formData = new FormData(form);
+
+                // Determine party size from seating option or direct input
+                let partySize = 1;
+                let seatType = 'general';
+                if (currentEventForModal.seatingOptions) {
+                    const seatingSelect = document.getElementById("seatingOption");
+                    const selectedSeating = seatingSelect.options[seatingSelect.selectedIndex];
+                    partySize = parseInt(selectedSeating.dataset.seats) || 1;
+                    seatType = seatingSelect.value.toLowerCase().replace(/\s+/g, '-');
+                } else {
+                    partySize = parseInt(formData.get("partySize")) || 1;
+                }
+
+                const payload = {
+                    eventId: currentEventForModal.id,
+                    name: formData.get("fullName"),
+                    email: formData.get("email"),
+                    phone: formData.get("phone"),
+                    partySize: partySize,
+                    seatType: seatType,
+                    tableId: selectedMapTable ? selectedMapTable.id : (formData.get("selectedTableId") || ''),
+                    ticketTier: formData.get("ticketTier"),
+                    successUrl: window.location.origin + '/quarry-events',
+                    cancelUrl: window.location.origin + '/quarry-events'
+                };
+
+                const response = await fetch("/.netlify/functions/event-register", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // For free events, show success message
+                if (data.free) {
+                    showModalSuccess();
+                    setTimeout(() => {
+                        closeModal();
+                        showSuccessBanner();
+                    }, 2000);
+                } else if (data.checkoutUrl) {
+                    // Redirect to checkout
+                    window.location.href = data.checkoutUrl;
+                } else {
+                    throw new Error("No checkout URL provided");
+                }
+            } catch (error) {
+                console.error("Form submission error:", error);
+                errorDiv.textContent = "An error occurred. Please try again.";
+                errorDiv.classList.add("show");
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Proceed to Payment";
+            }
+        }
+
+        /**
+         * Show success message in modal
+         */
+        function showModalSuccess() {
+            const modalBody = document.getElementById("modalFormContent");
+            const modalFooter = document.querySelector(".modal-footer");
+
+            modalBody.innerHTML = `
+                <div class="modal-success">
+                    <div class="modal-success-icon">✓</div>
+                    <h3>Registration Confirmed!</h3>
+                    <p>Check your email for event details and confirmation.</p>
+                </div>
+            `;
+
+            modalFooter.style.display = "none";
+        }
+
+        /**
+         * Show success banner
+         */
+        function showSuccessBanner() {
+            const banner = document.getElementById("successBanner");
+            banner.style.display = "block";
+
+            setTimeout(() => {
+                banner.style.animation = "slideDown 0.4s ease-out reverse";
+                setTimeout(() => {
+                    banner.style.display = "none";
+                    banner.style.animation = "slideDown 0.4s ease-out";
+                }, 400);
+            }, 8000);
+        }
+
+        /**
+         * Fetch seat availability for an event
+         */
+        async function fetchEventAvailability(eventId) {
+            try {
+                const response = await fetch(`/.netlify/functions/get-event?eventId=${eventId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    // Update event data with fetched information
+                    const eventIndex = allEvents.findIndex(e => e.id === eventId);
+                    if (eventIndex !== -1) {
+                        allEvents[eventIndex].registeredCount = data.registrationCount;
+                        // Re-render the event card
+                        renderEvents();
+                    }
+                }
+            } catch (error) {
+                console.log("Could not fetch availability for event", eventId, "- using hardcoded data");
+            }
+        }
+
+        /**
+         * Handle mobile navigation toggle
+         */
+        function toggleNav() {
+            const nav = document.getElementById("mainNav");
+            nav.classList.toggle("active");
+        }
+
+        /**
+         * Handle mailing list form submission
+         */
+        function handleMailingListSubmit(e) {
+            e.preventDefault();
+            const form = e.target;
+            const successMsg = document.getElementById("mailingSuccess");
+
+            // Show success message
+            form.style.display = "none";
+            successMsg.style.display = "block";
+
+            // Reset form after a delay
+            setTimeout(() => {
+                form.reset();
+                form.style.display = "flex";
+                successMsg.style.display = "none";
+            }, 4000);
+        }
+
+        /**
+         * Initialize on page load
+         */
+        document.addEventListener("DOMContentLoaded", function() {
+            // Check for registration success parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get("registered") === "1") {
+                showSuccessBanner();
+            }
+
+            // Handle mobile nav dropdowns
+            const navItems = document.querySelectorAll(".nav-item");
+            navItems.forEach(item => {
+                const link = item.querySelector(".nav-link");
+                if (link && link.textContent.includes("▾")) {
+                    link.addEventListener("click", function(e) {
+                        if (window.innerWidth <= 768) {
+                            e.preventDefault();
+                            item.classList.toggle("open");
+                        }
+                    });
+                }
+            });
+
+            // Close mobile menu when a link is clicked
+            const allLinks = document.querySelectorAll("nav a");
+            allLinks.forEach(link => {
+                link.addEventListener("click", function() {
+                    if (!this.textContent.includes("▾")) {
+                        const nav = document.getElementById("mainNav");
+                        nav.classList.remove("active");
+                    }
+                });
+            });
+
+            // Close modal when clicking outside of it
+            const modal = document.getElementById("registrationModal");
+            modal.addEventListener("click", function(e) {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+
+            // Render events
+            renderEvents();
+
+            // Fetch availability for each event
+            allEvents.forEach(event => {
+                if (event.id) {
+                    fetchEventAvailability(event.id);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
