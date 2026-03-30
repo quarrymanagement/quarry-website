@@ -4,590 +4,339 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Staff Admin | The Quarry</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
-:root {
-  --cream: #F5F0E8;
-  --brown-dark: #2C1A0E;
-  --brown-mid: #5C3D2E;
-  --brown-warm: #8B5E3C;
-  --brown-light: #C4956A;
-  --gold: #B8933A;
-  --gold-light: #D4AF6A;
-  --charcoal: #1A1A1A;
-  --white: #FFFFFF;
-  --border-light: rgba(188,149,106,0.25);
-  --border-mid: rgba(188,149,106,0.5);
-}
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:'Montserrat',sans-serif; background:var(--charcoal); color:var(--cream); overflow-x:hidden; }
-
-/* HEADER */
-header {
-  position:fixed; top:0; left:0; right:0; z-index:1000;
-  background:rgba(26,26,26,0.97);
-  border-bottom:1px solid var(--border-light);
-  backdrop-filter:blur(8px);
-}
-.header-inner {
-  max-width:1400px; margin:0 auto; padding:0 2rem;
-  display:flex; align-items:center; justify-content:space-between; height:80px;
-}
-.logo {
-  font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700;
-  letter-spacing:0.12em; color:#ffffff; text-transform:uppercase;
-  text-decoration:none; flex-shrink:0;
-}
-.logo span {
-  display:block; font-size:0.5rem; letter-spacing:0.3em;
-  color:rgba(255,255,255,0.6); margin-top:2px;
-  font-family:'Montserrat',sans-serif; font-weight:400;
-}
-
-nav { display:flex; align-items:center; }
-.nav-item { position:relative; }
-.nav-link {
-  font-family:'Montserrat',sans-serif; font-size:0.62rem; font-weight:500;
-  letter-spacing:0.14em; text-transform:uppercase;
-  color:var(--cream); text-decoration:none;
-  padding:0.6rem 0.75rem; display:block; transition:color 0.2s; white-space:nowrap;
-}
-.nav-link:hover { color:var(--gold-light); }
-.dropdown {
-  display:none; position:absolute; top:100%; left:0;
-  background:var(--brown-dark); border:1px solid var(--border-mid);
-  min-width:200px; z-index:200;
-}
-.nav-item:hover .dropdown { display:block; }
-.dropdown a {
-  display:block; padding:0.7rem 1.25rem;
-  font-size:0.65rem; letter-spacing:0.1em; text-transform:uppercase;
-  color:var(--cream); text-decoration:none;
-  border-bottom:1px solid var(--border-light);
-  font-family:'Montserrat',sans-serif; font-weight:400;
-  transition:background 0.2s, color 0.2s;
-}
-.dropdown a:last-child { border-bottom:none; }
-.dropdown a:hover { background:var(--brown-mid); color:var(--gold-light); }
-.dropdown .dimmed { color:rgba(196,149,106,0.75); }
-.cs-badge {
-  display:inline-block; font-size:0.48rem; letter-spacing:0.08em;
-  background:var(--gold); color:var(--brown-dark);
-  padding:1px 5px; margin-left:4px; vertical-align:middle; font-weight:700;
-}
-.hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:0.5rem; }
-.hamburger span { display:block; width:24px; height:1.5px; background:var(--cream); }
-
-/* HERO VIDEO */
-.hero-video {
-  position:absolute; inset:0; z-index:0;
-  overflow:hidden; pointer-events:none;
-}
-.hero-video iframe {
-  position:absolute;
-  top:50%; left:50%;
-  transform:translate(-50%,-50%);
-  width:56.25vh;
-  height:100vh;
-  min-width:100vw;
-  min-height:177.78vw;
-}
-/* HERO */
-.hero {
-  position:relative; height:100vh; min-height:650px;
-  display:flex; align-items:center; justify-content:center; overflow:hidden;
-}
-.hero-bg {
-  position:absolute; inset:0;
-  background:
-    linear-gradient(to bottom, rgba(15,10,5,0.15) 0%, rgba(15,10,5,0.2) 50%, rgba(15,10,5,0.65) 100%),
-    url('https://static.wixstatic.com/media/f1c1b8_c5a995404a4c4e20aa35de83c9c26bfa~mv2.jpg/v1/fill/w_1400,h_900,al_c,q_85/f1c1b8_c5a995404a4c4e20aa35de83c9c26bfa~mv2.jpg') center/cover no-repeat;
-}
-.hero-content { position:relative; z-index:2; text-align:center; padding:0 2rem; }
-.hero-eyebrow {
-  font-family:'Montserrat',sans-serif; font-size:0.62rem;
-  letter-spacing:0.45em; text-transform:uppercase; color:var(--gold-light); margin-bottom:1.25rem;
-}
-.hero-title {
-  font-family:'Playfair Display',serif;
-  font-size:clamp(4.5rem,10vw,9rem); font-weight:700;
-  line-height:0.88; color:var(--white);
-  letter-spacing:0.06em; text-transform:uppercase; margin-bottom:0.6rem;
-}
-.hero-sub {
-  font-family:'Cormorant Garamond',serif;
-  font-size:clamp(1rem,2.2vw,1.4rem); font-style:italic; font-weight:300;
-  color:var(--cream); letter-spacing:0.12em; opacity:0.85; margin-bottom:2.5rem;
-}
-.hero-divider { width:50px; height:1px; background:var(--gold); margin:0 auto 2.5rem; }
-.hero-cta {
-  display:inline-block; padding:0.9rem 2.8rem;
-  border:1px solid var(--gold); color:var(--gold-light);
-  font-family:'Montserrat',sans-serif; font-size:0.65rem; font-weight:600;
-  letter-spacing:0.28em; text-transform:uppercase; text-decoration:none;
-  transition:all 0.3s; position:relative; overflow:hidden; z-index:0;
-}
-.hero-cta::before {
-  content:''; position:absolute; inset:0; background:var(--gold);
-  transform:translateX(-100%); transition:transform 0.3s; z-index:-1;
-}
-.hero-cta:hover { color:var(--brown-dark); }
-.hero-cta:hover::before { transform:translateX(0); }
-.hero-scroll {
-  position:absolute; bottom:2rem; left:50%; transform:translateX(-50%);
-  display:flex; flex-direction:column; align-items:center; gap:0.4rem;
-  color:rgba(255,255,255,0.4); font-size:0.5rem; letter-spacing:0.3em; text-transform:uppercase;
-}
-.scroll-line { width:1px; height:36px; background:rgba(255,255,255,0.3); animation:pulse 2s infinite; }
-@keyframes pulse { 0%,100%{opacity:0.3} 50%{opacity:1} }
-
-/* 4 QUAD BOXES */
-.quad-grid { display:grid; grid-template-columns:repeat(4,1fr); border:2px solid rgba(255,255,255,0.35); }
-.quad-box {
-  position:relative; height:500px; overflow:hidden;
-  text-decoration:none; display:flex; flex-direction:column; justify-content:center;
-  border-bottom:2px solid rgba(255,255,255,0.35);
-  border-top:2px solid rgba(255,255,255,0.35);
-}
-.quad-box+.quad-box { border-left:2px solid rgba(255,255,255,0.35); }
-.quad-bg {
-  position:absolute; inset:0; background-size:cover; background-position:center;
-  transition:transform 0.7s ease; filter:brightness(0.85);
-}
-.quad-box:hover .quad-bg { transform:scale(1.06); filter:brightness(0.7); }
-.quad-overlay {
-  position:absolute; inset:0;
-  background:linear-gradient(to top, rgba(20,10,4,0.9) 0%, rgba(20,10,4,0.3) 50%, rgba(20,10,4,0.1) 100%);
-}
-.quad-content { position:relative; z-index:2; padding:2rem 1.75rem 2.25rem; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; height:100%; }
-.quad-label { display:none; }
-.quad-title {
-  font-family:'Montserrat',sans-serif; font-size:1.4rem; font-weight:700;
-  color:var(--white); line-height:1.1; margin-bottom:1.25rem; text-transform:uppercase;
-  letter-spacing:0.04em;
-}
-.quad-desc { display:none; }
-.quad-arrow {
-  display:inline-block;
-  font-family:'Montserrat',sans-serif; font-size:0.62rem; font-weight:600;
-  letter-spacing:0.22em; text-transform:uppercase; color:var(--white);
-  border:1px solid rgba(255,255,255,0.6); padding:0.55rem 1.5rem;
-  transition:all 0.3s;
-}
-.quad-box:hover .quad-arrow { background:var(--gold); border-color:var(--gold); color:var(--brown-dark); }
-
-/* QUICK LINKS */
-.quick-links-wrap { background:var(--charcoal); }
-.quick-links { display:flex; flex-direction:column; }
-.qlink {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:1.75rem 3rem; text-decoration:none;
-  border-top:1px solid rgba(255,255,255,0.15);
-  transition:background 0.2s;
-}
-.qlink:hover { background:rgba(255,255,255,0.04); }
-.qlink.disabled { pointer-events:none; opacity:0.5; }
-.qlink-title {
-  font-family:'Montserrat',sans-serif; font-size:1.3rem; font-weight:700;
-  letter-spacing:0.14em; text-transform:uppercase; color:#ffffff;
-}
-.qlink-badge {
-  display:inline-block; font-size:0.48rem; font-weight:700;
-  letter-spacing:0.08em; background:var(--gold); color:var(--brown-dark);
-  padding:3px 10px; font-family:'Montserrat',sans-serif; margin-left:1rem; vertical-align:middle;
-}
-.qlink-arrow {
-  font-size:1.8rem; color:#ffffff; transition:transform 0.2s; flex-shrink:0;
-}
-.qlink:hover .qlink-arrow { transform:translateX(6px); }
-
-/* FOOTER */
-footer { background:#0F0A07; padding:4.5rem 2rem 2rem; border-top:1px solid var(--border-light); }
-.footer-inner { max-width:1200px; margin:0 auto; }
-.footer-top {
-  display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:3rem;
-  margin-bottom:3.5rem; padding-bottom:3rem; border-bottom:1px solid var(--border-light);
-}
-.footer-logo {
-  font-family:'Playfair Display',serif; font-size:1.4rem;
-  letter-spacing:0.12em; color:#ffffff; text-transform:uppercase;
-}
-.footer-logo span {
-  display:block; font-size:0.48rem; letter-spacing:0.28em; color:rgba(255,255,255,0.55);
-  margin-top:2px; font-family:'Montserrat',sans-serif; font-weight:400;
-}
-.footer-tagline {
-  font-family:'Cormorant Garamond',serif; font-size:0.92rem; font-style:italic;
-  color:rgba(255,255,255,0.7); margin-top:0.75rem; line-height:1.65;
-}
-.footer-address {
-  font-family:'Montserrat',sans-serif; font-size:0.62rem;
-  color:rgba(255,255,255,0.65); line-height:2; margin-top:1.25rem; letter-spacing:0.04em;
-}
-.footer-address a { color:rgba(255,255,255,0.65); text-decoration:none; }
-.footer-address a:hover { color:#fff; }
-.social-row { display:flex; gap:0.6rem; margin-top:1.25rem; }
-.social-btn {
-  width:34px; height:34px; border:1px solid var(--border-mid);
-  display:flex; align-items:center; justify-content:center;
-  text-decoration:none; color:rgba(255,255,255,0.65); font-size:0.62rem;
-  font-weight:600; font-family:'Montserrat',sans-serif;
-  transition:border-color 0.2s, color 0.2s;
-}
-.social-btn:hover { border-color:var(--gold); color:var(--gold-light); }
-.footer-col-title {
-  font-family:'Montserrat',sans-serif; font-size:0.58rem; font-weight:600;
-  letter-spacing:0.28em; text-transform:uppercase; color:var(--gold); margin-bottom:1.1rem;
-}
-.footer-col ul { list-style:none; }
-.footer-col ul li { margin-bottom:0.45rem; }
-.footer-col ul li a {
-  font-family:'Montserrat',sans-serif; font-size:0.65rem;
-  color:rgba(255,255,255,0.65); text-decoration:none; letter-spacing:0.04em; transition:color 0.2s;
-}
-.footer-col ul li a:hover { color:#fff; }
-.footer-col .dim { font-family:'Montserrat',sans-serif; font-size:0.65rem; color:rgba(255,255,255,0.3); }
-.footer-bottom {
-  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;
-}
-.footer-legal {
-  font-family:'Montserrat',sans-serif; font-size:0.55rem;
-  color:rgba(255,255,255,0.3); letter-spacing:0.06em; line-height:1.9;
-}
-.footer-legal a { color:rgba(255,255,255,0.3); text-decoration:none; }
-.footer-legal a:hover { color:rgba(255,255,255,0.7); }
-
-/* RESPONSIVE */
-@media (max-width:1100px) {
-  nav { display:none; }
-  nav.open {
-    display:flex; flex-direction:column; position:absolute;
-    top:80px; left:0; right:0; background:#1a1a1a;
-    padding:0.5rem 0; border-top:1px solid var(--border-light);
-    max-height:calc(100vh - 80px); overflow-y:auto; z-index:999;
-  }
-  .hamburger { display:flex; }
-  .nav-item { width:100%; }
-  .nav-link { padding:0.85rem 1.5rem; font-size:0.7rem; border-bottom:1px solid rgba(255,255,255,0.06); }
-  .dropdown { position:static; display:none; border:none; background:rgba(0,0,0,0.3); }
-  .nav-item.open .dropdown { display:block; }
-  .dropdown a { padding:0.7rem 2.5rem; font-size:0.65rem; }
-  .quad-grid { grid-template-columns:1fr 1fr; }
-  .quad-box { height:380px; }
-  .quad-box+.quad-box { border-left:none; }
-  .qlink { padding:1.5rem 2rem; }
-  .qlink-title { font-size:1rem; }
-  .footer-top { grid-template-columns:1fr 1fr; gap:2rem; }
-}
-@media (max-width:640px) {
-  .header-inner { padding:0 1rem; height:70px; }
-  .logo { font-size:1.1rem; }
-  .hero-title { font-size:3.8rem; }
-  .hero-sub { font-size:0.9rem; }
-  .hero-cta { padding:0.75rem 2rem; font-size:0.6rem; }
-  .quad-grid { grid-template-columns:1fr; }
-  .quad-box { height:260px; }
-  .quad-box+.quad-box { border-left:none; border-top:1px solid rgba(255,255,255,0.15); }
-  .qlink { padding:1.25rem 1.5rem; }
-  .qlink-title { font-size:0.85rem; }
-  .qlink-arrow { font-size:1.3rem; }
-  .footer-top { grid-template-columns:1fr; gap:2rem; }
-  footer { padding:3rem 1.5rem 1.5rem; }
-  .footer-bottom { flex-direction:column; }
-  .footer-legal { text-align:center !important; }
-}
-
-
-</style>
-<style>
-:root{--black:#0D0D0D;--brown:#2C1A0E;--gold:#B8933A;--cream:#FAF7F2;}
-body{font-family:'Montserrat',sans-serif;background:#f0ede8;color:var(--brown);}
-.admin-login{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--brown);}
-.login-box{background:#fff;padding:3rem;max-width:400px;width:100%;text-align:center;}
-.login-box h2{font-family:'Cormorant Garamond',serif;font-size:2rem;margin-bottom:0.5rem;}
-.login-box p{font-size:0.78rem;color:#888;margin-bottom:1.5rem;}
-.login-box input{width:100%;padding:0.75rem;border:2px solid #e0d9d0;font-family:'Montserrat',sans-serif;font-size:0.85rem;margin-bottom:0.75rem;}
-.login-box button{width:100%;padding:0.9rem;background:var(--brown);color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:0.75rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;}
-.login-box button:hover{background:var(--gold);}
-.admin-wrap{display:none;}
-.admin-header{background:var(--brown);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;}
-.admin-header h1{font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:#fff;}
-.admin-header span{font-size:0.65rem;color:rgba(255,255,255,0.5);letter-spacing:0.1em;text-transform:uppercase;}
-.admin-body{max-width:1100px;margin:0 auto;padding:2rem 1.5rem;}
-.admin-tabs{display:flex;gap:0;margin-bottom:2rem;border-bottom:2px solid #e0d9d0;}
-.admin-tab{padding:0.75rem 1.5rem;font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.15s;color:#888;}
-.admin-tab.active{border-color:var(--gold);color:var(--brown);}
-.tab-content{display:none;}.tab-content.active{display:block;}
-.card{background:#fff;border:1px solid rgba(0,0,0,0.07);padding:1.5rem;margin-bottom:1rem;}
-.card h3{font-family:'Cormorant Garamond',serif;font-size:1.3rem;margin-bottom:1rem;}
-.fl{margin-bottom:0.75rem;}
-.fl label{display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.3rem;}
-.fl input,.fl select,.fl textarea{width:100%;padding:0.65rem 0.75rem;border:2px solid #e0d9d0;font-family:'Montserrat',sans-serif;font-size:0.82rem;}
-.fl input:focus,.fl select:focus,.fl textarea:focus{outline:none;border-color:var(--gold);}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;}
-.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.75rem;}
-.btn-primary{padding:0.8rem 1.5rem;background:var(--brown);color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:background 0.2s;}
-.btn-primary:hover{background:var(--gold);color:var(--black);}
-.btn-danger{padding:0.5rem 1rem;background:#c62828;color:#fff;border:none;font-size:0.65rem;font-weight:700;cursor:pointer;}
-.reg-table{width:100%;border-collapse:collapse;font-size:0.78rem;}
-.reg-table th{background:#f0ede8;padding:0.6rem 0.75rem;text-align:left;font-size:0.62rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#888;}
-.reg-table td{padding:0.7rem 0.75rem;border-bottom:1px solid #f0ede8;}
-.badge{display:inline-block;font-size:0.6rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:0.2rem 0.5rem;}
-.badge-base{background:#e8f5e9;color:#2e7d32;}
-.badge-premium{background:#fff3e0;color:#e65100;}
-.badge-table{background:#e3f2fd;color:#1565c0;}
-.badge-bar{background:#fce4ec;color:#880e4f;}
-.stat-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem;}
-@media(max-width:768px){.grid2{grid-template-columns:1fr;}.stat-cards{grid-template-columns:1fr 1fr;}}
-.stat{background:#fff;padding:1.25rem;border-left:4px solid var(--gold);}
-.stat .num{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:var(--gold);}
-.stat .lbl{font-size:0.65rem;color:#888;text-transform:uppercase;letter-spacing:0.08em;}
-.success-msg{display:none;background:#e8f5e9;border:1px solid #4caf50;color:#2e7d32;padding:0.75rem;font-size:0.78rem;margin-top:0.75rem;}
+:root{--black:#0D0D0D;--brown:#2C1A0E;--gold:#B8933A;--gold2:#D4AC55;--cream:#FAF7F2;--burg:#5C1A2E;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Montserrat',sans-serif;background:#0D0D0D;color:#fff;min-height:100vh;}
+.login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem;}
+.login-box{background:#1A0E08;border:1px solid rgba(184,147,58,0.3);padding:3rem;max-width:400px;width:100%;text-align:center;}
+.login-box .logo{font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--gold);margin-bottom:0.25rem;}
+.login-box p{font-size:0.75rem;color:rgba(255,255,255,0.4);margin-bottom:2rem;letter-spacing:0.1em;text-transform:uppercase;}
+.login-box input{width:100%;padding:0.8rem 1rem;background:rgba(255,255,255,0.07);border:1px solid rgba(184,147,58,0.3);color:#fff;font-family:'Montserrat',sans-serif;font-size:0.9rem;margin-bottom:1rem;}
+.login-box button{width:100%;padding:0.9rem;background:var(--gold);color:var(--black);border:none;font-family:'Montserrat',sans-serif;font-size:0.75rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;}
+.login-box .err{color:#fc8181;font-size:0.75rem;margin-top:0.5rem;display:none;}
+.admin-shell{display:none;min-height:100vh;}
+.admin-nav{background:#1A0E08;border-bottom:1px solid rgba(184,147,58,0.2);padding:0 2rem;height:56px;display:flex;align-items:center;justify-content:space-between;}
+.admin-nav .brand{font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--gold);}
+.admin-nav .brand small{display:block;font-size:0.5rem;color:rgba(255,255,255,0.3);letter-spacing:0.2em;text-transform:uppercase;font-family:'Montserrat',sans-serif;}
+.admin-nav-links{display:flex;gap:1.5rem;}
+.admin-nav-links a{color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.68rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:color 0.2s;}
+.admin-nav-links a:hover,.admin-nav-links a.active{color:var(--gold);}
+.admin-body{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 56px);}
+.admin-sidebar{background:#120A05;border-right:1px solid rgba(255,255,255,0.06);padding:1.5rem 0;}
+.sidebar-item{padding:0.75rem 1.5rem;font-size:0.7rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.4);cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:0.75rem;}
+.sidebar-item:hover,.sidebar-item.active{color:var(--gold);background:rgba(184,147,58,0.07);}
+.admin-main{padding:2rem;overflow-y:auto;}
+.admin-section{display:none;}
+.admin-section.active{display:block;}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:#fff;margin-bottom:0.25rem;}
+.section-sub{font-size:0.75rem;color:rgba(255,255,255,0.4);margin-bottom:2rem;}
+/* Stats row */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem;}
+.stat-card{background:#1A0E08;border:1px solid rgba(184,147,58,0.2);padding:1.25rem;}
+.stat-card .label{font-size:0.6rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:0.4rem;}
+.stat-card .value{font-family:'Cormorant Garamond',serif;font-size:2rem;color:var(--gold);line-height:1;}
+.stat-card .sub{font-size:0.65rem;color:rgba(255,255,255,0.3);margin-top:0.25rem;}
+/* Table */
+.admin-table{width:100%;border-collapse:collapse;font-size:0.78rem;}
+.admin-table th{text-align:left;padding:0.6rem 1rem;background:#1A0E08;color:rgba(255,255,255,0.4);font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,0.08);}
+.admin-table td{padding:0.8rem 1rem;border-bottom:1px solid rgba(255,255,255,0.05);color:rgba(255,255,255,0.8);vertical-align:top;}
+.admin-table tr:hover td{background:rgba(255,255,255,0.02);}
+/* Badges */
+.badge{display:inline-block;padding:0.2rem 0.6rem;font-size:0.6rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;}
+.badge-gold{background:rgba(184,147,58,0.15);color:var(--gold);}
+.badge-green{background:rgba(39,174,96,0.15);color:#2ecc71;}
+.badge-red{background:rgba(231,76,60,0.15);color:#e74c3c;}
+/* Add event form */
+.form-section{background:#1A0E08;border:1px solid rgba(184,147,58,0.15);padding:2rem;margin-bottom:2rem;}
+.form-section h3{font-size:0.72rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:1.25rem;padding-bottom:0.75rem;border-bottom:1px solid rgba(255,255,255,0.08);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1rem;}
+.admin-fl label{display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:0.35rem;}
+.admin-fl input,.admin-fl select,.admin-fl textarea{width:100%;padding:0.65rem 0.85rem;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#fff;font-family:'Montserrat',sans-serif;font-size:0.82rem;transition:border 0.2s;}
+.admin-fl input:focus,.admin-fl select:focus,.admin-fl textarea:focus{outline:none;border-color:var(--gold);}
+.admin-fl textarea{resize:vertical;min-height:80px;}
+.admin-fl select option{background:#1A0E08;}
+.btn-gold{padding:0.8rem 2rem;background:var(--gold);color:var(--black);border:none;font-family:'Montserrat',sans-serif;font-size:0.7rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;transition:background 0.2s;}
+.btn-gold:hover{background:var(--gold2);}
+.btn-ghost{padding:0.8rem 2rem;background:transparent;color:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.15);font-family:'Montserrat',sans-serif;font-size:0.7rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;margin-right:0.75rem;}
+.success-toast{background:#1A4731;border:1px solid #2ecc71;color:#2ecc71;padding:0.75rem 1rem;font-size:0.78rem;margin-bottom:1rem;display:none;}
+@media(max-width:768px){.admin-body{grid-template-columns:1fr;}.stats-row{grid-template-columns:1fr 1fr;}.form-row,.form-row-3{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
-<header>
-  <div class="header-inner">
-    <a href="index.html" class="logo">The Quarry<span>New Melle, Missouri</span></a>
-    <nav id="mainNav">
-      <div class="nav-item">
-        <a href="#" class="nav-link">Menu &#x25BE;</a>
-        <div class="dropdown">
-          <a href="quarry-menu.html">Food Menu</a>
-          <a href="quarry-drinks.html">Drink Menu</a>
-          <a href="quarry-catering.html">Catering Menu</a>
-          <a href="quarry-brunch.html">Brunch Menu</a>
-        </div>
-      </div>
-      <div class="nav-item">
-        <a href="quarry-golf.html" class="nav-link">Hole-In-One Golf</a>
-      </div>
-      <div class="nav-item">
-        <a href="#" class="nav-link">Entertainment &#x25BE;</a>
-        <div class="dropdown">
-          <a href="quarry-events.html">Events Calendar</a>
-          <a href="quarry-bands.html">Live Bands</a>
-          <a href="/quarry-wineclub">Rock &amp; Vine Wine Club</a>
-          <a href="quarry-beergarden.html">Beer Garden <span class="cs-badge">Coming 2026</span></a>
-        </div>
-      </div>
-      <div class="nav-item">
-        <a href="#" class="nav-link">Reservations &#x25BE;</a>
-        <div class="dropdown">
-          <a href="quarry-reservations.html">Book a Reservation</a>
-          <a href="weddings/index.html">Weddings</a>
-          <a href="quarry-private-events.html">Private Events</a>
-        </div>
-      </div>
-      <div class="nav-item">
-        <a href="quarry-giftcards.html" class="nav-link">Gift Cards</a>
-      </div>
-      <div class="nav-item">
-        <a href="#" class="nav-link">Connect &#x25BE;</a>
-        <div class="dropdown">
-          <a href="quarry-ourstory.html">Our Story</a>
-          <a href="quarry-press.html">Press & Media</a>
-          <a href="quarry-careers.html">Careers</a>
-          <a href="quarry-contact.html">Contact Us</a>
-        </div>
-      </div>
-    </nav>
-    <div class="hamburger" id="hamburger" onclick="toggleNav()"><span></span><span></span><span></span></div>
-  </div>
-</header>
-<div class="admin-login" id="loginScreen">
+
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen">
   <div class="login-box">
-    <div style="font-size:2rem;margin-bottom:0.5rem;">&#9965;</div>
-    <h2>Staff Admin</h2>
-    <p>The Quarry event management portal</p>
+    <div class="logo">The Quarry</div>
+    <p>Staff Admin Portal</p>
     <input type="password" id="adminPass" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')doLogin()"/>
-    <div id="loginErr" style="color:#c62828;font-size:0.75rem;margin-bottom:0.5rem;display:none;">Incorrect password</div>
     <button onclick="doLogin()">Sign In</button>
+    <div class="err" id="loginErr">Incorrect password. Please try again.</div>
   </div>
 </div>
 
-<div class="admin-wrap" id="adminWrap">
-  <div class="admin-header">
-    <h1>Event Admin</h1>
-    <span>The Quarry Staff Portal</span>
+<!-- ADMIN SHELL -->
+<div class="admin-shell" id="adminShell">
+  <div class="admin-nav">
+    <div class="brand">The Quarry<small>Staff Admin</small></div>
+    <div class="admin-nav-links">
+      <a onclick="showSection('dashboard')" class="active" id="nav-dashboard">Dashboard</a>
+      <a onclick="showSection('registrations')" id="nav-registrations">Registrations</a>
+      <a onclick="showSection('add-event')" id="nav-add-event">Add Event</a>
+      <a onclick="doLogout()">Sign Out</a>
+    </div>
   </div>
   <div class="admin-body">
-    <div class="admin-tabs">
-      <div class="admin-tab active" onclick="showTab('dashboard')">Dashboard</div>
-      <div class="admin-tab" onclick="showTab('registrations')">Registrations</div>
-      <div class="admin-tab" onclick="showTab('add-event')">Add Event</div>
+    <div class="admin-sidebar">
+      <div class="sidebar-item active" onclick="showSection('dashboard')">&#x1F4CA; Dashboard</div>
+      <div class="sidebar-item" onclick="showSection('registrations')">&#x1F4CB; Registrations</div>
+      <div class="sidebar-item" onclick="showSection('add-event')">&#x2795; Add Event</div>
+      <div class="sidebar-item" onclick="showSection('seats')">&#x1F4BA; Seat Map</div>
     </div>
+    <div class="admin-main">
 
-    <!-- DASHBOARD -->
-    <div class="tab-content active" id="tab-dashboard">
-      <div class="stat-cards">
-        <div class="stat"><div class="num" id="statTotal">—</div><div class="lbl">Total Registered</div></div>
-        <div class="stat"><div class="num" id="statTables">—</div><div class="lbl">Tables Reserved</div></div>
-        <div class="stat"><div class="num" id="statBar">—</div><div class="lbl">Bar Seats Taken</div></div>
-        <div class="stat"><div class="num" id="statRevenue">—</div><div class="lbl">Est. Revenue</div></div>
-      </div>
-      <div class="card">
-        <h3>Neon Singo Bingo Brunch — Apr 12, 2026</h3>
-        <div style="background:#f0ede8;padding:1rem;margin-bottom:1rem;">
-          <div style="font-size:0.78rem;color:#888;margin-bottom:0.5rem;">SEAT AVAILABILITY</div>
-          <div id="seatMap" style="display:flex;flex-wrap:wrap;gap:0.4rem;"></div>
+      <!-- DASHBOARD -->
+      <div class="admin-section active" id="section-dashboard">
+        <div class="section-title">Dashboard</div>
+        <div class="section-sub">Overview of current events and registrations</div>
+        <div class="stats-row" id="statsRow">
+          <div class="stat-card"><div class="label">Total Registered</div><div class="value" id="statTotal">—</div><div class="sub">all events</div></div>
+          <div class="stat-card"><div class="label">Seats Remaining</div><div class="value" id="statSeats">—</div><div class="sub">Ladies Bingo Brunch</div></div>
+          <div class="stat-card"><div class="label">Tables Taken</div><div class="value" id="statTables">—</div><div class="sub">of 10 total</div></div>
+          <div class="stat-card"><div class="label">Revenue</div><div class="value" id="statRevenue">—</div><div class="sub">estimated</div></div>
         </div>
-        <p style="font-size:0.75rem;color:#888;">&#9632; Reserved &nbsp; &#9633; Available &nbsp; Click "Registrations" tab to see all attendees</p>
+        <div class="form-section">
+          <h3>Active Events</h3>
+          <table class="admin-table">
+            <thead><tr><th>Event</th><th>Date</th><th>Registered</th><th>Capacity</th><th>Status</th></tr></thead>
+            <tbody id="eventsTableBody">
+              <tr><td colspan="5" style="color:rgba(255,255,255,0.3);text-align:center;padding:2rem;">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
 
-    <!-- REGISTRATIONS -->
-    <div class="tab-content" id="tab-registrations">
-      <div class="card">
-        <h3>Registrations</h3>
-        <div id="regTableWrap"><p style="font-size:0.8rem;color:#aaa;">Loading...</p></div>
+      <!-- REGISTRATIONS -->
+      <div class="admin-section" id="section-registrations">
+        <div class="section-title">Registrations</div>
+        <div class="section-sub">All registrations for Ladies Neon Singo Bingo Brunch</div>
+        <div class="success-toast" id="regToast"></div>
+        <div class="form-section">
+          <h3>Registration List</h3>
+          <table class="admin-table">
+            <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Seat</th><th>Ticket</th><th>Party</th><th>Amount</th><th>Date</th></tr></thead>
+            <tbody id="regTableBody">
+              <tr><td colspan="8" style="color:rgba(255,255,255,0.3);text-align:center;padding:2rem;">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
 
-    <!-- ADD EVENT -->
-    <div class="tab-content" id="tab-add-event">
-      <div class="card">
-        <h3>Add New Event</h3>
-        <div class="fl"><label>Event Title *</label><input type="text" id="evTitle" placeholder="e.g. Summer Wine Tasting"/></div>
-        <div class="fl"><label>Subtitle / Tagline</label><input type="text" id="evSubtitle" placeholder="e.g. An evening of local wines by the lake"/></div>
-        <div class="fl"><label>Description</label><textarea id="evDesc" rows="3" placeholder="Full event description..."></textarea></div>
-        <div class="grid3">
-          <div class="fl"><label>Date *</label><input type="date" id="evDate"/></div>
-          <div class="fl"><label>Start Time *</label><input type="time" id="evTimeStart"/></div>
-          <div class="fl"><label>End Time *</label><input type="time" id="evTimeEnd"/></div>
+      <!-- ADD EVENT -->
+      <div class="admin-section" id="section-add-event">
+        <div class="section-title">Add New Event</div>
+        <div class="section-sub">Create a new ticketed event with seating</div>
+        <div class="success-toast" id="addToast">&#10003; Event created successfully!</div>
+        <div class="form-section">
+          <h3>Event Details</h3>
+          <div class="form-row">
+            <div class="admin-fl"><label>Event Title *</label><input type="text" id="evTitle" placeholder="Ladies Bingo Brunch"/></div>
+            <div class="admin-fl"><label>Subtitle / Theme</label><input type="text" id="evSubtitle" placeholder="Neon 80s Singo-Bingo"/></div>
+          </div>
+          <div class="admin-fl" style="margin-bottom:1rem;"><label>Description</label><textarea id="evDesc" placeholder="Describe the event..."></textarea></div>
+          <div class="form-row-3">
+            <div class="admin-fl"><label>Event Date *</label><input type="date" id="evDate"/></div>
+            <div class="admin-fl"><label>Start Time *</label><input type="time" id="evStart"/></div>
+            <div class="admin-fl"><label>End Time *</label><input type="time" id="evEnd"/></div>
+          </div>
+          <div class="admin-fl" style="margin-bottom:1rem;"><label>Location</label><input type="text" id="evLocation" value="The Quarry, 3960 State Hwy Z, Wentzville, MO 63385"/></div>
         </div>
-        <div class="grid2">
-          <div class="fl"><label>Base Ticket Price ($) *</label><input type="number" id="evPriceBase" placeholder="35" min="0"/></div>
-          <div class="fl"><label>Premium Ticket Price ($)</label><input type="number" id="evPricePremium" placeholder="45" min="0"/></div>
+        <div class="form-section">
+          <h3>Pricing</h3>
+          <div class="form-row">
+            <div class="admin-fl"><label>Base Price ($) *</label><input type="number" id="evPriceBase" placeholder="35"/></div>
+            <div class="admin-fl"><label>Base Price Label</label><input type="text" id="evBaseLbl" placeholder="Bingo + Brunch"/></div>
+          </div>
+          <div class="form-row">
+            <div class="admin-fl"><label>Premium Price ($)</label><input type="number" id="evPricePrem" placeholder="45"/></div>
+            <div class="admin-fl"><label>Premium Label</label><input type="text" id="evPremLbl" placeholder="Bottomless Mimosas + Brunch + Bingo"/></div>
+          </div>
         </div>
-        <div class="grid3">
-          <div class="fl"><label>Number of Tables</label><input type="number" id="evTables" placeholder="10" min="0"/></div>
-          <div class="fl"><label>Seats Per Table</label><input type="number" id="evTableSize" placeholder="6" min="1"/></div>
-          <div class="fl"><label>Bar Seats</label><input type="number" id="evBarSeats" placeholder="12" min="0"/></div>
+        <div class="form-section">
+          <h3>Seating Layout</h3>
+          <div class="form-row-3">
+            <div class="admin-fl"><label>Number of Tables</label><input type="number" id="evTables" value="10"/></div>
+            <div class="admin-fl"><label>Seats Per Table</label><input type="number" id="evTableSize" value="6"/></div>
+            <div class="admin-fl"><label>Bar Seats</label><input type="number" id="evBarSeats" value="12"/></div>
+          </div>
         </div>
-        <div class="fl"><label>Style Theme</label>
-          <select id="evStyle"><option value="neon">Neon (dark/pink)</option><option value="wine">Wine (burgundy)</option><option value="default">Default (brown/gold)</option></select>
+        <div style="display:flex;align-items:center;gap:1rem;margin-top:1rem;">
+          <button class="btn-ghost" onclick="clearEventForm()">Clear</button>
+          <button class="btn-gold" onclick="createEvent()">Create Event &amp; Publish</button>
         </div>
-        <button class="btn-primary" onclick="saveEvent()">Save Event &amp; Create Payment Link</button>
-        <div class="success-msg" id="evSaveMsg">&#10003; Event saved! It will appear on the events page immediately.</div>
       </div>
+
+      <!-- SEAT MAP -->
+      <div class="admin-section" id="section-seats">
+        <div class="section-title">Seat Map</div>
+        <div class="section-sub">Current availability for Ladies Neon Singo Bingo Brunch</div>
+        <div id="adminSeatMap" style="background:#1A0E08;padding:2rem;border:1px solid rgba(184,147,58,0.15);">
+          <div style="text-align:center;padding:2rem;color:rgba(255,255,255,0.3);">Loading seat map...</div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
 
 <script>
-var ADMIN_PASS='quarry2026';
-var adminAuthed=false;
-var eventData=null;
+var ADMIN_PASS='quarry2026admin';
 
 function doLogin(){
   var p=document.getElementById('adminPass').value;
   if(p===ADMIN_PASS){
-    adminAuthed=true;
     document.getElementById('loginScreen').style.display='none';
-    document.getElementById('adminWrap').style.display='block';
-    loadDashboard();
-  } else {
+    document.getElementById('adminShell').style.display='block';
+    loadAdminData();
+  }else{
     document.getElementById('loginErr').style.display='block';
   }
 }
 
-function showTab(tab){
-  document.querySelectorAll('.admin-tab').forEach(function(t,i){t.classList.remove('active');});
-  document.querySelectorAll('.tab-content').forEach(function(t){t.classList.remove('active');});
-  event.target.classList.add('active');
-  document.getElementById('tab-'+tab).classList.add('active');
-  if(tab==='registrations')loadRegistrations();
+function doLogout(){document.getElementById('adminShell').style.display='none';document.getElementById('loginScreen').style.display='flex';document.getElementById('adminPass').value='';}
+
+function showSection(id){
+  document.querySelectorAll('.admin-section').forEach(function(s){s.classList.remove('active');});
+  document.querySelectorAll('.sidebar-item').forEach(function(s){s.classList.remove('active');});
+  document.querySelectorAll('.admin-nav-links a').forEach(function(a){a.classList.remove('active');});
+  document.getElementById('section-'+id).classList.add('active');
+  document.getElementById('nav-'+id)?.classList.add('active');
+  if(id==='registrations')loadRegistrations();
+  if(id==='seats')loadAdminSeatMap();
 }
 
-async function loadDashboard(){
+async function loadAdminData(){
   try{
-    const r=await fetch('/.netlify/functions/get-event?eventId=neon-bingo-apr12');
-    if(!r.ok)return;
-    eventData=await r.json();
-    document.getElementById('statTotal').textContent=eventData.registrationCount||0;
-    document.getElementById('statTables').textContent=(eventData.takenTables||[]).length;
-    document.getElementById('statBar').textContent=(eventData.takenBar||[]).length;
-    var regs=(eventData.registrations||[]);
-    var rev=regs.reduce(function(s,r){return s+(r.amount||0);},0);
-    document.getElementById('statRevenue').textContent='$'+rev;
-    renderSeatMap();
-  }catch(e){console.log('load err',e);}
-}
-
-function renderSeatMap(){
-  if(!eventData)return;
-  var map=document.getElementById('seatMap');
-  map.innerHTML='';
-  for(var i=1;i<=10;i++){
-    var taken=(eventData.takenTables||[]).includes('T'+i);
-    var d=document.createElement('div');
-    d.style='width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;border:2px solid '+(taken?'#c62828':'#4caf50')+';background:'+(taken?'#ffebee':'#e8f5e9')+';color:'+(taken?'#c62828':'#2e7d32');
-    d.textContent='T'+i;
-    map.appendChild(d);
-  }
-  var barLabel=document.createElement('div');
-  barLabel.style='width:100%;font-size:0.62rem;color:#888;margin-top:0.5rem;margin-bottom:0.25rem;text-transform:uppercase;letter-spacing:0.08em;';
-  barLabel.textContent='Bar Seats:';
-  map.appendChild(barLabel);
-  for(var j=1;j<=12;j++){
-    var btaken=(eventData.takenBar||[]).includes('B'+j);
-    var bd=document.createElement('div');
-    bd.style='width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:0.6rem;font-weight:700;border-radius:50%;border:2px solid '+(btaken?'#c62828':'#4caf50')+';background:'+(btaken?'#ffebee':'#e8f5e9')+';color:'+(btaken?'#c62828':'#2e7d32');
-    bd.textContent='B'+j;
-    map.appendChild(bd);
-  }
+    await fetch('/.netlify/functions/seed-events');
+    const evRes=await fetch('/.netlify/functions/get-event?eventId=neon-bingo-apr-2026');
+    if(!evRes.ok)return;
+    const ev=await evRes.json();
+    const taken=ev.takenTables?.length||0;
+    const barTaken=ev.takenBarSeats?.length||0;
+    const total=ev.totalCapacity||72;
+    const tableSpotsLeft=(10-taken)*6;
+    const barSpotsLeft=12-barTaken;
+    const seatsLeft=tableSpotsLeft+barSpotsLeft;
+    const regs=ev.registrationCount||0;
+    document.getElementById('statTotal').textContent=regs;
+    document.getElementById('statSeats').textContent=seatsLeft;
+    document.getElementById('statTables').textContent=taken+'/10';
+    document.getElementById('statRevenue').textContent='—';
+    document.getElementById('eventsTableBody').innerHTML='<tr>'
+      +'<td><strong style="color:#fff;">'+ev.title+'</strong></td>'
+      +'<td style="color:rgba(255,255,255,0.6);">'+ev.date+'</td>'
+      +'<td><span style="color:var(--gold);font-weight:700;">'+regs+'</span></td>'
+      +'<td style="color:rgba(255,255,255,0.6);">'+total+'</td>'
+      +'<td><span class="badge badge-green">Active</span></td>'
+      +'</tr>';
+  }catch(e){console.error(e);}
 }
 
 async function loadRegistrations(){
+  const tbody=document.getElementById('regTableBody');
+  tbody.innerHTML='<tr><td colspan="8" style="color:rgba(255,255,255,0.3);text-align:center;padding:2rem;">Loading...</td></tr>';
   try{
-    const r=await fetch('/.netlify/functions/get-event?eventId=neon-bingo-apr12');
-    if(!r.ok)return;
-    const d=await r.json();
-    var regs=d.registrations||[];
-    var wrap=document.getElementById('regTableWrap');
-    if(!regs.length){wrap.innerHTML='<p style="font-size:0.8rem;color:#aaa;">No registrations yet.</p>';return;}
-    var html='<table class="reg-table"><thead><tr><th>#</th><th>Name</th><th>Email</th><th>Phone</th><th>Seating</th><th>Ticket</th><th>Paid</th><th>Date</th></tr></thead><tbody>';
-    regs.forEach(function(r,i){
-      var seat=r.seatType==='table'?'<span class="badge badge-table">'+r.tableId+'</span>':'<span class="badge badge-bar">'+(r.seatIds||[]).join(', ')+'</span>';
-      var ticket='<span class="badge '+(r.ticketType==='premium'?'badge-premium':'badge-base')+'">'+( r.ticketType==='premium'?'Bottomless':'Base')+'</span>';
+    const res=await fetch('/.netlify/functions/get-event?eventId=neon-bingo-apr-2026');
+    if(!res.ok){tbody.innerHTML='<tr><td colspan="8" style="color:rgba(255,255,255,0.3);text-align:center;padding:2rem;">No registrations yet.</td></tr>';return;}
+    const ev=await res.json();
+    var regs=ev.registrations||[];
+    if(!regs.length){tbody.innerHTML='<tr><td colspan="8" style="color:rgba(255,255,255,0.3);text-align:center;padding:2rem;">No registrations yet. Be the first to register!</td></tr>';return;}
+    tbody.innerHTML=regs.map(function(r,i){
+      var seat=r.seatType==='table'?'Table '+r.tableId:'Bar: '+(r.seatIds||[]).join(', ');
+      var ticket=r.ticketType==='premium'?'<span class="badge badge-gold">VIP</span>':'<span class="badge" style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);">Base</span>';
+      var amt=r.amount?'$'+(r.amount/100).toFixed(2):'—';
       var date=r.registeredAt?new Date(r.registeredAt).toLocaleDateString():'—';
-      html+='<tr><td>'+(i+1)+'</td><td>'+r.firstName+' '+r.lastName+'</td><td>'+r.email+'</td><td>'+(r.phone||'—')+'</td><td>'+seat+'</td><td>'+ticket+'</td><td>$'+(r.amount||0)+'</td><td>'+date+'</td></tr>';
-    });
-    html+='</tbody></table>';
-    wrap.innerHTML=html;
-  }catch(e){document.getElementById('regTableWrap').innerHTML='<p style="color:#c62828;font-size:0.8rem;">Error loading registrations</p>';}
+      return '<tr><td style="color:rgba(255,255,255,0.4);">'+(i+1)+'</td>'
+        +'<td><strong style="color:#fff;">'+r.firstName+' '+r.lastName+'</strong></td>'
+        +'<td style="color:rgba(255,255,255,0.6);">'+r.email+'</td>'
+        +'<td style="color:rgba(255,255,255,0.6);">'+seat+'</td>'
+        +'<td>'+ticket+'</td>'
+        +'<td style="color:rgba(255,255,255,0.6);">'+r.partySize+'</td>'
+        +'<td style="color:var(--gold);">'+amt+'</td>'
+        +'<td style="color:rgba(255,255,255,0.4);font-size:0.72rem;">'+date+'</td>'
+        +'</tr>';
+    }).join('');
+  }catch(e){tbody.innerHTML='<tr><td colspan="8" style="color:#fc8181;text-align:center;padding:2rem;">Error loading registrations.</td></tr>';}
 }
 
-async function saveEvent(){
+async function loadAdminSeatMap(){
+  const container=document.getElementById('adminSeatMap');
+  try{
+    const res=await fetch('/.netlify/functions/get-event?eventId=neon-bingo-apr-2026');
+    const ev=await res.json();
+    const taken=ev.takenTables||[];
+    const takenBar=ev.takenBarSeats||[];
+    let html='<div style="font-size:0.62rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.3);text-align:center;margin-bottom:1.25rem;">Ladies Neon Singo Bingo Brunch — Seat Availability</div>';
+    html+='<div style="background:var(--brown);color:#fff;text-align:center;padding:0.5rem;font-size:0.65rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:1.5rem;">&#x1F3B6; Stage</div>';
+    html+='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;margin-bottom:1.5rem;">';
+    for(var i=1;i<=10;i++){var t='T'+i;var isTaken=taken.includes(t);html+='<div style="aspect-ratio:1;border-radius:50%;border:2px solid '+(isTaken?'#555':'var(--gold)')+';background:'+(isTaken?'rgba(255,255,255,0.05)':'rgba(184,147,58,0.1)')+';display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;"><span style="font-size:0.65rem;font-weight:700;color:'+(isTaken?'#555':'var(--gold)')+';">'+t+'</span><span style="font-size:0.5rem;color:'+(isTaken?'#555':'rgba(255,255,255,0.4)')+'">'+(isTaken?'TAKEN':'OPEN')+'</span></div>';}
+    html+='</div>';
+    html+='<div style="font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.3);text-align:center;margin-bottom:0.75rem;">Bar Seating</div>';
+    html+='<div style="display:flex;flex-wrap:wrap;gap:0.4rem;justify-content:center;">';
+    for(var j=1;j<=12;j++){var s='B'+j;var isTakenB=takenBar.includes(s);html+='<div style="width:36px;height:36px;border-radius:50%;border:2px solid '+(isTakenB?'#555':'var(--gold)')+';background:'+(isTakenB?'rgba(255,255,255,0.05)':'rgba(184,147,58,0.1)')+';display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;color:'+(isTakenB?'#555':'var(--gold)')+';">'+j+'</div>';}
+    html+='</div>';
+    html+='<div style="display:flex;gap:1.5rem;justify-content:center;margin-top:1.5rem;">'
+      +'<div style="display:flex;align-items:center;gap:0.4rem;font-size:0.65rem;color:rgba(255,255,255,0.4);"><div style="width:12px;height:12px;border-radius:50%;border:2px solid var(--gold);background:rgba(184,147,58,0.1);"></div>Available</div>'
+      +'<div style="display:flex;align-items:center;gap:0.4rem;font-size:0.65rem;color:rgba(255,255,255,0.4);"><div style="width:12px;height:12px;border-radius:50%;border:2px solid #555;background:rgba(255,255,255,0.05);"></div>Reserved</div>'
+      +'</div>';
+    container.innerHTML=html;
+  }catch(e){container.innerHTML='<div style="color:#fc8181;text-align:center;padding:2rem;">Error loading seat map.</div>';}
+}
+
+async function createEvent(){
   var title=document.getElementById('evTitle').value.trim();
   var date=document.getElementById('evDate').value;
+  var startTime=document.getElementById('evStart').value;
   var priceBase=parseFloat(document.getElementById('evPriceBase').value);
-  if(!title||!date||!priceBase){alert('Please fill in Title, Date, and Base Price.');return;}
-  var tables=parseInt(document.getElementById('evTables').value)||10;
-  var tableSize=parseInt(document.getElementById('evTableSize').value)||6;
-  var barSeats=parseInt(document.getElementById('evBarSeats').value)||12;
+  if(!title||!date||!startTime||!priceBase){alert('Please fill in required fields (Title, Date, Start Time, Base Price).');return;}
+  var endTime=document.getElementById('evEnd').value;
+  var fmt=function(t){if(!t)return '';var p=t.split(':');var h=parseInt(p[0]);var m=p[1];var ampm=h>=12?'PM':'AM';h=h%12||12;return h+':'+m+' '+ampm;};
+  var dtFmt=new Date(date).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
   var ev={
     id:'event-'+Date.now(),
     title:title,
-    subtitle:document.getElementById('evSubtitle').value,
-    description:document.getElementById('evDesc').value,
-    date:new Date(date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}),
-    timeStart:document.getElementById('evTimeStart').value,
-    timeEnd:document.getElementById('evTimeEnd').value,
+    subtitle:document.getElementById('evSubtitle').value||title,
+    date:dtFmt,dateISO:date,
+    startTime:fmt(startTime),endTime:fmt(endTime),
+    location:document.getElementById('evLocation').value||'The Quarry, 3960 State Hwy Z, Wentzville, MO 63385',
+    description:document.getElementById('evDesc').value||'',
     priceBase:priceBase,
-    pricePremium:parseFloat(document.getElementById('evPricePremium').value)||priceBase,
-    totalTables:tables,tableSize:tableSize,totalBarSeats:barSeats,
-    totalCapacity:tables*tableSize+barSeats,
-    style:document.getElementById('evStyle').value,
-    createdAt:new Date().toISOString()
+    pricePremium:parseFloat(document.getElementById('evPricePrem').value)||priceBase,
+    priceBaseLabel:document.getElementById('evBaseLbl').value||'General Admission',
+    pricePremiumLabel:document.getElementById('evPremLbl').value||'VIP Experience',
+    tableCount:parseInt(document.getElementById('evTables').value)||10,
+    tableSize:parseInt(document.getElementById('evTableSize').value)||6,
+    barSeatCount:parseInt(document.getElementById('evBarSeats').value)||12,
+    totalCapacity:((parseInt(document.getElementById('evTables').value)||10)*(parseInt(document.getElementById('evTableSize').value)||6))+(parseInt(document.getElementById('evBarSeats').value)||12),
+    status:'active',tags:['Event']
   };
   try{
-    const r=await fetch('/.netlify/functions/admin-events',{method:'POST',headers:{'Content-Type':'application/json','x-admin-password':ADMIN_PASS},body:JSON.stringify(ev)});
-    if(r.ok){document.getElementById('evSaveMsg').style.display='block';}
-    else{alert('Error saving event');}
-  }catch(e){alert('Network error');}
+    var res=await fetch('/.netlify/functions/seed-events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(ev)});
+    var toast=document.getElementById('addToast');
+    toast.style.display='block';
+    setTimeout(function(){toast.style.display='none';},4000);
+    clearEventForm();
+  }catch(e){alert('Error creating event: '+e.message);}
+}
+
+function clearEventForm(){
+  ['evTitle','evSubtitle','evDesc','evDate','evStart','evEnd','evPriceBase','evPricePrem','evBaseLbl','evPremLbl'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('evTables').value='10';
+  document.getElementById('evTableSize').value='6';
+  document.getElementById('evBarSeats').value='12';
 }
 </script>
 </body>
