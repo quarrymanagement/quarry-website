@@ -528,7 +528,7 @@ var EVENT_REGISTRATIONS={};
 function loadEvents(filter){
   var grid=document.getElementById("eventsGrid");
   var evs=filter&&filter!=="all"?EVENTS.filter(function(e){return e.category===filter;}):EVENTS;
-  if(!evs.length){grid.innerHTML="<div class=\"empty-state\"><h3>No Events Found</h3><p>Check back soon.</p></div>";return;}
+  if(!evs.length){grid.innerHTML='<div class="empty-state"><h3>No Events Found</h3><p>Check back soon.</p></div>';return;}
   var html="";
   for(var i=0;i<evs.length;i++){
     var ev=evs[i];
@@ -538,17 +538,15 @@ function loadEvents(filter){
     var sc=avail===0?"sold":avail<8?"low":"ok";
     var st=avail===0?"SOLD OUT":avail<8?avail+" seats left!":avail+" seats available";
     var price=ev.pricePerSeat===0?"Free":"$"+(ev.pricePerSeat/100).toFixed(2);
-    html+="<div class=\"event-card\" onclick=\"openModal('"+ev.id+"')\">";
-    html+="<div class=\"event-card-img\" style=\"background:"+ev.imageColor+"\"><div style=\"font-size:2.5rem;color:rgba(255,255,255,0.5);padding:1rem\">*</div>";
-    html+="<div class=\"event-date-badge\">"+ev.date.split(",")[0]+"</div>";
-    html+="<div class=\"event-category\">"+ev.category+"</div></div>";
-    html+="<div class=\"seats-bar\"><div class=\"seats-bar-fill"+(pct>80?" urgent":"")+"" style=\"width:"+pct+"%\"></div></div>";
-    html+="<div class=\"event-card-body\"><div class=\"event-title\">"+ev.name+"</div>";
-    html+="<div class=\"event-meta\"><span>"+ev.date+"</span><span>"+ev.time+"</span></div>";
-    html+="<div class=\"event-desc\">"+ev.description+"</div>";
-    html+="<div class=\"event-footer\"><div><div class=\"event-price\">"+price+(ev.pricePerSeat>0?" <span>per seat</span>":"")+"</div>";
-    html+="<div class=\"event-seats-left "+sc+"\">"+st+"</div></div>";
-    html+="<button class=\"btn-register\""+(avail===0?" disabled":"")+">"+(avail===0?"Sold Out":"Register")+"</button></div></div></div>";
+    var dis=avail===0?' disabled=""':'';
+    var btn=avail===0?"Sold Out":"Register";
+    html+='<div class="event-card" onclick="openModal(''+ev.id+'')"><div class="event-card-img" style="background:'+ev.imageColor+'"><div style="font-size:2.5rem;color:rgba(255,255,255,0.4);padding:1rem">'+ev.name.charAt(0)+'</div><div class="event-date-badge">'+ev.date.split(",")[0]+'</div><div class="event-category">'+ev.category+'</div></div>';
+    html+='<div class="seats-bar"><div class="seats-bar-fill'+(pct>80?" urgent":"")+('" style="width:')+pct+'%"></div></div>';
+    html+='<div class="event-card-body"><div class="event-title">'+ev.name+'</div>';
+    html+='<div class="event-meta"><span>'+ev.date+'</span><span>'+ev.time+'</span></div>';
+    html+='<div class="event-desc">'+ev.description+'</div>';
+    html+='<div class="event-footer"><div><div class="event-price">'+price+(ev.pricePerSeat>0?' <span>per seat</span>':"")+'</div><div class="event-seats-left '+sc+'">'+st+'</div></div>';
+    html+='<button class="btn-register"'+dis+'>'+btn+'</button></div></div></div>';
   }
   grid.innerHTML=html;
   evs.forEach(function(ev){fetchAvail(ev.id);});
