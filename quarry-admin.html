@@ -878,15 +878,72 @@
 
                 <!-- INVOICES SECTION -->
                 <div id="invoicesSection" class="section">
+                    <!-- Invoice Stats -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                        <div style="background: white; border-radius: 8px; padding: 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
+                            <div id="statTotal" style="font-size: 2rem; font-weight: 700; color: var(--brown-dark);">—</div>
+                            <div style="font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.25rem;">Total Sent</div>
+                        </div>
+                        <div style="background: white; border-radius: 8px; padding: 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
+                            <div id="statPaid" style="font-size: 2rem; font-weight: 700; color: var(--success);">—</div>
+                            <div style="font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.25rem;">Paid</div>
+                        </div>
+                        <div style="background: white; border-radius: 8px; padding: 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
+                            <div id="statOpen" style="font-size: 2rem; font-weight: 700; color: var(--warning, #f0ad4e);">—</div>
+                            <div style="font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.25rem;">Open / Unpaid</div>
+                        </div>
+                        <div style="background: white; border-radius: 8px; padding: 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
+                            <div id="statRevenue" style="font-size: 2rem; font-weight: 700; color: var(--gold);">—</div>
+                            <div style="font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.25rem;">Revenue Collected</div>
+                        </div>
+                    </div>
+
                     <div class="table-container">
                         <div class="table-header">
                             <h2>Invoices</h2>
-                            <button class="btn btn-primary btn-small" id="createInvoiceBtn2">+ Create Invoice</button>
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <button class="btn btn-secondary btn-small" id="refreshInvoicesBtn" onclick="loadInvoiceDashboard()" style="background: transparent; border: 1px solid var(--gold-light); color: var(--gold-light);">Refresh</button>
+                                <button class="btn btn-primary btn-small" id="createInvoiceBtn2">+ Create Invoice</button>
+                            </div>
                         </div>
-                        <div style="padding: 2rem; text-align: center; color: var(--charcoal);">
-                            <p>For full invoice history and management, visit the <strong>Stripe Dashboard</strong>:</p>
-                            <a href="https://dashboard.stripe.com" target="_blank" class="btn btn-secondary" style="display: inline-block; margin-top: 1rem;">Open Stripe Dashboard</a>
+
+                        <!-- Filter tabs -->
+                        <div style="display: flex; gap: 0; border-bottom: 2px solid var(--gray-medium); background: var(--gray-light);">
+                            <button class="inv-filter-btn active" onclick="filterInvoices('all', this)" style="padding: 0.75rem 1.25rem; border: none; background: none; font-family: 'Montserrat', sans-serif; font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; color: var(--brown-dark); border-bottom: 2px solid var(--gold); margin-bottom: -2px;">All</button>
+                            <button class="inv-filter-btn" onclick="filterInvoices('open', this)" style="padding: 0.75rem 1.25rem; border: none; background: none; font-family: 'Montserrat', sans-serif; font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; color: #888; border-bottom: 2px solid transparent; margin-bottom: -2px;">Open</button>
+                            <button class="inv-filter-btn" onclick="filterInvoices('paid', this)" style="padding: 0.75rem 1.25rem; border: none; background: none; font-family: 'Montserrat', sans-serif; font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; color: #888; border-bottom: 2px solid transparent; margin-bottom: -2px;">Paid</button>
+                            <button class="inv-filter-btn" onclick="filterInvoices('void', this)" style="padding: 0.75rem 1.25rem; border: none; background: none; font-family: 'Montserrat', sans-serif; font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; color: #888; border-bottom: 2px solid transparent; margin-bottom: -2px;">Voided</button>
+                            <button class="inv-filter-btn" onclick="filterInvoices('uncollectible', this)" style="padding: 0.75rem 1.25rem; border: none; background: none; font-family: 'Montserrat', sans-serif; font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; color: #888; border-bottom: 2px solid transparent; margin-bottom: -2px;">Overdue</button>
                         </div>
+
+                        <!-- Invoice table -->
+                        <div style="overflow-x: auto;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Invoice #</th>
+                                        <th>Customer</th>
+                                        <th>Description</th>
+                                        <th>Amount</th>
+                                        <th>Date Sent</th>
+                                        <th>Due Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="invoiceTableBody">
+                                    <tr>
+                                        <td colspan="8" style="text-align: center; padding: 3rem; color: #aaa;">
+                                            Loading invoices...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div style="text-align: center; padding: 1rem;">
+                        <a href="https://dashboard.stripe.com/invoices" target="_blank" style="font-size: 0.8rem; color: var(--gold); text-decoration: none;">View full history on Stripe Dashboard &rarr;</a>
                     </div>
                 </div>
             </div>
@@ -1276,6 +1333,11 @@
             if (section === 'tableMap' && !state.floorPlan) {
                 state.floorPlan = JSON.parse(JSON.stringify(defaultFloorPlan));
                 renderFloorPlan();
+            }
+
+            // Load invoice dashboard when switching to invoices tab
+            if (section === 'invoices') {
+                loadInvoiceDashboard();
             }
         }
 
@@ -1916,9 +1978,114 @@
         }
 
         // INVOICES
+        var allInvoices = [];
+
         function openAddInvoiceModal() {
             document.getElementById('invoiceForm').reset();
             openModal('invoiceModal');
+        }
+
+        async function loadInvoiceDashboard() {
+            const tbody = document.getElementById('invoiceTableBody');
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:3rem;color:#aaa;">Loading invoices...</td></tr>';
+
+            try {
+                const resp = await fetch('/.netlify/functions/list-invoices');
+                if (!resp.ok) throw new Error('Failed to load invoices');
+                const data = await resp.json();
+                allInvoices = data.invoices || [];
+                updateInvoiceStats();
+                renderInvoiceTable('all');
+            } catch (err) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:3rem;color:var(--danger);">Failed to load invoices: ' + err.message + '</td></tr>';
+            }
+        }
+
+        function updateInvoiceStats() {
+            const total = allInvoices.length;
+            const paid = allInvoices.filter(i => i.status === 'paid').length;
+            const open = allInvoices.filter(i => i.status === 'open').length;
+            const revenue = allInvoices.filter(i => i.status === 'paid').reduce((sum, i) => sum + i.amountPaid, 0);
+
+            document.getElementById('statTotal').textContent = total;
+            document.getElementById('statPaid').textContent = paid;
+            document.getElementById('statOpen').textContent = open;
+            document.getElementById('statRevenue').textContent = '$' + (revenue / 100).toLocaleString('en-US', {minimumFractionDigits: 2});
+        }
+
+        function filterInvoices(filter, btn) {
+            document.querySelectorAll('.inv-filter-btn').forEach(b => {
+                b.style.color = '#888';
+                b.style.borderBottomColor = 'transparent';
+            });
+            if (btn) {
+                btn.style.color = 'var(--brown-dark)';
+                btn.style.borderBottomColor = 'var(--gold)';
+            }
+            renderInvoiceTable(filter);
+        }
+
+        function renderInvoiceTable(filter) {
+            const tbody = document.getElementById('invoiceTableBody');
+            let invoices = allInvoices;
+
+            if (filter !== 'all') {
+                invoices = allInvoices.filter(i => i.status === filter);
+            }
+
+            if (invoices.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:3rem;color:#aaa;">No invoices found.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = invoices.map(inv => {
+                const amount = (inv.amount / 100).toFixed(2);
+                const created = new Date(inv.created * 1000);
+                const createdStr = (created.getMonth()+1) + '/' + created.getDate() + '/' + created.getFullYear();
+                let dueStr = '—';
+                if (inv.dueDate) {
+                    const due = new Date(inv.dueDate * 1000);
+                    dueStr = (due.getMonth()+1) + '/' + due.getDate() + '/' + due.getFullYear();
+                }
+
+                let statusColor, statusBg, statusLabel;
+                switch(inv.status) {
+                    case 'paid':
+                        statusColor = 'var(--success)'; statusBg = 'rgba(76,175,80,0.15)'; statusLabel = 'Paid'; break;
+                    case 'open':
+                        statusColor = '#e67e22'; statusBg = 'rgba(230,126,34,0.15)'; statusLabel = 'Open'; break;
+                    case 'draft':
+                        statusColor = '#888'; statusBg = 'rgba(136,136,136,0.15)'; statusLabel = 'Draft'; break;
+                    case 'void':
+                        statusColor = 'var(--danger)'; statusBg = 'rgba(255,107,107,0.15)'; statusLabel = 'Voided'; break;
+                    case 'uncollectible':
+                        statusColor = 'var(--danger)'; statusBg = 'rgba(255,107,107,0.15)'; statusLabel = 'Overdue'; break;
+                    default:
+                        statusColor = '#888'; statusBg = 'rgba(136,136,136,0.15)'; statusLabel = inv.status; break;
+                }
+
+                const invNumber = inv.number || inv.id.substring(0, 12) + '...';
+                const desc = inv.description ? (inv.description.length > 40 ? inv.description.substring(0, 40) + '...' : inv.description) : '—';
+
+                let actions = '';
+                if (inv.hostedUrl) {
+                    actions += '<a href="' + inv.hostedUrl + '" target="_blank" style="font-size:0.72rem;color:var(--gold);text-decoration:none;white-space:nowrap;">View</a>';
+                }
+                if (inv.pdfUrl) {
+                    actions += ' <a href="' + inv.pdfUrl + '" target="_blank" style="font-size:0.72rem;color:var(--brown-mid);text-decoration:none;margin-left:0.5rem;white-space:nowrap;">PDF</a>';
+                }
+
+                return '<tr>' +
+                    '<td style="font-size:0.8rem;font-weight:600;color:var(--brown-dark);">' + invNumber + '</td>' +
+                    '<td><div style="font-size:0.85rem;font-weight:600;">' + (inv.customerName || '—') + '</div><div style="font-size:0.72rem;color:#888;">' + (inv.customerEmail || '') + '</div></td>' +
+                    '<td style="font-size:0.8rem;color:#666;">' + desc + '</td>' +
+                    '<td style="font-size:0.9rem;font-weight:700;">$' + amount + '</td>' +
+                    '<td style="font-size:0.8rem;">' + createdStr + '</td>' +
+                    '<td style="font-size:0.8rem;">' + dueStr + '</td>' +
+                    '<td><span style="display:inline-block;padding:0.3rem 0.7rem;border-radius:20px;font-size:0.72rem;font-weight:600;background:' + statusBg + ';color:' + statusColor + ';">' + statusLabel + '</span></td>' +
+                    '<td>' + (actions || '—') + '</td>' +
+                    '</tr>';
+            }).join('');
         }
 
         async function handleInvoiceSubmit() {
