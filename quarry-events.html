@@ -307,88 +307,44 @@ footer { background:#0F0A07; padding:4.5rem 2rem 2rem; border-top:1px solid var(
 body{font-family:'Montserrat',sans-serif;background:var(--cream);color:var(--brown);}
 .page-hero{background:linear-gradient(135deg,rgba(44,26,14,0.92),rgba(13,13,13,0.97));padding:6rem 2rem 4rem;text-align:center;}
 .page-hero .eyebrow{font-size:0.62rem;font-weight:700;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:0.75rem;}
-.page-hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,6vw,4.5rem);color:#fff;font-weight:600;line-height:1.05;}
+.page-hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,6vw,4.5rem);color:#fff;font-weight:600;}
 .page-hero p{font-size:0.85rem;color:rgba(255,255,255,0.65);margin-top:0.75rem;max-width:480px;margin-left:auto;margin-right:auto;line-height:1.8;}
 .filter-strip{background:var(--brown);display:flex;gap:0.5rem;padding:1rem 2rem;flex-wrap:wrap;justify-content:center;}
-.filter-btn{padding:0.45rem 1.2rem;border:1px solid rgba(255,255,255,0.2);background:transparent;color:rgba(255,255,255,0.65);font-family:'Montserrat',sans-serif;font-size:0.65rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
-.filter-btn:hover,.filter-btn.active{background:var(--gold);border-color:var(--gold);color:var(--black);}
-.events-wrap{max-width:1100px;margin:0 auto;padding:3rem 1.5rem 5rem;}
-.events-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.5rem;}
-.event-card{background:#fff;border:1px solid rgba(0,0,0,0.07);overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;cursor:pointer;}
-.event-card:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,0.12);}
-.event-card-img{height:200px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;}
-.event-card-img .event-date-badge{position:absolute;top:1rem;left:1rem;background:var(--gold);color:var(--black);padding:0.4rem 0.75rem;font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;}
-.event-card-img .event-category{position:absolute;top:1rem;right:1rem;background:rgba(13,13,13,0.8);color:#fff;padding:0.3rem 0.65rem;font-size:0.6rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;}
-.seats-bar{height:4px;background:#e0d9d0;}
-.seats-bar-fill{height:100%;background:var(--gold);transition:width 0.5s;}
-.seats-bar-fill.urgent{background:#c0392b;}
-.event-card-body{padding:1.5rem;}
-.event-title{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;margin-bottom:0.4rem;line-height:1.2;}
-.event-meta{display:flex;gap:1rem;font-size:0.68rem;color:#888;margin-bottom:0.75rem;flex-wrap:wrap;}
-.event-desc{font-size:0.78rem;color:#666;line-height:1.7;margin-bottom:1rem;}
-.event-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;}
-.event-price{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:700;color:var(--brown);}
-.event-price span{font-size:0.7rem;font-weight:400;color:#aaa;font-family:'Montserrat',sans-serif;}
-.event-seats-left{font-size:0.65rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;}
-.event-seats-left.ok{color:#27ae60;}.event-seats-left.low{color:#e67e22;}.event-seats-left.sold{color:#c0392b;}
-.btn-register{background:var(--brown);color:#fff;border:none;padding:0.7rem 1.5rem;font-family:'Montserrat',sans-serif;font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:background 0.2s;}
-.btn-register:hover{background:var(--gold);color:var(--black);}
-.btn-register:disabled{background:#ccc;cursor:not-allowed;}
-.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto;}
-.modal-ov.open{display:flex;}
-.modal{background:#fff;max-width:780px;width:100%;margin:auto;position:relative;animation:slideUp 0.25s ease;}
-@keyframes slideUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
-.modal-close{position:absolute;top:1rem;right:1.25rem;background:none;border:none;font-size:1.5rem;cursor:pointer;color:#aaa;z-index:10;}.modal-close:hover{color:var(--brown);}
-.modal-header{background:linear-gradient(135deg,var(--brown),#1A0A05);padding:2rem 2.5rem;color:#fff;}
-.modal-header .eyebrow{font-size:0.6rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem;}
-.modal-header h2{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:600;margin-bottom:0.25rem;}
-.modal-header .meta{font-size:0.72rem;color:rgba(255,255,255,0.6);display:flex;gap:1.5rem;flex-wrap:wrap;margin-top:0.5rem;}
-.modal-body{padding:2rem 2.5rem;}
-.modal-body h3{font-family:'Cormorant Garamond',serif;font-size:1.25rem;color:var(--brown);margin-bottom:1rem;}
-.seat-type-toggle{display:flex;gap:0.75rem;margin-bottom:1.5rem;}
-.seat-type-btn{flex:1;padding:0.85rem;border:2px solid #e0d9d0;background:#fff;font-family:'Montserrat',sans-serif;font-size:0.72rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;text-align:center;}
-.seat-type-btn:hover{border-color:var(--gold);}
-.seat-type-btn.active{border-color:var(--gold);background:var(--gold);color:var(--black);}
-.venue-map{background:#1a1a1a;padding:1.5rem;margin-bottom:1.5rem;}
-.map-legend{display:flex;gap:1.25rem;margin-bottom:1rem;flex-wrap:wrap;}
-.legend-item{display:flex;align-items:center;gap:0.4rem;font-size:0.62rem;color:rgba(255,255,255,0.6);font-weight:600;letter-spacing:0.06em;text-transform:uppercase;}
-.legend-dot{width:12px;height:12px;border-radius:50%;}
-.legend-dot.avail{background:#B8933A;}.legend-dot.taken{background:#555;}.legend-dot.selected{background:#27ae60;}
-.stage-label{text-align:center;font-size:0.6rem;font-weight:700;letter-spacing:0.2em;color:rgba(255,255,255,0.3);text-transform:uppercase;border:1px solid rgba(255,255,255,0.1);padding:0.5rem;margin-bottom:1.25rem;}
-.tables-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0.75rem;margin-bottom:1.25rem;}
-.table-seat{background:rgba(184,147,58,0.15);border:2px solid var(--gold);padding:0.75rem 0.5rem;text-align:center;cursor:pointer;transition:all 0.2s;}
-.table-seat:hover{background:rgba(184,147,58,0.3);}
-.table-seat.taken{background:rgba(85,85,85,0.3);border-color:#555;cursor:not-allowed;opacity:0.5;}
-.table-seat.selected{background:#27ae60;border-color:#27ae60;}
-.table-seat .tnum{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:700;color:#fff;display:block;}
-.table-seat .tcap{font-size:0.55rem;color:rgba(255,255,255,0.5);letter-spacing:0.06em;text-transform:uppercase;}
-.bar-divider{border-top:1px dashed rgba(255,255,255,0.15);margin:1rem 0;text-align:center;}
-.bar-label{font-size:0.6rem;font-weight:700;letter-spacing:0.15em;color:rgba(255,255,255,0.3);text-transform:uppercase;margin-bottom:0.75rem;}
-.bar-seats-row{display:flex;gap:0.4rem;flex-wrap:wrap;justify-content:center;}
-.bar-seat{width:36px;height:36px;border-radius:50%;border:2px solid var(--gold);background:rgba(184,147,58,0.1);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.6rem;font-weight:700;color:rgba(255,255,255,0.7);transition:all 0.2s;}
-.bar-seat:hover{background:rgba(184,147,58,0.3);}
-.bar-seat.taken{border-color:#555;background:rgba(85,85,85,0.3);cursor:not-allowed;opacity:0.5;}
-.bar-seat.selected{background:#27ae60;border-color:#27ae60;color:#fff;}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;}
-@media(max-width:500px){.form-row{grid-template-columns:1fr;}}
-.fl{margin-bottom:0.75rem;}
-.fl label{display:block;font-size:0.6rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.3rem;}
-.fl input,.fl select{width:100%;padding:0.65rem 0.85rem;border:2px solid #e0d9d0;font-family:'Montserrat',sans-serif;font-size:0.82rem;color:var(--brown);transition:border 0.2s;background:#fff;}
-.fl input:focus,.fl select:focus{outline:none;border-color:var(--gold);}
-.modal-footer{padding:0 2.5rem 2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
-.modal-total{font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:var(--brown);}
-.modal-total span{font-size:0.7rem;font-family:'Montserrat',sans-serif;color:#888;display:block;}
-.btn-submit{background:var(--brown);color:#fff;border:none;padding:1rem 2.5rem;font-family:'Montserrat',sans-serif;font-size:0.72rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;transition:background 0.2s;}
-.btn-submit:hover:not(:disabled){background:var(--gold);color:var(--black);}
-.btn-submit:disabled{opacity:0.6;cursor:not-allowed;}
-.selection-info{background:#f0faf0;border:1px solid #27ae60;padding:0.75rem 1rem;margin-bottom:1rem;font-size:0.78rem;color:#1a7a3a;display:none;}
-.success-banner{background:#27ae60;color:#fff;text-align:center;padding:1rem;font-size:0.82rem;font-weight:600;display:none;}
-.empty-state{text-align:center;padding:4rem 2rem;color:#aaa;}
-.empty-state h3{font-family:'Cormorant Garamond',serif;font-size:1.5rem;margin-bottom:0.5rem;color:#ccc;}
-@media(max-width:600px){.modal-body,.modal-header,.modal-footer{padding-left:1.25rem;padding-right:1.25rem;}.tables-grid{grid-template-columns:repeat(3,1fr);}}
+.fbtn{padding:0.45rem 1.2rem;border:1px solid rgba(255,255,255,0.2);background:transparent;color:rgba(255,255,255,0.65);font-family:'Montserrat',sans-serif;font-size:0.65rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+.fbtn:hover,.fbtn.on{background:var(--gold);border-color:var(--gold);color:var(--black);}
+.wrap{max-width:1100px;margin:0 auto;padding:3rem 1.5rem 5rem;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.5rem;}
+.card{background:#fff;border:1px solid rgba(0,0,0,0.07);overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;}
+.card:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,0.12);}
+.card-img{height:200px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--burg),#2C0A1A);}
+.card-img img{width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;}
+.card-img .dbadge{position:absolute;top:1rem;left:1rem;background:var(--gold);color:var(--black);padding:0.4rem 0.75rem;font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;z-index:1;}
+.card-img .cbadge{position:absolute;top:1rem;right:1rem;background:rgba(13,13,13,0.8);color:#fff;padding:0.3rem 0.65rem;font-size:0.6rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;z-index:1;}
+.card-img .sold-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:2;}
+.card-img .sold-overlay span{background:#c0392b;color:#fff;font-size:0.75rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;padding:0.5rem 1.5rem;}
+.card-body{padding:1.5rem;}
+.card-title{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;margin-bottom:0.4rem;line-height:1.2;}
+.card-meta{display:flex;gap:1rem;font-size:0.68rem;color:#888;margin-bottom:0.75rem;flex-wrap:wrap;}
+.card-desc{font-size:0.78rem;color:#666;line-height:1.7;margin-bottom:1rem;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.card-foot{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;}
+.card-price{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:700;color:var(--brown);}
+.card-price small{font-size:0.7rem;font-weight:400;color:#aaa;font-family:'Montserrat',sans-serif;}
+.btn-reg{background:var(--brown);color:#fff;border:none;padding:0.7rem 1.5rem;font-family:'Montserrat',sans-serif;font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;text-decoration:none;display:inline-block;transition:background 0.2s;}
+.btn-reg:hover{background:var(--gold);color:var(--black);}
+.btn-reg.sold{background:#aaa;cursor:not-allowed;}
+.status-badge{display:inline-block;font-size:0.62rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:0.2rem 0.6rem;}
+.status-badge.open{background:#e8f8ed;color:#27ae60;}
+.status-badge.sold{background:#fde8e8;color:#c0392b;}
+.status-badge.closed{background:#f5f5f5;color:#888;}
+.loading{text-align:center;padding:4rem;color:#aaa;}
+.loading h3{font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:#ccc;margin-bottom:0.5rem;}
+.empty{text-align:center;padding:4rem;color:#aaa;}
+.empty h3{font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:#ccc;margin-bottom:0.5rem;}
+@media(max-width:600px){.grid{grid-template-columns:1fr;}}
 </style>
 </head>
-<body><header>
+<body>
+<header>
   <div class="header-inner">
     <a href="index.html" class="logo">The Quarry<span>New Melle, Missouri</span></a>
     <nav id="mainNav">
@@ -437,228 +393,149 @@ body{font-family:'Montserrat',sans-serif;background:var(--cream);color:var(--bro
     <div class="hamburger" id="hamburger" onclick="toggleNav()"><span></span><span></span><span></span></div>
   </div>
 </header>
-<form name="event-registration" netlify netlify-honeypot="bot-field" hidden>
-  <input type="hidden" name="form-name" value="event-registration"/>
-  <input name="bot-field"/><input name="eventId"/><input name="eventName"/>
-  <input name="name"/><input name="email"/><input name="phone"/>
-  <input name="partySize"/><input name="seatType"/><input name="tableId"/>
-  <input name="barSeats"/><input name="amountPaid"/>
-</form>
-<div id="successBanner" class="success-banner"></div>
 <div class="page-hero">
   <div class="eyebrow">What's Happening</div>
   <h1>Events Calendar</h1>
-  <p>Live music, ticketed events, fundraisers &amp; more at The Quarry</p>
+  <p>Live music, ticketed events, fundraisers and more at The Quarry</p>
 </div>
 <div class="filter-strip">
-  <button class="filter-btn active" onclick="filterEvents('all',this)">All Events</button>
-  <button class="filter-btn" onclick="filterEvents('Ticketed',this)">🎟 Ticketed</button>
-  <button class="filter-btn" onclick="filterEvents('Free',this)">🌟 Free Events</button>
-  <button class="filter-btn" onclick="filterEvents('Brunch',this)">🥂 Brunch</button>
-  <button class="filter-btn" onclick="filterEvents('Members Only',this)">🍷 Members Only</button>
+  <button class="fbtn on" onclick="doFilter('all',this)">All Events</button>
+  <button class="fbtn" onclick="doFilter('UPCOMING',this)">Upcoming</button>
+  <button class="fbtn" onclick="doFilter('TICKETING',this)">Ticketed</button>
 </div>
-<div class="events-wrap">
-  <div id="eventsGrid" class="events-grid">
-    <div class="empty-state"><h3>Loading Events...</h3><p>Just a moment</p></div>
+<div class="wrap">
+  <div id="grid" class="grid">
+    <div class="loading"><h3>Loading Events...</h3><p>Just a moment</p></div>
   </div>
 </div>
-<div class="modal-ov" id="regModal" onclick="if(event.target===this)closeModal()">
-<div class="modal">
-  <button class="modal-close" onclick="closeModal()">&#x2715;</button>
-  <div class="modal-header">
-    <div class="eyebrow">Event Registration</div>
-    <h2 id="modalTitle">Event Name</h2>
-    <div class="meta">
-      <span>&#128197; <span id="modalDate"></span></span>
-      <span>&#9200; <span id="modalTime"></span></span>
-      <span>&#128205; The Quarry, New Melle MO</span>
-    </div>
-  </div>
-  <div class="modal-body">
-    <div id="step1">
-      <h3>Step 1 &mdash; Choose Your Seating</h3>
-      <div class="seat-type-toggle">
-        <button class="seat-type-btn active" id="btnTable" onclick="setSeatType('table')">&#129681; Reserve a Full Table</button>
-        <button class="seat-type-btn" id="btnBar" onclick="setSeatType('bar')">&#127866; Individual Bar Seats</button>
-      </div>
-      <div class="venue-map">
-        <div class="map-legend">
-          <div class="legend-item"><div class="legend-dot avail"></div>Available</div>
-          <div class="legend-item"><div class="legend-dot taken"></div>Reserved</div>
-          <div class="legend-item"><div class="legend-dot selected"></div>Your Selection</div>
-        </div>
-        <div class="stage-label">&#127925; Stage / Dance Floor</div>
-        <div id="tablesGrid" class="tables-grid"></div>
-        <div class="bar-divider"><div class="bar-label">Bar Seating</div></div>
-        <div id="barSeatsRow" class="bar-seats-row"></div>
-      </div>
-      <div id="selectionInfo" class="selection-info"></div>
-      <button class="btn-register" id="btnToStep2" onclick="goToStep2()" disabled>Continue to Details &rarr;</button>
-    </div>
-    <div id="step2" style="display:none;">
-      <button onclick="backToStep1()" style="background:none;border:none;color:var(--gold);cursor:pointer;font-family:Montserrat,sans-serif;font-size:0.72rem;font-weight:700;letter-spacing:0.08em;margin-bottom:1.25rem;padding:0;">&larr; Back to Seating</button>
-      <h3>Step 2 &mdash; Your Information</h3>
-      <div class="form-row">
-        <div class="fl"><label>First Name *</label><input type="text" id="regFirst" placeholder="Jane" required/></div>
-        <div class="fl"><label>Last Name *</label><input type="text" id="regLast" placeholder="Smith" required/></div>
-      </div>
-      <div class="form-row">
-        <div class="fl"><label>Email Address *</label><input type="email" id="regEmail" placeholder="jane@email.com" required/></div>
-        <div class="fl"><label>Phone Number</label><input type="tel" id="regPhone" placeholder="(314) 555-0000"/></div>
-      </div>
-      <div class="fl"><label>Party Size *</label>
-        <select id="regPartySize">
-          <option value="1">1 person</option><option value="2">2 people</option>
-          <option value="3">3 people</option><option value="4" selected>4 people</option>
-          <option value="5">5 people</option><option value="6">6 people</option>
-        </select>
-      </div>
-      <div class="fl"><label>Special Requests</label><input type="text" id="regNotes" placeholder="Dietary needs, birthday celebration, accessibility..."/></div>
-    </div>
-  </div>
-  <div class="modal-footer">
-    <div class="modal-total"><span>Total</span><span id="modalTotalAmt">$0.00</span></div>
-    <button class="btn-submit" id="btnSubmit" onclick="submitReg()" style="display:none;">Complete Registration &rarr;</button>
-  </div>
-</div>
-</div><script>
-var currentEvent=null,selectedSeatType="table",selectedTableId=null,selectedBarSeats=[];
-var EVENTS=[{id:"evt-singo-bingo-001",name:"Neon 80s Singo-Bingo Ladies Brunch",date:"Saturday, May 10, 2026",time:"11:00 AM - 2:00 PM",description:"Put on your neon and join us for the ultimate ladies brunch! Singo-Bingo is the game where YOU sing the songs to win. Featuring 80s hits, mimosa service, brunch bites, and amazing prizes.",pricePerSeat:4500,tableCount:8,tableSeats:4,barSeatCount:12,totalCapacity:44,category:"Brunch",active:true,imageColor:"linear-gradient(135deg,#1a0050,#8B008B)"}];
-var EVENT_REGISTRATIONS={};
-function loadEvents(filter){
-  var grid=document.getElementById("eventsGrid");
-  var evs=filter&&filter!=="all"?EVENTS.filter(function(e){return e.category===filter;}):EVENTS;
-  if(!evs.length){grid.innerHTML='<div class="empty-state"><h3>No Events Found</h3><p>Check back soon.</p></div>';return;}
-  var html="";
-  for(var i=0;i<evs.length;i++){
-    var ev=evs[i];
-    var regs=EVENT_REGISTRATIONS[ev.id]||{tablesTaken:[],barSeatsTaken:[]};
-    var taken=regs.tablesTaken.length*ev.tableSeats+regs.barSeatsTaken.length;
-    var total=ev.totalCapacity;var avail=total-taken;var pct=Math.round((taken/total)*100);
-    var sc=avail===0?"sold":avail<8?"low":"ok";
-    var st=avail===0?"SOLD OUT":avail<8?avail+" seats left!":avail+" seats available";
-    var price=ev.pricePerSeat===0?"Free":"$"+(ev.pricePerSeat/100).toFixed(2);
-    var dis=avail===0?' disabled=""':'';
-    var btn=avail===0?"Sold Out":"Register";
-    html+='<div class="event-card" onclick="openModal(''+ev.id+'')"><div class="event-card-img" style="background:'+ev.imageColor+'"><div style="font-size:2.5rem;color:rgba(255,255,255,0.4);padding:1rem">'+ev.name.charAt(0)+'</div><div class="event-date-badge">'+ev.date.split(",")[0]+'</div><div class="event-category">'+ev.category+'</div></div>';
-    html+='<div class="seats-bar"><div class="seats-bar-fill'+(pct>80?' urgent':'')+'" style="width:'+pct+'%"></div></div>';
-    html+='<div class="event-card-body"><div class="event-title">'+ev.name+'</div>';
-    html+='<div class="event-meta"><span>'+ev.date+'</span><span>'+ev.time+'</span></div>';
-    html+='<div class="event-desc">'+ev.description+'</div>';
-    html+='<div class="event-footer"><div><div class="event-price">'+price+(ev.pricePerSeat>0?' <span>per seat</span>':"")+'</div><div class="event-seats-left '+sc+'">'+st+'</div></div>';
-    html+='<button class="btn-register"'+dis+'>'+btn+'</button></div></div></div>';
+<script>
+var allEvents = [];
+var currentFilter = "all";
+
+function doFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll(".fbtn").forEach(function(b) { b.classList.remove("on"); });
+  btn.classList.add("on");
+  renderEvents();
+}
+
+function formatDate(isoStr) {
+  if (!isoStr) return "";
+  var d = new Date(isoStr);
+  var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  var days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  return days[d.getDay()] + ", " + months[d.getMonth()] + " " + d.getDate() + ", " + d.getFullYear();
+}
+
+function formatTime(isoStr) {
+  if (!isoStr) return "";
+  var d = new Date(isoStr);
+  var h = d.getHours();
+  var m = d.getMinutes();
+  var ampm = h >= 12 ? "PM" : "AM";
+  h = h % 12 || 12;
+  return h + ":" + (m < 10 ? "0" : "") + m + " " + ampm;
+}
+
+function getStatus(ev) {
+  var s = ev.status;
+  var reg = ev.registration || {};
+  if (s === "ENDED") return "ended";
+  if (reg.tickets && reg.tickets.soldOut) return "sold";
+  if (reg.status === "CLOSED_AUTOMATICALLY" || reg.status === "CLOSED_MANUALLY") return "closed";
+  if (s === "SCHEDULED" || s === "STARTED") return "open";
+  return "closed";
+}
+
+function getPrice(ev) {
+  var reg = ev.registration || {};
+  if (reg.type === "RSVP") return "Free";
+  return "View Tickets";
+}
+
+function renderEvents() {
+  var grid = document.getElementById("grid");
+  var now = new Date();
+  var filtered = allEvents.filter(function(ev) {
+    var start = new Date(ev.dateAndTimeSettings && ev.dateAndTimeSettings.startDate || "");
+    if (currentFilter === "UPCOMING") return start >= now;
+    if (currentFilter === "TICKETING") return (ev.registration || {}).type === "TICKETING";
+    return true;
+  });
+
+  // Sort by start date ascending
+  filtered.sort(function(a, b) {
+    var da = new Date((a.dateAndTimeSettings || {}).startDate || "");
+    var db = new Date((b.dateAndTimeSettings || {}).startDate || "");
+    return da - db;
+  });
+
+  if (!filtered.length) {
+    grid.innerHTML = "<div class=\"empty\"><h3>No Events Found</h3><p>Check back soon for upcoming events.</p></div>";
+    return;
   }
-  grid.innerHTML=html;
-  evs.forEach(function(ev){fetchAvail(ev.id);});
-}
-function fetchAvail(id){
-  fetch("/.netlify/functions/get-event?eventId="+id).then(function(r){return r.json();}).then(function(d){if(d.event){EVENT_REGISTRATIONS[id]=d;loadEvents(window._cf);}}).catch(function(){});
-}
-function filterEvents(cat,btn){
-  window._cf=cat;
-  document.querySelectorAll(".filter-btn").forEach(function(b){b.classList.remove("active");});
-  btn.classList.add("active");
-  loadEvents(cat);
-}
-function openModal(eventId){
-  currentEvent=EVENTS.find(function(e){return e.id===eventId;})||null;
-  if(!currentEvent)return;
-  document.getElementById("modalTitle").textContent=currentEvent.name;
-  document.getElementById("modalDate").textContent=currentEvent.date;
-  document.getElementById("modalTime").textContent=currentEvent.time;
-  selectedTableId=null;selectedBarSeats=[];selectedSeatType="table";
-  renderMap();
-  document.getElementById("step1").style.display="";
-  document.getElementById("step2").style.display="none";
-  document.getElementById("btnSubmit").style.display="none";
-  document.getElementById("btnToStep2").style.display="";
-  document.getElementById("btnToStep2").disabled=true;
-  document.getElementById("selectionInfo").style.display="none";
-  document.getElementById("btnTable").classList.add("active");
-  document.getElementById("btnBar").classList.remove("active");
-  updateTotal();
-  document.getElementById("regModal").classList.add("open");
-  document.body.style.overflow="hidden";
-}
-function closeModal(){
-  document.getElementById("regModal").classList.remove("open");
-  document.body.style.overflow="";
-}
-function setSeatType(type){
-  selectedSeatType=type;selectedTableId=null;selectedBarSeats=[];
-  document.getElementById("btnTable").classList.toggle("active",type==="table");
-  document.getElementById("btnBar").classList.toggle("active",type==="bar");
-  renderMap();updateTotal();
-  document.getElementById("btnToStep2").disabled=true;
-  document.getElementById("selectionInfo").style.display="none";
-}
-function renderMap(){
-  if(!currentEvent)return;
-  var regs=EVENT_REGISTRATIONS[currentEvent.id]||{tablesTaken:[],barSeatsTaken:[]};
-  var tt=regs.tablesTaken||[];var tb=regs.barSeatsTaken||[];
-  var tH="";
-  for(var i=1;i<=currentEvent.tableCount;i++){
-    var tid="T"+i;var isTk=tt.includes(tid);var isSel=selectedTableId===tid;
-    var cls="table-seat"+(isTk?" taken":"")+(isSel?" selected":"");
-    var oc=isTk?"":(" onclick=\"selectTable('"+tid+"')\"");
-    tH+="<div class=\""+cls+"\""+oc+"><span class=\"tnum\">"+tid+"</span><span class=\"tcap\">"+currentEvent.tableSeats+" seats</span></div>";
+
+  var html = "";
+  for (var i = 0; i < filtered.length; i++) {
+    var ev = filtered[i];
+    var dt = ev.dateAndTimeSettings || {};
+    var start = dt.startDate || "";
+    var end = dt.endDate || "";
+    var title = ev.title || "Event";
+    var desc = ev.shortDescription || "";
+    var img = ev.mainImage ? ev.mainImage.url : "";
+    var wixUrl = ev.eventPageUrl ? (ev.eventPageUrl.base + ev.eventPageUrl.path) : "https://www.thequarrystl.com";
+    var status = getStatus(ev);
+    var price = getPrice(ev);
+    var dateStr = formatDate(start);
+    var timeStr = formatTime(start);
+    var endTime = formatTime(end);
+    if (endTime) timeStr += " - " + endTime;
+
+    var imgHtml = img
+      ? "<img src=\"" + img + "\" alt=\"" + title + "\" loading=\"lazy\"/>"
+      : "<div style=\"color:rgba(255,255,255,0.2);font-size:2rem;font-family:Cormorant Garamond,serif\">" + title.charAt(0) + "</div>";
+
+    var soldOverlay = (status === "sold" || status === "ended" || status === "closed")
+      ? "<div class=\"sold-overlay\"><span>" + (status === "sold" ? "Sold Out" : status === "ended" ? "Event Ended" : "Registration Closed") + "</span></div>"
+      : "";
+
+    var statusBadge = status === "open"
+      ? "<span class=\"status-badge open\">Open</span>"
+      : status === "sold"
+      ? "<span class=\"status-badge sold\">Sold Out</span>"
+      : "<span class=\"status-badge closed\">" + (status === "ended" ? "Ended" : "Closed") + "</span>";
+
+    var btnHtml = (status === "open")
+      ? "<a href=\"" + wixUrl + "\" target=\"_blank\" class=\"btn-reg\">Get Tickets</a>"
+      : "<a href=\"" + wixUrl + "\" target=\"_blank\" class=\"btn-reg sold\">View Event</a>";
+
+    html += "<div class=\"card\">";
+    html += "<div class=\"card-img\">" + imgHtml + soldOverlay;
+    html += "<div class=\"dbadge\">" + dateStr + "</div></div>";
+    html += "<div class=\"card-body\">";
+    html += "<div class=\"card-title\">" + title + "</div>";
+    html += "<div class=\"card-meta\"><span>" + timeStr + "</span><span>The Quarry, New Melle MO</span>" + statusBadge + "</div>";
+    html += "<div class=\"card-desc\">" + desc + "</div>";
+    html += "<div class=\"card-foot\"><div class=\"card-price\">" + price + "</div>" + btnHtml + "</div>";
+    html += "</div></div>";
   }
-  document.getElementById("tablesGrid").innerHTML=tH;
-  var bH="";
-  for(var j=1;j<=currentEvent.barSeatCount;j++){
-    var bid="B"+j;var isBT=tb.includes(bid);var isBSel=selectedBarSeats.includes(bid);
-    var bc="bar-seat"+(isBT?" taken":"")+(isBSel?" selected":"");
-    var boc=isBT?"":(" onclick=\"toggleBar('"+bid+"')\"");
-    bH+="<div class=\""+bc+"\""+boc+">"+j+"</div>";
+  grid.innerHTML = html;
+}
+
+async function loadEvents() {
+  try {
+    var res = await fetch("/.netlify/functions/get-wix-events");
+    var data = await res.json();
+    allEvents = data.events || [];
+    renderEvents();
+  } catch(e) {
+    // Fallback: show "check our Wix site" message
+    document.getElementById("grid").innerHTML = "<div class=\"empty\"><h3>Events Calendar</h3><p>View our full events calendar at <a href=\"https://www.thequarrystl.com/events\" style=\"color:var(--gold)\">thequarrystl.com/events</a></p></div>";
   }
-  document.getElementById("barSeatsRow").innerHTML=bH;
 }
-function selectTable(tid){
-  if(!currentEvent)return;
-  selectedTableId=selectedTableId===tid?null:tid;
-  renderMap();
-  var info=document.getElementById("selectionInfo");
-  if(selectedTableId){
-    info.textContent="Table "+selectedTableId+" selected ("+currentEvent.tableSeats+" seats) - $"+((currentEvent.pricePerSeat*currentEvent.tableSeats)/100).toFixed(2)+" total";
-    info.style.display="block";document.getElementById("btnToStep2").disabled=false;
-  }else{info.style.display="none";document.getElementById("btnToStep2").disabled=true;}
-  updateTotal();
-}
-function toggleBar(bid){
-  var idx=selectedBarSeats.indexOf(bid);
-  if(idx>-1)selectedBarSeats.splice(idx,1);else selectedBarSeats.push(bid);
-  renderMap();
-  var info=document.getElementById("selectionInfo");
-  if(selectedBarSeats.length){
-    info.textContent=selectedBarSeats.length+" bar seat(s): "+selectedBarSeats.join(", ")+" - $"+((currentEvent.pricePerSeat*selectedBarSeats.length)/100).toFixed(2)+" total";
-    info.style.display="block";document.getElementById("btnToStep2").disabled=false;
-  }else{info.style.display="none";document.getElementById("btnToStep2").disabled=true;}
-  updateTotal();
-}
-function updateTotal(){
-  if(!currentEvent)return;
-  var qty=selectedSeatType==="table"?(selectedTableId?currentEvent.tableSeats:0):selectedBarSeats.length;
-  document.getElementById("modalTotalAmt").textContent="$"+((currentEvent.pricePerSeat*qty)/100).toFixed(2);
-}
-function goToStep2(){document.getElementById("step1").style.display="none";document.getElementById("step2").style.display="";document.getElementById("btnToStep2").style.display="none";document.getElementById("btnSubmit").style.display="";}
-function backToStep1(){document.getElementById("step1").style.display="";document.getElementById("step2").style.display="none";document.getElementById("btnToStep2").style.display="";document.getElementById("btnSubmit").style.display="none";}
-async function submitReg(){
-  var first=document.getElementById("regFirst").value.trim();
-  var last=document.getElementById("regLast").value.trim();
-  var email=document.getElementById("regEmail").value.trim();
-  if(!first||!last||!email){alert("Please fill in your name and email.");return;}
-  var btn=document.getElementById("btnSubmit");btn.disabled=true;btn.textContent="Processing...";
-  try{
-    var res=await fetch("/.netlify/functions/event-register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({eventId:currentEvent.id,name:first+" "+last,email:email,phone:document.getElementById("regPhone").value,partySize:document.getElementById("regPartySize").value,seatType:selectedSeatType,tableId:selectedTableId,barSeats:selectedBarSeats,successUrl:window.location.origin+"/quarry-events",cancelUrl:window.location.origin+"/quarry-events"})});
-    var data=await res.json();
-    if(data.checkoutUrl){window.location.href=data.checkoutUrl;}
-    else if(data.success&&data.free){closeModal();var b=document.getElementById("successBanner");b.textContent="Registered for "+currentEvent.name+"! See you there.";b.style.display="block";setTimeout(function(){b.style.display="none";},6000);fetchAvail(currentEvent.id);}
-    else{alert(data.error||"Something went wrong.");btn.disabled=false;btn.textContent="Complete Registration";}
-  }catch(e){alert("Connection error. Try again.");btn.disabled=false;btn.textContent="Complete Registration";}
-}
-(function(){var p=new URLSearchParams(window.location.search);if(p.get("registered")){var b=document.getElementById("successBanner");b.textContent="Registration confirmed for "+decodeURIComponent(p.get("event")||"your event")+"! Check your email.";b.style.display="block";setTimeout(function(){b.style.display="none";},8000);history.replaceState({},"","/quarry-events");}})();
-window._cf="all";
-loadEvents("all");
+
+loadEvents();
 </script>
 </body>
 </html>
