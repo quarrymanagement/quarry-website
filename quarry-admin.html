@@ -733,9 +733,6 @@
             <div class="topnav">
                 <h1>The Quarry Admin</h1>
                 <div class="nav-items">
-                    <button class="nav-btn" onclick="openTokenSettings()" style="margin-right: auto; background: none; border: none; color: var(--gold); font-size: 1.5rem; cursor: pointer; padding: 0.5rem;" title="GitHub Settings">
-            ⚙️ <span id="tokenStatus" style="font-size: 0.7rem; margin-left: 0.25rem;">●</span>
-        </button>
         <button id="navDashboard" class="nav-btn active" data-section="dashboard">Dashboard</button>
                     <button id="navEvents" class="nav-btn" data-section="events">Events</button>
                     <button id="navBands" class="nav-btn" data-section="bands">Bands</button>
@@ -1096,26 +1093,7 @@
         </div>
     </div>
 
-    <!-- Token Settings Modal -->
-    <div id="tokenSettingsModal" class="modal-overlay" style="display:none;">
-        <div class="modal" style="max-width: 500px;">
-            <div class="modal-header">
-                <h2>GitHub Token Settings</h2>
-                <button class="modal-close" onclick="closeTokenSettings()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p style="margin-bottom: 1rem; color: var(--gray-dark); font-size: 0.9rem;">Enter your GitHub Personal Access Token to enable saving events and bands. The token needs <strong>repo</strong> scope for private repositories.</p>
-                <div class="form-group">
-                    <label>GitHub Token</label>
-                    <input type="text" id="githubTokenInput" placeholder="ghp_xxxxxxxxxxxx" style="width: 100%; padding: 0.75rem; border: 2px solid var(--gray-medium); border-radius: 4px; font-family: monospace;">
-                </div>
-                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-                    <button class="btn btn-primary" onclick="saveGitHubToken()">Save Token</button>
-                    <button class="btn btn-secondary" onclick="closeTokenSettings()">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Token managed securely via Netlify proxy — no modal needed -->
 
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
@@ -1144,7 +1122,9 @@
         };
 
 
-        // GITHUB CONFIGURATION
+        // GITHUB CONFIGURATION — token is stored securely in Netlify env vars
+        // All GitHub API calls go through the proxy function
+        const GITHUB_PROXY = '/.netlify/functions/github-proxy';
         const GITHUB_REPO = 'quarrymanagement/quarry-website';
         const DATA_FILE = 'events.json';
 
@@ -1298,26 +1278,13 @@
         // DATA LOADING
         async function loadData() {
             showLoadingIndicator(true);
-            const token = sessionStorage.getItem('quarryGithubToken');
-            if (!token) {
-                showLoadingIndicator(false);
-                showToast('Please set your GitHub token first (click the ⚙️ icon)', 'warning');
-                initGitHubToken();
-                openTokenSettings();
-                return;
-            }
             try {
-                const resp = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${DATA_FILE}`, {
-                    headers: {
-                        'Authorization': 'token ' + token,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                });
-                
+                const resp = await fetch(GITHUB_PROXY);
+
                 if (!resp.ok) {
                     throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
                 }
-                
+
                 const fileInfo = await resp.json();
                 state.dataSha = fileInfo.sha;
                 const content = JSON.parse(atob(fileInfo.content));
@@ -1346,7 +1313,6 @@
             renderBandsTable();
             loadFloorPlan();
             updateDashboard();
-            initGitHubToken();
         }
         function loadEvents() {
             // In a real app, this would call the Netlify function
@@ -1428,59 +1394,21 @@
         }
 
 
-        // GITHUB TOKEN MANAGEMENT
+        // GITHUB TOKEN — managed securely via Netlify environment variable
+        // No token input needed from users
         function initGitHubToken() {
-            const token = sessionStorage.getItem('quarryGithubToken');
-            if (token) {
-                document.getElementById('tokenStatus').textContent = '✓ Token set';
-                document.getElementById('tokenStatus').style.color = 'var(--success)';
-            } else {
-                document.getElementById('tokenStatus').textContent = '✗ Not set';
-                document.getElementById('tokenStatus').style.color = 'var(--danger)';
+            const el = document.getElementById('tokenStatus');
+            if (el) {
+                el.textContent = '✓ Secure proxy';
+                el.style.color = 'var(--success)';
             }
         }
-
-        function openTokenSettings() {
-            document.getElementById('tokenSettingsModal').style.display = 'flex';
-            const savedToken = sessionStorage.getItem('quarryGithubToken');
-            if (savedToken) {
-                document.getElementById('githubTokenInput').value = '••••••' + savedToken.slice(-4);
-            } else {
-                document.getElementById('githubTokenInput').value = '';
-            }
-        }
-
-        function closeTokenSettings() {
-            document.getElementById('tokenSettingsModal').style.display = 'none';
-            document.getElementById('githubTokenInput').value = '';
-        }
-
-        function saveGitHubToken() {
-            const token = document.getElementById('githubTokenInput').value.trim();
-            if (!token) {
-                showToast('Please enter a GitHub token', 'warning');
-                return;
-            }
-            if (token.startsWith('••••••')) {
-                showToast('Token already saved', 'info');
-                closeTokenSettings();
-                return;
-            }
-            sessionStorage.setItem('quarryGithubToken', token);
-            document.getElementById('githubTokenInput').value = '••••••' + token.slice(-4);
-            showToast('GitHub token saved — loading data...', 'success');
-            initGitHubToken();
-            closeTokenSettings();
-            loadData();
-        }
+        function openTokenSettings() { /* Token managed by Netlify */ }
+        function closeTokenSettings() { /* Token managed by Netlify */ }
+        function saveGitHubToken() { /* Token managed by Netlify */ }
 
         // GITHUB SAVE FUNCTION
         async function saveToGitHub(message) {
-            const token = sessionStorage.getItem('quarryGithubToken');
-            if (!token) {
-                showToast('Please set your GitHub token in Settings first', 'warning');
-                return false;
-            }
             
             const data = {
                 events: state.events,
@@ -1493,12 +1421,10 @@
             
             showSavingIndicator(true);
             try {
-                const resp = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${DATA_FILE}`, {
+                const resp = await fetch(GITHUB_PROXY, {
                     method: 'PUT',
                     headers: {
-                        'Authorization': 'token ' + token,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/vnd.github.v3+json'
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
                         message: message || 'Update events data',
