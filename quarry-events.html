@@ -3,664 +3,393 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Events Calendar | The Quarry</title>
+<title>Events | The Quarry</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"/>
+undefined
 <style>
-:root {
-  --cream: #F5F0E8;
-  --brown-dark: #2C1A0E;
-  --brown-mid: #5C3D2E;
-  --brown-warm: #8B5E3C;
-  --brown-light: #C4956A;
-  --gold: #B8933A;
-  --gold-light: #D4AF6A;
-  --charcoal: #1A1A1A;
-  --white: #FFFFFF;
-  --border-light: rgba(188,149,106,0.25);
-  --border-mid: rgba(188,149,106,0.5);
-}
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:'Montserrat',sans-serif; background:var(--charcoal); color:var(--cream); overflow-x:hidden; }
-
-/* HEADER */
-header {
-  position:fixed; top:0; left:0; right:0; z-index:1000;
-  background:rgba(26,26,26,0.97);
-  border-bottom:1px solid var(--border-light);
-  backdrop-filter:blur(8px);
-}
-.header-inner {
-  max-width:1400px; margin:0 auto; padding:0 2rem;
-  display:flex; align-items:center; justify-content:space-between; height:80px;
-}
-.logo {
-  font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700;
-  letter-spacing:0.12em; color:#ffffff; text-transform:uppercase;
-  text-decoration:none; flex-shrink:0;
-}
-.logo span {
-  display:block; font-size:0.5rem; letter-spacing:0.3em;
-  color:rgba(255,255,255,0.6); margin-top:2px;
-  font-family:'Montserrat',sans-serif; font-weight:400;
-}
-
-nav { display:flex; align-items:center; }
-.nav-item { position:relative; }
-.nav-link {
-  font-family:'Montserrat',sans-serif; font-size:0.62rem; font-weight:500;
-  letter-spacing:0.14em; text-transform:uppercase;
-  color:var(--cream); text-decoration:none;
-  padding:0.6rem 0.75rem; display:block; transition:color 0.2s; white-space:nowrap;
-}
-.nav-link:hover { color:var(--gold-light); }
-.dropdown {
-  display:none; position:absolute; top:100%; left:0;
-  background:var(--brown-dark); border:1px solid var(--border-mid);
-  min-width:200px; z-index:200;
-}
-.nav-item:hover .dropdown { display:block; }
-.dropdown a {
-  display:block; padding:0.7rem 1.25rem;
-  font-size:0.65rem; letter-spacing:0.1em; text-transform:uppercase;
-  color:var(--cream); text-decoration:none;
-  border-bottom:1px solid var(--border-light);
-  font-family:'Montserrat',sans-serif; font-weight:400;
-  transition:background 0.2s, color 0.2s;
-}
-.dropdown a:last-child { border-bottom:none; }
-.dropdown a:hover { background:var(--brown-mid); color:var(--gold-light); }
-.dropdown .dimmed { color:rgba(196,149,106,0.75); }
-.cs-badge {
-  display:inline-block; font-size:0.48rem; letter-spacing:0.08em;
-  background:var(--gold); color:var(--brown-dark);
-  padding:1px 5px; margin-left:4px; vertical-align:middle; font-weight:700;
-}
-.hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:0.5rem; }
-.hamburger span { display:block; width:24px; height:1.5px; background:var(--cream); }
-
-/* HERO VIDEO */
-.hero-video {
-  position:absolute; inset:0; z-index:0;
-  overflow:hidden; pointer-events:none;
-}
-.hero-video iframe {
-  position:absolute;
-  top:50%; left:50%;
-  transform:translate(-50%,-50%);
-  width:56.25vh;
-  height:100vh;
-  min-width:100vw;
-  min-height:177.78vw;
-}
-/* HERO */
-.hero {
-  position:relative; height:100vh; min-height:650px;
-  display:flex; align-items:center; justify-content:center; overflow:hidden;
-}
-.hero-bg {
-  position:absolute; inset:0;
-  background:
-    linear-gradient(to bottom, rgba(15,10,5,0.15) 0%, rgba(15,10,5,0.2) 50%, rgba(15,10,5,0.65) 100%),
-    url('https://static.wixstatic.com/media/f1c1b8_c5a995404a4c4e20aa35de83c9c26bfa~mv2.jpg/v1/fill/w_1400,h_900,al_c,q_85/f1c1b8_c5a995404a4c4e20aa35de83c9c26bfa~mv2.jpg') center/cover no-repeat;
-}
-.hero-content { position:relative; z-index:2; text-align:center; padding:0 2rem; }
-.hero-eyebrow {
-  font-family:'Montserrat',sans-serif; font-size:0.62rem;
-  letter-spacing:0.45em; text-transform:uppercase; color:var(--gold-light); margin-bottom:1.25rem;
-}
-.hero-title {
-  font-family:'Playfair Display',serif;
-  font-size:clamp(4.5rem,10vw,9rem); font-weight:700;
-  line-height:0.88; color:var(--white);
-  letter-spacing:0.06em; text-transform:uppercase; margin-bottom:0.6rem;
-}
-.hero-sub {
-  font-family:'Cormorant Garamond',serif;
-  font-size:clamp(1rem,2.2vw,1.4rem); font-style:italic; font-weight:300;
-  color:var(--cream); letter-spacing:0.12em; opacity:0.85; margin-bottom:2.5rem;
-}
-.hero-divider { width:50px; height:1px; background:var(--gold); margin:0 auto 2.5rem; }
-.hero-cta {
-  display:inline-block; padding:0.9rem 2.8rem;
-  border:1px solid var(--gold); color:var(--gold-light);
-  font-family:'Montserrat',sans-serif; font-size:0.65rem; font-weight:600;
-  letter-spacing:0.28em; text-transform:uppercase; text-decoration:none;
-  transition:all 0.3s; position:relative; overflow:hidden; z-index:0;
-}
-.hero-cta::before {
-  content:''; position:absolute; inset:0; background:var(--gold);
-  transform:translateX(-100%); transition:transform 0.3s; z-index:-1;
-}
-.hero-cta:hover { color:var(--brown-dark); }
-.hero-cta:hover::before { transform:translateX(0); }
-.hero-scroll {
-  position:absolute; bottom:2rem; left:50%; transform:translateX(-50%);
-  display:flex; flex-direction:column; align-items:center; gap:0.4rem;
-  color:rgba(255,255,255,0.4); font-size:0.5rem; letter-spacing:0.3em; text-transform:uppercase;
-}
-.scroll-line { width:1px; height:36px; background:rgba(255,255,255,0.3); animation:pulse 2s infinite; }
-@keyframes pulse { 0%,100%{opacity:0.3} 50%{opacity:1} }
-
-/* 4 QUAD BOXES */
-.quad-grid { display:grid; grid-template-columns:repeat(4,1fr); border:2px solid rgba(255,255,255,0.35); }
-.quad-box {
-  position:relative; height:500px; overflow:hidden;
-  text-decoration:none; display:flex; flex-direction:column; justify-content:center;
-  border-bottom:2px solid rgba(255,255,255,0.35);
-  border-top:2px solid rgba(255,255,255,0.35);
-}
-.quad-box+.quad-box { border-left:2px solid rgba(255,255,255,0.35); }
-.quad-bg {
-  position:absolute; inset:0; background-size:cover; background-position:center;
-  transition:transform 0.7s ease; filter:brightness(0.85);
-}
-.quad-box:hover .quad-bg { transform:scale(1.06); filter:brightness(0.7); }
-.quad-overlay {
-  position:absolute; inset:0;
-  background:linear-gradient(to top, rgba(20,10,4,0.9) 0%, rgba(20,10,4,0.3) 50%, rgba(20,10,4,0.1) 100%);
-}
-.quad-content { position:relative; z-index:2; padding:2rem 1.75rem 2.25rem; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; height:100%; }
-.quad-label { display:none; }
-.quad-title {
-  font-family:'Montserrat',sans-serif; font-size:1.4rem; font-weight:700;
-  color:var(--white); line-height:1.1; margin-bottom:1.25rem; text-transform:uppercase;
-  letter-spacing:0.04em;
-}
-.quad-desc { display:none; }
-.quad-arrow {
-  display:inline-block;
-  font-family:'Montserrat',sans-serif; font-size:0.62rem; font-weight:600;
-  letter-spacing:0.22em; text-transform:uppercase; color:var(--white);
-  border:1px solid rgba(255,255,255,0.6); padding:0.55rem 1.5rem;
-  transition:all 0.3s;
-}
-.quad-box:hover .quad-arrow { background:var(--gold); border-color:var(--gold); color:var(--brown-dark); }
-
-/* QUICK LINKS */
-.quick-links-wrap { background:var(--charcoal); }
-.quick-links { display:flex; flex-direction:column; }
-.qlink {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:1.75rem 3rem; text-decoration:none;
-  border-top:1px solid rgba(255,255,255,0.15);
-  transition:background 0.2s;
-}
-.qlink:hover { background:rgba(255,255,255,0.04); }
-.qlink.disabled { pointer-events:none; opacity:0.5; }
-.qlink-title {
-  font-family:'Montserrat',sans-serif; font-size:1.3rem; font-weight:700;
-  letter-spacing:0.14em; text-transform:uppercase; color:#ffffff;
-}
-.qlink-badge {
-  display:inline-block; font-size:0.48rem; font-weight:700;
-  letter-spacing:0.08em; background:var(--gold); color:var(--brown-dark);
-  padding:3px 10px; font-family:'Montserrat',sans-serif; margin-left:1rem; vertical-align:middle;
-}
-.qlink-arrow {
-  font-size:1.8rem; color:#ffffff; transition:transform 0.2s; flex-shrink:0;
-}
-.qlink:hover .qlink-arrow { transform:translateX(6px); }
-
-/* FOOTER */
-footer { background:#0F0A07; padding:4.5rem 2rem 2rem; border-top:1px solid var(--border-light); }
-.footer-inner { max-width:1200px; margin:0 auto; }
-.footer-top {
-  display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:3rem;
-  margin-bottom:3.5rem; padding-bottom:3rem; border-bottom:1px solid var(--border-light);
-}
-.footer-logo {
-  font-family:'Playfair Display',serif; font-size:1.4rem;
-  letter-spacing:0.12em; color:#ffffff; text-transform:uppercase;
-}
-.footer-logo span {
-  display:block; font-size:0.48rem; letter-spacing:0.28em; color:rgba(255,255,255,0.55);
-  margin-top:2px; font-family:'Montserrat',sans-serif; font-weight:400;
-}
-.footer-tagline {
-  font-family:'Cormorant Garamond',serif; font-size:0.92rem; font-style:italic;
-  color:rgba(255,255,255,0.7); margin-top:0.75rem; line-height:1.65;
-}
-.footer-address {
-  font-family:'Montserrat',sans-serif; font-size:0.62rem;
-  color:rgba(255,255,255,0.65); line-height:2; margin-top:1.25rem; letter-spacing:0.04em;
-}
-.footer-address a { color:rgba(255,255,255,0.65); text-decoration:none; }
-.footer-address a:hover { color:#fff; }
-.social-row { display:flex; gap:0.6rem; margin-top:1.25rem; }
-.social-btn {
-  width:34px; height:34px; border:1px solid var(--border-mid);
-  display:flex; align-items:center; justify-content:center;
-  text-decoration:none; color:rgba(255,255,255,0.65); font-size:0.62rem;
-  font-weight:600; font-family:'Montserrat',sans-serif;
-  transition:border-color 0.2s, color 0.2s;
-}
-.social-btn:hover { border-color:var(--gold); color:var(--gold-light); }
-.footer-col-title {
-  font-family:'Montserrat',sans-serif; font-size:0.58rem; font-weight:600;
-  letter-spacing:0.28em; text-transform:uppercase; color:var(--gold); margin-bottom:1.1rem;
-}
-.footer-col ul { list-style:none; }
-.footer-col ul li { margin-bottom:0.45rem; }
-.footer-col ul li a {
-  font-family:'Montserrat',sans-serif; font-size:0.65rem;
-  color:rgba(255,255,255,0.65); text-decoration:none; letter-spacing:0.04em; transition:color 0.2s;
-}
-.footer-col ul li a:hover { color:#fff; }
-.footer-col .dim { font-family:'Montserrat',sans-serif; font-size:0.65rem; color:rgba(255,255,255,0.3); }
-.footer-bottom {
-  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;
-}
-.footer-legal {
-  font-family:'Montserrat',sans-serif; font-size:0.55rem;
-  color:rgba(255,255,255,0.3); letter-spacing:0.06em; line-height:1.9;
-}
-.footer-legal a { color:rgba(255,255,255,0.3); text-decoration:none; }
-.footer-legal a:hover { color:rgba(255,255,255,0.7); }
-
-/* RESPONSIVE */
-@media (max-width:1100px) {
-  nav { display:none; }
-  nav.open {
-    display:flex; flex-direction:column; position:absolute;
-    top:80px; left:0; right:0; background:#1a1a1a;
-    padding:0.5rem 0; border-top:1px solid var(--border-light);
-    max-height:calc(100vh - 80px); overflow-y:auto; z-index:999;
-  }
-  .hamburger { display:flex; }
-  .nav-item { width:100%; }
-  .nav-link { padding:0.85rem 1.5rem; font-size:0.7rem; border-bottom:1px solid rgba(255,255,255,0.06); }
-  .dropdown { position:static; display:none; border:none; background:rgba(0,0,0,0.3); }
-  .nav-item.open .dropdown { display:block; }
-  .dropdown a { padding:0.7rem 2.5rem; font-size:0.65rem; }
-  .quad-grid { grid-template-columns:1fr 1fr; }
-  .quad-box { height:380px; }
-  .quad-box+.quad-box { border-left:none; }
-  .qlink { padding:1.5rem 2rem; }
-  .qlink-title { font-size:1rem; }
-  .footer-top { grid-template-columns:1fr 1fr; gap:2rem; }
-}
-@media (max-width:640px) {
-  .header-inner { padding:0 1rem; height:70px; }
-  .logo { font-size:1.1rem; }
-  .hero-title { font-size:3.8rem; }
-  .hero-sub { font-size:0.9rem; }
-  .hero-cta { padding:0.75rem 2rem; font-size:0.6rem; }
-  .quad-grid { grid-template-columns:1fr; }
-  .quad-box { height:260px; }
-  .quad-box+.quad-box { border-left:none; border-top:1px solid rgba(255,255,255,0.15); }
-  .qlink { padding:1.25rem 1.5rem; }
-  .qlink-title { font-size:0.85rem; }
-  .qlink-arrow { font-size:1.3rem; }
-  .footer-top { grid-template-columns:1fr; gap:2rem; }
-  footer { padding:3rem 1.5rem 1.5rem; }
-  .footer-bottom { flex-direction:column; }
-  .footer-legal { text-align:center !important; }
-}
-
-
-</style>
-<style>
-:root{--black:#0D0D0D;--brown:#2C1A0E;--gold:#B8933A;--gold2:#D4AC55;--cream:#FAF7F2;--burg:#5C1A2E;--neon:#FF6EC7;}
-body{font-family:'Montserrat',sans-serif;background:var(--cream);color:var(--brown);}
-.hero{background:linear-gradient(135deg,#0D0D0D,#1A0A1A);padding:5rem 1.5rem 3rem;text-align:center;}
-.hero-eye{font-size:0.65rem;font-weight:700;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:0.75rem;}
-.hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,6vw,4rem);color:#fff;margin-bottom:0.5rem;}
-.hero p{font-size:0.85rem;color:rgba(255,255,255,0.6);max-width:480px;margin:0 auto;}
-.events-wrap{max-width:1100px;margin:0 auto;padding:4rem 1.5rem;}
-.section-label{font-size:0.62rem;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);}
-.section-title{font-family:'Cormorant Garamond',serif;font-size:2.4rem;color:var(--brown);margin:0.4rem 0 2rem;}
-.events-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.5rem;}
-.event-card{background:#fff;border:1px solid rgba(0,0,0,0.07);overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;cursor:pointer;}
-.event-card:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,0.12);}
-.event-card-banner{height:140px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
-.event-card-banner.neon{background:linear-gradient(135deg,#0D0D0D,#1A0A2E);}
-.event-card-banner.neon::after{content:'🎤 🎱 🥂';position:absolute;font-size:2rem;opacity:0.3;letter-spacing:0.5rem;}
-.event-card-banner h3{font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:#fff;text-align:center;z-index:1;padding:0 1rem;line-height:1.3;}
-.event-card-body{padding:1.5rem;}
-.event-meta{display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1rem;}
-.event-tag{font-size:0.6rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:0.2rem 0.6rem;border-radius:2px;}
-.tag-date{background:#F5F0E8;color:var(--brown);}
-.tag-time{background:#F5F0E8;color:var(--brown);}
-.tag-spots{background:#e8f5e9;color:#2e7d32;}
-.tag-spots.low{background:#fff3e0;color:#e65100;}
-.tag-spots.sold{background:#ffebee;color:#c62828;}
-.event-prices{display:flex;gap:0.75rem;margin-bottom:1.25rem;}
-.price-opt{flex:1;border:1px solid #e0d9d0;padding:0.6rem;text-align:center;}
-.price-opt .amount{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:700;color:var(--gold);display:block;}
-.price-opt .label{font-size:0.6rem;color:#888;text-transform:uppercase;letter-spacing:0.06em;}
-.event-btn{display:block;width:100%;padding:0.85rem;background:var(--brown);color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:0.72rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;transition:background 0.2s;text-align:center;}
-.event-btn:hover{background:var(--gold);color:var(--black);}
-.event-btn.sold-out{background:#ccc;cursor:not-allowed;}
+:root{--black:#0D0D0D;--brown:#2C1A0E;--gold:#B8933A;--gold2:#D4AC55;--cream:#FAF7F2;--burg:#5C1A2E;}
+body{font-family:'Montserrat',sans-serif;background:var(--cream);color:var(--brown);margin:0;}
+.page-hero{background:linear-gradient(135deg,rgba(44,26,14,0.92),rgba(13,13,13,0.95));padding:4rem 1.5rem 3rem;text-align:center;}
+.page-hero .eye{font-size:0.62rem;font-weight:700;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:0.75rem;}
+.page-hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,6vw,4rem);color:#fff;margin-bottom:0.5rem;}
+.page-hero p{font-size:0.85rem;color:rgba(255,255,255,0.65);max-width:500px;margin:0 auto;}
+.filter-bar{display:flex;gap:0.5rem;flex-wrap:wrap;justify-content:center;padding:1.5rem 1.5rem 0;}
+.filter-btn{padding:0.5rem 1.25rem;border:1.5px solid #e0d9d0;background:#fff;font-family:'Montserrat',sans-serif;font-size:0.68rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--brown);cursor:pointer;transition:all 0.2s;}
+.filter-btn:hover,.filter-btn.active{border-color:var(--gold);background:var(--gold);color:#fff;}
+.events-wrap{max-width:1100px;margin:2.5rem auto;padding:0 1.5rem 5rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.5rem;}
+.ev-card{background:#fff;border:1px solid rgba(0,0,0,0.07);overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;display:flex;flex-direction:column;}
+.ev-card:hover{transform:translateY(-3px);box-shadow:0 10px 40px rgba(0,0,0,0.1);}
+.ev-card-img{height:200px;background:linear-gradient(135deg,var(--burg),#1A0508);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:1.5rem;position:relative;}
+.ev-card-img .ev-emoji{font-size:3rem;margin-bottom:0.5rem;}
+.ev-card-img .ev-name{font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:#fff;font-weight:600;line-height:1.2;}
+.ev-badge{position:absolute;top:1rem;right:1rem;background:var(--gold);color:var(--black);font-size:0.58rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:0.25rem 0.6rem;}
+.ev-card-body{padding:1.5rem;flex:1;display:flex;flex-direction:column;gap:0.4rem;}
+.ev-date{font-size:0.7rem;font-weight:700;letter-spacing:0.08em;color:var(--gold);text-transform:uppercase;}
+.ev-title{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;color:var(--brown);line-height:1.2;}
+.ev-location{font-size:0.72rem;color:#888;}
+.ev-prices{display:flex;gap:0.75rem;margin:0.5rem 0;flex-wrap:wrap;}
+.ev-price{font-size:0.78rem;font-weight:700;}
+.ev-price .amt{color:var(--gold);font-size:1rem;}
+.ev-seats{font-size:0.7rem;color:#888;margin-bottom:auto;}
+.ev-seats .avail{color:#27ae60;font-weight:700;}
+.ev-seats .low{color:#e67e22;font-weight:700;}
+.ev-seats .sold{color:#e74c3c;font-weight:700;}
+.ev-btn{display:block;margin-top:1rem;padding:0.85rem;background:var(--brown);color:#fff;text-align:center;font-size:0.7rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;border:none;font-family:'Montserrat',sans-serif;transition:background 0.2s;width:100%;}
+.ev-btn:hover:not(:disabled){background:var(--gold);color:var(--black);}
+.ev-btn:disabled{background:#ccc;cursor:not-allowed;}
 /* MODAL */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;overflow-y:auto;padding:2rem 1rem;}
 .modal-overlay.open{display:flex;align-items:flex-start;justify-content:center;}
-.modal{background:#fff;max-width:780px;width:100%;position:relative;animation:slideUp 0.25s ease;}
+.modal{background:#fff;max-width:680px;width:100%;position:relative;animation:slideUp 0.25s ease;}
 @keyframes slideUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
-.modal-close{position:absolute;top:1rem;right:1.25rem;background:none;border:none;font-size:1.5rem;cursor:pointer;color:#aaa;z-index:10;}
-.modal-header{background:linear-gradient(135deg,#0D0D0D,#1A0A2E);padding:2rem;color:#fff;}
+.modal-close{position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:1.5rem;cursor:pointer;color:#aaa;z-index:2;}
+.modal-header{background:linear-gradient(135deg,var(--burg),#1A0508);padding:2rem;color:#fff;}
 .modal-header h2{font-family:'Cormorant Garamond',serif;font-size:1.8rem;margin-bottom:0.25rem;}
-.modal-header p{font-size:0.78rem;color:rgba(255,255,255,0.6);}
-.modal-body{display:grid;grid-template-columns:1fr 1fr;gap:0;}
-@media(max-width:600px){.modal-body{grid-template-columns:1fr;}}
-.seat-panel{padding:1.75rem;border-right:1px solid #e0d9d0;}
-.seat-panel h4{font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--brown);margin-bottom:1rem;}
-.seat-legend{display:flex;gap:1rem;margin-bottom:1rem;flex-wrap:wrap;}
-.legend-item{display:flex;align-items:center;gap:0.35rem;font-size:0.65rem;color:#888;}
-.legend-dot{width:12px;height:12px;border-radius:2px;}
-.dot-avail{background:#e8f5e9;border:1px solid #4caf50;}
-.dot-taken{background:#ffebee;border:1px solid #f44336;}
-.dot-selected{background:#B8933A;border:1px solid #B8933A;}
-.tables-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:0.5rem;margin-bottom:1.5rem;}
-.table-seat{aspect-ratio:1;border:2px solid #e0d9d0;background:#f9f6f1;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s;font-size:0.6rem;font-weight:700;color:#888;border-radius:4px;}
-.table-seat:hover:not(.taken){border-color:var(--gold);background:#fff9f0;color:var(--brown);}
-.table-seat.selected{border-color:var(--gold);background:var(--gold);color:#fff;}
-.table-seat.taken{border-color:#f44336;background:#ffebee;color:#c62828;cursor:not-allowed;opacity:0.7;}
-.table-seat .icon{font-size:1.1rem;}
-.bar-seats-row{display:flex;gap:0.4rem;flex-wrap:wrap;}
-.bar-seat{width:36px;height:36px;border:2px solid #e0d9d0;background:#f9f6f1;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.6rem;font-weight:700;color:#888;border-radius:50%;transition:all 0.15s;}
-.bar-seat:hover:not(.taken){border-color:var(--gold);background:#fff9f0;color:var(--brown);}
-.bar-seat.selected{border-color:var(--gold);background:var(--gold);color:#fff;}
-.bar-seat.taken{border-color:#f44336;background:#ffebee;color:#c62828;cursor:not-allowed;opacity:0.7;}
-.form-panel{padding:1.75rem;}
-.form-panel h4{font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--brown);margin-bottom:1rem;}
-.fl{margin-bottom:0.75rem;}
-.fl label{display:block;font-size:0.6rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.3rem;}
-.fl input,.fl select{width:100%;padding:0.65rem 0.75rem;border:2px solid #e0d9d0;font-family:'Montserrat',sans-serif;font-size:0.82rem;color:var(--brown);transition:border 0.2s;}
+.modal-header p{font-size:0.78rem;color:rgba(255,255,255,0.7);}
+.modal-body{padding:2rem;}
+.ticket-choice{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;}
+.ticket-opt{border:2px solid #e0d9d0;padding:1rem;cursor:pointer;transition:all 0.2s;text-align:center;}
+.ticket-opt.selected{border-color:var(--gold);background:#FBF6EC;}
+.ticket-opt h4{font-size:0.8rem;font-weight:700;color:var(--brown);margin-bottom:0.25rem;}
+.ticket-opt .price{font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--gold);font-weight:700;}
+.ticket-opt .desc{font-size:0.65rem;color:#888;line-height:1.5;margin-top:0.25rem;}
+.seat-section{margin-bottom:1.5rem;}
+.seat-section h3{font-size:0.72rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--brown);margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid #e0d9d0;}
+.seat-toggle{display:flex;gap:0.5rem;margin-bottom:1.25rem;}
+.seat-toggle-btn{flex:1;padding:0.65rem;border:2px solid #e0d9d0;background:#fff;font-family:'Montserrat',sans-serif;font-size:0.7rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+.seat-toggle-btn.active{border-color:var(--brown);background:var(--brown);color:#fff;}
+/* TABLE MAP */
+.table-map{background:#F5F0E8;padding:1.25rem;border:1px solid #e0d9d0;margin-bottom:1rem;}
+.table-map-title{font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:1rem;text-align:center;}
+.stage{background:var(--brown);color:#fff;text-align:center;padding:0.5rem;font-size:0.65rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:1.25rem;}
+.tables-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:0.75rem;margin-bottom:1rem;}
+.table-btn{aspect-ratio:1;border-radius:50%;border:2px solid var(--brown);background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:0.6rem;font-weight:700;color:var(--brown);transition:all 0.2s;text-align:center;}
+.table-btn:hover:not(.taken,.selected){background:#FBF6EC;border-color:var(--gold);}
+.table-btn.selected{background:var(--gold);border-color:var(--gold);color:#fff;}
+.table-btn.taken{background:#f0f0f0;border-color:#ccc;color:#bbb;cursor:not-allowed;}
+.bar-label{font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;text-align:center;margin-bottom:0.5rem;}
+.bar-seats-row{display:flex;flex-wrap:wrap;gap:0.4rem;justify-content:center;}
+.bar-seat{width:32px;height:32px;border-radius:50%;border:2px solid var(--brown);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.6rem;font-weight:700;color:var(--brown);transition:all 0.2s;}
+.bar-seat:hover:not(.taken,.selected){background:#FBF6EC;border-color:var(--gold);}
+.bar-seat.selected{background:var(--gold);border-color:var(--gold);color:#fff;}
+.bar-seat.taken{background:#f0f0f0;border-color:#ccc;color:#bbb;cursor:not-allowed;}
+.legend{display:flex;gap:1rem;justify-content:center;margin-top:0.75rem;flex-wrap:wrap;}
+.legend-item{display:flex;align-items:center;gap:0.4rem;font-size:0.62rem;color:#666;}
+.legend-dot{width:12px;height:12px;border-radius:50%;}
+.legend-dot.avail{background:#fff;border:2px solid var(--brown);}
+.legend-dot.taken{background:#f0f0f0;border:2px solid #ccc;}
+.legend-dot.selected{background:var(--gold);}
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;}
+@media(max-width:500px){.form-grid{grid-template-columns:1fr;}}
+.fl label{display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.35rem;}
+.fl input,.fl select{width:100%;padding:0.7rem 0.85rem;border:2px solid #e0d9d0;font-family:'Montserrat',sans-serif;font-size:0.85rem;color:var(--brown);transition:border 0.2s;background:#fff;}
 .fl input:focus,.fl select:focus{outline:none;border-color:var(--gold);}
-.ticket-opts{display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:0.75rem;}
-.ticket-opt{border:2px solid #e0d9d0;padding:0.75rem;cursor:pointer;transition:all 0.15s;text-align:center;}
-.ticket-opt.selected{border-color:var(--gold);background:#fff9f0;}
-.ticket-opt .t-price{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;color:var(--gold);}
-.ticket-opt .t-label{font-size:0.6rem;color:#888;text-transform:uppercase;}
-.selection-summary{background:#F5F0E8;padding:0.75rem;margin-bottom:0.75rem;font-size:0.75rem;color:var(--brown);}
-.selection-summary strong{color:var(--gold);}
-.submit-btn{width:100%;padding:1rem;background:var(--brown);color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:0.72rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;transition:background 0.2s;}
-.submit-btn:hover:not(:disabled){background:var(--gold);color:var(--black);}
-.submit-btn:disabled{opacity:0.5;cursor:not-allowed;}
-.error-msg{color:#c62828;font-size:0.75rem;margin-bottom:0.5rem;display:none;}
-.success-panel{display:none;text-align:center;padding:3rem 2rem;}
-.success-panel h3{font-family:'Cormorant Garamond',serif;font-size:2rem;color:var(--gold);margin-bottom:0.5rem;}
-/* ADMIN link */
-.admin-bar{background:var(--brown);text-align:center;padding:0.5rem;font-size:0.65rem;}
-.admin-bar a{color:var(--gold);text-decoration:none;letter-spacing:0.1em;text-transform:uppercase;}
-footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62rem;color:rgba(255,255,255,0.3);}
-@media(max-width:768px){.events-grid{grid-template-columns:1fr;}.seat-panel{border-right:none;border-bottom:1px solid #e0d9d0;}}
+.order-summary{background:#FAF7F2;border:1px solid #e0d9d0;padding:1rem;margin:1rem 0;}
+.order-summary h4{font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.75rem;}
+.order-row{display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:0.35rem;}
+.order-total{border-top:1px solid #e0d9d0;padding-top:0.5rem;margin-top:0.5rem;font-weight:700;font-size:0.9rem;}
+.modal-submit{width:100%;padding:1.1rem;background:var(--brown);color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:0.75rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;transition:background 0.2s;margin-top:0.5rem;}
+.modal-submit:hover:not(:disabled){background:var(--gold);color:var(--black);}
+.modal-submit:disabled{opacity:0.6;cursor:not-allowed;}
+.success-box{display:none;text-align:center;padding:3rem 2rem;}
+.success-box .icon{font-size:3rem;margin-bottom:1rem;}
+.success-box h3{font-family:'Cormorant Garamond',serif;font-size:2rem;color:var(--gold);margin-bottom:0.5rem;}
+.success-box p{font-size:0.82rem;color:#666;line-height:1.7;}
+.error-msg{background:#FEF2F2;border:1px solid #FECACA;color:#991B1B;padding:0.75rem 1rem;font-size:0.78rem;margin-top:0.75rem;display:none;}
+footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62rem;color:rgba(255,255,255,0.3);letter-spacing:0.05em;}
+@media(max-width:600px){.events-wrap{grid-template-columns:1fr;}.ticket-choice{grid-template-columns:1fr;}.tables-grid{grid-template-columns:repeat(4,1fr);}}
 </style>
 </head>
-<body><header>
-  <div class="header-inner">
-    <a href="index.html" class="logo">The Quarry<span>New Melle, Missouri</span></a>
-    <nav id="mainNav">
-      <div class="nav-item">
-        <a href="#" class="nav-link">Menu &#x25BE;</a>
-        <div class="dropdown">
-          <a href="quarry-menu.html">Food Menu</a>
-          <a href="quarry-drinks.html">Drink Menu</a>
-          <a href="quarry-catering.html">Catering Menu</a>
-          <a href="quarry-brunch.html">Brunch Menu</a>
-        </div>
-      </div>
-      <div class="nav-item">
-        <a href="quarry-golf.html" class="nav-link">Hole-In-One Golf</a>
-      </div>
-      <div class="nav-item">
-        <a href="#" class="nav-link">Entertainment &#x25BE;</a>
-        <div class="dropdown">
-          <a href="quarry-events.html">Events Calendar</a>
-          <a href="quarry-bands.html">Live Bands</a>
-          <a href="/quarry-wineclub">Rock &amp; Vine Wine Club</a>
-          <a href="quarry-beergarden.html">Beer Garden <span class="cs-badge">Coming 2026</span></a>
-        </div>
-      </div>
-      <div class="nav-item">
-        <a href="#" class="nav-link">Reservations &#x25BE;</a>
-        <div class="dropdown">
-          <a href="quarry-reservations.html">Book a Reservation</a>
-          <a href="weddings/index.html">Weddings</a>
-          <a href="quarry-private-events.html">Private Events</a>
-        </div>
-      </div>
-      <div class="nav-item">
-        <a href="quarry-giftcards.html" class="nav-link">Gift Cards</a>
-      </div>
-      <div class="nav-item">
-        <a href="#" class="nav-link">Connect &#x25BE;</a>
-        <div class="dropdown">
-          <a href="quarry-ourstory.html">Our Story</a>
-          <a href="quarry-press.html">Press & Media</a>
-          <a href="quarry-careers.html">Careers</a>
-          <a href="quarry-contact.html">Contact Us</a>
-        </div>
-      </div>
-    </nav>
-    <div class="hamburger" id="hamburger" onclick="toggleNav()"><span></span><span></span><span></span></div>
-  </div>
-</header>
-<!-- Hidden form for Netlify -->
-<form name="event-registration" netlify netlify-honeypot="bot-field" hidden>
-  <input type="hidden" name="form-name" value="event-registration"/>
+<body>undefined
+<!-- Hidden form for Netlify detection -->
+<form name="event-registration-notification" netlify netlify-honeypot="bot-field" hidden>
+  <input type="hidden" name="form-name" value="event-registration-notification"/>
   <input name="bot-field"/><input name="eventId"/><input name="name"/>
-  <input name="email"/><input name="phone"/><input name="seatType"/>
-  <input name="seats"/><input name="ticketType"/><input name="amount"/>
+  <input name="email"/><input name="seatType"/><input name="table"/>
+  <input name="seats"/><input name="party"/><input name="ticket"/><input name="amount"/>
 </form>
 
-<div class="hero">
-  <div class="hero-eye">The Quarry</div>
+<div class="page-hero">
+  <div class="eye">The Quarry</div>
   <h1>Events Calendar</h1>
-  <p>Live music, ticketed events, and special experiences at The Quarry</p>
+  <p>Live music, themed brunches, ticketed events &amp; more — all at The Quarry</p>
 </div>
 
-<div class="events-wrap">
-  <div class="section-label">Upcoming Events</div>
-  <h2 class="section-title">What's Happening</h2>
-  <div class="events-grid" id="eventsGrid">
-    <div style="text-align:center;padding:3rem;color:#aaa;grid-column:1/-1;">Loading events...</div>
-  </div>
+<div class="filter-bar">
+  <button class="filter-btn active" onclick="filterEvents('all',this)">All Events</button>
+  <button class="filter-btn" onclick="filterEvents('brunch',this)">Brunch</button>
+  <button class="filter-btn" onclick="filterEvents('music',this)">Live Music</button>
+  <button class="filter-btn" onclick="filterEvents('members',this)">Members Only</button>
 </div>
 
-<div class="admin-bar"><a href="/quarry-admin.html">&#9965; Staff Admin</a></div>
-<footer>&copy; 2026 The Quarry &nbsp;&middot;&nbsp; 3960 Highway Z, New Melle, MO 63385 &nbsp;&middot;&nbsp; 636-224-8257</footer>
+<div class="events-wrap" id="eventsGrid">
+  <div style="grid-column:1/-1;text-align:center;padding:3rem;color:#aaa;font-size:0.85rem;">Loading events...</div>
+</div>
 
 <!-- REGISTRATION MODAL -->
 <div class="modal-overlay" id="regModal" onclick="if(event.target===this)closeModal()">
 <div class="modal">
   <button class="modal-close" onclick="closeModal()">&#x2715;</button>
-  <div id="modalContent">
+  <div id="modalInner">
     <div class="modal-header">
-      <h2 id="modalTitle">Register for Event</h2>
-      <p id="modalSubtitle"></p>
+      <h2 id="modalTitle">Register</h2>
+      <p id="modalMeta"></p>
     </div>
     <div class="modal-body">
-      <div class="seat-panel">
-        <h4>1. Choose Your Seating</h4>
-        <div style="display:flex;gap:0.5rem;margin-bottom:1rem;">
-          <button onclick="setSeatMode('table')" id="btnTable" style="flex:1;padding:0.5rem;border:2px solid #e0d9d0;background:#fff;font-family:Montserrat,sans-serif;font-size:0.7rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" class="seat-mode-btn active-mode">&#127860; Reserve Table</button>
-          <button onclick="setSeatMode('bar')" id="btnBar" style="flex:1;padding:0.5rem;border:2px solid #e0d9d0;background:#fff;font-family:Montserrat,sans-serif;font-size:0.7rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" class="seat-mode-btn">&#127867; Bar Seats</button>
+      <!-- Step 1: Ticket Type -->
+      <div id="step1">
+        <div class="seat-section">
+          <h3>Choose Your Ticket</h3>
+          <div class="ticket-choice">
+            <div class="ticket-opt selected" id="ticketBase" onclick="selectTicket('base')">
+              <h4>Bingo + Brunch</h4>
+              <div class="price" id="basePrice">$35</div>
+              <div class="desc">Brunch buffet + Singo Bingo game</div>
+            </div>
+            <div class="ticket-opt" id="ticketPremium" onclick="selectTicket('premium')">
+              <h4>VIP Experience</h4>
+              <div class="price" id="premiumPrice">$45</div>
+              <div class="desc">Bottomless Mimosas/Bloody Marys + Brunch + Bingo</div>
+            </div>
+          </div>
         </div>
-        <div class="seat-legend">
-          <div class="legend-item"><div class="legend-dot dot-avail"></div>Available</div>
-          <div class="legend-item"><div class="legend-dot dot-taken"></div>Taken</div>
-          <div class="legend-item"><div class="legend-dot dot-selected"></div>Selected</div>
+        <!-- Step 2: Seat Selection -->
+        <div class="seat-section">
+          <h3>Choose Your Seating</h3>
+          <div class="seat-toggle">
+            <button class="seat-toggle-btn active" id="btnTable" onclick="setSeatMode('table')">&#x1F4CB; Reserve Full Table</button>
+            <button class="seat-toggle-btn" id="btnBar" onclick="setSeatMode('bar')">&#x1F37A; Bar Seats</button>
+          </div>
+          <!-- Table Map -->
+          <div id="tableMapSection">
+            <div class="table-map">
+              <div class="table-map-title">Select Your Table</div>
+              <div class="stage">&#127926; Stage</div>
+              <div class="tables-grid" id="tablesGrid"></div>
+              <div class="bar-label">&#x1F37A; Bar Seating</div>
+              <div class="bar-seats-row" id="barSeatsRow"></div>
+              <div class="legend">
+                <div class="legend-item"><div class="legend-dot avail"></div>Available</div>
+                <div class="legend-item"><div class="legend-dot selected"></div>Selected</div>
+                <div class="legend-item"><div class="legend-dot taken"></div>Reserved</div>
+              </div>
+            </div>
+            <div id="tableInfo" style="font-size:0.78rem;color:#888;text-align:center;min-height:20px;"></div>
+          </div>
         </div>
-        <div id="tableSection">
-          <h4 style="font-size:0.65rem;color:#888;margin-bottom:0.5rem;">DINING TABLES (seats 6 — reserve full table)</h4>
-          <div class="tables-grid" id="tablesGrid"></div>
-        </div>
-        <div id="barSection" style="display:none;">
-          <h4 style="font-size:0.65rem;color:#888;margin-bottom:0.5rem;">BAR SEATS (select individual seats)</h4>
-          <div class="bar-seats-row" id="barGrid"></div>
-          <div style="margin-top:0.75rem;">
-            <label style="font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;">How many seats?</label>
-            <select id="barQty" onchange="updateSummary()" style="width:100%;padding:0.5rem;border:2px solid #e0d9d0;margin-top:0.3rem;font-family:Montserrat,sans-serif;">
+        <!-- Step 3: Contact Info -->
+        <div class="seat-section">
+          <h3>Your Information</h3>
+          <div class="form-grid">
+            <div class="fl"><label>First Name *</label><input type="text" id="regFirst" placeholder="Jane" required/></div>
+            <div class="fl"><label>Last Name *</label><input type="text" id="regLast" placeholder="Smith" required/></div>
+          </div>
+          <div class="form-grid">
+            <div class="fl"><label>Email *</label><input type="email" id="regEmail" placeholder="jane@email.com" required/></div>
+            <div class="fl"><label>Phone</label><input type="tel" id="regPhone" placeholder="(314) 555-0000"/></div>
+          </div>
+          <div id="barPartyRow" style="display:none;" class="fl">
+            <label>Number of Seats *</label>
+            <select id="barPartySize">
               <option value="1">1 seat</option><option value="2">2 seats</option>
               <option value="3">3 seats</option><option value="4">4 seats</option>
             </select>
           </div>
         </div>
+        <!-- Order Summary -->
+        <div class="order-summary">
+          <h4>Order Summary</h4>
+          <div class="order-row"><span id="summaryDesc">Bingo + Brunch</span><span id="summaryPrice">$35</span></div>
+          <div class="order-row"><span id="summarySeats">—</span><span id="summaryQty"></span></div>
+          <div class="order-row order-total"><span>Total</span><span id="summaryTotal">—</span></div>
+        </div>
+        <div id="regError" class="error-msg"></div>
+        <button class="modal-submit" id="regSubmit" onclick="submitRegistration()">Proceed to Payment &rarr;</button>
       </div>
-      <div class="form-panel">
-        <h4>2. Ticket Type</h4>
-        <div class="ticket-opts">
-          <div class="ticket-opt selected" onclick="selectTicket('base')" id="ticketBase">
-            <div class="t-price">$35</div>
-            <div class="t-label">Brunch + Bingo</div>
-          </div>
-          <div class="ticket-opt" onclick="selectTicket('premium')" id="ticketPremium">
-            <div class="t-price">$45</div>
-            <div class="t-label">Bottomless + Brunch + Bingo</div>
-          </div>
-        </div>
-        <h4>3. Your Info</h4>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
-          <div class="fl"><label>First Name *</label><input type="text" id="regFirst" placeholder="Jane" required/></div>
-          <div class="fl"><label>Last Name *</label><input type="text" id="regLast" placeholder="Smith" required/></div>
-        </div>
-        <div class="fl"><label>Email *</label><input type="email" id="regEmail" placeholder="jane@email.com" required/></div>
-        <div class="fl"><label>Phone</label><input type="tel" id="regPhone" placeholder="(314) 555-0000"/></div>
-        <div class="selection-summary" id="selSummary">Select a table or bar seat to continue</div>
-        <div class="error-msg" id="regError"></div>
-        <button class="submit-btn" id="regSubmitBtn" onclick="submitRegistration()">Proceed to Payment &rarr;</button>
+      <!-- Success -->
+      <div class="success-box" id="regSuccess">
+        <div class="icon">&#127881;</div>
+        <h3>You're Registered!</h3>
+        <p id="successMsg">Your spot is reserved. Check your email for confirmation details.</p>
       </div>
     </div>
   </div>
-  <div class="success-panel" id="successPanel">
-    <div style="font-size:2.5rem;margin-bottom:0.75rem;">&#127881;</div>
-    <h3>You're Registered!</h3>
-    <p style="font-size:0.8rem;color:#666;line-height:1.7;">Your registration is confirmed. Check your email for details.</p>
-  </div>
 </div>
 </div>
 
+<footer>&copy; 2026 The Quarry &nbsp;&middot;&nbsp; 3960 Highway Z, New Melle, MO 63385 &nbsp;&middot;&nbsp; 636-224-8257 &nbsp;&middot;&nbsp; management@thequarrystl.com</footer>
 <script>
-// Embedded event data (fallback + primary for fast load)
-var EVENTS = [{
-  id:'neon-bingo-apr12',
-  title:'Ladies Neon Singo Bingo Brunch',
-  subtitle:'Neon 80s Singo-Bingo Ladies Brunch',
-  date:'April 12, 2026',
-  time:'8:40 AM – 11:40 AM',
-  location:'The Quarry, 3960 State Hwy Z, Wentzville, MO 63385',
-  priceBase:35,
-  pricePremium:45,
-  tableSize:6,
-  totalTables:10,
-  totalBarSeats:12,
-  totalCapacity:72,
-  takenTables:[],
-  takenBar:[],
-  totalRegistered:0,
-  style:'neon',
-  description:'Ladies, get your neon on! Join us for a morning of Singo Bingo, bottomless brunch cocktails, and great food. Tables seat 6 — reserve your full table or grab a bar seat.'
-}];
+var ALL_EVENTS=[];
+var currentEvent=null;
+var selectedTicket='base';
+var selectedTable=null;
+var selectedBarSeats=[];
+var seatMode='table';
 
-var currentEvent=null, selectedSeatType='table', selectedTable=null, selectedBarSeats=[], selectedTicket='base';
-
-// Load live seat data
-(async function loadSeatData(){
+// Load events
+async function loadEvents(){
   try{
-    const r=await fetch('/.netlify/functions/get-event?eventId=neon-bingo-apr12');
-    if(r.ok){const d=await r.json();if(d.takenTables)EVENTS[0].takenTables=d.takenTables;if(d.takenBar)EVENTS[0].takenBar=d.takenBar;if(d.totalRegistered)EVENTS[0].totalRegistered=d.totalRegistered;}
-  }catch(e){}
-  renderEvents();
-})();
-
-function renderEvents(){
-  var grid=document.getElementById('eventsGrid');
-  grid.innerHTML='';
-  EVENTS.forEach(function(ev){
-    var spotsLeft=ev.totalCapacity-ev.totalRegistered;
-    var spotsClass=spotsLeft<=0?'sold':spotsLeft<=10?'low':'';
-    var spotsText=spotsLeft<=0?'SOLD OUT':spotsLeft+' spots left';
-    var card=document.createElement('div');
-    card.className='event-card';
-    card.innerHTML=
-      '<div class="event-card-banner '+ev.style+'"><h3>'+ev.title+'</h3></div>'+
-      '<div class="event-card-body">'+
-        '<div class="event-meta">'+
-          '<span class="event-tag tag-date">&#128197; '+ev.date+'</span>'+
-          '<span class="event-tag tag-time">&#128336; '+ev.time+'</span>'+
-          '<span class="event-tag tag-spots '+spotsClass+'">'+spotsText+'</span>'+
-        '</div>'+
-        '<p style="font-size:0.78rem;color:#666;line-height:1.6;margin-bottom:1rem;">'+ev.description+'</p>'+
-        '<div class="event-prices">'+
-          '<div class="price-opt"><span class="amount">$35</span><span class="label">Brunch + Bingo</span></div>'+
-          '<div class="price-opt"><span class="amount">$45</span><span class="label">Bottomless + Brunch + Bingo</span></div>'+
-        '</div>'+
-        '<button class="event-btn'+(spotsLeft<=0?' sold-out':'')+'" onclick="openModal(''+ev.id+'')">'+(spotsLeft<=0?'Sold Out':'Register Now &rarr;')+'</button>'+
-      '</div>';
-    grid.appendChild(card);
-  });
+    // Seed first then load
+    await fetch('/.netlify/functions/seed-events');
+    const res=await fetch('/.netlify/functions/get-event?eventId=neon-bingo-apr-2026');
+    if(res.ok){
+      const ev=await res.json();
+      ALL_EVENTS=[ev];
+      renderEvents(ALL_EVENTS);
+    }
+  }catch(e){
+    document.getElementById('eventsGrid').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:3rem;color:#aaa;">Unable to load events. Please try again.</div>';
+  }
 }
 
-function openModal(eventId){
-  currentEvent=EVENTS.find(function(e){return e.id===eventId;});
-  if(!currentEvent)return;
-  selectedTable=null;selectedBarSeats=[];selectedTicket='base';selectedSeatType='table';
-  document.getElementById('modalTitle').textContent=currentEvent.title;
-  document.getElementById('modalSubtitle').textContent=currentEvent.date+' · '+currentEvent.time;
-  document.getElementById('modalContent').style.display='block';
-  document.getElementById('successPanel').style.display='none';
+function renderEvents(events){
+  const grid=document.getElementById('eventsGrid');
+  if(!events.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:3rem;color:#aaa;font-size:0.85rem;">No events in this category right now. Check back soon!</div>';return;}
+  grid.innerHTML=events.map(ev=>{
+    const taken=ev.takenTables?ev.takenTables.length:0;
+    const totalTables=ev.tableCount||10;
+    const barTaken=(ev.takenBarSeats||[]).length;
+    const totalBar=ev.barSeatCount||12;
+    const tableSpotsLeft=(totalTables-taken)*((ev.tableSize||6));
+    const barSpotsLeft=totalBar-barTaken;
+    const totalLeft=tableSpotsLeft+barSpotsLeft;
+    const total=ev.totalCapacity||72;
+    const pct=Math.round(((total-totalLeft)/total)*100);
+    const availClass=totalLeft===0?'sold':totalLeft<20?'low':'avail';
+    const availText=totalLeft===0?'SOLD OUT':totalLeft<20?totalLeft+' spots left':totalLeft+' spots available';
+    return '<div class="ev-card" data-tags="'+(ev.tags||[]).join(',').toLowerCase()+'">'
+      +'<div class="ev-card-img"><div class="ev-emoji">&#x1F380;&#128142;&#x1F378;</div>'
+      +'<div class="ev-name">'+ev.title+'</div>'
+      +(pct>80?'<div class="ev-badge">Almost Full</div>':pct>50?'<div class="ev-badge" style="background:var(--brown)">Filling Fast</div>':'')
+      +'</div>'
+      +'<div class="ev-card-body">'
+      +'<div class="ev-date">'+ev.date+' &nbsp;&middot;&nbsp; '+ev.startTime+' – '+ev.endTime+'</div>'
+      +'<div class="ev-title">'+ev.subtitle+'</div>'
+      +'<div class="ev-location">&#x1F4CD; '+ev.location+'</div>'
+      +'<div class="ev-prices">'
+      +'<div class="ev-price"><span class="amt">$'+ev.priceBase+'</span><br/><span style="font-size:0.62rem;color:#888;">'+ev.priceBaseLabel+'</span></div>'
+      +'<div style="width:1px;background:#e0d9d0;"></div>'
+      +'<div class="ev-price"><span class="amt">$'+ev.pricePremium+'</span><br/><span style="font-size:0.62rem;color:#888;">'+ev.pricePremiumLabel+'</span></div>'
+      +'</div>'
+      +'<div class="ev-seats">Availability: <span class="'+availClass+'">'+availText+'</span></div>'
+      +'<button class="ev-btn"'+(totalLeft===0?' disabled':' onclick="openModal(''+ev.id+'',ALL_EVENTS.find(function(e){return e.id===''+ev.id+''}))"')+'>'+(totalLeft===0?'Sold Out':'Register Now')+' &rarr;</button>'
+      +'</div></div>';
+  }).join('');
+}
+
+function filterEvents(tag,btn){
+  document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  if(tag==='all'){renderEvents(ALL_EVENTS);return;}
+  renderEvents(ALL_EVENTS.filter(function(ev){return (ev.tags||[]).join(',').toLowerCase().includes(tag);}));
+}
+
+function openModal(eventId,ev){
+  currentEvent=ev;
+  selectedTicket='base';
+  selectedTable=null;
+  selectedBarSeats=[];
+  seatMode='table';
+  document.getElementById('modalTitle').textContent=ev.title;
+  document.getElementById('modalMeta').textContent=ev.date+' · '+ev.startTime+'–'+ev.endTime;
+  document.getElementById('basePrice').textContent='$'+ev.priceBase;
+  document.getElementById('premiumPrice').textContent='$'+ev.pricePremium;
+  document.getElementById('ticketBase').classList.add('selected');
+  document.getElementById('ticketPremium').classList.remove('selected');
+  document.getElementById('btnTable').classList.add('active');
+  document.getElementById('btnBar').classList.remove('active');
+  document.getElementById('tableMapSection').style.display='block';
+  document.getElementById('barPartyRow').style.display='none';
+  document.getElementById('regSuccess').style.display='none';
+  document.getElementById('step1').style.display='block';
   document.getElementById('regError').style.display='none';
-  document.getElementById('regSubmitBtn').disabled=false;
-  document.getElementById('regSubmitBtn').textContent='Proceed to Payment →';
-  renderTables();renderBar();updateSummary();
+  document.getElementById('regFirst').value='';
+  document.getElementById('regLast').value='';
+  document.getElementById('regEmail').value='';
+  document.getElementById('regPhone').value='';
+  buildTableMap(ev);
+  updateSummary();
   document.getElementById('regModal').classList.add('open');
   document.body.style.overflow='hidden';
 }
+
 function closeModal(){document.getElementById('regModal').classList.remove('open');document.body.style.overflow='';}
 
+function buildTableMap(ev){
+  const tablesGrid=document.getElementById('tablesGrid');
+  const barRow=document.getElementById('barSeatsRow');
+  const taken=ev.takenTables||[];
+  const takenBar=ev.takenBarSeats||[];
+  tablesGrid.innerHTML='';
+  for(var i=1;i<=(ev.tableCount||10);i++){
+    (function(n){
+      var isTaken=taken.includes('T'+n);
+      var btn=document.createElement('div');
+      btn.className='table-btn'+(isTaken?' taken':'');
+      btn.innerHTML='<span style="font-size:0.8rem;">T'+n+'</span><span style="font-size:0.55rem;opacity:0.7;">'+(ev.tableSize||6)+' seats</span>';
+      btn.id='tbl-T'+n;
+      if(!isTaken)btn.onclick=function(){selectTable('T'+n);};
+      tablesGrid.appendChild(btn);
+    })(i);
+  }
+  barRow.innerHTML='';
+  for(var j=1;j<=(ev.barSeatCount||12);j++){
+    (function(n){
+      var isTaken=takenBar.includes('B'+n);
+      var s=document.createElement('div');
+      s.className='bar-seat'+(isTaken?' taken':'');
+      s.textContent=n;
+      s.id='bar-B'+n;
+      if(!isTaken)s.onclick=function(){toggleBarSeat('B'+n);};
+      barRow.appendChild(s);
+    })(j);
+  }
+}
+
+function selectTable(id){
+  document.querySelectorAll('.table-btn').forEach(function(b){b.classList.remove('selected');});
+  selectedTable=id;
+  var el=document.getElementById('tbl-'+id);
+  if(el)el.classList.add('selected');
+  document.getElementById('tableInfo').textContent='Table '+id+' selected — seats entire table of '+(currentEvent.tableSize||6);
+  updateSummary();
+}
+
+function toggleBarSeat(id){
+  var idx=selectedBarSeats.indexOf(id);
+  if(idx>-1){selectedBarSeats.splice(idx,1);document.getElementById('bar-'+id).classList.remove('selected');}
+  else{selectedBarSeats.push(id);document.getElementById('bar-'+id).classList.add('selected');}
+  updateSummary();
+}
+
 function setSeatMode(mode){
-  selectedSeatType=mode;selectedTable=null;selectedBarSeats=[];
-  document.getElementById('tableSection').style.display=mode==='table'?'block':'none';
-  document.getElementById('barSection').style.display=mode==='bar'?'block':'none';
-  document.querySelectorAll('.seat-mode-btn').forEach(function(b){b.style.borderColor='#e0d9d0';b.style.background='#fff';b.style.color=''});
-  var activeBtn=document.getElementById(mode==='table'?'btnTable':'btnBar');
-  activeBtn.style.borderColor='#B8933A';activeBtn.style.background='#fff9f0';activeBtn.style.color='#B8933A';
-  updateSummary();
-}
-
-function renderTables(){
-  var g=document.getElementById('tablesGrid');g.innerHTML='';
-  for(var i=1;i<=currentEvent.totalTables;i++){
-    var taken=currentEvent.takenTables.includes('T'+i);
-    var d=document.createElement('div');
-    d.className='table-seat'+(taken?' taken':'');
-    d.dataset.table='T'+i;
-    d.innerHTML='<span class="icon">&#127860;</span><span>T'+i+'</span>';
-    if(!taken)d.onclick=(function(tid){return function(){selectTable(tid);};}('T'+i));
-    g.appendChild(d);
+  seatMode=mode;
+  selectedTable=null;selectedBarSeats=[];
+  document.querySelectorAll('.table-btn').forEach(function(b){b.classList.remove('selected');});
+  document.querySelectorAll('.bar-seat').forEach(function(s){s.classList.remove('selected');});
+  document.getElementById('tableInfo').textContent='';
+  if(mode==='table'){
+    document.getElementById('btnTable').classList.add('active');
+    document.getElementById('btnBar').classList.remove('active');
+    document.getElementById('tableMapSection').style.display='block';
+    document.getElementById('barPartyRow').style.display='none';
+    document.querySelectorAll('.bar-seat').forEach(function(s){s.style.display='none';});
+    document.querySelectorAll('.table-btn').forEach(function(b){b.style.display='flex';});
+    document.querySelector('.bar-label').style.display='none';
+    document.querySelector('.bar-seats-row').style.display='none';
+  }else{
+    document.getElementById('btnBar').classList.add('active');
+    document.getElementById('btnTable').classList.remove('active');
+    document.getElementById('tableMapSection').style.display='block';
+    document.getElementById('barPartyRow').style.display='block';
+    document.querySelectorAll('.table-btn').forEach(function(b){b.style.display='none';});
+    document.querySelector('.stage').style.display='none';
+    document.querySelector('.bar-label').style.display='block';
+    document.querySelector('.bar-seats-row').style.display='flex';
   }
-}
-function selectTable(tid){
-  selectedTable=tid;
-  document.querySelectorAll('.table-seat:not(.taken)').forEach(function(el){
-    el.classList.toggle('selected',el.dataset.table===tid);
-  });
-  updateSummary();
-}
-
-function renderBar(){
-  var g=document.getElementById('barGrid');g.innerHTML='';
-  for(var i=1;i<=currentEvent.totalBarSeats;i++){
-    var taken=currentEvent.takenBar.includes('B'+i);
-    var d=document.createElement('div');
-    d.className='bar-seat'+(taken?' taken':'');
-    d.dataset.seat='B'+i;
-    d.innerHTML='B'+i;
-    if(!taken)d.onclick=(function(sid){return function(){toggleBarSeat(sid);};}('B'+i));
-    g.appendChild(d);
-  }
-}
-function toggleBarSeat(sid){
-  var qty=parseInt(document.getElementById('barQty').value)||1;
-  var idx=selectedBarSeats.indexOf(sid);
-  if(idx>-1){selectedBarSeats.splice(idx,1);}
-  else if(selectedBarSeats.length<qty){selectedBarSeats.push(sid);}
-  else{selectedBarSeats.shift();selectedBarSeats.push(sid);}
-  document.querySelectorAll('.bar-seat:not(.taken)').forEach(function(el){
-    el.classList.toggle('selected',selectedBarSeats.includes(el.dataset.seat));
-  });
   updateSummary();
 }
 
@@ -672,19 +401,17 @@ function selectTicket(type){
 }
 
 function updateSummary(){
-  var summary=document.getElementById('selSummary');
+  if(!currentEvent)return;
   var price=selectedTicket==='premium'?currentEvent.pricePremium:currentEvent.priceBase;
-  var ticketLabel=selectedTicket==='premium'?'Bottomless + Brunch + Bingo':'Brunch + Bingo';
-  if(selectedSeatType==='table'){
-    if(!selectedTable){summary.innerHTML='Select a table to continue';return;}
-    var total=price*currentEvent.tableSize;
-    summary.innerHTML='<strong>'+selectedTable+'</strong> (seats '+currentEvent.tableSize+') &nbsp;&middot;&nbsp; '+ticketLabel+' &nbsp;&middot;&nbsp; <strong>$'+total+' total</strong>';
-  } else {
-    var qty=parseInt(document.getElementById('barQty').value)||1;
-    if(selectedBarSeats.length<qty){summary.innerHTML='Select '+qty+' bar seat'+(qty>1?'s':'')+' to continue';return;}
-    var total2=price*qty;
-    summary.innerHTML='Bar seats: <strong>'+selectedBarSeats.join(', ')+'</strong> &nbsp;&middot;&nbsp; '+ticketLabel+' &nbsp;&middot;&nbsp; <strong>$'+total2+' total</strong>';
-  }
+  var desc=selectedTicket==='premium'?'VIP (Bottomless + Brunch + Bingo)':'Bingo + Brunch';
+  document.getElementById('summaryDesc').textContent=desc;
+  document.getElementById('summaryPrice').textContent='$'+price+'/person';
+  var qty=0,seatsDesc='No seat selected';
+  if(seatMode==='table'&&selectedTable){qty=currentEvent.tableSize||6;seatsDesc='Table '+selectedTable+' ('+qty+' seats)';}
+  else if(seatMode==='bar'){qty=parseInt(document.getElementById('barPartySize')?.value)||1;seatsDesc=selectedBarSeats.length?selectedBarSeats.join(', ')+' ('+qty+' seat'+(qty>1?'s':'')+')':'Select bar seats above';}
+  document.getElementById('summarySeats').textContent=seatsDesc;
+  document.getElementById('summaryQty').textContent=qty?'x'+qty:'';
+  document.getElementById('summaryTotal').textContent=qty?'$'+(price*qty).toFixed(2):'—';
 }
 
 async function submitRegistration(){
@@ -694,34 +421,34 @@ async function submitRegistration(){
   var phone=document.getElementById('regPhone').value.trim();
   var errEl=document.getElementById('regError');
   errEl.style.display='none';
-  if(!first||!last||!email){errEl.textContent='Please fill in all required fields.';errEl.style.display='block';return;}
-  if(selectedSeatType==='table'&&!selectedTable){errEl.textContent='Please select a table.';errEl.style.display='block';return;}
-  if(selectedSeatType==='bar'){
-    var qty=parseInt(document.getElementById('barQty').value)||1;
-    if(selectedBarSeats.length<qty){errEl.textContent='Please select '+qty+' bar seat'+(qty>1?'s':'')+'.';errEl.style.display='block';return;}
-  }
-  var btn=document.getElementById('regSubmitBtn');
+  if(!first||!email){errEl.textContent='Please fill in your first name and email.';errEl.style.display='block';return;}
+  if(!email.includes('@')){errEl.textContent='Please enter a valid email address.';errEl.style.display='block';return;}
+  if(seatMode==='table'&&!selectedTable){errEl.textContent='Please select a table from the map.';errEl.style.display='block';return;}
+  if(seatMode==='bar'&&selectedBarSeats.length===0){errEl.textContent='Please select your bar seat(s).';errEl.style.display='block';return;}
+  var qty=seatMode==='bar'?parseInt(document.getElementById('barPartySize').value)||1:(currentEvent.tableSize||6);
+  var btn=document.getElementById('regSubmit');
   btn.disabled=true;btn.textContent='Processing...';
   try{
-    var body={eventId:currentEvent.id,firstName:first,lastName:last,email:email,phone:phone,seatType:selectedSeatType,tableId:selectedSeatType==='table'?selectedTable:null,seatIds:selectedSeatType==='bar'?selectedBarSeats:null,partySize:selectedSeatType==='bar'?parseInt(document.getElementById('barQty').value):currentEvent.tableSize,ticketType:selectedTicket};
-    var r=await fetch('/.netlify/functions/event-register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-    var d=await r.json();
-    if(d.checkoutUrl){window.location.href=d.checkoutUrl;}
-    else{errEl.textContent=d.error||'Something went wrong.';errEl.style.display='block';btn.disabled=false;btn.textContent='Proceed to Payment →';}
+    var body={eventId:currentEvent.id,firstName:first,lastName:last,email:email,phone:phone,
+      seatType:seatMode,tableId:selectedTable||null,seatIds:seatMode==='bar'?selectedBarSeats:[],
+      partySize:qty,ticketType:selectedTicket};
+    var res=await fetch('/.netlify/functions/event-register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    var data=await res.json();
+    if(data.checkoutUrl){window.location.href=data.checkoutUrl;}
+    else{errEl.textContent=data.error||'Something went wrong. Please try again.';errEl.style.display='block';btn.disabled=false;btn.textContent='Proceed to Payment →';}
   }catch(e){errEl.textContent='Network error. Please try again.';errEl.style.display='block';btn.disabled=false;btn.textContent='Proceed to Payment →';}
 }
 
-// Check for success return
-if(window.location.search.includes('registered=1')){
-  window.addEventListener('DOMContentLoaded',function(){
-    var banner=document.createElement('div');
-    banner.style='position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#2e7d32;color:#fff;padding:1rem 2rem;font-size:0.8rem;font-weight:700;z-index:999;border-radius:2px;box-shadow:0 4px 20px rgba(0,0,0,0.2)';
-    banner.textContent='✓ Registration confirmed! Check your email.';
-    document.body.appendChild(banner);
-    setTimeout(function(){banner.remove();},5000);
-  });
+document.getElementById('barPartySize')?.addEventListener('change',updateSummary);
+
+// Show success message if returning from payment
+if(new URLSearchParams(window.location.search).get('registered')==='1'){
+  setTimeout(function(){
+    document.getElementById('eventsGrid').insertAdjacentHTML('beforebegin','<div style="background:#f0fdf4;border:1px solid #86efac;color:#166534;padding:1rem 1.5rem;text-align:center;font-size:0.85rem;font-weight:600;">&#10003; Registration confirmed! Check your email for details.</div>');
+  },500);
 }
-renderEvents();
+
+loadEvents();
 </script>
 </body>
 </html>
