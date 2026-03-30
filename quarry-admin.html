@@ -1,177 +1,1820 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Admin — The Quarry</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-<style>
-:root{--black:#0D0D0D;--brown:#2C1A0E;--gold:#B8933A;--cream:#FAF7F2;}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Montserrat',sans-serif;background:#f5f5f5;color:#333;}
-#loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,var(--brown),#0D0D0D);}
-.login-box{background:#fff;padding:3rem;max-width:380px;width:100%;text-align:center;}
-.login-box h1{font-family:'Cormorant Garamond',serif;font-size:2rem;color:var(--brown);margin-bottom:0.25rem;}
-.login-box p{font-size:0.75rem;color:#888;margin-bottom:2rem;}
-.login-box input{width:100%;padding:0.75rem 1rem;border:2px solid #e0d9d0;font-family:'Montserrat',sans-serif;font-size:0.85rem;margin-bottom:0.75rem;}
-.login-box input:focus{outline:none;border-color:var(--gold);}
-.btn-login{width:100%;padding:0.85rem;background:var(--brown);color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:0.75rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;}
-.btn-login:hover{background:var(--gold);color:var(--black);}
-.login-err{color:#c0392b;font-size:0.75rem;margin-top:0.5rem;display:none;}
-#adminScreen{display:none;min-height:100vh;}
-.admin-nav{background:var(--brown);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:60px;}
-.admin-nav .logo{font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:#fff;}
-.admin-nav .logo span{color:var(--gold);}
-.admin-nav .nav-links{display:flex;gap:0.25rem;}
-.admin-nav .nav-links button{background:none;border:none;color:rgba(255,255,255,0.65);font-family:'Montserrat',sans-serif;font-size:0.65rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;padding:0.5rem 0.85rem;}
-.admin-nav .nav-links button:hover,.admin-nav .nav-links button.active{color:var(--gold);}
-.admin-body{max-width:1200px;margin:0 auto;padding:2rem 1.5rem;}
-.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;}
-.section-header h2{font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--brown);}
-.btn-primary{background:var(--brown);color:#fff;border:none;padding:0.65rem 1.5rem;font-family:'Montserrat',sans-serif;font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;}
-.btn-primary:hover{background:var(--gold);color:var(--black);}
-.btn-danger{background:#c0392b;color:#fff;border:none;padding:0.5rem 1rem;font-family:'Montserrat',sans-serif;font-size:0.62rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;}
-.btn-sec{background:#fff;color:var(--brown);border:1px solid #e0d9d0;padding:0.5rem 1rem;font-family:'Montserrat',sans-serif;font-size:0.62rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;}
-.stat-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem;margin-bottom:2rem;}
-.stat-card{background:#fff;padding:1.5rem;border-left:4px solid var(--gold);box-shadow:0 1px 4px rgba(0,0,0,0.06);}
-.stat-card .num{font-family:'Cormorant Garamond',serif;font-size:2.5rem;color:var(--brown);line-height:1;}
-.stat-card .label{font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-top:0.25rem;}
-.events-table{width:100%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.06);border-collapse:collapse;}
-.events-table th{background:var(--brown);color:#fff;font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:0.75rem 1rem;text-align:left;}
-.events-table td{padding:0.85rem 1rem;border-bottom:1px solid #f0ece8;font-size:0.78rem;vertical-align:middle;}
-.events-table tr:hover td{background:#faf7f2;}
-.pct-bar{height:6px;background:#e0d9d0;width:120px;display:inline-block;vertical-align:middle;margin-top:4px;}
-.pct-fill{height:100%;background:var(--gold);}
-.pct-fill.high{background:#c0392b;}
-.badge{display:inline-block;padding:0.25rem 0.6rem;font-size:0.6rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;}
-.badge.active{background:#e8f8ed;color:#27ae60;}.badge.inactive{background:#f5e8e8;color:#c0392b;}.badge.free{background:#e8f0fa;color:#2980b9;}
-.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;align-items:center;justify-content:center;padding:1rem;}
-.modal-ov.open{display:flex;}
-.modal{background:#fff;max-width:620px;width:100%;max-height:90vh;overflow-y:auto;}
-.modal-hd{background:var(--brown);padding:1.5rem 2rem;color:#fff;display:flex;align-items:center;justify-content:space-between;}
-.modal-hd h3{font-family:'Cormorant Garamond',serif;font-size:1.5rem;}
-.modal-hd button{background:none;border:none;color:rgba(255,255,255,0.5);font-size:1.3rem;cursor:pointer;}
-.modal-bd{padding:2rem;}
-.fl{margin-bottom:1rem;}
-.fl label{display:block;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:0.3rem;}
-.fl input,.fl select,.fl textarea{width:100%;padding:0.65rem 0.85rem;border:2px solid #e0d9d0;font-family:'Montserrat',sans-serif;font-size:0.82rem;}
-.fl input:focus,.fl select:focus{outline:none;border-color:var(--gold);}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;}
-.modal-ft{padding:0 2rem 2rem;display:flex;gap:0.75rem;justify-content:flex-end;}
-.reg-table{width:100%;background:#fff;border-collapse:collapse;box-shadow:0 1px 4px rgba(0,0,0,0.06);}
-.reg-table th{background:#333;color:#fff;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:0.65rem 1rem;text-align:left;}
-.reg-table td{padding:0.75rem 1rem;border-bottom:1px solid #f0ece8;font-size:0.75rem;}
-.back-btn{background:none;border:none;color:var(--gold);font-family:'Montserrat',sans-serif;font-size:0.72rem;font-weight:700;cursor:pointer;padding:0;margin-bottom:1.25rem;letter-spacing:0.08em;}
-.empty{text-align:center;padding:3rem;color:#aaa;font-size:0.82rem;}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Quarry Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --brown-dark: #2C1A0E;
+            --gold: #B8933A;
+            --gold-light: #D4AF6A;
+            --cream: #FAF7F2;
+            --charcoal: #1A1A1A;
+            --gray-light: #F5F3F0;
+            --gray-medium: #D0CCCB;
+            --success: #4CAF50;
+            --danger: #FF6B6B;
+            --warning: #FFC107;
+            --info: #2196F3;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--cream);
+            color: var(--charcoal);
+            overflow: hidden;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 600;
+        }
+
+        /* LOGIN SCREEN */
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: linear-gradient(135deg, var(--charcoal) 0%, var(--brown-dark) 100%);
+        }
+
+        .login-card {
+            background: var(--cream);
+            padding: 3rem;
+            border-radius: 8px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-card h1 {
+            font-size: 2.5rem;
+            color: var(--brown-dark);
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .login-card .subtitle {
+            font-size: 0.9rem;
+            color: var(--gray-medium);
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--brown-dark);
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--gray-medium);
+            border-radius: 4px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(184, 147, 58, 0.1);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: var(--gold);
+            color: var(--charcoal);
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--gold-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(184, 147, 58, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: var(--brown-dark);
+            color: var(--cream);
+        }
+
+        .btn-secondary:hover {
+            background-color: #3D2415;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #45a049;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #FF5252;
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .btn-icon {
+            padding: 0.5rem;
+            width: 36px;
+            height: 36px;
+        }
+
+        /* MAIN LAYOUT */
+        .main-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .topnav {
+            background-color: var(--brown-dark);
+            color: var(--cream);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            grid-column: 1 / -1;
+        }
+
+        .topnav h1 {
+            font-size: 1.8rem;
+            color: var(--gold-light);
+        }
+
+        .nav-items {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-items button {
+            background: none;
+            border: none;
+            color: var(--cream);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .nav-items button:hover {
+            background-color: rgba(212, 175, 106, 0.2);
+            color: var(--gold-light);
+        }
+
+        .nav-items button.active {
+            background-color: var(--gold);
+            color: var(--brown-dark);
+        }
+
+        .content-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        /* SECTIONS */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* DASHBOARD */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--brown-dark), #3D2415);
+            color: var(--cream);
+            padding: 2rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--gold);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card h3 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--gold-light);
+        }
+
+        .dashboard-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+        }
+
+        /* TABLES */
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .table-header {
+            background-color: var(--brown-dark);
+            color: var(--cream);
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-header h2 {
+            font-size: 1.5rem;
+            color: var(--gold-light);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background-color: var(--gray-light);
+            border-bottom: 2px solid var(--gray-medium);
+        }
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--brown-dark);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        tbody tr:hover {
+            background-color: rgba(212, 175, 106, 0.05);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background-color: rgba(76, 175, 80, 0.2);
+            color: var(--success);
+        }
+
+        .status-inactive {
+            background-color: rgba(255, 107, 107, 0.2);
+            color: var(--danger);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* MODALS */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--cream);
+            border-radius: 8px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            background-color: var(--brown-dark);
+            color: var(--cream);
+            padding: 2rem;
+            border-bottom: 2px solid var(--gold);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 1.8rem;
+            color: var(--gold-light);
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--cream);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .modal-footer {
+            padding: 1rem 2rem;
+            background-color: var(--gray-light);
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            border-top: 1px solid var(--gray-medium);
+        }
+
+        /* FORMS */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+
+        /* TOASTS */
+        .toast-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .toast {
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            min-width: 300px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        .toast.info {
+            border-left: 4px solid var(--info);
+        }
+
+        /* FLOOR PLAN BUILDER */
+        .floorplan-container {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 2rem;
+            height: calc(100vh - 200px);
+        }
+
+        .floorplan-canvas {
+            background: linear-gradient(45deg, var(--gray-light) 25%, transparent 25%, transparent 75%, var(--gray-light) 75%, var(--gray-light)),
+                        linear-gradient(45deg, var(--gray-light) 25%, transparent 25%, transparent 75%, var(--gray-light) 75%, var(--gray-light));
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            background-color: white;
+            border: 2px solid var(--gray-medium);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .floorplan-toolbar {
+            background: white;
+            border: 1px solid var(--gray-medium);
+            border-radius: 8px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .toolbar-section {
+            border-bottom: 1px solid var(--gray-light);
+            padding-bottom: 1rem;
+        }
+
+        .toolbar-section:last-child {
+            border-bottom: none;
+        }
+
+        .toolbar-section h3 {
+            font-size: 0.9rem;
+            color: var(--brown-dark);
+            margin-bottom: 0.8rem;
+        }
+
+        .toolbar-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .toolbar-buttons button {
+            width: 100%;
+            padding: 0.6rem;
+            font-size: 0.85rem;
+            text-align: left;
+        }
+
+        .properties-panel {
+            background: white;
+            border: 1px solid var(--gray-medium);
+            border-radius: 8px;
+            padding: 1.5rem;
+            display: none;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .properties-panel.active {
+            display: flex;
+        }
+
+        .properties-panel h3 {
+            font-size: 1rem;
+            color: var(--brown-dark);
+        }
+
+        .property-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .property-field label {
+            font-size: 0.85rem;
+            color: var(--charcoal);
+            font-weight: 500;
+        }
+
+        .property-field input {
+            padding: 0.5rem;
+            border: 1px solid var(--gray-medium);
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        /* SVG TABLE STYLES */
+        .table-shape {
+            stroke: var(--brown-dark);
+            stroke-width: 2;
+            fill: var(--gold-light);
+            cursor: move;
+            transition: fill 0.2s;
+        }
+
+        .table-shape:hover {
+            fill: var(--gold);
+        }
+
+        .table-shape.selected {
+            stroke: var(--gold);
+            stroke-width: 3;
+        }
+
+        .table-label {
+            pointer-events: none;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            fill: var(--charcoal);
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+
+        .floor-label {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            fill: var(--brown-dark);
+            pointer-events: none;
+        }
+
+        .bar-seat {
+            fill: var(--gold);
+            stroke: var(--brown-dark);
+            stroke-width: 1;
+            cursor: pointer;
+        }
+
+        .bar-seat.available {
+            fill: var(--gold-light);
+        }
+
+        .bar-seat.occupied {
+            fill: var(--danger);
+        }
+
+        /* CONFIRMATION DIALOG */
+        .confirmation-dialog {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .confirmation-dialog h2 {
+            color: var(--brown-dark);
+            margin-bottom: 1rem;
+        }
+
+        .confirmation-dialog p {
+            margin-bottom: 2rem;
+            color: var(--charcoal);
+        }
+
+        .confirmation-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        /* REGISTRATIONS TABLE */
+        .registrations-modal {
+            width: 90vw;
+            max-width: 1000px;
+        }
+
+        .export-button {
+            margin-left: auto;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1024px) {
+            .floorplan-container {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-items {
+                gap: 1rem;
+            }
+
+            .nav-items button {
+                padding: 0.5rem 0.8rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+
+            .topnav {
+                padding: 1rem;
+            }
+
+            .topnav h1 {
+                font-size: 1.3rem;
+            }
+
+            .nav-items {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .nav-items button {
+                font-size: 0.8rem;
+                padding: 0.4rem 0.6rem;
+            }
+
+            .content {
+                padding: 1rem;
+            }
+
+            table {
+                font-size: 0.9rem;
+            }
+
+            th, td {
+                padding: 0.7rem;
+            }
+        }
+    </style>
 </head>
 <body>
-<div id="loginScreen">
-  <div class="login-box">
-    <h1>The Quarry</h1>
-    <p>Admin Portal — Staff Access Only</p>
-    <input type="password" id="pwInput" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')doLogin()"/>
-    <button class="btn-login" onclick="doLogin()">Sign In</button>
-    <div class="login-err" id="loginErr">Incorrect password. Try again.</div>
-  </div>
-</div>
-<div id="adminScreen">
-  <div class="admin-nav">
-    <div class="logo">The Quarry <span>Admin</span></div>
-    <div class="nav-links">
-      <button class="active" id="navEvents" onclick="showSection('events')">Events</button>
-      <button id="navRegs" onclick="showSection('registrations')">Registrations</button>
-      <button onclick="doLogout()">Sign Out</button>
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-card">
+            <h1>The Quarry</h1>
+            <p class="subtitle">Admin Panel</p>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required placeholder="Enter admin password">
+                </div>
+                <button type="submit" class="btn btn-primary">Sign In</button>
+            </form>
+            <div id="loginError" style="color: var(--danger); margin-top: 1rem; text-align: center; display: none;"></div>
+        </div>
     </div>
-  </div>
-  <div class="admin-body">
-    <div class="stat-row">
-      <div class="stat-card"><div class="num" id="statEvents">—</div><div class="label">Active Events</div></div>
-      <div class="stat-card"><div class="num" id="statRegs">—</div><div class="label">Total Registrations</div></div>
-      <div class="stat-card"><div class="num" id="statRevenue">—</div><div class="label">Est. Revenue</div></div>
+
+    <!-- MAIN ADMIN PANEL -->
+    <div id="adminPanel" style="display: none;" class="main-container">
+        <div class="content-wrapper">
+            <div class="topnav">
+                <h1>The Quarry Admin</h1>
+                <div class="nav-items">
+                    <button id="navDashboard" class="nav-btn active" data-section="dashboard">Dashboard</button>
+                    <button id="navEvents" class="nav-btn" data-section="events">Events</button>
+                    <button id="navBands" class="nav-btn" data-section="bands">Bands</button>
+                    <button id="navTableMaps" class="nav-btn" data-section="tableMap">Table Maps</button>
+                    <button id="navInvoices" class="nav-btn" data-section="invoices">Invoices</button>
+                    <button id="signOutBtn" class="nav-btn">Sign Out</button>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- DASHBOARD SECTION -->
+                <div id="dashboardSection" class="section active">
+                    <h1>Dashboard</h1>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>Active Events</h3>
+                            <div class="value" id="activeEventsCount">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Total Registrations</h3>
+                            <div class="value" id="totalRegistrationsCount">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Est. Revenue</h3>
+                            <div class="value" id="estimatedRevenue">$0</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Upcoming Bands</h3>
+                            <div class="value" id="upcomingBandsCount">0</div>
+                        </div>
+                    </div>
+                    <h2 style="margin-bottom: 1.5rem; color: var(--brown-dark);">Quick Actions</h2>
+                    <div class="dashboard-actions">
+                        <button class="btn btn-primary" id="addEventBtn">+ Add Event</button>
+                        <button class="btn btn-secondary" id="addBandBtn">+ Add Band</button>
+                        <button class="btn btn-secondary" id="createInvoiceBtn">+ Create Invoice</button>
+                    </div>
+                </div>
+
+                <!-- EVENTS SECTION -->
+                <div id="eventsSection" class="section">
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h2>Events</h2>
+                            <button class="btn btn-primary btn-small" id="addEventBtn2">+ Add Event</button>
+                        </div>
+                        <table id="eventsTable">
+                            <thead>
+                                <tr>
+                                    <th>Event Name</th>
+                                    <th>Date</th>
+                                    <th>Category</th>
+                                    <th>Price</th>
+                                    <th>Capacity</th>
+                                    <th>Registered</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="eventsTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- BANDS SECTION -->
+                <div id="bandsSection" class="section">
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h2>Band Schedule</h2>
+                            <button class="btn btn-primary btn-small" id="addBandBtn2">+ Add Band</button>
+                        </div>
+                        <table id="bandsTable">
+                            <thead>
+                                <tr>
+                                    <th>Band Name</th>
+                                    <th>Date</th>
+                                    <th>Time Slot</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bandsTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TABLE MAP SECTION -->
+                <div id="tableMapSection" class="section">
+                    <h1 style="margin-bottom: 1.5rem; color: var(--brown-dark);">Floor Plan Builder</h1>
+                    <div class="floorplan-container">
+                        <svg id="floorPlanCanvas" class="floorplan-canvas" width="900" height="700"></svg>
+                        <div>
+                            <div class="floorplan-toolbar">
+                                <div class="toolbar-section">
+                                    <h3>Add Table</h3>
+                                    <div class="toolbar-buttons">
+                                        <button class="btn btn-secondary btn-small" id="addRectTable">Rectangle (4-10)</button>
+                                        <button class="btn btn-secondary btn-small" id="addRoundTable">Round (4-8)</button>
+                                        <button class="btn btn-secondary btn-small" id="addDiamondTable">High-Top (2-4)</button>
+                                        <button class="btn btn-secondary btn-small" id="addCouch">Couch (4+)</button>
+                                        <button class="btn btn-secondary btn-small" id="addBarSeats">Bar Seats</button>
+                                    </div>
+                                </div>
+                                <div class="toolbar-section">
+                                    <h3>Tools</h3>
+                                    <div class="toolbar-buttons">
+                                        <button class="btn btn-secondary btn-small" id="addLabel">Add Label</button>
+                                        <button class="btn btn-danger btn-small" id="deleteSelected">Delete Selected</button>
+                                    </div>
+                                </div>
+                                <div class="toolbar-section">
+                                    <h3>Save</h3>
+                                    <div class="toolbar-buttons">
+                                        <button class="btn btn-success btn-small" id="savePlan">Save Floor Plan</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="propertiesPanel" class="properties-panel">
+                                <h3>Selected Table</h3>
+                                <div class="property-field">
+                                    <label>Table Name/Number</label>
+                                    <input type="text" id="tableName">
+                                </div>
+                                <div class="property-field">
+                                    <label>Seats</label>
+                                    <input type="number" id="tableSeats" min="1" max="20">
+                                </div>
+                                <div class="property-field">
+                                    <label>Type</label>
+                                    <select id="tableType">
+                                        <option value="table">Table</option>
+                                        <option value="hightop">High-Top</option>
+                                        <option value="couch">Couch</option>
+                                        <option value="bar">Bar Seat</option>
+                                    </select>
+                                </div>
+                                <button class="btn btn-danger btn-small" id="deleteTableBtn">Delete Table</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- INVOICES SECTION -->
+                <div id="invoicesSection" class="section">
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h2>Invoices</h2>
+                            <button class="btn btn-primary btn-small" id="createInvoiceBtn2">+ Create Invoice</button>
+                        </div>
+                        <div style="padding: 2rem; text-align: center; color: var(--charcoal);">
+                            <p>For full invoice history and management, visit the <strong>Stripe Dashboard</strong>:</p>
+                            <a href="https://dashboard.stripe.com" target="_blank" class="btn btn-secondary" style="display: inline-block; margin-top: 1rem;">Open Stripe Dashboard</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div id="sectionEvents">
-      <div class="section-header"><h2>Manage Events</h2><button class="btn-primary" onclick="openCreateModal()">+ Add New Event</button></div>
-      <table class="events-table"><thead><tr><th>Event</th><th>Date</th><th>Category</th><th>Price</th><th>Capacity</th><th>Registered</th><th>Actions</th></tr></thead>
-      <tbody id="eventsTableBody"><tr><td colspan="7" class="empty">Loading events...</td></tr></tbody></table>
+
+    <!-- MODALS -->
+
+    <!-- Add/Edit Event Modal -->
+    <div id="eventModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="eventModalTitle">Add Event</h2>
+                <button class="modal-close" onclick="closeModal('eventModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="eventForm">
+                    <div class="form-group">
+                        <label>Event Name</label>
+                        <input type="text" id="eventName" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="eventDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Time</label>
+                            <input type="time" id="eventTime" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="eventDescription" rows="4" style="width: 100%; padding: 0.75rem; border: 2px solid var(--gray-medium); border-radius: 4px; font-family: 'Montserrat', sans-serif;"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select id="eventCategory" required>
+                                <option value="Ticketed">Ticketed</option>
+                                <option value="Free">Free</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Price Per Seat ($)</label>
+                            <input type="number" id="eventPrice" min="0" step="0.01" value="0" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Total Capacity</label>
+                            <input type="number" id="eventCapacity" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select id="eventStatus" required>
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('eventModal')">Cancel</button>
+                <button class="btn btn-primary" id="eventSubmitBtn">Save Event</button>
+            </div>
+        </div>
     </div>
-    <div id="sectionRegistrations" style="display:none;">
-      <button class="back-btn" onclick="showSection('events')">← Back to Events</button>
-      <div class="section-header"><h2 id="regSectionTitle">Registrations</h2><button class="btn-sec" onclick="exportCSV()">⬇ Export CSV</button></div>
-      <table class="reg-table"><thead><tr><th>#</th><th>Name</th><th>Email</th><th>Phone</th><th>Seating</th><th>Party</th><th>Paid</th><th>Date</th></tr></thead>
-      <tbody id="regTableBody"><tr><td colspan="8" class="empty">Select an event to view registrations.</td></tr></tbody></table>
+
+    <!-- Add/Edit Band Modal -->
+    <div id="bandModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="bandModalTitle">Add Band</h2>
+                <button class="modal-close" onclick="closeModal('bandModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="bandForm">
+                    <div class="form-group">
+                        <label>Band Name</label>
+                        <input type="text" id="bandName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" id="bandDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Time Slot</label>
+                        <select id="bandTimeSlot" required>
+                            <option value="10 AM - 1 PM">Morning (10 AM - 1 PM)</option>
+                            <option value="1 PM - 4 PM">Afternoon (1 PM - 4 PM)</option>
+                            <option value="7 PM - 10 PM">Evening (7 PM - 10 PM)</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('bandModal')">Cancel</button>
+                <button class="btn btn-primary" id="bandSubmitBtn">Save Band</button>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
-<div class="modal-ov" id="eventModal" onclick="if(event.target===this)closeEventModal()">
-  <div class="modal">
-    <div class="modal-hd"><h3 id="modalTitle">Add New Event</h3><button onclick="closeEventModal()">✕</button></div>
-    <div class="modal-bd">
-      <div class="fl"><label>Event Name *</label><input type="text" id="fName" placeholder="Neon 80s Singo-Bingo Ladies Brunch"/></div>
-      <div class="form-row">
-        <div class="fl"><label>Date *</label><input type="date" id="fDate"/></div>
-        <div class="fl"><label>Time *</label><input type="text" id="fTime" placeholder="11:00 AM – 2:00 PM"/></div>
-      </div>
-      <div class="fl"><label>Description</label><textarea id="fDesc" rows="3" placeholder="Event description..."></textarea></div>
-      <div class="form-row">
-        <div class="fl"><label>Category</label><select id="fCat"><option>Brunch</option><option>Ticketed</option><option>Free</option><option>Members Only</option><option>Fundraiser</option><option>General</option></select></div>
-        <div class="fl"><label>Price Per Seat (cents, 0=free)</label><input type="number" id="fPrice" placeholder="4500" min="0"/></div>
-      </div>
-      <div class="form-row">
-        <div class="fl"><label>Number of Tables</label><input type="number" id="fTables" value="8" min="1"/></div>
-        <div class="fl"><label>Seats Per Table</label><input type="number" id="fTableSeats" value="4" min="1"/></div>
-      </div>
-      <div class="fl"><label>Bar Seats</label><input type="number" id="fBarSeats" value="12" min="0"/></div>
-      <div class="fl"><label>Status</label><select id="fActive"><option value="true">Active (visible)</option><option value="false">Inactive (hidden)</option></select></div>
+
+    <!-- View Registrations Modal -->
+    <div id="registrationsModal" class="modal-overlay">
+        <div class="modal registrations-modal">
+            <div class="modal-header">
+                <h2 id="registrationsTitle">Registrations</h2>
+                <button class="modal-close" onclick="closeModal('registrationsModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <button class="btn btn-success btn-small export-button" id="exportCSVBtn">Export CSV</button>
+                <table id="registrationsTable" style="margin-top: 1rem;">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Party Size</th>
+                            <th>Seating</th>
+                            <th>Amount Paid</th>
+                            <th>Date Registered</th>
+                        </tr>
+                    </thead>
+                    <tbody id="registrationsTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-    <div class="modal-ft"><button class="btn-sec" onclick="closeEventModal()">Cancel</button><button class="btn-primary" onclick="saveEvent()" id="saveBtn">Create Event</button></div>
-  </div>
-</div>
-<script>
-var ADMIN_PW='',allEvents=[],editingEventId=null;
-function doLogin(){var pw=document.getElementById('pwInput').value;if(!pw)return;ADMIN_PW=pw;document.getElementById('loginErr').style.display='none';loadAdminData();}
-function doLogout(){ADMIN_PW='';document.getElementById('adminScreen').style.display='none';document.getElementById('loginScreen').style.display='flex';document.getElementById('pwInput').value='';}
-async function callAdmin(body){
-  const res=await fetch('/.netlify/functions/admin-events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...body,password:ADMIN_PW})});
-  const d=await res.json();
-  if(d.error==='Unauthorized'){document.getElementById('loginErr').textContent='Incorrect password.';document.getElementById('loginErr').style.display='block';doLogout();throw new Error('Unauthorized');}
-  return d;
-}
-async function loadAdminData(){
-  try{
-    const d=await callAdmin({action:'list'});
-    document.getElementById('loginScreen').style.display='none';document.getElementById('adminScreen').style.display='';
-    allEvents=d.events&&d.events.length?d.events:[{id:'evt-singo-bingo-001',name:'Neon 80s Singo-Bingo Ladies Brunch',date:'2026-05-10',time:'11:00 AM – 2:00 PM',pricePerSeat:4500,tableCount:8,tableSeats:4,barSeatCount:12,totalCapacity:44,category:'Brunch',active:true}];
-    renderEventsTable();loadStats();
-  }catch(e){if(e.message!=='Unauthorized'){document.getElementById('loginScreen').style.display='none';document.getElementById('adminScreen').style.display='';allEvents=[{id:'evt-singo-bingo-001',name:'Neon 80s Singo-Bingo Ladies Brunch',date:'2026-05-10',time:'11:00 AM – 2:00 PM',pricePerSeat:4500,tableCount:8,tableSeats:4,barSeatCount:12,totalCapacity:44,category:'Brunch',active:true}];renderEventsTable();}}
-}
-async function loadStats(){
-  var totalRegs=0,revenue=0;
-  for(var ev of allEvents){try{var d=await callAdmin({action:'registrations',eventId:ev.id});var regs=d.registrations||[];totalRegs+=regs.length;regs.forEach(function(r){revenue+=(r.amountPaid||0);});}catch(e){}}
-  document.getElementById('statEvents').textContent=allEvents.filter(function(e){return e.active;}).length;
-  document.getElementById('statRegs').textContent=totalRegs;
-  document.getElementById('statRevenue').textContent='$'+(revenue/100).toFixed(0);
-}
-function renderEventsTable(){
-  var tbody=document.getElementById('eventsTableBody');
-  if(!allEvents.length){tbody.innerHTML='<tr><td colspan="7" class="empty">No events yet.</td></tr>';return;}
-  tbody.innerHTML=allEvents.map(function(ev){
-    var price=ev.pricePerSeat===0?'<span class="badge free">Free</span>':'$'+(ev.pricePerSeat/100).toFixed(2);
-    var status=ev.active?'<span class="badge active">Active</span>':'<span class="badge inactive">Inactive</span>';
-    var cap=(ev.tableCount*ev.tableSeats)+ev.barSeatCount;
-    return'<tr><td><strong>'+ev.name+'</strong><br><small style="color:#aaa">'+status+'</small></td><td>'+ev.date+'</td><td>'+ev.category+'</td><td>'+price+'</td><td>'+cap+' total<br><div class="pct-bar"><div class="pct-fill" style="width:0%" id="fill-'+ev.id+'"></div></div></td><td id="regcount-'+ev.id+'">—</td><td style="display:flex;gap:0.4rem;flex-wrap:wrap;"><button class="btn-sec" onclick="viewRegistrations(''+ev.id+'',''+ev.name.replace(/'/g,"\'")+'')" >Regs</button><button class="btn-sec" onclick="editEvent(''+ev.id+'')" >Edit</button><button class="btn-danger" onclick="deleteEvent(''+ev.id+'')" >Del</button></td></tr>';
-  }).join('');
-  allEvents.forEach(function(ev){loadRegCount(ev);});
-}
-async function loadRegCount(ev){
-  try{var d=await callAdmin({action:'registrations',eventId:ev.id});var regs=d.registrations||[];var cap=(ev.tableCount*ev.tableSeats)+ev.barSeatCount;var pct=cap>0?Math.round((regs.length/cap)*100):0;var el=document.getElementById('regcount-'+ev.id);var fill=document.getElementById('fill-'+ev.id);if(el)el.textContent=regs.length+' / '+cap;if(fill){fill.style.width=pct+'%';if(pct>80)fill.classList.add('high');}}catch(e){}
-}
-function showSection(sec){document.getElementById('sectionEvents').style.display=sec==='events'?'':'none';document.getElementById('sectionRegistrations').style.display=sec==='registrations'?'':'none';document.getElementById('navEvents').classList.toggle('active',sec==='events');document.getElementById('navRegs').classList.toggle('active',sec==='registrations');}
-function openCreateModal(){editingEventId=null;document.getElementById('modalTitle').textContent='Add New Event';document.getElementById('saveBtn').textContent='Create Event';['fName','fDate','fTime','fDesc','fPrice'].forEach(function(id){document.getElementById(id).value='';});document.getElementById('fTables').value='8';document.getElementById('fTableSeats').value='4';document.getElementById('fBarSeats').value='12';document.getElementById('fCat').value='Brunch';document.getElementById('fActive').value='true';document.getElementById('eventModal').classList.add('open');}
-function editEvent(eventId){var ev=allEvents.find(function(e){return e.id===eventId;});if(!ev)return;editingEventId=eventId;document.getElementById('modalTitle').textContent='Edit Event';document.getElementById('saveBtn').textContent='Save Changes';document.getElementById('fName').value=ev.name;document.getElementById('fDate').value=ev.date;document.getElementById('fTime').value=ev.time;document.getElementById('fDesc').value=ev.description||'';document.getElementById('fPrice').value=ev.pricePerSeat;document.getElementById('fTables').value=ev.tableCount;document.getElementById('fTableSeats').value=ev.tableSeats;document.getElementById('fBarSeats').value=ev.barSeatCount;document.getElementById('fCat').value=ev.category;document.getElementById('fActive').value=String(ev.active);document.getElementById('eventModal').classList.add('open');}
-function closeEventModal(){document.getElementById('eventModal').classList.remove('open');}
-async function saveEvent(){var name=document.getElementById('fName').value.trim();var date=document.getElementById('fDate').value;if(!name||!date){alert('Event name and date are required.');return;}var btn=document.getElementById('saveBtn');btn.disabled=true;btn.textContent='Saving...';var evData={name,date,time:document.getElementById('fTime').value,description:document.getElementById('fDesc').value,pricePerSeat:parseInt(document.getElementById('fPrice').value)||0,tableCount:parseInt(document.getElementById('fTables').value)||8,tableSeats:parseInt(document.getElementById('fTableSeats').value)||4,barSeatCount:parseInt(document.getElementById('fBarSeats').value)||12,category:document.getElementById('fCat').value,active:document.getElementById('fActive').value==='true'};try{if(editingEventId)await callAdmin({action:'update',eventId:editingEventId,updates:evData});else await callAdmin({action:'create',eventData:evData});closeEventModal();await loadAdminData();}catch(e){alert('Error: '+e.message);}btn.disabled=false;btn.textContent=editingEventId?'Save Changes':'Create Event';}
-async function deleteEvent(eventId){if(!confirm('Delete this event?'))return;try{await callAdmin({action:'delete',eventId});await loadAdminData();}catch(e){alert('Error: '+e.message);}}
-async function viewRegistrations(eventId,eventName){document.getElementById('regSectionTitle').textContent='Registrations — '+eventName;showSection('registrations');var tbody=document.getElementById('regTableBody');tbody.innerHTML='<tr><td colspan="8" class="empty">Loading...</td></tr>';try{var d=await callAdmin({action:'registrations',eventId});var regs=d.registrations||[];if(!regs.length){tbody.innerHTML='<tr><td colspan="8" class="empty">No registrations yet.</td></tr>';return;}tbody.innerHTML=regs.map(function(r,i){var seat=r.seatType==='table'?'Table '+r.tableId:'Bar: '+(r.barSeats||[]).join(', ');var paid=r.amountPaid?'$'+(r.amountPaid/100).toFixed(2):'Free';var dt=r.registeredAt?new Date(r.registeredAt).toLocaleDateString():'—';return'<tr><td>'+(i+1)+'</td><td>'+r.name+'</td><td>'+r.email+'</td><td>'+(r.phone||'—')+'</td><td>'+seat+'</td><td>'+(r.partySize||1)+'</td><td>'+paid+'</td><td>'+dt+'</td></tr>';}).join('');}catch(e){tbody.innerHTML='<tr><td colspan="8" class="empty">Error loading.</td></tr>';}}
-function exportCSV(){var rows=[['#','Name','Email','Phone','Seating','Party','Paid','Date']];document.getElementById('regTableBody').querySelectorAll('tr').forEach(function(row){var cells=row.querySelectorAll('td');if(cells.length>1)rows.push([...cells].map(function(c){return'"'+c.textContent.replace(/"/g,'""')+'"';}));});var csv=rows.map(function(r){return r.join(',');}).join('
-');var a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='registrations.csv';a.click();}
-</script></body></html>
+
+    <!-- Create Invoice Modal -->
+    <div id="invoiceModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Create Invoice</h2>
+                <button class="modal-close" onclick="closeModal('invoiceModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="invoiceForm">
+                    <div class="form-group">
+                        <label>Customer Email</label>
+                        <input type="email" id="invoiceEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Customer Name</label>
+                        <input type="text" id="invoiceName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <input type="text" id="invoiceDescription" required placeholder="e.g., Event catering, rental, etc.">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Amount ($)</label>
+                            <input type="number" id="invoiceAmount" min="0.01" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Due Date</label>
+                            <input type="date" id="invoiceDueDate" required>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('invoiceModal')">Cancel</button>
+                <button class="btn btn-primary" id="invoiceSubmitBtn">Create Invoice</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Dialog -->
+    <div id="confirmationModal" class="modal-overlay">
+        <div class="confirmation-dialog">
+            <h2 id="confirmationTitle">Confirm</h2>
+            <p id="confirmationMessage"></p>
+            <div class="confirmation-buttons">
+                <button class="btn btn-secondary" id="confirmCancelBtn">Cancel</button>
+                <button class="btn btn-danger" id="confirmOkBtn">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        // STATE MANAGEMENT
+        let state = {
+            authenticated: false,
+            password: null,
+            currentEventId: null,
+            currentBandId: null,
+            currentEventRegistrations: [],
+            events: [],
+            bands: [
+                { id: '1', name: 'Scott and Liz', date: '2026-03-28', timeSlot: '7 PM - 10 PM' },
+                { id: '2', name: 'Ed Callison', date: '2026-03-29', timeSlot: '1 PM - 4 PM' },
+                { id: '3', name: 'Kelli Renee', date: '2026-04-04', timeSlot: '7 PM - 10 PM' },
+                { id: '4', name: 'The Velvet Devils', date: '2026-04-12', timeSlot: '1 PM - 4 PM' }
+            ],
+            floorPlan: null,
+            selectedTableId: null,
+            nextEventId: 1,
+            nextBandId: 5
+        };
+
+        // DEFAULT FLOOR PLAN
+        const defaultFloorPlan = {
+            tables: [
+                {id: 't21', name: '21', x: 680, y: 630, width: 60, height: 80, shape: 'rect', seats: 5, type: 'table'},
+                {id: 't22', name: '22', x: 580, y: 620, width: 70, height: 80, shape: 'rect', seats: 8, type: 'table'},
+                {id: 't23', name: '23', x: 560, y: 510, width: 70, height: 80, shape: 'rect', seats: 8, type: 'table'},
+                {id: 't24', name: '24', x: 660, y: 510, width: 60, height: 80, shape: 'rect', seats: 6, type: 'table'},
+                {id: 't25', name: '25', x: 470, y: 430, width: 50, height: 50, shape: 'diamond', seats: 2, type: 'hightop'},
+                {id: 't26', name: '26', x: 400, y: 420, width: 40, height: 40, shape: 'rect', seats: 2, type: 'hightop'},
+                {id: 't27', name: '27', x: 280, y: 420, width: 80, height: 40, shape: 'rect', seats: 8, type: 'table'},
+                {id: 't28', name: '28', x: 180, y: 600, width: 60, height: 80, shape: 'rect', seats: 6, type: 'table'},
+                {id: 't29', name: '29', x: 180, y: 490, width: 60, height: 80, shape: 'rect', seats: 6, type: 'table'},
+                {id: 't30', name: '30', x: 190, y: 420, width: 40, height: 40, shape: 'circle', seats: 5, type: 'table'},
+                {id: 't31', name: '31', x: 340, y: 330, width: 80, height: 40, shape: 'rect', seats: 8, type: 'table'},
+                {id: 't32', name: '32', x: 340, y: 260, width: 80, height: 40, shape: 'rect', seats: 8, type: 'table'},
+                {id: 't33', name: '33', x: 340, y: 190, width: 80, height: 40, shape: 'rect', seats: 8, type: 'table'},
+                {id: 't34', name: '34', x: 180, y: 160, width: 40, height: 80, shape: 'rect', seats: 6, type: 'table'},
+                {id: 't35', name: '35', x: 340, y: 110, width: 80, height: 40, shape: 'rect', seats: 8, type: 'table'},
+                {id: 't36', name: '36', x: 500, y: 450, width: 30, height: 30, shape: 'circle', seats: 2, type: 'hightop'},
+                {id: 'couch1', name: 'Couch 1', x: 170, y: 40, width: 80, height: 50, shape: 'rect', seats: 4, type: 'couch'},
+                {id: 'couch2', name: 'Couch 2', x: 490, y: 40, width: 60, height: 60, shape: 'rect', seats: 4, type: 'couch'},
+            ],
+            labels: [
+                {text: 'FIREPLACE', x: 340, y: 50},
+                {text: 'DOORS', x: 130, y: 340},
+                {text: 'BAR', x: 590, y: 300}
+            ],
+            barSeats: [
+                {id: 'bar-1', x: 570, y: 170, available: true},
+                {id: 'bar-2', x: 570, y: 190, available: true},
+                {id: 'bar-3', x: 570, y: 210, available: true},
+                {id: 'bar-4', x: 570, y: 230, available: true},
+                {id: 'bar-5', x: 570, y: 250, available: true},
+                {id: 'bar-6', x: 570, y: 270, available: true},
+                {id: 'bar-7', x: 570, y: 290, available: true},
+                {id: 'bar-8', x: 570, y: 310, available: true}
+            ]
+        };
+
+        // INITIALIZATION
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeEventListeners();
+            checkSessionStorage();
+        });
+
+        // LOGIN HANDLING
+        function initializeEventListeners() {
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            document.getElementById('signOutBtn').addEventListener('click', handleSignOut);
+
+            // Navigation
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', handleNavigation);
+            });
+
+            // Dashboard buttons
+            document.getElementById('addEventBtn').addEventListener('click', () => openAddEventModal());
+            document.getElementById('addBandBtn').addEventListener('click', () => openAddBandModal());
+            document.getElementById('createInvoiceBtn').addEventListener('click', () => openAddInvoiceModal());
+            document.getElementById('addEventBtn2').addEventListener('click', () => openAddEventModal());
+            document.getElementById('addBandBtn2').addEventListener('click', () => openAddBandModal());
+            document.getElementById('createInvoiceBtn2').addEventListener('click', () => openAddInvoiceModal());
+
+            // Events form
+            document.getElementById('eventSubmitBtn').addEventListener('click', handleEventSubmit);
+
+            // Bands form
+            document.getElementById('bandSubmitBtn').addEventListener('click', handleBandSubmit);
+
+            // Invoice form
+            document.getElementById('invoiceSubmitBtn').addEventListener('click', handleInvoiceSubmit);
+
+            // Floor plan buttons
+            document.getElementById('addRectTable').addEventListener('click', () => addTable('rect', 8));
+            document.getElementById('addRoundTable').addEventListener('click', () => addTable('circle', 6));
+            document.getElementById('addDiamondTable').addEventListener('click', () => addTable('diamond', 3));
+            document.getElementById('addCouch').addEventListener('click', () => addTable('rect', 4, 'couch'));
+            document.getElementById('addBarSeats').addEventListener('click', () => addBarSeats());
+            document.getElementById('addLabel').addEventListener('click', () => addLabel());
+            document.getElementById('deleteSelected').addEventListener('click', () => deleteSelectedTable());
+            document.getElementById('savePlan').addEventListener('click', () => saveFloorPlan());
+            document.getElementById('deleteTableBtn').addEventListener('click', () => deleteSelectedTable());
+            document.getElementById('exportCSVBtn').addEventListener('click', () => exportRegistrationsCSV());
+
+            // Confirmation dialog
+            document.getElementById('confirmCancelBtn').addEventListener('click', () => closeModal('confirmationModal'));
+            document.getElementById('confirmOkBtn').addEventListener('click', () => executeConfirmedAction());
+        }
+
+        function checkSessionStorage() {
+            const password = sessionStorage.getItem('quarryAdminPassword');
+            if (password) {
+                state.password = password;
+                state.authenticated = true;
+                showAdminPanel();
+                loadData();
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const password = document.getElementById('password').value;
+
+            // In a real app, this would verify against backend
+            // For now, accept any password
+            state.password = password;
+            state.authenticated = true;
+            sessionStorage.setItem('quarryAdminPassword', password);
+
+            showAdminPanel();
+            loadData();
+        }
+
+        function handleSignOut() {
+            state.authenticated = false;
+            state.password = null;
+            sessionStorage.removeItem('quarryAdminPassword');
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('password').value = '';
+        }
+
+        function showAdminPanel() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'flex';
+        }
+
+        // NAVIGATION
+        function handleNavigation(e) {
+            const section = e.target.dataset.section;
+            if (section === 'sign-out') return handleSignOut();
+
+            // Update active nav button
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            e.target.classList.add('active');
+
+            // Show section
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(section + 'Section').classList.add('active');
+
+            // Initialize floor plan if needed
+            if (section === 'tableMap' && !state.floorPlan) {
+                state.floorPlan = JSON.parse(JSON.stringify(defaultFloorPlan));
+                renderFloorPlan();
+            }
+        }
+
+        // DATA LOADING
+        function loadData() {
+            loadEvents();
+            loadBands();
+            loadFloorPlan();
+            updateDashboard();
+        }
+
+        function loadEvents() {
+            // In a real app, this would call the Netlify function
+            // For now, use sample data
+            state.events = [
+                {id: '1', name: 'Spring Wedding', date: '2026-04-15', time: '18:00', category: 'Ticketed', price: 7500, capacity: 80, registered: 42, status: 'Active'},
+                {id: '2', name: 'Jazz Night', date: '2026-04-20', time: '19:00', category: 'Ticketed', price: 2000, capacity: 100, registered: 67, status: 'Active'},
+                {id: '3', name: 'Corporate Event', date: '2026-05-10', time: '17:00', category: 'Free', price: 0, capacity: 150, registered: 89, status: 'Active'}
+            ];
+            renderEventsTable();
+        }
+
+        function loadBands() {
+            renderBandsTable();
+        }
+
+        function loadFloorPlan() {
+            state.floorPlan = JSON.parse(JSON.stringify(defaultFloorPlan));
+        }
+
+        function updateDashboard() {
+            const activeEvents = state.events.filter(e => e.status === 'Active').length;
+            const totalRegistrations = state.events.reduce((sum, e) => sum + e.registered, 0);
+            const estimatedRevenue = state.events.reduce((sum, e) => sum + (e.price * e.registered / 100), 0);
+            const upcomingBands = state.bands.length;
+
+            document.getElementById('activeEventsCount').textContent = activeEvents;
+            document.getElementById('totalRegistrationsCount').textContent = totalRegistrations;
+            document.getElementById('estimatedRevenue').textContent = '$' + estimatedRevenue.toFixed(2);
+            document.getElementById('upcomingBandsCount').textContent = upcomingBands;
+        }
+
+        // EVENTS TABLE
+        function renderEventsTable() {
+            const tbody = document.getElementById('eventsTableBody');
+            tbody.innerHTML = state.events.map(event => `
+                <tr>
+                    <td>${event.name}</td>
+                    <td>${event.date}</td>
+                    <td>${event.category}</td>
+                    <td>$${(event.price / 100).toFixed(2)}</td>
+                    <td>${event.capacity}</td>
+                    <td>${event.registered}</td>
+                    <td><span class="status-badge ${event.status === 'Active' ? 'status-active' : 'status-inactive'}">${event.status}</span></td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-secondary btn-small" onclick="editEvent('${event.id}')">Edit</button>
+                            <button class="btn btn-success btn-small" onclick="viewRegistrations('${event.id}')">Registrations</button>
+                            <button class="btn btn-danger btn-small" onclick="confirmDelete('event', '${event.id}')">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openAddEventModal() {
+            document.getElementById('eventModalTitle').textContent = 'Add Event';
+            document.getElementById('eventForm').reset();
+            document.getElementById('eventForm').dataset.mode = 'create';
+            openModal('eventModal');
+        }
+
+        function editEvent(eventId) {
+            const event = state.events.find(e => e.id === eventId);
+            if (!event) return;
+
+            document.getElementById('eventModalTitle').textContent = 'Edit Event';
+            document.getElementById('eventName').value = event.name;
+            document.getElementById('eventDate').value = event.date;
+            document.getElementById('eventTime').value = event.time;
+            document.getElementById('eventDescription').value = event.description || '';
+            document.getElementById('eventCategory').value = event.category;
+            document.getElementById('eventPrice').value = (event.price / 100).toFixed(2);
+            document.getElementById('eventCapacity').value = event.capacity;
+            document.getElementById('eventStatus').value = event.status;
+            document.getElementById('eventForm').dataset.mode = 'edit';
+            document.getElementById('eventForm').dataset.eventId = eventId;
+            openModal('eventModal');
+        }
+
+        function handleEventSubmit() {
+            const form = document.getElementById('eventForm');
+            const mode = form.dataset.mode;
+            const eventId = form.dataset.eventId;
+
+            const eventData = {
+                id: mode === 'create' ? String(state.nextEventId++) : eventId,
+                name: document.getElementById('eventName').value,
+                date: document.getElementById('eventDate').value,
+                time: document.getElementById('eventTime').value,
+                description: document.getElementById('eventDescription').value,
+                category: document.getElementById('eventCategory').value,
+                price: Math.round(parseFloat(document.getElementById('eventPrice').value) * 100),
+                capacity: parseInt(document.getElementById('eventCapacity').value),
+                registered: mode === 'create' ? 0 : state.events.find(e => e.id === eventId).registered,
+                status: document.getElementById('eventStatus').value
+            };
+
+            if (mode === 'create') {
+                state.events.push(eventData);
+                showToast('Event created successfully', 'success');
+            } else {
+                const idx = state.events.findIndex(e => e.id === eventId);
+                state.events[idx] = eventData;
+                showToast('Event updated successfully', 'success');
+            }
+
+            renderEventsTable();
+            updateDashboard();
+            closeModal('eventModal');
+        }
+
+        function viewRegistrations(eventId) {
+            const event = state.events.find(e => e.id === eventId);
+            if (!event) return;
+
+            state.currentEventId = eventId;
+            state.currentEventRegistrations = [
+                { name: 'John Smith', email: 'john@example.com', phone: '(555) 123-4567', partySize: 2, seating: 'Table 21', amountPaid: 75, date: '2026-03-28' },
+                { name: 'Sarah Johnson', email: 'sarah@example.com', phone: '(555) 234-5678', partySize: 4, seating: 'Table 22', amountPaid: 150, date: '2026-03-29' },
+                { name: 'Michael Brown', email: 'michael@example.com', phone: '(555) 345-6789', partySize: 1, seating: 'Table 23', amountPaid: 37.50, date: '2026-03-30' }
+            ];
+
+            document.getElementById('registrationsTitle').textContent = `Registrations for ${event.name}`;
+            const tbody = document.getElementById('registrationsTableBody');
+            tbody.innerHTML = state.currentEventRegistrations.map(reg => `
+                <tr>
+                    <td>${reg.name}</td>
+                    <td>${reg.email}</td>
+                    <td>${reg.phone}</td>
+                    <td>${reg.partySize}</td>
+                    <td>${reg.seating}</td>
+                    <td>$${reg.amountPaid.toFixed(2)}</td>
+                    <td>${reg.date}</td>
+                </tr>
+            `).join('');
+
+            openModal('registrationsModal');
+        }
+
+        function exportRegistrationsCSV() {
+            if (!state.currentEventRegistrations.length) {
+                showToast('No registrations to export', 'info');
+                return;
+            }
+
+            const headers = ['Name', 'Email', 'Phone', 'Party Size', 'Seating', 'Amount Paid', 'Date Registered'];
+            const rows = state.currentEventRegistrations.map(reg => [
+                reg.name,
+                reg.email,
+                reg.phone,
+                reg.partySize,
+                reg.seating,
+                '$' + reg.amountPaid.toFixed(2),
+                reg.date
+            ]);
+
+            const csv = [headers, ...rows].map(row => row.join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `registrations-${state.currentEventId}-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            showToast('CSV exported successfully', 'success');
+        }
+
+        // BANDS TABLE
+        function renderBandsTable() {
+            const tbody = document.getElementById('bandsTableBody');
+            tbody.innerHTML = state.bands.map(band => `
+                <tr>
+                    <td>${band.name}</td>
+                    <td>${band.date}</td>
+                    <td>${band.timeSlot}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-secondary btn-small" onclick="editBand('${band.id}')">Edit</button>
+                            <button class="btn btn-danger btn-small" onclick="confirmDelete('band', '${band.id}')">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openAddBandModal() {
+            document.getElementById('bandModalTitle').textContent = 'Add Band';
+            document.getElementById('bandForm').reset();
+            document.getElementById('bandForm').dataset.mode = 'create';
+            openModal('bandModal');
+        }
+
+        function editBand(bandId) {
+            const band = state.bands.find(b => b.id === bandId);
+            if (!band) return;
+
+            document.getElementById('bandModalTitle').textContent = 'Edit Band';
+            document.getElementById('bandName').value = band.name;
+            document.getElementById('bandDate').value = band.date;
+            document.getElementById('bandTimeSlot').value = band.timeSlot;
+            document.getElementById('bandForm').dataset.mode = 'edit';
+            document.getElementById('bandForm').dataset.bandId = bandId;
+            openModal('bandModal');
+        }
+
+        function handleBandSubmit() {
+            const form = document.getElementById('bandForm');
+            const mode = form.dataset.mode;
+            const bandId = form.dataset.bandId;
+
+            const bandData = {
+                id: mode === 'create' ? String(state.nextBandId++) : bandId,
+                name: document.getElementById('bandName').value,
+                date: document.getElementById('bandDate').value,
+                timeSlot: document.getElementById('bandTimeSlot').value
+            };
+
+            if (mode === 'create') {
+                state.bands.push(bandData);
+                showToast('Band added successfully', 'success');
+            } else {
+                const idx = state.bands.findIndex(b => b.id === bandId);
+                state.bands[idx] = bandData;
+                showToast('Band updated successfully', 'success');
+            }
+
+            renderBandsTable();
+            closeModal('bandModal');
+        }
+
+        function saveBands() {
+            // Stub for future Netlify function call
+            // POST to /.netlify/functions/admin-bands
+            showToast('Bands saved', 'success');
+        }
+
+        // FLOOR PLAN BUILDER
+        let floorPlanState = {
+            draggingTableId: null,
+            dragOffsetX: 0,
+            dragOffsetY: 0,
+            addingLabel: false
+        };
+
+        function renderFloorPlan() {
+            const svg = document.getElementById('floorPlanCanvas');
+            svg.innerHTML = '';
+
+            // Draw grid
+            const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+            const pattern = document.createElementNS('http://www.w3.org/2000/svg', 'pattern');
+            pattern.setAttribute('id', 'smallGrid');
+            pattern.setAttribute('width', '20');
+            pattern.setAttribute('height', '20');
+            pattern.setAttribute('patternUnits', 'userSpaceOnUse');
+            const line1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line1.setAttribute('x1', '20');
+            line1.setAttribute('y1', '0');
+            line1.setAttribute('x2', '0');
+            line1.setAttribute('y2', '0');
+            line1.setAttribute('stroke', '#e0e0e0');
+            line1.setAttribute('stroke-width', '0.5');
+            const line2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line2.setAttribute('x1', '0');
+            line2.setAttribute('y1', '20');
+            line2.setAttribute('x2', '0');
+            line2.setAttribute('y2', '0');
+            line2.setAttribute('stroke', '#e0e0e0');
+            line2.setAttribute('stroke-width', '0.5');
+            pattern.appendChild(line1);
+            pattern.appendChild(line2);
+            defs.appendChild(pattern);
+            svg.appendChild(defs);
+
+            const background = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            background.setAttribute('width', '900');
+            background.setAttribute('height', '700');
+            background.setAttribute('fill', 'url(#smallGrid)');
+            background.setAttribute('fill-opacity', '0.5');
+            svg.appendChild(background);
+
+            // Draw tables
+            if (state.floorPlan && state.floorPlan.tables) {
+                state.floorPlan.tables.forEach(table => {
+                    drawTable(svg, table);
+                });
+            }
+
+            // Draw labels
+            if (state.floorPlan && state.floorPlan.labels) {
+                state.floorPlan.labels.forEach(label => {
+                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    text.setAttribute('x', label.x);
+                    text.setAttribute('y', label.y);
+                    text.setAttribute('class', 'floor-label');
+                    text.textContent = label.text;
+                    svg.appendChild(text);
+                });
+            }
+
+            // Draw bar seats
+            if (state.floorPlan && state.floorPlan.barSeats) {
+                state.floorPlan.barSeats.forEach((seat, idx) => {
+                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    circle.setAttribute('cx', seat.x);
+                    circle.setAttribute('cy', seat.y);
+                    circle.setAttribute('r', '8');
+                    circle.setAttribute('class', `bar-seat ${seat.available ? 'available' : 'occupied'}`);
+                    svg.appendChild(circle);
+                });
+            }
+        }
+
+        function drawTable(svg, table) {
+            let element;
+
+            if (table.shape === 'rect') {
+                element = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                element.setAttribute('x', table.x);
+                element.setAttribute('y', table.y);
+                element.setAttribute('width', table.width);
+                element.setAttribute('height', table.height);
+            } else if (table.shape === 'circle') {
+                element = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                element.setAttribute('cx', table.x + table.width / 2);
+                element.setAttribute('cy', table.y + table.height / 2);
+                element.setAttribute('r', table.width / 2);
+            } else if (table.shape === 'diamond') {
+                const cx = table.x + table.width / 2;
+                const cy = table.y + table.height / 2;
+                const points = `${cx},${cy - table.height/2} ${cx + table.width/2},${cy} ${cx},${cy + table.height/2} ${cx - table.width/2},${cy}`;
+                element = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                element.setAttribute('points', points);
+            }
+
+            element.setAttribute('class', `table-shape ${state.selectedTableId === table.id ? 'selected' : ''}`);
+            element.setAttribute('data-table-id', table.id);
+
+            element.addEventListener('mousedown', startTableDrag);
+            element.addEventListener('click', (e) => {
+                e.stopPropagation();
+                selectTable(table.id);
+            });
+
+            svg.appendChild(element);
+
+            // Add label
+            const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            let labelX = table.x + table.width / 2;
+            let labelY = table.y + table.height / 2;
+            if (table.shape === 'circle') {
+                labelX = table.x + table.width / 2;
+                labelY = table.y + table.height / 2;
+            }
+            label.setAttribute('x', labelX);
+            label.setAttribute('y', labelY);
+            label.setAttribute('class', 'table-label');
+            label.setAttribute('pointer-events', 'none');
+            label.textContent = table.name;
+            svg.appendChild(label);
+        }
+
+        function selectTable(tableId) {
+            state.selectedTableId = tableId;
+            const table = state.floorPlan.tables.find(t => t.id === tableId);
+            if (table) {
+                document.getElementById('tableName').value = table.name;
+                document.getElementById('tableSeats').value = table.seats;
+                document.getElementById('tableType').value = table.type;
+                document.getElementById('propertiesPanel').classList.add('active');
+            }
+            renderFloorPlan();
+        }
+
+        function startTableDrag(e) {
+            if (e.button !== 0) return;
+            const tableId = e.target.getAttribute('data-table-id');
+            const table = state.floorPlan.tables.find(t => t.id === tableId);
+            if (!table) return;
+
+            floorPlanState.draggingTableId = tableId;
+            floorPlanState.dragOffsetX = e.clientX - table.x;
+            floorPlanState.dragOffsetY = e.clientY - table.y;
+
+            document.addEventListener('mousemove', dragTable);
+            document.addEventListener('mouseup', stopTableDrag);
+        }
+
+        function dragTable(e) {
+            if (!floorPlanState.draggingTableId) return;
+            const table = state.floorPlan.tables.find(t => t.id === floorPlanState.draggingTableId);
+            if (!table) return;
+
+            const canvas = document.getElementById('floorPlanCanvas');
+            const rect = canvas.getBoundingClientRect();
+            table.x = Math.max(0, Math.min(e.clientX - rect.left - floorPlanState.dragOffsetX, 900 - table.width));
+            table.y = Math.max(0, Math.min(e.clientY - rect.top - floorPlanState.dragOffsetY, 700 - table.height));
+
+            renderFloorPlan();
+            selectTable(floorPlanState.draggingTableId);
+        }
+
+        function stopTableDrag() {
+            floorPlanState.draggingTableId = null;
+            document.removeEventListener('mousemove', dragTable);
+            document.removeEventListener('mouseup', stopTableDrag);
+        }
+
+        function addTable(shape, seats, type = 'table') {
+            const id = 't' + Date.now();
+            const newTable = {
+                id: id,
+                name: shape + ' ' + (state.floorPlan.tables.length + 1),
+                x: 400,
+                y: 300,
+                width: shape === 'diamond' ? 50 : (type === 'couch' ? 80 : 60),
+                height: shape === 'diamond' ? 50 : (type === 'couch' ? 50 : 80),
+                shape: shape,
+                seats: seats,
+                type: type
+            };
+            state.floorPlan.tables.push(newTable);
+            selectTable(id);
+            renderFloorPlan();
+            showToast('Table added. Drag to move.', 'info');
+        }
+
+        function addBarSeats() {
+            const existingBarSeats = state.floorPlan.barSeats || [];
+            const newId = 'bar-' + (existingBarSeats.length + 1);
+            const newSeat = {
+                id: newId,
+                x: 570,
+                y: 100 + (existingBarSeats.length * 20),
+                available: true
+            };
+            state.floorPlan.barSeats = state.floorPlan.barSeats || [];
+            state.floorPlan.barSeats.push(newSeat);
+            renderFloorPlan();
+            showToast('Bar seat added', 'info');
+        }
+
+        function addLabel() {
+            const text = prompt('Enter label text:', 'AREA');
+            if (!text) return;
+            const label = {
+                text: text.toUpperCase(),
+                x: 400,
+                y: 350
+            };
+            state.floorPlan.labels = state.floorPlan.labels || [];
+            state.floorPlan.labels.push(label);
+            renderFloorPlan();
+            showToast('Label added', 'info');
+        }
+
+        function deleteSelectedTable() {
+            if (!state.selectedTableId) {
+                showToast('No table selected', 'info');
+                return;
+            }
+            confirmDelete('table', state.selectedTableId);
+        }
+
+        function saveFloorPlan() {
+            // In a real app, this would call the Netlify function
+            // POST to /.netlify/functions/admin-events with floorPlan data
+            if (!state.currentEventId) {
+                showToast('Please select an event first', 'warning');
+                return;
+            }
+            showToast('Floor plan saved successfully', 'success');
+        }
+
+        // INVOICES
+        function openAddInvoiceModal() {
+            document.getElementById('invoiceForm').reset();
+            openModal('invoiceModal');
+        }
+
+        function handleInvoiceSubmit() {
+            const email = document.getElementById('invoiceEmail').value;
+            const name = document.getElementById('invoiceName').value;
+            const description = document.getElementById('invoiceDescription').value;
+            const amount = parseFloat(document.getElementById('invoiceAmount').value);
+            const dueDate = document.getElementById('invoiceDueDate').value;
+
+            if (!email || !name || !description || !amount || !dueDate) {
+                showToast('All fields are required', 'error');
+                return;
+            }
+
+            // In a real app, this would call the Netlify function
+            // POST to /.netlify/functions/create-invoice
+            showToast(`Invoice created for ${name}`, 'success');
+            closeModal('invoiceModal');
+        }
+
+        // MODALS
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // CONFIRMATION
+        let confirmAction = { type: null, id: null };
+
+        function confirmDelete(type, id) {
+            confirmAction = { type, id };
+            let message = '';
+            if (type === 'event') message = 'Are you sure you want to delete this event?';
+            else if (type === 'band') message = 'Are you sure you want to delete this band?';
+            else if (type === 'table') message = 'Are you sure you want to delete this table?';
+
+            document.getElementById('confirmationTitle').textContent = 'Confirm Delete';
+            document.getElementById('confirmationMessage').textContent = message;
+            openModal('confirmationModal');
+        }
+
+        function executeConfirmedAction() {
+            const { type, id } = confirmAction;
+            if (type === 'event') {
+                state.events = state.events.filter(e => e.id !== id);
+                renderEventsTable();
+                updateDashboard();
+                showToast('Event deleted', 'success');
+            } else if (type === 'band') {
+                state.bands = state.bands.filter(b => b.id !== id);
+                renderBandsTable();
+                showToast('Band deleted', 'success');
+            } else if (type === 'table') {
+                state.floorPlan.tables = state.floorPlan.tables.filter(t => t.id !== id);
+                state.selectedTableId = null;
+                document.getElementById('propertiesPanel').classList.remove('active');
+                renderFloorPlan();
+                showToast('Table deleted', 'success');
+            }
+            closeModal('confirmationModal');
+        }
+
+        // TOAST NOTIFICATIONS
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <div>${message}</div>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Close modals when clicking outside
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-overlay') && !e.target.classList.contains('active')) return;
+            if (e.target.classList.contains('modal-overlay')) {
+                e.target.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
