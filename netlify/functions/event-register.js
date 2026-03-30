@@ -1,4 +1,4 @@
-const Stripe=require('stripe');const fetch=require('node-fetch');
+const Stripe=require('stripe');
 exports.handler=async(event)=>{
   const h={'Access-Control-Allow-Origin':'*','Content-Type':'application/json'};
   if(event.httpMethod==='OPTIONS')return{statusCode:200,headers:h,body:''};
@@ -17,7 +17,7 @@ exports.handler=async(event)=>{
     const takenTables=regs.filter(r=>r.seatType==='table').map(r=>r.tableId);
     const takenBarSeats=regs.filter(r=>r.seatType==='bar').flatMap(r=>r.seatIds||[]);
     if(seatType==='table'&&takenTables.includes(tableId))return{statusCode:409,headers:h,body:JSON.stringify({error:'Table already reserved. Please choose another.'})};
-    if(seatType==='bar'){const conflict=(seatIds||[]).some(s=>takenBarSeats.includes(s));if(conflict)return{statusCode:409,headers:h,body:JSON.stringify({error:'One or more bar seats already taken.'});};}
+    if(seatType==='bar'&&(seatIds||[]).some(s=>takenBarSeats.includes(s)))return{statusCode:409,headers:h,body:JSON.stringify({error:'One or more bar seats already taken.'})};
     const qty=seatType==='table'?(ev.tableSize||6):(parseInt(partySize)||1);
     const pricePerSeat=ticketType==='premium'?ev.pricePremium:ev.priceBase;
     const session=await stripe.checkout.sessions.create({
@@ -29,5 +29,5 @@ exports.handler=async(event)=>{
       cancel_url:'https://roaring-pegasus-444826.netlify.app/quarry-events'
     });
     return{statusCode:200,headers:h,body:JSON.stringify({checkoutUrl:session.url})};
-  }catch(err){console.error('event-register:',err.message);return{statusCode:500,headers:h,body:JSON.stringify({error:err.message})};}
+  }catch(err){return{statusCode:500,headers:h,body:JSON.stringify({error:err.message})};}
 };
