@@ -737,7 +737,13 @@
                     <button id="navEvents" class="nav-btn" data-section="events">Events</button>
                     <button id="navBands" class="nav-btn" data-section="bands">Bands</button>
                     <button id="navTableMaps" class="nav-btn" data-section="tableMap">Table Maps</button>
-                    <button id="navInvoices" class="nav-btn" data-section="invoices">Invoices</button>
+                    <div class="nav-dropdown" style="position:relative;">
+                        <button id="navPayments" class="nav-btn" onclick="togglePaymentsMenu(event)">Payments &#x25BE;</button>
+                        <div id="paymentsDropdown" style="display:none;position:absolute;top:100%;left:0;background:var(--brown-dark);border:1px solid rgba(212,175,106,0.3);min-width:180px;z-index:100;border-radius:0 0 4px 4px;box-shadow:0 4px 12px rgba(0,0,0,0.3);">
+                            <button class="nav-btn" data-section="invoices" style="display:block;width:100%;text-align:left;padding:0.75rem 1.25rem;font-size:0.85rem;border-radius:0;">Invoices</button>
+                            <button class="nav-btn" data-section="subscriptions" style="display:block;width:100%;text-align:left;padding:0.75rem 1.25rem;font-size:0.85rem;border-radius:0;">Subscriptions</button>
+                        </div>
+                    </div>
                     <button id="signOutBtn" class="nav-btn">Sign Out</button>
                 </div>
             </div>
@@ -944,6 +950,74 @@
 
                     <div style="text-align: center; padding: 1rem;">
                         <a href="https://dashboard.stripe.com/invoices" target="_blank" style="font-size: 0.8rem; color: var(--gold); text-decoration: none;">View full history on Stripe Dashboard &rarr;</a>
+                    </div>
+                </div>
+
+                <!-- SUBSCRIPTIONS SECTION -->
+                <div id="subscriptionsSection" class="section">
+                    <!-- Subscription Stats -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                        <div style="background: white; border-radius: 8px; padding: 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
+                            <div id="subStatTotal" style="font-size: 2rem; font-weight: 700; color: var(--brown-dark);">—</div>
+                            <div style="font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.25rem;">Total Subscribers</div>
+                        </div>
+                        <div style="background: white; border-radius: 8px; padding: 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
+                            <div id="subStatActive" style="font-size: 2rem; font-weight: 700; color: var(--success);">—</div>
+                            <div style="font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.25rem;">Active</div>
+                        </div>
+                        <div style="background: white; border-radius: 8px; padding: 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
+                            <div id="subStatCanceled" style="font-size: 2rem; font-weight: 700; color: var(--danger, #ff6b6b);">—</div>
+                            <div style="font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.25rem;">Canceled</div>
+                        </div>
+                        <div style="background: white; border-radius: 8px; padding: 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
+                            <div id="subStatMRR" style="font-size: 2rem; font-weight: 700; color: var(--gold);">—</div>
+                            <div style="font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.25rem;">Monthly Revenue</div>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h2>Subscriptions</h2>
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <select id="subProductFilter" onchange="filterSubscriptions()" style="padding: 0.4rem 0.75rem; border: 1px solid var(--gold-light); background: transparent; color: var(--gold-light); font-family: 'Montserrat', sans-serif; font-size: 0.75rem; border-radius: 4px; cursor: pointer;">
+                                    <option value="all" style="color: #333;">All Products</option>
+                                </select>
+                                <button class="btn btn-secondary btn-small" onclick="loadSubscriptionDashboard()" style="background: transparent; border: 1px solid var(--gold-light); color: var(--gold-light);">Refresh</button>
+                            </div>
+                        </div>
+
+                        <!-- Status filter tabs -->
+                        <div style="display: flex; gap: 0; border-bottom: 2px solid var(--gray-medium); background: var(--gray-light);">
+                            <button class="sub-filter-btn active" onclick="filterSubStatus('all', this)" style="padding: 0.75rem 1.25rem; border: none; background: none; font-family: 'Montserrat', sans-serif; font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; color: var(--brown-dark); border-bottom: 2px solid var(--gold); margin-bottom: -2px;">All</button>
+                            <button class="sub-filter-btn" onclick="filterSubStatus('active', this)" style="padding: 0.75rem 1.25rem; border: none; background: none; font-family: 'Montserrat', sans-serif; font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; color: #888; border-bottom: 2px solid transparent; margin-bottom: -2px;">Active</button>
+                            <button class="sub-filter-btn" onclick="filterSubStatus('past_due', this)" style="padding: 0.75rem 1.25rem; border: none; background: none; font-family: 'Montserrat', sans-serif; font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; color: #888; border-bottom: 2px solid transparent; margin-bottom: -2px;">Past Due</button>
+                            <button class="sub-filter-btn" onclick="filterSubStatus('canceled', this)" style="padding: 0.75rem 1.25rem; border: none; background: none; font-family: 'Montserrat', sans-serif; font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; color: #888; border-bottom: 2px solid transparent; margin-bottom: -2px;">Canceled</button>
+                        </div>
+
+                        <div style="overflow-x: auto;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Customer</th>
+                                        <th>Product</th>
+                                        <th>Amount</th>
+                                        <th>Billing</th>
+                                        <th>Started</th>
+                                        <th>Next Billing</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="subscriptionTableBody">
+                                    <tr>
+                                        <td colspan="7" style="text-align: center; padding: 3rem; color: #aaa;">Loading subscriptions...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div style="text-align: center; padding: 1rem;">
+                        <a href="https://dashboard.stripe.com/subscriptions" target="_blank" style="font-size: 0.8rem; color: var(--gold); text-decoration: none;">Manage subscriptions on Stripe Dashboard &rarr;</a>
                     </div>
                 </div>
             </div>
@@ -1317,13 +1391,36 @@
         }
 
         // NAVIGATION
+        function togglePaymentsMenu(e) {
+            e.stopPropagation();
+            const dd = document.getElementById('paymentsDropdown');
+            dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Close payments dropdown when clicking elsewhere
+        document.addEventListener('click', function(e) {
+            const dd = document.getElementById('paymentsDropdown');
+            if (dd && !e.target.closest('.nav-dropdown')) {
+                dd.style.display = 'none';
+            }
+        });
+
         function handleNavigation(e) {
             const section = e.target.dataset.section;
-            if (section === 'sign-out') return handleSignOut();
+            if (!section || section === 'sign-out') return handleSignOut ? handleSignOut() : null;
+
+            // Close payments dropdown
+            const dd = document.getElementById('paymentsDropdown');
+            if (dd) dd.style.display = 'none';
 
             // Update active nav button
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
             e.target.classList.add('active');
+
+            // Highlight Payments parent if sub-section selected
+            if (section === 'invoices' || section === 'subscriptions') {
+                document.getElementById('navPayments').classList.add('active');
+            }
 
             // Show section
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -1338,6 +1435,11 @@
             // Load invoice dashboard when switching to invoices tab
             if (section === 'invoices') {
                 loadInvoiceDashboard();
+            }
+
+            // Load subscriptions when switching to subscriptions tab
+            if (section === 'subscriptions') {
+                loadSubscriptionDashboard();
             }
         }
 
@@ -2074,6 +2176,10 @@
                 if (inv.pdfUrl) {
                     actions += ' <a href="' + inv.pdfUrl + '" target="_blank" style="font-size:0.72rem;color:var(--brown-mid);text-decoration:none;margin-left:0.5rem;white-space:nowrap;">PDF</a>';
                 }
+                if (inv.status === 'open') {
+                    actions += ' <a href="#" onclick="resendInvoice(\'' + inv.id + '\');return false;" style="font-size:0.72rem;color:#2196F3;text-decoration:none;margin-left:0.5rem;white-space:nowrap;">Resend</a>';
+                    actions += ' <a href="#" onclick="voidInvoice(\'' + inv.id + '\');return false;" style="font-size:0.72rem;color:var(--danger,#ff6b6b);text-decoration:none;margin-left:0.5rem;white-space:nowrap;">Void</a>';
+                }
 
                 return '<tr>' +
                     '<td style="font-size:0.8rem;font-weight:600;color:var(--brown-dark);">' + invNumber + '</td>' +
@@ -2084,6 +2190,172 @@
                     '<td style="font-size:0.8rem;">' + dueStr + '</td>' +
                     '<td><span style="display:inline-block;padding:0.3rem 0.7rem;border-radius:20px;font-size:0.72rem;font-weight:600;background:' + statusBg + ';color:' + statusColor + ';">' + statusLabel + '</span></td>' +
                     '<td>' + (actions || '—') + '</td>' +
+                    '</tr>';
+            }).join('');
+        }
+
+        async function voidInvoice(invoiceId) {
+            if (!confirm('Are you sure you want to void this invoice? This cannot be undone.')) return;
+            try {
+                const resp = await fetch('/.netlify/functions/manage-invoice', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'void', invoiceId: invoiceId })
+                });
+                const result = await resp.json();
+                if (!resp.ok) throw new Error(result.error);
+                showToast('Invoice voided successfully', 'success');
+                loadInvoiceDashboard();
+            } catch (err) {
+                showToast('Failed to void invoice: ' + err.message, 'error');
+            }
+        }
+
+        async function resendInvoice(invoiceId) {
+            if (!confirm('Resend this invoice to the customer?')) return;
+            try {
+                const resp = await fetch('/.netlify/functions/manage-invoice', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'send', invoiceId: invoiceId })
+                });
+                const result = await resp.json();
+                if (!resp.ok) throw new Error(result.error);
+                showToast('Invoice resent successfully', 'success');
+            } catch (err) {
+                showToast('Failed to resend invoice: ' + err.message, 'error');
+            }
+        }
+
+        // SUBSCRIPTIONS
+        var allSubscriptions = [];
+        var subStatusFilter = 'all';
+        var subProductFilter = 'all';
+
+        async function loadSubscriptionDashboard() {
+            const tbody = document.getElementById('subscriptionTableBody');
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:3rem;color:#aaa;">Loading subscriptions...</td></tr>';
+
+            try {
+                const resp = await fetch('/.netlify/functions/list-subscriptions');
+                if (!resp.ok) throw new Error('Failed to load subscriptions');
+                const data = await resp.json();
+                allSubscriptions = data.subscriptions || [];
+
+                // Populate product filter dropdown
+                const select = document.getElementById('subProductFilter');
+                const currentVal = select.value;
+                select.innerHTML = '<option value="all" style="color:#333;">All Products</option>';
+                (data.products || []).forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p;
+                    opt.textContent = p;
+                    opt.style.color = '#333';
+                    select.appendChild(opt);
+                });
+                select.value = currentVal;
+
+                updateSubStats();
+                renderSubscriptionTable();
+            } catch (err) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:3rem;color:var(--danger);">Failed to load subscriptions: ' + err.message + '</td></tr>';
+            }
+        }
+
+        function updateSubStats() {
+            const total = allSubscriptions.length;
+            const active = allSubscriptions.filter(s => s.status === 'active').length;
+            const canceled = allSubscriptions.filter(s => s.status === 'canceled').length;
+            const mrr = allSubscriptions.filter(s => s.status === 'active').reduce((sum, s) => {
+                let monthly = s.amount;
+                if (s.interval === 'year') monthly = s.amount / 12;
+                else if (s.interval === 'week') monthly = s.amount * 4;
+                return sum + monthly;
+            }, 0);
+
+            document.getElementById('subStatTotal').textContent = total;
+            document.getElementById('subStatActive').textContent = active;
+            document.getElementById('subStatCanceled').textContent = canceled;
+            document.getElementById('subStatMRR').textContent = '$' + (mrr / 100).toLocaleString('en-US', {minimumFractionDigits: 2});
+        }
+
+        function filterSubStatus(status, btn) {
+            document.querySelectorAll('.sub-filter-btn').forEach(b => {
+                b.style.color = '#888';
+                b.style.borderBottomColor = 'transparent';
+            });
+            if (btn) {
+                btn.style.color = 'var(--brown-dark)';
+                btn.style.borderBottomColor = 'var(--gold)';
+            }
+            subStatusFilter = status;
+            renderSubscriptionTable();
+        }
+
+        function filterSubscriptions() {
+            subProductFilter = document.getElementById('subProductFilter').value;
+            renderSubscriptionTable();
+        }
+
+        function renderSubscriptionTable() {
+            const tbody = document.getElementById('subscriptionTableBody');
+            let subs = allSubscriptions;
+
+            if (subStatusFilter !== 'all') {
+                subs = subs.filter(s => s.status === subStatusFilter);
+            }
+            if (subProductFilter !== 'all') {
+                subs = subs.filter(s => s.productName === subProductFilter);
+            }
+
+            if (subs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:3rem;color:#aaa;">No subscriptions found.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = subs.map(sub => {
+                const amount = (sub.amount / 100).toFixed(2);
+                const created = new Date(sub.created * 1000);
+                const createdStr = (created.getMonth()+1) + '/' + created.getDate() + '/' + created.getFullYear();
+                let nextBilling = '—';
+                if (sub.currentPeriodEnd && sub.status === 'active') {
+                    const nb = new Date(sub.currentPeriodEnd * 1000);
+                    nextBilling = (nb.getMonth()+1) + '/' + nb.getDate() + '/' + nb.getFullYear();
+                }
+
+                const intervalLabel = sub.intervalCount > 1
+                    ? 'Every ' + sub.intervalCount + ' ' + sub.interval + 's'
+                    : sub.interval ? sub.interval.charAt(0).toUpperCase() + sub.interval.slice(1) + 'ly' : '—';
+
+                let statusColor, statusBg, statusLabel;
+                switch(sub.status) {
+                    case 'active':
+                        statusColor = 'var(--success)'; statusBg = 'rgba(76,175,80,0.15)'; statusLabel = 'Active'; break;
+                    case 'past_due':
+                        statusColor = '#e67e22'; statusBg = 'rgba(230,126,34,0.15)'; statusLabel = 'Past Due'; break;
+                    case 'canceled':
+                        statusColor = 'var(--danger,#ff6b6b)'; statusBg = 'rgba(255,107,107,0.15)'; statusLabel = 'Canceled'; break;
+                    case 'trialing':
+                        statusColor = '#2196F3'; statusBg = 'rgba(33,150,243,0.15)'; statusLabel = 'Trialing'; break;
+                    case 'unpaid':
+                        statusColor = 'var(--danger,#ff6b6b)'; statusBg = 'rgba(255,107,107,0.15)'; statusLabel = 'Unpaid'; break;
+                    default:
+                        statusColor = '#888'; statusBg = 'rgba(136,136,136,0.15)'; statusLabel = sub.status; break;
+                }
+
+                let cancelNote = '';
+                if (sub.cancelAtPeriodEnd) {
+                    cancelNote = '<div style="font-size:0.65rem;color:#e67e22;margin-top:2px;">Cancels at period end</div>';
+                }
+
+                return '<tr>' +
+                    '<td><div style="font-size:0.85rem;font-weight:600;">' + (sub.customerName || '—') + '</div><div style="font-size:0.72rem;color:#888;">' + (sub.customerEmail || '') + '</div></td>' +
+                    '<td style="font-size:0.8rem;color:var(--brown-dark);font-weight:500;">' + sub.productName + '</td>' +
+                    '<td style="font-size:0.9rem;font-weight:700;">$' + amount + '</td>' +
+                    '<td style="font-size:0.8rem;">' + intervalLabel + '</td>' +
+                    '<td style="font-size:0.8rem;">' + createdStr + '</td>' +
+                    '<td style="font-size:0.8rem;">' + nextBilling + '</td>' +
+                    '<td><span style="display:inline-block;padding:0.3rem 0.7rem;border-radius:20px;font-size:0.72rem;font-weight:600;background:' + statusBg + ';color:' + statusColor + ';">' + statusLabel + '</span>' + cancelNote + '</td>' +
                     '</tr>';
             }).join('');
         }
