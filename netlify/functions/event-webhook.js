@@ -7,7 +7,7 @@ exports.handler=async(event)=>{
   if(evt.type==='checkout.session.completed'){
     const session=evt.data.object;const m=session.metadata||{};
     const token=process.env.NETLIFY_AUTH_TOKEN;
-    const site='roaring-pegasus-444826';
+    const site=process.env.SITE_ID||'d9496ae2-2b01-4229-b6d2-9203c3be7acb';
     if(m.eventId&&token){
       const url='https://api.netlify.com/api/v1/blobs/'+site+'/event-registrations/'+m.eventId;
       let regs=[];
