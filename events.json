@@ -12,7 +12,12 @@
       "totalCapacity": 44,
       "registeredCount": 44,
       "tiers": [
-        { "name": "General Admission", "description": "Entry + music bingo all night", "pricePerPerson": 3500, "priceLabel": "$35" }
+        {
+          "name": "General Admission",
+          "description": "Entry + music bingo all night",
+          "pricePerPerson": 3500,
+          "priceLabel": "$35"
+        }
       ],
       "seatingOptions": null,
       "imageGradient": "neon-80s",
@@ -33,7 +38,12 @@
       "totalCapacity": 44,
       "registeredCount": 42,
       "tiers": [
-        { "name": "General Admission", "description": "Entry + music bingo all night", "pricePerPerson": 3500, "priceLabel": "$35" }
+        {
+          "name": "General Admission",
+          "description": "Entry + music bingo all night",
+          "pricePerPerson": 3500,
+          "priceLabel": "$35"
+        }
       ],
       "seatingOptions": null,
       "imageGradient": "neon-80s",
@@ -46,7 +56,7 @@
       "id": "evt-brunch-apr12",
       "name": "Ladies Neon Singo Bingo Brunch",
       "date": "Sunday, April 12, 2026",
-      "time": "11:00 AM – 2:00 PM",
+      "time": "11:00 AM â 2:00 PM",
       "location": "The Quarry, New Melle MO",
       "description": "The ultimate ladies brunch! Neon attire, Singo-Bingo, prizes and amazing food. Single seats and full tables available.",
       "category": "Ticketed",
@@ -54,28 +64,353 @@
       "totalCapacity": 31,
       "registeredCount": 0,
       "tiers": [
-        { "name": "Bingo + Brunch", "description": "Bingo games + full brunch menu", "pricePerPerson": 3500, "priceLabel": "$35" },
-        { "name": "VIP Bottomless", "description": "Bottomless bloodys + mimosas, bingo + brunch", "pricePerPerson": 4500, "priceLabel": "$45" }
+        {
+          "name": "Bingo + Brunch",
+          "description": "Bingo games + full brunch menu",
+          "pricePerPerson": 3500,
+          "priceLabel": "$35"
+        },
+        {
+          "name": "VIP Bottomless",
+          "description": "Bottomless bloodys + mimosas, bingo + brunch",
+          "pricePerPerson": 4500,
+          "priceLabel": "$45"
+        }
       ],
       "seatingOptions": [
-        { "name": "Single Seat", "seats": 1, "available": 8 },
-        { "name": "5-Top Table", "seats": 5, "available": 1 },
-        { "name": "8-Top Table", "seats": 8, "available": 1 },
-        { "name": "10-Top Table", "seats": 10, "available": 1 }
+        {
+          "name": "Single Seat",
+          "seats": 1,
+          "available": 8
+        },
+        {
+          "name": "5-Top Table",
+          "seats": 5,
+          "available": 1
+        },
+        {
+          "name": "8-Top Table",
+          "seats": 8,
+          "available": 1
+        },
+        {
+          "name": "10-Top Table",
+          "seats": 10,
+          "available": 1
+        }
       ],
       "imageGradient": "neon-brunch",
       "imageText": "Brunch",
       "status": "available",
       "floorPlan": null,
-      "bookedTableIds": ["t31", "t33", "bar-3", "bar-5"]
+      "bookedTableIds": [
+        "t31",
+        "t33",
+        "bar-3",
+        "bar-5"
+      ]
     }
   ],
   "bands": [
-    { "id": "1", "name": "Scott and Liz", "date": "2026-03-28", "timeSlot": "7 PM - 10 PM" },
-    { "id": "2", "name": "Ed Callison", "date": "2026-03-29", "timeSlot": "1 PM - 4 PM" },
-    { "id": "3", "name": "Kelli Renee", "date": "2026-04-04", "timeSlot": "7 PM - 10 PM" },
-    { "id": "4", "name": "The Velvet Devils", "date": "2026-04-12", "timeSlot": "1 PM - 4 PM" }
+    {
+      "id": "1",
+      "name": "Scott and Liz",
+      "date": "2026-03-28",
+      "timeSlot": "7 PM - 10 PM"
+    },
+    {
+      "id": "2",
+      "name": "Ed Callison",
+      "date": "2026-03-29",
+      "timeSlot": "1 PM - 4 PM"
+    },
+    {
+      "id": "3",
+      "name": "Kelli Renee",
+      "date": "2026-04-04",
+      "timeSlot": "7 PM - 10 PM"
+    },
+    {
+      "id": "4",
+      "name": "The Velvet Devils",
+      "date": "2026-04-12",
+      "timeSlot": "1 PM - 4 PM"
+    },
+    {
+      "id": "5",
+      "name": "test",
+      "date": "2026-03-30",
+      "timeSlot": "10 AM - 1 PM"
+    }
   ],
-  "floorPlan": null,
+  "floorPlan": {
+    "tables": [
+      {
+        "id": "t21",
+        "name": "21",
+        "x": 680,
+        "y": 630,
+        "width": 60,
+        "height": 80,
+        "shape": "rect",
+        "seats": 5,
+        "type": "table"
+      },
+      {
+        "id": "t22",
+        "name": "22",
+        "x": 580,
+        "y": 620,
+        "width": 70,
+        "height": 80,
+        "shape": "rect",
+        "seats": 8,
+        "type": "table"
+      },
+      {
+        "id": "t23",
+        "name": "23",
+        "x": 560,
+        "y": 510,
+        "width": 70,
+        "height": 80,
+        "shape": "rect",
+        "seats": 8,
+        "type": "table"
+      },
+      {
+        "id": "t24",
+        "name": "24",
+        "x": 660,
+        "y": 510,
+        "width": 60,
+        "height": 80,
+        "shape": "rect",
+        "seats": 6,
+        "type": "table"
+      },
+      {
+        "id": "t25",
+        "name": "25",
+        "x": 470,
+        "y": 430,
+        "width": 50,
+        "height": 50,
+        "shape": "diamond",
+        "seats": 2,
+        "type": "hightop"
+      },
+      {
+        "id": "t26",
+        "name": "26",
+        "x": 400,
+        "y": 420,
+        "width": 40,
+        "height": 40,
+        "shape": "rect",
+        "seats": 2,
+        "type": "hightop"
+      },
+      {
+        "id": "t27",
+        "name": "27",
+        "x": 280,
+        "y": 420,
+        "width": 80,
+        "height": 40,
+        "shape": "rect",
+        "seats": 8,
+        "type": "table"
+      },
+      {
+        "id": "t28",
+        "name": "28",
+        "x": 180,
+        "y": 600,
+        "width": 60,
+        "height": 80,
+        "shape": "rect",
+        "seats": 6,
+        "type": "table"
+      },
+      {
+        "id": "t29",
+        "name": "29",
+        "x": 180,
+        "y": 490,
+        "width": 60,
+        "height": 80,
+        "shape": "rect",
+        "seats": 6,
+        "type": "table"
+      },
+      {
+        "id": "t30",
+        "name": "30",
+        "x": 190,
+        "y": 420,
+        "width": 40,
+        "height": 40,
+        "shape": "circle",
+        "seats": 5,
+        "type": "table"
+      },
+      {
+        "id": "t31",
+        "name": "31",
+        "x": 340,
+        "y": 330,
+        "width": 80,
+        "height": 40,
+        "shape": "rect",
+        "seats": 8,
+        "type": "table"
+      },
+      {
+        "id": "t32",
+        "name": "32",
+        "x": 340,
+        "y": 260,
+        "width": 80,
+        "height": 40,
+        "shape": "rect",
+        "seats": 8,
+        "type": "table"
+      },
+      {
+        "id": "t33",
+        "name": "33",
+        "x": 340,
+        "y": 190,
+        "width": 80,
+        "height": 40,
+        "shape": "rect",
+        "seats": 8,
+        "type": "table"
+      },
+      {
+        "id": "t34",
+        "name": "34",
+        "x": 180,
+        "y": 160,
+        "width": 40,
+        "height": 80,
+        "shape": "rect",
+        "seats": 6,
+        "type": "table"
+      },
+      {
+        "id": "t35",
+        "name": "35",
+        "x": 340,
+        "y": 110,
+        "width": 80,
+        "height": 40,
+        "shape": "rect",
+        "seats": 8,
+        "type": "table"
+      },
+      {
+        "id": "t36",
+        "name": "36",
+        "x": 500,
+        "y": 450,
+        "width": 30,
+        "height": 30,
+        "shape": "circle",
+        "seats": 2,
+        "type": "hightop"
+      },
+      {
+        "id": "couch1",
+        "name": "Couch 1",
+        "x": 170,
+        "y": 40,
+        "width": 80,
+        "height": 50,
+        "shape": "rect",
+        "seats": 4,
+        "type": "couch"
+      },
+      {
+        "id": "couch2",
+        "name": "Couch 2",
+        "x": 490,
+        "y": 40,
+        "width": 60,
+        "height": 60,
+        "shape": "rect",
+        "seats": 4,
+        "type": "couch"
+      }
+    ],
+    "labels": [
+      {
+        "text": "FIREPLACE",
+        "x": 340,
+        "y": 50
+      },
+      {
+        "text": "DOORS",
+        "x": 130,
+        "y": 340
+      },
+      {
+        "text": "BAR",
+        "x": 590,
+        "y": 300
+      }
+    ],
+    "barSeats": [
+      {
+        "id": "bar-1",
+        "x": 570,
+        "y": 170,
+        "available": true
+      },
+      {
+        "id": "bar-2",
+        "x": 570,
+        "y": 190,
+        "available": true
+      },
+      {
+        "id": "bar-3",
+        "x": 570,
+        "y": 210,
+        "available": true
+      },
+      {
+        "id": "bar-4",
+        "x": 570,
+        "y": 230,
+        "available": true
+      },
+      {
+        "id": "bar-5",
+        "x": 570,
+        "y": 250,
+        "available": true
+      },
+      {
+        "id": "bar-6",
+        "x": 570,
+        "y": 270,
+        "available": true
+      },
+      {
+        "id": "bar-7",
+        "x": 570,
+        "y": 290,
+        "available": true
+      },
+      {
+        "id": "bar-8",
+        "x": 570,
+        "y": 310,
+        "available": true
+      }
+    ]
+  },
   "registrations": {}
 }
