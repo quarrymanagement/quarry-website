@@ -523,7 +523,7 @@ body{font-family:'Montserrat',sans-serif;background:var(--cream);color:var(--bro
 </div>
 </div><script>
 var currentEvent=null,selectedSeatType='table',selectedTableId=null,selectedBarSeats=[];
-var EVENTS=[{id:'evt-singo-bingo-001',name:'Neon 80s Singo-Bingo Ladies Brunch',date:'Saturday, May 10, 2026',time:'11:00 AM – 2:00 PM',description:'Put on your neon and join us for the ultimate ladies brunch! Singo-Bingo is the game where YOU sing the songs to win. Featuring 80s hits, mimosa service, brunch bites, and amazing prizes.',pricePerSeat:4500,tableCount:8,tableSeats:4,barSeatCount:12,totalCapacity:44,category:'Brunch',active:true,imageColor:'linear-gradient(135deg,#1a0050,#8B008B)',emoji:'🎤'}];
+var EVENTS=[{id:'evt-singo-bingo-001',name:'Neon 80s Singo-Bingo Ladies Brunch',date:'Saturday, May 10, 2026',time:'11:00 AM - 2:00 PM',description:'Put on your neon and join us for the ultimate ladies brunch! Singo-Bingo is the game where YOU sing the songs to win. Featuring 80s hits, mimosa service, brunch bites, and amazing prizes.',pricePerSeat:4500,tableCount:8,tableSeats:4,barSeatCount:12,totalCapacity:44,category:'Brunch',active:true,imageColor:'linear-gradient(135deg,#1a0050,#8B008B)',emoji:'🎤'}];
 var EVENT_REGISTRATIONS={};
 async function loadEvents(filter){
   var grid=document.getElementById('eventsGrid');
@@ -598,7 +598,7 @@ function selectTable(tid){
   if(!currentEvent)return;
   selectedTableId=selectedTableId===tid?null:tid;renderVenueMap();
   var info=document.getElementById('selectionInfo');
-  if(selectedTableId){info.textContent='✓ Table '+selectedTableId+' selected ('+currentEvent.tableSeats+' seats) — $'+((currentEvent.pricePerSeat*currentEvent.tableSeats)/100).toFixed(2)+' total';info.style.display='block';document.getElementById('btnToStep2').disabled=false;}
+  if(selectedTableId){info.textContent='✓ Table '+selectedTableId+' selected ('+currentEvent.tableSeats+' seats) -- $'+((currentEvent.pricePerSeat*currentEvent.tableSeats)/100).toFixed(2)+' total';info.style.display='block';document.getElementById('btnToStep2').disabled=false;}
   else{info.style.display='none';document.getElementById('btnToStep2').disabled=true;}
   updateTotal();
 }
@@ -607,7 +607,7 @@ function toggleBarSeat(bid){
   if(idx>-1)selectedBarSeats.splice(idx,1);else selectedBarSeats.push(bid);
   renderVenueMap();
   var info=document.getElementById('selectionInfo');
-  if(selectedBarSeats.length){info.textContent='✓ '+selectedBarSeats.length+' bar seat(s): '+selectedBarSeats.join(', ')+' — $'+((currentEvent.pricePerSeat*selectedBarSeats.length)/100).toFixed(2)+' total';info.style.display='block';document.getElementById('btnToStep2').disabled=false;}
+  if(selectedBarSeats.length){info.textContent='✓ '+selectedBarSeats.length+' bar seat(s): '+selectedBarSeats.join(', ')+' -- $'+((currentEvent.pricePerSeat*selectedBarSeats.length)/100).toFixed(2)+' total';info.style.display='block';document.getElementById('btnToStep2').disabled=false;}
   else{info.style.display='none';document.getElementById('btnToStep2').disabled=true;}
   updateTotal();
 }
