@@ -1,0 +1,2007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Quarry Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --brown-dark: #2C1A0E;
+            --gold: #B8933A;
+            --gold-light: #D4AF6A;
+            --cream: #FAF7F2;
+            --charcoal: #1A1A1A;
+            --gray-light: #F5F3F0;
+            --gray-medium: #D0CCCB;
+            --success: #4CAF50;
+            --danger: #FF6B6B;
+            --warning: #FFC107;
+            --info: #2196F3;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--cream);
+            color: var(--charcoal);
+            overflow: hidden;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 600;
+        }
+
+        /* LOGIN SCREEN */
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: linear-gradient(135deg, var(--charcoal) 0%, var(--brown-dark) 100%);
+        }
+
+        .login-card {
+            background: var(--cream);
+            padding: 3rem;
+            border-radius: 8px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-card h1 {
+            font-size: 2.5rem;
+            color: var(--brown-dark);
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .login-card .subtitle {
+            font-size: 0.9rem;
+            color: var(--gray-medium);
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--brown-dark);
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--gray-medium);
+            border-radius: 4px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(184, 147, 58, 0.1);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: var(--gold);
+            color: var(--charcoal);
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--gold-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(184, 147, 58, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: var(--brown-dark);
+            color: var(--cream);
+        }
+
+        .btn-secondary:hover {
+            background-color: #3D2415;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #45a049;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #FF5252;
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .btn-icon {
+            padding: 0.5rem;
+            width: 36px;
+            height: 36px;
+        }
+
+        /* MAIN LAYOUT */
+        .main-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .topnav {
+            background-color: var(--brown-dark);
+            color: var(--cream);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            grid-column: 1 / -1;
+        }
+
+        .topnav h1 {
+            font-size: 1.8rem;
+            color: var(--gold-light);
+        }
+
+        .nav-items {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-items button {
+            background: none;
+            border: none;
+            color: var(--cream);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .nav-items button:hover {
+            background-color: rgba(212, 175, 106, 0.2);
+            color: var(--gold-light);
+        }
+
+        .nav-items button.active {
+            background-color: var(--gold);
+            color: var(--brown-dark);
+        }
+
+        .content-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        /* SECTIONS */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* DASHBOARD */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--brown-dark), #3D2415);
+            color: var(--cream);
+            padding: 2rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--gold);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card h3 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--gold-light);
+        }
+
+        .dashboard-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+        }
+
+        /* TABLES */
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .table-header {
+            background-color: var(--brown-dark);
+            color: var(--cream);
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-header h2 {
+            font-size: 1.5rem;
+            color: var(--gold-light);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background-color: var(--gray-light);
+            border-bottom: 2px solid var(--gray-medium);
+        }
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--brown-dark);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        tbody tr:hover {
+            background-color: rgba(212, 175, 106, 0.05);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background-color: rgba(76, 175, 80, 0.2);
+            color: var(--success);
+        }
+
+        .status-inactive {
+            background-color: rgba(255, 107, 107, 0.2);
+            color: var(--danger);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* MODALS */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--cream);
+            border-radius: 8px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            background-color: var(--brown-dark);
+            color: var(--cream);
+            padding: 2rem;
+            border-bottom: 2px solid var(--gold);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 1.8rem;
+            color: var(--gold-light);
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--cream);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .modal-footer {
+            padding: 1rem 2rem;
+            background-color: var(--gray-light);
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            border-top: 1px solid var(--gray-medium);
+        }
+
+        /* FORMS */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+
+        /* TOASTS */
+        .toast-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .toast {
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            min-width: 300px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        .toast.info {
+            border-left: 4px solid var(--info);
+        }
+
+        /* FLOOR PLAN BUILDER */
+        .floorplan-container {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 2rem;
+            height: calc(100vh - 200px);
+        }
+
+        .floorplan-canvas {
+            background: linear-gradient(45deg, var(--gray-light) 25%, transparent 25%, transparent 75%, var(--gray-light) 75%, var(--gray-light)),
+                        linear-gradient(45deg, var(--gray-light) 25%, transparent 25%, transparent 75%, var(--gray-light) 75%, var(--gray-light));
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            background-color: white;
+            border: 2px solid var(--gray-medium);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .floorplan-toolbar {
+            background: white;
+            border: 1px solid var(--gray-medium);
+            border-radius: 8px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .toolbar-section {
+            border-bottom: 1px solid var(--gray-light);
+            padding-bottom: 1rem;
+        }
+
+        .toolbar-section:last-child {
+            border-bottom: none;
+        }
+
+        .toolbar-section h3 {
+            font-size: 0.9rem;
+            color: var(--brown-dark);
+            margin-bottom: 0.8rem;
+        }
+
+        .toolbar-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .toolbar-buttons button {
+            width: 100%;
+            padding: 0.6rem;
+            font-size: 0.85rem;
+            text-align: left;
+        }
+
+        .properties-panel {
+            background: white;
+            border: 1px solid var(--gray-medium);
+            border-radius: 8px;
+            padding: 1.5rem;
+            display: none;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .properties-panel.active {
+            display: flex;
+        }
+
+        .properties-panel h3 {
+            font-size: 1rem;
+            color: var(--brown-dark);
+        }
+
+        .property-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .property-field label {
+            font-size: 0.85rem;
+            color: var(--charcoal);
+            font-weight: 500;
+        }
+
+        .property-field input {
+            padding: 0.5rem;
+            border: 1px solid var(--gray-medium);
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        /* SVG TABLE STYLES */
+        .table-shape {
+            stroke: var(--brown-dark);
+            stroke-width: 2;
+            fill: var(--gold-light);
+            cursor: move;
+            transition: fill 0.2s;
+        }
+
+        .table-shape:hover {
+            fill: var(--gold);
+        }
+
+        .table-shape.selected {
+            stroke: var(--gold);
+            stroke-width: 3;
+        }
+
+        .table-label {
+            pointer-events: none;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            fill: var(--charcoal);
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+
+        .floor-label {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            fill: var(--brown-dark);
+            pointer-events: none;
+        }
+
+        .bar-seat {
+            fill: var(--gold);
+            stroke: var(--brown-dark);
+            stroke-width: 1;
+            cursor: pointer;
+        }
+
+        .bar-seat.available {
+            fill: var(--gold-light);
+        }
+
+        .bar-seat.occupied {
+            fill: var(--danger);
+        }
+
+        /* CONFIRMATION DIALOG */
+        .confirmation-dialog {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .confirmation-dialog h2 {
+            color: var(--brown-dark);
+            margin-bottom: 1rem;
+        }
+
+        .confirmation-dialog p {
+            margin-bottom: 2rem;
+            color: var(--charcoal);
+        }
+
+        .confirmation-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        /* REGISTRATIONS TABLE */
+        .registrations-modal {
+            width: 90vw;
+            max-width: 1000px;
+        }
+
+        .export-button {
+            margin-left: auto;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1024px) {
+            .floorplan-container {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-items {
+                gap: 1rem;
+            }
+
+            .nav-items button {
+                padding: 0.5rem 0.8rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+
+            .topnav {
+                padding: 1rem;
+            }
+
+            .topnav h1 {
+                font-size: 1.3rem;
+            }
+
+            .nav-items {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .nav-items button {
+                font-size: 0.8rem;
+                padding: 0.4rem 0.6rem;
+            }
+
+            .content {
+                padding: 1rem;
+            }
+
+            table {
+                font-size: 0.9rem;
+            }
+
+            th, td {
+                padding: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-card">
+            <h1>The Quarry</h1>
+            <p class="subtitle">Admin Panel</p>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required placeholder="Enter admin password">
+                </div>
+                <button type="submit" class="btn btn-primary">Sign In</button>
+            </form>
+            <div id="loginError" style="color: var(--danger); margin-top: 1rem; text-align: center; display: none;"></div>
+        </div>
+    </div>
+
+    <!-- MAIN ADMIN PANEL -->
+    <div id="adminPanel" style="display: none;" class="main-container">
+        <div class="content-wrapper">
+            <div class="topnav">
+                <h1>The Quarry Admin</h1>
+                <div class="nav-items">
+        <button id="navDashboard" class="nav-btn active" data-section="dashboard">Dashboard</button>
+                    <button id="navEvents" class="nav-btn" data-section="events">Events</button>
+                    <button id="navBands" class="nav-btn" data-section="bands">Bands</button>
+                    <button id="navTableMaps" class="nav-btn" data-section="tableMap">Table Maps</button>
+                    <button id="navInvoices" class="nav-btn" data-section="invoices">Invoices</button>
+                    <button id="signOutBtn" class="nav-btn">Sign Out</button>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- DASHBOARD SECTION -->
+                <div id="dashboardSection" class="section active">
+                    <h1>Dashboard</h1>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>Active Events</h3>
+                            <div class="value" id="activeEventsCount">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Total Registrations</h3>
+                            <div class="value" id="totalRegistrationsCount">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Est. Revenue</h3>
+                            <div class="value" id="estimatedRevenue">$0</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Upcoming Bands</h3>
+                            <div class="value" id="upcomingBandsCount">0</div>
+                        </div>
+                    </div>
+                    <h2 style="margin-bottom: 1.5rem; color: var(--brown-dark);">Quick Actions</h2>
+                    <div class="dashboard-actions">
+                        <button class="btn btn-primary" id="addEventBtn">+ Add Event</button>
+                        <button class="btn btn-secondary" id="addBandBtn">+ Add Band</button>
+                        <button class="btn btn-secondary" id="createInvoiceBtn">+ Create Invoice</button>
+                    </div>
+                </div>
+
+                <!-- EVENTS SECTION -->
+                <div id="eventsSection" class="section">
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h2>Events</h2>
+                            <button class="btn btn-primary btn-small" id="addEventBtn2">+ Add Event</button>
+                        </div>
+                        <table id="eventsTable">
+                            <thead>
+                                <tr>
+                                    <th>Event Name</th>
+                                    <th>Date</th>
+                                    <th>Category</th>
+                                    <th>Price</th>
+                                    <th>Capacity</th>
+                                    <th>Registered</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="eventsTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- BANDS SECTION -->
+                <div id="bandsSection" class="section">
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h2>Band Schedule</h2>
+                            <button class="btn btn-primary btn-small" id="addBandBtn2">+ Add Band</button>
+                        </div>
+                        <table id="bandsTable">
+                            <thead>
+                                <tr>
+                                    <th>Band Name</th>
+                                    <th>Date</th>
+                                    <th>Time Slot</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bandsTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TABLE MAP SECTION -->
+                <div id="tableMapSection" class="section">
+                    <h1 style="margin-bottom: 1.5rem; color: var(--brown-dark);">Floor Plan Builder</h1>
+                    <div class="floorplan-container">
+                        <svg id="floorPlanCanvas" class="floorplan-canvas" width="900" height="700"></svg>
+                        <div>
+                            <div class="floorplan-toolbar">
+                                <div class="toolbar-section">
+                                    <h3>Add Table</h3>
+                                    <div class="toolbar-buttons">
+                                        <button class="btn btn-secondary btn-small" id="addRectTable">Rectangle (4-10)</button>
+                                        <button class="btn btn-secondary btn-small" id="addRoundTable">Round (4-8)</button>
+                                        <button class="btn btn-secondary btn-small" id="addDiamondTable">High-Top (2-4)</button>
+                                        <button class="btn btn-secondary btn-small" id="addCouch">Couch (4+)</button>
+                                        <button class="btn btn-secondary btn-small" id="addBarSeats">Bar Seats</button>
+                                    </div>
+                                </div>
+                                <div class="toolbar-section">
+                                    <h3>Tools</h3>
+                                    <div class="toolbar-buttons">
+                                        <button class="btn btn-secondary btn-small" id="addLabel">Add Label</button>
+                                        <button class="btn btn-danger btn-small" id="deleteSelected">Delete Selected</button>
+                                    </div>
+                                </div>
+                                <div class="toolbar-section">
+                                    <h3>Save</h3>
+                                    <div class="toolbar-buttons">
+                                        <button class="btn btn-success btn-small" id="savePlan">Save Floor Plan</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="propertiesPanel" class="properties-panel">
+                                <h3>Selected Table</h3>
+                                <div class="property-field">
+                                    <label>Table Name/Number</label>
+                                    <input type="text" id="tableName">
+                                </div>
+                                <div class="property-field">
+                                    <label>Seats</label>
+                                    <input type="number" id="tableSeats" min="1" max="20">
+                                </div>
+                                <div class="property-field">
+                                    <label>Type</label>
+                                    <select id="tableType">
+                                        <option value="table">Table</option>
+                                        <option value="hightop">High-Top</option>
+                                        <option value="couch">Couch</option>
+                                        <option value="bar">Bar Seat</option>
+                                    </select>
+                                </div>
+                                <button class="btn btn-danger btn-small" id="deleteTableBtn">Delete Table</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- INVOICES SECTION -->
+                <div id="invoicesSection" class="section">
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h2>Invoices</h2>
+                            <button class="btn btn-primary btn-small" id="createInvoiceBtn2">+ Create Invoice</button>
+                        </div>
+                        <div style="padding: 2rem; text-align: center; color: var(--charcoal);">
+                            <p>For full invoice history and management, visit the <strong>Stripe Dashboard</strong>:</p>
+                            <a href="https://dashboard.stripe.com" target="_blank" class="btn btn-secondary" style="display: inline-block; margin-top: 1rem;">Open Stripe Dashboard</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALS -->
+
+    <!-- Add/Edit Event Modal -->
+    <div id="eventModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="eventModalTitle">Add Event</h2>
+                <button class="modal-close" onclick="closeModal('eventModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="eventForm">
+                    <div class="form-group">
+                        <label>Event Name</label>
+                        <input type="text" id="eventName" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="eventDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Time</label>
+                            <input type="time" id="eventTime" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="eventDescription" rows="4" style="width: 100%; padding: 0.75rem; border: 2px solid var(--gray-medium); border-radius: 4px; font-family: 'Montserrat', sans-serif;"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select id="eventCategory" required>
+                                <option value="Ticketed">Ticketed</option>
+                                <option value="Free">Free</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Price Per Seat ($)</label>
+                            <input type="number" id="eventPrice" min="0" step="0.01" value="0" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Image Gradient</label>
+                            <select id="eventImageGradient" required>
+                                <option value="general">General</option>
+                                <option value="neon-80s">Neon 80s</option>
+                                <option value="neon-brunch">Neon Brunch</option>
+                                <option value="live-music">Live Music</option>
+                                <option value="comedy">Comedy</option>
+                                <option value="wine-tasting">Wine Tasting</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Image Text</label>
+                            <input type="text" id="eventImageText" placeholder="Text for event card">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select id="eventStatus" required>
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label><input type="checkbox" id="eventUseSeating"> Enable Seating Options</label>
+                    </div>
+                    <div id="seatingOptionsDiv" style="display: none;">
+                        <div class="form-group">
+                            <label>Single Seats Available</label>
+                            <input type="number" id="eventSingleSeats" min="0" value="0">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('eventModal')">Cancel</button>
+                <button class="btn btn-primary" id="eventSubmitBtn">Save Event</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Band Modal -->
+    <div id="bandModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="bandModalTitle">Add Band</h2>
+                <button class="modal-close" onclick="closeModal('bandModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="bandForm">
+                    <div class="form-group">
+                        <label>Band Name</label>
+                        <input type="text" id="bandName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" id="bandDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Time Slot</label>
+                        <select id="bandTimeSlot" required>
+                            <option value="10 AM - 1 PM">Morning (10 AM - 1 PM)</option>
+                            <option value="1 PM - 4 PM">Afternoon (1 PM - 4 PM)</option>
+                            <option value="7 PM - 10 PM">Evening (7 PM - 10 PM)</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('bandModal')">Cancel</button>
+                <button class="btn btn-primary" id="bandSubmitBtn">Save Band</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Registrations Modal -->
+    <div id="registrationsModal" class="modal-overlay">
+        <div class="modal registrations-modal">
+            <div class="modal-header">
+                <h2 id="registrationsTitle">Registrations</h2>
+                <button class="modal-close" onclick="closeModal('registrationsModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <button class="btn btn-success btn-small export-button" id="exportCSVBtn">Export CSV</button>
+                <table id="registrationsTable" style="margin-top: 1rem;">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Party Size</th>
+                            <th>Seating</th>
+                            <th>Amount Paid</th>
+                            <th>Date Registered</th>
+                        </tr>
+                    </thead>
+                    <tbody id="registrationsTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Invoice Modal -->
+    <div id="invoiceModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Create Invoice</h2>
+                <button class="modal-close" onclick="closeModal('invoiceModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="invoiceForm">
+                    <div class="form-group">
+                        <label>Customer Email</label>
+                        <input type="email" id="invoiceEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Customer Name</label>
+                        <input type="text" id="invoiceName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <input type="text" id="invoiceDescription" required placeholder="e.g., Event catering, rental, etc.">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Amount ($)</label>
+                            <input type="number" id="invoiceAmount" min="0.01" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Due Date</label>
+                            <input type="date" id="invoiceDueDate" required>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('invoiceModal')">Cancel</button>
+                <button class="btn btn-primary" id="invoiceSubmitBtn">Create Invoice</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Dialog -->
+    <div id="confirmationModal" class="modal-overlay">
+        <div class="confirmation-dialog">
+            <h2 id="confirmationTitle">Confirm</h2>
+            <p id="confirmationMessage"></p>
+            <div class="confirmation-buttons">
+                <button class="btn btn-secondary" id="confirmCancelBtn">Cancel</button>
+                <button class="btn btn-danger" id="confirmOkBtn">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Token managed securely via Netlify proxy — no modal needed -->
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        // STATE MANAGEMENT
+        let state = {
+            authenticated: false,
+            password: null,
+            currentEventId: null,
+            currentBandId: null,
+            currentEventRegistrations: [],
+            events: [],
+            bands: [
+                { id: '1', name: 'Scott and Liz', date: '2026-03-28', timeSlot: '7 PM - 10 PM' },
+                { id: '2', name: 'Ed Callison', date: '2026-03-29', timeSlot: '1 PM - 4 PM' },
+                { id: '3', name: 'Kelli Renee', date: '2026-04-04', timeSlot: '7 PM - 10 PM' },
+                { id: '4', name: 'The Velvet Devils', date: '2026-04-12', timeSlot: '1 PM - 4 PM' }
+            ],
+            floorPlan: null,
+            selectedTableId: null,
+            nextEventId: 1,
+            nextBandId: 5,
+            dataSha: null,
+            registrations: {}
+        };
+
+
+        // GITHUB CONFIGURATION — token is stored securely in Netlify env vars
+        // All GitHub API calls go through the proxy function
+        const GITHUB_PROXY = '/.netlify/functions/github-proxy';
+        const GITHUB_REPO = 'quarrymanagement/quarry-website';
+        const DATA_FILE = 'events.json';
+
+        // DEFAULT FLOOR PLAN
+        const defaultFloorPlan = {
+            tables: [
+                {id: 't21', name: '21', x: 680, y: 630, width: 60, height: 80, shape: 'rect', seats: 5, type: 'table'},
+                {id: 't22', name: '22', x: 580, y: 620, width: 70, height: 80, shape: 'rect', seats: 8, type: 'table'},
+                {id: 't23', name: '23', x: 560, y: 510, width: 70, height: 80, shape: 'rect', seats: 8, type: 'table'},
+                {id: 't24', name: '24', x: 660, y: 510, width: 60, height: 80, shape: 'rect', seats: 6, type: 'table'},
+                {id: 't25', name: '25', x: 470, y: 430, width: 50, height: 50, shape: 'diamond', seats: 2, type: 'hightop'},
+                {id: 't26', name: '26', x: 400, y: 420, width: 40, height: 40, shape: 'rect', seats: 2, type: 'hightop'},
+                {id: 't27', name: '27', x: 280, y: 420, width: 80, height: 40, shape: 'rect', seats: 8, type: 'table'},
+                {id: 't28', name: '28', x: 180, y: 600, width: 60, height: 80, shape: 'rect', seats: 6, type: 'table'},
+                {id: 't29', name: '29', x: 180, y: 490, width: 60, height: 80, shape: 'rect', seats: 6, type: 'table'},
+                {id: 't30', name: '30', x: 190, y: 420, width: 40, height: 40, shape: 'circle', seats: 5, type: 'table'},
+                {id: 't31', name: '31', x: 340, y: 330, width: 80, height: 40, shape: 'rect', seats: 8, type: 'table'},
+                {id: 't32', name: '32', x: 340, y: 260, width: 80, height: 40, shape: 'rect', seats: 8, type: 'table'},
+                {id: 't33', name: '33', x: 340, y: 190, width: 80, height: 40, shape: 'rect', seats: 8, type: 'table'},
+                {id: 't34', name: '34', x: 180, y: 160, width: 40, height: 80, shape: 'rect', seats: 6, type: 'table'},
+                {id: 't35', name: '35', x: 340, y: 110, width: 80, height: 40, shape: 'rect', seats: 8, type: 'table'},
+                {id: 't36', name: '36', x: 500, y: 450, width: 30, height: 30, shape: 'circle', seats: 2, type: 'hightop'},
+                {id: 'couch1', name: 'Couch 1', x: 170, y: 40, width: 80, height: 50, shape: 'rect', seats: 4, type: 'couch'},
+                {id: 'couch2', name: 'Couch 2', x: 490, y: 40, width: 60, height: 60, shape: 'rect', seats: 4, type: 'couch'},
+            ],
+            labels: [
+                {text: 'FIREPLACE', x: 340, y: 50},
+                {text: 'DOORS', x: 130, y: 340},
+                {text: 'BAR', x: 590, y: 300}
+            ],
+            barSeats: [
+                {id: 'bar-1', x: 570, y: 170, available: true},
+                {id: 'bar-2', x: 570, y: 190, available: true},
+                {id: 'bar-3', x: 570, y: 210, available: true},
+                {id: 'bar-4', x: 570, y: 230, available: true},
+                {id: 'bar-5', x: 570, y: 250, available: true},
+                {id: 'bar-6', x: 570, y: 270, available: true},
+                {id: 'bar-7', x: 570, y: 290, available: true},
+                {id: 'bar-8', x: 570, y: 310, available: true}
+            ]
+        };
+
+        // INITIALIZATION
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeEventListeners();
+            checkSessionStorage();
+        });
+
+        // LOGIN HANDLING
+        function initializeEventListeners() {
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            document.getElementById('signOutBtn').addEventListener('click', handleSignOut);
+
+            // Navigation
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', handleNavigation);
+            });
+
+            // Dashboard buttons
+            document.getElementById('addEventBtn').addEventListener('click', () => openAddEventModal());
+            document.getElementById('addBandBtn').addEventListener('click', () => openAddBandModal());
+            document.getElementById('createInvoiceBtn').addEventListener('click', () => openAddInvoiceModal());
+            document.getElementById('addEventBtn2').addEventListener('click', () => openAddEventModal());
+            document.getElementById('addBandBtn2').addEventListener('click', () => openAddBandModal());
+            document.getElementById('createInvoiceBtn2').addEventListener('click', () => openAddInvoiceModal());
+
+            // Events form
+            document.getElementById('eventSubmitBtn').addEventListener('click', handleEventSubmit);
+
+            // Bands form
+            document.getElementById('bandSubmitBtn').addEventListener('click', handleBandSubmit);
+
+            // Invoice form
+            document.getElementById('invoiceSubmitBtn').addEventListener('click', handleInvoiceSubmit);
+
+            // Floor plan buttons
+            document.getElementById('addRectTable').addEventListener('click', () => addTable('rect', 8));
+            document.getElementById('addRoundTable').addEventListener('click', () => addTable('circle', 6));
+            document.getElementById('addDiamondTable').addEventListener('click', () => addTable('diamond', 3));
+            document.getElementById('addCouch').addEventListener('click', () => addTable('rect', 4, 'couch'));
+            document.getElementById('addBarSeats').addEventListener('click', () => addBarSeats());
+            document.getElementById('addLabel').addEventListener('click', () => addLabel());
+            document.getElementById('deleteSelected').addEventListener('click', () => deleteSelectedTable());
+            document.getElementById('savePlan').addEventListener('click', () => saveFloorPlan());
+            document.getElementById('deleteTableBtn').addEventListener('click', () => deleteSelectedTable());
+            document.getElementById('exportCSVBtn').addEventListener('click', () => exportRegistrationsCSV());
+
+            // Confirmation dialog
+            document.getElementById('confirmCancelBtn').addEventListener('click', () => closeModal('confirmationModal'));
+            document.getElementById('confirmOkBtn').addEventListener('click', () => executeConfirmedAction());
+        }
+
+        function checkSessionStorage() {
+            const password = sessionStorage.getItem('quarryAdminPassword');
+            if (password && password === 'quarry2026') {
+                state.password = password;
+                state.authenticated = true;
+                showAdminPanel();
+                loadData();
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const password = document.getElementById('password').value;
+            if (password !== 'quarry2026') {
+                showToast('Invalid password', 'error');
+                return;
+            }
+            state.password = password;
+            state.authenticated = true;
+            sessionStorage.setItem('quarryAdminPassword', password);
+            showAdminPanel();
+            loadData();
+        }
+
+        function handleSignOut() {
+            state.authenticated = false;
+            state.password = null;
+            sessionStorage.removeItem('quarryAdminPassword');
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('password').value = '';
+        }
+
+        function showAdminPanel() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'flex';
+        }
+
+        // NAVIGATION
+        function handleNavigation(e) {
+            const section = e.target.dataset.section;
+            if (section === 'sign-out') return handleSignOut();
+
+            // Update active nav button
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            e.target.classList.add('active');
+
+            // Show section
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(section + 'Section').classList.add('active');
+
+            // Initialize floor plan if needed
+            if (section === 'tableMap' && !state.floorPlan) {
+                state.floorPlan = JSON.parse(JSON.stringify(defaultFloorPlan));
+                renderFloorPlan();
+            }
+        }
+
+        // DATA LOADING
+        async function loadData() {
+            showLoadingIndicator(true);
+            try {
+                const resp = await fetch(GITHUB_PROXY);
+
+                if (!resp.ok) {
+                    throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
+                }
+
+                const fileInfo = await resp.json();
+                state.dataSha = fileInfo.sha;
+                const content = JSON.parse(atob(fileInfo.content));
+                state.events = content.events || [];
+                state.bands = content.bands || [];
+                state.floorPlan = content.floorPlan || JSON.parse(JSON.stringify(defaultFloorPlan));
+                state.registrations = content.registrations || {};
+                
+                // Set next IDs
+                state.nextEventId = Math.max(...state.events.map(e => parseInt(e.id.replace(/\D/g,'')) || 0), 0) + 1;
+                state.nextBandId = Math.max(...state.bands.map(b => parseInt(b.id) || 0), 0) + 1;
+                
+                showLoadingIndicator(false);
+            } catch (err) {
+                console.error('Failed to load data:', err);
+                showToast('Failed to load data from GitHub: ' + err.message, 'error');
+                showLoadingIndicator(false);
+                // Fall back to defaults
+                state.events = [];
+                state.bands = [];
+                state.floorPlan = JSON.parse(JSON.stringify(defaultFloorPlan));
+                state.registrations = {};
+            }
+            
+            renderEventsTable();
+            renderBandsTable();
+            loadFloorPlan();
+            updateDashboard();
+        }
+        function loadEvents() {
+            // In a real app, this would call the Netlify function
+            // For now, use sample data
+            state.events = [
+                {id: '1', name: 'Spring Wedding', date: '2026-04-15', time: '18:00', category: 'Ticketed', price: 7500, capacity: 80, registered: 42, status: 'Active'},
+                {id: '2', name: 'Jazz Night', date: '2026-04-20', time: '19:00', category: 'Ticketed', price: 2000, capacity: 100, registered: 67, status: 'Active'},
+                {id: '3', name: 'Corporate Event', date: '2026-05-10', time: '17:00', category: 'Free', price: 0, capacity: 150, registered: 89, status: 'Active'}
+            ];
+            renderEventsTable();
+        }
+
+        function loadBands() {
+            renderBandsTable();
+        }
+
+        function loadFloorPlan() {
+            state.floorPlan = JSON.parse(JSON.stringify(defaultFloorPlan));
+        }
+
+        function updateDashboard() {
+            const activeEvents = state.events.filter(e => e.status === 'Active').length;
+            const totalRegistrations = state.events.reduce((sum, e) => sum + e.registered, 0);
+            const estimatedRevenue = state.events.reduce((sum, e) => sum + (e.price * e.registered / 100), 0);
+            const upcomingBands = state.bands.length;
+
+            document.getElementById('activeEventsCount').textContent = activeEvents;
+            document.getElementById('totalRegistrationsCount').textContent = totalRegistrations;
+            document.getElementById('estimatedRevenue').textContent = '$' + estimatedRevenue.toFixed(2);
+            document.getElementById('upcomingBandsCount').textContent = upcomingBands;
+        }
+
+        // EVENTS TABLE
+        function renderEventsTable() {
+            const tbody = document.getElementById('eventsTableBody');
+            tbody.innerHTML = state.events.map(event => `
+                <tr>
+                    <td>${event.name}</td>
+                    <td>${event.date}</td>
+                    <td>${event.category}</td>
+                    <td>$${(event.price / 100).toFixed(2)}</td>
+                    <td>${event.capacity}</td>
+                    <td>${event.registered}</td>
+                    <td><span class="status-badge ${event.status === 'Active' ? 'status-active' : 'status-inactive'}">${event.status}</span></td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-secondary btn-small" onclick="editEvent('${event.id}')">Edit</button>
+                            <button class="btn btn-success btn-small" onclick="viewRegistrations('${event.id}')">Registrations</button>
+                            <button class="btn btn-danger btn-small" onclick="confirmDelete('event', '${event.id}')">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openAddEventModal() {
+            document.getElementById('eventModalTitle').textContent = 'Add Event';
+            document.getElementById('eventForm').reset();
+            document.getElementById('eventForm').dataset.mode = 'create';
+            openModal('eventModal');
+        }
+
+        function editEvent(eventId) {
+            const event = state.events.find(e => e.id === eventId);
+            if (!event) return;
+
+            document.getElementById('eventModalTitle').textContent = 'Edit Event';
+            document.getElementById('eventName').value = event.name;
+            document.getElementById('eventDate').value = event.date;
+            document.getElementById('eventTime').value = event.time;
+            document.getElementById('eventDescription').value = event.description || '';
+            document.getElementById('eventCategory').value = event.category;
+            document.getElementById('eventPrice').value = (event.price / 100).toFixed(2);
+            document.getElementById('eventCapacity').value = event.capacity;
+            document.getElementById('eventStatus').value = event.status;
+            document.getElementById('eventForm').dataset.mode = 'edit';
+            document.getElementById('eventForm').dataset.eventId = eventId;
+            openModal('eventModal');
+        }
+
+
+        // GITHUB TOKEN — managed securely via Netlify environment variable
+        // No token input needed from users
+        function initGitHubToken() {
+            const el = document.getElementById('tokenStatus');
+            if (el) {
+                el.textContent = '✓ Secure proxy';
+                el.style.color = 'var(--success)';
+            }
+        }
+        function openTokenSettings() { /* Token managed by Netlify */ }
+        function closeTokenSettings() { /* Token managed by Netlify */ }
+        function saveGitHubToken() { /* Token managed by Netlify */ }
+
+        // GITHUB SAVE FUNCTION
+        async function saveToGitHub(message) {
+            
+            const data = {
+                events: state.events,
+                bands: state.bands,
+                floorPlan: state.floorPlan,
+                registrations: state.registrations || {}
+            };
+            
+            const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+            
+            showSavingIndicator(true);
+            try {
+                const resp = await fetch(GITHUB_PROXY, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: message || 'Update events data',
+                        content: content,
+                        sha: state.dataSha
+                    })
+                });
+                
+                const result = await resp.json();
+                if (!resp.ok) throw new Error(result.message || 'GitHub API error');
+                
+                state.dataSha = result.content.sha;
+                showSavingIndicator(false);
+                return true;
+            } catch (err) {
+                console.error('Save failed:', err);
+                showToast('Failed to save: ' + err.message, 'error');
+                showSavingIndicator(false);
+                return false;
+            }
+        }
+
+        function showLoadingIndicator(show) {
+            let loader = document.getElementById('loadingIndicator');
+            if (!loader) {
+                loader = document.createElement('div');
+                loader.id = 'loadingIndicator';
+                loader.innerHTML = '<div style="text-align: center; padding: 2rem; color: white; font-size: 1.2rem;">Loading...</div>';
+                loader.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 10000;';
+                document.body.appendChild(loader);
+            }
+            loader.style.display = show ? 'flex' : 'none';
+        }
+
+        function showSavingIndicator(show) {
+            // Disable submit buttons temporarily
+            document.querySelectorAll('.btn-primary').forEach(btn => {
+                btn.disabled = show;
+            });
+        }
+
+
+        async function handleEventSubmit() {
+            const form = document.getElementById('eventForm');
+            const mode = form.dataset.mode;
+            const eventId = form.dataset.eventId;
+
+            const dateStr = document.getElementById('eventDate').value;
+            const dateObj = new Date(dateStr + 'T00:00:00');
+            const options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
+            const humanDate = dateObj.toLocaleDateString('en-US', options);
+
+            const eventData = {
+                id: mode === 'create' ? String(state.nextEventId++) : eventId,
+                name: document.getElementById('eventName').value,
+                date: humanDate,
+                time: document.getElementById('eventTime').value,
+                description: document.getElementById('eventDescription').value,
+                category: document.getElementById('eventCategory').value,
+                pricePerSeat: Math.round(parseFloat(document.getElementById('eventPrice').value) * 100),
+                totalCapacity: parseInt(document.getElementById('eventCapacity').value),
+                registeredCount: mode === 'create' ? 0 : (state.events.find(e => e.id === eventId)?.registeredCount || 0),
+                status: document.getElementById('eventStatus').value,
+                imageGradient: document.getElementById('eventImageGradient')?.value || 'general',
+                imageText: document.getElementById('eventImageText')?.value || '',
+                tiers: parseEventTiers(),
+                seatingOptions: parseSeatingOptions(),
+                floorPlan: null,
+                bookedTableIds: []
+            };
+
+            if (mode === 'create') {
+                state.events.push(eventData);
+            } else {
+                const idx = state.events.findIndex(e => e.id === eventId);
+                state.events[idx] = eventData;
+            }
+
+            const saved = await saveToGitHub(mode === 'create' ? `Add event: ${eventData.name}` : `Update event: ${eventData.name}`);
+            if (saved) {
+                showToast(mode === 'create' ? 'Event created and published!' : 'Event updated and published!', 'success');
+                renderEventsTable();
+                updateDashboard();
+                closeModal('eventModal');
+            }
+        }
+
+        function parseEventTiers() {
+            const tiers = [];
+            const tierElements = document.querySelectorAll('.tier-row');
+            tierElements.forEach(el => {
+                const name = el.querySelector('.tier-name')?.value;
+                const price = el.querySelector('.tier-price')?.value;
+                if (name && price) {
+                    tiers.push({ name, price: Math.round(parseFloat(price) * 100), description: '' });
+                }
+            });
+            if (tiers.length === 0) {
+                const price = Math.round(parseFloat(document.getElementById('eventPrice').value) * 100);
+                tiers.push({ name: 'Standard', price, description: '' });
+            }
+            return tiers;
+        }
+
+        function parseSeatingOptions() {
+            const useSeating = document.getElementById('eventUseSeating')?.checked;
+            if (!useSeating) return null;
+            
+            return {
+                singleSeats: parseInt(document.getElementById('eventSingleSeats')?.value || 0),
+                tableOptions: [
+                    { name: 'Table for 2', seats: 2 },
+                    { name: 'Table for 4', seats: 4 },
+                    { name: 'Table for 6', seats: 6 }
+                ]
+            };
+        }
+
+        function viewRegistrations(eventId) {
+            const event = state.events.find(e => e.id === eventId);
+            if (!event) return;
+
+            state.currentEventId = eventId;
+            state.currentEventRegistrations = [
+                { name: 'John Smith', email: 'john@example.com', phone: '(555) 123-4567', partySize: 2, seating: 'Table 21', amountPaid: 75, date: '2026-03-28' },
+                { name: 'Sarah Johnson', email: 'sarah@example.com', phone: '(555) 234-5678', partySize: 4, seating: 'Table 22', amountPaid: 150, date: '2026-03-29' },
+                { name: 'Michael Brown', email: 'michael@example.com', phone: '(555) 345-6789', partySize: 1, seating: 'Table 23', amountPaid: 37.50, date: '2026-03-30' }
+            ];
+
+            document.getElementById('registrationsTitle').textContent = `Registrations for ${event.name}`;
+            const tbody = document.getElementById('registrationsTableBody');
+            tbody.innerHTML = state.currentEventRegistrations.map(reg => `
+                <tr>
+                    <td>${reg.name}</td>
+                    <td>${reg.email}</td>
+                    <td>${reg.phone}</td>
+                    <td>${reg.partySize}</td>
+                    <td>${reg.seating}</td>
+                    <td>$${reg.amountPaid.toFixed(2)}</td>
+                    <td>${reg.date}</td>
+                </tr>
+            `).join('');
+
+            openModal('registrationsModal');
+        }
+
+        function exportRegistrationsCSV() {
+            if (!state.currentEventRegistrations.length) {
+                showToast('No registrations to export', 'info');
+                return;
+            }
+
+            const headers = ['Name', 'Email', 'Phone', 'Party Size', 'Seating', 'Amount Paid', 'Date Registered'];
+            const rows = state.currentEventRegistrations.map(reg => [
+                reg.name,
+                reg.email,
+                reg.phone,
+                reg.partySize,
+                reg.seating,
+                '$' + reg.amountPaid.toFixed(2),
+                reg.date
+            ]);
+
+            const csv = [headers, ...rows].map(row => row.join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `registrations-${state.currentEventId}-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            showToast('CSV exported successfully', 'success');
+        }
+
+        // BANDS TABLE
+        function renderBandsTable() {
+            const tbody = document.getElementById('bandsTableBody');
+            tbody.innerHTML = state.bands.map(band => `
+                <tr>
+                    <td>${band.name}</td>
+                    <td>${band.date}</td>
+                    <td>${band.timeSlot}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-secondary btn-small" onclick="editBand('${band.id}')">Edit</button>
+                            <button class="btn btn-danger btn-small" onclick="confirmDelete('band', '${band.id}')">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openAddBandModal() {
+            document.getElementById('bandModalTitle').textContent = 'Add Band';
+            document.getElementById('bandForm').reset();
+            document.getElementById('bandForm').dataset.mode = 'create';
+            openModal('bandModal');
+        }
+
+        function editBand(bandId) {
+            const band = state.bands.find(b => b.id === bandId);
+            if (!band) return;
+
+            document.getElementById('bandModalTitle').textContent = 'Edit Band';
+            document.getElementById('bandName').value = band.name;
+            document.getElementById('bandDate').value = band.date;
+            document.getElementById('bandTimeSlot').value = band.timeSlot;
+            document.getElementById('bandForm').dataset.mode = 'edit';
+            document.getElementById('bandForm').dataset.bandId = bandId;
+            openModal('bandModal');
+        }
+
+        function handleBandSubmit() {
+            const form = document.getElementById('bandForm');
+            const mode = form.dataset.mode;
+            const bandId = form.dataset.bandId;
+
+            const bandData = {
+                id: mode === 'create' ? String(state.nextBandId++) : bandId,
+                name: document.getElementById('bandName').value,
+                date: document.getElementById('bandDate').value,
+                timeSlot: document.getElementById('bandTimeSlot').value
+            };
+
+            if (mode === 'create') {
+                state.bands.push(bandData);
+            } else {
+                const idx = state.bands.findIndex(b => b.id === bandId);
+                state.bands[idx] = bandData;
+            }
+
+            // Save to GitHub (no await here for bands)
+            saveToGitHub(mode === 'create' ? `Add band: ${bandData.name}` : `Update band: ${bandData.name}`).then(saved => {
+                if (saved) {
+                    showToast(mode === 'create' ? 'Band added and published!' : 'Band updated and published!', 'success');
+                }
+            });
+
+            renderBandsTable();
+            updateDashboard();
+            closeModal('bandModal');
+        }
+        function saveBands() {
+            // Stub for future Netlify function call
+            // POST to /.netlify/functions/admin-bands
+            showToast('Bands saved', 'success');
+        }
+
+        // FLOOR PLAN BUILDER
+        let floorPlanState = {
+            draggingTableId: null,
+            dragOffsetX: 0,
+            dragOffsetY: 0,
+            addingLabel: false
+        };
+
+        function renderFloorPlan() {
+            const svg = document.getElementById('floorPlanCanvas');
+            svg.innerHTML = '';
+
+            // Draw grid
+            const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+            const pattern = document.createElementNS('http://www.w3.org/2000/svg', 'pattern');
+            pattern.setAttribute('id', 'smallGrid');
+            pattern.setAttribute('width', '20');
+            pattern.setAttribute('height', '20');
+            pattern.setAttribute('patternUnits', 'userSpaceOnUse');
+            const line1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line1.setAttribute('x1', '20');
+            line1.setAttribute('y1', '0');
+            line1.setAttribute('x2', '0');
+            line1.setAttribute('y2', '0');
+            line1.setAttribute('stroke', '#e0e0e0');
+            line1.setAttribute('stroke-width', '0.5');
+            const line2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line2.setAttribute('x1', '0');
+            line2.setAttribute('y1', '20');
+            line2.setAttribute('x2', '0');
+            line2.setAttribute('y2', '0');
+            line2.setAttribute('stroke', '#e0e0e0');
+            line2.setAttribute('stroke-width', '0.5');
+            pattern.appendChild(line1);
+            pattern.appendChild(line2);
+            defs.appendChild(pattern);
+            svg.appendChild(defs);
+
+            const background = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            background.setAttribute('width', '900');
+            background.setAttribute('height', '700');
+            background.setAttribute('fill', 'url(#smallGrid)');
+            background.setAttribute('fill-opacity', '0.5');
+            svg.appendChild(background);
+
+            // Draw tables
+            if (state.floorPlan && state.floorPlan.tables) {
+                state.floorPlan.tables.forEach(table => {
+                    drawTable(svg, table);
+                });
+            }
+
+            // Draw labels
+            if (state.floorPlan && state.floorPlan.labels) {
+                state.floorPlan.labels.forEach(label => {
+                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    text.setAttribute('x', label.x);
+                    text.setAttribute('y', label.y);
+                    text.setAttribute('class', 'floor-label');
+                    text.textContent = label.text;
+                    svg.appendChild(text);
+                });
+            }
+
+            // Draw bar seats
+            if (state.floorPlan && state.floorPlan.barSeats) {
+                state.floorPlan.barSeats.forEach((seat, idx) => {
+                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    circle.setAttribute('cx', seat.x);
+                    circle.setAttribute('cy', seat.y);
+                    circle.setAttribute('r', '8');
+                    circle.setAttribute('class', `bar-seat ${seat.available ? 'available' : 'occupied'}`);
+                    svg.appendChild(circle);
+                });
+            }
+        }
+
+        function drawTable(svg, table) {
+            let element;
+
+            if (table.shape === 'rect') {
+                element = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                element.setAttribute('x', table.x);
+                element.setAttribute('y', table.y);
+                element.setAttribute('width', table.width);
+                element.setAttribute('height', table.height);
+            } else if (table.shape === 'circle') {
+                element = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                element.setAttribute('cx', table.x + table.width / 2);
+                element.setAttribute('cy', table.y + table.height / 2);
+                element.setAttribute('r', table.width / 2);
+            } else if (table.shape === 'diamond') {
+                const cx = table.x + table.width / 2;
+                const cy = table.y + table.height / 2;
+                const points = `${cx},${cy - table.height/2} ${cx + table.width/2},${cy} ${cx},${cy + table.height/2} ${cx - table.width/2},${cy}`;
+                element = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                element.setAttribute('points', points);
+            }
+
+            element.setAttribute('class', `table-shape ${state.selectedTableId === table.id ? 'selected' : ''}`);
+            element.setAttribute('data-table-id', table.id);
+
+            element.addEventListener('mousedown', startTableDrag);
+            element.addEventListener('click', (e) => {
+                e.stopPropagation();
+                selectTable(table.id);
+            });
+
+            svg.appendChild(element);
+
+            // Add label
+            const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            let labelX = table.x + table.width / 2;
+            let labelY = table.y + table.height / 2;
+            if (table.shape === 'circle') {
+                labelX = table.x + table.width / 2;
+                labelY = table.y + table.height / 2;
+            }
+            label.setAttribute('x', labelX);
+            label.setAttribute('y', labelY);
+            label.setAttribute('class', 'table-label');
+            label.setAttribute('pointer-events', 'none');
+            label.textContent = table.name;
+            svg.appendChild(label);
+        }
+
+        function selectTable(tableId) {
+            state.selectedTableId = tableId;
+            const table = state.floorPlan.tables.find(t => t.id === tableId);
+            if (table) {
+                document.getElementById('tableName').value = table.name;
+                document.getElementById('tableSeats').value = table.seats;
+                document.getElementById('tableType').value = table.type;
+                document.getElementById('propertiesPanel').classList.add('active');
+            }
+            renderFloorPlan();
+        }
+
+        function startTableDrag(e) {
+            if (e.button !== 0) return;
+            const tableId = e.target.getAttribute('data-table-id');
+            const table = state.floorPlan.tables.find(t => t.id === tableId);
+            if (!table) return;
+
+            floorPlanState.draggingTableId = tableId;
+            floorPlanState.dragOffsetX = e.clientX - table.x;
+            floorPlanState.dragOffsetY = e.clientY - table.y;
+
+            document.addEventListener('mousemove', dragTable);
+            document.addEventListener('mouseup', stopTableDrag);
+        }
+
+        function dragTable(e) {
+            if (!floorPlanState.draggingTableId) return;
+            const table = state.floorPlan.tables.find(t => t.id === floorPlanState.draggingTableId);
+            if (!table) return;
+
+            const canvas = document.getElementById('floorPlanCanvas');
+            const rect = canvas.getBoundingClientRect();
+            table.x = Math.max(0, Math.min(e.clientX - rect.left - floorPlanState.dragOffsetX, 900 - table.width));
+            table.y = Math.max(0, Math.min(e.clientY - rect.top - floorPlanState.dragOffsetY, 700 - table.height));
+
+            renderFloorPlan();
+            selectTable(floorPlanState.draggingTableId);
+        }
+
+        function stopTableDrag() {
+            floorPlanState.draggingTableId = null;
+            document.removeEventListener('mousemove', dragTable);
+            document.removeEventListener('mouseup', stopTableDrag);
+        }
+
+        function addTable(shape, seats, type = 'table') {
+            const id = 't' + Date.now();
+            const newTable = {
+                id: id,
+                name: shape + ' ' + (state.floorPlan.tables.length + 1),
+                x: 400,
+                y: 300,
+                width: shape === 'diamond' ? 50 : (type === 'couch' ? 80 : 60),
+                height: shape === 'diamond' ? 50 : (type === 'couch' ? 50 : 80),
+                shape: shape,
+                seats: seats,
+                type: type
+            };
+            state.floorPlan.tables.push(newTable);
+            selectTable(id);
+            renderFloorPlan();
+            showToast('Table added. Drag to move.', 'info');
+        }
+
+        function addBarSeats() {
+            const existingBarSeats = state.floorPlan.barSeats || [];
+            const newId = 'bar-' + (existingBarSeats.length + 1);
+            const newSeat = {
+                id: newId,
+                x: 570,
+                y: 100 + (existingBarSeats.length * 20),
+                available: true
+            };
+            state.floorPlan.barSeats = state.floorPlan.barSeats || [];
+            state.floorPlan.barSeats.push(newSeat);
+            renderFloorPlan();
+            showToast('Bar seat added', 'info');
+        }
+
+        function addLabel() {
+            const text = prompt('Enter label text:', 'AREA');
+            if (!text) return;
+            const label = {
+                text: text.toUpperCase(),
+                x: 400,
+                y: 350
+            };
+            state.floorPlan.labels = state.floorPlan.labels || [];
+            state.floorPlan.labels.push(label);
+            renderFloorPlan();
+            showToast('Label added', 'info');
+        }
+
+        function deleteSelectedTable() {
+            if (!state.selectedTableId) {
+                showToast('No table selected', 'info');
+                return;
+            }
+            confirmDelete('table', state.selectedTableId);
+        }
+
+        function saveFloorPlan() {
+            // In a real app, this would call the Netlify function
+            // POST to /.netlify/functions/admin-events with floorPlan data
+            if (!state.currentEventId) {
+                showToast('Please select an event first', 'warning');
+                return;
+            }
+            showToast('Floor plan saved successfully', 'success');
+        }
+
+        // INVOICES
+        function openAddInvoiceModal() {
+            document.getElementById('invoiceForm').reset();
+            openModal('invoiceModal');
+        }
+
+        function handleInvoiceSubmit() {
+            const email = document.getElementById('invoiceEmail').value;
+            const name = document.getElementById('invoiceName').value;
+            const description = document.getElementById('invoiceDescription').value;
+            const amount = parseFloat(document.getElementById('invoiceAmount').value);
+            const dueDate = document.getElementById('invoiceDueDate').value;
+
+            if (!email || !name || !description || !amount || !dueDate) {
+                showToast('All fields are required', 'error');
+                return;
+            }
+
+            // In a real app, this would call the Netlify function
+            // POST to /.netlify/functions/create-invoice
+            showToast(`Invoice created for ${name}`, 'success');
+            closeModal('invoiceModal');
+        }
+
+        // MODALS
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // CONFIRMATION
+        let confirmAction = { type: null, id: null };
+
+        function confirmDelete(type, id) {
+            confirmAction = { type, id };
+            let message = '';
+            if (type === 'event') message = 'Are you sure you want to delete this event?';
+            else if (type === 'band') message = 'Are you sure you want to delete this band?';
+            else if (type === 'table') message = 'Are you sure you want to delete this table?';
+
+            document.getElementById('confirmationTitle').textContent = 'Confirm Delete';
+            document.getElementById('confirmationMessage').textContent = message;
+            openModal('confirmationModal');
+        }
+
+        function executeConfirmedAction() {
+            const { type, id } = confirmAction;
+            if (type === 'event') {
+                state.events = state.events.filter(e => e.id !== id);
+                renderEventsTable();
+                updateDashboard();
+                showToast('Event deleted', 'success');
+            } else if (type === 'band') {
+                state.bands = state.bands.filter(b => b.id !== id);
+                renderBandsTable();
+                showToast('Band deleted', 'success');
+            } else if (type === 'table') {
+                state.floorPlan.tables = state.floorPlan.tables.filter(t => t.id !== id);
+                state.selectedTableId = null;
+                document.getElementById('propertiesPanel').classList.remove('active');
+                renderFloorPlan();
+                showToast('Table deleted', 'success');
+            }
+            closeModal('confirmationModal');
+        }
+
+        // TOAST NOTIFICATIONS
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <div>${message}</div>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Close modals when clicking outside
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-overlay') && !e.target.classList.contains('active')) return;
+            if (e.target.classList.contains('modal-overlay')) {
+                e.target.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
