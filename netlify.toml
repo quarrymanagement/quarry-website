@@ -4,3 +4,7 @@
 
 [functions]
   node_bundler = "esbuild"
+  included_files = []
+
+[[plugins]]
+  package = "@netlify/plugin-functions-install-core"
