@@ -10,1546 +10,584 @@
         /* ================================================================
            GLOBAL STYLES & RESET
            ================================================================ */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body {
-            width: 100%;
-            height: 100%;
-            background: #0a0a0a;
-            color: #e0e0e0;
+            width: 100%; height: 100%;
+            background: #0a0a0a; color: #e0e0e0;
             font-family: 'Montserrat', sans-serif;
             overflow: hidden;
         }
-
-        /* ================================================================
-           UTILITY CLASSES
-           ================================================================ */
-        .hidden {
-            display: none !important;
-        }
-
-        .active {
-            color: #d4af37;
-            border-bottom: 3px solid #d4af37;
-        }
-
-        .text-gold {
-            color: #d4af37;
-        }
-
-        .bg-dark {
-            background: #0a0a0a;
-        }
-
-        .bg-dark-card {
-            background: #1a1a1a;
-        }
-
-        .border-gold {
-            border: 1px solid #d4af37;
-        }
-
-        .accent-gold {
-            background: #d4af37;
-            color: #0a0a0a;
-        }
-
-        .scrollable {
-            overflow-y: auto;
-            overflow-x: hidden;
-        }
+        .hidden { display: none !important; }
+        .active { color: #d4af37; border-bottom: 3px solid #d4af37; }
+        .text-gold { color: #d4af37; }
+        .bg-dark { background: #0a0a0a; }
+        .bg-dark-card { background: #1a1a1a; }
+        .border-gold { border: 1px solid #d4af37; }
+        .accent-gold { background: #d4af37; color: #0a0a0a; }
+        .scrollable { overflow-y: auto; overflow-x: hidden; }
 
         /* ================================================================
            LOGIN OVERLAY
            ================================================================ */
         #loginOverlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(10, 10, 10, 0.95);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999; backdrop-filter: blur(4px);
         }
-
         .login-container {
-            background: #1a1a1a;
-            border: 2px solid #d4af37;
-            padding: 3rem;
-            border-radius: 12px;
-            width: 100%;
-            max-width: 400px;
+            background: #1a1a1a; border: 2px solid #d4af37;
+            padding: 3rem; border-radius: 12px; width: 100%; max-width: 400px;
             box-shadow: 0 8px 32px rgba(212, 175, 55, 0.2);
         }
-
         .login-header {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.5rem;
-            color: #d4af37;
-            margin-bottom: 1.5rem;
-            text-align: center;
-            font-weight: 700;
-            letter-spacing: 2px;
+            font-family: 'Playfair Display', serif; font-size: 2.5rem;
+            color: #d4af37; margin-bottom: 1.5rem; text-align: center;
+            font-weight: 700; letter-spacing: 2px;
         }
-
-        .login-subtitle {
-            text-align: center;
-            color: #999;
-            font-size: 0.9rem;
-            margin-bottom: 2rem;
-        }
-
-        .login-form {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-
+        .login-subtitle { text-align: center; color: #999; font-size: 0.9rem; margin-bottom: 2rem; }
+        .login-form { display: flex; flex-direction: column; gap: 1.5rem; }
         .login-form input {
-            background: #0a0a0a;
-            border: 1px solid #d4af37;
-            color: #e0e0e0;
-            padding: 0.75rem 1rem;
-            border-radius: 6px;
-            font-size: 1rem;
+            background: #0a0a0a; border: 1px solid #d4af37; color: #e0e0e0;
+            padding: 0.75rem 1rem; border-radius: 6px; font-size: 1rem;
             transition: all 0.3s ease;
         }
-
         .login-form input:focus {
-            outline: none;
-            border-color: #d4af37;
-            box-shadow: 0 0 8px rgba(212, 175, 55, 0.3);
-            background: #1a1a1a;
+            outline: none; border-color: #d4af37;
+            box-shadow: 0 0 8px rgba(212, 175, 55, 0.3); background: #1a1a1a;
         }
-
         .login-button {
-            background: #d4af37;
-            color: #0a0a0a;
-            border: none;
-            padding: 0.75rem;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            font-family: 'Montserrat', sans-serif;
+            background: #d4af37; color: #0a0a0a; border: none; padding: 0.75rem;
+            border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 1rem;
+            transition: all 0.3s ease; font-family: 'Montserrat', sans-serif;
         }
-
-        .login-button:hover {
-            background: #e5c158;
-            transform: translateY(-2px);
-        }
-
-        .login-error {
-            color: #ff6b6b;
-            text-align: center;
-            font-size: 0.9rem;
-        }
+        .login-button:hover { background: #e5c158; transform: translateY(-2px); }
+        .login-error { color: #ff6b6b; text-align: center; font-size: 0.9rem; }
 
         /* ================================================================
            MAIN LAYOUT
            ================================================================ */
-        #mainApp {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            height: 100%;
-        }
+        #mainApp { display: flex; flex-direction: column; width: 100%; height: 100%; }
 
         /* ================================================================
            NAVIGATION BAR
            ================================================================ */
         .navbar {
-            background: #1a1a1a;
-            border-bottom: 2px solid #d4af37;
-            padding: 1rem 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            min-height: 70px;
+            background: #1a1a1a; border-bottom: 2px solid #d4af37;
+            padding: 1rem 2rem; display: flex; align-items: center;
+            justify-content: space-between; min-height: 70px;
         }
-
         .navbar-brand {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.5rem;
-            color: #d4af37;
-            font-weight: 700;
-            letter-spacing: 2px;
+            font-family: 'Playfair Display', serif; font-size: 1.5rem;
+            color: #d4af37; font-weight: 700; letter-spacing: 2px;
         }
-
-        .nav-tabs {
-            display: flex;
-            gap: 2rem;
-            flex: 1;
-            margin-left: 3rem;
-        }
-
+        .nav-tabs { display: flex; gap: 1.5rem; flex: 1; margin-left: 2rem; flex-wrap: wrap; }
         .nav-tab {
-            color: #999;
-            cursor: pointer;
-            padding: 0.5rem 0;
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s ease;
-            font-weight: 500;
-            font-size: 0.95rem;
+            color: #999; cursor: pointer; padding: 0.5rem 0;
+            border-bottom: 3px solid transparent; transition: all 0.3s ease;
+            font-weight: 500; font-size: 0.9rem; white-space: nowrap;
         }
-
-        .nav-tab:hover {
-            color: #d4af37;
-        }
-
-        .nav-tab.active {
-            color: #d4af37;
-            border-bottom: 3px solid #d4af37;
-        }
-
-        .navbar-actions {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-
+        .nav-tab:hover { color: #d4af37; }
+        .nav-tab.active { color: #d4af37; border-bottom: 3px solid #d4af37; }
+        .navbar-actions { display: flex; gap: 1rem; align-items: center; }
         .logout-btn {
-            background: #d4af37;
-            color: #0a0a0a;
-            border: none;
-            padding: 0.5rem 1.2rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
+            background: #d4af37; color: #0a0a0a; border: none;
+            padding: 0.5rem 1.2rem; border-radius: 4px; cursor: pointer;
+            font-weight: 600; font-size: 0.9rem; transition: all 0.3s ease;
             font-family: 'Montserrat', sans-serif;
         }
-
-        .logout-btn:hover {
-            background: #e5c158;
+        .logout-btn:hover { background: #e5c158; }
+        .save-github-btn {
+            background: transparent; color: #d4af37; border: 1px solid #d4af37;
+            padding: 0.5rem 1.2rem; border-radius: 4px; cursor: pointer;
+            font-weight: 600; font-size: 0.9rem; transition: all 0.3s ease;
+            font-family: 'Montserrat', sans-serif;
         }
+        .save-github-btn:hover { background: #d4af37; color: #0a0a0a; }
 
         /* ================================================================
            CONTENT AREA
            ================================================================ */
-        .content {
-            flex: 1;
-            display: flex;
-            overflow: hidden;
-        }
-
+        .content { flex: 1; display: flex; overflow: hidden; }
         .tab-content {
-            display: none;
-            width: 100%;
-            height: 100%;
-            padding: 2rem;
-            overflow-y: auto;
-            animation: fadeIn 0.3s ease;
+            display: none; width: 100%; height: 100%;
+            padding: 2rem; overflow-y: auto; animation: fadeIn 0.3s ease;
         }
-
-        .tab-content.active {
-            display: flex;
-            flex-direction: column;
-        }
-
+        .tab-content.active { display: flex; flex-direction: column; }
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* ================================================================
            DASHBOARD TAB
            ================================================================ */
         .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem; margin-bottom: 2rem;
         }
-
         .summary-card {
-            background: #1a1a1a;
-            border: 1px solid #333;
-            border-radius: 8px;
-            padding: 1.5rem;
-            transition: all 0.3s ease;
+            background: #1a1a1a; border: 1px solid #333;
+            border-radius: 8px; padding: 1.5rem; transition: all 0.3s ease;
         }
-
-        .summary-card:hover {
-            border-color: #d4af37;
-            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.1);
-        }
-
+        .summary-card:hover { border-color: #d4af37; box-shadow: 0 4px 12px rgba(212, 175, 55, 0.1); }
         .summary-label {
-            color: #999;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 0.5rem;
+            color: #999; font-size: 0.85rem; text-transform: uppercase;
+            letter-spacing: 1px; margin-bottom: 0.5rem;
         }
-
-        .summary-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #d4af37;
-        }
-
+        .summary-value { font-size: 2rem; font-weight: 700; color: #d4af37; }
         .activity-section h3 {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: #e0e0e0;
+            font-family: 'Playfair Display', serif; font-size: 1.5rem;
+            margin-bottom: 1rem; color: #e0e0e0;
         }
-
         .activity-feed {
-            background: #1a1a1a;
-            border-radius: 8px;
-            border: 1px solid #333;
-            max-height: 400px;
-            overflow-y: auto;
+            background: #1a1a1a; border-radius: 8px;
+            border: 1px solid #333; max-height: 400px; overflow-y: auto;
         }
-
         .activity-item {
-            padding: 1rem;
-            border-bottom: 1px solid #2a2a2a;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 1rem; border-bottom: 1px solid #2a2a2a;
+            display: flex; justify-content: space-between; align-items: center;
             font-size: 0.95rem;
         }
-
-        .activity-item:last-child {
-            border-bottom: none;
-        }
-
-        .activity-event {
-            color: #d4af37;
-            font-weight: 600;
-        }
-
-        .activity-time {
-            color: #666;
-            font-size: 0.85rem;
-        }
+        .activity-item:last-child { border-bottom: none; }
+        .activity-event { color: #d4af37; font-weight: 600; }
+        .activity-time { color: #666; font-size: 0.85rem; }
 
         /* ================================================================
            EVENTS TAB
            ================================================================ */
         .events-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            display: flex; justify-content: space-between; align-items: center;
             margin-bottom: 2rem;
         }
-
-        .events-header h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 2rem;
-            color: #e0e0e0;
-        }
-
+        .events-header h2 { font-family: 'Playfair Display', serif; font-size: 2rem; color: #e0e0e0; }
         .btn-primary {
-            background: #d4af37;
-            color: #0a0a0a;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
+            background: #d4af37; color: #0a0a0a; border: none;
+            padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer;
+            font-weight: 600; font-size: 0.95rem; transition: all 0.3s ease;
             font-family: 'Montserrat', sans-serif;
         }
-
-        .btn-primary:hover {
-            background: #e5c158;
-            transform: translateY(-2px);
-        }
-
+        .btn-primary:hover { background: #e5c158; transform: translateY(-2px); }
         .events-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 1.5rem;
         }
-
         .event-card {
-            background: #1a1a1a;
-            border: 1px solid #333;
-            border-radius: 8px;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
+            background: #1a1a1a; border: 1px solid #333; border-radius: 8px;
+            overflow: hidden; transition: all 0.3s ease; cursor: pointer;
+            display: flex; flex-direction: column;
         }
-
-        .event-card:hover {
-            border-color: #d4af37;
-            box-shadow: 0 8px 24px rgba(212, 175, 55, 0.15);
-        }
-
+        .event-card:hover { border-color: #d4af37; box-shadow: 0 8px 24px rgba(212, 175, 55, 0.15); }
         .event-card-image {
-            width: 100%;
-            height: 200px;
+            width: 100%; height: 200px;
             background: linear-gradient(135deg, #d4af37, #1a1a1a);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #999;
-            font-size: 3rem;
-            overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+            color: #999; font-size: 3rem; overflow: hidden;
         }
-
-        .event-card-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .event-card-content {
-            padding: 1.5rem;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .event-card-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.3rem;
-            color: #e0e0e0;
-            margin-bottom: 0.5rem;
-        }
-
-        .event-card-date {
-            color: #999;
-            font-size: 0.85rem;
-            margin-bottom: 1rem;
-        }
-
-        .event-card-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-
-        .event-status {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .status-active {
-            background: #4ade80;
-            color: #0a0a0a;
-        }
-
-        .status-draft {
-            background: #64748b;
-            color: #e0e0e0;
-        }
-
-        .status-sold-out {
-            background: #f87171;
-            color: #0a0a0a;
-        }
-
-        .event-capacity {
-            color: #999;
-            font-size: 0.85rem;
-        }
-
-        .event-revenue {
-            color: #d4af37;
-            font-weight: 600;
-            font-size: 1.1rem;
-            margin-top: auto;
-        }
-
-        .event-card-actions {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 1rem;
-        }
-
+        .event-card-image img { width: 100%; height: 100%; object-fit: cover; }
+        .event-card-content { padding: 1.5rem; flex: 1; display: flex; flex-direction: column; }
+        .event-card-title { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: #e0e0e0; margin-bottom: 0.5rem; }
+        .event-card-date { color: #999; font-size: 0.85rem; margin-bottom: 1rem; }
+        .event-card-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
+        .event-status { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+        .status-active, .status-available { background: #4ade80; color: #0a0a0a; }
+        .status-draft { background: #64748b; color: #e0e0e0; }
+        .status-sold-out { background: #f87171; color: #0a0a0a; }
+        .event-capacity { color: #999; font-size: 0.85rem; }
+        .event-revenue { color: #d4af37; font-weight: 600; font-size: 1.1rem; margin-top: auto; }
+        .event-card-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
         .btn-small {
-            flex: 1;
-            padding: 0.5rem;
-            border: 1px solid #d4af37;
-            background: transparent;
-            color: #d4af37;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: all 0.3s ease;
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 500;
+            flex: 1; padding: 0.5rem; border: 1px solid #d4af37;
+            background: transparent; color: #d4af37; border-radius: 4px;
+            cursor: pointer; font-size: 0.85rem; transition: all 0.3s ease;
+            font-family: 'Montserrat', sans-serif; font-weight: 500;
         }
-
-        .btn-small:hover {
-            background: #d4af37;
-            color: #0a0a0a;
-        }
+        .btn-small:hover { background: #d4af37; color: #0a0a0a; }
 
         /* ================================================================
            EVENT EDITOR PANEL
            ================================================================ */
         .event-editor-panel {
-            position: fixed;
-            right: -500px;
-            top: 0;
-            width: 500px;
-            height: 100vh;
-            background: #1a1a1a;
-            border-left: 2px solid #d4af37;
-            overflow-y: auto;
-            z-index: 500;
-            transition: right 0.3s ease;
-            padding: 2rem;
-            display: flex;
-            flex-direction: column;
+            position: fixed; right: -500px; top: 0; width: 500px; height: 100vh;
+            background: #1a1a1a; border-left: 2px solid #d4af37;
+            overflow-y: auto; z-index: 500; transition: right 0.3s ease;
+            padding: 2rem; display: flex; flex-direction: column;
         }
-
-        .event-editor-panel.open {
-            right: 0;
-        }
-
+        .event-editor-panel.open { right: 0; }
         .event-editor-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #333;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #333;
         }
-
-        .event-editor-header h3 {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.5rem;
-            color: #d4af37;
-        }
-
-        .btn-close {
-            background: none;
-            border: none;
-            color: #999;
-            font-size: 1.5rem;
-            cursor: pointer;
-            transition: color 0.3s ease;
-        }
-
-        .btn-close:hover {
-            color: #d4af37;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
+        .event-editor-header h3 { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: #d4af37; }
+        .btn-close { background: none; border: none; color: #999; font-size: 1.5rem; cursor: pointer; transition: color 0.3s ease; }
+        .btn-close:hover { color: #d4af37; }
+        .form-group { margin-bottom: 1.5rem; }
         .form-label {
-            display: block;
-            color: #d4af37;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            display: block; color: #d4af37; font-weight: 600; margin-bottom: 0.5rem;
+            font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;
         }
-
-        .form-input,
-        .form-select,
-        .form-textarea {
-            width: 100%;
-            background: #0a0a0a;
-            border: 1px solid #333;
-            color: #e0e0e0;
-            padding: 0.75rem;
-            border-radius: 4px;
-            font-size: 0.95rem;
-            font-family: 'Montserrat', sans-serif;
+        .form-input, .form-select, .form-textarea {
+            width: 100%; background: #0a0a0a; border: 1px solid #333;
+            color: #e0e0e0; padding: 0.75rem; border-radius: 4px;
+            font-size: 0.95rem; font-family: 'Montserrat', sans-serif;
             transition: all 0.3s ease;
         }
-
-        .form-input:focus,
-        .form-select:focus,
-        .form-textarea:focus {
-            outline: none;
-            border-color: #d4af37;
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none; border-color: #d4af37;
             box-shadow: 0 0 8px rgba(212, 175, 55, 0.2);
         }
-
-        .form-textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
+        .form-textarea { resize: vertical; min-height: 100px; }
+        .pricing-type-group { display: flex; gap: 1.5rem; }
+        .radio-wrapper { display: flex; align-items: center; gap: 0.5rem; }
+        .radio-wrapper label { color: #e0e0e0; cursor: pointer; font-size: 0.95rem; }
         .image-upload-area {
-            border: 2px dashed #d4af37;
-            border-radius: 8px;
-            padding: 1rem;
-            text-align: center;
-            cursor: pointer;
-            background: rgba(212, 175, 55, 0.05);
-            transition: all 0.3s ease;
+            border: 2px dashed #333; border-radius: 8px; padding: 2rem;
+            text-align: center; cursor: pointer; transition: all 0.3s ease;
+            position: relative; background: rgba(212, 175, 55, 0.05);
         }
-
-        .image-upload-area:hover {
-            background: rgba(212, 175, 55, 0.1);
-            border-color: #e5c158;
+        .image-upload-area:hover { border-color: #d4af37; }
+        .image-upload-area input[type="file"] {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0; cursor: pointer;
         }
-
-        .image-upload-area input {
-            display: none;
-        }
-
-        .image-preview {
-            margin-top: 1rem;
-            border-radius: 8px;
-            max-width: 100%;
-            max-height: 200px;
-        }
-
-        .pricing-type-group {
-            display: flex;
-            gap: 1.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .radio-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            cursor: pointer;
-            flex: 1;
-        }
-
-        .radio-wrapper input[type="radio"] {
-            cursor: pointer;
-            accent-color: #d4af37;
-        }
-
-        .radio-wrapper label {
-            cursor: pointer;
-            font-weight: 500;
-        }
-
-        .highlights-input {
-            font-size: 0.85rem;
-            color: #999;
-        }
-
-        .highlights-preview {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 0.75rem;
-        }
-
+        .image-preview { max-width: 100%; max-height: 200px; border-radius: 6px; margin-top: 1rem; }
+        .highlights-preview { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
         .highlight-tag {
-            background: #d4af37;
-            color: #0a0a0a;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
+            background: rgba(212, 175, 55, 0.2); color: #d4af37;
+            padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem;
         }
-
-        .registrations-section {
-            margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 1px solid #333;
-        }
-
-        .registrations-section h4 {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.1rem;
-            margin-bottom: 1rem;
-            color: #d4af37;
-        }
-
+        .registrations-section { margin-top: 2rem; border-top: 1px solid #333; padding-top: 1.5rem; }
+        .registrations-section h4 { color: #d4af37; font-size: 1.1rem; margin-bottom: 1rem; }
         .registrations-toolbar {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
+            display: flex; gap: 1rem; margin-bottom: 1rem; align-items: center;
         }
-
-        .registrations-search {
-            flex: 1;
-            min-width: 200px;
-        }
-
+        .registrations-search { flex: 1; }
         .registrations-search input {
-            width: 100%;
-            background: #0a0a0a;
-            border: 1px solid #333;
-            color: #e0e0e0;
-            padding: 0.5rem;
-            border-radius: 4px;
-            font-size: 0.9rem;
+            width: 100%; background: #0a0a0a; border: 1px solid #333;
+            color: #e0e0e0; padding: 0.5rem; border-radius: 4px; font-size: 0.9rem;
         }
-
-        .registrations-toolbar button {
-            background: #d4af37;
-            color: #0a0a0a;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.85rem;
-            transition: all 0.3s ease;
-        }
-
-        .registrations-toolbar button:hover {
-            background: #e5c158;
-        }
-
-        .registrations-table {
-            width: 100%;
-            border-collapse: collapse;
+        .registrations-table { width: 100%; border-collapse: collapse; }
+        .registrations-table th, .registrations-table td {
+            padding: 0.5rem; text-align: left; border-bottom: 1px solid #2a2a2a;
             font-size: 0.85rem;
         }
-
-        .registrations-table th {
-            background: #0a0a0a;
-            padding: 0.75rem;
-            text-align: left;
-            border-bottom: 2px solid #d4af37;
-            color: #d4af37;
-            font-weight: 600;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .registrations-table td {
-            padding: 0.75rem;
-            border-bottom: 1px solid #2a2a2a;
-        }
-
-        .registrations-table tr:hover {
-            background: rgba(212, 175, 55, 0.05);
-        }
-
-        .editor-buttons {
-            display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
-            position: sticky;
-            bottom: 0;
-            background: #1a1a1a;
-            padding-top: 1rem;
-            border-top: 1px solid #333;
-        }
-
+        .registrations-table th { color: #d4af37; font-weight: 600; }
+        .editor-buttons { display: flex; gap: 1rem; margin-top: 2rem; }
         .btn-save {
-            flex: 1;
-            background: #d4af37;
-            color: #0a0a0a;
-            border: none;
-            padding: 0.75rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
+            flex: 1; background: #d4af37; color: #0a0a0a; border: none;
+            padding: 0.75rem; border-radius: 4px; cursor: pointer;
+            font-weight: 600; font-size: 1rem; transition: all 0.3s ease;
             font-family: 'Montserrat', sans-serif;
         }
-
-        .btn-save:hover {
-            background: #e5c158;
-        }
-
+        .btn-save:hover { background: #e5c158; }
         .btn-cancel {
-            flex: 1;
-            background: transparent;
-            border: 1px solid #999;
-            color: #999;
-            padding: 0.75rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
+            flex: 1; background: transparent; border: 1px solid #999;
+            color: #999; padding: 0.75rem; border-radius: 4px; cursor: pointer;
+            font-size: 1rem; transition: all 0.3s ease; font-family: 'Montserrat', sans-serif;
+        }
+        .btn-cancel:hover { border-color: #d4af37; color: #d4af37; }
+
+        /* ================================================================
+           BANDS TAB
+           ================================================================ */
+        .bands-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 2rem;
+        }
+        .bands-header h2 { font-family: 'Playfair Display', serif; font-size: 2rem; color: #e0e0e0; }
+        .bands-table { width: 100%; border-collapse: collapse; background: #1a1a1a; border-radius: 8px; overflow: hidden; }
+        .bands-table th, .bands-table td {
+            padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid #2a2a2a;
+        }
+        .bands-table th { color: #d4af37; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; background: #1a1a1a; }
+        .bands-table td { font-size: 0.95rem; }
+        .bands-table tr:hover { background: rgba(212, 175, 55, 0.05); }
+        .band-type-badge {
+            display: inline-block; padding: 0.2rem 0.6rem; border-radius: 12px;
+            font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+        }
+        .band-type-afternoon { background: #fbbf24; color: #0a0a0a; }
+        .band-type-evening { background: #818cf8; color: #fff; }
+        .band-actions-cell { display: flex; gap: 0.5rem; }
+        .btn-icon {
+            background: transparent; border: 1px solid #333; color: #999;
+            width: 32px; height: 32px; border-radius: 4px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s ease; font-size: 0.9rem;
+        }
+        .btn-icon:hover { border-color: #d4af37; color: #d4af37; }
+        .btn-icon.delete:hover { border-color: #f87171; color: #f87171; }
+
+        /* ================================================================
+           FLOOR PLAN TAB
+           ================================================================ */
+        .floorplan-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 1rem;
+        }
+        .floorplan-header h2 { font-family: 'Playfair Display', serif; font-size: 2rem; color: #e0e0e0; }
+        .floorplan-toolbar {
+            display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;
+            margin-bottom: 1rem; padding: 1rem; background: #1a1a1a;
+            border: 1px solid #333; border-radius: 8px;
+        }
+        .floorplan-toolbar button {
+            background: transparent; border: 1px solid #333; color: #e0e0e0;
+            padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;
+            font-size: 0.85rem; transition: all 0.3s ease;
             font-family: 'Montserrat', sans-serif;
         }
-
-        .btn-cancel:hover {
-            border-color: #d4af37;
-            color: #d4af37;
+        .floorplan-toolbar button:hover { border-color: #d4af37; color: #d4af37; }
+        .floorplan-toolbar button.active { background: #d4af37; color: #0a0a0a; border-color: #d4af37; }
+        .floorplan-container {
+            flex: 1; background: #1a1a1a; border: 1px solid #333;
+            border-radius: 8px; overflow: hidden; position: relative;
+            min-height: 500px;
         }
+        .floorplan-canvas { width: 100%; height: 100%; cursor: crosshair; }
+        .table-props-panel {
+            position: absolute; right: 1rem; top: 1rem;
+            background: #0a0a0a; border: 1px solid #d4af37;
+            border-radius: 8px; padding: 1rem; width: 220px; z-index: 10;
+        }
+        .table-props-panel h4 { color: #d4af37; margin-bottom: 1rem; font-size: 0.9rem; }
+        .table-props-panel .form-group { margin-bottom: 0.75rem; }
+        .table-props-panel .form-label { font-size: 0.75rem; margin-bottom: 0.25rem; }
+        .table-props-panel .form-input { padding: 0.4rem; font-size: 0.85rem; }
+        .fp-legend { display: flex; gap: 1.5rem; margin-top: 0.5rem; padding: 0.5rem; }
+        .fp-legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: #999; }
+        .fp-legend-color { width: 16px; height: 16px; border-radius: 3px; }
 
         /* ================================================================
            CRM TAB
            ================================================================ */
-        .crm-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-
-        .crm-header h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 2rem;
-            color: #e0e0e0;
-        }
-
+        .crm-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .crm-header h2 { font-family: 'Playfair Display', serif; font-size: 2rem; color: #e0e0e0; }
         .crm-stats {
-            display: flex;
-            gap: 2rem;
-            margin-bottom: 2rem;
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
+            margin-bottom: 1.5rem;
         }
-
         .stat-item {
-            flex: 1;
+            background: #1a1a1a; border: 1px solid #333; border-radius: 8px;
+            padding: 1rem; text-align: center;
         }
-
-        .stat-label {
-            color: #999;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-value {
-            font-size: 1.5rem;
-            color: #d4af37;
-            font-weight: 700;
-        }
-
+        .stat-label { color: #999; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-value { font-size: 1.8rem; font-weight: 700; color: #d4af37; }
         .crm-filters {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
+            display: flex; gap: 1rem; margin-bottom: 1.5rem;
+            flex-wrap: wrap; align-items: flex-end;
         }
-
-        .filter-group {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-            flex: 1;
-            min-width: 250px;
+        .filter-group { display: flex; flex-direction: column; gap: 0.25rem; }
+        .filter-group label { color: #999; font-size: 0.8rem; }
+        .filter-group input, .filter-group select {
+            background: #0a0a0a; border: 1px solid #333; color: #e0e0e0;
+            padding: 0.5rem; border-radius: 4px; font-size: 0.9rem;
         }
-
-        .filter-group label {
-            color: #999;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .filter-group select,
-        .filter-group input {
-            background: #0a0a0a;
-            border: 1px solid #333;
-            color: #e0e0e0;
-            padding: 0.5rem;
-            border-radius: 4px;
-            flex: 1;
-            font-family: 'Montserrat', sans-serif;
-        }
-
-        .filter-group select:focus,
-        .filter-group input:focus {
-            outline: none;
-            border-color: #d4af37;
-        }
-
-        .crm-table-container {
-            background: #1a1a1a;
-            border: 1px solid #333;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .crm-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.9rem;
-        }
-
-        .crm-table thead {
-            background: #0a0a0a;
-            border-bottom: 2px solid #d4af37;
-        }
-
-        .crm-table th {
-            padding: 1rem;
-            text-align: left;
-            color: #d4af37;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.8rem;
-            letter-spacing: 0.5px;
-        }
-
-        .crm-table td {
-            padding: 1rem;
-            border-bottom: 1px solid #2a2a2a;
-        }
-
-        .crm-table tbody tr:hover {
-            background: rgba(212, 175, 55, 0.05);
-            cursor: pointer;
-        }
-
-        .crm-checkbox {
-            cursor: pointer;
-            accent-color: #d4af37;
-        }
-
-        .crm-pagination {
-            display: flex;
-            justify-content: center;
-            gap: 0.5rem;
-            margin-top: 2rem;
-            align-items: center;
-        }
-
-        .pagination-btn {
-            background: #0a0a0a;
-            border: 1px solid #333;
-            color: #e0e0e0;
-            padding: 0.5rem 0.75rem;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .pagination-btn:hover {
-            border-color: #d4af37;
-            color: #d4af37;
-        }
-
-        .pagination-btn.active {
-            background: #d4af37;
-            color: #0a0a0a;
-            border-color: #d4af37;
-        }
-
-        .pagination-info {
-            color: #999;
-            font-size: 0.9rem;
-        }
-
+        .filter-group input:focus, .filter-group select:focus { outline: none; border-color: #d4af37; }
         .bulk-actions {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
-            padding: 1rem;
-            background: rgba(212, 175, 55, 0.1);
-            border-radius: 8px;
-            border: 1px solid #d4af37;
+            display: flex; align-items: center; gap: 1rem; padding: 0.75rem;
+            background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37;
+            border-radius: 6px;
         }
-
         .bulk-actions button {
-            background: #d4af37;
-            color: #0a0a0a;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 600;
+            background: transparent; border: 1px solid #d4af37; color: #d4af37;
+            padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer;
+            font-size: 0.85rem; transition: all 0.3s ease;
+        }
+        .bulk-actions button:hover { background: #d4af37; color: #0a0a0a; }
+        .crm-table-container { overflow-x: auto; margin-bottom: 1rem; }
+        .crm-table { width: 100%; border-collapse: collapse; }
+        .crm-table th, .crm-table td {
+            padding: 0.6rem 0.75rem; text-align: left; border-bottom: 1px solid #2a2a2a;
             font-size: 0.85rem;
-            transition: all 0.3s ease;
         }
+        .crm-table th { color: #d4af37; font-weight: 600; background: #1a1a1a; position: sticky; top: 0; }
+        .crm-table tr:hover { background: rgba(212, 175, 55, 0.05); cursor: pointer; }
+        .crm-checkbox { accent-color: #d4af37; }
+        .crm-pagination {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.75rem; flex-wrap: wrap; gap: 0.5rem;
+        }
+        .pagination-info { color: #999; font-size: 0.85rem; }
+        .pagination-btn {
+            background: transparent; border: 1px solid #333; color: #e0e0e0;
+            padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer;
+            font-size: 0.85rem; transition: all 0.3s ease;
+        }
+        .pagination-btn:hover { border-color: #d4af37; color: #d4af37; }
+        .pagination-btn.active { background: #d4af37; color: #0a0a0a; border-color: #d4af37; }
 
-        .bulk-actions button:hover {
-            background: #e5c158;
+        /* ================================================================
+           EMAIL TAB
+           ================================================================ */
+        .email-container { display: grid; grid-template-columns: 1fr 350px; gap: 2rem; flex: 1; }
+        .email-editor-section {
+            display: flex; flex-direction: column; gap: 1rem;
         }
+        .email-editor-section h3 { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: #e0e0e0; }
+        .email-subject input {
+            width: 100%; background: #0a0a0a; border: 1px solid #333;
+            color: #e0e0e0; padding: 0.75rem; border-radius: 4px;
+            font-size: 1rem;
+        }
+        .email-subject input:focus { outline: none; border-color: #d4af37; }
+        .merge-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .merge-tag {
+            background: rgba(212, 175, 55, 0.15); color: #d4af37;
+            padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem;
+            cursor: pointer; transition: all 0.3s ease; font-family: monospace;
+        }
+        .merge-tag:hover { background: rgba(212, 175, 55, 0.3); }
+        .rich-editor-toolbar {
+            display: flex; gap: 0.25rem; background: #1a1a1a; padding: 0.5rem;
+            border: 1px solid #333; border-bottom: none; border-radius: 4px 4px 0 0;
+        }
+        .toolbar-btn {
+            background: transparent; border: 1px solid #333; color: #e0e0e0;
+            padding: 0.3rem 0.6rem; border-radius: 3px; cursor: pointer;
+            font-size: 0.85rem; transition: all 0.2s;
+        }
+        .toolbar-btn:hover { background: rgba(212, 175, 55, 0.2); color: #d4af37; }
+        .rich-editor {
+            background: #0a0a0a; border: 1px solid #333; color: #e0e0e0;
+            padding: 1rem; border-radius: 0 0 4px 4px; min-height: 200px;
+            max-height: 400px; overflow-y: auto; font-size: 0.95rem; line-height: 1.6;
+        }
+        .rich-editor:focus { outline: none; border-color: #d4af37; }
+        .email-recipient-section {
+            display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;
+        }
+        .recipient-group { display: flex; flex-direction: column; gap: 0.25rem; }
+        .recipient-group label { color: #999; font-size: 0.8rem; }
+        .recipient-group select {
+            background: #0a0a0a; border: 1px solid #333; color: #e0e0e0;
+            padding: 0.5rem; border-radius: 4px; font-size: 0.9rem;
+        }
+        .recipient-count { color: #d4af37; font-weight: 600; font-size: 0.9rem; padding-bottom: 0.5rem; }
+        .email-actions { display: flex; gap: 1rem; }
+        .btn-test {
+            background: transparent; border: 1px solid #d4af37; color: #d4af37;
+            padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer;
+            font-weight: 600; transition: all 0.3s ease; font-family: 'Montserrat', sans-serif;
+        }
+        .btn-test:hover { background: rgba(212, 175, 55, 0.15); }
+        .btn-send {
+            background: #d4af37; color: #0a0a0a; border: none;
+            padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer;
+            font-weight: 600; transition: all 0.3s ease; font-family: 'Montserrat', sans-serif;
+        }
+        .btn-send:hover { background: #e5c158; }
+        .email-history { margin-top: 1.5rem; }
+        .email-history h4 { color: #e0e0e0; margin-bottom: 0.5rem; }
+        .history-table { width: 100%; border-collapse: collapse; }
+        .history-table th, .history-table td {
+            padding: 0.5rem; text-align: left; border-bottom: 1px solid #2a2a2a;
+            font-size: 0.85rem;
+        }
+        .history-table th { color: #d4af37; }
+        .email-preview-section { display: flex; flex-direction: column; gap: 1rem; }
+        .email-preview-section h3 { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: #e0e0e0; }
+        .email-preview {
+            background: #fff; border-radius: 8px; overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3); flex: 1;
+        }
+        .email-preview-content { padding: 0; }
+        .email-preview-header {
+            background: #1a1a1a; padding: 1.5rem; text-align: center;
+            border-bottom: 3px solid #d4af37;
+        }
+        .email-preview-logo {
+            font-family: 'Playfair Display', serif; font-size: 1.5rem;
+            color: #d4af37; font-weight: 700;
+        }
+        .email-preview-body { padding: 1.5rem; color: #333; font-size: 0.95rem; line-height: 1.6; min-height: 200px; }
 
         /* ================================================================
            SUBSCRIBER DETAIL PANEL
            ================================================================ */
         .subscriber-detail-panel {
-            position: fixed;
-            right: -500px;
-            top: 0;
-            width: 500px;
-            height: 100vh;
-            background: #1a1a1a;
-            border-left: 2px solid #d4af37;
-            overflow-y: auto;
-            z-index: 500;
-            transition: right 0.3s ease;
-            padding: 2rem;
+            position: fixed; right: -400px; top: 0; width: 400px; height: 100vh;
+            background: #1a1a1a; border-left: 2px solid #d4af37;
+            overflow-y: auto; z-index: 500; transition: right 0.3s ease;
+            padding: 2rem; display: flex; flex-direction: column;
         }
-
-        .subscriber-detail-panel.open {
-            right: 0;
-        }
-
+        .subscriber-detail-panel.open { right: 0; }
         .subscriber-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #333;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #333;
         }
-
-        .subscriber-header h3 {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.5rem;
-            color: #d4af37;
-        }
-
-        .subscriber-info {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .info-item {
-            padding: 1rem;
-            background: #0a0a0a;
-            border-radius: 4px;
-            border: 1px solid #333;
-        }
-
-        .info-label {
-            color: #999;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 0.25rem;
-        }
-
-        .info-value {
-            color: #e0e0e0;
-            font-size: 0.95rem;
-            word-break: break-all;
-        }
-
-        .event-history {
-            margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 1px solid #333;
-        }
-
-        .event-history h4 {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.1rem;
-            margin-bottom: 1rem;
-            color: #d4af37;
-        }
-
+        .subscriber-header h3 { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: #d4af37; }
+        .subscriber-info { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem; }
+        .info-item { display: flex; flex-direction: column; }
+        .info-label { color: #999; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .info-value { color: #e0e0e0; font-size: 0.95rem; margin-top: 0.25rem; }
+        .event-history h4 { color: #d4af37; margin-bottom: 1rem; }
         .history-item {
-            padding: 0.75rem;
-            background: #0a0a0a;
-            border-left: 3px solid #d4af37;
-            margin-bottom: 0.75rem;
-            border-radius: 4px;
+            background: #0a0a0a; border: 1px solid #333; border-radius: 6px;
+            padding: 0.75rem; display: flex; justify-content: space-between; align-items: center;
         }
-
-        .history-event-name {
-            color: #d4af37;
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-
-        .history-date {
-            color: #666;
-            font-size: 0.85rem;
-        }
-
-        /* ================================================================
-           EMAIL TAB
-           ================================================================ */
-        .email-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            height: 100%;
-        }
-
-        .email-editor-section,
-        .email-preview-section {
-            display: flex;
-            flex-direction: column;
-            background: #1a1a1a;
-            border: 1px solid #333;
-            border-radius: 8px;
-            padding: 1.5rem;
-            overflow: hidden;
-        }
-
-        .email-editor-section h3,
-        .email-preview-section h3 {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.3rem;
-            color: #d4af37;
-            margin-bottom: 1rem;
-        }
-
-        .email-subject {
-            margin-bottom: 1.5rem;
-        }
-
-        .email-subject input {
-            width: 100%;
-            background: #0a0a0a;
-            border: 1px solid #333;
-            color: #e0e0e0;
-            padding: 0.75rem;
-            border-radius: 4px;
-            font-size: 0.95rem;
-            font-family: 'Montserrat', sans-serif;
-        }
-
-        .email-subject input:focus {
-            outline: none;
-            border-color: #d4af37;
-        }
-
-        .rich-editor-toolbar {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-            padding: 0.75rem;
-            background: #0a0a0a;
-            border-radius: 4px;
-            border: 1px solid #333;
-        }
-
-        .toolbar-btn {
-            background: #1a1a1a;
-            border: 1px solid #333;
-            color: #d4af37;
-            padding: 0.5rem 0.75rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.8rem;
-            transition: all 0.3s ease;
-        }
-
-        .toolbar-btn:hover {
-            background: #d4af37;
-            color: #0a0a0a;
-            border-color: #d4af37;
-        }
-
-        .rich-editor {
-            flex: 1;
-            background: #0a0a0a;
-            border: 1px solid #333;
-            color: #e0e0e0;
-            padding: 1rem;
-            border-radius: 4px;
-            overflow-y: auto;
-            font-family: 'Montserrat', sans-serif;
-            font-size: 0.95rem;
-            outline: none;
-            min-height: 200px;
-            line-height: 1.6;
-        }
-
-        .rich-editor:focus {
-            border-color: #d4af37;
-        }
-
-        .merge-tags {
-            margin-top: 1rem;
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .merge-tag {
-            background: #0a0a0a;
-            border: 1px solid #d4af37;
-            color: #d4af37;
-            padding: 0.5rem 0.75rem;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: all 0.3s ease;
-            font-weight: 600;
-        }
-
-        .merge-tag:hover {
-            background: #d4af37;
-            color: #0a0a0a;
-        }
-
-        .email-recipient-section {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            margin-bottom: 1rem;
-            padding: 1rem;
-            background: #0a0a0a;
-            border-radius: 4px;
-            border: 1px solid #333;
-        }
-
-        .recipient-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .recipient-group label {
-            color: #d4af37;
-            font-weight: 600;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-        }
-
-        .recipient-group select,
-        .recipient-group input {
-            background: #1a1a1a;
-            border: 1px solid #333;
-            color: #e0e0e0;
-            padding: 0.5rem;
-            border-radius: 4px;
-            font-family: 'Montserrat', sans-serif;
-        }
-
-        .recipient-count {
-            color: #999;
-            font-size: 0.85rem;
-            margin-top: 0.5rem;
-        }
-
-        .email-actions {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .btn-test,
-        .btn-send {
-            flex: 1;
-            padding: 0.75rem;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 600;
-            font-family: 'Montserrat', sans-serif;
-            transition: all 0.3s ease;
-        }
-
-        .btn-test {
-            background: #0a0a0a;
-            border: 1px solid #d4af37;
-            color: #d4af37;
-        }
-
-        .btn-test:hover {
-            background: #d4af37;
-            color: #0a0a0a;
-        }
-
-        .btn-send {
-            background: #d4af37;
-            color: #0a0a0a;
-        }
-
-        .btn-send:hover {
-            background: #e5c158;
-        }
-
-        .email-preview {
-            height: 100%;
-            background: #e0e0e0;
-            border-radius: 8px;
-            padding: 2rem;
-            overflow-y: auto;
-        }
-
-        .email-preview-content {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            font-family: 'Georgia', serif;
-        }
-
-        .email-preview-header {
-            text-align: center;
-            border-bottom: 2px solid #d4af37;
-            padding-bottom: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .email-preview-logo {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.5rem;
-            color: #d4af37;
-            font-weight: 700;
-            letter-spacing: 2px;
-        }
-
-        .email-preview-body {
-            color: #333;
-            line-height: 1.6;
-        }
-
-        .email-history {
-            margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 1px solid #333;
-        }
-
-        .email-history h4 {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.1rem;
-            margin-bottom: 1rem;
-            color: #d4af37;
-        }
-
-        .history-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85rem;
-        }
-
-        .history-table th {
-            background: #0a0a0a;
-            padding: 0.75rem;
-            text-align: left;
-            border-bottom: 2px solid #d4af37;
-            color: #d4af37;
-            font-weight: 600;
-        }
-
-        .history-table td {
-            padding: 0.75rem;
-            border-bottom: 1px solid #2a2a2a;
-        }
+        .history-event-name { color: #e0e0e0; font-weight: 500; }
+        .history-date { color: #999; font-size: 0.85rem; }
 
         /* ================================================================
            MODALS
            ================================================================ */
         .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(10, 10, 10, 0.7);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            backdrop-filter: blur(4px);
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); z-index: 9000;
+            display: none; align-items: center; justify-content: center;
         }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
+        .modal-overlay.active { display: flex; }
         .modal {
-            background: #1a1a1a;
-            border: 2px solid #d4af37;
-            border-radius: 8px;
-            padding: 2rem;
-            max-width: 500px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-            animation: modalSlide 0.3s ease;
+            background: #1a1a1a; border: 2px solid #d4af37; border-radius: 12px;
+            padding: 2rem; max-width: 500px; width: 90%;
         }
-
-        @keyframes modalSlide {
-            from {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        .modal-header {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.5rem;
-            color: #d4af37;
-            margin-bottom: 1rem;
-        }
-
-        .modal-content {
-            color: #e0e0e0;
-            margin-bottom: 1.5rem;
-            line-height: 1.6;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-end;
-        }
-
+        .modal-header { font-family: 'Playfair Display', serif; color: #d4af37; font-size: 1.3rem; margin-bottom: 1rem; }
+        .modal-content { color: #e0e0e0; margin-bottom: 1.5rem; line-height: 1.6; }
+        .modal-actions { display: flex; gap: 1rem; justify-content: flex-end; }
         .modal-btn {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            font-family: 'Montserrat', sans-serif;
+            padding: 0.5rem 1.5rem; border-radius: 4px; cursor: pointer;
+            font-weight: 600; transition: all 0.3s ease; font-family: 'Montserrat', sans-serif;
         }
-
-        .modal-btn-primary {
-            background: #d4af37;
-            color: #0a0a0a;
-        }
-
-        .modal-btn-primary:hover {
-            background: #e5c158;
-        }
-
-        .modal-btn-secondary {
-            background: transparent;
-            border: 1px solid #999;
-            color: #999;
-        }
-
-        .modal-btn-secondary:hover {
-            border-color: #d4af37;
-            color: #d4af37;
-        }
+        .modal-btn-primary { background: #d4af37; color: #0a0a0a; border: none; }
+        .modal-btn-primary:hover { background: #e5c158; }
+        .modal-btn-secondary { background: transparent; border: 1px solid #999; color: #999; }
+        .modal-btn-secondary:hover { border-color: #d4af37; color: #d4af37; }
 
         /* ================================================================
            SUCCESS MESSAGE
            ================================================================ */
         .success-message {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            background: #4ade80;
-            color: #0a0a0a;
-            padding: 1rem 1.5rem;
-            border-radius: 6px;
-            font-weight: 600;
-            z-index: 2000;
-            animation: slideIn 0.3s ease;
+            position: fixed; top: 1rem; right: 1rem; background: #4ade80; color: #0a0a0a;
+            padding: 1rem 1.5rem; border-radius: 8px; font-weight: 600;
+            z-index: 10000; animation: slideIn 0.3s ease;
         }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
 
         /* ================================================================
-           RESPONSIVE DESIGN
+           SAVING INDICATOR
            ================================================================ */
-        @media (max-width: 1200px) {
-            .email-container {
-                grid-template-columns: 1fr;
-            }
-
-            .event-editor-panel {
-                width: 100%;
-                right: -100%;
-            }
-
-            .subscriber-detail-panel {
-                width: 100%;
-                right: -100%;
-            }
+        .saving-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 9999;
+            display: flex; align-items: center; justify-content: center;
         }
-
-        @media (max-width: 768px) {
-            .navbar {
-                flex-direction: column;
-                gap: 1rem;
-                padding: 1rem;
-            }
-
-            .navbar-brand {
-                font-size: 1.2rem;
-            }
-
-            .nav-tabs {
-                margin-left: 0;
-                width: 100%;
-                justify-content: space-between;
-                gap: 0.5rem;
-            }
-
-            .nav-tab {
-                font-size: 0.8rem;
-            }
-
-            .navbar-actions {
-                width: 100%;
-                justify-content: flex-start;
-            }
-
-            .content {
-                padding: 1rem;
-            }
-
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .events-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .crm-filters {
-                flex-direction: column;
-            }
-
-            .filter-group {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .crm-table {
-                font-size: 0.75rem;
-            }
-
-            .crm-table th,
-            .crm-table td {
-                padding: 0.5rem;
-            }
-
-            .bulk-actions {
-                flex-direction: column;
-            }
-
-            .bulk-actions button {
-                width: 100%;
-            }
-
-            .editor-buttons {
-                flex-direction: column;
-            }
-
-            .modal {
-                width: 95%;
-            }
+        .saving-spinner {
+            background: #1a1a1a; border: 2px solid #d4af37; border-radius: 12px;
+            padding: 2rem 3rem; text-align: center;
         }
+        .saving-spinner .spinner {
+            width: 40px; height: 40px; border: 3px solid #333;
+            border-top-color: #d4af37; border-radius: 50%;
+            animation: spin 1s linear infinite; margin: 0 auto 1rem;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ================================================================
+           BAND MODAL
+           ================================================================ */
+        .band-modal-form { display: flex; flex-direction: column; gap: 1rem; }
+        .band-modal-form .form-group { margin-bottom: 0; }
     </style>
 </head>
 <body>
@@ -1558,10 +596,10 @@
          ================================================================ -->
     <div id="loginOverlay">
         <div class="login-container">
-            <h1 class="login-header">THE QUARRY</h1>
-            <p class="login-subtitle">Admin Panel</p>
+            <div class="login-header">THE QUARRY</div>
+            <div class="login-subtitle">Admin Panel</div>
             <form class="login-form" id="loginForm">
-                <input type="password" id="passwordInput" placeholder="Enter password" required>
+                <input type="password" id="passwordInput" placeholder="Enter admin password" required autocomplete="current-password">
                 <button type="submit" class="login-button">Sign In</button>
                 <div class="login-error" id="loginError"></div>
             </form>
@@ -1578,10 +616,13 @@
             <div class="nav-tabs">
                 <div class="nav-tab active" data-tab="dashboard">Dashboard</div>
                 <div class="nav-tab" data-tab="events">Events</div>
+                <div class="nav-tab" data-tab="bands">Bands</div>
+                <div class="nav-tab" data-tab="floorplan">Floor Plan</div>
                 <div class="nav-tab" data-tab="crm">CRM</div>
                 <div class="nav-tab" data-tab="email">Email</div>
             </div>
             <div class="navbar-actions">
+                <button class="save-github-btn" id="saveGitHubBtn" title="Save changes to GitHub">Save to GitHub</button>
                 <button class="logout-btn" id="logoutBtn">Logout</button>
             </div>
         </nav>
@@ -1594,8 +635,20 @@
             <div id="dashboardTab" class="tab-content active">
                 <div class="dashboard-grid">
                     <div class="summary-card">
-                        <div class="summary-label">Total Events</div>
+                        <div class="summary-label">Active Events</div>
                         <div class="summary-value" id="totalEvents">0</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">Total Registrations</div>
+                        <div class="summary-value" id="totalRegistrations">0</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">Est. Revenue</div>
+                        <div class="summary-value" id="totalRevenue">$0</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">Upcoming Bands</div>
+                        <div class="summary-value" id="upcomingBands">0</div>
                     </div>
                     <div class="summary-card">
                         <div class="summary-label">Total Subscribers</div>
@@ -1604,10 +657,6 @@
                     <div class="summary-card">
                         <div class="summary-label">Email Subscribed</div>
                         <div class="summary-value" id="emailSubscribed">0</div>
-                    </div>
-                    <div class="summary-card">
-                        <div class="summary-label">Total Revenue</div>
-                        <div class="summary-value" id="totalRevenue">$0</div>
                     </div>
                 </div>
 
@@ -1631,6 +680,86 @@
                 </div>
                 <div class="events-grid" id="eventsGrid">
                     <div style="grid-column: 1/-1; text-align: center; color: #999;">Loading events...</div>
+                </div>
+            </div>
+
+            <!-- ========================================================
+                 BANDS TAB
+                 ======================================================== -->
+            <div id="bandsTab" class="tab-content">
+                <div class="bands-header">
+                    <h2>Band Schedule</h2>
+                    <button class="btn-primary" id="addBandBtn">+ Add Band</button>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="bands-table" id="bandsTable">
+                        <thead>
+                            <tr>
+                                <th>Band Name</th>
+                                <th>Date</th>
+                                <th>Time Slot</th>
+                                <th>Type</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bandsTableBody">
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: #999;">Loading bands...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ========================================================
+                 FLOOR PLAN TAB
+                 ======================================================== -->
+            <div id="floorplanTab" class="tab-content">
+                <div class="floorplan-header">
+                    <h2>Floor Plan</h2>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn-primary" id="addTableBtn">+ Add Table</button>
+                        <button class="btn-primary" id="saveFloorPlanBtn" style="background: transparent; color: #d4af37; border: 1px solid #d4af37;">Save Floor Plan</button>
+                    </div>
+                </div>
+                <div class="floorplan-toolbar">
+                    <button id="fpToolSelect" class="active">Select</button>
+                    <button id="fpToolRect">Rectangle</button>
+                    <button id="fpToolCircle">Circle</button>
+                    <span style="color: #666; margin: 0 0.5rem;">|</span>
+                    <span style="color: #999; font-size: 0.85rem;">Tables: <span id="fpTableCount">0</span> | Total Seats: <span id="fpTotalSeats">0</span></span>
+                </div>
+                <div class="floorplan-container" id="floorplanContainer">
+                    <canvas class="floorplan-canvas" id="floorplanCanvas"></canvas>
+                    <div class="table-props-panel hidden" id="tablePropsPanel">
+                        <h4>Selected Table</h4>
+                        <div class="form-group">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-input" id="fpTableName">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Seats</label>
+                            <input type="number" class="form-input" id="fpTableSeats" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Type</label>
+                            <select class="form-input" id="fpTableType">
+                                <option value="table">Table</option>
+                                <option value="hightop">High Top</option>
+                                <option value="couch">Couch</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                            <button class="btn-small" id="fpApplyProps" style="flex: 1;">Apply</button>
+                            <button class="btn-small delete" id="fpDeleteTable" style="flex: 1; border-color: #f87171; color: #f87171;">Delete</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="fp-legend">
+                    <div class="fp-legend-item"><div class="fp-legend-color" style="background: #4ade80;"></div> Table</div>
+                    <div class="fp-legend-item"><div class="fp-legend-color" style="background: #818cf8;"></div> High Top</div>
+                    <div class="fp-legend-item"><div class="fp-legend-color" style="background: #fbbf24;"></div> Couch</div>
+                    <div class="fp-legend-item"><div class="fp-legend-color" style="background: #38bdf8;"></div> Bar Seat</div>
                 </div>
             </div>
 
@@ -1821,49 +950,41 @@
                 <label class="form-label">Event Name</label>
                 <input type="text" class="form-input" id="eventName" required>
             </div>
-
             <div class="form-group">
                 <label class="form-label">Date</label>
                 <input type="date" class="form-input" id="eventDate" required>
             </div>
-
             <div class="form-group">
                 <label class="form-label">Time</label>
                 <input type="time" class="form-input" id="eventTime" required>
             </div>
-
             <div class="form-group">
                 <label class="form-label">Location</label>
                 <input type="text" class="form-input" id="eventLocation" required>
             </div>
-
             <div class="form-group">
                 <label class="form-label">Description</label>
                 <textarea class="form-textarea" id="eventDescription" placeholder="Short description..." style="min-height: 80px;"></textarea>
             </div>
-
             <div class="form-group">
                 <label class="form-label">Detail Description</label>
                 <textarea class="form-textarea" id="eventDetailDescription" placeholder="Detailed description for event page..." style="min-height: 120px;"></textarea>
             </div>
-
             <div class="form-group">
                 <label class="form-label">Additional Info</label>
                 <textarea class="form-textarea" id="eventAdditionalInfo" placeholder="Any additional information..." style="min-height: 80px;"></textarea>
             </div>
-
             <div class="form-group">
                 <label class="form-label">Event Image</label>
                 <div class="image-upload-area" id="imageUploadArea">
                     <input type="file" id="imageInput" accept="image/*">
                     <div style="color: #999; font-size: 0.9rem;">
-                        <div style="margin-bottom: 0.5rem;">📸 Click to upload or drag image</div>
+                        <div style="margin-bottom: 0.5rem;">Click to upload or drag image</div>
                         <div style="font-size: 0.8rem;">PNG, JPG up to 5MB</div>
                     </div>
                     <img id="imagePreview" class="image-preview hidden" alt="Preview">
                 </div>
             </div>
-
             <div class="form-group">
                 <label class="form-label">Pricing Type</label>
                 <div class="pricing-type-group">
@@ -1881,36 +1002,30 @@
                     </div>
                 </div>
             </div>
-
             <div id="pricePerPersonGroup" class="form-group">
                 <label class="form-label">Price Per Person ($)</label>
                 <input type="number" class="form-input" id="pricePerPerson" min="0" step="0.01">
             </div>
-
             <div id="pricePerTableGroup" class="form-group hidden">
                 <label class="form-label">Price Per Table ($)</label>
                 <input type="number" class="form-input" id="pricePerTable" min="0" step="0.01">
             </div>
-
             <div id="tableSizeGroup" class="form-group hidden">
                 <label class="form-label">Seats Per Table</label>
                 <input type="number" class="form-input" id="tableSize" min="1">
             </div>
-
             <div class="form-group">
                 <label class="form-label">Capacity</label>
                 <input type="number" class="form-input" id="eventCapacity" min="1" required>
             </div>
-
             <div class="form-group">
                 <label class="form-label">Status</label>
                 <select class="form-select" id="eventStatus">
-                    <option value="Active">Active</option>
-                    <option value="Draft">Draft</option>
-                    <option value="Sold Out">Sold Out</option>
+                    <option value="available">Active</option>
+                    <option value="draft">Draft</option>
+                    <option value="sold-out">Sold Out</option>
                 </select>
             </div>
-
             <div class="form-group">
                 <label class="form-label">Highlights (comma-separated)</label>
                 <input type="text" class="form-input highlights-input" id="eventHighlights" placeholder="e.g., Live Music, Open Bar, Premium Catering">
@@ -1919,30 +1034,26 @@
 
             <div class="registrations-section hidden" id="registrationsSection">
                 <h4>Registrations</h4>
-
                 <div class="registrations-toolbar">
                     <div class="registrations-search">
                         <input type="text" id="registrationSearch" placeholder="Search registrations...">
                     </div>
                     <button type="button" id="exportRegistrationsBtn">Export CSV</button>
                 </div>
-
                 <table class="registrations-table">
                     <thead>
                         <tr>
                             <th>Name</th>
                             <th>Email</th>
                             <th>Phone</th>
-                            <th>Guests</th>
-                            <th>Amount Paid</th>
+                            <th>Tickets</th>
+                            <th>Amount</th>
                             <th>Status</th>
-                            <th>Date</th>
+                            <th>Method</th>
                         </tr>
                     </thead>
                     <tbody id="registrationsTable">
-                        <tr>
-                            <td colspan="7" style="text-align: center; color: #999;">No registrations yet</td>
-                        </tr>
+                        <tr><td colspan="7" style="text-align: center; color: #999;">No registrations yet</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -1962,34 +1073,14 @@
             <h3 id="subscriberName">Subscriber</h3>
             <button class="btn-close" id="closeSubscriberBtn">&times;</button>
         </div>
-
         <div class="subscriber-info">
-            <div class="info-item">
-                <div class="info-label">Email</div>
-                <div class="info-value" id="subscriberEmail">—</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Phone</div>
-                <div class="info-value" id="subscriberPhone">—</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Source</div>
-                <div class="info-value" id="subscriberSource">—</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Email Status</div>
-                <div class="info-value" id="subscriberStatus">—</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Created</div>
-                <div class="info-value" id="subscriberCreated">—</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Last Activity</div>
-                <div class="info-value" id="subscriberLastActivity">—</div>
-            </div>
+            <div class="info-item"><div class="info-label">Email</div><div class="info-value" id="subscriberEmail"></div></div>
+            <div class="info-item"><div class="info-label">Phone</div><div class="info-value" id="subscriberPhone"></div></div>
+            <div class="info-item"><div class="info-label">Source</div><div class="info-value" id="subscriberSource"></div></div>
+            <div class="info-item"><div class="info-label">Email Status</div><div class="info-value" id="subscriberStatus"></div></div>
+            <div class="info-item"><div class="info-label">Created</div><div class="info-value" id="subscriberCreated"></div></div>
+            <div class="info-item"><div class="info-label">Last Activity</div><div class="info-value" id="subscriberLastActivity"></div></div>
         </div>
-
         <div class="event-history">
             <h4>Event History</h4>
             <div id="subscriberEventHistory" style="display: flex; flex-direction: column; gap: 0.75rem;">
@@ -2012,20 +1103,50 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="emailPreviewModal">
-        <div class="modal" style="max-width: 700px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <h2 class="modal-header" style="margin: 0;">Email Preview</h2>
-                <button class="btn-close" id="closeEmailPreviewBtn">&times;</button>
-            </div>
-            <div class="email-preview">
-                <div class="email-preview-content">
-                    <div class="email-preview-header">
-                        <div class="email-preview-logo">THE QUARRY</div>
-                        <div style="font-size: 0.9rem; color: #999; margin-top: 0.5rem;" id="previewSubject">Subject</div>
-                    </div>
-                    <div class="email-preview-body" id="previewEmailBody"></div>
+    <div class="modal-overlay" id="bandModal">
+        <div class="modal">
+            <h2 class="modal-header" id="bandModalTitle">Add Band</h2>
+            <form class="band-modal-form" id="bandModalForm">
+                <div class="form-group">
+                    <label class="form-label">Band Name</label>
+                    <input type="text" class="form-input" id="bandName" required>
                 </div>
+                <div class="form-group">
+                    <label class="form-label">Date</label>
+                    <input type="date" class="form-input" id="bandDate" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Time Slot</label>
+                    <input type="text" class="form-input" id="bandTimeSlot" placeholder="e.g., 7 PM - 10 PM" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Type</label>
+                    <select class="form-input" id="bandType">
+                        <option value="afternoon">Afternoon</option>
+                        <option value="evening">Evening</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="modal-btn modal-btn-secondary" id="cancelBandModal">Cancel</button>
+                    <button type="submit" class="modal-btn modal-btn-primary">Save Band</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="githubTokenModal">
+        <div class="modal">
+            <h2 class="modal-header">GitHub Settings</h2>
+            <div class="modal-content">
+                <p style="margin-bottom: 1rem; color: #999; font-size: 0.9rem;">Enter your GitHub Personal Access Token to enable saving directly to your repository.</p>
+                <div class="form-group">
+                    <label class="form-label">GitHub Token</label>
+                    <input type="password" class="form-input" id="githubTokenInput" placeholder="ghp_xxxxxxxxxxxx">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-secondary" id="cancelTokenModal">Cancel</button>
+                <button class="modal-btn modal-btn-primary" id="saveTokenBtn">Save Token</button>
             </div>
         </div>
     </div>
@@ -2038,13 +1159,23 @@
             authenticated: false,
             currentTab: 'dashboard',
             events: [],
+            bands: [],
+            floorPlan: { tables: [], labels: [], barSeats: [] },
+            registrations: {},
             subscribers: [],
             emailHistory: [],
             currentEvent: null,
+            currentBand: null,
             crmCurrentPage: 1,
             crmPageSize: 50,
             crmFilteredData: [],
             selectedSubscribers: new Set(),
+            githubToken: localStorage.getItem('quarryGithubToken') || '',
+            // Floor plan state
+            fpSelectedTable: null,
+            fpTool: 'select',
+            fpDragging: false,
+            fpDragOffset: { x: 0, y: 0 },
         };
 
         // ================================================================
@@ -2103,15 +1234,16 @@
         }
 
         function switchTab(tabName) {
-            // Update nav
             document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
             document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-
-            // Update content
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.getElementById(tabName + 'Tab').classList.add('active');
-
             app.currentTab = tabName;
+
+            // Resize canvas when switching to floor plan
+            if (tabName === 'floorplan') {
+                setTimeout(resizeFloorPlanCanvas, 100);
+            }
         }
 
         // ================================================================
@@ -2125,7 +1257,17 @@
                 ]);
 
                 if (eventsRes.ok) {
-                    app.events = await eventsRes.json();
+                    const eventsData = await eventsRes.json();
+                    if (eventsData.events && Array.isArray(eventsData.events)) {
+                        app.events = eventsData.events;
+                        app.registrations = eventsData.registrations || {};
+                        app.bands = eventsData.bands || [];
+                        app.floorPlan = eventsData.floorPlan || { tables: [], labels: [], barSeats: [] };
+                    } else if (Array.isArray(eventsData)) {
+                        app.events = eventsData;
+                    } else {
+                        app.events = [];
+                    }
                 }
                 if (subscribersRes.ok) {
                     app.subscribers = await subscribersRes.json();
@@ -2133,8 +1275,10 @@
 
                 updateDashboard();
                 updateEvents();
+                updateBands();
                 updateCRM();
                 updateEmailRecipients();
+                drawFloorPlan();
             } catch (err) {
                 console.error('Error loading data:', err);
             }
@@ -2150,10 +1294,24 @@
             const subscribed = app.subscribers.filter(s => s.emailStatus === 'Subscribed').length;
             document.getElementById('emailSubscribed').textContent = subscribed;
 
-            const revenue = app.events.reduce((sum, e) => {
-                return sum + (e.registrations || []).reduce((eventSum, r) => eventSum + (r.amountPaid || 0), 0);
-            }, 0);
+            // Calculate total registrations and revenue from registrations data
+            let totalRegs = 0;
+            let revenue = 0;
+            const regs = app.registrations || {};
+            for (const eventId in regs) {
+                const eventRegs = regs[eventId] || [];
+                totalRegs += eventRegs.length;
+                eventRegs.forEach(r => {
+                    revenue += parseFloat(r.amount || r.amountPaid || 0);
+                });
+            }
+            document.getElementById('totalRegistrations').textContent = totalRegs;
             document.getElementById('totalRevenue').textContent = '$' + revenue.toLocaleString('en-US', { minimumFractionDigits: 2 });
+
+            // Upcoming bands
+            const today = new Date().toISOString().split('T')[0];
+            const upcoming = app.bands.filter(b => b.date >= today).length;
+            document.getElementById('upcomingBands').textContent = upcoming;
 
             updateActivityFeed();
         }
@@ -2161,17 +1319,23 @@
         function updateActivityFeed() {
             const feed = document.getElementById('activityFeed');
             const activities = [];
+            const regs = app.registrations || {};
 
-            app.events.forEach(event => {
-                (event.registrations || []).forEach(reg => {
-                    activities.push({
-                        type: 'registration',
-                        name: event.name,
-                        user: reg.name,
-                        date: new Date(reg.date),
-                    });
+            for (const eventId in regs) {
+                const event = app.events.find(e => e.id === eventId);
+                const eventName = event ? event.name : eventId;
+                (regs[eventId] || []).forEach(reg => {
+                    if (reg.created) {
+                        activities.push({
+                            type: 'registration',
+                            name: eventName,
+                            user: reg.name || 'Unknown',
+                            date: new Date(reg.created),
+                            amount: reg.amount || '0',
+                        });
+                    }
                 });
-            });
+            }
 
             activities.sort((a, b) => b.date - a.date);
 
@@ -2180,11 +1344,11 @@
                 return;
             }
 
-            feed.innerHTML = activities.slice(0, 10).map(activity => `
+            feed.innerHTML = activities.slice(0, 15).map(activity => `
                 <div class="activity-item">
                     <div>
                         <span class="activity-event">${activity.name}</span><br>
-                        <span style="color: #999; font-size: 0.85rem;">Registered: ${activity.user}</span>
+                        <span style="color: #999; font-size: 0.85rem;">${activity.user} - $${parseFloat(activity.amount).toFixed(2)}</span>
                     </div>
                     <span class="activity-time">${formatTimeAgo(activity.date)}</span>
                 </div>
@@ -2192,12 +1356,12 @@
         }
 
         function formatTimeAgo(date) {
+            if (!date || isNaN(date.getTime())) return '—';
             const now = new Date();
             const diff = now - date;
             const minutes = Math.floor(diff / 60000);
             const hours = Math.floor(diff / 3600000);
             const days = Math.floor(diff / 86400000);
-
             if (minutes < 60) return `${minutes}m ago`;
             if (hours < 24) return `${hours}h ago`;
             if (days < 7) return `${days}d ago`;
@@ -2207,6 +1371,10 @@
         // ================================================================
         // EVENTS
         // ================================================================
+        function getEventRegistrations(eventId) {
+            return app.registrations[eventId] || [];
+        }
+
         function updateEvents() {
             const grid = document.getElementById('eventsGrid');
 
@@ -2215,42 +1383,50 @@
                 return;
             }
 
-            grid.innerHTML = app.events.map(event => `
+            grid.innerHTML = app.events.map(event => {
+                const regs = getEventRegistrations(event.id);
+                const regCount = regs.reduce((sum, r) => sum + (r.tickets || 1), 0);
+                const eventRevenue = regs.reduce((sum, r) => sum + parseFloat(r.amount || r.amountPaid || 0), 0);
+                return `
                 <div class="event-card" data-event-id="${event.id}">
                     <div class="event-card-image">
-                        ${event.image ? `<img src="${event.image}" alt="${event.name}">` : '🎭'}
+                        ${event.image ? `<img src="${event.image}" alt="${event.name}">` : '&#127917;'}
                     </div>
                     <div class="event-card-content">
                         <div class="event-card-title">${event.name}</div>
-                        <div class="event-card-date">${formatDate(event.date)} at ${event.time}</div>
+                        <div class="event-card-date">${event.date} at ${event.time}</div>
                         <div class="event-card-meta">
-                            <span class="event-status status-${event.status.toLowerCase().replace(' ', '-')}">${event.status}</span>
+                            <span class="event-status status-${(event.status || 'available').toLowerCase().replace(/\s+/g, '-')}">${event.status || 'Active'}</span>
                         </div>
-                        <div class="event-capacity">
-                            ${(event.registrations || []).length} / ${event.capacity} registered
-                        </div>
-                        <div class="event-revenue">
-                            $${((event.registrations || []).reduce((sum, r) => sum + (r.amountPaid || 0), 0) || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                        </div>
+                        <div class="event-capacity">${regCount} / ${event.capacity || event.totalCapacity || '?'} registered</div>
+                        <div class="event-revenue">$${eventRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
                         <div class="event-card-actions">
                             <button class="btn-small edit-event-btn" data-event-id="${event.id}">Edit</button>
-                            <button class="btn-small" style="border-color: #4ade80; color: #4ade80;" data-event-id="${event.id}">View Registrations</button>
+                            <button class="btn-small view-regs-btn" style="border-color: #4ade80; color: #4ade80;" data-event-id="${event.id}">Registrations</button>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                </div>`;
+            }).join('');
 
             document.querySelectorAll('.edit-event-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    const eventId = btn.dataset.eventId;
-                    openEventEditor(eventId);
+                    openEventEditor(btn.dataset.eventId);
+                });
+            });
+
+            document.querySelectorAll('.view-regs-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openEventEditor(btn.dataset.eventId);
                 });
             });
         }
 
         function formatDate(dateStr) {
+            if (!dateStr) return '—';
             const date = new Date(dateStr);
+            if (isNaN(date.getTime())) return dateStr;
             return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         }
 
@@ -2265,7 +1441,6 @@
             const title = document.getElementById('editorTitle');
             const registrationsSection = document.getElementById('registrationsSection');
 
-            // Reset form
             form.reset();
             document.getElementById('imagePreview').classList.add('hidden');
             document.getElementById('highlightsPreview').innerHTML = '';
@@ -2276,15 +1451,15 @@
                     app.currentEvent = event;
                     title.textContent = 'Edit Event';
 
-                    document.getElementById('eventName').value = event.name;
-                    document.getElementById('eventDate').value = event.date;
-                    document.getElementById('eventTime').value = event.time;
-                    document.getElementById('eventLocation').value = event.location;
+                    document.getElementById('eventName').value = event.name || '';
+                    document.getElementById('eventDate').value = event.date || '';
+                    document.getElementById('eventTime').value = event.time || '';
+                    document.getElementById('eventLocation').value = event.location || '';
                     document.getElementById('eventDescription').value = event.description || '';
                     document.getElementById('eventDetailDescription').value = event.detailDescription || '';
                     document.getElementById('eventAdditionalInfo').value = event.additionalInfo || '';
-                    document.getElementById('eventCapacity').value = event.capacity;
-                    document.getElementById('eventStatus').value = event.status;
+                    document.getElementById('eventCapacity').value = event.capacity || event.totalCapacity || '';
+                    document.getElementById('eventStatus').value = event.status || 'available';
 
                     if (event.image) {
                         const img = document.getElementById('imagePreview');
@@ -2292,9 +1467,9 @@
                         img.classList.remove('hidden');
                     }
 
-                    // Set pricing type
                     const pricingType = event.pricingType || 'individual';
-                    document.querySelector(`input[name="pricingType"][value="${pricingType}"]`).checked = true;
+                    const radioEl = document.querySelector(`input[name="pricingType"][value="${pricingType}"]`);
+                    if (radioEl) radioEl.checked = true;
                     updatePricingFields();
 
                     if (event.pricePerPerson) {
@@ -2312,10 +1487,13 @@
                         updateHighlightsTags();
                     }
 
-                    // Show registrations
-                    if (event.registrations && event.registrations.length > 0) {
+                    // Show registrations from app.registrations
+                    const eventRegs = getEventRegistrations(event.id);
+                    if (eventRegs.length > 0) {
                         registrationsSection.classList.remove('hidden');
-                        populateRegistrationsTable(event.registrations);
+                        populateRegistrationsTable(eventRegs);
+                    } else {
+                        registrationsSection.classList.add('hidden');
                     }
                 }
             } else {
@@ -2331,13 +1509,9 @@
 
         function updatePricingFields() {
             const type = document.querySelector('input[name="pricingType"]:checked').value;
-            const pricePerPersonGroup = document.getElementById('pricePerPersonGroup');
-            const pricePerTableGroup = document.getElementById('pricePerTableGroup');
-            const tableSizeGroup = document.getElementById('tableSizeGroup');
-
-            pricePerPersonGroup.classList.toggle('hidden', type !== 'individual' && type !== 'both');
-            pricePerTableGroup.classList.toggle('hidden', type !== 'table' && type !== 'both');
-            tableSizeGroup.classList.toggle('hidden', type !== 'table' && type !== 'both');
+            document.getElementById('pricePerPersonGroup').classList.toggle('hidden', type !== 'individual' && type !== 'both');
+            document.getElementById('pricePerTableGroup').classList.toggle('hidden', type !== 'table' && type !== 'both');
+            document.getElementById('tableSizeGroup').classList.toggle('hidden', type !== 'table' && type !== 'both');
         }
 
         document.querySelectorAll('input[name="pricingType"]').forEach(radio => {
@@ -2355,24 +1529,25 @@
 
         function populateRegistrationsTable(registrations) {
             const tbody = document.getElementById('registrationsTable');
-            if (registrations.length === 0) {
+            if (!registrations || registrations.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #999;">No registrations yet</td></tr>';
                 return;
             }
 
             tbody.innerHTML = registrations.map(reg => `
                 <tr>
-                    <td>${reg.name}</td>
-                    <td>${reg.email}</td>
+                    <td>${reg.name || '—'}</td>
+                    <td>${reg.email || '—'}</td>
                     <td>${reg.phone || '—'}</td>
-                    <td>${reg.guests || 1}</td>
-                    <td>$${(reg.amountPaid || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
-                    <td>${reg.status || 'Confirmed'}</td>
-                    <td>${formatDate(reg.date)}</td>
+                    <td>${reg.tickets || 1}</td>
+                    <td>$${parseFloat(reg.amount || reg.amountPaid || 0).toFixed(2)}</td>
+                    <td>${reg.status || 'PAID'}</td>
+                    <td>${reg.paymentMethod || '—'}</td>
                 </tr>
             `).join('');
         }
 
+        // Image upload handlers
         document.getElementById('imageInput').addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -2390,11 +1565,9 @@
             e.preventDefault();
             e.currentTarget.style.background = 'rgba(212, 175, 55, 0.15)';
         });
-
         document.getElementById('imageUploadArea').addEventListener('dragleave', (e) => {
             e.currentTarget.style.background = 'rgba(212, 175, 55, 0.05)';
         });
-
         document.getElementById('imageUploadArea').addEventListener('drop', (e) => {
             e.preventDefault();
             e.currentTarget.style.background = 'rgba(212, 175, 55, 0.05)';
@@ -2414,11 +1587,9 @@
         document.getElementById('closeEditorBtn').addEventListener('click', () => {
             document.getElementById('eventEditorPanel').classList.remove('open');
         });
-
         document.getElementById('cancelEditorBtn').addEventListener('click', () => {
             document.getElementById('eventEditorPanel').classList.remove('open');
         });
-
         document.getElementById('eventEditorForm').addEventListener('submit', (e) => {
             e.preventDefault();
             saveEvent();
@@ -2438,10 +1609,9 @@
                 status: document.getElementById('eventStatus').value,
                 pricingType: document.querySelector('input[name="pricingType"]:checked').value,
                 highlights: document.getElementById('eventHighlights').value.split(',').map(h => h.trim()).filter(h => h),
-                registrations: app.currentEvent?.registrations || [],
+                slug: app.currentEvent?.slug || document.getElementById('eventName').value.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
             };
 
-            // Handle pricing
             const pricingType = eventData.pricingType;
             if (pricingType === 'individual' || pricingType === 'both') {
                 const price = parseFloat(document.getElementById('pricePerPerson').value || 0);
@@ -2453,7 +1623,6 @@
                 eventData.tableSize = parseInt(document.getElementById('tableSize').value || 8);
             }
 
-            // Handle image
             const imagePreview = document.getElementById('imagePreview');
             if (imagePreview.src && !imagePreview.classList.contains('hidden')) {
                 eventData.image = imagePreview.src;
@@ -2475,12 +1644,14 @@
         }
 
         document.getElementById('exportRegistrationsBtn').addEventListener('click', () => {
-            if (!app.currentEvent || !app.currentEvent.registrations) return;
+            if (!app.currentEvent) return;
+            const regs = getEventRegistrations(app.currentEvent.id);
+            if (regs.length === 0) return;
 
             const csv = [
-                ['Name', 'Email', 'Phone', 'Guests', 'Amount Paid', 'Status', 'Date'].join(','),
-                ...app.currentEvent.registrations.map(r =>
-                    [r.name, r.email, r.phone || '', r.guests || 1, r.amountPaid || 0, r.status || 'Confirmed', r.date].join(',')
+                ['Name', 'Email', 'Phone', 'Tickets', 'Amount', 'Status', 'Method'].join(','),
+                ...regs.map(r =>
+                    [r.name||'', r.email||'', r.phone||'', r.tickets||1, r.amount||0, r.status||'PAID', r.paymentMethod||''].join(',')
                 )
             ].join('\n');
 
@@ -2494,6 +1665,317 @@
         });
 
         // ================================================================
+        // BANDS
+        // ================================================================
+        function updateBands() {
+            const tbody = document.getElementById('bandsTableBody');
+            if (!app.bands || app.bands.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">No bands scheduled</td></tr>';
+                return;
+            }
+
+            // Sort by date
+            const sorted = [...app.bands].sort((a, b) => a.date.localeCompare(b.date));
+
+            tbody.innerHTML = sorted.map(band => `
+                <tr>
+                    <td style="font-weight: 500;">${band.name}</td>
+                    <td>${formatDate(band.date)}</td>
+                    <td>${band.timeSlot}</td>
+                    <td><span class="band-type-badge band-type-${band.type}">${band.type}</span></td>
+                    <td>
+                        <div class="band-actions-cell">
+                            <button class="btn-icon edit-band-btn" data-band-id="${band.id}" title="Edit">&#9998;</button>
+                            <button class="btn-icon delete delete-band-btn" data-band-id="${band.id}" title="Delete">&#128465;</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            document.querySelectorAll('.edit-band-btn').forEach(btn => {
+                btn.addEventListener('click', () => openBandModal(btn.dataset.bandId));
+            });
+            document.querySelectorAll('.delete-band-btn').forEach(btn => {
+                btn.addEventListener('click', () => deleteBand(btn.dataset.bandId));
+            });
+        }
+
+        document.getElementById('addBandBtn').addEventListener('click', () => openBandModal(null));
+
+        function openBandModal(bandId) {
+            const modal = document.getElementById('bandModal');
+            const form = document.getElementById('bandModalForm');
+            const title = document.getElementById('bandModalTitle');
+
+            form.reset();
+
+            if (bandId) {
+                const band = app.bands.find(b => b.id === bandId);
+                if (band) {
+                    app.currentBand = band;
+                    title.textContent = 'Edit Band';
+                    document.getElementById('bandName').value = band.name;
+                    document.getElementById('bandDate').value = band.date;
+                    document.getElementById('bandTimeSlot').value = band.timeSlot;
+                    document.getElementById('bandType').value = band.type;
+                }
+            } else {
+                app.currentBand = null;
+                title.textContent = 'Add Band';
+            }
+
+            modal.classList.add('active');
+        }
+
+        document.getElementById('cancelBandModal').addEventListener('click', () => {
+            document.getElementById('bandModal').classList.remove('active');
+        });
+
+        document.getElementById('bandModalForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const bandData = {
+                id: app.currentBand?.id || 'band-' + Date.now(),
+                name: document.getElementById('bandName').value,
+                date: document.getElementById('bandDate').value,
+                timeSlot: document.getElementById('bandTimeSlot').value,
+                type: document.getElementById('bandType').value,
+            };
+
+            if (app.currentBand) {
+                const index = app.bands.findIndex(b => b.id === app.currentBand.id);
+                if (index !== -1) app.bands[index] = bandData;
+            } else {
+                app.bands.push(bandData);
+            }
+
+            document.getElementById('bandModal').classList.remove('active');
+            updateBands();
+            updateDashboard();
+            showSuccess(`Band "${bandData.name}" saved!`);
+        });
+
+        function deleteBand(bandId) {
+            const band = app.bands.find(b => b.id === bandId);
+            if (!band) return;
+            showConfirmModal('Delete Band?', `Are you sure you want to delete "${band.name}"?`, () => {
+                app.bands = app.bands.filter(b => b.id !== bandId);
+                updateBands();
+                updateDashboard();
+                showSuccess('Band deleted.');
+            });
+        }
+
+        // ================================================================
+        // FLOOR PLAN
+        // ================================================================
+        function resizeFloorPlanCanvas() {
+            const container = document.getElementById('floorplanContainer');
+            const canvas = document.getElementById('floorplanCanvas');
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight || 500;
+            drawFloorPlan();
+        }
+
+        function drawFloorPlan() {
+            const canvas = document.getElementById('floorplanCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw grid
+            ctx.strokeStyle = '#1f1f1f';
+            ctx.lineWidth = 0.5;
+            for (let x = 0; x < canvas.width; x += 40) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+            }
+            for (let y = 0; y < canvas.height; y += 40) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+            }
+
+            // Draw labels
+            (app.floorPlan.labels || []).forEach(label => {
+                ctx.fillStyle = '#666';
+                ctx.font = 'bold 14px Montserrat';
+                ctx.textAlign = 'center';
+                ctx.fillText(label.text, label.x, label.y);
+            });
+
+            // Draw bar seats
+            (app.floorPlan.barSeats || []).forEach(seat => {
+                ctx.fillStyle = '#38bdf8';
+                ctx.beginPath();
+                ctx.arc(seat.x, seat.y, 8, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Draw tables
+            const tables = app.floorPlan.tables || [];
+            tables.forEach(table => {
+                const isSelected = app.fpSelectedTable && app.fpSelectedTable.id === table.id;
+                const colors = { table: '#4ade80', hightop: '#818cf8', couch: '#fbbf24' };
+                const color = colors[table.type] || '#4ade80';
+
+                ctx.fillStyle = isSelected ? '#d4af37' : color;
+                ctx.globalAlpha = isSelected ? 0.4 : 0.25;
+
+                if (table.shape === 'circle') {
+                    ctx.beginPath();
+                    ctx.arc(table.x + table.width/2, table.y + table.height/2, table.width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                    ctx.strokeStyle = isSelected ? '#d4af37' : color;
+                    ctx.lineWidth = isSelected ? 3 : 2;
+                    ctx.stroke();
+                } else if (table.shape === 'diamond') {
+                    const cx = table.x + table.width/2, cy = table.y + table.height/2;
+                    ctx.beginPath();
+                    ctx.moveTo(cx, table.y);
+                    ctx.lineTo(table.x + table.width, cy);
+                    ctx.lineTo(cx, table.y + table.height);
+                    ctx.lineTo(table.x, cy);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                    ctx.strokeStyle = isSelected ? '#d4af37' : color;
+                    ctx.lineWidth = isSelected ? 3 : 2;
+                    ctx.stroke();
+                } else {
+                    ctx.fillRect(table.x, table.y, table.width, table.height);
+                    ctx.globalAlpha = 1;
+                    ctx.strokeStyle = isSelected ? '#d4af37' : color;
+                    ctx.lineWidth = isSelected ? 3 : 2;
+                    ctx.strokeRect(table.x, table.y, table.width, table.height);
+                }
+
+                // Table label
+                ctx.globalAlpha = 1;
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 12px Montserrat';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(table.name, table.x + table.width/2, table.y + table.height/2 - 6);
+                ctx.font = '10px Montserrat';
+                ctx.fillStyle = '#ccc';
+                ctx.fillText(table.seats + ' seats', table.x + table.width/2, table.y + table.height/2 + 8);
+            });
+
+            // Update counts
+            document.getElementById('fpTableCount').textContent = tables.length;
+            document.getElementById('fpTotalSeats').textContent = tables.reduce((sum, t) => sum + (t.seats || 0), 0);
+        }
+
+        // Floor plan canvas interaction
+        document.getElementById('floorplanCanvas').addEventListener('mousedown', (e) => {
+            const canvas = e.target;
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const tables = app.floorPlan.tables || [];
+
+            if (app.fpTool === 'select') {
+                const clicked = tables.find(t =>
+                    x >= t.x && x <= t.x + t.width && y >= t.y && y <= t.y + t.height
+                );
+
+                if (clicked) {
+                    app.fpSelectedTable = clicked;
+                    app.fpDragging = true;
+                    app.fpDragOffset = { x: x - clicked.x, y: y - clicked.y };
+                    showTableProps(clicked);
+                } else {
+                    app.fpSelectedTable = null;
+                    document.getElementById('tablePropsPanel').classList.add('hidden');
+                }
+                drawFloorPlan();
+            } else if (app.fpTool === 'rect' || app.fpTool === 'circle') {
+                const newTable = {
+                    id: 't' + Date.now(),
+                    name: String(tables.length + 1),
+                    x: Math.round(x / 20) * 20,
+                    y: Math.round(y / 20) * 20,
+                    width: 80,
+                    height: app.fpTool === 'circle' ? 80 : 60,
+                    shape: app.fpTool === 'circle' ? 'circle' : 'rect',
+                    seats: 4,
+                    type: 'table',
+                };
+                tables.push(newTable);
+                app.fpSelectedTable = newTable;
+                showTableProps(newTable);
+                drawFloorPlan();
+            }
+        });
+
+        document.getElementById('floorplanCanvas').addEventListener('mousemove', (e) => {
+            if (!app.fpDragging || !app.fpSelectedTable) return;
+            const canvas = e.target;
+            const rect = canvas.getBoundingClientRect();
+            app.fpSelectedTable.x = Math.round((e.clientX - rect.left - app.fpDragOffset.x) / 10) * 10;
+            app.fpSelectedTable.y = Math.round((e.clientY - rect.top - app.fpDragOffset.y) / 10) * 10;
+            drawFloorPlan();
+        });
+
+        document.getElementById('floorplanCanvas').addEventListener('mouseup', () => {
+            app.fpDragging = false;
+        });
+
+        function showTableProps(table) {
+            const panel = document.getElementById('tablePropsPanel');
+            panel.classList.remove('hidden');
+            document.getElementById('fpTableName').value = table.name;
+            document.getElementById('fpTableSeats').value = table.seats;
+            document.getElementById('fpTableType').value = table.type;
+        }
+
+        document.getElementById('fpApplyProps').addEventListener('click', () => {
+            if (!app.fpSelectedTable) return;
+            app.fpSelectedTable.name = document.getElementById('fpTableName').value;
+            app.fpSelectedTable.seats = parseInt(document.getElementById('fpTableSeats').value) || 4;
+            app.fpSelectedTable.type = document.getElementById('fpTableType').value;
+            drawFloorPlan();
+            showSuccess('Table updated');
+        });
+
+        document.getElementById('fpDeleteTable').addEventListener('click', () => {
+            if (!app.fpSelectedTable) return;
+            app.floorPlan.tables = app.floorPlan.tables.filter(t => t.id !== app.fpSelectedTable.id);
+            app.fpSelectedTable = null;
+            document.getElementById('tablePropsPanel').classList.add('hidden');
+            drawFloorPlan();
+            showSuccess('Table deleted');
+        });
+
+        // Tool buttons
+        ['fpToolSelect', 'fpToolRect', 'fpToolCircle'].forEach(id => {
+            document.getElementById(id).addEventListener('click', () => {
+                const toolMap = { fpToolSelect: 'select', fpToolRect: 'rect', fpToolCircle: 'circle' };
+                app.fpTool = toolMap[id];
+                document.querySelectorAll('.floorplan-toolbar button').forEach(b => b.classList.remove('active'));
+                document.getElementById(id).classList.add('active');
+            });
+        });
+
+        document.getElementById('addTableBtn').addEventListener('click', () => {
+            const tables = app.floorPlan.tables || [];
+            const newTable = {
+                id: 't' + Date.now(),
+                name: String(tables.length + 1),
+                x: 100 + Math.random() * 400,
+                y: 100 + Math.random() * 300,
+                width: 80, height: 60,
+                shape: 'rect', seats: 4, type: 'table',
+            };
+            tables.push(newTable);
+            if (!app.floorPlan.tables) app.floorPlan.tables = tables;
+            app.fpSelectedTable = newTable;
+            showTableProps(newTable);
+            drawFloorPlan();
+        });
+
+        // ================================================================
         // CRM
         // ================================================================
         function updateCRM() {
@@ -2503,7 +1985,6 @@
             document.getElementById('crmSubscribed').textContent = subscribed;
             document.getElementById('crmUnsubscribed').textContent = unsubscribed;
 
-            // Populate source filter
             const sources = [...new Set(app.subscribers.map(s => s.source).filter(Boolean))];
             const sourceSelect = document.getElementById('crmSourceFilter');
             sources.forEach(source => {
@@ -2525,7 +2006,8 @@
             const statusFilter = document.getElementById('crmStatusFilter').value;
 
             app.crmFilteredData = app.subscribers.filter(sub => {
-                const matchesSearch = !search || sub.name.toLowerCase().includes(search) || sub.email.toLowerCase().includes(search);
+                const name = (sub.firstName || '') + ' ' + (sub.lastName || '');
+                const matchesSearch = !search || name.toLowerCase().includes(search) || (sub.email||'').toLowerCase().includes(search);
                 const matchesSource = !sourceFilter || sub.source === sourceFilter;
                 const matchesStatus = !statusFilter || sub.emailStatus === statusFilter;
                 return matchesSearch && matchesSource && matchesStatus;
@@ -2546,80 +2028,64 @@
                 return;
             }
 
-            tbody.innerHTML = pageData.map(sub => `
-                <tr class="crm-subscriber-row" data-subscriber-id="${sub.id}">
-                    <td><input type="checkbox" class="crm-checkbox subscriber-checkbox" value="${sub.id}"></td>
-                    <td>${sub.name}</td>
-                    <td>${sub.email}</td>
+            tbody.innerHTML = pageData.map(sub => {
+                const name = (sub.firstName || '') + ' ' + (sub.lastName || '');
+                return `
+                <tr class="crm-subscriber-row" data-subscriber-id="${sub.email}">
+                    <td><input type="checkbox" class="crm-checkbox subscriber-checkbox" value="${sub.email}"></td>
+                    <td>${name.trim() || '—'}</td>
+                    <td>${sub.email || '—'}</td>
                     <td>${sub.phone || '—'}</td>
                     <td>${sub.source || '—'}</td>
                     <td>${sub.emailStatus || '—'}</td>
-                    <td>${sub.lastActivity ? formatDate(sub.lastActivity) : '—'}</td>
+                    <td>${sub.lastActivityDate ? formatDate(sub.lastActivityDate) : '—'}</td>
                     <td>${formatDate(sub.created)}</td>
-                </tr>
-            `).join('');
+                </tr>`;
+            }).join('');
 
             document.querySelectorAll('.subscriber-checkbox').forEach(cb => {
                 cb.addEventListener('change', updateSelectedCount);
-                cb.addEventListener('click', (e) => openSubscriberDetail(cb.value, e));
             });
-
             document.querySelectorAll('.crm-subscriber-row').forEach(row => {
-                row.addEventListener('click', () => openSubscriberDetail(row.dataset.subscriberId));
+                row.addEventListener('click', (e) => {
+                    if (e.target.type === 'checkbox') return;
+                    openSubscriberDetail(row.dataset.subscriberId);
+                });
             });
         }
 
         function renderCRMPagination() {
             const pagination = document.getElementById('crmPagination');
             const totalPages = Math.ceil(app.crmFilteredData.length / app.crmPageSize);
+            if (totalPages <= 1) { pagination.innerHTML = ''; return; }
 
-            if (totalPages <= 1) {
-                pagination.innerHTML = '';
-                return;
-            }
-
-            let html = `<span class="pagination-info">Page ${app.crmCurrentPage} of ${totalPages}</span>`;
+            let html = `<span class="pagination-info">Page ${app.crmCurrentPage} of ${totalPages} (${app.crmFilteredData.length} contacts)</span>`;
             html += '<div style="display: flex; gap: 0.5rem;">';
-
             if (app.crmCurrentPage > 1) {
                 html += `<button class="pagination-btn" onclick="app.crmCurrentPage = 1; filterAndPaginateCRM();">First</button>`;
                 html += `<button class="pagination-btn" onclick="app.crmCurrentPage--; filterAndPaginateCRM();">Prev</button>`;
             }
-
             for (let i = Math.max(1, app.crmCurrentPage - 2); i <= Math.min(totalPages, app.crmCurrentPage + 2); i++) {
                 html += `<button class="pagination-btn ${i === app.crmCurrentPage ? 'active' : ''}" onclick="app.crmCurrentPage = ${i}; filterAndPaginateCRM();">${i}</button>`;
             }
-
             if (app.crmCurrentPage < totalPages) {
                 html += `<button class="pagination-btn" onclick="app.crmCurrentPage++; filterAndPaginateCRM();">Next</button>`;
                 html += `<button class="pagination-btn" onclick="app.crmCurrentPage = ${totalPages}; filterAndPaginateCRM();">Last</button>`;
             }
-
             html += '</div>';
             pagination.innerHTML = html;
         }
 
-        document.getElementById('crmSearch').addEventListener('input', () => {
-            filterAndPaginateCRM();
-        });
-
-        document.getElementById('crmSourceFilter').addEventListener('change', () => {
-            filterAndPaginateCRM();
-        });
-
-        document.getElementById('crmStatusFilter').addEventListener('change', () => {
-            filterAndPaginateCRM();
-        });
+        document.getElementById('crmSearch').addEventListener('input', filterAndPaginateCRM);
+        document.getElementById('crmSourceFilter').addEventListener('change', filterAndPaginateCRM);
+        document.getElementById('crmStatusFilter').addEventListener('change', filterAndPaginateCRM);
 
         document.getElementById('selectAllCheckbox').addEventListener('change', (e) => {
             const checked = e.target.checked;
             document.querySelectorAll('.subscriber-checkbox').forEach(cb => {
                 cb.checked = checked;
-                if (checked) {
-                    app.selectedSubscribers.add(cb.value);
-                } else {
-                    app.selectedSubscribers.delete(cb.value);
-                }
+                if (checked) app.selectedSubscribers.add(cb.value);
+                else app.selectedSubscribers.delete(cb.value);
             });
             updateSelectedCount();
         });
@@ -2629,10 +2095,8 @@
             document.querySelectorAll('.subscriber-checkbox:checked').forEach(cb => {
                 app.selectedSubscribers.add(cb.value);
             });
-
             const bulkBar = document.getElementById('bulkActionsBar');
             const count = app.selectedSubscribers.size;
-
             if (count > 0) {
                 bulkBar.classList.remove('hidden');
                 document.getElementById('selectedCount').textContent = `${count} selected`;
@@ -2641,40 +2105,44 @@
             }
         }
 
-        function openSubscriberDetail(subscriberId, e) {
-            if (e) e.stopPropagation();
-
-            const subscriber = app.subscribers.find(s => s.id === subscriberId);
+        function openSubscriberDetail(subscriberEmail) {
+            const subscriber = app.subscribers.find(s => s.email === subscriberEmail);
             if (!subscriber) return;
 
-            document.getElementById('subscriberName').textContent = subscriber.name;
-            document.getElementById('subscriberEmail').textContent = subscriber.email;
+            const name = (subscriber.firstName || '') + ' ' + (subscriber.lastName || '');
+            document.getElementById('subscriberName').textContent = name.trim() || subscriber.email;
+            document.getElementById('subscriberEmail').textContent = subscriber.email || '—';
             document.getElementById('subscriberPhone').textContent = subscriber.phone || '—';
             document.getElementById('subscriberSource').textContent = subscriber.source || '—';
             document.getElementById('subscriberStatus').textContent = subscriber.emailStatus || '—';
             document.getElementById('subscriberCreated').textContent = formatDate(subscriber.created);
-            document.getElementById('subscriberLastActivity').textContent = subscriber.lastActivity ? formatDate(subscriber.lastActivity) : '—';
+            document.getElementById('subscriberLastActivity').textContent = subscriber.lastActivityDate ? formatDate(subscriber.lastActivityDate) : '—';
 
-            // Event history
+            // Event history from registrations
             const eventHistoryEl = document.getElementById('subscriberEventHistory');
             const eventHistory = [];
-
-            app.events.forEach(event => {
-                const registration = (event.registrations || []).find(r => r.email === subscriber.email);
-                if (registration) {
+            const regs = app.registrations || {};
+            for (const eventId in regs) {
+                const match = regs[eventId].find(r => r.email === subscriber.email);
+                if (match) {
+                    const event = app.events.find(e => e.id === eventId);
                     eventHistory.push({
-                        eventName: event.name,
-                        date: registration.date,
+                        eventName: event ? event.name : eventId,
+                        date: match.created || event?.date,
+                        amount: match.amount || '0',
                     });
                 }
-            });
+            }
 
             if (eventHistory.length === 0) {
                 eventHistoryEl.innerHTML = '<div style="color: #999; font-size: 0.9rem; text-align: center;">No event history</div>';
             } else {
                 eventHistoryEl.innerHTML = eventHistory.map(h => `
                     <div class="history-item">
-                        <div class="history-event-name">${h.eventName}</div>
+                        <div>
+                            <div class="history-event-name">${h.eventName}</div>
+                            <div style="color: #4ade80; font-size: 0.8rem;">$${parseFloat(h.amount).toFixed(2)}</div>
+                        </div>
                         <div class="history-date">${formatDate(h.date)}</div>
                     </div>
                 `).join('');
@@ -2695,35 +2163,25 @@
             eventSelect.innerHTML = '<option value="">Choose an event...</option>' + app.events.map(e => `
                 <option value="${e.id}">${e.name}</option>
             `).join('');
-
             updateRecipientCount();
         }
 
         function updateRecipientCount() {
             const type = document.getElementById('recipientType').value;
             let count = 0;
-
-            if (type === 'all') {
-                count = app.subscribers.length;
-            } else if (type === 'subscribed') {
-                count = app.subscribers.filter(s => s.emailStatus === 'Subscribed').length;
-            } else if (type === 'event') {
+            if (type === 'all') count = app.subscribers.length;
+            else if (type === 'subscribed') count = app.subscribers.filter(s => s.emailStatus === 'Subscribed').length;
+            else if (type === 'event') {
                 const eventId = document.getElementById('eventSelect').value;
-                if (eventId) {
-                    const event = app.events.find(e => e.id === eventId);
-                    count = (event?.registrations || []).length;
-                }
+                if (eventId) count = getEventRegistrations(eventId).length;
             }
-
             document.getElementById('recipientCount').textContent = count + ' recipient' + (count !== 1 ? 's' : '');
         }
 
         document.getElementById('recipientType').addEventListener('change', (e) => {
-            const eventGroup = document.getElementById('eventSelectGroup');
-            eventGroup.classList.toggle('hidden', e.target.value !== 'event');
+            document.getElementById('eventSelectGroup').classList.toggle('hidden', e.target.value !== 'event');
             updateRecipientCount();
         });
-
         document.getElementById('eventSelect').addEventListener('change', updateRecipientCount);
 
         // Rich text editor
@@ -2732,21 +2190,11 @@
                 e.preventDefault();
                 const command = btn.dataset.command;
                 const value = btn.dataset.value;
-
-                if (command === 'formatBlock' || command === 'createLink' || command === 'insertImage') {
-                    if (command === 'createLink') {
-                        const url = prompt('Enter URL:');
-                        if (url) document.execCommand(command, false, url);
-                    } else if (command === 'insertImage') {
-                        const url = prompt('Enter image URL:');
-                        if (url) document.execCommand(command, false, url);
-                    } else {
-                        document.execCommand(command, false, value);
-                    }
-                } else {
-                    document.execCommand(command, false, null);
+                if (command) {
+                    if (command === 'createLink') { const url = prompt('Enter URL:'); if (url) document.execCommand(command, false, url); }
+                    else if (command === 'insertImage') { const url = prompt('Enter image URL:'); if (url) document.execCommand(command, false, url); }
+                    else document.execCommand(command, false, value || null);
                 }
-
                 document.getElementById('emailBody').focus();
                 updateEmailPreview();
             });
@@ -2756,19 +2204,14 @@
         document.getElementById('emailSubject').addEventListener('input', updateEmailPreview);
 
         function updateEmailPreview() {
-            const subject = document.getElementById('emailSubject').value || 'Your email subject';
             const body = document.getElementById('emailBody').innerHTML || 'Your email content will appear here...';
-
             document.getElementById('emailPreviewBody').innerHTML = body;
         }
 
         document.querySelectorAll('.merge-tag').forEach(tag => {
             tag.addEventListener('click', () => {
                 const editor = document.getElementById('emailBody');
-                const tagText = tag.dataset.tag;
-                const placeholder = `{${tagText}}`;
-
-                document.execCommand('insertText', false, placeholder);
+                document.execCommand('insertText', false, `{${tag.dataset.tag}}`);
                 editor.focus();
                 updateEmailPreview();
             });
@@ -2776,62 +2219,120 @@
 
         document.getElementById('testEmailBtn').addEventListener('click', () => {
             const subject = document.getElementById('emailSubject').value;
-            if (!subject) {
-                alert('Please enter an email subject');
-                return;
-            }
-
-            showConfirmModal(
-                'Send Test Email?',
-                'A test email will be sent to your admin email address.',
-                () => {
-                    showSuccess('Test email sent successfully!');
-                }
-            );
+            if (!subject) { alert('Please enter an email subject'); return; }
+            showConfirmModal('Send Test Email?', 'A test email will be sent to your admin email address.', () => {
+                showSuccess('Test email sent successfully!');
+            });
         });
 
         document.getElementById('sendCampaignBtn').addEventListener('click', () => {
             const subject = document.getElementById('emailSubject').value;
-            const recipientType = document.getElementById('recipientType').value;
-
-            if (!subject) {
-                alert('Please enter an email subject');
-                return;
-            }
-
+            if (!subject) { alert('Please enter an email subject'); return; }
             const recipientCount = parseInt(document.getElementById('recipientCount').textContent);
-            if (recipientCount === 0) {
-                alert('No recipients selected');
+            if (recipientCount === 0) { alert('No recipients selected'); return; }
+
+            showConfirmModal('Send Campaign?', `This email will be sent to ${recipientCount} recipients. This action cannot be undone.`, () => {
+                app.emailHistory.push({
+                    date: new Date().toISOString().split('T')[0],
+                    subject, recipients: recipientCount, status: 'Sent',
+                });
+
+                const tbody = document.getElementById('emailHistoryTable');
+                tbody.innerHTML = app.emailHistory.map(c => `
+                    <tr>
+                        <td>${c.date}</td>
+                        <td>${c.subject}</td>
+                        <td>${c.recipients}</td>
+                        <td><span style="color: #4ade80;">&#10003; ${c.status}</span></td>
+                    </tr>
+                `).join('');
+
+                showSuccess('Campaign sent to ' + recipientCount + ' recipients!');
+            });
+        });
+
+        // ================================================================
+        // GITHUB SAVE
+        // ================================================================
+        document.getElementById('saveGitHubBtn').addEventListener('click', () => {
+            if (!app.githubToken) {
+                document.getElementById('githubTokenModal').classList.add('active');
                 return;
             }
-
-            showConfirmModal(
-                'Send Campaign?',
-                `This email will be sent to ${recipientCount} recipients. This action cannot be undone.`,
-                () => {
-                    const campaign = {
-                        date: new Date().toISOString().split('T')[0],
-                        subject: subject,
-                        recipients: recipientCount,
-                        status: 'Sent',
-                    };
-
-                    app.emailHistory.push(campaign);
-
-                    const tbody = document.getElementById('emailHistoryTable');
-                    tbody.innerHTML = app.emailHistory.map(c => `
-                        <tr>
-                            <td>${c.date}</td>
-                            <td>${c.subject}</td>
-                            <td>${c.recipients}</td>
-                            <td><span style="color: #4ade80;">✓ ${c.status}</span></td>
-                        </tr>
-                    `).join('');
-
-                    showSuccess('Campaign sent to ' + recipientCount + ' recipients!');
-                }
-            );
+            saveToGitHub();
         });
+
+        document.getElementById('cancelTokenModal').addEventListener('click', () => {
+            document.getElementById('githubTokenModal').classList.remove('active');
+        });
+
+        document.getElementById('saveTokenBtn').addEventListener('click', () => {
+            const token = document.getElementById('githubTokenInput').value.trim();
+            if (token) {
+                app.githubToken = token;
+                localStorage.setItem('quarryGithubToken', token);
+                document.getElementById('githubTokenModal').classList.remove('active');
+                showSuccess('GitHub token saved!');
+            }
+        });
+
+        async function saveToGitHub() {
+            const overlay = document.createElement('div');
+            overlay.className = 'saving-overlay';
+            overlay.innerHTML = '<div class="saving-spinner"><div class="spinner"></div><div style="color: #d4af37; font-weight: 600;">Saving to GitHub...</div></div>';
+            document.body.appendChild(overlay);
+
+            try {
+                // Build the complete events.json data
+                const eventsData = {
+                    events: app.events,
+                    bands: app.bands,
+                    floorPlan: app.floorPlan,
+                    registrations: app.registrations,
+                    subscribers: [],
+                };
+
+                const content = JSON.stringify(eventsData, null, 2);
+                const encoded = btoa(unescape(encodeURIComponent(content)));
+
+                // Get current file SHA
+                const shaRes = await fetch('https://api.github.com/repos/quarrymanagement/quarry-website/contents/events.json', {
+                    headers: { 'Authorization': `token ${app.githubToken}` }
+                });
+
+                let sha = '';
+                if (shaRes.ok) {
+                    const shaData = await shaRes.json();
+                    sha = shaData.sha;
+                }
+
+                // Push update
+                const res = await fetch('https://api.github.com/repos/quarrymanagement/quarry-website/contents/events.json', {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${app.githubToken}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: 'Update events.json from admin panel',
+                        content: encoded,
+                        sha: sha,
+                    }),
+                });
+
+                if (res.ok) {
+                    showSuccess('Saved to GitHub! Deploy will start automatically.');
+                } else {
+                    const err = await res.json();
+                    throw new Error(err.message || 'GitHub save failed');
+                }
+            } catch (err) {
+                console.error('GitHub save error:', err);
+                alert('Error saving to GitHub: ' + err.message + '\n\nYou can also download the file and upload it manually.');
+            } finally {
+                overlay.remove();
+            }
+        }
 
         // ================================================================
         // UTILITY FUNCTIONS
@@ -2841,7 +2342,6 @@
             el.className = 'success-message';
             el.textContent = message;
             document.body.appendChild(el);
-
             setTimeout(() => {
                 el.style.animation = 'slideIn 0.3s ease reverse';
                 setTimeout(() => el.remove(), 300);
@@ -2851,7 +2351,6 @@
         function showConfirmModal(title, message, onConfirm) {
             document.getElementById('confirmTitle').textContent = title;
             document.getElementById('confirmMessage').textContent = message;
-
             const modal = document.getElementById('confirmModal');
             const confirmBtn = document.getElementById('confirmOk');
             const cancelBtn = document.getElementById('confirmCancel');
@@ -2861,20 +2360,13 @@
                 modal.classList.remove('active');
                 confirmBtn.removeEventListener('click', handleConfirm);
             };
-
             confirmBtn.addEventListener('click', handleConfirm);
             cancelBtn.onclick = () => modal.classList.remove('active');
-
             modal.classList.add('active');
         }
 
         function setupEventListeners() {
-            // Tab switching
-            document.querySelectorAll('[data-tab]').forEach(tab => {
-                tab.addEventListener('click', () => {
-                    switchTab(tab.dataset.tab);
-                });
-            });
+            // Additional global listeners can go here
         }
 
         // Initialize
