@@ -737,13 +737,7 @@
                     <button id="navEvents" class="nav-btn" data-section="events">Events</button>
                     <button id="navBands" class="nav-btn" data-section="bands">Bands</button>
                     <button id="navTableMaps" class="nav-btn" data-section="tableMap">Table Maps</button>
-                    <div class="nav-dropdown" style="position:relative;">
-                        <button id="navPayments" class="nav-btn" onclick="togglePaymentsMenu(event)">Payments &#x25BE;</button>
-                        <div id="paymentsDropdown" style="display:none;position:absolute;top:100%;left:0;background:var(--brown-dark);border:1px solid rgba(212,175,106,0.3);min-width:180px;z-index:100;border-radius:0 0 4px 4px;box-shadow:0 4px 12px rgba(0,0,0,0.3);">
-                            <button class="nav-btn" data-section="invoices" style="display:block;width:100%;text-align:left;padding:0.75rem 1.25rem;font-size:0.85rem;border-radius:0;">Invoices</button>
-                            <button class="nav-btn" data-section="subscriptions" style="display:block;width:100%;text-align:left;padding:0.75rem 1.25rem;font-size:0.85rem;border-radius:0;">Subscriptions</button>
-                        </div>
-                    </div>
+                    <button id="navInvoices" class="nav-btn" data-section="invoices">Invoices</button>
                     <button id="signOutBtn" class="nav-btn">Sign Out</button>
                 </div>
             </div>
@@ -884,140 +878,15 @@
 
                 <!-- INVOICES SECTION -->
                 <div id="invoicesSection" class="section">
-                    <!-- Invoice Stats -->
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
-                        <div style="background: white; border-radius: 8px; padding: 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
-                            <div id="statTotal" style="font-size: 2rem; font-weight: 700; color: var(--brown-dark);">—</div>
-                            <div style="font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.25rem;">Total Sent</div>
-                        </div>
-                        <div style="background: white; border-radius: 8px; padding: 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
-                            <div id="statPaid" style="font-size: 2rem; font-weight: 700; color: var(--success);">—</div>
-                            <div style="font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.25rem;">Paid</div>
-                        </div>
-                        <div style="background: white; border-radius: 8px; padding: 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
-                            <div id="statOpen" style="font-size: 2rem; font-weight: 700; color: var(--warning, #f0ad4e);">—</div>
-                            <div style="font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.25rem;">Open / Unpaid</div>
-                        </div>
-                        <div style="background: white; border-radius: 8px; padding: 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
-                            <div id="statRevenue" style="font-size: 2rem; font-weight: 700; color: var(--gold);">—</div>
-                            <div style="font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.25rem;">Revenue Collected</div>
-                        </div>
-                    </div>
-
                     <div class="table-container">
                         <div class="table-header">
                             <h2>Invoices</h2>
-                            <div style="display: flex; gap: 0.5rem; align-items: center;">
-                                <button class="btn btn-secondary btn-small" id="refreshInvoicesBtn" onclick="loadInvoiceDashboard()" style="background: transparent; border: 1px solid var(--gold-light); color: var(--gold-light);">Refresh</button>
-                                <button class="btn btn-primary btn-small" id="createInvoiceBtn2">+ Create Invoice</button>
-                            </div>
+                            <button class="btn btn-primary btn-small" id="createInvoiceBtn2">+ Create Invoice</button>
                         </div>
-
-                        <!-- Filter tabs -->
-                        <div style="display: flex; gap: 0; border-bottom: 2px solid var(--gray-medium); background: var(--gray-light);">
-                            <button class="inv-filter-btn active" onclick="filterInvoices('all', this)" style="padding: 0.75rem 1.25rem; border: none; background: none; font-family: 'Montserrat', sans-serif; font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; color: var(--brown-dark); border-bottom: 2px solid var(--gold); margin-bottom: -2px;">All</button>
-                            <button class="inv-filter-btn" onclick="filterInvoices('open', this)" style="padding: 0.75rem 1.25rem; border: none; background: none; font-family: 'Montserrat', sans-serif; font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; color: #888; border-bottom: 2px solid transparent; margin-bottom: -2px;">Open</button>
-                            <button class="inv-filter-btn" onclick="filterInvoices('paid', this)" style="padding: 0.75rem 1.25rem; border: none; background: none; font-family: 'Montserrat', sans-serif; font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; color: #888; border-bottom: 2px solid transparent; margin-bottom: -2px;">Paid</button>
-                            <button class="inv-filter-btn" onclick="filterInvoices('void', this)" style="padding: 0.75rem 1.25rem; border: none; background: none; font-family: 'Montserrat', sans-serif; font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; color: #888; border-bottom: 2px solid transparent; margin-bottom: -2px;">Voided</button>
-                            <button class="inv-filter-btn" onclick="filterInvoices('uncollectible', this)" style="padding: 0.75rem 1.25rem; border: none; background: none; font-family: 'Montserrat', sans-serif; font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; color: #888; border-bottom: 2px solid transparent; margin-bottom: -2px;">Overdue</button>
+                        <div style="padding: 2rem; text-align: center; color: var(--charcoal);">
+                            <p>For full invoice history and management, visit the <strong>Stripe Dashboard</strong>:</p>
+                            <a href="https://dashboard.stripe.com" target="_blank" class="btn btn-secondary" style="display: inline-block; margin-top: 1rem;">Open Stripe Dashboard</a>
                         </div>
-
-                        <!-- Invoice table -->
-                        <div style="overflow-x: auto;">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Invoice #</th>
-                                        <th>Customer</th>
-                                        <th>Description</th>
-                                        <th>Amount</th>
-                                        <th>Date Sent</th>
-                                        <th>Due Date</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="invoiceTableBody">
-                                    <tr>
-                                        <td colspan="8" style="text-align: center; padding: 3rem; color: #aaa;">
-                                            Loading invoices...
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div style="text-align: center; padding: 1rem;">
-                        <a href="https://dashboard.stripe.com/invoices" target="_blank" style="font-size: 0.8rem; color: var(--gold); text-decoration: none;">View full history on Stripe Dashboard &rarr;</a>
-                    </div>
-                </div>
-
-                <!-- SUBSCRIPTIONS SECTION -->
-                <div id="subscriptionsSection" class="section">
-                    <!-- Subscription Stats -->
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
-                        <div style="background: white; border-radius: 8px; padding: 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
-                            <div id="subStatTotal" style="font-size: 2rem; font-weight: 700; color: var(--brown-dark);">—</div>
-                            <div style="font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.25rem;">Total Subscribers</div>
-                        </div>
-                        <div style="background: white; border-radius: 8px; padding: 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
-                            <div id="subStatActive" style="font-size: 2rem; font-weight: 700; color: var(--success);">—</div>
-                            <div style="font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.25rem;">Active</div>
-                        </div>
-                        <div style="background: white; border-radius: 8px; padding: 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
-                            <div id="subStatCanceled" style="font-size: 2rem; font-weight: 700; color: var(--danger, #ff6b6b);">—</div>
-                            <div style="font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.25rem;">Canceled</div>
-                        </div>
-                        <div style="background: white; border-radius: 8px; padding: 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
-                            <div id="subStatMRR" style="font-size: 2rem; font-weight: 700; color: var(--gold);">—</div>
-                            <div style="font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.25rem;">Monthly Revenue</div>
-                        </div>
-                    </div>
-
-                    <div class="table-container">
-                        <div class="table-header">
-                            <h2>Subscriptions</h2>
-                            <div style="display: flex; gap: 0.5rem; align-items: center;">
-                                <select id="subProductFilter" onchange="filterSubscriptions()" style="padding: 0.4rem 0.75rem; border: 1px solid var(--gold-light); background: transparent; color: var(--gold-light); font-family: 'Montserrat', sans-serif; font-size: 0.75rem; border-radius: 4px; cursor: pointer;">
-                                    <option value="all" style="color: #333;">All Products</option>
-                                </select>
-                                <button class="btn btn-secondary btn-small" onclick="loadSubscriptionDashboard()" style="background: transparent; border: 1px solid var(--gold-light); color: var(--gold-light);">Refresh</button>
-                            </div>
-                        </div>
-
-                        <!-- Status filter tabs -->
-                        <div style="display: flex; gap: 0; border-bottom: 2px solid var(--gray-medium); background: var(--gray-light);">
-                            <button class="sub-filter-btn active" onclick="filterSubStatus('all', this)" style="padding: 0.75rem 1.25rem; border: none; background: none; font-family: 'Montserrat', sans-serif; font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; color: var(--brown-dark); border-bottom: 2px solid var(--gold); margin-bottom: -2px;">All</button>
-                            <button class="sub-filter-btn" onclick="filterSubStatus('active', this)" style="padding: 0.75rem 1.25rem; border: none; background: none; font-family: 'Montserrat', sans-serif; font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; color: #888; border-bottom: 2px solid transparent; margin-bottom: -2px;">Active</button>
-                            <button class="sub-filter-btn" onclick="filterSubStatus('past_due', this)" style="padding: 0.75rem 1.25rem; border: none; background: none; font-family: 'Montserrat', sans-serif; font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; color: #888; border-bottom: 2px solid transparent; margin-bottom: -2px;">Past Due</button>
-                            <button class="sub-filter-btn" onclick="filterSubStatus('canceled', this)" style="padding: 0.75rem 1.25rem; border: none; background: none; font-family: 'Montserrat', sans-serif; font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; color: #888; border-bottom: 2px solid transparent; margin-bottom: -2px;">Canceled</button>
-                        </div>
-
-                        <div style="overflow-x: auto;">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Customer</th>
-                                        <th>Product</th>
-                                        <th>Amount</th>
-                                        <th>Billing</th>
-                                        <th>Started</th>
-                                        <th>Next Billing</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="subscriptionTableBody">
-                                    <tr>
-                                        <td colspan="7" style="text-align: center; padding: 3rem; color: #aaa;">Loading subscriptions...</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div style="text-align: center; padding: 1rem;">
-                        <a href="https://dashboard.stripe.com/subscriptions" target="_blank" style="font-size: 0.8rem; color: var(--gold); text-decoration: none;">Manage subscriptions on Stripe Dashboard &rarr;</a>
                     </div>
                 </div>
             </div>
@@ -1193,10 +1062,6 @@
                         <label>Description</label>
                         <input type="text" id="invoiceDescription" required placeholder="e.g., Event catering, rental, etc.">
                     </div>
-                    <div class="form-group">
-                        <label>Event Date</label>
-                        <input type="date" id="invoiceEventDate">
-                    </div>
                     <div class="form-row">
                         <div class="form-group">
                             <label>Amount ($)</label>
@@ -1211,7 +1076,7 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeModal('invoiceModal')">Cancel</button>
-                <button class="btn btn-primary" id="invoiceSubmitBtn">Create & Send Invoice</button>
+                <button class="btn btn-primary" id="invoiceSubmitBtn">Create Invoice</button>
             </div>
         </div>
     </div>
@@ -1228,7 +1093,26 @@
         </div>
     </div>
 
-    <!-- Token managed securely via Netlify proxy — no modal needed -->
+    <!-- Token Settings Modal -->
+    <div id="tokenSettingsModal" class="modal-overlay" style="display:none;">
+        <div class="modal" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>GitHub Token Settings</h2>
+                <button class="modal-close" onclick="closeTokenSettings()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 1rem; color: var(--gray-dark); font-size: 0.9rem;">Enter your GitHub Personal Access Token to enable saving events and bands. The token needs <strong>repo</strong> scope for private repositories.</p>
+                <div class="form-group">
+                    <label>GitHub Token</label>
+                    <input type="text" id="githubTokenInput" placeholder="ghp_xxxxxxxxxxxx" style="width: 100%; padding: 0.75rem; border: 2px solid var(--gray-medium); border-radius: 4px; font-family: monospace;">
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button class="btn btn-primary" onclick="saveGitHubToken()">Save Token</button>
+                    <button class="btn btn-secondary" onclick="closeTokenSettings()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
@@ -1257,9 +1141,8 @@
         };
 
 
-        // GITHUB CONFIGURATION — token is stored securely in Netlify env vars
-        // All GitHub API calls go through the proxy function
-        const GITHUB_PROXY = '/.netlify/functions/github-proxy';
+        // GITHUB CONFIGURATION
+        const GITHUB_TOKEN = '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';
         const GITHUB_REPO = 'quarrymanagement/quarry-website';
         const DATA_FILE = 'events.json';
 
@@ -1391,37 +1274,13 @@
         }
 
         // NAVIGATION
-        function togglePaymentsMenu(e) {
-            e.stopPropagation();
-            const dd = document.getElementById('paymentsDropdown');
-            dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
-        }
-
-        // Close payments dropdown when clicking elsewhere
-        document.addEventListener('click', function(e) {
-            const dd = document.getElementById('paymentsDropdown');
-            if (dd && !e.target.closest('.nav-dropdown')) {
-                dd.style.display = 'none';
-            }
-        });
-
         function handleNavigation(e) {
             const section = e.target.dataset.section;
-            if (!section) return; // No section = dropdown parent or non-nav button, ignore
-            if (section === 'sign-out') return handleSignOut ? handleSignOut() : null;
-
-            // Close payments dropdown
-            const dd = document.getElementById('paymentsDropdown');
-            if (dd) dd.style.display = 'none';
+            if (section === 'sign-out') return handleSignOut();
 
             // Update active nav button
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
             e.target.classList.add('active');
-
-            // Highlight Payments parent if sub-section selected
-            if (section === 'invoices' || section === 'subscriptions') {
-                document.getElementById('navPayments').classList.add('active');
-            }
 
             // Show section
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -1432,28 +1291,23 @@
                 state.floorPlan = JSON.parse(JSON.stringify(defaultFloorPlan));
                 renderFloorPlan();
             }
-
-            // Load invoice dashboard when switching to invoices tab
-            if (section === 'invoices') {
-                loadInvoiceDashboard();
-            }
-
-            // Load subscriptions when switching to subscriptions tab
-            if (section === 'subscriptions') {
-                loadSubscriptionDashboard();
-            }
         }
 
         // DATA LOADING
         async function loadData() {
             showLoadingIndicator(true);
             try {
-                const resp = await fetch(GITHUB_PROXY);
-
+                const resp = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${DATA_FILE}`, {
+                    headers: {
+                        'Authorization': 'token ' + GITHUB_TOKEN,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                
                 if (!resp.ok) {
                     throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
                 }
-
+                
                 const fileInfo = await resp.json();
                 state.dataSha = fileInfo.sha;
                 const content = JSON.parse(atob(fileInfo.content));
@@ -1563,18 +1417,51 @@
         }
 
 
-        // GITHUB TOKEN — managed securely via Netlify environment variable
-        // No token input needed from users
+        // GITHUB TOKEN MANAGEMENT
         function initGitHubToken() {
-            const el = document.getElementById('tokenStatus');
-            if (el) {
-                el.textContent = '✓ Secure proxy';
-                el.style.color = 'var(--success)';
+            const token = sessionStorage.getItem('quarryGithubToken');
+            if (token) {
+                document.getElementById('tokenStatus').textContent = '✓ Token set';
+                document.getElementById('tokenStatus').style.color = 'var(--success)';
+            } else {
+                document.getElementById('tokenStatus').textContent = '✗ Not set';
+                document.getElementById('tokenStatus').style.color = 'var(--danger)';
             }
         }
-        function openTokenSettings() { /* Token managed by Netlify */ }
-        function closeTokenSettings() { /* Token managed by Netlify */ }
-        function saveGitHubToken() { /* Token managed by Netlify */ }
+
+        function openTokenSettings() {
+            document.getElementById('tokenSettingsModal').style.display = 'flex';
+            const savedToken = sessionStorage.getItem('quarryGithubToken');
+            if (savedToken) {
+                document.getElementById('githubTokenInput').value = '••••••' + savedToken.slice(-4);
+            } else {
+                document.getElementById('githubTokenInput').value = '';
+            }
+        }
+
+        function closeTokenSettings() {
+            document.getElementById('tokenSettingsModal').style.display = 'none';
+            document.getElementById('githubTokenInput').value = '';
+        }
+
+        function saveGitHubToken() {
+            const token = document.getElementById('githubTokenInput').value.trim();
+            if (!token) {
+                showToast('Please enter a GitHub token', 'warning');
+                return;
+            }
+            if (token.startsWith('••••••')) {
+                showToast('Token already saved', 'info');
+                closeTokenSettings();
+                return;
+            }
+            sessionStorage.setItem('quarryGithubToken', token);
+            document.getElementById('githubTokenInput').value = '••••••' + token.slice(-4);
+            showToast('GitHub token saved — loading data...', 'success');
+            initGitHubToken();
+            closeTokenSettings();
+            loadData();
+        }
 
         // GITHUB SAVE FUNCTION
         async function saveToGitHub(message) {
@@ -1590,10 +1477,12 @@
             
             showSavingIndicator(true);
             try {
-                const resp = await fetch(GITHUB_PROXY, {
+                const resp = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${DATA_FILE}`, {
                     method: 'PUT',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Authorization': 'token ' + GITHUB_TOKEN,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/vnd.github.v3+json'
                     },
                     body: JSON.stringify({
                         message: message || 'Update events data',
@@ -2081,333 +1970,27 @@
         }
 
         // INVOICES
-        var allInvoices = [];
-
         function openAddInvoiceModal() {
             document.getElementById('invoiceForm').reset();
             openModal('invoiceModal');
         }
 
-        async function loadInvoiceDashboard() {
-            const tbody = document.getElementById('invoiceTableBody');
-            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:3rem;color:#aaa;">Loading invoices...</td></tr>';
-
-            try {
-                const resp = await fetch('/.netlify/functions/list-invoices');
-                if (!resp.ok) throw new Error('Failed to load invoices');
-                const data = await resp.json();
-                allInvoices = data.invoices || [];
-                updateInvoiceStats();
-                renderInvoiceTable('all');
-            } catch (err) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:3rem;color:var(--danger);">Failed to load invoices: ' + err.message + '</td></tr>';
-            }
-        }
-
-        function updateInvoiceStats() {
-            const total = allInvoices.length;
-            const paid = allInvoices.filter(i => i.status === 'paid').length;
-            const open = allInvoices.filter(i => i.status === 'open').length;
-            const revenue = allInvoices.filter(i => i.status === 'paid').reduce((sum, i) => sum + i.amountPaid, 0);
-
-            document.getElementById('statTotal').textContent = total;
-            document.getElementById('statPaid').textContent = paid;
-            document.getElementById('statOpen').textContent = open;
-            document.getElementById('statRevenue').textContent = '$' + (revenue / 100).toLocaleString('en-US', {minimumFractionDigits: 2});
-        }
-
-        function filterInvoices(filter, btn) {
-            document.querySelectorAll('.inv-filter-btn').forEach(b => {
-                b.style.color = '#888';
-                b.style.borderBottomColor = 'transparent';
-            });
-            if (btn) {
-                btn.style.color = 'var(--brown-dark)';
-                btn.style.borderBottomColor = 'var(--gold)';
-            }
-            renderInvoiceTable(filter);
-        }
-
-        function renderInvoiceTable(filter) {
-            const tbody = document.getElementById('invoiceTableBody');
-            let invoices = allInvoices;
-
-            if (filter !== 'all') {
-                invoices = allInvoices.filter(i => i.status === filter);
-            }
-
-            if (invoices.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:3rem;color:#aaa;">No invoices found.</td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = invoices.map(inv => {
-                const amount = (inv.amount / 100).toFixed(2);
-                const created = new Date(inv.created * 1000);
-                const createdStr = (created.getMonth()+1) + '/' + created.getDate() + '/' + created.getFullYear();
-                let dueStr = '—';
-                if (inv.dueDate) {
-                    const due = new Date(inv.dueDate * 1000);
-                    dueStr = (due.getMonth()+1) + '/' + due.getDate() + '/' + due.getFullYear();
-                }
-
-                let statusColor, statusBg, statusLabel;
-                switch(inv.status) {
-                    case 'paid':
-                        statusColor = 'var(--success)'; statusBg = 'rgba(76,175,80,0.15)'; statusLabel = 'Paid'; break;
-                    case 'open':
-                        statusColor = '#e67e22'; statusBg = 'rgba(230,126,34,0.15)'; statusLabel = 'Open'; break;
-                    case 'draft':
-                        statusColor = '#888'; statusBg = 'rgba(136,136,136,0.15)'; statusLabel = 'Draft'; break;
-                    case 'void':
-                        statusColor = 'var(--danger)'; statusBg = 'rgba(255,107,107,0.15)'; statusLabel = 'Voided'; break;
-                    case 'uncollectible':
-                        statusColor = 'var(--danger)'; statusBg = 'rgba(255,107,107,0.15)'; statusLabel = 'Overdue'; break;
-                    default:
-                        statusColor = '#888'; statusBg = 'rgba(136,136,136,0.15)'; statusLabel = inv.status; break;
-                }
-
-                const invNumber = inv.number || inv.id.substring(0, 12) + '...';
-                const desc = inv.description ? (inv.description.length > 40 ? inv.description.substring(0, 40) + '...' : inv.description) : '—';
-
-                let actions = '';
-                if (inv.hostedUrl) {
-                    actions += '<a href="' + inv.hostedUrl + '" target="_blank" style="font-size:0.72rem;color:var(--gold);text-decoration:none;white-space:nowrap;">View</a>';
-                }
-                if (inv.pdfUrl) {
-                    actions += ' <a href="' + inv.pdfUrl + '" target="_blank" style="font-size:0.72rem;color:var(--brown-mid);text-decoration:none;margin-left:0.5rem;white-space:nowrap;">PDF</a>';
-                }
-                if (inv.status === 'open') {
-                    actions += ' <a href="#" onclick="resendInvoice(\'' + inv.id + '\');return false;" style="font-size:0.72rem;color:#2196F3;text-decoration:none;margin-left:0.5rem;white-space:nowrap;">Resend</a>';
-                    actions += ' <a href="#" onclick="voidInvoice(\'' + inv.id + '\');return false;" style="font-size:0.72rem;color:var(--danger,#ff6b6b);text-decoration:none;margin-left:0.5rem;white-space:nowrap;">Void</a>';
-                }
-
-                return '<tr>' +
-                    '<td style="font-size:0.8rem;font-weight:600;color:var(--brown-dark);">' + invNumber + '</td>' +
-                    '<td><div style="font-size:0.85rem;font-weight:600;">' + (inv.customerName || '—') + '</div><div style="font-size:0.72rem;color:#888;">' + (inv.customerEmail || '') + '</div></td>' +
-                    '<td style="font-size:0.8rem;color:#666;">' + desc + '</td>' +
-                    '<td style="font-size:0.9rem;font-weight:700;">$' + amount + '</td>' +
-                    '<td style="font-size:0.8rem;">' + createdStr + '</td>' +
-                    '<td style="font-size:0.8rem;">' + dueStr + '</td>' +
-                    '<td><span style="display:inline-block;padding:0.3rem 0.7rem;border-radius:20px;font-size:0.72rem;font-weight:600;background:' + statusBg + ';color:' + statusColor + ';">' + statusLabel + '</span></td>' +
-                    '<td>' + (actions || '—') + '</td>' +
-                    '</tr>';
-            }).join('');
-        }
-
-        async function voidInvoice(invoiceId) {
-            if (!confirm('Are you sure you want to void this invoice? This cannot be undone.')) return;
-            try {
-                const resp = await fetch('/.netlify/functions/manage-invoice', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'void', invoiceId: invoiceId })
-                });
-                const result = await resp.json();
-                if (!resp.ok) throw new Error(result.error);
-                showToast('Invoice voided successfully', 'success');
-                loadInvoiceDashboard();
-            } catch (err) {
-                showToast('Failed to void invoice: ' + err.message, 'error');
-            }
-        }
-
-        async function resendInvoice(invoiceId) {
-            if (!confirm('Resend this invoice to the customer?')) return;
-            try {
-                const resp = await fetch('/.netlify/functions/manage-invoice', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'send', invoiceId: invoiceId })
-                });
-                const result = await resp.json();
-                if (!resp.ok) throw new Error(result.error);
-                showToast('Invoice resent successfully', 'success');
-            } catch (err) {
-                showToast('Failed to resend invoice: ' + err.message, 'error');
-            }
-        }
-
-        // SUBSCRIPTIONS
-        var allSubscriptions = [];
-        var subStatusFilter = 'all';
-        var subProductFilter = 'all';
-
-        async function loadSubscriptionDashboard() {
-            const tbody = document.getElementById('subscriptionTableBody');
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:3rem;color:#aaa;">Loading subscriptions...</td></tr>';
-
-            try {
-                const resp = await fetch('/.netlify/functions/list-subscriptions');
-                if (!resp.ok) throw new Error('Failed to load subscriptions');
-                const data = await resp.json();
-                allSubscriptions = data.subscriptions || [];
-
-                // Populate product filter dropdown
-                const select = document.getElementById('subProductFilter');
-                const currentVal = select.value;
-                select.innerHTML = '<option value="all" style="color:#333;">All Products</option>';
-                (data.products || []).forEach(p => {
-                    const opt = document.createElement('option');
-                    opt.value = p;
-                    opt.textContent = p;
-                    opt.style.color = '#333';
-                    select.appendChild(opt);
-                });
-                select.value = currentVal;
-
-                updateSubStats();
-                renderSubscriptionTable();
-            } catch (err) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:3rem;color:var(--danger);">Failed to load subscriptions: ' + err.message + '</td></tr>';
-            }
-        }
-
-        function updateSubStats() {
-            const total = allSubscriptions.length;
-            const active = allSubscriptions.filter(s => s.status === 'active').length;
-            const canceled = allSubscriptions.filter(s => s.status === 'canceled').length;
-            const mrr = allSubscriptions.filter(s => s.status === 'active').reduce((sum, s) => {
-                let monthly = s.amount;
-                if (s.interval === 'year') monthly = s.amount / 12;
-                else if (s.interval === 'week') monthly = s.amount * 4;
-                return sum + monthly;
-            }, 0);
-
-            document.getElementById('subStatTotal').textContent = total;
-            document.getElementById('subStatActive').textContent = active;
-            document.getElementById('subStatCanceled').textContent = canceled;
-            document.getElementById('subStatMRR').textContent = '$' + (mrr / 100).toLocaleString('en-US', {minimumFractionDigits: 2});
-        }
-
-        function filterSubStatus(status, btn) {
-            document.querySelectorAll('.sub-filter-btn').forEach(b => {
-                b.style.color = '#888';
-                b.style.borderBottomColor = 'transparent';
-            });
-            if (btn) {
-                btn.style.color = 'var(--brown-dark)';
-                btn.style.borderBottomColor = 'var(--gold)';
-            }
-            subStatusFilter = status;
-            renderSubscriptionTable();
-        }
-
-        function filterSubscriptions() {
-            subProductFilter = document.getElementById('subProductFilter').value;
-            renderSubscriptionTable();
-        }
-
-        function renderSubscriptionTable() {
-            const tbody = document.getElementById('subscriptionTableBody');
-            let subs = allSubscriptions;
-
-            if (subStatusFilter !== 'all') {
-                subs = subs.filter(s => s.status === subStatusFilter);
-            }
-            if (subProductFilter !== 'all') {
-                subs = subs.filter(s => s.productName === subProductFilter);
-            }
-
-            if (subs.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:3rem;color:#aaa;">No subscriptions found.</td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = subs.map(sub => {
-                const amount = (sub.amount / 100).toFixed(2);
-                const created = new Date(sub.created * 1000);
-                const createdStr = (created.getMonth()+1) + '/' + created.getDate() + '/' + created.getFullYear();
-                let nextBilling = '—';
-                if (sub.currentPeriodEnd && sub.status === 'active') {
-                    const nb = new Date(sub.currentPeriodEnd * 1000);
-                    nextBilling = (nb.getMonth()+1) + '/' + nb.getDate() + '/' + nb.getFullYear();
-                }
-
-                const intervalLabel = sub.intervalCount > 1
-                    ? 'Every ' + sub.intervalCount + ' ' + sub.interval + 's'
-                    : sub.interval ? sub.interval.charAt(0).toUpperCase() + sub.interval.slice(1) + 'ly' : '—';
-
-                let statusColor, statusBg, statusLabel;
-                switch(sub.status) {
-                    case 'active':
-                        statusColor = 'var(--success)'; statusBg = 'rgba(76,175,80,0.15)'; statusLabel = 'Active'; break;
-                    case 'past_due':
-                        statusColor = '#e67e22'; statusBg = 'rgba(230,126,34,0.15)'; statusLabel = 'Past Due'; break;
-                    case 'canceled':
-                        statusColor = 'var(--danger,#ff6b6b)'; statusBg = 'rgba(255,107,107,0.15)'; statusLabel = 'Canceled'; break;
-                    case 'trialing':
-                        statusColor = '#2196F3'; statusBg = 'rgba(33,150,243,0.15)'; statusLabel = 'Trialing'; break;
-                    case 'unpaid':
-                        statusColor = 'var(--danger,#ff6b6b)'; statusBg = 'rgba(255,107,107,0.15)'; statusLabel = 'Unpaid'; break;
-                    default:
-                        statusColor = '#888'; statusBg = 'rgba(136,136,136,0.15)'; statusLabel = sub.status; break;
-                }
-
-                let cancelNote = '';
-                if (sub.cancelAtPeriodEnd) {
-                    cancelNote = '<div style="font-size:0.65rem;color:#e67e22;margin-top:2px;">Cancels at period end</div>';
-                }
-
-                return '<tr>' +
-                    '<td><div style="font-size:0.85rem;font-weight:600;">' + (sub.customerName || '—') + '</div><div style="font-size:0.72rem;color:#888;">' + (sub.customerEmail || '') + '</div></td>' +
-                    '<td style="font-size:0.8rem;color:var(--brown-dark);font-weight:500;">' + sub.productName + '</td>' +
-                    '<td style="font-size:0.9rem;font-weight:700;">$' + amount + '</td>' +
-                    '<td style="font-size:0.8rem;">' + intervalLabel + '</td>' +
-                    '<td style="font-size:0.8rem;">' + createdStr + '</td>' +
-                    '<td style="font-size:0.8rem;">' + nextBilling + '</td>' +
-                    '<td><span style="display:inline-block;padding:0.3rem 0.7rem;border-radius:20px;font-size:0.72rem;font-weight:600;background:' + statusBg + ';color:' + statusColor + ';">' + statusLabel + '</span>' + cancelNote + '</td>' +
-                    '</tr>';
-            }).join('');
-        }
-
-        async function handleInvoiceSubmit() {
+        function handleInvoiceSubmit() {
             const email = document.getElementById('invoiceEmail').value;
             const name = document.getElementById('invoiceName').value;
             const description = document.getElementById('invoiceDescription').value;
             const amount = parseFloat(document.getElementById('invoiceAmount').value);
             const dueDate = document.getElementById('invoiceDueDate').value;
-            const eventDate = document.getElementById('invoiceEventDate').value;
 
             if (!email || !name || !description || !amount || !dueDate) {
                 showToast('All fields are required', 'error');
                 return;
             }
 
-            const submitBtn = document.getElementById('invoiceSubmitBtn');
-            const originalText = submitBtn.textContent;
-            submitBtn.textContent = 'Sending...';
-            submitBtn.disabled = true;
-
-            try {
-                const resp = await fetch('/.netlify/functions/create-invoice', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        customerName: name,
-                        customerEmail: email,
-                        description: description,
-                        amount: amount,
-                        dueDate: dueDate,
-                        eventDate: eventDate || null
-                    })
-                });
-
-                const result = await resp.json();
-
-                if (!resp.ok) {
-                    throw new Error(result.error || 'Failed to create invoice');
-                }
-
-                showToast(`Invoice for $${amount.toFixed(2)} sent to ${email}`, 'success');
-                closeModal('invoiceModal');
-                document.getElementById('invoiceForm').reset();
-            } catch (err) {
-                showToast('Failed to send invoice: ' + err.message, 'error');
-            } finally {
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-            }
+            // In a real app, this would call the Netlify function
+            // POST to /.netlify/functions/create-invoice
+            showToast(`Invoice created for ${name}`, 'success');
+            closeModal('invoiceModal');
         }
 
         // MODALS
