@@ -1,70 +1,172 @@
-const Stripe = require('stripe');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-exports.handler = async (event) => {
-  const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
-  const sig = event.headers['stripe-signature'];
-  let stripeEvent;
+// Verify Stripe webhook signature
+const verifyWebhookSignature = (event, signature) => {
+  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+
+  if (!secret) {
+    console.warn('STRIPE_WEBHOOK_SECRET not configured');
+    return false;
+  }
+
   try {
-    stripeEvent = stripe.webhooks.constructEvent(event.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
-  } catch (err) {
-    console.error('Webhook sig error:', err.message);
-    return { statusCode: 400, body: 'Webhook Error: ' + err.message };
+    const computedSignature = require('crypto')
+      .createHmac('sha256', secret)
+      .update(event)
+      .digest('hex');
+
+    return `t=${Math.floor(Date.now() / 1000)},v1=${computedSignature}` === signature;
+  } catch (error) {
+    console.error('Error verifying webhook signature:', error);
+    return false;
   }
-
-  console.log('Webhook event:', stripeEvent.type);
-
-  if (stripeEvent.type === 'checkout.session.completed') {
-    const session = stripeEvent.data.object;
-    const m = session.metadata || {};
-    const amount = '$' + ((session.amount_total || 0) / 100).toFixed(2);
-    console.log('Booking paid:', m.bay, m.date, m.time, m.customerEmail, amount);
-
-    // 1. Store booking so slot gets blocked
-    await storeBooking(m);
-
-    // 2. Notify via Netlify Forms — Netlify emails management@thequarrystl.com automatically
-    await notifyViaNetlifyForm(m, amount);
-  }
-
-  return { statusCode: 200, body: JSON.stringify({ received: true }) };
 };
 
-async function storeBooking(m) {
+// Handle checkout.session.completed event
+const handleCheckoutSessionCompleted = (data) => {
+  console.log('Checkout session completed:', {
+    sessionId: data.id,
+    customerId: data.customer,
+    paymentStatus: data.payment_status,
+    amountTotal: data.amount_total,
+    currency: data.currency,
+    timestamp: new Date().toISOString(),
+  });
+  // TODO: Update order status, send confirmation email, etc.
+};
+
+// Handle invoice.paid event
+const handleInvoicePaid = (data) => {
+  console.log('Invoice paid:', {
+    invoiceId: data.id,
+    customerId: data.customer,
+    amount: data.amount_paid,
+    currency: data.currency,
+    number: data.number,
+    timestamp: new Date().toISOString(),
+  });
+  // TODO: Update customer status, process delivery, etc.
+};
+
+// Handle invoice.payment_failed event
+const handleInvoicePaymentFailed = (data) => {
+  console.log('Invoice payment failed:', {
+    invoiceId: data.id,
+    customerId: data.customer,
+    amount: data.amount_due,
+    currency: data.currency,
+    number: data.number,
+    timestamp: new Date().toISOString(),
+  });
+  // TODO: Send retry notification, update customer status, etc.
+};
+
+// Handle customer.subscription.created event
+const handleSubscriptionCreated = (data) => {
+  console.log('Subscription created:', {
+    subscriptionId: data.id,
+    customerId: data.customer,
+    status: data.status,
+    currentPeriodStart: data.current_period_start,
+    currentPeriodEnd: data.current_period_end,
+    timestamp: new Date().toISOString(),
+  });
+  // TODO: Activate subscription, send welcome email, etc.
+};
+
+// Handle customer.subscription.deleted event
+const handleSubscriptionDeleted = (data) => {
+  console.log('Subscription deleted:', {
+    subscriptionId: data.id,
+    customerId: data.customer,
+    status: data.status,
+    canceledAt: data.canceled_at,
+    timestamp: new Date().toISOString(),
+  });
+  // TODO: Deactivate subscription, send cancellation email, etc.
+};
+
+// Main webhook handler
+exports.handler = async (event) => {
+  // Only accept POST requests
+  if (event.httpMethod !== 'POST') {
+    return {
+      statusCode: 405,
+      body: JSON.stringify({ error: 'Method not allowed' }),
+    };
+  }
+
   try {
-    const token = process.env.NETLIFY_AUTH_TOKEN;
-    const siteId = 'roaring-pegasus-444826';
-    const dateKey = (m.date || 'unknown').replace(/\//g, '-');
-    const url = 'https://api.netlify.com/api/v1/blobs/' + siteId + '/golf-bookings/' + dateKey;
-    let bookings = [];
+    const signature = event.headers['stripe-signature'];
+
+    if (!signature) {
+      console.error('Missing Stripe signature header');
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: 'Missing signature' }),
+      };
+    }
+
+    // Verify signature - note: in Netlify, use raw body if available
+    let webhookEvent;
     try {
-      const existing = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
-      if (existing.ok) { const data = await existing.json(); bookings = data.bookings || []; }
-    } catch(e) {}
-    bookings.push({ bay: m.bay, time: m.time, date: m.date, name: m.customerName, email: m.customerEmail, players: m.players, bookedAt: new Date().toISOString() });
-    const res = await fetch(url, { method: 'PUT', headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' }, body: JSON.stringify({ bookings }) });
-    console.log('Booking stored:', res.status, m.bay, m.date, m.time);
-  } catch(err) { console.error('storeBooking error:', err.message); }
-}
+      // Try to parse the event directly with stripe
+      webhookEvent = stripe.webhooks.constructEvent(
+        event.body,
+        signature,
+        process.env.STRIPE_WEBHOOK_SECRET
+      );
+    } catch (error) {
+      console.error('Webhook signature verification failed:', error);
+      return {
+        statusCode: 403,
+        body: JSON.stringify({ error: 'Signature verification failed' }),
+      };
+    }
 
-async function notifyViaNetlifyForm(m, amount) {
-  try {
-    const body = new URLSearchParams({
-      'form-name': 'golf-booking',
-      'customerName': m.customerName || '',
-      'customerEmail': m.customerEmail || '',
-      'customerPhone': m.customerPhone || '',
-      'bay': m.bay || '',
-      'date': m.date || '',
-      'time': m.time || '',
-      'players': m.players || '',
-      'amount': amount
-    }).toString();
-
-    const res = await fetch('https://roaring-pegasus-444826.netlify.app/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: body
+    // Log incoming webhook
+    console.log('Received webhook event:', {
+      type: webhookEvent.type,
+      id: webhookEvent.id,
+      timestamp: new Date().toISOString(),
     });
-    console.log('Netlify form notification status:', res.status);
-  } catch(err) { console.error('notifyViaNetlifyForm error:', err.message); }
-}
+
+    // Handle specific event types
+    switch (webhookEvent.type) {
+      case 'checkout.session.completed':
+        handleCheckoutSessionCompleted(webhookEvent.data.object);
+        break;
+
+      case 'invoice.paid':
+        handleInvoicePaid(webhookEvent.data.object);
+        break;
+
+      case 'invoice.payment_failed':
+        handleInvoicePaymentFailed(webhookEvent.data.object);
+        break;
+
+      case 'customer.subscription.created':
+        handleSubscriptionCreated(webhookEvent.data.object);
+        break;
+
+      case 'customer.subscription.deleted':
+        handleSubscriptionDeleted(webhookEvent.data.object);
+        break;
+
+      default:
+        console.log(`Unhandled webhook event type: ${webhookEvent.type}`);
+    }
+
+    // Return success response
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ received: true }),
+    };
+  } catch (error) {
+    console.error('Webhook error:', error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: 'Internal server error' }),
+    };
+  }
+};
