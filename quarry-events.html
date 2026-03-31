@@ -578,9 +578,10 @@
 
         .event-footer {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-end;
             align-items: center;
             margin-top: auto;
+            gap: 8px;
         }
 
         .availability-text {
@@ -612,6 +613,27 @@
             transition: var(--transition);
             text-transform: uppercase;
             letter-spacing: 0.5px;
+        }
+
+        .more-info-button {
+            padding: 10px 20px;
+            background: transparent;
+            color: var(--gold);
+            border: 1px solid var(--gold);
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .more-info-button:hover {
+            background: var(--gold);
+            color: var(--dark);
         }
 
         .event-button:hover:not(:disabled) {
@@ -1980,8 +2002,10 @@
                             <span class="availability-text ${availabilityInfo.class}">${availabilityInfo.text}</span>
                             ${event.status === "sold-out" ? `
                                 <button class="event-button" disabled>Sold Out</button>
+                                <a href="quarry-event-detail?id=${event.slug || event.id}" class="more-info-button">More Info</a>
                             ` : `
-                                <button class="event-button" onclick="openModal(${allEvents.indexOf(event)})">Get Tickets</button>
+                                <button class="event-button" onclick="openModal(${allEvents.indexOf(event)})">Register</button>
+                                <a href="quarry-event-detail?id=${event.slug || event.id}" class="more-info-button">More Info</a>
                             `}
                         </div>
                     </div>
