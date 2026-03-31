@@ -16,9 +16,9 @@ const handleOptions = () => response(200, { message: 'OK' });
 
 // Initialize AWS SES
 const ses = new AWS.SES({
-  region: process.env.AWS_SES_REGION || 'us-east-1',
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.SES_REGION || 'us-east-1',
+  accessKeyId: process.env.SES_ACCESS_KEY_ID,
+  secretAccessKey: process.env.SES_SECRET_ACCESS_KEY,
 });
 
 // Replace merge tags in template
