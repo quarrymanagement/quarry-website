@@ -1484,14 +1484,31 @@
             updateDashboard();
         }
         function loadEvents() {
-            // In a real app, this would call the Netlify function
-            // For now, use sample data
-            state.events = [
-                {id: '1', name: 'Spring Wedding', date: '2026-04-15', time: '18:00', category: 'Ticketed', price: 7500, capacity: 80, registered: 42, status: 'Active'},
-                {id: '2', name: 'Jazz Night', date: '2026-04-20', time: '19:00', category: 'Ticketed', price: 2000, capacity: 100, registered: 67, status: 'Active'},
-                {id: '3', name: 'Corporate Event', date: '2026-05-10', time: '17:00', category: 'Free', price: 0, capacity: 150, registered: 89, status: 'Active'}
-            ];
-            renderEventsTable();
+            // Fetch real event data from events.json
+            fetch('/events.json?t=' + Date.now())
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    state.events = data.events.map(function(evt) {
+                        return {
+                            id: evt.id,
+                            name: evt.name,
+                            date: evt.date,
+                            time: evt.time,
+                            category: evt.category || 'Ticketed',
+                            price: evt.price,
+                            capacity: evt.capacity,
+                            registered: evt.registered,
+                            status: evt.status || 'Active'
+                        };
+                    });
+                    if (data.registrations) { state.registrations = data.registrations; }
+                    renderEventsTable();
+                })
+                .catch(function(err) {
+                    console.error('Failed to load events:', err);
+                    state.events = [];
+                    renderEventsTable();
+                });
         }
 
         function loadBands() {
