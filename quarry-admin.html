@@ -588,6 +588,81 @@
            ================================================================ */
         .band-modal-form { display: flex; flex-direction: column; gap: 1rem; }
         .band-modal-form .form-group { margin-bottom: 0; }
+
+        /* ================================================================
+           SORTABLE CRM HEADERS
+           ================================================================ */
+        .sortable-th {
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            white-space: nowrap;
+        }
+        .sortable-th:hover { color: #d4af37; }
+        .sort-arrow { font-size: 0.7rem; margin-left: 4px; opacity: 0.4; }
+        .sort-arrow.asc::after { content: '\25B2'; opacity: 1; }
+        .sort-arrow.desc::after { content: '\25BC'; opacity: 1; }
+
+        /* ================================================================
+           PAYMENT STATUS BADGES
+           ================================================================ */
+        .status-badge {
+            display: inline-block; padding: 0.2rem 0.6rem; border-radius: 12px;
+            font-size: 0.75rem; font-weight: 600; text-transform: capitalize;
+        }
+        .status-badge.paid { background: rgba(74, 222, 128, 0.15); color: #4ade80; }
+        .status-badge.open { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
+        .status-badge.draft { background: rgba(160, 160, 160, 0.15); color: #999; }
+        .status-badge.void { background: rgba(248, 113, 113, 0.15); color: #f87171; }
+        .status-badge.uncollectible { background: rgba(248, 113, 113, 0.15); color: #f87171; }
+        .status-badge.active { background: rgba(74, 222, 128, 0.15); color: #4ade80; }
+        .status-badge.canceled, .status-badge.cancelled { background: rgba(248, 113, 113, 0.15); color: #f87171; }
+        .status-badge.past_due { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
+        .status-badge.trialing { background: rgba(96, 165, 250, 0.15); color: #60a5fa; }
+
+        /* ================================================================
+           CRM NOTES & TAGS
+           ================================================================ */
+        .crm-tag {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: rgba(212, 175, 55, 0.15); color: #d4af37;
+            padding: 0.2rem 0.6rem; border-radius: 12px;
+            font-size: 0.75rem; font-weight: 500;
+        }
+        .crm-tag .remove-tag {
+            cursor: pointer; font-size: 0.9rem; line-height: 1; opacity: 0.6;
+        }
+        .crm-tag .remove-tag:hover { opacity: 1; }
+        .note-item {
+            background: #0a0a0a; border: 1px solid #333; border-radius: 6px;
+            padding: 0.75rem; font-size: 0.85rem;
+        }
+        .note-item .note-meta {
+            color: #999; font-size: 0.75rem; margin-bottom: 0.3rem;
+        }
+        .note-item .note-text { color: #e0e0e0; }
+        .btn-small {
+            background: #d4af37; color: #0a0a0a; border: none; border-radius: 4px;
+            font-size: 0.8rem; font-weight: 600; cursor: pointer;
+        }
+        .btn-small:hover { background: #c4a030; }
+
+        /* ================================================================
+           PAYMENT LINK CARDS
+           ================================================================ */
+        .payment-link-card {
+            background: #1a1a1a; border: 1px solid #333; border-radius: 8px;
+            padding: 1rem; margin-bottom: 0.75rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .payment-link-card .pl-info h4 { color: #e0e0e0; margin-bottom: 0.25rem; }
+        .payment-link-card .pl-info p { color: #999; font-size: 0.85rem; }
+        .payment-link-url {
+            background: #0a0a0a; border: 1px solid #333; color: #60a5fa;
+            padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.8rem;
+            cursor: pointer; text-decoration: none;
+        }
+        .payment-link-url:hover { color: #93bbfc; }
     </style>
 </head>
 <body>
@@ -618,6 +693,7 @@
                 <div class="nav-tab" data-tab="events">Events</div>
                 <div class="nav-tab" data-tab="bands">Bands</div>
                 <div class="nav-tab" data-tab="floorplan">Floor Plan</div>
+                <div class="nav-tab" data-tab="payments">Payments</div>
                 <div class="nav-tab" data-tab="crm">CRM</div>
                 <div class="nav-tab" data-tab="email">Email</div>
             </div>
@@ -764,6 +840,84 @@
             </div>
 
             <!-- ========================================================
+                 PAYMENTS TAB
+                 ======================================================== -->
+            <div id="paymentsTab" class="tab-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h2 style="font-family: 'Playfair Display', serif; font-size: 2rem; color: #e0e0e0;">Payments & Invoicing</h2>
+                </div>
+
+                <div class="dashboard-grid" style="margin-bottom: 2rem;">
+                    <div class="summary-card">
+                        <div class="summary-label">Stripe Balance</div>
+                        <div class="summary-value" id="stripeBalance">--</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">Open Invoices</div>
+                        <div class="summary-value" id="openInvoicesCount">--</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">Active Subscriptions</div>
+                        <div class="summary-value" id="activeSubsCount">--</div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 2rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 style="color: #e0e0e0;">Invoices</h3>
+                        <button class="btn-primary" id="createInvoiceBtn">+ Create Invoice</button>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="bands-table" id="invoicesTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Customer</th>
+                                    <th>Email</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="invoicesTableBody">
+                                <tr><td colspan="6" style="text-align: center; color: #999;">Loading invoices...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 2rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 style="color: #e0e0e0;">Subscriptions</h3>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="bands-table" id="subscriptionsTable">
+                            <thead>
+                                <tr>
+                                    <th>Customer</th>
+                                    <th>Email</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                </tr>
+                            </thead>
+                            <tbody id="subscriptionsTableBody">
+                                <tr><td colspan="5" style="text-align: center; color: #999;">Loading subscriptions...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 style="color: #e0e0e0;">Payment Links</h3>
+                        <button class="btn-primary" id="createPaymentLinkBtn">+ Create Payment Link</button>
+                    </div>
+                    <div id="paymentLinksContainer" style="color: #999;">No payment links created yet.</div>
+                </div>
+            </div>
+
+            <!-- ========================================================
                  CRM TAB
                  ======================================================== -->
             <div id="crmTab" class="tab-content">
@@ -819,13 +973,13 @@
                         <thead>
                             <tr>
                                 <th><input type="checkbox" id="selectAllCheckbox" class="crm-checkbox"></th>
-                                <th>Name</th>
-                                <th>Email</th>
+                                <th class="sortable-th" data-sort="name" onclick="sortCRM('name')">Name <span class="sort-arrow"></span></th>
+                                <th class="sortable-th" data-sort="email" onclick="sortCRM('email')">Email <span class="sort-arrow"></span></th>
                                 <th>Phone</th>
-                                <th>Source</th>
-                                <th>Email Status</th>
-                                <th>Last Activity</th>
-                                <th>Created</th>
+                                <th class="sortable-th" data-sort="source" onclick="sortCRM('source')">Source <span class="sort-arrow"></span></th>
+                                <th class="sortable-th" data-sort="emailStatus" onclick="sortCRM('emailStatus')">Email Status <span class="sort-arrow"></span></th>
+                                <th class="sortable-th" data-sort="lastActivity" onclick="sortCRM('lastActivity')">Last Activity <span class="sort-arrow"></span></th>
+                                <th class="sortable-th" data-sort="created" onclick="sortCRM('created')">Created <span class="sort-arrow"></span></th>
                             </tr>
                         </thead>
                         <tbody id="crmTableBody">
@@ -1073,18 +1227,39 @@
             <h3 id="subscriberName">Subscriber</h3>
             <button class="btn-close" id="closeSubscriberBtn">&times;</button>
         </div>
-        <div class="subscriber-info">
-            <div class="info-item"><div class="info-label">Email</div><div class="info-value" id="subscriberEmail"></div></div>
-            <div class="info-item"><div class="info-label">Phone</div><div class="info-value" id="subscriberPhone"></div></div>
-            <div class="info-item"><div class="info-label">Source</div><div class="info-value" id="subscriberSource"></div></div>
-            <div class="info-item"><div class="info-label">Email Status</div><div class="info-value" id="subscriberStatus"></div></div>
-            <div class="info-item"><div class="info-label">Created</div><div class="info-value" id="subscriberCreated"></div></div>
-            <div class="info-item"><div class="info-label">Last Activity</div><div class="info-value" id="subscriberLastActivity"></div></div>
-        </div>
-        <div class="event-history">
-            <h4>Event History</h4>
-            <div id="subscriberEventHistory" style="display: flex; flex-direction: column; gap: 0.75rem;">
-                <div style="color: #999; font-size: 0.9rem; text-align: center;">No event history</div>
+        <div style="overflow-y: auto; flex: 1;">
+            <div class="subscriber-info">
+                <div class="info-item"><div class="info-label">Email</div><div class="info-value" id="subscriberEmail"></div></div>
+                <div class="info-item"><div class="info-label">Phone</div><div class="info-value" id="subscriberPhone"></div></div>
+                <div class="info-item"><div class="info-label">Source</div><div class="info-value" id="subscriberSource"></div></div>
+                <div class="info-item"><div class="info-label">Email Status</div><div class="info-value" id="subscriberStatus"></div></div>
+                <div class="info-item"><div class="info-label">Created</div><div class="info-value" id="subscriberCreated"></div></div>
+                <div class="info-item"><div class="info-label">Last Activity</div><div class="info-value" id="subscriberLastActivity"></div></div>
+            </div>
+
+            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #333;">
+                <h4 style="color: #d4af37; margin-bottom: 0.75rem;">Tags</h4>
+                <div id="subscriberTags" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem;"></div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <input type="text" id="newTagInput" placeholder="Add tag..." style="flex: 1; background: #0a0a0a; border: 1px solid #333; color: #e0e0e0; padding: 0.4rem; border-radius: 4px; font-size: 0.85rem;">
+                    <button class="btn-small" id="addTagToContact" style="flex: 0; padding: 0.4rem 0.8rem;">Add</button>
+                </div>
+            </div>
+
+            <div class="event-history" style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #333;">
+                <h4 style="color: #d4af37; margin-bottom: 0.75rem;">Registrations & Activity</h4>
+                <div id="subscriberEventHistory" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <div style="color: #999; font-size: 0.9rem; text-align: center;">No event history</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #333;">
+                <h4 style="color: #d4af37; margin-bottom: 0.75rem;">Notes</h4>
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                    <textarea id="newNoteText" placeholder="Add a note about this contact..." style="flex: 1; background: #0a0a0a; border: 1px solid #333; color: #e0e0e0; padding: 0.5rem; border-radius: 4px; font-size: 0.85rem; min-height: 60px; resize: vertical; font-family: 'Montserrat', sans-serif;"></textarea>
+                </div>
+                <button class="btn-small" id="addNoteBtn" style="margin-bottom: 1rem; padding: 0.5rem 1rem;">Save Note</button>
+                <div id="contactNotesList" style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
             </div>
         </div>
     </div>
@@ -1151,6 +1326,58 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="invoiceModal">
+        <div class="modal">
+            <h2 class="modal-header">Create Invoice</h2>
+            <form id="invoiceForm">
+                <div class="form-group">
+                    <label class="form-label">Customer Name</label>
+                    <input type="text" class="form-input" id="invoiceCustomerName" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Customer Email</label>
+                    <input type="email" class="form-input" id="invoiceCustomerEmail" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <input type="text" class="form-input" id="invoiceDescription" placeholder="What is this invoice for?" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Amount ($)</label>
+                    <input type="number" class="form-input" id="invoiceAmount" step="0.01" min="0.01" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="modal-btn modal-btn-secondary" onclick="document.getElementById('invoiceModal').classList.remove('active')">Cancel</button>
+                    <button type="submit" class="modal-btn modal-btn-primary">Create & Send Invoice</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="paymentLinkModal">
+        <div class="modal">
+            <h2 class="modal-header">Create Payment Link</h2>
+            <form id="paymentLinkForm">
+                <div class="form-group">
+                    <label class="form-label">Event / Product Name</label>
+                    <input type="text" class="form-input" id="plEventName" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <input type="text" class="form-input" id="plDescription">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Amount ($)</label>
+                    <input type="number" class="form-input" id="plAmount" step="0.01" min="0.01" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="modal-btn modal-btn-secondary" onclick="document.getElementById('paymentLinkModal').classList.remove('active')">Cancel</button>
+                    <button type="submit" class="modal-btn modal-btn-primary">Create Link</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         // ================================================================
         // GLOBAL STATE
@@ -1176,6 +1403,15 @@
             fpTool: 'select',
             fpDragging: false,
             fpDragOffset: { x: 0, y: 0 },
+            // CRM sort state
+            crmSortField: 'created',
+            crmSortDir: 'desc',
+            crmNotes: {},
+            crmTags: {},
+            // Payments state
+            invoices: [],
+            stripeSubscriptions: [],
+            paymentLinks: [],
         };
 
         // ================================================================
@@ -1244,6 +1480,10 @@
             if (tabName === 'floorplan') {
                 setTimeout(resizeFloorPlanCanvas, 100);
             }
+            // Load payments when switching to payments tab
+            if (tabName === 'payments') {
+                loadPaymentsData();
+            }
         }
 
         // ================================================================
@@ -1273,15 +1513,55 @@
                     app.subscribers = await subscribersRes.json();
                 }
 
+                // Auto-merge registrations into CRM
+                mergeRegistrationsIntoCRM();
+
+                // Load CRM notes from Netlify function
+                loadCRMNotes();
+
                 updateDashboard();
                 updateEvents();
                 updateBands();
                 updateCRM();
                 updateEmailRecipients();
                 drawFloorPlan();
+
+                // Load payments data if on payments tab
+                loadPaymentsData();
             } catch (err) {
                 console.error('Error loading data:', err);
             }
+        }
+
+        // ================================================================
+        // AUTO-MERGE REGISTRATIONS INTO CRM
+        // ================================================================
+        function mergeRegistrationsIntoCRM() {
+            const existingEmails = new Set(app.subscribers.map(s => (s.email || '').toLowerCase()));
+            const regs = app.registrations || {};
+            let added = 0;
+
+            for (const eventId in regs) {
+                const eventRegs = regs[eventId] || [];
+                for (const reg of eventRegs) {
+                    if (reg.email && !existingEmails.has(reg.email.toLowerCase())) {
+                        existingEmails.add(reg.email.toLowerCase());
+                        const nameParts = (reg.name || '').split(' ');
+                        app.subscribers.push({
+                            firstName: nameParts[0] || '',
+                            lastName: nameParts.slice(1).join(' ') || '',
+                            email: reg.email,
+                            phone: reg.phone || '',
+                            source: 'Event Registration',
+                            emailStatus: 'Never Subscribed',
+                            created: reg.created || new Date().toISOString(),
+                            lastActivityDate: reg.created || new Date().toISOString(),
+                        });
+                        added++;
+                    }
+                }
+            }
+            if (added > 0) console.log(`Auto-merged ${added} new contacts from registrations`);
         }
 
         // ================================================================
@@ -2013,8 +2293,164 @@
                 return matchesSearch && matchesSource && matchesStatus;
             });
 
+            // Apply sort
+            sortCRMData();
+
             renderCRMTable();
             renderCRMPagination();
+        }
+
+        // ================================================================
+        // CRM SORTING
+        // ================================================================
+        function sortCRM(field) {
+            if (app.crmSortField === field) {
+                app.crmSortDir = app.crmSortDir === 'asc' ? 'desc' : 'asc';
+            } else {
+                app.crmSortField = field;
+                app.crmSortDir = (field === 'created' || field === 'lastActivity') ? 'desc' : 'asc';
+            }
+
+            // Update sort arrows
+            document.querySelectorAll('.sort-arrow').forEach(el => {
+                el.className = 'sort-arrow';
+            });
+            const activeHeader = document.querySelector(`[data-sort="${field}"] .sort-arrow`);
+            if (activeHeader) activeHeader.className = 'sort-arrow ' + app.crmSortDir;
+
+            app.crmCurrentPage = 1;
+            filterAndPaginateCRM();
+        }
+
+        function sortCRMData() {
+            const field = app.crmSortField;
+            const dir = app.crmSortDir;
+
+            app.crmFilteredData.sort((a, b) => {
+                let valA, valB;
+                switch (field) {
+                    case 'name':
+                        valA = ((a.firstName || '') + ' ' + (a.lastName || '')).trim().toLowerCase();
+                        valB = ((b.firstName || '') + ' ' + (b.lastName || '')).trim().toLowerCase();
+                        break;
+                    case 'email':
+                        valA = (a.email || '').toLowerCase();
+                        valB = (b.email || '').toLowerCase();
+                        break;
+                    case 'source':
+                        valA = (a.source || '').toLowerCase();
+                        valB = (b.source || '').toLowerCase();
+                        break;
+                    case 'emailStatus':
+                        valA = (a.emailStatus || '').toLowerCase();
+                        valB = (b.emailStatus || '').toLowerCase();
+                        break;
+                    case 'lastActivity':
+                        valA = a.lastActivityDate ? new Date(a.lastActivityDate).getTime() : 0;
+                        valB = b.lastActivityDate ? new Date(b.lastActivityDate).getTime() : 0;
+                        break;
+                    case 'created':
+                    default:
+                        valA = a.created ? new Date(a.created).getTime() : 0;
+                        valB = b.created ? new Date(b.created).getTime() : 0;
+                        break;
+                }
+                if (valA < valB) return dir === 'asc' ? -1 : 1;
+                if (valA > valB) return dir === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+
+        // ================================================================
+        // CRM NOTES (persisted via Netlify function)
+        // ================================================================
+        async function loadCRMNotes() {
+            try {
+                const res = await fetch('/.netlify/functions/save-crm-notes');
+                if (res.ok) {
+                    const data = await res.json();
+                    app.crmNotes = data.notes || {};
+                    app.crmTags = data.tags || {};
+                }
+            } catch (err) {
+                console.log('CRM notes not available (add Netlify function):', err.message);
+            }
+        }
+
+        async function saveCRMNote(email, noteText) {
+            try {
+                const res = await fetch('/.netlify/functions/save-crm-notes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'addNote', email, note: noteText }),
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    app.crmNotes = data.notes || app.crmNotes;
+                    return true;
+                }
+            } catch (err) {
+                console.error('Error saving note:', err);
+            }
+            // Fallback: save locally
+            if (!app.crmNotes[email]) app.crmNotes[email] = [];
+            app.crmNotes[email].unshift({
+                text: noteText,
+                timestamp: new Date().toISOString(),
+            });
+            return true;
+        }
+
+        async function saveCRMTags(email, tags) {
+            try {
+                const res = await fetch('/.netlify/functions/save-crm-notes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'setTags', email, tags }),
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    app.crmTags = data.tags || app.crmTags;
+                }
+            } catch (err) {
+                console.error('Error saving tags:', err);
+            }
+        }
+
+        function renderContactNotes(email) {
+            const notes = app.crmNotes[email] || [];
+            const container = document.getElementById('contactNotesList');
+            if (notes.length === 0) {
+                container.innerHTML = '<div style="color: #999; font-size: 0.85rem; text-align: center;">No notes yet</div>';
+                return;
+            }
+            container.innerHTML = notes.map(n => `
+                <div class="note-item">
+                    <div class="note-meta">${formatDate(n.timestamp)}</div>
+                    <div class="note-text">${escapeHtml(n.text)}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderContactTags(email) {
+            const tags = app.crmTags[email] || [];
+            const container = document.getElementById('subscriberTags');
+            container.innerHTML = tags.map(tag => `
+                <span class="crm-tag">${escapeHtml(tag)} <span class="remove-tag" onclick="removeTag('${email}', '${escapeHtml(tag)}')">&times;</span></span>
+            `).join('');
+        }
+
+        async function removeTag(email, tag) {
+            const tags = (app.crmTags[email] || []).filter(t => t !== tag);
+            app.crmTags[email] = tags;
+            renderContactTags(email);
+            await saveCRMTags(email, tags);
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
         }
 
         function renderCRMTable() {
@@ -2148,11 +2584,42 @@
                 `).join('');
             }
 
+            // Render tags and notes
+            renderContactTags(subscriber.email);
+            renderContactNotes(subscriber.email);
+
+            // Store current subscriber email for note/tag buttons
+            app.currentSubscriberEmail = subscriber.email;
+
             document.getElementById('subscriberDetailPanel').classList.add('open');
         }
 
         document.getElementById('closeSubscriberBtn').addEventListener('click', () => {
             document.getElementById('subscriberDetailPanel').classList.remove('open');
+        });
+
+        // Add note button
+        document.getElementById('addNoteBtn').addEventListener('click', async () => {
+            const noteText = document.getElementById('newNoteText').value.trim();
+            if (!noteText || !app.currentSubscriberEmail) return;
+            await saveCRMNote(app.currentSubscriberEmail, noteText);
+            document.getElementById('newNoteText').value = '';
+            renderContactNotes(app.currentSubscriberEmail);
+            showSuccess('Note saved!');
+        });
+
+        // Add tag to contact button
+        document.getElementById('addTagToContact').addEventListener('click', async () => {
+            const tagInput = document.getElementById('newTagInput');
+            const tag = tagInput.value.trim();
+            if (!tag || !app.currentSubscriberEmail) return;
+            if (!app.crmTags[app.currentSubscriberEmail]) app.crmTags[app.currentSubscriberEmail] = [];
+            if (!app.crmTags[app.currentSubscriberEmail].includes(tag)) {
+                app.crmTags[app.currentSubscriberEmail].push(tag);
+                renderContactTags(app.currentSubscriberEmail);
+                await saveCRMTags(app.currentSubscriberEmail, app.crmTags[app.currentSubscriberEmail]);
+            }
+            tagInput.value = '';
         });
 
         // ================================================================
@@ -2217,38 +2684,300 @@
             });
         });
 
+        // ================================================================
+        // SES EMAIL SENDING (via Netlify function)
+        // ================================================================
+        function getEmailRecipients() {
+            const type = document.getElementById('recipientType').value;
+            let recipients = [];
+            if (type === 'all') {
+                recipients = app.subscribers.filter(s => s.email);
+            } else if (type === 'subscribed') {
+                recipients = app.subscribers.filter(s => s.email && s.emailStatus === 'Subscribed');
+            } else if (type === 'event') {
+                const eventId = document.getElementById('eventSelect').value;
+                if (eventId) {
+                    const eventRegs = getEventRegistrations(eventId);
+                    recipients = eventRegs.filter(r => r.email).map(r => ({
+                        email: r.email,
+                        firstName: (r.name || '').split(' ')[0] || '',
+                        lastName: (r.name || '').split(' ').slice(1).join(' ') || '',
+                    }));
+                }
+            }
+            return recipients;
+        }
+
+        async function sendEmailViaSES(recipients, subject, htmlBody) {
+            try {
+                const recipientList = recipients.map(r => ({
+                    email: r.email,
+                    firstName: r.firstName || '',
+                    lastName: r.lastName || '',
+                }));
+
+                const res = await fetch('/.netlify/functions/send-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        subject,
+                        htmlBody,
+                        recipients: recipientList,
+                        fromEmail: 'management@thequarrystl.com',
+                        fromName: 'The Quarry STL',
+                    }),
+                });
+
+                if (res.ok) {
+                    const result = await res.json();
+                    return result;
+                } else {
+                    const err = await res.json();
+                    throw new Error(err.error || 'Email send failed');
+                }
+            } catch (err) {
+                throw err;
+            }
+        }
+
         document.getElementById('testEmailBtn').addEventListener('click', () => {
             const subject = document.getElementById('emailSubject').value;
             if (!subject) { alert('Please enter an email subject'); return; }
-            showConfirmModal('Send Test Email?', 'A test email will be sent to your admin email address.', () => {
-                showSuccess('Test email sent successfully!');
+            const body = document.getElementById('emailBody').innerHTML;
+            if (!body || body === '<br>') { alert('Please enter email content'); return; }
+
+            showConfirmModal('Send Test Email?', 'A test email will be sent to management@thequarrystl.com.', async () => {
+                try {
+                    await sendEmailViaSES(
+                        [{ email: 'management@thequarrystl.com', firstName: 'Matthew', lastName: '' }],
+                        '[TEST] ' + subject,
+                        body
+                    );
+                    showSuccess('Test email sent successfully!');
+                } catch (err) {
+                    alert('Error sending test email: ' + err.message + '\n\nMake sure AWS SES environment variables are configured in Netlify.');
+                }
             });
         });
 
         document.getElementById('sendCampaignBtn').addEventListener('click', () => {
             const subject = document.getElementById('emailSubject').value;
             if (!subject) { alert('Please enter an email subject'); return; }
-            const recipientCount = parseInt(document.getElementById('recipientCount').textContent);
-            if (recipientCount === 0) { alert('No recipients selected'); return; }
+            const body = document.getElementById('emailBody').innerHTML;
+            if (!body || body === '<br>') { alert('Please enter email content'); return; }
+            const recipients = getEmailRecipients();
+            if (recipients.length === 0) { alert('No recipients selected'); return; }
 
-            showConfirmModal('Send Campaign?', `This email will be sent to ${recipientCount} recipients. This action cannot be undone.`, () => {
-                app.emailHistory.push({
-                    date: new Date().toISOString().split('T')[0],
-                    subject, recipients: recipientCount, status: 'Sent',
+            showConfirmModal('Send Campaign?', `This email will be sent to ${recipients.length} recipients via Amazon SES. This action cannot be undone.`, async () => {
+                try {
+                    const result = await sendEmailViaSES(recipients, subject, body);
+                    const sentCount = result.sent || recipients.length;
+
+                    app.emailHistory.push({
+                        date: new Date().toISOString().split('T')[0],
+                        subject, recipients: sentCount, status: 'Sent',
+                    });
+
+                    const tbody = document.getElementById('emailHistoryTable');
+                    tbody.innerHTML = app.emailHistory.map(c => `
+                        <tr>
+                            <td>${c.date}</td>
+                            <td>${c.subject}</td>
+                            <td>${c.recipients}</td>
+                            <td><span style="color: #4ade80;">&#10003; ${c.status}</span></td>
+                        </tr>
+                    `).join('');
+
+                    showSuccess('Campaign sent to ' + sentCount + ' recipients!');
+                } catch (err) {
+                    alert('Error sending campaign: ' + err.message + '\n\nMake sure AWS SES environment variables are configured in Netlify.');
+                }
+            });
+        });
+
+        // ================================================================
+        // PAYMENTS TAB (Stripe via Netlify Functions)
+        // ================================================================
+        async function loadPaymentsData() {
+            try {
+                const [balanceRes, invoicesRes, subsRes] = await Promise.all([
+                    fetch('/.netlify/functions/stripe-data?action=balance').catch(() => null),
+                    fetch('/.netlify/functions/stripe-data?action=invoices').catch(() => null),
+                    fetch('/.netlify/functions/stripe-data?action=subscriptions').catch(() => null),
+                ]);
+
+                if (balanceRes && balanceRes.ok) {
+                    const balance = await balanceRes.json();
+                    const available = (balance.available || []).reduce((sum, b) => sum + b.amount, 0);
+                    document.getElementById('stripeBalance').textContent = '$' + (available / 100).toFixed(2);
+                }
+
+                if (invoicesRes && invoicesRes.ok) {
+                    const data = await invoicesRes.json();
+                    app.invoices = data.data || [];
+                    renderInvoices();
+                }
+
+                if (subsRes && subsRes.ok) {
+                    const data = await subsRes.json();
+                    app.stripeSubscriptions = data.data || [];
+                    renderSubscriptions();
+                }
+            } catch (err) {
+                console.log('Payments data not available (add Netlify functions + STRIPE_SECRET_KEY):', err.message);
+                document.getElementById('invoicesTableBody').innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999;">Connect Stripe to view invoices</td></tr>';
+                document.getElementById('subscriptionsTableBody').innerHTML = '<tr><td colspan="5" style="text-align:center;color:#999;">Connect Stripe to view subscriptions</td></tr>';
+            }
+        }
+
+        function renderInvoices() {
+            const tbody = document.getElementById('invoicesTableBody');
+            const open = app.invoices.filter(i => i.status === 'open').length;
+            document.getElementById('openInvoicesCount').textContent = open;
+
+            if (app.invoices.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999;">No invoices found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = app.invoices.map(inv => {
+                const date = inv.created ? new Date(inv.created * 1000).toLocaleDateString() : '—';
+                const custName = inv.customer_name || inv.customer_email || '—';
+                const email = inv.customer_email || '—';
+                const amount = inv.amount_due != null ? '$' + (inv.amount_due / 100).toFixed(2) : '—';
+                const status = inv.status || 'unknown';
+                const invoiceUrl = inv.hosted_invoice_url || '#';
+
+                return `<tr>
+                    <td>${date}</td>
+                    <td>${custName}</td>
+                    <td>${email}</td>
+                    <td>${amount}</td>
+                    <td><span class="status-badge ${status}">${status}</span></td>
+                    <td>${invoiceUrl !== '#' ? `<a href="${invoiceUrl}" target="_blank" style="color:#60a5fa;text-decoration:none;">View</a>` : '—'}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        function renderSubscriptions() {
+            const tbody = document.getElementById('subscriptionsTableBody');
+            const active = app.stripeSubscriptions.filter(s => s.status === 'active').length;
+            document.getElementById('activeSubsCount').textContent = active;
+
+            if (app.stripeSubscriptions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#999;">No subscriptions found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = app.stripeSubscriptions.map(sub => {
+                const custName = sub.customer_name || sub.customer_email || '—';
+                const email = sub.customer_email || '—';
+                const amount = sub.plan && sub.plan.amount != null ? '$' + (sub.plan.amount / 100).toFixed(2) + '/' + (sub.plan.interval || 'month') : '—';
+                const status = sub.status || 'unknown';
+                const created = sub.created ? new Date(sub.created * 1000).toLocaleDateString() : '—';
+
+                return `<tr>
+                    <td>${custName}</td>
+                    <td>${email}</td>
+                    <td>${amount}</td>
+                    <td><span class="status-badge ${status}">${status}</span></td>
+                    <td>${created}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        // Create Invoice
+        document.getElementById('createInvoiceBtn').addEventListener('click', () => {
+            document.getElementById('invoiceModal').classList.add('active');
+        });
+
+        document.getElementById('invoiceForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('invoiceCustomerName').value.trim();
+            const email = document.getElementById('invoiceCustomerEmail').value.trim();
+            const description = document.getElementById('invoiceDescription').value.trim();
+            const amount = parseFloat(document.getElementById('invoiceAmount').value);
+
+            if (!name || !email || !description || !amount) return;
+
+            showConfirmModal('Create Invoice?', `Send a $${amount.toFixed(2)} invoice to ${email} for "${description}"?`, async () => {
+                try {
+                    // First create or find customer
+                    const custRes = await fetch('/.netlify/functions/stripe-data?action=create-customer', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name, email }),
+                    });
+                    const customer = await custRes.json();
+
+                    // Create invoice
+                    const invRes = await fetch('/.netlify/functions/stripe-data?action=create-invoice', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            customerId: customer.id,
+                            description,
+                            amount: Math.round(amount * 100),
+                        }),
+                    });
+
+                    if (invRes.ok) {
+                        showSuccess('Invoice created and sent!');
+                        document.getElementById('invoiceModal').classList.remove('active');
+                        document.getElementById('invoiceForm').reset();
+                        loadPaymentsData();
+                    } else {
+                        throw new Error('Failed to create invoice');
+                    }
+                } catch (err) {
+                    alert('Error creating invoice: ' + err.message);
+                }
+            });
+        });
+
+        // Create Payment Link
+        document.getElementById('createPaymentLinkBtn').addEventListener('click', () => {
+            document.getElementById('paymentLinkModal').classList.add('active');
+        });
+
+        document.getElementById('paymentLinkForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('plEventName').value.trim();
+            const description = document.getElementById('plDescription').value.trim();
+            const amount = parseFloat(document.getElementById('plAmount').value);
+
+            if (!name || !amount) return;
+
+            try {
+                const res = await fetch('/.netlify/functions/stripe-data?action=create-payment-link', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, description, amount: Math.round(amount * 100) }),
                 });
 
-                const tbody = document.getElementById('emailHistoryTable');
-                tbody.innerHTML = app.emailHistory.map(c => `
-                    <tr>
-                        <td>${c.date}</td>
-                        <td>${c.subject}</td>
-                        <td>${c.recipients}</td>
-                        <td><span style="color: #4ade80;">&#10003; ${c.status}</span></td>
-                    </tr>
-                `).join('');
+                if (res.ok) {
+                    const link = await res.json();
+                    showSuccess('Payment link created!');
+                    document.getElementById('paymentLinkModal').classList.remove('active');
+                    document.getElementById('paymentLinkForm').reset();
 
-                showSuccess('Campaign sent to ' + recipientCount + ' recipients!');
-            });
+                    // Add to container
+                    const container = document.getElementById('paymentLinksContainer');
+                    if (container.textContent.includes('No payment links')) container.innerHTML = '';
+                    container.innerHTML += `
+                        <div class="payment-link-card">
+                            <div class="pl-info">
+                                <h4>${escapeHtml(name)}</h4>
+                                <p>$${amount.toFixed(2)} ${description ? '— ' + escapeHtml(description) : ''}</p>
+                            </div>
+                            <a href="${link.url}" target="_blank" class="payment-link-url">${link.url}</a>
+                        </div>`;
+                } else {
+                    throw new Error('Failed to create payment link');
+                }
+            } catch (err) {
+                alert('Error creating payment link: ' + err.message);
+            }
         });
 
         // ================================================================
