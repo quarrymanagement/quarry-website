@@ -24,16 +24,36 @@ exports.handler = async (event) => {
     const stripe = Stripe(STRIPE_SECRET_KEY);
 
     try {
-        // Fetch all subscriptions (active, past_due, canceled, etc.)
+        // Fetch all subscriptions with customer expanded (keep expand shallow)
         const subscriptions = await stripe.subscriptions.list({
             limit: 100,
-            expand: ['data.customer', 'data.items.data.price.product']
+            expand: ['data.customer']
         });
+
+        // Collect all unique product IDs from prices, then fetch product names
+        const productIds = new Set();
+        subscriptions.data.forEach(sub => {
+            const item = sub.items.data[0];
+            if (item && item.price && item.price.product) {
+                productIds.add(item.price.product);
+            }
+        });
+
+        // Fetch product details
+        const productMap = {};
+        for (const pid of productIds) {
+            try {
+                const product = await stripe.products.retrieve(pid);
+                productMap[pid] = product.name;
+            } catch (e) {
+                productMap[pid] = 'Unknown Product';
+            }
+        }
 
         const subList = subscriptions.data.map(sub => {
             const item = sub.items.data[0];
             const price = item && item.price;
-            const product = price && price.product;
+            const productId = price ? price.product : '';
 
             return {
                 id: sub.id,
@@ -41,8 +61,8 @@ exports.handler = async (event) => {
                 customerName: sub.customer && typeof sub.customer === 'object' ? sub.customer.name : '',
                 customerEmail: sub.customer && typeof sub.customer === 'object' ? sub.customer.email : '',
                 status: sub.status,
-                productId: product && typeof product === 'object' ? product.id : (product || ''),
-                productName: product && typeof product === 'object' ? product.name : 'Unknown Product',
+                productId: productId,
+                productName: productMap[productId] || 'Unknown Product',
                 amount: price ? price.unit_amount : 0,
                 currency: price ? price.currency : 'usd',
                 interval: price && price.recurring ? price.recurring.interval : '',
