@@ -1,11 +1,6 @@
 [build]
+  functions = "netlify/functions"
   publish = "."
 
-[build.processing]
-  skip_processing = false
-
-[build.processing.html]
-  pretty_urls = true
-
-[[plugins]]
-  package = "@netlify/plugin-functions-install-core"
+[functions]
+  node_bundler = "esbuild"
