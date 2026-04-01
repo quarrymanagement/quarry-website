@@ -127,20 +127,9 @@ const createInvoice = async (event) => {
     // Finalize the invoice
     const finalizedInvoice = await stripe.invoices.finalizeInvoice(invoice.id);
 
-    // FIX: Use stripe.invoices.send() instead of stripe.invoices.sendInvoice()
-    // sendInvoice was renamed to send in stripe-node v14+
-    try {
-      await stripe.invoices.send(invoice.id);
-    } catch (sendError) {
-      // Fallback: try the old method name for compatibility
-      console.warn('send() failed, trying sendInvoice():', sendError.message);
-      try {
-        await stripe.invoices.sendInvoice(invoice.id);
-      } catch (fallbackError) {
-        console.warn('sendInvoice() also failed:', fallbackError.message);
-        // Invoice is still finalized and auto_advance will handle email delivery
-      }
-    }
+    // Send the invoice email to the customer
+    // auto_advance: true above ensures delivery even if this call has issues
+    await stripe.invoices.sendInvoice(invoice.id);
 
     return response(200, {
       success: true,
@@ -263,12 +252,23 @@ const sendReminder = async (event) => {
       return response(400, { success: false, error: 'Missing required field: invoice_id' });
     }
 
-    // FIX: Try send() first, fall back to sendInvoice() for compatibility
-    try {
-      await stripe.invoices.send(invoice_id);
-    } catch (e) {
-      await stripe.invoices.sendInvoice(invoice_id);
+    // First, retrieve the invoice to check its status
+    const invoice = await stripe.invoices.retrieve(invoice_id);
+
+    if (invoice.status === 'void' || invoice.status === 'paid') {
+      return response(400, {
+        success: false,
+        error: `Cannot send reminder for ${invoice.status} invoice`,
+      });
     }
+
+    if (invoice.status === 'draft') {
+      // Finalize first, then send
+      await stripe.invoices.finalizeInvoice(invoice_id);
+    }
+
+    // Send the invoice email to the customer
+    await stripe.invoices.sendInvoice(invoice_id);
 
     return response(200, {
       success: true,
