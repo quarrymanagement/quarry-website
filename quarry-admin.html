@@ -2902,32 +2902,25 @@
 
             showConfirmModal('Create Invoice?', `Send a $${amount.toFixed(2)} invoice to ${email} for "${description}"?`, async () => {
                 try {
-                    // First create or find customer
-                    const custRes = await fetch('/.netlify/functions/stripe-data?action=create-customer', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name, email }),
-                    });
-                    const customer = await custRes.json();
-
-                    // Create invoice
                     const invRes = await fetch('/.netlify/functions/stripe-data?action=create-invoice', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            customerId: customer.id,
+                            customer_email: email,
+                            customer_name: name,
                             description,
                             amount: Math.round(amount * 100),
                         }),
                     });
 
-                    if (invRes.ok) {
+                    const invData = await invRes.json();
+                    if (invRes.ok && invData.success) {
                         showSuccess('Invoice created and sent!');
                         document.getElementById('invoiceModal').classList.remove('active');
                         document.getElementById('invoiceForm').reset();
                         loadPaymentsData();
                     } else {
-                        throw new Error('Failed to create invoice');
+                        throw new Error(invData.error || 'Failed to create invoice');
                     }
                 } catch (err) {
                     alert('Error creating invoice: ' + err.message);
@@ -2952,11 +2945,11 @@
                 const res = await fetch('/.netlify/functions/stripe-data?action=create-payment-link', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, description, amount: Math.round(amount * 100) }),
+                    body: JSON.stringify({ event_name: name, description, amount: Math.round(amount * 100) }),
                 });
 
-                if (res.ok) {
-                    const link = await res.json();
+                const linkData = await res.json();
+                if (res.ok && linkData.success) {
                     showSuccess('Payment link created!');
                     document.getElementById('paymentLinkModal').classList.remove('active');
                     document.getElementById('paymentLinkForm').reset();
@@ -2970,10 +2963,10 @@
                                 <h4>${escapeHtml(name)}</h4>
                                 <p>$${amount.toFixed(2)} ${description ? '— ' + escapeHtml(description) : ''}</p>
                             </div>
-                            <a href="${link.url}" target="_blank" class="payment-link-url">${link.url}</a>
+                            <a href="${linkData.url}" target="_blank" class="payment-link-url">${linkData.url}</a>
                         </div>`;
                 } else {
-                    throw new Error('Failed to create payment link');
+                    throw new Error(linkData.error || 'Failed to create payment link');
                 }
             } catch (err) {
                 alert('Error creating payment link: ' + err.message);
