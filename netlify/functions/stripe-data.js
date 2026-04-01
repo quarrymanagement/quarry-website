@@ -221,6 +221,51 @@ const createPaymentLink = async (event) => {
   }
 };
 
+// Void an invoice
+const voidInvoice = async (event) => {
+  try {
+    const body = JSON.parse(event.body);
+    const { invoice_id } = body;
+
+    if (!invoice_id) {
+      return response(400, { success: false, error: 'Missing required field: invoice_id' });
+    }
+
+    const invoice = await stripe.invoices.voidInvoice(invoice_id);
+
+    return response(200, {
+      success: true,
+      invoice,
+      message: 'Invoice voided successfully',
+    });
+  } catch (error) {
+    console.error('Error voiding invoice:', error);
+    return response(500, { success: false, error: error.message });
+  }
+};
+
+// Send invoice reminder
+const sendReminder = async (event) => {
+  try {
+    const body = JSON.parse(event.body);
+    const { invoice_id } = body;
+
+    if (!invoice_id) {
+      return response(400, { success: false, error: 'Missing required field: invoice_id' });
+    }
+
+    await stripe.invoices.sendInvoice(invoice_id);
+
+    return response(200, {
+      success: true,
+      message: 'Reminder sent successfully',
+    });
+  } catch (error) {
+    console.error('Error sending reminder:', error);
+    return response(500, { success: false, error: error.message });
+  }
+};
+
 // Get account balance
 const getBalance = async (event) => {
   try {
@@ -270,10 +315,20 @@ exports.handler = async (event) => {
         return await createPaymentLink(event);
       case 'balance':
         return await getBalance(event);
+      case 'void-invoice':
+        if (event.httpMethod !== 'POST') {
+          return response(405, { success: false, error: 'Method not allowed' });
+        }
+        return await voidInvoice(event);
+      case 'send-reminder':
+        if (event.httpMethod !== 'POST') {
+          return response(405, { success: false, error: 'Method not allowed' });
+        }
+        return await sendReminder(event);
       default:
         return response(400, {
           success: false,
-          error: 'Invalid action. Valid actions: customers, invoices, subscriptions, create-invoice, create-customer, create-payment-link, balance',
+          error: 'Invalid action. Valid actions: customers, invoices, subscriptions, create-invoice, create-customer, create-payment-link, balance, void-invoice, send-reminder',
         });
     }
   } catch (error) {
