@@ -111,10 +111,12 @@ const createInvoice = async (event) => {
       });
     }
 
-    // Create invoice
+    // Create invoice with send_invoice collection method
     const invoice = await stripe.invoices.create({
       customer: customer.id,
       description,
+      collection_method: 'send_invoice',
+      days_until_due: 30,
     });
 
     // Add line item
