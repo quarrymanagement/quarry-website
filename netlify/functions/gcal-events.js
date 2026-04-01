@@ -34,8 +34,10 @@ exports.handler = async (event) => {
 
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 
-    // Default: fetch events from now to 3 months out
-    const timeMin = event.queryStringParameters?.timeMin || new Date().toISOString();
+    // Default: fetch events from 3 months ago to 3 months out
+    const timeMinDate = new Date();
+    timeMinDate.setMonth(timeMinDate.getMonth() - 3);
+    const timeMin = event.queryStringParameters?.timeMin || timeMinDate.toISOString();
     const timeMaxDate = new Date();
     timeMaxDate.setMonth(timeMaxDate.getMonth() + 3);
     const timeMax = event.queryStringParameters?.timeMax || timeMaxDate.toISOString();
@@ -123,6 +125,14 @@ function parseEventContact(summary, description, attendees) {
     }
   }
 
+  // Extract phone from summary if present (e.g., "...for Nick Mantia +13149563219")
+  const summaryPhoneMatch = summary.match(/([+]?\d[\d\s()-]{9,})/);
+  if (summaryPhoneMatch) {
+    contact.phone = summaryPhoneMatch[1].trim();
+    // Clean the phone from the name if it got included
+    if (contact.name) contact.name = contact.name.replace(/[+]?\d[\d\s()-]{9,}/, '').trim();
+  }
+
   // Parse description for structured contact info
   const phoneMatch = description.match(/(?:phone|tel|contact)[:\s]*([+\d()\s-]{10,})/i);
   const emailMatch = description.match(/(?:email)[:\s]*([^\s]+@[^\s]+)/i);
@@ -138,15 +148,18 @@ function parseEventContact(summary, description, attendees) {
   if (clientPhoneMatch) contact.phone = clientPhoneMatch[1].trim();
   if (clientEmailMatch) contact.email = clientEmailMatch[1].trim();
 
-  // Get email from attendees (skip the management email)
+  // Get email from attendees (skip thequarrystl.com addresses)
   if (!contact.email && attendees.length > 0) {
-    const externalAttendee = attendees.find(a =>
-      a.email && !a.email.includes('thequarrystl.com') && !a.organizer
+    // Prefer non-organizer external attendees first, then fall back to organizer
+    const externalAttendees = attendees.filter(a =>
+      a.email && !a.email.includes('thequarrystl.com')
     );
-    if (externalAttendee) {
-      contact.email = externalAttendee.email;
-      if (!contact.name && externalAttendee.displayName) {
-        contact.name = externalAttendee.displayName;
+    // Pick non-organizer first if available
+    const preferred = externalAttendees.find(a => !a.organizer) || externalAttendees[0];
+    if (preferred) {
+      contact.email = preferred.email;
+      if (!contact.name && preferred.displayName) {
+        contact.name = preferred.displayName;
       }
     }
   }
