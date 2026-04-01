@@ -1981,6 +1981,9 @@
 
                 app.confirmedEvents = data.events || [];
 
+                // Auto-move past confirmed events into CRM as customers
+                movePastConfirmedToCRM();
+
                 // Cross-reference with potential
                 if (app.potentialEvents.length > 0) {
                     crossMatchEvents();
@@ -2028,7 +2031,7 @@
                 const location = evt.location || '';
                 const isPast = new Date(evt.start) < new Date();
                 const statusHtml = isPast
-                    ? '<span style="color:#999;font-size:0.8rem;">Past</span>'
+                    ? (evt._past ? '<span style="color:#60a5fa;font-size:0.8rem;">Moved to CRM</span>' : '<span style="color:#999;font-size:0.8rem;">Past</span>')
                     : '<span style="color:#4ade80;font-size:0.8rem;">Upcoming</span>';
 
                 return `
@@ -2071,7 +2074,8 @@
             if (!evt) return;
             const c = evt.contact || {};
             const email = c.email || '';
-            // If contact exists in CRM, open their CRM detail
+
+            // If contact exists in CRM, open their CRM detail (which includes email thread)
             if (email) {
                 const subscriber = app.subscribers.find(s => s.email.toLowerCase() === email.toLowerCase());
                 if (subscriber) {
@@ -2079,8 +2083,91 @@
                     return;
                 }
             }
-            // Otherwise open in Google Calendar
-            if (evt.htmlLink) window.open(evt.htmlLink, '_blank');
+
+            // Even if not in CRM, show the detail panel with event info + email thread
+            // Try to find email from attendees if contact didn't have one
+            let contactEmail = email;
+            if (!contactEmail && evt.attendees) {
+                const ext = evt.attendees.find(a => a.email && !a.email.includes('thequarrystl.com'));
+                if (ext) contactEmail = ext.email;
+            }
+
+            // Populate the subscriber detail panel with calendar event data
+            const contactName = c.name || evt.summary || '(Unknown)';
+            document.getElementById('subscriberName').textContent = contactName;
+            document.getElementById('subscriberEmail').textContent = contactEmail || '—';
+            document.getElementById('subscriberPhone').textContent = c.phone || '—';
+            document.getElementById('subscriberSource').textContent = 'Google Calendar';
+            document.getElementById('subscriberStatus').textContent = evt.status || 'confirmed';
+            document.getElementById('subscriberCreated').textContent = evt.start ? formatDateTime(evt.start) : '—';
+            document.getElementById('subscriberLastActivity').textContent = c.occasion || evt.summary || '—';
+
+            // Gmail link — search for this contact's emails
+            const gmailLink = document.getElementById('subscriberGmailLink');
+            if (contactEmail) {
+                gmailLink.href = `https://mail.google.com/mail/u/0/#search/from%3A${encodeURIComponent(contactEmail)}+OR+to%3A${encodeURIComponent(contactEmail)}`;
+                gmailLink.style.display = '';
+            } else {
+                gmailLink.href = '#';
+                gmailLink.style.display = 'none';
+            }
+
+            // Load email thread for this contact
+            const emailThreadEl = document.getElementById('subscriberEmailThread');
+            if (contactEmail) {
+                emailThreadEl.innerHTML = '<div style="color: #999; font-size: 0.85rem; text-align: center; padding: 0.75rem;"><div class="spinner" style="width:20px;height:20px;margin:0 auto 0.5rem;"></div>Loading emails...</div>';
+                loadContactEmails(contactEmail);
+            } else {
+                emailThreadEl.innerHTML = '<div style="color: #999; font-size: 0.85rem; text-align: center; padding: 0.75rem;">No email address available for this reservation</div>';
+            }
+
+            // Build activity timeline from event info
+            const eventHistoryEl = document.getElementById('subscriberEventHistory');
+            const timeline = [];
+            timeline.push({
+                type: 'reservation',
+                label: evt.summary || 'Confirmed Reservation',
+                detail: [c.occasion, c.guests ? c.guests + ' guests' : '', evt.location || ''].filter(Boolean).join(' · '),
+                date: evt.start || '',
+                icon: '📅',
+            });
+            if (evt.htmlLink) {
+                timeline.push({
+                    type: 'calendar',
+                    label: 'View in Google Calendar',
+                    detail: `<a href="${evt.htmlLink}" target="_blank" style="color:#60a5fa;text-decoration:none;">Open Calendar Event &rarr;</a>`,
+                    date: '',
+                    icon: '🔗',
+                });
+            }
+            eventHistoryEl.innerHTML = timeline.map(item => `
+                <div class="history-item">
+                    <div style="display:flex;align-items:center;gap:0.5rem;">
+                        <span style="font-size:1.1rem;">${item.icon}</span>
+                        <div>
+                            <div class="history-event-name">${escapeHtml(item.label)}</div>
+                            <div style="color: #4ade80; font-size: 0.8rem;">${item.detail}</div>
+                        </div>
+                    </div>
+                    <div class="history-date">${item.date ? formatDate(item.date) : ''}</div>
+                </div>
+            `).join('');
+
+            // Tags and notes — use email if available, otherwise eventId
+            const contactKey = contactEmail || `event_${eventId}`;
+            app.currentSubscriberEmail = contactKey;
+            renderContactTags(contactKey);
+            renderContactNotes(contactKey);
+
+            const notes = app.crmNotes[contactKey] || [];
+            if (notes.length > 0) {
+                const lastNote = notes.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+                document.getElementById('lastNoteDate').textContent = 'Last note: ' + formatDate(lastNote.date);
+            } else {
+                document.getElementById('lastNoteDate').textContent = '';
+            }
+
+            document.getElementById('subscriberDetailPanel').classList.add('open');
         }
 
         // ================================================================
@@ -2162,6 +2249,60 @@
             try {
                 return new Date(dateStr).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
             } catch (e) { return dateStr; }
+        }
+
+        // ================================================================
+        // AUTO-MOVE: Past confirmed events → CRM as customers
+        // ================================================================
+        function movePastConfirmedToCRM() {
+            const now = new Date();
+            const existingEmails = new Set(app.subscribers.map(s => (s.email || '').toLowerCase()));
+            let moved = 0;
+            const stillActive = [];
+
+            app.confirmedEvents.forEach(evt => {
+                const eventEnd = evt.end ? new Date(evt.end) : (evt.start ? new Date(evt.start) : null);
+                if (!eventEnd || eventEnd >= now) {
+                    // Event hasn't passed yet — keep it in confirmed
+                    stillActive.push(evt);
+                    return;
+                }
+
+                // Event date has passed — move contact to CRM
+                const c = evt.contact || {};
+                let contactEmail = c.email || '';
+                if (!contactEmail && evt.attendees) {
+                    const ext = evt.attendees.find(a => a.email && !a.email.includes('thequarrystl.com'));
+                    if (ext) contactEmail = ext.email;
+                }
+
+                if (contactEmail && !existingEmails.has(contactEmail.toLowerCase())) {
+                    existingEmails.add(contactEmail.toLowerCase());
+                    const nameParts = (c.name || evt.summary || '').split(/[\s-–|]+/);
+                    app.subscribers.push({
+                        firstName: nameParts[0] || '',
+                        lastName: nameParts.length > 1 ? nameParts[1] : '',
+                        email: contactEmail,
+                        phone: c.phone || '',
+                        source: 'Confirmed Reservation',
+                        emailStatus: 'Customer',
+                        created: evt.start || new Date().toISOString(),
+                        lastActivityDate: evt.start || new Date().toISOString(),
+                    });
+                    moved++;
+                }
+                // Still keep in the confirmed list but mark as past
+                evt._past = true;
+                stillActive.push(evt);
+            });
+
+            if (moved > 0) {
+                console.log(`Auto-moved ${moved} past reservation contacts into CRM`);
+                // Re-render CRM table if it's loaded
+                if (typeof renderSubscribers === 'function') {
+                    renderSubscribers();
+                }
+            }
         }
 
         // ================================================================
