@@ -129,11 +129,23 @@ exports.handler = async (event) => {
     });
   } catch (error) {
     console.error('Gmail API error:', error.message);
+    console.error('Full error:', JSON.stringify(error.response?.data || error));
+    console.error('Env check - CLIENT_ID exists:', !!process.env.GMAIL_CLIENT_ID);
+    console.error('Env check - CLIENT_SECRET exists:', !!process.env.GMAIL_CLIENT_SECRET);
+    console.error('Env check - REFRESH_TOKEN exists:', !!process.env.GMAIL_REFRESH_TOKEN);
+    console.error('Env check - REFRESH_TOKEN length:', (process.env.GMAIL_REFRESH_TOKEN || '').length);
+    console.error('Env check - REFRESH_TOKEN starts with:', (process.env.GMAIL_REFRESH_TOKEN || '').substring(0, 10));
 
     if (error.message.includes('invalid_grant') || error.message.includes('Token')) {
       return response(401, {
         success: false,
-        error: 'Gmail authentication expired. Please refresh the OAuth token.',
+        error: 'Gmail auth error: ' + error.message,
+        debug: {
+          clientIdExists: !!process.env.GMAIL_CLIENT_ID,
+          secretExists: !!process.env.GMAIL_CLIENT_SECRET,
+          tokenExists: !!process.env.GMAIL_REFRESH_TOKEN,
+          tokenLength: (process.env.GMAIL_REFRESH_TOKEN || '').length,
+        }
       });
     }
 
