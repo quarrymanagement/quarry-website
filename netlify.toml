@@ -1,6 +1,7 @@
 [build]
   functions = "netlify/functions"
   publish = "."
+  ignore = "git diff --quiet $CACHED_COMMIT HEAD -- . ':!events.json'"
 
 [functions]
   node_bundler = "esbuild"
