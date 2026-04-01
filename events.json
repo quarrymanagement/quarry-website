@@ -15,7 +15,7 @@
       "tiers": [
         {
           "name": "Music Bingo Registration (Table of 4)",
-          "description": "Table of 4 \u2014 includes bucket of beer or bottle of wine",
+          "description": "Table of 4 — includes bucket of beer or bottle of wine",
           "pricePerPerson": 8000,
           "priceLabel": "$80/table"
         }
@@ -59,7 +59,7 @@
       "tiers": [
         {
           "name": "Music Bingo Registration (Table of 4)",
-          "description": "Table of 4 \u2014 includes bucket of beer or bottle of wine",
+          "description": "Table of 4 — includes bucket of beer or bottle of wine",
           "pricePerPerson": 8000,
           "priceLabel": "$80/table"
         }
@@ -103,7 +103,7 @@
       "tiers": [
         {
           "name": "Music Bingo Registration (Table of 4)",
-          "description": "Table of 4 \u2014 includes bucket of beer or bottle of wine. Supports Timberland Wolves Grad Night.",
+          "description": "Table of 4 — includes bucket of beer or bottle of wine. Supports Timberland Wolves Grad Night.",
           "pricePerPerson": 12000,
           "priceLabel": "$120/table"
         }
@@ -189,7 +189,7 @@
       "date": "Saturday, October 17, 2026",
       "time": "4:00 PM",
       "location": "The Quarry, New Melle MO",
-      "description": "Join us for country music, line dancing, hole-in-one golf challenges, prizes, and plenty of fun \u2014 all while giving back. Grab your boots and come out to support the pack!",
+      "description": "Join us for country music, line dancing, hole-in-one golf challenges, prizes, and plenty of fun — all while giving back. Grab your boots and come out to support the pack!",
       "category": "Ticketed",
       "pricePerSeat": 2500,
       "totalCapacity": 200,
@@ -214,7 +214,7 @@
       "title": "BOOT SCOOTIN' WITH THE PACK",
       "image": "",
       "imageAlt": "BOOT SCOOTIN' WITH THE PACK",
-      "detailDescription": "Join us for country music, line dancing, hole-in-one golf challenges, prizes, and plenty of fun \u2014 all while giving back. Grab your boots and come out to support the pack!",
+      "detailDescription": "Join us for country music, line dancing, hole-in-one golf challenges, prizes, and plenty of fun — all while giving back. Grab your boots and come out to support the pack!",
       "pricingType": "individual",
       "pricePerPerson": 2500,
       "pricePerTable": 0,
@@ -255,13 +255,6 @@
       "date": "2026-03-29",
       "timeSlot": "1 PM - 4 PM",
       "type": "afternoon"
-    },
-    {
-      "id": "band-5",
-      "name": "Kelli Renee",
-      "date": "2026-04-03",
-      "timeSlot": "7 PM - 10 PM",
-      "type": "evening"
     },
     {
       "id": "band-6",
@@ -624,6 +617,279 @@
       }
     ]
   },
+  "floorPlans": [
+    {
+      "id": "fp_default",
+      "name": "Default",
+      "tables": [
+        {
+          "id": "t21",
+          "name": "21",
+          "x": 680,
+          "y": 630,
+          "width": 60,
+          "height": 80,
+          "shape": "rect",
+          "seats": 5,
+          "type": "table"
+        },
+        {
+          "id": "t22",
+          "name": "22",
+          "x": 580,
+          "y": 620,
+          "width": 70,
+          "height": 80,
+          "shape": "rect",
+          "seats": 8,
+          "type": "table"
+        },
+        {
+          "id": "t23",
+          "name": "23",
+          "x": 560,
+          "y": 510,
+          "width": 70,
+          "height": 80,
+          "shape": "rect",
+          "seats": 8,
+          "type": "table"
+        },
+        {
+          "id": "t24",
+          "name": "24",
+          "x": 660,
+          "y": 510,
+          "width": 60,
+          "height": 80,
+          "shape": "rect",
+          "seats": 6,
+          "type": "table"
+        },
+        {
+          "id": "t25",
+          "name": "25",
+          "x": 470,
+          "y": 430,
+          "width": 50,
+          "height": 50,
+          "shape": "diamond",
+          "seats": 2,
+          "type": "hightop"
+        },
+        {
+          "id": "t26",
+          "name": "26",
+          "x": 400,
+          "y": 420,
+          "width": 40,
+          "height": 40,
+          "shape": "rect",
+          "seats": 2,
+          "type": "hightop"
+        },
+        {
+          "id": "t27",
+          "name": "27",
+          "x": 280,
+          "y": 420,
+          "width": 80,
+          "height": 40,
+          "shape": "rect",
+          "seats": 8,
+          "type": "table"
+        },
+        {
+          "id": "t28",
+          "name": "28",
+          "x": 180,
+          "y": 600,
+          "width": 60,
+          "height": 80,
+          "shape": "rect",
+          "seats": 6,
+          "type": "table"
+        },
+        {
+          "id": "t29",
+          "name": "29",
+          "x": 180,
+          "y": 490,
+          "width": 60,
+          "height": 80,
+          "shape": "rect",
+          "seats": 6,
+          "type": "table"
+        },
+        {
+          "id": "t30",
+          "name": "30",
+          "x": 190,
+          "y": 420,
+          "width": 40,
+          "height": 40,
+          "shape": "circle",
+          "seats": 5,
+          "type": "table"
+        },
+        {
+          "id": "t31",
+          "name": "31",
+          "x": 340,
+          "y": 330,
+          "width": 80,
+          "height": 40,
+          "shape": "rect",
+          "seats": 8,
+          "type": "table"
+        },
+        {
+          "id": "t32",
+          "name": "32",
+          "x": 340,
+          "y": 260,
+          "width": 80,
+          "height": 40,
+          "shape": "rect",
+          "seats": 8,
+          "type": "table"
+        },
+        {
+          "id": "t33",
+          "name": "33",
+          "x": 340,
+          "y": 190,
+          "width": 80,
+          "height": 40,
+          "shape": "rect",
+          "seats": 8,
+          "type": "table"
+        },
+        {
+          "id": "t34",
+          "name": "34",
+          "x": 180,
+          "y": 160,
+          "width": 40,
+          "height": 80,
+          "shape": "rect",
+          "seats": 6,
+          "type": "table"
+        },
+        {
+          "id": "t35",
+          "name": "35",
+          "x": 340,
+          "y": 110,
+          "width": 80,
+          "height": 40,
+          "shape": "rect",
+          "seats": 8,
+          "type": "table"
+        },
+        {
+          "id": "t36",
+          "name": "36",
+          "x": 500,
+          "y": 450,
+          "width": 30,
+          "height": 30,
+          "shape": "circle",
+          "seats": 2,
+          "type": "hightop"
+        },
+        {
+          "id": "couch1",
+          "name": "Couch 1",
+          "x": 170,
+          "y": 40,
+          "width": 80,
+          "height": 50,
+          "shape": "rect",
+          "seats": 4,
+          "type": "couch"
+        },
+        {
+          "id": "couch2",
+          "name": "Couch 2",
+          "x": 490,
+          "y": 40,
+          "width": 60,
+          "height": 60,
+          "shape": "rect",
+          "seats": 4,
+          "type": "couch"
+        }
+      ],
+      "labels": [
+        {
+          "text": "FIREPLACE",
+          "x": 340,
+          "y": 50
+        },
+        {
+          "text": "DOORS",
+          "x": 130,
+          "y": 340
+        },
+        {
+          "text": "BAR",
+          "x": 590,
+          "y": 300
+        }
+      ],
+      "barSeats": [
+        {
+          "id": "bar-1",
+          "x": 570,
+          "y": 170,
+          "available": true
+        },
+        {
+          "id": "bar-2",
+          "x": 570,
+          "y": 190,
+          "available": true
+        },
+        {
+          "id": "bar-3",
+          "x": 570,
+          "y": 210,
+          "available": true
+        },
+        {
+          "id": "bar-4",
+          "x": 570,
+          "y": 230,
+          "available": true
+        },
+        {
+          "id": "bar-5",
+          "x": 570,
+          "y": 250,
+          "available": true
+        },
+        {
+          "id": "bar-6",
+          "x": 570,
+          "y": 270,
+          "available": true
+        },
+        {
+          "id": "bar-7",
+          "x": 570,
+          "y": 290,
+          "available": true
+        },
+        {
+          "id": "bar-8",
+          "x": 570,
+          "y": 310,
+          "available": true
+        }
+      ]
+    }
+  ],
   "registrations": {
     "evt-80s-apr3": [
       {
