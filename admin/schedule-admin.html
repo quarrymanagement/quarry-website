@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule Management - The Quarry Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* ================================================================
+           CSS CUSTOM PROPERTIES
+           ================================================================ */
+        :root {
+            --bg-primary: #f4f5f7;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --bg-elevated: #f0f1f3;
+            --bg-hover: #eef0f4;
+            --border-subtle: #e0e3e8;
+            --border-medium: #cdd1d8;
+            --border-accent: #9a7b2a;
+            --text-primary: #1c1f26;
+            --text-secondary: #4b5263;
+            --text-muted: #858d9e;
+            --gold: #9a7b2a;
+            --gold-light: #b08e30;
+            --gold-dim: rgba(154, 123, 42, 0.07);
+            --gold-glow: rgba(154, 123, 42, 0.04);
+            --green: #16a34a;
+            --green-dim: rgba(22, 163, 74, 0.08);
+            --red: #dc2626;
+            --red-dim: rgba(220, 38, 38, 0.06);
+            --blue: #2563eb;
+            --blue-dim: rgba(37, 99, 235, 0.06);
+            --yellow: #b45309;
+            --yellow-dim: rgba(180, 83, 9, 0.07);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04), 0 1px 4px rgba(0,0,0,0.03);
+            --shadow-md: 0 2px 8px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+            --shadow-lg: 0 4px 12px rgba(0,0,0,0.06), 0 12px 40px rgba(0,0,0,0.08);
+            --shadow-gold: 0 0 16px rgba(154, 123, 42, 0.05);
+            --transition: 0.15s ease;
+            --font-sans: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-serif: 'Playfair Display', Georgia, serif;
+        }
+
+        /* ================================================================
+           GLOBAL STYLES & RESET
+           ================================================================ */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            width: 100%; height: 100%;
+            background: var(--bg-primary); color: var(--text-primary);
+            font-family: var(--font-sans);
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .hidden { display: none !important; }
+        .scrollable { overflow-y: auto; overflow-x: hidden; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--border-medium); }
+
+        /* ================================================================
+           LOGIN OVERLAY
+           ================================================================ */
+        #loginOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-primary);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999;
+        }
+        .login-container {
+            background: var(--bg-card); border: 1px solid var(--border-subtle);
+            padding: 2.5rem 2rem; border-radius: var(--radius-lg); width: 100%; max-width: 380px;
+            box-shadow: var(--shadow-lg), var(--shadow-gold);
+        }
+        .login-header {
+            font-family: var(--font-serif); font-size: 2rem;
+            color: var(--gold); margin-bottom: 0.5rem; text-align: center;
+            font-weight: 700; letter-spacing: 3px;
+        }
+        .login-subtitle { text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 2rem; font-weight: 400; letter-spacing: 1px; }
+        .login-form { display: flex; flex-direction: column; gap: 1.25rem; }
+        .login-form input {
+            background: var(--bg-primary); border: 1px solid var(--border-subtle); color: var(--text-primary);
+            padding: 0.8rem 1rem; border-radius: var(--radius-sm); font-size: 0.95rem;
+            transition: var(--transition); font-family: var(--font-sans);
+        }
+        .login-form input:focus {
+            outline: none; border-color: var(--gold);
+            box-shadow: 0 0 0 3px var(--gold-dim);
+        }
+        .login-button {
+            background: var(--gold); color: var(--bg-primary); border: none; padding: 0.8rem;
+            border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; font-size: 0.95rem;
+            transition: var(--transition); font-family: var(--font-sans); letter-spacing: 0.5px;
+        }
+        .login-button:hover { background: var(--gold-light); }
+        .login-error { color: var(--red); text-align: center; font-size: 0.85rem; }
+
+        /* ================================================================
+           MAIN LAYOUT
+           ================================================================ */
+        #mainApp { display: flex; flex-direction: column; width: 100%; height: 100%; }
+        .navbar {
+            background: var(--bg-secondary); border-bottom: 1px solid var(--border-subtle);
+            padding: 0 1.5rem; display: flex; align-items: center;
+            justify-content: space-between; height: 60px;
+            position: relative; z-index: 200;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        }
+        .navbar-brand {
+            font-family: var(--font-serif); font-size: 1.15rem;
+            color: var(--gold); font-weight: 700; letter-spacing: 2.5px;
+            white-space: nowrap;
+        }
+        .navbar-spacer { flex: 1; }
+        .logout-btn {
+            background: transparent; color: var(--text-muted); border: 1px solid var(--border-subtle);
+            padding: 0.4rem 1rem; border-radius: var(--radius-sm); cursor: pointer;
+            font-weight: 500; font-size: 0.8rem; transition: var(--transition);
+            font-family: var(--font-sans);
+        }
+        .logout-btn:hover { border-color: var(--red); color: var(--red); }
+
+        /* ================================================================
+           CONTENT AREA
+           ================================================================ */
+        .content { flex: 1; display: flex; flex-direction: column; padding: 1.75rem; overflow-y: auto; }
+        .content-header {
+            margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;
+        }
+        .content-header h1 {
+            font-family: var(--font-serif); font-size: 1.75rem;
+            color: var(--text-primary); font-weight: 600;
+        }
+
+        /* ================================================================
+           TABS
+           ================================================================ */
+        .tab-navigation {
+            display: flex; gap: 0; border-bottom: 1px solid var(--border-subtle);
+            margin-bottom: 1.5rem; background: var(--bg-card);
+        }
+        .tab-button {
+            color: var(--text-muted); cursor: pointer; padding: 0.65rem 1.25rem;
+            border-bottom: 2px solid transparent; transition: var(--transition);
+            font-weight: 500; font-size: 0.82rem; white-space: nowrap;
+            display: flex; align-items: center; letter-spacing: 0.3px;
+            text-transform: uppercase; background: transparent; border: none;
+            font-family: var(--font-sans);
+        }
+        .tab-button:hover { color: var(--text-primary); background: var(--gold-glow); }
+        .tab-button.active { color: var(--gold); border-bottom: 2px solid var(--gold); }
+        .tab-content {
+            display: none; flex: 1; overflow-y: auto;
+        }
+        .tab-content.active { display: flex; flex-direction: column; }
+
+        /* ================================================================
+           BUTTONS
+           ================================================================ */
+        .btn-primary {
+            background: var(--gold); color: var(--bg-primary); border: none;
+            padding: 0.6rem 1.25rem; border-radius: var(--radius-sm); cursor: pointer;
+            font-weight: 600; font-size: 0.85rem; transition: var(--transition);
+            font-family: var(--font-sans); letter-spacing: 0.3px;
+        }
+        .btn-primary:hover { background: var(--gold-light); }
+        .btn-small {
+            padding: 0.45rem 0.8rem; border: 1px solid var(--border-medium);
+            background: transparent; color: var(--text-secondary); border-radius: var(--radius-sm);
+            cursor: pointer; font-size: 0.8rem; transition: var(--transition);
+            font-family: var(--font-sans); font-weight: 500;
+        }
+        .btn-small:hover { background: var(--gold); color: var(--bg-primary); border-color: var(--gold); }
+        .btn-secondary {
+            background: transparent; border: 1px solid var(--border-medium); color: var(--text-secondary);
+            padding: 0.5rem 1rem; border-radius: var(--radius-sm); cursor: pointer;
+            font-weight: 500; font-size: 0.85rem; transition: var(--transition);
+            font-family: var(--font-sans);
+        }
+        .btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
+        .btn-success {
+            background: var(--green); color: white; border: none;
+            padding: 0.6rem 1.25rem; border-radius: var(--radius-sm); cursor: pointer;
+            font-weight: 600; font-size: 0.85rem; transition: var(--transition);
+            font-family: var(--font-sans);
+        }
+        .btn-success:hover { background: #15803d; }
+        .btn-danger {
+            background: transparent; color: var(--red); border: 1px solid var(--red);
+            padding: 0.4rem 0.8rem; border-radius: var(--radius-sm); cursor: pointer;
+            font-weight: 500; font-size: 0.8rem; transition: var(--transition);
+            font-family: var(--font-sans);
+        }
+        .btn-danger:hover { background: var(--red-dim); }
+
+        /* ================================================================
+           SECTIONS
+           ================================================================ */
+        .section {
+            margin-bottom: 2rem;
+        }
+        .section-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 1rem;
+        }
+        .section-title {
+            font-size: 1.1rem; font-weight: 600; color: var(--text-primary);
+        }
+
+        /* ================================================================
+           FORMS
+           ================================================================ */
+        .form-group { margin-bottom: 1rem; }
+        .form-label {
+            display: block; color: var(--text-secondary); font-weight: 600; margin-bottom: 0.4rem;
+            font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.8px;
+        }
+        .form-input, .form-select, .form-textarea {
+            width: 100%; background: var(--bg-primary); border: 1px solid var(--border-subtle);
+            color: var(--text-primary); padding: 0.65rem 0.8rem; border-radius: var(--radius-sm);
+            font-size: 0.9rem; font-family: var(--font-sans);
+            transition: var(--transition);
+        }
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none; border-color: var(--gold);
+            box-shadow: 0 0 0 3px var(--gold-dim);
+        }
+        .form-row {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;
+        }
+
+        /* ================================================================
+           TABLES
+           ================================================================ */
+        .table-container {
+            background: var(--bg-card); border-radius: var(--radius-md);
+            border: 1px solid var(--border-subtle); overflow: hidden;
+        }
+        .table {
+            width: 100%; border-collapse: collapse;
+        }
+        .table th, .table td {
+            padding: 0.7rem 1rem; text-align: left; border-bottom: 1px solid var(--border-subtle);
+        }
+        .table th {
+            color: var(--text-muted); font-weight: 600; font-size: 0.72rem;
+            text-transform: uppercase; letter-spacing: 0.8px; background: var(--bg-elevated);
+        }
+        .table td { font-size: 0.88rem; color: var(--text-primary); }
+        .table tr:hover { background: var(--bg-hover); }
+
+        /* ================================================================
+           EMPLOYEE MANAGEMENT
+           ================================================================ */
+        .employee-form-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;
+            background: var(--bg-card); padding: 1.25rem; border-radius: var(--radius-md);
+            border: 1px solid var(--border-subtle); margin-bottom: 1.5rem;
+        }
+        .employee-list {
+            background: var(--bg-card); border-radius: var(--radius-md);
+            border: 1px solid var(--border-subtle); overflow: hidden;
+        }
+        .employee-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1rem; border-bottom: 1px solid var(--border-subtle);
+            transition: var(--transition);
+        }
+        .employee-row:hover { background: var(--bg-hover); }
+        .employee-row:last-child { border-bottom: none; }
+        .employee-info { flex: 1; }
+        .employee-name { font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem; }
+        .employee-details { font-size: 0.82rem; color: var(--text-muted); }
+        .employee-role-badge {
+            display: inline-block; background: var(--gold-dim); color: var(--gold);
+            padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.7rem;
+            font-weight: 600; text-transform: uppercase; margin-right: 0.5rem;
+        }
+        .employee-actions { display: flex; gap: 0.5rem; }
+
+        /* ================================================================
+           SCHEDULE GRID
+           ================================================================ */
+        .schedule-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .week-navigator {
+            display: flex; gap: 0.5rem; align-items: center;
+        }
+        .week-display {
+            color: var(--text-secondary); font-weight: 500; font-size: 0.95rem;
+            min-width: 200px; text-align: center;
+        }
+        .nav-btn {
+            background: var(--bg-card); color: var(--text-primary);
+            border: 1px solid var(--border-subtle); width: 36px; height: 36px;
+            border-radius: var(--radius-sm); cursor: pointer; display: flex;
+            align-items: center; justify-content: center; font-weight: 600;
+            transition: var(--transition);
+        }
+        .nav-btn:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+
+        .schedule-grid-container {
+            background: var(--bg-card); border-radius: var(--radius-md);
+            border: 1px solid var(--border-subtle); overflow: hidden;
+            display: flex; flex-direction: column;
+        }
+        .schedule-grid-header {
+            display: grid; grid-template-columns: 120px repeat(7, 1fr);
+            border-bottom: 2px solid var(--border-medium); font-weight: 600;
+            background: var(--bg-elevated);
+        }
+        .schedule-grid-header-cell {
+            padding: 0.85rem; text-align: center; font-size: 0.82rem;
+            text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);
+        }
+        .schedule-grid-body {
+            overflow-x: auto;
+        }
+        .schedule-role-group {
+            border-bottom: 2px solid var(--border-subtle);
+        }
+        .schedule-role-header {
+            display: grid; grid-template-columns: 120px repeat(7, 1fr);
+            background: var(--gold-dim); padding: 0.75rem 0;
+            font-weight: 600; color: var(--gold); font-size: 0.8rem;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .schedule-role-name {
+            padding: 0.75rem 1rem; display: flex; align-items: center;
+        }
+        .schedule-row {
+            display: grid; grid-template-columns: 120px repeat(7, 1fr);
+            border-bottom: 1px solid var(--border-subtle); align-items: stretch;
+        }
+        .schedule-row:hover { background: var(--bg-hover); }
+        .schedule-cell-name {
+            padding: 0.75rem 1rem; display: flex; align-items: center;
+            background: var(--bg-elevated); font-weight: 500;
+            font-size: 0.9rem; color: var(--text-primary);
+        }
+        .schedule-cell {
+            padding: 0.6rem; text-align: center; cursor: pointer;
+            border-left: 1px solid var(--border-subtle);
+            transition: var(--transition); position: relative;
+            display: flex; align-items: center; justify-content: center;
+            min-height: 50px;
+        }
+        .schedule-cell:hover { background: rgba(154, 123, 42, 0.05); }
+        .schedule-cell.closed {
+            background: #f5f5f5; color: var(--text-muted);
+            cursor: default;
+        }
+        .schedule-cell.warning {
+            background: var(--red-dim);
+        }
+        .shift-display {
+            font-size: 0.8rem; font-weight: 500; color: var(--text-primary);
+            background: var(--gold-dim); padding: 0.35rem 0.6rem;
+            border-radius: 4px; white-space: nowrap;
+        }
+        .shift-off {
+            color: var(--text-muted); font-size: 0.85rem;
+        }
+
+        /* ================================================================
+           SCHEDULE MODAL
+           ================================================================ */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+            z-index: 9000; display: none; align-items: center; justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: var(--bg-card); border: 1px solid var(--border-medium); border-radius: var(--radius-lg);
+            padding: 2rem; max-width: 420px; width: 90%;
+            box-shadow: var(--shadow-lg);
+        }
+        .modal-header { font-family: var(--font-serif); color: var(--gold); font-size: 1.2rem; margin-bottom: 1rem; font-weight: 600; }
+        .modal-content { margin-bottom: 1.5rem; }
+        .modal-actions { display: flex; gap: 0.75rem; justify-content: flex-end; }
+        .modal-btn {
+            padding: 0.5rem 1.25rem; border-radius: var(--radius-sm); cursor: pointer;
+            font-weight: 600; transition: var(--transition); font-family: var(--font-sans); font-size: 0.85rem;
+        }
+        .modal-btn-primary { background: var(--gold); color: var(--bg-primary); border: none; }
+        .modal-btn-primary:hover { background: var(--gold-light); }
+        .modal-btn-secondary { background: transparent; border: 1px solid var(--border-medium); color: var(--text-secondary); }
+        .modal-btn-secondary:hover { border-color: var(--text-primary); color: var(--text-primary); }
+
+        /* ================================================================
+           TIME-OFF SECTION
+           ================================================================ */
+        .timeoff-list {
+            background: var(--bg-card); border-radius: var(--radius-md);
+            border: 1px solid var(--border-subtle); overflow: hidden;
+        }
+        .timeoff-item {
+            padding: 1rem; border-bottom: 1px solid var(--border-subtle);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .timeoff-item:last-child { border-bottom: none; }
+        .timeoff-info { flex: 1; }
+        .timeoff-name { font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem; }
+        .timeoff-dates { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.25rem; }
+        .timeoff-reason { font-size: 0.82rem; color: var(--text-secondary); }
+        .timeoff-status {
+            display: inline-block; padding: 0.2rem 0.65rem; border-radius: 20px;
+            font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+        .timeoff-status.pending { background: var(--yellow-dim); color: var(--yellow); }
+        .timeoff-status.approved { background: var(--green-dim); color: var(--green); }
+        .timeoff-status.denied { background: var(--red-dim); color: var(--red); }
+        .timeoff-actions { display: flex; gap: 0.5rem; }
+
+        /* ================================================================
+           COPY WEEK SECTION
+           ================================================================ */
+        .copy-week-section {
+            background: var(--gold-dim); border: 1px solid rgba(154, 123, 42, 0.2);
+            border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.5rem;
+        }
+        .copy-week-btn {
+            background: var(--gold); color: var(--bg-primary); border: none;
+            padding: 0.85rem 1.75rem; border-radius: var(--radius-sm); cursor: pointer;
+            font-weight: 600; font-size: 0.95rem; transition: var(--transition);
+            font-family: var(--font-sans); letter-spacing: 0.3px;
+        }
+        .copy-week-btn:hover { background: var(--gold-light); }
+
+        /* ================================================================
+           SUCCESS MESSAGE
+           ================================================================ */
+        .success-message {
+            position: fixed; top: 1rem; right: 1rem; background: var(--green);
+            color: #fff; padding: 0.85rem 1.25rem; border-radius: var(--radius-md);
+            font-weight: 600; font-size: 0.88rem;
+            z-index: 10000; animation: slideIn 0.3s ease;
+            box-shadow: 0 4px 16px rgba(22, 163, 74, 0.3);
+        }
+        .error-message {
+            position: fixed; top: 1rem; right: 1rem; background: var(--red);
+            color: #fff; padding: 0.85rem 1.25rem; border-radius: var(--radius-md);
+            font-weight: 600; font-size: 0.88rem;
+            z-index: 10000; animation: slideIn 0.3s ease;
+            box-shadow: 0 4px 16px rgba(220, 38, 38, 0.3);
+        }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* ================================================================
+           SEARCH INPUT
+           ================================================================ */
+        .search-input {
+            background: var(--bg-primary); border: 1px solid var(--border-subtle);
+            color: var(--text-primary); padding: 0.65rem 0.85rem; border-radius: var(--radius-sm);
+            font-size: 0.9rem; font-family: var(--font-sans); transition: var(--transition);
+            width: 100%; max-width: 300px;
+        }
+        .search-input:focus {
+            outline: none; border-color: var(--gold);
+            box-shadow: 0 0 0 3px var(--gold-dim);
+        }
+
+        /* ================================================================
+           UTILITY
+           ================================================================ */
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        .flex-gap { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+        .mt-1 { margin-top: 1rem; }
+        .mb-1 { margin-bottom: 1rem; }
+        .text-center { text-align: center; }
+        .text-muted { color: var(--text-muted); }
+        .warning-banner {
+            background: var(--red-dim); border: 1px solid var(--red);
+            color: var(--red); padding: 0.85rem 1rem; border-radius: var(--radius-sm);
+            margin-bottom: 1rem; font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Overlay -->
+    <div id="loginOverlay">
+        <div class="login-container">
+            <div class="login-header">THE QUARRY</div>
+            <div class="login-subtitle">Schedule Management</div>
+            <form class="login-form" id="loginForm">
+                <input type="password" id="passwordInput" placeholder="Enter admin password" required>
+                <button type="submit" class="login-button">Access Admin</button>
+                <div id="loginError" class="login-error hidden"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" class="hidden">
+        <!-- Navbar -->
+        <div class="navbar">
+            <div class="navbar-brand">THE QUARRY</div>
+            <div class="navbar-spacer"></div>
+            <button class="logout-btn" id="logoutBtn">LOGOUT</button>
+        </div>
+
+        <!-- Content -->
+        <div class="content scrollable">
+            <div class="content-header">
+                <h1>Schedule Management</h1>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tab-navigation">
+                <button class="tab-button active" data-tab="employees">EMPLOYEES</button>
+                <button class="tab-button" data-tab="schedule">WEEKLY SCHEDULE</button>
+                <button class="tab-button" data-tab="timeoff">TIME-OFF</button>
+            </div>
+
+            <!-- EMPLOYEES TAB -->
+            <div class="tab-content active" id="employees-tab">
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">Add New Employee</div>
+                    </div>
+                    <div class="employee-form-grid">
+                        <div class="form-group">
+                            <label class="form-label">First Name</label>
+                            <input type="text" id="empFirstName" class="form-input" placeholder="John">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" id="empLastName" class="form-input" placeholder="Doe">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" id="empEmail" class="form-input" placeholder="john@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Phone</label>
+                            <input type="tel" id="empPhone" class="form-input" placeholder="(555) 123-4567">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Primary Role</label>
+                            <select id="empPrimaryRole" class="form-select">
+                                <option value="Bartender">Bartender</option>
+                                <option value="Server">Server</option>
+                                <option value="Busser/Host">Busser/Host</option>
+                                <option value="Kitchen">Kitchen</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Hire Date</label>
+                            <input type="date" id="empHireDate" class="form-input">
+                        </div>
+                        <button class="btn-primary" id="addEmployeeBtn">Add Employee</button>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">Employee Directory</div>
+                        <input type="text" id="empSearch" class="search-input" placeholder="Search employees...">
+                    </div>
+                    <div class="employee-list" id="employeeList"></div>
+                </div>
+            </div>
+
+            <!-- SCHEDULE TAB -->
+            <div class="tab-content" id="schedule-tab">
+                <div class="copy-week-section">
+                    <button class="copy-week-btn" id="copyWeekBtn">Copy Previous Week</button>
+                    <div id="copyWeekMessage" class="text-muted" style="margin-top: 0.5rem; font-size: 0.9rem;"></div>
+                </div>
+
+                <div class="schedule-header">
+                    <div class="week-navigator">
+                        <button class="nav-btn" id="prevWeekBtn">←</button>
+                        <div class="week-display" id="weekDisplay"></div>
+                        <button class="nav-btn" id="nextWeekBtn">→</button>
+                    </div>
+                </div>
+
+                <div class="schedule-grid-container" id="scheduleGrid"></div>
+
+                <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+                    <button class="btn-success" id="submitScheduleBtn">Submit & Notify</button>
+                    <button class="btn-secondary" id="resetScheduleBtn">Discard Changes</button>
+                </div>
+            </div>
+
+            <!-- TIME-OFF TAB -->
+            <div class="tab-content" id="timeoff-tab">
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">Pending Requests</div>
+                    </div>
+                    <div class="timeoff-list" id="timeoffList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shift Edit Modal -->
+    <div id="shiftModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">Edit Shift</div>
+            <div class="modal-content">
+                <div class="form-group">
+                    <label class="form-label">Employee</label>
+                    <div id="modalEmployeeName" style="font-weight: 500; color: var(--text-primary);"></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Day</label>
+                    <div id="modalDay" style="font-weight: 500; color: var(--text-primary);"></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Role</label>
+                    <select id="modalRole" class="form-select">
+                        <option value="">-- No Shift (Off) --</option>
+                        <option value="Bar">Bartender (Bar)</option>
+                        <option value="S">Server (S)</option>
+                        <option value="B">Busser/Host (B)</option>
+                        <option value="K">Kitchen (K)</option>
+                        <option value="D">Driver (D)</option>
+                        <option value="Expo">Expo (Expo)</option>
+                        <option value="FR">Food Runner (FR)</option>
+                        <option value="Host">Host</option>
+                    </select>
+                </div>
+                <div class="form-group" id="startTimeGroup">
+                    <label class="form-label">Start Time</label>
+                    <input type="text" id="modalStartTime" class="form-input" placeholder="e.g. 5 PM, 10:30 AM">
+                </div>
+                <div class="form-group" id="endTimeGroup">
+                    <label class="form-label">End Time</label>
+                    <input type="text" id="modalEndTime" class="form-input" placeholder="e.g. 11 PM, CL">
+                </div>
+                <div id="timeoffWarning" class="warning-banner hidden" style="margin-bottom: 1rem;">
+                    Warning: This employee has approved time-off on this date
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-secondary" id="modalCancel">Cancel</button>
+                <button class="modal-btn modal-btn-primary" id="modalSave">Save</button>
+                <button class="modal-btn modal-btn-secondary" id="modalClear" style="border-color: var(--red); color: var(--red);">Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Employee Edit Modal -->
+    <div id="employeeModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">Edit Employee</div>
+            <div class="modal-content">
+                <div class="form-group">
+                    <label class="form-label">First Name</label>
+                    <input type="text" id="editEmpFirstName" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Last Name</label>
+                    <input type="text" id="editEmpLastName" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" id="editEmpEmail" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone</label>
+                    <input type="tel" id="editEmpPhone" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Primary Role</label>
+                    <select id="editEmpPrimaryRole" class="form-select">
+                        <option value="Bartender">Bartender</option>
+                        <option value="Server">Server</option>
+                        <option value="Busser/Host">Busser/Host</option>
+                        <option value="Kitchen">Kitchen</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <select id="editEmpStatus" class="form-select">
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-secondary" id="editEmpCancel">Cancel</button>
+                <button class="modal-btn modal-btn-primary" id="editEmpSave">Save</button>
+                <button class="modal-btn modal-btn-secondary" id="editEmpDelete" style="border-color: var(--red); color: var(--red);">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ================================================================
+        // DATA MANAGEMENT
+        // ================================================================
+        let appData = {
+            employees: [],
+            schedules: {},
+            timeOffRequests: []
+        };
+
+        let currentWeekStart = getMonday(new Date());
+        let editingScheduleData = null;
+
+        // ================================================================
+        // INITIALIZATION
+        // ================================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginOverlay = document.getElementById('loginOverlay');
+            const mainApp = document.getElementById('mainApp');
+            const loginForm = document.getElementById('loginForm');
+
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const password = document.getElementById('passwordInput').value;
+                const errorEl = document.getElementById('loginError');
+                if (password === 'quarry2026') {
+                    loginOverlay.classList.add('hidden');
+                    mainApp.classList.remove('hidden');
+                    loadData();
+                    initializeApp();
+                } else {
+                    errorEl.textContent = 'Invalid password';
+                    errorEl.classList.remove('hidden');
+                }
+            });
+        });
+
+        function initializeApp() {
+            setupTabNavigation();
+            setupEmployeeTab();
+            setupScheduleTab();
+            setupTimeoffTab();
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+        }
+
+        function logout() {
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('loginOverlay').classList.remove('hidden');
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('loginError').classList.add('hidden');
+        }
+
+        // ================================================================
+        // DATA PERSISTENCE
+        // ================================================================
+        async function loadData() {
+            try {
+                const response = await fetch(`https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/schedule.json?t=${Date.now()}`);
+                if (response.ok) {
+                    appData = await response.json();
+                    editingScheduleData = JSON.parse(JSON.stringify(appData.schedules));
+                } else {
+                    appData = { employees: [], schedules: {}, timeOffRequests: [] };
+                    editingScheduleData = {};
+                }
+            } catch (err) {
+                console.warn('Could not load from GitHub, using empty data');
+                appData = { employees: [], schedules: {}, timeOffRequests: [] };
+                editingScheduleData = {};
+            }
+        }
+
+        async function saveScheduleData() {
+            try {
+                const response = await fetch('/.netlify/functions/save-schedule', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ schedules: editingScheduleData })
+                });
+                if (response.ok) {
+                    appData.schedules = JSON.parse(JSON.stringify(editingScheduleData));
+                    return true;
+                }
+            } catch (err) {
+                console.error('Error saving schedule:', err);
+            }
+            return false;
+        }
+
+        async function sendScheduleEmails() {
+            try {
+                const weekKey = formatWeekKey(currentWeekStart);
+                const response = await fetch('/.netlify/functions/send-schedule-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ weekStartDate: weekKey })
+                });
+                return response.ok;
+            } catch (err) {
+                console.error('Error sending emails:', err);
+            }
+            return false;
+        }
+
+        // ================================================================
+        // TAB NAVIGATION
+        // ================================================================
+        function setupTabNavigation() {
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+                    btn.classList.add('active');
+                    document.getElementById(`${btn.dataset.tab}-tab`).classList.add('active');
+                });
+            });
+        }
+
+        // ================================================================
+        // EMPLOYEE TAB
+        // ================================================================
+        function setupEmployeeTab() {
+            document.getElementById('addEmployeeBtn').addEventListener('click', addEmployee);
+            document.getElementById('empSearch').addEventListener('input', filterEmployees);
+            document.getElementById('editEmpCancel').addEventListener('click', () => closeModal('employeeModal'));
+            document.getElementById('editEmpSave').addEventListener('click', saveEmployeeEdit);
+            document.getElementById('editEmpDelete').addEventListener('click', deleteEmployee);
+            renderEmployeeList();
+        }
+
+        function addEmployee() {
+            const firstName = document.getElementById('empFirstName').value.trim();
+            const lastName = document.getElementById('empLastName').value.trim();
+            const email = document.getElementById('empEmail').value.trim();
+            const phone = document.getElementById('empPhone').value.trim();
+            const primaryRole = document.getElementById('empPrimaryRole').value;
+            const hireDate = document.getElementById('empHireDate').value;
+
+            if (!firstName || !lastName || !email) {
+                showError('Please fill in all required fields');
+                return;
+            }
+
+            const emp = {
+                id: 'emp-' + Date.now(),
+                name: firstName + ' ' + lastName,
+                firstName,
+                lastName,
+                email,
+                phone,
+                primaryRole,
+                secondaryRoles: [],
+                hireDate,
+                status: 'active',
+                passwordHash: ''
+            };
+
+            appData.employees.push(emp);
+            clearEmployeeForm();
+            renderEmployeeList();
+            showSuccess('Employee added');
+        }
+
+        function clearEmployeeForm() {
+            document.getElementById('empFirstName').value = '';
+            document.getElementById('empLastName').value = '';
+            document.getElementById('empEmail').value = '';
+            document.getElementById('empPhone').value = '';
+            document.getElementById('empPrimaryRole').value = 'Bartender';
+            document.getElementById('empHireDate').value = '';
+        }
+
+        function renderEmployeeList() {
+            const list = document.getElementById('employeeList');
+            if (appData.employees.length === 0) {
+                list.innerHTML = '<div style="padding: 2rem; text-align: center; color: var(--text-muted);">No employees yet</div>';
+                return;
+            }
+
+            list.innerHTML = appData.employees.map(emp => `
+                <div class="employee-row">
+                    <div class="employee-info">
+                        <div class="employee-name">${emp.firstName} ${emp.lastName}</div>
+                        <div class="employee-details">
+                            ${emp.email} | ${emp.phone || 'No phone'}
+                        </div>
+                        <div style="margin-top: 0.35rem;">
+                            <span class="employee-role-badge">${emp.primaryRole}</span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">
+                                ${emp.status === 'active' ? 'Active' : 'Inactive'}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="employee-actions">
+                        <button class="btn-small" onclick="editEmployee('${emp.id}')">Edit</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function editEmployee(empId) {
+            const emp = appData.employees.find(e => e.id === empId);
+            if (!emp) return;
+
+            document.getElementById('editEmpFirstName').value = emp.firstName;
+            document.getElementById('editEmpLastName').value = emp.lastName;
+            document.getElementById('editEmpEmail').value = emp.email;
+            document.getElementById('editEmpPhone').value = emp.phone;
+            document.getElementById('editEmpPrimaryRole').value = emp.primaryRole;
+            document.getElementById('editEmpStatus').value = emp.status;
+
+            document.getElementById('editEmpCancel').onclick = () => closeModal('employeeModal');
+            document.getElementById('editEmpSave').onclick = () => saveEmployeeEdit(empId);
+            document.getElementById('editEmpDelete').onclick = () => deleteEmployee(empId);
+
+            openModal('employeeModal');
+        }
+
+        function saveEmployeeEdit(empId) {
+            const emp = appData.employees.find(e => e.id === empId);
+            if (!emp) return;
+
+            emp.firstName = document.getElementById('editEmpFirstName').value;
+            emp.lastName = document.getElementById('editEmpLastName').value;
+            emp.name = emp.firstName + ' ' + emp.lastName;
+            emp.email = document.getElementById('editEmpEmail').value;
+            emp.phone = document.getElementById('editEmpPhone').value;
+            emp.primaryRole = document.getElementById('editEmpPrimaryRole').value;
+            emp.status = document.getElementById('editEmpStatus').value;
+
+            renderEmployeeList();
+            closeModal('employeeModal');
+            showSuccess('Employee updated');
+        }
+
+        function deleteEmployee(empId) {
+            appData.employees = appData.employees.filter(e => e.id !== empId);
+            renderEmployeeList();
+            closeModal('employeeModal');
+            showSuccess('Employee deleted');
+        }
+
+        function filterEmployees() {
+            const query = document.getElementById('empSearch').value.toLowerCase();
+            const rows = document.querySelectorAll('.employee-row');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(query) ? '' : 'none';
+            });
+        }
+
+        // ================================================================
+        // SCHEDULE TAB
+        // ================================================================
+        function setupScheduleTab() {
+            document.getElementById('prevWeekBtn').addEventListener('click', () => {
+                currentWeekStart = new Date(currentWeekStart);
+                currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+                renderScheduleGrid();
+            });
+
+            document.getElementById('nextWeekBtn').addEventListener('click', () => {
+                currentWeekStart = new Date(currentWeekStart);
+                currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+                renderScheduleGrid();
+            });
+
+            document.getElementById('copyWeekBtn').addEventListener('click', copyPreviousWeek);
+            document.getElementById('submitScheduleBtn').addEventListener('click', submitSchedule);
+            document.getElementById('resetScheduleBtn').addEventListener('click', resetSchedule);
+
+            document.getElementById('modalCancel').addEventListener('click', () => closeModal('shiftModal'));
+            document.getElementById('modalSave').addEventListener('click', saveShiftEdit);
+            document.getElementById('modalClear').addEventListener('click', clearShiftEdit);
+
+            document.getElementById('modalRole').addEventListener('change', updateTimeInputVisibility);
+
+            renderScheduleGrid();
+        }
+
+        function renderScheduleGrid() {
+            const weekKey = formatWeekKey(currentWeekStart);
+            const endDate = new Date(currentWeekStart);
+            endDate.setDate(endDate.getDate() + 6);
+
+            document.getElementById('weekDisplay').textContent =
+                formatDate(currentWeekStart) + ' - ' + formatDate(endDate);
+
+            const weekData = editingScheduleData[weekKey] || { shifts: {}, submitted: false };
+            editingScheduleData[weekKey] = weekData;
+
+            const grid = document.getElementById('scheduleGrid');
+            const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+            const dayKeys = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            const roles = ['Bartender', 'Server', 'Busser/Host', 'Kitchen'];
+
+            let html = `
+                <div class="schedule-grid-header">
+                    <div class="schedule-grid-header-cell"></div>
+                    ${days.map(d => `<div class="schedule-grid-header-cell">${d}</div>`).join('')}
+                </div>
+                <div class="schedule-grid-body">
+            `;
+
+            roles.forEach(role => {
+                const roleEmployees = appData.employees.filter(e => e.primaryRole === role && e.status === 'active');
+
+                html += `<div class="schedule-role-group">`;
+                html += `<div class="schedule-role-header">
+                    <div class="schedule-role-name">${role}</div>
+                    ${days.map(() => '').join('<div></div>')}
+                </div>`;
+
+                roleEmployees.forEach(emp => {
+                    if (!weekData.shifts[emp.id]) {
+                        weekData.shifts[emp.id] = {};
+                    }
+                    const empShifts = weekData.shifts[emp.id];
+
+                    html += `<div class="schedule-row">
+                        <div class="schedule-cell-name">${emp.firstName}</div>
+                    `;
+
+                    dayKeys.forEach((dayKey, idx) => {
+                        const shiftDate = new Date(currentWeekStart);
+                        shiftDate.setDate(shiftDate.getDate() + idx);
+                        const dateStr = shiftDate.toISOString().split('T')[0];
+
+                        const isClosed = dayKey === 'monday' || dayKey === 'tuesday';
+                        const shift = empShifts[dayKey];
+                        const hasTimeOff = appData.timeOffRequests.some(t =>
+                            t.employeeId === emp.id && t.dates.includes(dateStr) && t.status === 'approved'
+                        );
+
+                        let cellHTML = `<div class="schedule-cell ${isClosed ? 'closed' : ''} ${hasTimeOff ? 'warning' : ''}"
+                            onclick="editShift('${emp.id}', '${dayKey}', '${emp.firstName}', '${emp.primaryRole}')">
+                        `;
+
+                        if (shift && shift.role) {
+                            cellHTML += `<div class="shift-display">${shift.display || shift.role}</div>`;
+                        } else {
+                            cellHTML += `<div class="shift-off">x</div>`;
+                        }
+
+                        cellHTML += `</div>`;
+                        html += cellHTML;
+                    });
+
+                    html += `</div>`;
+                });
+
+                html += `</div>`;
+            });
+
+            html += `</div>`;
+            grid.innerHTML = html;
+        }
+
+        let currentEditShift = null;
+
+        function editShift(empId, dayKey, empName, role) {
+            currentEditShift = { empId, dayKey, empName, role };
+
+            const weekKey = formatWeekKey(currentWeekStart);
+            const weekData = editingScheduleData[weekKey];
+            const shift = weekData.shifts[empId][dayKey];
+
+            document.getElementById('modalEmployeeName').textContent = empName;
+            document.getElementById('modalDay').textContent = dayKey.charAt(0).toUpperCase() + dayKey.slice(1);
+            document.getElementById('modalRole').value = shift && shift.role ? shift.role : '';
+            document.getElementById('modalStartTime').value = shift && shift.startTime ? shift.startTime : '';
+            document.getElementById('modalEndTime').value = shift && shift.endTime ? shift.endTime : '';
+
+            const dayIdx = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].indexOf(dayKey);
+            const shiftDate = new Date(currentWeekStart);
+            shiftDate.setDate(shiftDate.getDate() + dayIdx);
+            const dateStr = shiftDate.toISOString().split('T')[0];
+
+            const hasTimeOff = appData.timeOffRequests.some(t =>
+                t.employeeId === empId && t.dates.includes(dateStr) && t.status === 'approved'
+            );
+            document.getElementById('timeoffWarning').classList.toggle('hidden', !hasTimeOff);
+
+            updateTimeInputVisibility();
+            openModal('shiftModal');
+        }
+
+        function updateTimeInputVisibility() {
+            const role = document.getElementById('modalRole').value;
+            const startGroup = document.getElementById('startTimeGroup');
+            const endGroup = document.getElementById('endTimeGroup');
+
+            if (role) {
+                startGroup.classList.remove('hidden');
+                endGroup.classList.remove('hidden');
+            } else {
+                startGroup.classList.add('hidden');
+                endGroup.classList.add('hidden');
+            }
+        }
+
+        function saveShiftEdit() {
+            if (!currentEditShift) return;
+
+            const { empId, dayKey } = currentEditShift;
+            const weekKey = formatWeekKey(currentWeekStart);
+            const weekData = editingScheduleData[weekKey];
+            const role = document.getElementById('modalRole').value;
+
+            if (!role) {
+                weekData.shifts[empId][dayKey] = null;
+            } else {
+                const startTime = document.getElementById('modalStartTime').value.trim();
+                const endTime = document.getElementById('modalEndTime').value.trim();
+
+                if (!startTime || !endTime) {
+                    showError('Please enter start and end times');
+                    return;
+                }
+
+                weekData.shifts[empId][dayKey] = {
+                    role,
+                    startTime,
+                    endTime,
+                    display: `${role} ${startTime}-${endTime}`
+                };
+            }
+
+            closeModal('shiftModal');
+            renderScheduleGrid();
+            showSuccess('Shift updated');
+        }
+
+        function clearShiftEdit() {
+            if (!currentEditShift) return;
+
+            const { empId, dayKey } = currentEditShift;
+            const weekKey = formatWeekKey(currentWeekStart);
+            editingScheduleData[weekKey].shifts[empId][dayKey] = null;
+
+            closeModal('shiftModal');
+            renderScheduleGrid();
+            showSuccess('Shift removed');
+        }
+
+        function copyPreviousWeek() {
+            const currentKey = formatWeekKey(currentWeekStart);
+            const prevStart = new Date(currentWeekStart);
+            prevStart.setDate(prevStart.getDate() - 7);
+            const prevKey = formatWeekKey(prevStart);
+
+            if (!editingScheduleData[prevKey]) {
+                showError('No previous week schedule to copy');
+                return;
+            }
+
+            const prevData = editingScheduleData[prevKey];
+            editingScheduleData[currentKey] = JSON.parse(JSON.stringify(prevData));
+
+            renderScheduleGrid();
+            document.getElementById('copyWeekMessage').textContent =
+                `Copied schedule from ${formatDate(prevStart)}. Make your adjustments and click Submit.`;
+            showSuccess('Schedule copied from previous week');
+        }
+
+        async function submitSchedule() {
+            const weekKey = formatWeekKey(currentWeekStart);
+            const weekData = editingScheduleData[weekKey];
+
+            weekData.submitted = true;
+            weekData.submittedAt = new Date().toISOString();
+
+            const saved = await saveScheduleData();
+            if (!saved) {
+                showError('Failed to save schedule');
+                return;
+            }
+
+            const emailed = await sendScheduleEmails();
+            const count = appData.employees.length;
+            showSuccess(`Schedule published! ${count} employees notified of changes.`);
+        }
+
+        function resetSchedule() {
+            editingScheduleData = JSON.parse(JSON.stringify(appData.schedules));
+            renderScheduleGrid();
+            showSuccess('Changes discarded');
+        }
+
+        // ================================================================
+        // TIME-OFF TAB
+        // ================================================================
+        function setupTimeoffTab() {
+            renderTimeoffList();
+        }
+
+        function renderTimeoffList() {
+            const list = document.getElementById('timeoffList');
+
+            if (appData.timeOffRequests.length === 0) {
+                list.innerHTML = '<div style="padding: 2rem; text-align: center; color: var(--text-muted);">No time-off requests</div>';
+                return;
+            }
+
+            list.innerHTML = appData.timeOffRequests.map(req => {
+                const emp = appData.employees.find(e => e.id === req.employeeId);
+                const empName = emp ? emp.name : 'Unknown';
+                const dateRange = req.dates.join(', ');
+
+                return `
+                    <div class="timeoff-item">
+                        <div class="timeoff-info">
+                            <div class="timeoff-status timeoff-status-${req.status}">${req.status.toUpperCase()}</div>
+                            <div class="timeoff-name">${empName}</div>
+                            <div class="timeoff-dates">${dateRange}</div>
+                            <div class="timeoff-reason">Reason: ${req.reason}</div>
+                        </div>
+                        <div class="timeoff-actions">
+                            ${req.status === 'pending' ? `
+                                <button class="btn-small" onclick="updateTimeoff('${req.id}', 'approved')">Approve</button>
+                                <button class="btn-danger" onclick="updateTimeoff('${req.id}', 'denied')">Deny</button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateTimeoff(reqId, status) {
+            const req = appData.timeOffRequests.find(r => r.id === reqId);
+            if (req) {
+                req.status = status;
+                req.reviewedAt = new Date().toISOString();
+                renderTimeoffList();
+                renderScheduleGrid();
+                showSuccess(`Time-off request ${status}`);
+            }
+        }
+
+        // ================================================================
+        // UTILITIES
+        // ================================================================
+        function getMonday(date) {
+            const d = new Date(date);
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            return new Date(d.setDate(diff));
+        }
+
+        function formatWeekKey(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function formatDate(date) {
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function showSuccess(message) {
+            const msg = document.createElement('div');
+            msg.className = 'success-message';
+            msg.textContent = message;
+            document.body.appendChild(msg);
+            setTimeout(() => msg.remove(), 3000);
+        }
+
+        function showError(message) {
+            const msg = document.createElement('div');
+            msg.className = 'error-message';
+            msg.textContent = message;
+            document.body.appendChild(msg);
+            setTimeout(() => msg.remove(), 3000);
+        }
+    </script>
+</body>
+</html>
