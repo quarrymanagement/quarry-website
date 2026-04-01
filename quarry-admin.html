@@ -11,40 +11,40 @@
            CSS CUSTOM PROPERTIES
            ================================================================ */
         :root {
-            --bg-primary: #0b0d0f;
-            --bg-secondary: #13161a;
-            --bg-card: #181c21;
-            --bg-elevated: #1e2228;
-            --bg-hover: #232830;
-            --border-subtle: #2a2f38;
-            --border-medium: #353b45;
-            --border-accent: #d4af37;
-            --text-primary: #f0f0f0;
-            --text-secondary: #a0a8b4;
-            --text-muted: #6b7280;
-            --gold: #d4af37;
-            --gold-light: #e5c458;
-            --gold-dim: rgba(212, 175, 55, 0.12);
-            --gold-glow: rgba(212, 175, 55, 0.08);
-            --green: #34d399;
-            --green-dim: rgba(52, 211, 153, 0.12);
-            --red: #f87171;
-            --red-dim: rgba(248, 113, 113, 0.12);
-            --blue: #60a5fa;
-            --blue-dim: rgba(96, 165, 250, 0.12);
-            --yellow: #fbbf24;
-            --yellow-dim: rgba(251, 191, 36, 0.12);
-            --radius-sm: 6px;
-            --radius-md: 10px;
-            --radius-lg: 14px;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
-            --shadow-md: 0 4px 16px rgba(0,0,0,0.35);
-            --shadow-lg: 0 8px 32px rgba(0,0,0,0.4);
-            --shadow-gold: 0 0 20px rgba(212, 175, 55, 0.08);
-            --transition: 0.2s ease;
+            --bg-primary: #f4f5f7;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --bg-elevated: #f0f1f3;
+            --bg-hover: #eef0f4;
+            --border-subtle: #e0e3e8;
+            --border-medium: #cdd1d8;
+            --border-accent: #9a7b2a;
+            --text-primary: #1c1f26;
+            --text-secondary: #4b5263;
+            --text-muted: #858d9e;
+            --gold: #9a7b2a;
+            --gold-light: #b08e30;
+            --gold-dim: rgba(154, 123, 42, 0.07);
+            --gold-glow: rgba(154, 123, 42, 0.04);
+            --green: #16a34a;
+            --green-dim: rgba(22, 163, 74, 0.08);
+            --red: #dc2626;
+            --red-dim: rgba(220, 38, 38, 0.06);
+            --blue: #2563eb;
+            --blue-dim: rgba(37, 99, 235, 0.06);
+            --yellow: #b45309;
+            --yellow-dim: rgba(180, 83, 9, 0.07);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04), 0 1px 4px rgba(0,0,0,0.03);
+            --shadow-md: 0 2px 8px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+            --shadow-lg: 0 4px 12px rgba(0,0,0,0.06), 0 12px 40px rgba(0,0,0,0.08);
+            --shadow-gold: 0 0 16px rgba(154, 123, 42, 0.05);
+            --transition: 0.15s ease;
             --font-sans: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
             --font-serif: 'Playfair Display', Georgia, serif;
-            --nav-height: 64px;
+            --nav-height: 60px;
         }
 
         /* ================================================================
@@ -122,7 +122,7 @@
             padding: 0 1.5rem; display: flex; align-items: center;
             justify-content: space-between; height: var(--nav-height);
             position: relative; z-index: 200;
-            box-shadow: 0 1px 8px rgba(0,0,0,0.25);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
         }
         .navbar-brand {
             font-family: var(--font-serif); font-size: 1.15rem;
@@ -331,13 +331,13 @@
         .form-textarea { resize: vertical; min-height: 100px; }
         .pricing-type-group { display: flex; gap: 1.5rem; }
         .radio-wrapper { display: flex; align-items: center; gap: 0.5rem; }
-        .radio-wrapper label { color: #e0e0e0; cursor: pointer; font-size: 0.95rem; }
+        .radio-wrapper label { color: #1c1f26; cursor: pointer; font-size: 0.95rem; }
         .image-upload-area {
-            border: 2px dashed #333; border-radius: 8px; padding: 2rem;
+            border: 2px dashed #e0e3e8; border-radius: 8px; padding: 2rem;
             text-align: center; cursor: pointer; transition: all 0.3s ease;
             position: relative; background: rgba(212, 175, 55, 0.05);
         }
-        .image-upload-area:hover { border-color: #d4af37; }
+        .image-upload-area:hover { border-color: #9a7b2a; }
         .image-upload-area input[type="file"] {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             opacity: 0; cursor: pointer;
@@ -345,28 +345,28 @@
         .image-preview { max-width: 100%; max-height: 200px; border-radius: 6px; margin-top: 1rem; }
         .highlights-preview { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
         .highlight-tag {
-            background: rgba(212, 175, 55, 0.2); color: #d4af37;
+            background: rgba(212, 175, 55, 0.2); color: #9a7b2a;
             padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem;
         }
-        .registrations-section { margin-top: 2rem; border-top: 1px solid #333; padding-top: 1.5rem; }
-        .registrations-section h4 { color: #d4af37; font-size: 1.1rem; margin-bottom: 1rem; }
+        .registrations-section { margin-top: 2rem; border-top: 1px solid #e0e3e8; padding-top: 1.5rem; }
+        .registrations-section h4 { color: #9a7b2a; font-size: 1.1rem; margin-bottom: 1rem; }
         .registrations-toolbar {
             display: flex; gap: 1rem; margin-bottom: 1rem; align-items: center;
         }
         .registrations-search { flex: 1; }
         .registrations-search input {
-            width: 100%; background: #0a0a0a; border: 1px solid #333;
-            color: #e0e0e0; padding: 0.5rem; border-radius: 4px; font-size: 0.9rem;
+            width: 100%; background: #f4f5f7; border: 1px solid #e0e3e8;
+            color: #1c1f26; padding: 0.5rem; border-radius: 4px; font-size: 0.9rem;
         }
         .registrations-table { width: 100%; border-collapse: collapse; }
         .registrations-table th, .registrations-table td {
-            padding: 0.5rem; text-align: left; border-bottom: 1px solid #2a2a2a;
+            padding: 0.5rem; text-align: left; border-bottom: 1px solid #e0e3e8;
             font-size: 0.85rem;
         }
-        .registrations-table th { color: #d4af37; font-weight: 600; }
+        .registrations-table th { color: #9a7b2a; font-weight: 600; }
         .editor-buttons { display: flex; gap: 1rem; margin-top: 2rem; }
         .btn-save {
-            flex: 1; background: #d4af37; color: #0a0a0a; border: none;
+            flex: 1; background: #9a7b2a; color: #fff; border: none;
             padding: 0.75rem; border-radius: 4px; cursor: pointer;
             font-weight: 600; font-size: 1rem; transition: all 0.3s ease;
             font-family: 'Montserrat', sans-serif;
@@ -374,10 +374,10 @@
         .btn-save:hover { background: #e5c158; }
         .btn-cancel {
             flex: 1; background: transparent; border: 1px solid #999;
-            color: #999; padding: 0.75rem; border-radius: 4px; cursor: pointer;
+            color: #858d9e; padding: 0.75rem; border-radius: 4px; cursor: pointer;
             font-size: 1rem; transition: all 0.3s ease; font-family: 'Montserrat', sans-serif;
         }
-        .btn-cancel:hover { border-color: #d4af37; color: #d4af37; }
+        .btn-cancel:hover { border-color: #9a7b2a; color: #9a7b2a; }
 
         /* ================================================================
            BANDS TAB
@@ -643,47 +643,47 @@
             display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;
         }
         .recipient-group { display: flex; flex-direction: column; gap: 0.25rem; }
-        .recipient-group label { color: #999; font-size: 0.8rem; }
+        .recipient-group label { color: #858d9e; font-size: 0.8rem; }
         .recipient-group select {
-            background: #0a0a0a; border: 1px solid #333; color: #e0e0e0;
+            background: #f4f5f7; border: 1px solid #e0e3e8; color: #1c1f26;
             padding: 0.5rem; border-radius: 4px; font-size: 0.9rem;
         }
-        .recipient-count { color: #d4af37; font-weight: 600; font-size: 0.9rem; padding-bottom: 0.5rem; }
+        .recipient-count { color: #9a7b2a; font-weight: 600; font-size: 0.9rem; padding-bottom: 0.5rem; }
         .email-actions { display: flex; gap: 1rem; }
         .btn-test {
-            background: transparent; border: 1px solid #d4af37; color: #d4af37;
+            background: transparent; border: 1px solid #d4af37; color: #9a7b2a;
             padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer;
             font-weight: 600; transition: all 0.3s ease; font-family: 'Montserrat', sans-serif;
         }
         .btn-test:hover { background: rgba(212, 175, 55, 0.15); }
         .btn-send {
-            background: #d4af37; color: #0a0a0a; border: none;
+            background: #9a7b2a; color: #fff; border: none;
             padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer;
             font-weight: 600; transition: all 0.3s ease; font-family: 'Montserrat', sans-serif;
         }
         .btn-send:hover { background: #e5c158; }
         .email-history { margin-top: 1.5rem; }
-        .email-history h4 { color: #e0e0e0; margin-bottom: 0.5rem; }
+        .email-history h4 { color: #1c1f26; margin-bottom: 0.5rem; }
         .history-table { width: 100%; border-collapse: collapse; }
         .history-table th, .history-table td {
-            padding: 0.5rem; text-align: left; border-bottom: 1px solid #2a2a2a;
+            padding: 0.5rem; text-align: left; border-bottom: 1px solid #e0e3e8;
             font-size: 0.85rem;
         }
-        .history-table th { color: #d4af37; }
+        .history-table th { color: #9a7b2a; }
         .email-preview-section { display: flex; flex-direction: column; gap: 1rem; }
-        .email-preview-section h3 { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: #e0e0e0; }
+        .email-preview-section h3 { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: #1c1f26; }
         .email-preview {
-            background: #fff; border-radius: 8px; overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3); flex: 1;
+            background: #fff; border-radius: var(--radius-md); overflow: hidden;
+            box-shadow: var(--shadow-md); flex: 1; border: 1px solid var(--border-subtle);
         }
         .email-preview-content { padding: 0; }
         .email-preview-header {
-            background: #1a1a1a; padding: 1.5rem; text-align: center;
-            border-bottom: 3px solid #d4af37;
+            background: var(--bg-elevated); padding: 1.5rem; text-align: center;
+            border-bottom: 2px solid var(--gold);
         }
         .email-preview-logo {
             font-family: 'Playfair Display', serif; font-size: 1.5rem;
-            color: #d4af37; font-weight: 700;
+            color: #9a7b2a; font-weight: 700;
         }
         .email-preview-body { padding: 1.5rem; color: #333; font-size: 0.95rem; line-height: 1.6; min-height: 200px; }
 
@@ -747,7 +747,7 @@
            ================================================================ */
         .success-message {
             position: fixed; top: 1rem; right: 1rem; background: var(--green);
-            color: #0a0a0a; padding: 0.85rem 1.25rem; border-radius: var(--radius-md);
+            color: #fff; padding: 0.85rem 1.25rem; border-radius: var(--radius-md);
             font-weight: 600; font-size: 0.88rem;
             z-index: 10000; animation: slideIn 0.3s ease;
             box-shadow: 0 4px 16px rgba(52, 211, 153, 0.3);
@@ -1059,7 +1059,7 @@
                     <button class="btn-primary" id="addEventBtn">+ Add Event</button>
                 </div>
                 <div class="events-grid" id="eventsGrid">
-                    <div style="grid-column: 1/-1; text-align: center; color: #999;">Loading events...</div>
+                    <div style="grid-column: 1/-1; text-align: center; color: #858d9e;">Loading events...</div>
                 </div>
             </div>
 
@@ -1084,7 +1084,7 @@
                         </thead>
                         <tbody id="bandsTableBody">
                             <tr>
-                                <td colspan="5" style="text-align: center; color: #999;">Loading bands...</td>
+                                <td colspan="5" style="text-align: center; color: #858d9e;">Loading bands...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -1100,7 +1100,7 @@
                     <div style="display: flex; gap: 0.5rem; align-items: center;">
                         <input type="text" id="floorPlanName" class="form-input" placeholder="Floor plan name..." style="width: 200px; height: 36px; font-size: 0.85rem;">
                         <button class="btn-primary" id="addTableBtn">+ Add Table</button>
-                        <button class="btn-primary" id="saveFloorPlanBtn" style="background: transparent; color: #d4af37; border: 1px solid #d4af37;">Save Floor Plan</button>
+                        <button class="btn-primary" id="saveFloorPlanBtn" style="background: transparent; color: #9a7b2a; border: 1px solid #d4af37;">Save Floor Plan</button>
                         <button class="btn-primary" id="newFloorPlanBtn" style="background: transparent; color: #4ade80; border: 1px solid #4ade80;">New</button>
                     </div>
                 </div>
@@ -1109,8 +1109,8 @@
                     <button id="fpToolSelect" class="active">Select</button>
                     <button id="fpToolRect">Rectangle</button>
                     <button id="fpToolCircle">Circle</button>
-                    <span style="color: #666; margin: 0 0.5rem;">|</span>
-                    <span style="color: #999; font-size: 0.85rem;">Tables: <span id="fpTableCount">0</span> | Total Seats: <span id="fpTotalSeats">0</span></span>
+                    <span style="color: #858d9e; margin: 0 0.5rem;">|</span>
+                    <span style="color: #858d9e; font-size: 0.85rem;">Tables: <span id="fpTableCount">0</span> | Total Seats: <span id="fpTotalSeats">0</span></span>
                 </div>
                 <div class="floorplan-container" id="floorplanContainer">
                     <canvas class="floorplan-canvas" id="floorplanCanvas"></canvas>
@@ -1151,7 +1151,7 @@
                  ======================================================== -->
             <div id="paymentsTab" class="tab-content">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                    <h2 style="font-family: 'Playfair Display', serif; font-size: 2rem; color: #e0e0e0;">Payments & Invoicing</h2>
+                    <h2 style="font-family: 'Playfair Display', serif; font-size: 2rem; color: #1c1f26;">Payments & Invoicing</h2>
                 </div>
 
                 <div class="dashboard-grid" style="margin-bottom: 2rem;">
@@ -1171,7 +1171,7 @@
 
                 <div style="margin-bottom: 2rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                        <h3 style="color: #e0e0e0;">Invoices</h3>
+                        <h3 style="color: #1c1f26;">Invoices</h3>
                         <button class="btn-primary" id="createInvoiceBtn">+ Create Invoice</button>
                     </div>
                     <div style="overflow-x: auto;">
@@ -1187,7 +1187,7 @@
                                 </tr>
                             </thead>
                             <tbody id="invoicesTableBody">
-                                <tr><td colspan="6" style="text-align: center; color: #999;">Loading invoices...</td></tr>
+                                <tr><td colspan="6" style="text-align: center; color: #858d9e;">Loading invoices...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -1195,7 +1195,7 @@
 
                 <div style="margin-bottom: 2rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                        <h3 style="color: #e0e0e0;">Subscriptions</h3>
+                        <h3 style="color: #1c1f26;">Subscriptions</h3>
                     </div>
                     <div style="overflow-x: auto;">
                         <table class="bands-table" id="subscriptionsTable">
@@ -1209,7 +1209,7 @@
                                 </tr>
                             </thead>
                             <tbody id="subscriptionsTableBody">
-                                <tr><td colspan="5" style="text-align: center; color: #999;">Loading subscriptions...</td></tr>
+                                <tr><td colspan="5" style="text-align: center; color: #858d9e;">Loading subscriptions...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -1217,10 +1217,10 @@
 
                 <div>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                        <h3 style="color: #e0e0e0;">Payment Links</h3>
+                        <h3 style="color: #1c1f26;">Payment Links</h3>
                         <button class="btn-primary" id="createPaymentLinkBtn">+ Create Payment Link</button>
                     </div>
-                    <div id="paymentLinksContainer" style="color: #999;">No payment links created yet.</div>
+                    <div id="paymentLinksContainer" style="color: #858d9e;">No payment links created yet.</div>
                 </div>
             </div>
 
@@ -1269,7 +1269,7 @@
                 </div>
 
                 <div id="bulkActionsBar" class="bulk-actions hidden" style="margin-bottom: 1rem;">
-                    <span id="selectedCount" style="color: #d4af37; font-weight: 600;"></span>
+                    <span id="selectedCount" style="color: #9a7b2a; font-weight: 600;"></span>
                     <button id="emailSelectedBtn">Email Selected</button>
                     <button id="addTagBtn">Add Tag</button>
                     <button id="exportSelectedBtn">Export Selected</button>
@@ -1291,7 +1291,7 @@
                         </thead>
                         <tbody id="crmTableBody">
                             <tr>
-                                <td colspan="8" style="text-align: center; color: #999;">Loading contacts...</td>
+                                <td colspan="8" style="text-align: center; color: #858d9e;">Loading contacts...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -1306,7 +1306,7 @@
             <div id="potentialTab" class="tab-content">
                 <div class="crm-header">
                     <h2>Potential Reservations</h2>
-                    <button onclick="loadPotentialEvents()" style="background:transparent;border:1px solid #d4af37;color:#d4af37;padding:0.5rem 1rem;border-radius:4px;cursor:pointer;font-size:0.85rem;font-weight:500;">Refresh</button>
+                    <button onclick="loadPotentialEvents()" style="background:transparent;border:1px solid #d4af37;color:#9a7b2a;padding:0.5rem 1rem;border-radius:4px;cursor:pointer;font-size:0.85rem;font-weight:500;">Refresh</button>
                 </div>
 
                 <div class="crm-stats" style="grid-template-columns: repeat(3, 1fr);">
@@ -1350,7 +1350,7 @@
                         </thead>
                         <tbody id="potentialTableBody">
                             <tr>
-                                <td colspan="9" style="text-align: center; color: #999;">Loading potential reservations from Gmail...</td>
+                                <td colspan="9" style="text-align: center; color: #858d9e;">Loading potential reservations from Gmail...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -1363,7 +1363,7 @@
             <div id="confirmedTab" class="tab-content">
                 <div class="crm-header">
                     <h2>Confirmed Reservations</h2>
-                    <button onclick="loadConfirmedEvents()" style="background:transparent;border:1px solid #d4af37;color:#d4af37;padding:0.5rem 1rem;border-radius:4px;cursor:pointer;font-size:0.85rem;font-weight:500;">Refresh</button>
+                    <button onclick="loadConfirmedEvents()" style="background:transparent;border:1px solid #d4af37;color:#9a7b2a;padding:0.5rem 1rem;border-radius:4px;cursor:pointer;font-size:0.85rem;font-weight:500;">Refresh</button>
                 </div>
 
                 <div class="crm-stats" style="grid-template-columns: repeat(3, 1fr);">
@@ -1407,7 +1407,7 @@
                         </thead>
                         <tbody id="confirmedTableBody">
                             <tr>
-                                <td colspan="9" style="text-align: center; color: #999;">Loading confirmed reservations from Google Calendar...</td>
+                                <td colspan="9" style="text-align: center; color: #858d9e;">Loading confirmed reservations from Google Calendar...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -1486,7 +1486,7 @@
                                 </thead>
                                 <tbody id="emailHistoryTable">
                                     <tr>
-                                        <td colspan="4" style="text-align: center; color: #999;">No campaigns sent yet</td>
+                                        <td colspan="4" style="text-align: center; color: #858d9e;">No campaigns sent yet</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -1553,7 +1553,7 @@
                 <label class="form-label">Event Image</label>
                 <div class="image-upload-area" id="imageUploadArea">
                     <input type="file" id="imageInput" accept="image/*">
-                    <div style="color: #999; font-size: 0.9rem;">
+                    <div style="color: #858d9e; font-size: 0.9rem;">
                         <div style="margin-bottom: 0.5rem;">Click to upload or drag image</div>
                         <div style="font-size: 0.8rem;">PNG, JPG up to 5MB</div>
                     </div>
@@ -1647,7 +1647,7 @@
                         </tr>
                     </thead>
                     <tbody id="registrationsTable">
-                        <tr><td colspan="7" style="text-align: center; color: #999;">No registrations yet</td></tr>
+                        <tr><td colspan="7" style="text-align: center; color: #858d9e;">No registrations yet</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -1677,39 +1677,39 @@
                 <div class="info-item"><div class="info-label">Last Activity</div><div class="info-value" id="subscriberLastActivity"></div></div>
             </div>
 
-            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #333;">
-                <h4 style="color: #d4af37; margin-bottom: 0.75rem;">Tags</h4>
+            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #e0e3e8;">
+                <h4 style="color: #9a7b2a; margin-bottom: 0.75rem;">Tags</h4>
                 <div id="subscriberTags" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem;"></div>
                 <div style="display: flex; gap: 0.5rem;">
-                    <input type="text" id="newTagInput" placeholder="Add tag..." style="flex: 1; background: #0a0a0a; border: 1px solid #333; color: #e0e0e0; padding: 0.4rem; border-radius: 4px; font-size: 0.85rem;">
+                    <input type="text" id="newTagInput" placeholder="Add tag..." style="flex: 1; background: #f4f5f7; border: 1px solid #e0e3e8; color: #1c1f26; padding: 0.4rem; border-radius: 4px; font-size: 0.85rem;">
                     <button class="btn-small" id="addTagToContact" style="flex: 0; padding: 0.4rem 0.8rem;">Add</button>
                 </div>
             </div>
 
-            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #333;">
+            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #e0e3e8;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                    <h4 style="color: #d4af37; margin: 0;">Email Thread</h4>
+                    <h4 style="color: #9a7b2a; margin: 0;">Email Thread</h4>
                     <a id="subscriberGmailLink" href="#" target="_blank" style="color: #60a5fa; font-size: 0.8rem; text-decoration: none;">Open in Gmail &rarr;</a>
                 </div>
                 <div id="subscriberEmailThread" style="display: flex; flex-direction: column; gap: 0.5rem;">
-                    <div style="color: #999; font-size: 0.85rem; text-align: center; padding: 0.75rem;">No emails found</div>
+                    <div style="color: #858d9e; font-size: 0.85rem; text-align: center; padding: 0.75rem;">No emails found</div>
                 </div>
             </div>
 
-            <div class="event-history" style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #333;">
-                <h4 style="color: #d4af37; margin-bottom: 0.75rem;">Activity Timeline</h4>
+            <div class="event-history" style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #e0e3e8;">
+                <h4 style="color: #9a7b2a; margin-bottom: 0.75rem;">Activity Timeline</h4>
                 <div id="subscriberEventHistory" style="display: flex; flex-direction: column; gap: 0.75rem;">
-                    <div style="color: #999; font-size: 0.9rem; text-align: center;">No activity yet</div>
+                    <div style="color: #858d9e; font-size: 0.9rem; text-align: center;">No activity yet</div>
                 </div>
             </div>
 
-            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #333;">
+            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #e0e3e8;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                    <h4 style="color: #d4af37; margin: 0;">Notes</h4>
-                    <span id="lastNoteDate" style="color: #666; font-size: 0.75rem;"></span>
+                    <h4 style="color: #9a7b2a; margin: 0;">Notes</h4>
+                    <span id="lastNoteDate" style="color: #858d9e; font-size: 0.75rem;"></span>
                 </div>
                 <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
-                    <textarea id="newNoteText" placeholder="Add a note about this contact..." style="flex: 1; background: #0a0a0a; border: 1px solid #333; color: #e0e0e0; padding: 0.5rem; border-radius: 4px; font-size: 0.85rem; min-height: 60px; resize: vertical; font-family: 'Montserrat', sans-serif;"></textarea>
+                    <textarea id="newNoteText" placeholder="Add a note about this contact..." style="flex: 1; background: #f4f5f7; border: 1px solid #e0e3e8; color: #1c1f26; padding: 0.5rem; border-radius: 4px; font-size: 0.85rem; min-height: 60px; resize: vertical; font-family: 'Montserrat', sans-serif;"></textarea>
                 </div>
                 <button class="btn-small" id="addNoteBtn" style="margin-bottom: 1rem; padding: 0.5rem 1rem;">Save Note</button>
                 <div id="contactNotesList" style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
@@ -1766,7 +1766,7 @@
         <div class="modal">
             <h2 class="modal-header">GitHub Settings</h2>
             <div class="modal-content">
-                <p style="margin-bottom: 1rem; color: #999; font-size: 0.9rem;">Enter your GitHub Personal Access Token to enable saving directly to your repository.</p>
+                <p style="margin-bottom: 1rem; color: #858d9e; font-size: 0.9rem;">Enter your GitHub Personal Access Token to enable saving directly to your repository.</p>
                 <div class="form-group">
                     <label class="form-label">GitHub Token</label>
                     <input type="password" class="form-input" id="githubTokenInput" placeholder="ghp_xxxxxxxxxxxx">
@@ -2006,7 +2006,7 @@
 
         async function loadPotentialEvents() {
             const tbody = document.getElementById('potentialTableBody');
-            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#999;padding:2rem;"><div class="spinner" style="width:24px;height:24px;margin:0 auto 0.5rem;"></div>Loading potential reservations from Gmail...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#858d9e;padding:2rem;"><div class="spinner" style="width:24px;height:24px;margin:0 auto 0.5rem;"></div>Loading potential reservations from Gmail...</td></tr>';
 
             try {
                 const res = await fetch(`/.netlify/functions/gmail-label-threads?labelId=${POTENTIAL_LABEL_ID}`);
@@ -2032,7 +2032,7 @@
 
             } catch (err) {
                 console.error('Error loading potential reservations:', err);
-                tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:#ff6b6b;padding:2rem;">Failed to load: ${escapeHtml(err.message)}<br><button onclick="loadPotentialEvents()" style="margin-top:0.5rem;background:#d4af37;color:#0a0a0a;border:none;padding:0.4rem 0.8rem;border-radius:4px;cursor:pointer;">Retry</button></td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:#dc2626;padding:2rem;">Failed to load: ${escapeHtml(err.message)}<br><button onclick="loadPotentialEvents()" style="margin-top:0.5rem;background:#9a7b2a;color:#fff;border:none;padding:0.4rem 0.8rem;border-radius:4px;cursor:pointer;">Retry</button></td></tr>`;
             }
         }
 
@@ -2041,7 +2041,7 @@
             const events = app.potentialEventsFiltered.length > 0 ? app.potentialEventsFiltered : app.potentialEvents;
 
             if (events.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#999;padding:2rem;">No potential reservations found.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#858d9e;padding:2rem;">No potential reservations found.</td></tr>';
                 return;
             }
 
@@ -2059,12 +2059,12 @@
                 const guests = c.guests || '';
                 const isMatched = thread._matched;
                 const statusHtml = isMatched
-                    ? '<span style="color:#4ade80;font-weight:600;font-size:0.8rem;">Confirmed</span>'
+                    ? '<span style="color:#16a34a;font-weight:600;font-size:0.8rem;">Confirmed</span>'
                     : '<span style="color:#f59e0b;font-size:0.8rem;">Pending</span>';
 
                 return `
                     <tr style="${isMatched ? 'opacity:0.65;' : ''}" onclick="openPotentialDetail('${thread.id}')" class="clickable-row">
-                        <td style="font-weight:500;color:#e0e0e0;">${escapeHtml(name)}</td>
+                        <td style="font-weight:500;color:#1c1f26;">${escapeHtml(name)}</td>
                         <td>${escapeHtml(email)}</td>
                         <td>${escapeHtml(phone)}</td>
                         <td>${escapeHtml(occasion)}</td>
@@ -2073,8 +2073,8 @@
                         <td>${date}</td>
                         <td>${statusHtml}</td>
                         <td>
-                            <a href="${thread.link || '#'}" target="_blank" onclick="event.stopPropagation()" style="color:#d4af37;text-decoration:none;font-size:0.8rem;">Gmail</a>
-                            ${email ? ` · <a href="mailto:${encodeURIComponent(email)}" onclick="event.stopPropagation()" style="color:#d4af37;text-decoration:none;font-size:0.8rem;">Email</a>` : ''}
+                            <a href="${thread.link || '#'}" target="_blank" onclick="event.stopPropagation()" style="color:#9a7b2a;text-decoration:none;font-size:0.8rem;">Gmail</a>
+                            ${email ? ` · <a href="mailto:${encodeURIComponent(email)}" onclick="event.stopPropagation()" style="color:#9a7b2a;text-decoration:none;font-size:0.8rem;">Email</a>` : ''}
                         </td>
                     </tr>
                 `;
@@ -2119,7 +2119,7 @@
         // ================================================================
         async function loadConfirmedEvents() {
             const tbody = document.getElementById('confirmedTableBody');
-            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#999;padding:2rem;"><div class="spinner" style="width:24px;height:24px;margin:0 auto 0.5rem;"></div>Loading confirmed reservations...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#858d9e;padding:2rem;"><div class="spinner" style="width:24px;height:24px;margin:0 auto 0.5rem;"></div>Loading confirmed reservations...</td></tr>';
 
             try {
                 // PRIMARY SOURCE: Google Sheet "Events at The Quarry"
@@ -2235,7 +2235,7 @@
 
             } catch (err) {
                 console.error('Error loading confirmed reservations:', err);
-                tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:#ff6b6b;padding:2rem;">Failed to load: ${escapeHtml(err.message)}<br><button onclick="loadConfirmedEvents()" style="margin-top:0.5rem;background:#d4af37;color:#0a0a0a;border:none;padding:0.4rem 0.8rem;border-radius:4px;cursor:pointer;">Retry</button></td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:#dc2626;padding:2rem;">Failed to load: ${escapeHtml(err.message)}<br><button onclick="loadConfirmedEvents()" style="margin-top:0.5rem;background:#9a7b2a;color:#fff;border:none;padding:0.4rem 0.8rem;border-radius:4px;cursor:pointer;">Retry</button></td></tr>`;
             }
         }
 
@@ -2244,7 +2244,7 @@
             const events = app.confirmedEventsFiltered.length > 0 ? app.confirmedEventsFiltered : app.confirmedEvents;
 
             if (events.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#999;padding:2rem;">No confirmed reservations found.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#858d9e;padding:2rem;">No confirmed reservations found.</td></tr>';
                 return;
             }
 
@@ -2258,12 +2258,12 @@
                 const location = evt.location || '';
                 const isPast = new Date(evt.start) < new Date();
                 const statusHtml = isPast
-                    ? (evt._past ? '<span style="color:#60a5fa;font-size:0.8rem;">Moved to CRM</span>' : '<span style="color:#999;font-size:0.8rem;">Past</span>')
-                    : '<span style="color:#4ade80;font-size:0.8rem;">Upcoming</span>';
+                    ? (evt._past ? '<span style="color:#2563eb;font-size:0.8rem;">Moved to CRM</span>' : '<span style="color:#858d9e;font-size:0.8rem;">Past</span>')
+                    : '<span style="color:#16a34a;font-size:0.8rem;">Upcoming</span>';
 
                 return `
-                    <tr style="${isPast ? 'opacity:0.55;' : ''}" onclick="openConfirmedDetail('${evt.id}')" class="clickable-row">
-                        <td style="font-weight:500;color:#e0e0e0;">${escapeHtml(evt.summary || '(No title)')}</td>
+                    <tr style="${isPast ? 'opacity:0.5;' : ''}" onclick="openConfirmedDetail('${evt.id}')" class="clickable-row">
+                        <td style="font-weight:500;color:#1c1f26;">${escapeHtml(evt.summary || '(No title)')}</td>
                         <td>${escapeHtml(name)}</td>
                         <td>${escapeHtml(email)}</td>
                         <td>${escapeHtml(phone)}</td>
@@ -2272,8 +2272,8 @@
                         <td>${escapeHtml(location.length > 30 ? location.substring(0, 30) + '...' : location)}</td>
                         <td>${statusHtml}</td>
                         <td>
-                            ${evt.htmlLink ? `<a href="${evt.htmlLink}" target="_blank" onclick="event.stopPropagation()" style="color:#d4af37;text-decoration:none;font-size:0.8rem;">Calendar</a>` : ''}
-                            ${email ? ` · <a href="mailto:${encodeURIComponent(email)}" onclick="event.stopPropagation()" style="color:#d4af37;text-decoration:none;font-size:0.8rem;">Email</a>` : ''}
+                            ${evt.htmlLink ? `<a href="${evt.htmlLink}" target="_blank" onclick="event.stopPropagation()" style="color:#9a7b2a;text-decoration:none;font-size:0.8rem;">Calendar</a>` : ''}
+                            ${email ? ` · <a href="mailto:${encodeURIComponent(email)}" onclick="event.stopPropagation()" style="color:#9a7b2a;text-decoration:none;font-size:0.8rem;">Email</a>` : ''}
                         </td>
                     </tr>
                 `;
@@ -2342,10 +2342,10 @@
             // Load email thread for this contact
             const emailThreadEl = document.getElementById('subscriberEmailThread');
             if (contactEmail) {
-                emailThreadEl.innerHTML = '<div style="color: #999; font-size: 0.85rem; text-align: center; padding: 0.75rem;"><div class="spinner" style="width:20px;height:20px;margin:0 auto 0.5rem;"></div>Loading emails...</div>';
+                emailThreadEl.innerHTML = '<div style="color: #858d9e; font-size: 0.85rem; text-align: center; padding: 0.75rem;"><div class="spinner" style="width:20px;height:20px;margin:0 auto 0.5rem;"></div>Loading emails...</div>';
                 loadContactEmails(contactEmail);
             } else {
-                emailThreadEl.innerHTML = '<div style="color: #999; font-size: 0.85rem; text-align: center; padding: 0.75rem;">No email address available for this reservation</div>';
+                emailThreadEl.innerHTML = '<div style="color: #858d9e; font-size: 0.85rem; text-align: center; padding: 0.75rem;">No email address available for this reservation</div>';
             }
 
             // Build activity timeline from event info
@@ -2362,7 +2362,7 @@
                 timeline.push({
                     type: 'calendar',
                     label: 'View in Google Calendar',
-                    detail: `<a href="${evt.htmlLink}" target="_blank" style="color:#60a5fa;text-decoration:none;">Open Calendar Event &rarr;</a>`,
+                    detail: `<a href="${evt.htmlLink}" target="_blank" style="color:#2563eb;text-decoration:none;">Open Calendar Event &rarr;</a>`,
                     date: '',
                     icon: '🔗',
                 });
@@ -2672,7 +2672,7 @@
             activities.sort((a, b) => b.date - a.date);
 
             if (activities.length === 0) {
-                feed.innerHTML = '<div class="activity-item"><span style="color: #999;">No recent activity</span></div>';
+                feed.innerHTML = '<div class="activity-item"><span style="color: #858d9e;">No recent activity</span></div>';
                 return;
             }
 
@@ -2680,7 +2680,7 @@
                 <div class="activity-item">
                     <div>
                         <span class="activity-event">${activity.name}</span><br>
-                        <span style="color: #999; font-size: 0.85rem;">${activity.user} - $${parseFloat(activity.amount).toFixed(2)}</span>
+                        <span style="color: #858d9e; font-size: 0.85rem;">${activity.user} - $${parseFloat(activity.amount).toFixed(2)}</span>
                     </div>
                     <span class="activity-time">${formatTimeAgo(activity.date)}</span>
                 </div>
@@ -2711,7 +2711,7 @@
             const grid = document.getElementById('eventsGrid');
 
             if (app.events.length === 0) {
-                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #999; padding: 3rem;">No events found. Create your first event!</div>';
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #858d9e; padding: 3rem;">No events found. Create your first event!</div>';
                 return;
             }
 
@@ -2875,7 +2875,7 @@
         function populateRegistrationsTable(registrations) {
             const tbody = document.getElementById('registrationsTable');
             if (!registrations || registrations.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #999;">No registrations yet</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #858d9e;">No registrations yet</td></tr>';
                 return;
             }
 
@@ -3017,7 +3017,7 @@
         function updateBands() {
             const tbody = document.getElementById('bandsTableBody');
             if (!app.bands || app.bands.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">No bands scheduled</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #858d9e;">No bands scheduled</td></tr>';
                 return;
             }
 
@@ -3165,7 +3165,7 @@
                 const colors = { table: '#4ade80', hightop: '#818cf8', couch: '#fbbf24' };
                 const color = colors[table.type] || '#4ade80';
 
-                ctx.fillStyle = isSelected ? '#d4af37' : color;
+                ctx.fillStyle = isSelected ? '#9a7b2a' : color;
                 ctx.globalAlpha = isSelected ? 0.4 : 0.25;
 
                 if (table.shape === 'circle') {
@@ -3173,7 +3173,7 @@
                     ctx.arc(table.x + table.width/2, table.y + table.height/2, table.width/2, 0, Math.PI * 2);
                     ctx.fill();
                     ctx.globalAlpha = 1;
-                    ctx.strokeStyle = isSelected ? '#d4af37' : color;
+                    ctx.strokeStyle = isSelected ? '#9a7b2a' : color;
                     ctx.lineWidth = isSelected ? 3 : 2;
                     ctx.stroke();
                 } else if (table.shape === 'diamond') {
@@ -3186,13 +3186,13 @@
                     ctx.closePath();
                     ctx.fill();
                     ctx.globalAlpha = 1;
-                    ctx.strokeStyle = isSelected ? '#d4af37' : color;
+                    ctx.strokeStyle = isSelected ? '#9a7b2a' : color;
                     ctx.lineWidth = isSelected ? 3 : 2;
                     ctx.stroke();
                 } else {
                     ctx.fillRect(table.x, table.y, table.width, table.height);
                     ctx.globalAlpha = 1;
-                    ctx.strokeStyle = isSelected ? '#d4af37' : color;
+                    ctx.strokeStyle = isSelected ? '#9a7b2a' : color;
                     ctx.lineWidth = isSelected ? 3 : 2;
                     ctx.strokeRect(table.x, table.y, table.width, table.height);
                 }
@@ -3360,11 +3360,11 @@
         function renderSavedFloorPlans() {
             const container = document.getElementById('savedFloorPlansList');
             if (app.floorPlans.length === 0) {
-                container.innerHTML = '<span style="color:#666;font-size:0.85rem;">No saved floor plans yet.</span>';
+                container.innerHTML = '<span style="color:#858d9e;font-size:0.85rem;">No saved floor plans yet.</span>';
                 return;
             }
             container.innerHTML = app.floorPlans.map(fp => `
-                <div style="display:inline-flex;align-items:center;gap:4px;background:${fp.id === app.currentFloorPlanId ? '#d4af37' : '#2a2a2a'};color:${fp.id === app.currentFloorPlanId ? '#000' : '#e0e0e0'};padding:4px 12px;border-radius:20px;cursor:pointer;font-size:0.85rem;border:1px solid ${fp.id === app.currentFloorPlanId ? '#d4af37' : '#444'};" onclick="loadFloorPlan('${fp.id}')">
+                <div style="display:inline-flex;align-items:center;gap:4px;background:${fp.id === app.currentFloorPlanId ? '#9a7b2a' : '#f0f1f3'};color:${fp.id === app.currentFloorPlanId ? '#fff' : '#1c1f26'};padding:4px 12px;border-radius:20px;cursor:pointer;font-size:0.85rem;border:1px solid ${fp.id === app.currentFloorPlanId ? '#9a7b2a' : '#e0e3e8'};" onclick="loadFloorPlan('${fp.id}')">
                     ${escapeHtml(fp.name)} <span style="color:${fp.id === app.currentFloorPlanId ? '#333' : '#999'};font-size:0.75rem;">(${(fp.tables || []).length} tables)</span>
                     <span onclick="event.stopPropagation();deleteFloorPlan('${fp.id}')" style="margin-left:4px;cursor:pointer;color:${fp.id === app.currentFloorPlanId ? '#600' : '#f87171'};font-weight:bold;">&times;</span>
                 </div>
@@ -3591,7 +3591,7 @@
             const notes = (app.crmNotes[email] || []).slice().sort((a, b) => new Date(b.timestamp || b.date || 0) - new Date(a.timestamp || a.date || 0));
             const container = document.getElementById('contactNotesList');
             if (notes.length === 0) {
-                container.innerHTML = '<div style="color: #999; font-size: 0.85rem; text-align: center;">No notes yet</div>';
+                container.innerHTML = '<div style="color: #858d9e; font-size: 0.85rem; text-align: center;">No notes yet</div>';
                 return;
             }
             container.innerHTML = notes.map(n => {
@@ -3634,7 +3634,7 @@
             const pageData = app.crmFilteredData.slice(start, end);
 
             if (pageData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #999;">No contacts found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #858d9e;">No contacts found</td></tr>';
                 return;
             }
 
@@ -3734,7 +3734,7 @@
 
             // Email thread section
             const emailThreadEl = document.getElementById('subscriberEmailThread');
-            emailThreadEl.innerHTML = '<div style="color: #999; font-size: 0.85rem; text-align: center; padding: 0.75rem;"><div class="spinner" style="width:20px;height:20px;margin:0 auto 0.5rem;"></div>Loading emails...</div>';
+            emailThreadEl.innerHTML = '<div style="color: #858d9e; font-size: 0.85rem; text-align: center; padding: 0.75rem;"><div class="spinner" style="width:20px;height:20px;margin:0 auto 0.5rem;"></div>Loading emails...</div>';
             loadContactEmails(subscriber.email);
 
             // Build activity timeline from registrations + email campaigns + notes
@@ -3789,7 +3789,7 @@
             });
 
             if (timeline.length === 0) {
-                eventHistoryEl.innerHTML = '<div style="color: #999; font-size: 0.9rem; text-align: center;">No activity yet</div>';
+                eventHistoryEl.innerHTML = '<div style="color: #858d9e; font-size: 0.9rem; text-align: center;">No activity yet</div>';
             } else {
                 eventHistoryEl.innerHTML = timeline.map(item => `
                     <div class="history-item">
@@ -3832,16 +3832,16 @@
                     const data = await res.json();
                     if (data.threads && data.threads.length > 0) {
                         threadEl.innerHTML = data.threads.map(thread => `
-                            <a href="${thread.link || '#'}" target="_blank" style="display:block;background:#0a0a0a;border:1px solid #333;border-radius:6px;padding:0.6rem;text-decoration:none;transition:border-color 0.2s;" onmouseover="this.style.borderColor='#d4af37'" onmouseout="this.style.borderColor='#333'">
+                            <a href="${thread.link || '#'}" target="_blank" style="display:block;background:#f4f5f7;border:1px solid #e0e3e8;border-radius:6px;padding:0.6rem;text-decoration:none;transition:border-color 0.2s;" onmouseover="this.style.borderColor='#9a7b2a'" onmouseout="this.style.borderColor='#e0e3e8'">
                                 <div style="display:flex;justify-content:space-between;align-items:start;">
-                                    <div style="color:#e0e0e0;font-size:0.85rem;font-weight:500;">${escapeHtml(thread.subject || '(no subject)')}</div>
-                                    <div style="color:#666;font-size:0.7rem;white-space:nowrap;margin-left:0.5rem;">${formatDate(thread.date)}</div>
+                                    <div style="color:#1c1f26;font-size:0.85rem;font-weight:500;">${escapeHtml(thread.subject || '(no subject)')}</div>
+                                    <div style="color:#858d9e;font-size:0.7rem;white-space:nowrap;margin-left:0.5rem;">${formatDate(thread.date)}</div>
                                 </div>
-                                <div style="color:#999;font-size:0.75rem;margin-top:0.25rem;">${escapeHtml(thread.snippet || '')}</div>
+                                <div style="color:#858d9e;font-size:0.75rem;margin-top:0.25rem;">${escapeHtml(thread.snippet || '')}</div>
                             </a>
                         `).join('');
                     } else {
-                        threadEl.innerHTML = '<div style="color: #999; font-size: 0.85rem; text-align: center; padding: 0.75rem;">No emails found</div>';
+                        threadEl.innerHTML = '<div style="color: #858d9e; font-size: 0.85rem; text-align: center; padding: 0.75rem;">No emails found</div>';
                     }
                 } else {
                     throw new Error('Not available');
@@ -3850,8 +3850,8 @@
                 // Gmail function not set up yet — show Gmail link as fallback
                 threadEl.innerHTML = `
                     <div style="text-align:center;padding:1rem;">
-                        <div style="color:#999;font-size:0.85rem;margin-bottom:0.75rem;">Email thread loading requires Gmail API setup.</div>
-                        <a href="https://mail.google.com/mail/u/0/#search/from%3A${encodeURIComponent(contactEmail)}+OR+to%3A${encodeURIComponent(contactEmail)}" target="_blank" style="color:#60a5fa;font-size:0.85rem;text-decoration:none;">Search in Gmail &rarr;</a>
+                        <div style="color:#858d9e;font-size:0.85rem;margin-bottom:0.75rem;">Email thread loading requires Gmail API setup.</div>
+                        <a href="https://mail.google.com/mail/u/0/#search/from%3A${encodeURIComponent(contactEmail)}+OR+to%3A${encodeURIComponent(contactEmail)}" target="_blank" style="color:#2563eb;font-size:0.85rem;text-decoration:none;">Search in Gmail &rarr;</a>
                     </div>`;
             }
         }
@@ -4087,8 +4087,8 @@
                 }
             } catch (err) {
                 console.log('Payments data not available (add Netlify functions + STRIPE_SECRET_KEY):', err.message);
-                document.getElementById('invoicesTableBody').innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999;">Connect Stripe to view invoices</td></tr>';
-                document.getElementById('subscriptionsTableBody').innerHTML = '<tr><td colspan="5" style="text-align:center;color:#999;">Connect Stripe to view subscriptions</td></tr>';
+                document.getElementById('invoicesTableBody').innerHTML = '<tr><td colspan="6" style="text-align:center;color:#858d9e;">Connect Stripe to view invoices</td></tr>';
+                document.getElementById('subscriptionsTableBody').innerHTML = '<tr><td colspan="5" style="text-align:center;color:#858d9e;">Connect Stripe to view subscriptions</td></tr>';
             }
         }
 
@@ -4098,7 +4098,7 @@
             document.getElementById('openInvoicesCount').textContent = open;
 
             if (app.invoices.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999;">No invoices found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#858d9e;">No invoices found</td></tr>';
                 return;
             }
 
@@ -4112,7 +4112,7 @@
 
                 let actions = '';
                 if (invoiceUrl !== '#') {
-                    actions += `<a href="${invoiceUrl}" target="_blank" style="color:#60a5fa;text-decoration:none;margin-right:0.5rem;">View</a>`;
+                    actions += `<a href="${invoiceUrl}" target="_blank" style="color:#2563eb;text-decoration:none;margin-right:0.5rem;">View</a>`;
                 }
                 if (status === 'open') {
                     actions += `<button class="btn-small" onclick="sendInvoiceReminder('${inv.id}')" style="font-size:0.7rem;padding:2px 8px;margin-right:4px;border-color:#fbbf24;color:#fbbf24;">Remind</button>`;
@@ -4177,7 +4177,7 @@
             document.getElementById('activeSubsCount').textContent = active;
 
             if (app.stripeSubscriptions.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#999;">No subscriptions found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#858d9e;">No subscriptions found</td></tr>';
                 return;
             }
 
@@ -4313,7 +4313,7 @@
         async function saveToGitHub() {
             const overlay = document.createElement('div');
             overlay.className = 'saving-overlay';
-            overlay.innerHTML = '<div class="saving-spinner"><div class="spinner"></div><div style="color: #d4af37; font-weight: 600;">Saving to GitHub...</div></div>';
+            overlay.innerHTML = '<div class="saving-spinner"><div class="spinner"></div><div style="color: #9a7b2a; font-weight: 600;">Saving to GitHub...</div></div>';
             document.body.appendChild(overlay);
 
             try {
