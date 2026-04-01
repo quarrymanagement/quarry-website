@@ -1944,42 +1944,91 @@
             tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#999;padding:2rem;"><div class="spinner" style="width:24px;height:24px;margin:0 auto 0.5rem;"></div>Loading confirmed reservations...</td></tr>';
 
             try {
-                // Try Google Calendar first, fall back to Gmail label
+                // PRIMARY SOURCE: Google Sheet "Events at The Quarry"
+                // This has the richest data: contact person, phone, email, catering, deposits, etc.
                 let data;
+                let source = '';
                 try {
-                    const calRes = await fetch('/.netlify/functions/gcal-events');
-                    if (calRes.ok) {
-                        data = await calRes.json();
-                        if (!data.success) throw new Error('Calendar not available');
+                    const sheetRes = await fetch('/.netlify/functions/gsheet-reservations');
+                    if (sheetRes.ok) {
+                        const sheetData = await sheetRes.json();
+                        if (sheetData.success && sheetData.reservations && sheetData.reservations.length > 0) {
+                            source = 'sheet';
+                            // Transform sheet reservations into the standard event format
+                            data = {
+                                success: true,
+                                events: sheetData.reservations.map(r => ({
+                                    id: r.id,
+                                    summary: [r.contact?.name, r.eventDetails || r.eventType].filter(Boolean).join(' - '),
+                                    start: r.startISO || r.date || '',
+                                    end: '',
+                                    location: r.location || '',
+                                    status: r.status || 'confirmed',
+                                    contact: {
+                                        name: r.contact?.name || '',
+                                        email: r.contact?.email || '',
+                                        phone: r.contact?.phone || '',
+                                        guests: r.guests || '',
+                                        occasion: r.eventDetails || r.eventType || '',
+                                    },
+                                    attendees: [],
+                                    htmlLink: '',
+                                    // Extra sheet data
+                                    eventType: r.eventType || '',
+                                    catering: r.catering || '',
+                                    deposit: r.deposit || '',
+                                    remainingBalance: r.remainingBalance || '',
+                                    paymentComplete: r.paymentComplete || '',
+                                    notes: r.notes || '',
+                                })),
+                            };
+                            console.log(`Loaded ${sheetData.reservations.length} reservations from Google Sheet`);
+                        } else {
+                            throw new Error('Sheet data empty or unavailable');
+                        }
                     } else {
-                        throw new Error('Calendar API not available');
+                        throw new Error('Sheet API not available');
                     }
-                } catch (calErr) {
-                    console.log('Calendar API not available, falling back to Gmail label');
-                    // Fall back to confirmed reservations Gmail label
-                    const gmailRes = await fetch(`/.netlify/functions/gmail-label-threads?labelId=${CONFIRMED_LABEL_ID}`);
-                    if (!gmailRes.ok) throw new Error('Failed to fetch confirmed reservations');
-                    const gmailData = await gmailRes.json();
-                    if (!gmailData.success) throw new Error(gmailData.error || 'Unknown error');
-                    // Transform Gmail threads into the same format as calendar events
-                    data = {
-                        success: true,
-                        events: (gmailData.threads || []).map(t => ({
-                            id: t.id,
-                            summary: t.contact?.name ? `${t.contact.name} - ${t.contact?.occasion || t.subject}` : t.subject,
-                            start: t.contact?.date || t.date,
-                            end: '',
-                            location: '',
-                            status: 'confirmed',
-                            contact: t.contact || {},
-                            attendees: [],
-                            htmlLink: t.link,
-                        })),
-                    };
+                } catch (sheetErr) {
+                    console.log('Google Sheet not available, trying Calendar API:', sheetErr.message);
+                    // FALLBACK 1: Google Calendar
+                    try {
+                        const calRes = await fetch('/.netlify/functions/gcal-events');
+                        if (calRes.ok) {
+                            data = await calRes.json();
+                            source = 'calendar';
+                            if (!data.success) throw new Error('Calendar not available');
+                        } else {
+                            throw new Error('Calendar API not available');
+                        }
+                    } catch (calErr) {
+                        console.log('Calendar API not available, falling back to Gmail label');
+                        // FALLBACK 2: Gmail label
+                        const gmailRes = await fetch(`/.netlify/functions/gmail-label-threads?labelId=${CONFIRMED_LABEL_ID}`);
+                        if (!gmailRes.ok) throw new Error('Failed to fetch confirmed reservations');
+                        const gmailData = await gmailRes.json();
+                        if (!gmailData.success) throw new Error(gmailData.error || 'Unknown error');
+                        source = 'gmail';
+                        data = {
+                            success: true,
+                            events: (gmailData.threads || []).map(t => ({
+                                id: t.id,
+                                summary: t.contact?.name ? `${t.contact.name} - ${t.contact?.occasion || t.subject}` : t.subject,
+                                start: t.contact?.date || t.date,
+                                end: '',
+                                location: '',
+                                status: 'confirmed',
+                                contact: t.contact || {},
+                                attendees: [],
+                                htmlLink: t.link,
+                            })),
+                        };
+                    }
                 }
                 if (!data.success) throw new Error(data.error || 'Unknown error');
 
                 app.confirmedEvents = data.events || [];
+                app.confirmedSource = source;
 
                 // Auto-move past confirmed events into CRM as customers
                 movePastConfirmedToCRM();
