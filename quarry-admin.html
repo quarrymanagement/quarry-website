@@ -81,14 +81,41 @@
             font-family: 'Playfair Display', serif; font-size: 1.5rem;
             color: #d4af37; font-weight: 700; letter-spacing: 2px;
         }
-        .nav-tabs { display: flex; gap: 1.5rem; flex: 1; margin-left: 2rem; flex-wrap: wrap; }
+        .nav-tabs { display: flex; gap: 0.25rem; flex: 1; margin-left: 2rem; flex-wrap: wrap; }
         .nav-tab {
-            color: #999; cursor: pointer; padding: 0.5rem 0;
+            color: #999; cursor: pointer; padding: 0.5rem 0.75rem;
             border-bottom: 3px solid transparent; transition: all 0.3s ease;
             font-weight: 500; font-size: 0.9rem; white-space: nowrap;
         }
         .nav-tab:hover { color: #d4af37; }
         .nav-tab.active { color: #d4af37; border-bottom: 3px solid #d4af37; }
+
+        /* Dropdown nav items */
+        .nav-dropdown {
+            position: relative;
+        }
+        .nav-dropdown > .nav-tab {
+            padding-right: 1.2rem;
+        }
+        .nav-dropdown > .nav-tab::after {
+            content: '▾'; font-size: 0.65rem; margin-left: 0.3rem;
+            opacity: 0.6;
+        }
+        .nav-dropdown-menu {
+            display: none; position: absolute; top: 100%; left: 0;
+            background: #1a1a1a; border: 1px solid #333; border-radius: 6px;
+            min-width: 180px; z-index: 100; padding: 0.35rem 0;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            margin-top: 3px;
+        }
+        .nav-dropdown:hover .nav-dropdown-menu,
+        .nav-dropdown.open .nav-dropdown-menu { display: block; }
+        .nav-dropdown-item {
+            display: block; padding: 0.55rem 1rem; color: #999;
+            font-size: 0.85rem; cursor: pointer; transition: all 0.2s ease;
+        }
+        .nav-dropdown-item:hover { background: rgba(212, 175, 55, 0.1); color: #d4af37; }
+        .nav-dropdown-item.active { color: #d4af37; font-weight: 600; }
         .navbar-actions { display: flex; gap: 1rem; align-items: center; }
         .logout-btn {
             background: #d4af37; color: #0a0a0a; border: none;
@@ -363,6 +390,92 @@
            ================================================================ */
         .crm-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
         .crm-header h2 { font-family: 'Playfair Display', serif; font-size: 2rem; color: #e0e0e0; }
+
+        /* CRM Sub-Tabs */
+        .crm-subtabs {
+            display: flex; gap: 0; margin-bottom: 1.5rem;
+            border-bottom: 2px solid #333;
+        }
+        .crm-subtab {
+            padding: 0.75rem 1.5rem; cursor: pointer; color: #999;
+            font-weight: 500; font-size: 0.9rem; border-bottom: 3px solid transparent;
+            transition: all 0.3s ease; position: relative; bottom: -2px;
+        }
+        .crm-subtab:hover { color: #d4af37; }
+        .crm-subtab.active { color: #d4af37; border-bottom: 3px solid #d4af37; }
+        .crm-subtab .subtab-badge {
+            display: inline-block; background: #d4af37; color: #0a0a0a;
+            font-size: 0.7rem; font-weight: 700; padding: 0.1rem 0.45rem;
+            border-radius: 10px; margin-left: 0.4rem; vertical-align: middle;
+        }
+        .crm-subcontent { display: none; }
+        .crm-subcontent.active { display: block; }
+
+        /* Events CRM Cards */
+        .event-crm-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 1rem; margin-top: 1rem;
+        }
+        .event-crm-card {
+            background: #1a1a1a; border: 1px solid #333; border-radius: 8px;
+            padding: 1rem; transition: all 0.3s ease; position: relative;
+        }
+        .event-crm-card:hover { border-color: #d4af37; }
+        .event-crm-card .card-header {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+        .event-crm-card .card-title {
+            font-weight: 600; color: #e0e0e0; font-size: 0.95rem; line-height: 1.3;
+        }
+        .event-crm-card .card-date {
+            color: #d4af37; font-size: 0.8rem; font-weight: 500; white-space: nowrap;
+        }
+        .event-crm-card .card-details {
+            display: flex; flex-direction: column; gap: 0.35rem;
+        }
+        .event-crm-card .card-detail {
+            display: flex; align-items: center; gap: 0.5rem;
+            color: #999; font-size: 0.82rem;
+        }
+        .event-crm-card .card-detail .detail-label {
+            color: #777; min-width: 65px;
+        }
+        .event-crm-card .card-detail .detail-value {
+            color: #ccc;
+        }
+        .event-crm-card .card-snippet {
+            color: #888; font-size: 0.8rem; margin-top: 0.5rem; line-height: 1.4;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .event-crm-card .card-actions {
+            display: flex; gap: 0.5rem; margin-top: 0.75rem; padding-top: 0.75rem;
+            border-top: 1px solid #2a2a2a;
+        }
+        .event-crm-card .card-action-btn {
+            background: transparent; border: 1px solid #333; color: #999;
+            padding: 0.3rem 0.6rem; border-radius: 4px; cursor: pointer;
+            font-size: 0.78rem; transition: all 0.2s ease; text-decoration: none;
+        }
+        .event-crm-card .card-action-btn:hover { border-color: #d4af37; color: #d4af37; }
+        .event-crm-card .card-action-btn.primary { border-color: #d4af37; color: #d4af37; }
+        .event-crm-card .matched-badge {
+            position: absolute; top: 0.5rem; right: 0.5rem;
+            background: #4ade80; color: #0a0a0a; font-size: 0.7rem;
+            font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 10px;
+        }
+        .events-crm-filters {
+            display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;
+        }
+        .events-crm-filters input {
+            background: #0a0a0a; border: 1px solid #333; color: #e0e0e0;
+            padding: 0.5rem; border-radius: 4px; font-size: 0.9rem; flex: 1; max-width: 300px;
+        }
+        .events-crm-filters input:focus { outline: none; border-color: #d4af37; }
+        .events-crm-status {
+            color: #999; font-size: 0.85rem;
+        }
+        .events-crm-status .status-count { color: #d4af37; font-weight: 600; }
         .crm-stats {
             display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
             margin-bottom: 1.5rem;
@@ -403,6 +516,7 @@
         }
         .crm-table th { color: #d4af37; font-weight: 600; background: #1a1a1a; position: sticky; top: 0; }
         .crm-table tr:hover { background: rgba(212, 175, 55, 0.05); cursor: pointer; }
+        .crm-table tr.clickable-row:hover { background: rgba(212, 175, 55, 0.08); }
         .crm-checkbox { accent-color: #d4af37; }
         .crm-pagination {
             display: flex; justify-content: space-between; align-items: center;
@@ -691,12 +805,29 @@
             <div class="navbar-brand">THE QUARRY ADMIN</div>
             <div class="nav-tabs">
                 <div class="nav-tab active" data-tab="dashboard">Dashboard</div>
-                <div class="nav-tab" data-tab="events">Events</div>
-                <div class="nav-tab" data-tab="bands">Bands</div>
-                <div class="nav-tab" data-tab="floorplan">Floor Plan</div>
+                <div class="nav-dropdown">
+                    <div class="nav-tab" data-tab="events" data-dropdown="entertainment">Entertainment</div>
+                    <div class="nav-dropdown-menu">
+                        <div class="nav-dropdown-item" data-tab="events">Events</div>
+                        <div class="nav-dropdown-item" data-tab="bands">Live Bands</div>
+                    </div>
+                </div>
+                <div class="nav-dropdown">
+                    <div class="nav-tab" data-tab="crm" data-dropdown="customers">Customer Relations</div>
+                    <div class="nav-dropdown-menu">
+                        <div class="nav-dropdown-item" data-tab="crm">CRM</div>
+                        <div class="nav-dropdown-item" data-tab="potential">Potential Reservations</div>
+                        <div class="nav-dropdown-item" data-tab="confirmed">Confirmed Reservations</div>
+                        <div class="nav-dropdown-item" data-tab="email">Email</div>
+                    </div>
+                </div>
                 <div class="nav-tab" data-tab="payments">Payments</div>
-                <div class="nav-tab" data-tab="crm">CRM</div>
-                <div class="nav-tab" data-tab="email">Email</div>
+                <div class="nav-dropdown">
+                    <div class="nav-tab" data-tab="floorplan" data-dropdown="settings">Settings</div>
+                    <div class="nav-dropdown-menu">
+                        <div class="nav-dropdown-item" data-tab="floorplan">Floor Plan</div>
+                    </div>
+                </div>
             </div>
             <div class="navbar-actions">
                 <button class="save-github-btn" id="saveGitHubBtn" title="Save changes to GitHub">Save to GitHub</button>
@@ -926,7 +1057,7 @@
                  ======================================================== -->
             <div id="crmTab" class="tab-content">
                 <div class="crm-header">
-                    <h2>CRM</h2>
+                    <h2>CRM — All Contacts</h2>
                 </div>
 
                 <div class="crm-stats">
@@ -995,6 +1126,120 @@
                 </div>
 
                 <div class="crm-pagination" id="crmPagination"></div>
+            </div>
+
+            <!-- ========================================================
+                 POTENTIAL EVENTS TAB
+                 ======================================================== -->
+            <div id="potentialTab" class="tab-content">
+                <div class="crm-header">
+                    <h2>Potential Reservations</h2>
+                    <button onclick="loadPotentialEvents()" style="background:transparent;border:1px solid #d4af37;color:#d4af37;padding:0.5rem 1rem;border-radius:4px;cursor:pointer;font-size:0.85rem;font-weight:500;">Refresh</button>
+                </div>
+
+                <div class="crm-stats" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="stat-item">
+                        <div class="stat-label">Potential Reservations</div>
+                        <div class="stat-value" id="potentialLeadsCount">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">This Month</div>
+                        <div class="stat-value" id="potentialThisMonth">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Matched to Confirmed</div>
+                        <div class="stat-value" id="potentialMatched" style="color: #4ade80;">0</div>
+                    </div>
+                </div>
+
+                <div class="crm-filters">
+                    <div class="filter-group" style="flex: 2;">
+                        <input type="text" id="potentialSearch" placeholder="Search potential reservations..." oninput="filterPotentialEvents()">
+                    </div>
+                    <div class="events-crm-status" style="padding-top: 1.2rem;">
+                        <span class="status-count" id="potentialStatusText">Loading...</span>
+                    </div>
+                </div>
+
+                <div class="crm-table-container">
+                    <table class="crm-table" id="potentialTable">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Occasion</th>
+                                <th>Event Date</th>
+                                <th>Guests</th>
+                                <th>Received</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="potentialTableBody">
+                            <tr>
+                                <td colspan="9" style="text-align: center; color: #999;">Loading potential reservations from Gmail...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ========================================================
+                 CONFIRMED EVENTS TAB
+                 ======================================================== -->
+            <div id="confirmedTab" class="tab-content">
+                <div class="crm-header">
+                    <h2>Confirmed Reservations</h2>
+                    <button onclick="loadConfirmedEvents()" style="background:transparent;border:1px solid #d4af37;color:#d4af37;padding:0.5rem 1rem;border-radius:4px;cursor:pointer;font-size:0.85rem;font-weight:500;">Refresh</button>
+                </div>
+
+                <div class="crm-stats" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="stat-item">
+                        <div class="stat-label">Confirmed Reservations</div>
+                        <div class="stat-value" id="confirmedEventsCount">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Upcoming</div>
+                        <div class="stat-value" id="confirmedUpcoming">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">This Week</div>
+                        <div class="stat-value" id="confirmedThisWeek">0</div>
+                    </div>
+                </div>
+
+                <div class="crm-filters">
+                    <div class="filter-group" style="flex: 2;">
+                        <input type="text" id="confirmedSearch" placeholder="Search confirmed reservations..." oninput="filterConfirmedEvents()">
+                    </div>
+                    <div class="events-crm-status" style="padding-top: 1.2rem;">
+                        <span class="status-count" id="confirmedStatusText">Loading...</span>
+                    </div>
+                </div>
+
+                <div class="crm-table-container">
+                    <table class="crm-table" id="confirmedTable">
+                        <thead>
+                            <tr>
+                                <th>Event</th>
+                                <th>Contact</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Date &amp; Time</th>
+                                <th>Guests</th>
+                                <th>Location</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="confirmedTableBody">
+                            <tr>
+                                <td colspan="9" style="text-align: center; color: #999;">Loading confirmed reservations from Google Calendar...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- ========================================================
@@ -1450,6 +1695,12 @@
             invoices: [],
             stripeSubscriptions: [],
             paymentLinks: [],
+            // Events CRM state
+            potentialEvents: [],
+            confirmedEvents: [],
+            potentialEventsFiltered: [],
+            confirmedEventsFiltered: [],
+            currentCRMSubTab: 'contacts',
         };
 
         // ================================================================
@@ -1500,18 +1751,55 @@
         }
 
         function setupNavigation() {
+            // Top-level nav tabs (non-dropdown)
             document.querySelectorAll('.nav-tab').forEach(tab => {
                 tab.addEventListener('click', (e) => {
-                    switchTab(e.target.dataset.tab);
+                    const tabName = e.target.dataset.tab;
+                    const dropdown = e.target.dataset.dropdown;
+                    if (tabName && !dropdown) {
+                        switchTab(tabName);
+                    } else if (tabName && dropdown) {
+                        // Clicking the dropdown parent opens its first child
+                        switchTab(tabName);
+                    }
+                });
+            });
+            // Dropdown items
+            document.querySelectorAll('.nav-dropdown-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const tabName = e.target.dataset.tab;
+                    if (tabName) switchTab(tabName);
+                    // Close all dropdowns
+                    document.querySelectorAll('.nav-dropdown').forEach(d => d.classList.remove('open'));
                 });
             });
         }
 
         function switchTab(tabName) {
+            // Clear all active states
             document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            document.querySelectorAll('.nav-dropdown-item').forEach(t => t.classList.remove('active'));
+
+            // Set active on the correct nav element
+            const directTab = document.querySelector(`.nav-tab[data-tab="${tabName}"]:not([data-dropdown])`);
+            const dropdownItem = document.querySelector(`.nav-dropdown-item[data-tab="${tabName}"]`);
+
+            if (dropdownItem) {
+                dropdownItem.classList.add('active');
+                // Also highlight the parent dropdown nav-tab
+                const parentDropdown = dropdownItem.closest('.nav-dropdown');
+                if (parentDropdown) {
+                    parentDropdown.querySelector('.nav-tab').classList.add('active');
+                }
+            } else if (directTab) {
+                directTab.classList.add('active');
+            }
+
+            // Switch tab content
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.getElementById(tabName + 'Tab').classList.add('active');
+            const tabEl = document.getElementById(tabName + 'Tab');
+            if (tabEl) tabEl.classList.add('active');
             app.currentTab = tabName;
 
             // Resize canvas when switching to floor plan
@@ -1522,6 +1810,358 @@
             if (tabName === 'payments') {
                 loadPaymentsData();
             }
+            // Load potential reservations data
+            if (tabName === 'potential') {
+                if (app.potentialEvents.length === 0) loadPotentialEvents();
+            }
+            // Load confirmed reservations data
+            if (tabName === 'confirmed') {
+                if (app.confirmedEvents.length === 0) loadConfirmedEvents();
+            }
+        }
+
+        // ================================================================
+        // POTENTIAL EVENTS (Gmail Label)
+        // ================================================================
+        const POTENTIAL_LABEL_ID = 'Label_2122833696008819079';
+        const CONFIRMED_LABEL_ID = 'Label_4413436895836869123';
+
+        async function loadPotentialEvents() {
+            const tbody = document.getElementById('potentialTableBody');
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#999;padding:2rem;"><div class="spinner" style="width:24px;height:24px;margin:0 auto 0.5rem;"></div>Loading potential reservations from Gmail...</td></tr>';
+
+            try {
+                const res = await fetch(`/.netlify/functions/gmail-label-threads?labelId=${POTENTIAL_LABEL_ID}`);
+                if (!res.ok) throw new Error('Failed to fetch potential reservations');
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error || 'Unknown error');
+
+                app.potentialEvents = data.threads || [];
+
+                // Cross-reference with confirmed reservations
+                if (app.confirmedEvents.length > 0) crossMatchEvents();
+
+                renderPotentialEvents();
+                document.getElementById('potentialLeadsCount').textContent = app.potentialEvents.length;
+                document.getElementById('potentialStatusText').textContent = `${app.potentialEvents.length} potential reservations`;
+
+                const now = new Date();
+                const thisMonth = app.potentialEvents.filter(e => {
+                    const d = new Date(e.date);
+                    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+                }).length;
+                document.getElementById('potentialThisMonth').textContent = thisMonth;
+
+            } catch (err) {
+                console.error('Error loading potential reservations:', err);
+                tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:#ff6b6b;padding:2rem;">Failed to load: ${escapeHtml(err.message)}<br><button onclick="loadPotentialEvents()" style="margin-top:0.5rem;background:#d4af37;color:#0a0a0a;border:none;padding:0.4rem 0.8rem;border-radius:4px;cursor:pointer;">Retry</button></td></tr>`;
+            }
+        }
+
+        function renderPotentialEvents() {
+            const tbody = document.getElementById('potentialTableBody');
+            const events = app.potentialEventsFiltered.length > 0 ? app.potentialEventsFiltered : app.potentialEvents;
+
+            if (events.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#999;padding:2rem;">No potential reservations found.</td></tr>';
+                return;
+            }
+
+            const matchedCount = events.filter(e => e._matched).length;
+            document.getElementById('potentialMatched').textContent = matchedCount;
+
+            tbody.innerHTML = events.map(thread => {
+                const c = thread.contact || {};
+                const date = thread.date ? formatDate(thread.date) : '—';
+                const name = c.name || thread.subject || '(unknown)';
+                const email = c.email || '';
+                const phone = c.phone || '';
+                const occasion = c.occasion || '';
+                const eventDate = c.date || '';
+                const guests = c.guests || '';
+                const isMatched = thread._matched;
+                const statusHtml = isMatched
+                    ? '<span style="color:#4ade80;font-weight:600;font-size:0.8rem;">Confirmed</span>'
+                    : '<span style="color:#f59e0b;font-size:0.8rem;">Pending</span>';
+
+                return `
+                    <tr style="${isMatched ? 'opacity:0.65;' : ''}" onclick="openPotentialDetail('${thread.id}')" class="clickable-row">
+                        <td style="font-weight:500;color:#e0e0e0;">${escapeHtml(name)}</td>
+                        <td>${escapeHtml(email)}</td>
+                        <td>${escapeHtml(phone)}</td>
+                        <td>${escapeHtml(occasion)}</td>
+                        <td>${escapeHtml(eventDate)}</td>
+                        <td>${escapeHtml(guests)}</td>
+                        <td>${date}</td>
+                        <td>${statusHtml}</td>
+                        <td>
+                            <a href="${thread.link || '#'}" target="_blank" onclick="event.stopPropagation()" style="color:#d4af37;text-decoration:none;font-size:0.8rem;">Gmail</a>
+                            ${email ? ` · <a href="mailto:${encodeURIComponent(email)}" onclick="event.stopPropagation()" style="color:#d4af37;text-decoration:none;font-size:0.8rem;">Email</a>` : ''}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function filterPotentialEvents() {
+            const query = document.getElementById('potentialSearch').value.toLowerCase().trim();
+            if (!query) {
+                app.potentialEventsFiltered = [];
+            } else {
+                app.potentialEventsFiltered = app.potentialEvents.filter(t => {
+                    const c = t.contact || {};
+                    return (c.name || '').toLowerCase().includes(query) ||
+                           (c.email || '').toLowerCase().includes(query) ||
+                           (t.subject || '').toLowerCase().includes(query) ||
+                           (t.snippet || '').toLowerCase().includes(query);
+                });
+            }
+            renderPotentialEvents();
+        }
+
+        function openPotentialDetail(threadId) {
+            const thread = app.potentialEvents.find(t => t.id === threadId);
+            if (!thread) return;
+            const c = thread.contact || {};
+            const email = c.email || '';
+            // If contact exists in CRM, open their CRM detail
+            if (email) {
+                const subscriber = app.subscribers.find(s => s.email.toLowerCase() === email.toLowerCase());
+                if (subscriber) {
+                    openSubscriberDetail(subscriber.email);
+                    return;
+                }
+            }
+            // Otherwise open Gmail thread
+            if (thread.link) window.open(thread.link, '_blank');
+        }
+
+        // ================================================================
+        // CONFIRMED EVENTS (Google Calendar)
+        // ================================================================
+        async function loadConfirmedEvents() {
+            const tbody = document.getElementById('confirmedTableBody');
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#999;padding:2rem;"><div class="spinner" style="width:24px;height:24px;margin:0 auto 0.5rem;"></div>Loading confirmed reservations...</td></tr>';
+
+            try {
+                // Try Google Calendar first, fall back to Gmail label
+                let data;
+                try {
+                    const calRes = await fetch('/.netlify/functions/gcal-events');
+                    if (calRes.ok) {
+                        data = await calRes.json();
+                        if (!data.success) throw new Error('Calendar not available');
+                    } else {
+                        throw new Error('Calendar API not available');
+                    }
+                } catch (calErr) {
+                    console.log('Calendar API not available, falling back to Gmail label');
+                    // Fall back to confirmed reservations Gmail label
+                    const gmailRes = await fetch(`/.netlify/functions/gmail-label-threads?labelId=${CONFIRMED_LABEL_ID}`);
+                    if (!gmailRes.ok) throw new Error('Failed to fetch confirmed reservations');
+                    const gmailData = await gmailRes.json();
+                    if (!gmailData.success) throw new Error(gmailData.error || 'Unknown error');
+                    // Transform Gmail threads into the same format as calendar events
+                    data = {
+                        success: true,
+                        events: (gmailData.threads || []).map(t => ({
+                            id: t.id,
+                            summary: t.contact?.name ? `${t.contact.name} - ${t.contact?.occasion || t.subject}` : t.subject,
+                            start: t.contact?.date || t.date,
+                            end: '',
+                            location: '',
+                            status: 'confirmed',
+                            contact: t.contact || {},
+                            attendees: [],
+                            htmlLink: t.link,
+                        })),
+                    };
+                }
+                if (!data.success) throw new Error(data.error || 'Unknown error');
+
+                app.confirmedEvents = data.events || [];
+
+                // Cross-reference with potential
+                if (app.potentialEvents.length > 0) {
+                    crossMatchEvents();
+                    renderPotentialEvents();
+                }
+
+                renderConfirmedEvents();
+                document.getElementById('confirmedEventsCount').textContent = app.confirmedEvents.length;
+                document.getElementById('confirmedStatusText').textContent = `${app.confirmedEvents.length} confirmed reservations`;
+
+                const now = new Date();
+                const upcoming = app.confirmedEvents.filter(e => new Date(e.start) > now).length;
+                document.getElementById('confirmedUpcoming').textContent = upcoming;
+
+                const weekFromNow = new Date();
+                weekFromNow.setDate(weekFromNow.getDate() + 7);
+                const thisWeek = app.confirmedEvents.filter(e => {
+                    const d = new Date(e.start);
+                    return d >= now && d <= weekFromNow;
+                }).length;
+                document.getElementById('confirmedThisWeek').textContent = thisWeek;
+
+            } catch (err) {
+                console.error('Error loading confirmed reservations:', err);
+                tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:#ff6b6b;padding:2rem;">Failed to load: ${escapeHtml(err.message)}<br><button onclick="loadConfirmedEvents()" style="margin-top:0.5rem;background:#d4af37;color:#0a0a0a;border:none;padding:0.4rem 0.8rem;border-radius:4px;cursor:pointer;">Retry</button></td></tr>`;
+            }
+        }
+
+        function renderConfirmedEvents() {
+            const tbody = document.getElementById('confirmedTableBody');
+            const events = app.confirmedEventsFiltered.length > 0 ? app.confirmedEventsFiltered : app.confirmedEvents;
+
+            if (events.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#999;padding:2rem;">No confirmed reservations found.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = events.map(evt => {
+                const c = evt.contact || {};
+                const startDate = evt.start ? formatDateTime(evt.start) : '—';
+                const name = c.name || '';
+                const email = c.email || '';
+                const phone = c.phone || '';
+                const guests = c.guests || '';
+                const location = evt.location || '';
+                const isPast = new Date(evt.start) < new Date();
+                const statusHtml = isPast
+                    ? '<span style="color:#999;font-size:0.8rem;">Past</span>'
+                    : '<span style="color:#4ade80;font-size:0.8rem;">Upcoming</span>';
+
+                return `
+                    <tr style="${isPast ? 'opacity:0.55;' : ''}" onclick="openConfirmedDetail('${evt.id}')" class="clickable-row">
+                        <td style="font-weight:500;color:#e0e0e0;">${escapeHtml(evt.summary || '(No title)')}</td>
+                        <td>${escapeHtml(name)}</td>
+                        <td>${escapeHtml(email)}</td>
+                        <td>${escapeHtml(phone)}</td>
+                        <td style="white-space:nowrap;">${startDate}</td>
+                        <td>${escapeHtml(guests)}</td>
+                        <td>${escapeHtml(location.length > 30 ? location.substring(0, 30) + '...' : location)}</td>
+                        <td>${statusHtml}</td>
+                        <td>
+                            ${evt.htmlLink ? `<a href="${evt.htmlLink}" target="_blank" onclick="event.stopPropagation()" style="color:#d4af37;text-decoration:none;font-size:0.8rem;">Calendar</a>` : ''}
+                            ${email ? ` · <a href="mailto:${encodeURIComponent(email)}" onclick="event.stopPropagation()" style="color:#d4af37;text-decoration:none;font-size:0.8rem;">Email</a>` : ''}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function filterConfirmedEvents() {
+            const query = document.getElementById('confirmedSearch').value.toLowerCase().trim();
+            if (!query) {
+                app.confirmedEventsFiltered = [];
+            } else {
+                app.confirmedEventsFiltered = app.confirmedEvents.filter(e => {
+                    const c = e.contact || {};
+                    return (c.name || '').toLowerCase().includes(query) ||
+                           (c.email || '').toLowerCase().includes(query) ||
+                           (e.summary || '').toLowerCase().includes(query) ||
+                           (e.location || '').toLowerCase().includes(query);
+                });
+            }
+            renderConfirmedEvents();
+        }
+
+        function openConfirmedDetail(eventId) {
+            const evt = app.confirmedEvents.find(e => e.id === eventId);
+            if (!evt) return;
+            const c = evt.contact || {};
+            const email = c.email || '';
+            // If contact exists in CRM, open their CRM detail
+            if (email) {
+                const subscriber = app.subscribers.find(s => s.email.toLowerCase() === email.toLowerCase());
+                if (subscriber) {
+                    openSubscriberDetail(subscriber.email);
+                    return;
+                }
+            }
+            // Otherwise open in Google Calendar
+            if (evt.htmlLink) window.open(evt.htmlLink, '_blank');
+        }
+
+        // ================================================================
+        // AUTO-MATCH: Cross-reference Potential ↔ Confirmed
+        // ================================================================
+        function crossMatchEvents() {
+            // Build a set of emails and names from confirmed reservations
+            const confirmedEmails = new Set();
+            const confirmedNames = new Set();
+
+            app.confirmedEvents.forEach(evt => {
+                // Collect emails from attendees
+                (evt.attendees || []).forEach(a => {
+                    if (a.email && !a.email.includes('thequarrystl.com')) {
+                        confirmedEmails.add(a.email.toLowerCase());
+                    }
+                });
+                // Collect email from contact info
+                if (evt.contact?.email) {
+                    confirmedEmails.add(evt.contact.email.toLowerCase());
+                }
+                // Collect names from event summary
+                if (evt.contact?.name) {
+                    confirmedNames.add(evt.contact.name.toLowerCase());
+                }
+                // Also try to extract names from the event summary
+                const summary = (evt.summary || '').toLowerCase();
+                confirmedNames.add(summary);
+            });
+
+            // Match potential reservations against confirmed
+            let matchCount = 0;
+            app.potentialEvents.forEach(thread => {
+                thread._matched = false;
+                const c = thread.contact || {};
+
+                // Match by email
+                if (c.email && confirmedEmails.has(c.email.toLowerCase())) {
+                    thread._matched = true;
+                    matchCount++;
+                    return;
+                }
+
+                // Match by name (fuzzy: check if the potential contact name appears in any confirmed event summary)
+                if (c.name) {
+                    const potentialName = c.name.toLowerCase();
+                    for (const cName of confirmedNames) {
+                        if (cName.includes(potentialName) || potentialName.includes(cName)) {
+                            thread._matched = true;
+                            matchCount++;
+                            return;
+                        }
+                    }
+                }
+
+                // Also check if thread "from" email (for non-form emails) matches
+                if (thread.from) {
+                    const fromEmail = (thread.from.match(/<([^>]+)>/) || [])[1];
+                    if (fromEmail && fromEmail !== 'formresponses@netlify.com' && confirmedEmails.has(fromEmail.toLowerCase())) {
+                        thread._matched = true;
+                        matchCount++;
+                    }
+                }
+            });
+
+            document.getElementById('potentialMatched').textContent = matchCount;
+        }
+
+        // Helpers for confirmed reservations date formatting
+        function formatDateTime(dateStr) {
+            try {
+                const d = new Date(dateStr);
+                return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) +
+                       ' ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+            } catch (e) { return dateStr; }
+        }
+
+        function formatTime(dateStr) {
+            try {
+                return new Date(dateStr).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+            } catch (e) { return dateStr; }
         }
 
         // ================================================================
