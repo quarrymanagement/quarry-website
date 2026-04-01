@@ -1,1 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Quarry - Employee Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+    <style>
+        /* ================================================================
+           CSS CUSTOM PROPERTIES
+           ================================================================ */
+        :root {
+            --bg-primary: #f4f5f7;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --bg-elevated: #f0f1f3;
+            --bg-hover: #eef0f4;
+            --border-subtle: #e0e3e8;
+            --border-medium: #cdd1d8;
+            --border-accent: #9a7b2a;
+            --text-primary: #1c1f26;
+            --text-secondary: #4b5263;
+            --text-muted: #858d9e;
+            --gold: #9a7b2a;
+            --gold-light: #b08e30;
+            --gold-dim: rgba(154, 123, 42, 0.07);
+            --gold-glow: rgba(154, 123, 42, 0.04);
+            --green: #16a34a;
+            --green-dim: rgba(22, 163, 74, 0.08);
+            --blue: #2563eb;
+            --blue-dim: rgba(37, 99, 235, 0.08);
+            --purple: #7c3aed;
+            --purple-dim: rgba(124, 58, 237, 0.08);
+            --amber: #d97706;
+            --amber-dim: rgba(217, 119, 6, 0.08);
+            --red: #dc2626;
+            --red-dim: rgba(220, 38, 38, 0.06);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04), 0 1px 4px rgba(0,0,0,0.03);
+            --shadow-md: 0 2px 8px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+            --shadow-lg: 0 4px 12px rgba(0,0,0,0.06), 0 12px 40px rgba(0,0,0,0.08);
+            --shadow-gold: 0 0 16px rgba(154, 123, 42, 0.05);
+            --transition: 0.15s ease;
+            --font-sans: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-serif: 'Playfair Display', Georgia, serif;
+            --nav-height: 60px;
+        }
+
+        /* ================================================================
+           GLOBAL STYLES & RESET
+           ================================================================ */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            width: 100%; height: 100%;
+            background: var(--bg-primary); color: var(--text-primary);
+            font-family: var(--font-sans);
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .hidden { display: none !important; }
+        .text-gold { color: var(--gold); }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--border-medium); }
+
+        /* ================================================================
+           LOGIN SCREEN
+           ================================================================ */
+        #loginScreen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-primary);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999;
+            animation: fadeIn 0.3s ease;
+        }
+        #loginScreen.hidden { display: none; }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .login-container {
+            background: var(--bg-card); border: 1px solid var(--border-subtle);
+            padding: 3rem 2.5rem; border-radius: var(--radius-lg); width: 100%; max-width: 400px;
+            box-shadow: var(--shadow-lg), var(--shadow-gold);
+        }
+        .login-header {
+            font-family: var(--font-serif); font-size: 2rem;
+            color: var(--gold); margin-bottom: 0.5rem; text-align: center;
+            font-weight: 700; letter-spacing: 3px;
+        }
+        .login-subtitle {
+            text-align: center; color: var(--text-muted); font-size: 0.85rem;
+            margin-bottom: 2rem; font-weight: 400; letter-spacing: 0.5px;
+        }
+        .login-form { display: flex; flex-direction: column; gap: 1.25rem; }
+        .login-form input {
+            background: var(--bg-primary); border: 1px solid var(--border-subtle);
+            color: var(--text-primary); padding: 0.85rem 1rem; border-radius: var(--radius-sm);
+            font-size: 0.95rem; transition: var(--transition); font-family: var(--font-sans);
+        }
+        .login-form input::placeholder {
+            color: var(--text-muted);
+        }
+        .login-form input:focus {
+            outline: none; border-color: var(--gold);
+            box-shadow: 0 0 0 3px var(--gold-dim);
+        }
+        .login-button {
+            background: var(--gold); color: var(--bg-primary); border: none;
+            padding: 0.85rem; border-radius: var(--radius-sm); font-weight: 600;
+            cursor: pointer; font-size: 0.95rem; transition: var(--transition);
+            font-family: var(--font-sans); letter-spacing: 0.5px;
+        }
+        .login-button:hover { background: var(--gold-light); }
+        .login-button:active { transform: scale(0.98); }
+        .login-error { color: var(--red); text-align: center; font-size: 0.85rem; }
+        .login-loading { color: var(--text-muted); text-align: center; font-size: 0.85rem; }
+
+        /* ================================================================
+           MAIN APP LAYOUT
+           ================================================================ */
+        #mainApp {
+            display: flex; flex-direction: column; width: 100%; height: 100%;
+        }
+        #mainApp.hidden { display: none; }
+
+        /* ================================================================
+           NAVBAR
+           ================================================================ */
+        .navbar {
+            background: var(--bg-secondary); border-bottom: 1px solid var(--border-subtle);
+            padding: 0 1.5rem; display: flex; align-items: center;
+            justify-content: space-between; height: var(--nav-height);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        }
+        .navbar-brand {
+            font-family: var(--font-serif); font-size: 1.15rem;
+            color: var(--gold); font-weight: 700; letter-spacing: 2.5px;
+            white-space: nowrap;
+        }
+        .navbar-center {
+            flex: 1; display: flex; gap: 0.5rem; margin-left: 2rem; align-items: center;
+        }
+        .nav-item {
+            color: var(--text-muted); cursor: pointer; padding: 0 1rem;
+            border-bottom: 2px solid transparent; transition: var(--transition);
+            font-weight: 500; font-size: 0.82rem; white-space: nowrap;
+            display: flex; align-items: center; text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .nav-item:hover { color: var(--text-primary); background: var(--gold-glow); }
+        .nav-item.active { color: var(--gold); border-bottom: 2px solid var(--gold); }
+        .navbar-right {
+            display: flex; align-items: center; gap: 1rem;
+        }
+        .employee-name {
+            color: var(--text-secondary); font-size: 0.9rem; font-weight: 500;
+        }
+        .logout-btn {
+            background: transparent; color: var(--text-muted); border: 1px solid var(--border-subtle);
+            padding: 0.4rem 0.9rem; border-radius: var(--radius-sm); cursor: pointer;
+            font-weight: 500; font-size: 0.8rem; transition: var(--transition);
+            font-family: var(--font-sans);
+        }
+        .logout-btn:hover { border-color: var(--red); color: var(--red); }
+
+        /* Mobile menu toggle */
+        .mobile-menu-btn {
+            display: none; background: none; border: none; color: var(--text-primary);
+            font-size: 1.4rem; cursor: pointer; padding: 0.4rem; line-height: 1;
+        }
+
+        /* ================================================================
+           NOTIFICATION BANNER
+           ================================================================ */
+        .notification-banner {
+            background: var(--gold-dim); border-left: 4px solid var(--gold);
+            padding: 1rem 1.5rem; display: flex; align-items: center; gap: 1rem;
+            border-radius: var(--radius-md); margin-bottom: 1.5rem;
+            animation: slideDown 0.3s ease;
+        }
+        .notification-banner.hidden { display: none; }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .notification-icon {
+            color: var(--gold); font-size: 1.25rem; flex-shrink: 0;
+        }
+        .notification-content {
+            flex: 1;
+        }
+        .notification-title {
+            color: var(--gold); font-weight: 600; font-size: 0.95rem;
+        }
+        .notification-text {
+            color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.25rem;
+        }
+        .notification-close {
+            background: none; border: none; color: var(--text-muted);
+            cursor: pointer; font-size: 1.2rem; padding: 0;
+        }
+        .notification-close:hover { color: var(--gold); }
+
+        /* ================================================================
+           CONTENT AREA
+           ================================================================ */
+        .content {
+            flex: 1; overflow: hidden; display: flex;
+        }
+        .page-container {
+            display: none; width: 100%; height: 100%;
+            flex-direction: column; padding: 1.75rem;
+            overflow-y: auto; animation: fadeIn 0.25s ease;
+        }
+        .page-container.active { display: flex; }
+        .page-title {
+            font-family: var(--font-serif); font-size: 1.6rem;
+            color: var(--text-primary); margin-bottom: 1.5rem; font-weight: 600;
+        }
+
+        /* ================================================================
+           SCHEDULE PAGE
+           ================================================================ */
+        .schedule-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;
+        }
+        .schedule-week-info {
+            color: var(--text-secondary); font-size: 0.95rem;
+        }
+        .schedule-nav {
+            display: flex; gap: 0.5rem; align-items: center;
+        }
+        .schedule-btn {
+            background: var(--bg-card); border: 1px solid var(--border-subtle);
+            padding: 0.5rem 1rem; border-radius: var(--radius-sm);
+            color: var(--text-primary); cursor: pointer; font-weight: 500;
+            font-size: 0.85rem; transition: var(--transition);
+        }
+        .schedule-btn:hover { border-color: var(--gold); color: var(--gold); }
+        .schedule-btn.active { background: var(--gold); color: var(--bg-primary); border-color: var(--gold); }
+        .schedule-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem; margin-bottom: 2rem;
+        }
+        .schedule-day {
+            background: var(--bg-card); border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md); padding: 1.25rem; text-align: center;
+            transition: var(--transition);
+        }
+        .schedule-day:hover { border-color: var(--border-medium); box-shadow: var(--shadow-sm); }
+        .schedule-day-name {
+            font-weight: 600; color: var(--text-secondary); font-size: 0.9rem;
+            text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.75rem;
+        }
+        .schedule-day-date {
+            color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1rem;
+        }
+        .schedule-shift {
+            background: var(--bg-primary); border-radius: var(--radius-sm);
+            padding: 0.75rem; font-weight: 600; font-size: 0.95rem;
+            letter-spacing: 0.3px;
+        }
+        .schedule-shift.off {
+            color: var(--text-muted); font-style: italic;
+        }
+        .schedule-shift.bar {
+            color: #fff; background: var(--gold);
+        }
+        .schedule-shift.server {
+            color: #fff; background: var(--blue);
+        }
+        .schedule-shift.kitchen {
+            color: #fff; background: var(--green);
+        }
+        .schedule-shift.busser,
+        .schedule-shift.host {
+            color: #fff; background: var(--purple);
+        }
+        .schedule-shift.expo {
+            color: #fff; background: var(--amber);
+        }
+
+        /* ================================================================
+           TIME OFF SECTION
+           ================================================================ */
+        .time-off-container {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        .time-off-form {
+            background: var(--bg-card); border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md); padding: 1.5rem;
+        }
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        .form-label {
+            display: block; color: var(--text-primary); font-weight: 600;
+            font-size: 0.9rem; margin-bottom: 0.5rem; text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .form-input, .form-textarea {
+            width: 100%; padding: 0.8rem; border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm); font-family: var(--font-sans);
+            font-size: 0.95rem; color: var(--text-primary);
+            background: var(--bg-primary); transition: var(--transition);
+        }
+        .form-input:focus, .form-textarea:focus {
+            outline: none; border-color: var(--gold);
+            box-shadow: 0 0 0 3px var(--gold-dim);
+        }
+        .form-textarea {
+            resize: vertical; min-height: 80px;
+        }
+        .form-button {
+            background: var(--gold); color: var(--bg-primary); border: none;
+            padding: 0.8rem 1.5rem; border-radius: var(--radius-sm); font-weight: 600;
+            cursor: pointer; font-size: 0.95rem; transition: var(--transition);
+            font-family: var(--font-sans); width: 100%;
+        }
+        .form-button:hover { background: var(--gold-light); }
+        .form-button:active { transform: scale(0.98); }
+        .form-success {
+            background: rgba(22, 163, 74, 0.1); border: 1px solid var(--green);
+            color: var(--green); padding: 0.75rem 1rem; border-radius: var(--radius-sm);
+            font-size: 0.9rem; margin-bottom: 1rem;
+        }
+        .form-error {
+            background: rgba(220, 38, 38, 0.1); border: 1px solid var(--red);
+            color: var(--red); padding: 0.75rem 1rem; border-radius: var(--radius-sm);
+            font-size: 0.9rem; margin-bottom: 1rem;
+        }
+
+        /* ================================================================
+           TIME OFF HISTORY
+           ================================================================ */
+        .time-off-history {
+            background: var(--bg-card); border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md); padding: 1.5rem;
+        }
+        .history-title {
+            font-weight: 600; color: var(--text-primary); font-size: 1rem;
+            margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.4px;
+        }
+        .history-list {
+            display: flex; flex-direction: column; gap: 0.75rem;
+        }
+        .history-item {
+            background: var(--bg-primary); border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm); padding: 0.9rem; display: flex;
+            justify-content: space-between; align-items: center;
+        }
+        .history-info {
+            flex: 1;
+        }
+        .history-dates {
+            color: var(--text-primary); font-weight: 500; font-size: 0.9rem;
+        }
+        .history-reason {
+            color: var(--text-muted); font-size: 0.8rem; margin-top: 0.25rem;
+        }
+        .history-status {
+            display: inline-block; padding: 0.3rem 0.75rem; border-radius: 20px;
+            font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.4px; white-space: nowrap;
+        }
+        .status-pending {
+            background: rgba(180, 83, 9, 0.15); color: var(--amber);
+        }
+        .status-approved {
+            background: rgba(22, 163, 74, 0.15); color: var(--green);
+        }
+        .status-denied {
+            background: rgba(220, 38, 38, 0.15); color: var(--red);
+        }
+        .history-empty {
+            color: var(--text-muted); text-align: center; padding: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        /* ================================================================
+           PROFILE PAGE
+           ================================================================ */
+        .profile-container {
+            display: grid; grid-template-columns: 300px 1fr; gap: 2rem;
+            max-width: 900px;
+        }
+        .profile-card {
+            background: var(--bg-card); border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md); padding: 1.5rem; text-align: center;
+        }
+        .profile-avatar {
+            width: 100px; height: 100px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            display: flex; align-items: center; justify-content: center;
+            color: var(--bg-primary); font-size: 2.5rem; margin: 0 auto 1rem;
+            font-weight: 700;
+        }
+        .profile-name {
+            font-size: 1.25rem; font-weight: 600; color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+        .profile-role {
+            color: var(--gold); font-weight: 600; margin-bottom: 1rem; font-size: 0.9rem;
+            text-transform: uppercase; letter-spacing: 0.4px;
+        }
+        .profile-email {
+            color: var(--text-secondary); font-size: 0.9rem; word-break: break-all;
+        }
+
+        .profile-details {
+            display: flex; flex-direction: column; gap: 1.5rem;
+        }
+        .profile-section {
+            background: var(--bg-card); border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md); padding: 1.5rem;
+        }
+        .section-title {
+            font-weight: 600; color: var(--text-primary); font-size: 1rem;
+            margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.4px;
+        }
+        .password-form { display: flex; flex-direction: column; gap: 1rem; }
+        .password-input {
+            display: flex; flex-direction: column; gap: 0.5rem;
+        }
+
+        /* ================================================================
+           RESPONSIVE DESIGN
+           ================================================================ */
+        @media (max-width: 768px) {
+            .navbar-center { display: none; }
+            .mobile-menu-btn { display: block; }
+            .page-title { font-size: 1.3rem; }
+            .schedule-grid {
+                grid-template-columns: 1fr;
+            }
+            .time-off-container {
+                grid-template-columns: 1fr;
+            }
+            .profile-container {
+                grid-template-columns: 1fr;
+            }
+            .schedule-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .navbar-right {
+                gap: 0.5rem;
+            }
+            .employee-name {
+                display: none;
+            }
+            .login-container {
+                margin: 1rem;
+                padding: 2rem 1.5rem;
+            }
+            .page-container {
+                padding: 1rem;
+            }
+        }
+        @media (max-width: 480px) {
+            .navbar {
+                padding: 0 1rem;
+            }
+            .navbar-brand {
+                font-size: 0.95rem;
+                letter-spacing: 1.5px;
+            }
+            .schedule-day {
+                padding: 0.9rem;
+            }
+            .form-button {
+                padding: 0.7rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen">
+        <div class="login-container">
+            <div class="login-header">THE QUARRY</div>
+            <div class="login-subtitle">Employee Portal</div>
+            <form class="login-form" id="loginForm">
+                <input
+                    type="email"
+                    id="loginEmail"
+                    placeholder="Email"
+                    required
+                    autocomplete="email"
+                />
+                <input
+                    type="password"
+                    id="loginPassword"
+                    placeholder="Password"
+                    required
+                    autocomplete="current-password"
+                />
+                <button type="submit" class="login-button">Sign In</button>
+                <div id="loginStatus" class="hidden"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" class="hidden">
+        <!-- Navbar -->
+        <nav class="navbar">
+            <div class="navbar-brand">THE QUARRY</div>
+            <div class="navbar-center">
+                <div class="nav-item active" data-page="schedule">My Schedule</div>
+                <div class="nav-item" data-page="time-off">Time Off</div>
+                <div class="nav-item" data-page="profile">Profile</div>
+            </div>
+            <div class="navbar-right">
+                <div class="employee-name" id="navEmployeeName"></div>
+                <button class="logout-btn" id="logoutBtn">Sign Out</button>
+            </div>
+            <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+        </nav>
+
+        <!-- Content -->
+        <div class="content">
+            <!-- Notification Banner -->
+            <div style="width: 100%; padding: 1.75rem 1.75rem 0;">
+                <div id="notificationBanner" class="notification-banner hidden">
+                    <div class="notification-icon">📅</div>
+                    <div class="notification-content">
+                        <div class="notification-title" id="notificationTitle"></div>
+                        <div class="notification-text" id="notificationText"></div>
+                    </div>
+                    <button class="notification-close" id="closeNotification">&times;</button>
+                </div>
+            </div>
+
+            <!-- Schedule Page -->
+            <div id="schedulePage" class="page-container active">
+                <h1 class="page-title">My Schedule</h1>
+                <div class="schedule-header">
+                    <div>
+                        <div class="schedule-week-info">
+                            Week of <span id="scheduleWeekStart"></span>
+                        </div>
+                    </div>
+                    <div class="schedule-nav">
+                        <button class="schedule-btn" id="prevWeekBtn">← Prev</button>
+                        <button class="schedule-btn active" id="currentWeekBtn">This Week</button>
+                        <button class="schedule-btn" id="nextWeekBtn">Next →</button>
+                    </div>
+                </div>
+                <div class="schedule-grid" id="scheduleGrid"></div>
+            </div>
+
+            <!-- Time Off Page -->
+            <div id="timeOffPage" class="page-container">
+                <h1 class="page-title">Request Time Off</h1>
+                <div class="time-off-container">
+                    <div class="time-off-form">
+                        <div id="timeOffSuccess" class="form-success hidden"></div>
+                        <div id="timeOffError" class="form-error hidden"></div>
+                        <form id="timeOffForm">
+                            <div class="form-group">
+                                <label class="form-label">Start Date</label>
+                                <input
+                                    type="date"
+                                    id="timeOffStartDate"
+                                    class="form-input"
+                                    required
+                                />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">End Date</label>
+                                <input
+                                    type="date"
+                                    id="timeOffEndDate"
+                                    class="form-input"
+                                    required
+                                />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Reason (Optional)</label>
+                                <textarea
+                                    id="timeOffReason"
+                                    class="form-textarea"
+                                    placeholder="Let your manager know why you're requesting time off..."
+                                ></textarea>
+                            </div>
+                            <button type="submit" class="form-button">Submit Request</button>
+                        </form>
+                    </div>
+                    <div class="time-off-history">
+                        <div class="history-title">Your Requests</div>
+                        <div class="history-list" id="historyList">
+                            <div class="history-empty">No time off requests yet.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Page -->
+            <div id="profilePage" class="page-container">
+                <h1 class="page-title">Profile</h1>
+                <div class="profile-container">
+                    <div class="profile-card">
+                        <div class="profile-avatar" id="profileAvatar">Q</div>
+                        <div class="profile-name" id="profileName">Employee Name</div>
+                        <div class="profile-role" id="profileRole">Role</div>
+                        <div class="profile-email" id="profileEmail">email@example.com</div>
+                    </div>
+                    <div class="profile-details">
+                        <div class="profile-section">
+                            <div class="section-title">Basic Information</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">
+                                <div><strong>Name:</strong> <span id="profileDisplayName">-</span></div>
+                                <div style="margin-top: 0.75rem;"><strong>Email:</strong> <span id="profileDisplayEmail">-</span></div>
+                                <div style="margin-top: 0.75rem;"><strong>Role:</strong> <span id="profileDisplayRole">-</span></div>
+                            </div>
+                        </div>
+                        <div class="profile-section">
+                            <div class="section-title">Change Password</div>
+                            <form id="passwordForm" class="password-form">
+                                <div class="password-input">
+                                    <label class="form-label">Current Password</label>
+                                    <input
+                                        type="password"
+                                        id="currentPassword"
+                                        class="form-input"
+                                        placeholder="Enter your current password"
+                                        required
+                                    />
+                                </div>
+                                <div class="password-input">
+                                    <label class="form-label">New Password</label>
+                                    <input
+                                        type="password"
+                                        id="newPassword"
+                                        class="form-input"
+                                        placeholder="Enter a new password"
+                                        required
+                                    />
+                                </div>
+                                <div class="password-input">
+                                    <label class="form-label">Confirm New Password</label>
+                                    <input
+                                        type="password"
+                                        id="confirmPassword"
+                                        class="form-input"
+                                        placeholder="Confirm your new password"
+                                        required
+                                    />
+                                </div>
+                                <button type="submit" class="form-button">Update Password</button>
+                                <div id="passwordStatus" class="hidden"></div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ================================================================
+        // STATE MANAGEMENT
+        // ================================================================
+        let sessionToken = null;
+        let currentEmployee = null;
+        let allScheduleData = null;
+        let currentWeekOffset = 0;
+
+        const CLOSING_TIMES = {
+            'Monday': 'Closed',
+            'Tuesday': 'Closed',
+            'Wednesday': '9 PM',
+            'Thursday': '9 PM',
+            'Friday': '11 PM',
+            'Saturday': '11 PM',
+            'Sunday': '5 PM'
+        };
+
+        // ================================================================
+        // API CALLS
+        // ================================================================
+        async function authenticateEmployee(email, password) {
+            try {
+                const response = await fetch('/.netlify/functions/employee-auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, action: 'login' })
+                });
+                const data = await response.json();
+                if (response.ok && data.token) {
+                    return { success: true, token: data.token, employee: data.employee };
+                }
+                return { success: false, error: data.error || 'Authentication failed' };
+            } catch (error) {
+                return { success: false, error: 'Network error. Please try again.' };
+            }
+        }
+
+        async function loadScheduleData() {
+            try {
+                const url = `https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/schedule.json?t=${Date.now()}`;
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Failed to load schedule');
+                const data = await response.json();
+                allScheduleData = data;
+                return data;
+            } catch (error) {
+                console.error('Schedule load error:', error);
+                return null;
+            }
+        }
+
+        async function submitTimeOffRequest(dates, reason) {
+            try {
+                const response = await fetch('/.netlify/functions/time-off', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        employeeId: currentEmployee.id,
+                        dates,
+                        reason,
+                        action: 'request'
+                    })
+                });
+                const data = await response.json();
+                return { success: response.ok, data };
+            } catch (error) {
+                return { success: false, error: 'Network error' };
+            }
+        }
+
+        async function changePassword(oldPassword, newPassword) {
+            try {
+                const response = await fetch('/.netlify/functions/employee-auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        employeeId: currentEmployee.id,
+                        oldPassword,
+                        newPassword,
+                        action: 'change-password'
+                    })
+                });
+                const data = await response.json();
+                return { success: response.ok, data };
+            } catch (error) {
+                return { success: false, error: 'Network error' };
+            }
+        }
+
+        // ================================================================
+        // LOGIN HANDLING
+        // ================================================================
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const statusDiv = document.getElementById('loginStatus');
+
+            statusDiv.innerHTML = '<div class="login-loading">Signing in...</div>';
+            statusDiv.classList.remove('hidden');
+
+            const result = await authenticateEmployee(email, password);
+            if (result.success) {
+                sessionToken = result.token;
+                currentEmployee = result.employee;
+                showMainApp();
+            } else {
+                statusDiv.innerHTML = `<div class="login-error">${result.error}</div>`;
+            }
+        });
+
+        function showMainApp() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            document.getElementById('navEmployeeName').textContent = currentEmployee.name;
+            updateProfileUI();
+            loadAndDisplaySchedule();
+            loadTimeOffRequests();
+        }
+
+        // ================================================================
+        // LOGOUT
+        // ================================================================
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            sessionToken = null;
+            currentEmployee = null;
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('loginForm').reset();
+            document.getElementById('loginStatus').classList.add('hidden');
+        });
+
+        // ================================================================
+        // SCHEDULE DISPLAY
+        // ================================================================
+        async function loadAndDisplaySchedule() {
+            const data = await loadScheduleData();
+            if (data) {
+                displayScheduleWeek();
+                checkForScheduleNotification();
+            }
+        }
+
+        function getWeekDates(offset) {
+            const today = new Date();
+            const dayOfWeek = today.getDay();
+            const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+            const monday = new Date(today.getFullYear(), today.getMonth(), diff);
+            monday.setDate(monday.getDate() + offset * 7);
+
+            const dates = [];
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(monday);
+                d.setDate(d.getDate() + i);
+                dates.push(d);
+            }
+            return dates;
+        }
+
+        function formatDate(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        function displayScheduleWeek() {
+            const weekDates = getWeekDates(currentWeekOffset);
+            const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+            const grid = document.getElementById('scheduleGrid');
+            grid.innerHTML = '';
+
+            const startDate = formatDate(weekDates[0]);
+            document.getElementById('scheduleWeekStart').textContent = weekDates[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+            weekDates.forEach((date, index) => {
+                const dayName = dayNames[index];
+                const dateStr = formatDate(date);
+                const shift = getEmployeeShift(dateStr, dayName);
+                const closingTime = CLOSING_TIMES[dayName];
+
+                const dayCard = document.createElement('div');
+                dayCard.className = 'schedule-day';
+                dayCard.innerHTML = `
+                    <div class="schedule-day-name">${dayName}</div>
+                    <div class="schedule-day-date">${date.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' })}</div>
+                    <div class="schedule-shift ${shift.className}">${shift.display}</div>
+                    ${shift.display !== 'OFF' ? `<div style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.5rem;">Close: ${closingTime}</div>` : ''}
+                `;
+                grid.appendChild(dayCard);
+            });
+        }
+
+        function getEmployeeShift(dateStr, dayName) {
+            if (!allScheduleData || !currentEmployee) {
+                return { display: 'OFF', className: 'off' };
+            }
+
+            const scheduleKey = Object.keys(allScheduleData.schedules || {})[0];
+            if (!scheduleKey) return { display: 'OFF', className: 'off' };
+
+            const weekSchedule = allScheduleData.schedules[scheduleKey] || {};
+            const employeeShifts = weekSchedule.shifts?.[currentEmployee.id] || {};
+            const dayLower = dayName.toLowerCase();
+            const shift = employeeShifts[dayLower];
+
+            if (!shift || shift.display === 'OFF') {
+                return { display: 'OFF', className: 'off' };
+            }
+
+            const roleClass = (shift.role || '').toLowerCase().replace(/\s+/g, '');
+            return {
+                display: shift.display || 'OFF',
+                className: roleClass || 'off'
+            };
+        }
+
+        function checkForScheduleNotification() {
+            if (allScheduleData && allScheduleData.lastUpdated) {
+                const banner = document.getElementById('notificationBanner');
+                const lastUpdate = new Date(allScheduleData.lastUpdated);
+                const today = new Date();
+                const daysOld = (today - lastUpdate) / (1000 * 60 * 60 * 24);
+
+                if (daysOld < 7) {
+                    document.getElementById('notificationTitle').textContent = 'Schedule Updated';
+                    document.getElementById('notificationText').textContent = `Your schedule was updated on ${lastUpdate.toLocaleDateString()}`;
+                    banner.classList.remove('hidden');
+                }
+            }
+        }
+
+        document.getElementById('prevWeekBtn').addEventListener('click', () => {
+            currentWeekOffset--;
+            displayScheduleWeek();
+        });
+
+        document.getElementById('nextWeekBtn').addEventListener('click', () => {
+            currentWeekOffset++;
+            displayScheduleWeek();
+        });
+
+        document.getElementById('currentWeekBtn').addEventListener('click', () => {
+            currentWeekOffset = 0;
+            displayScheduleWeek();
+        });
+
+        // ================================================================
+        // TIME OFF
+        // ================================================================
+        document.getElementById('timeOffForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const startDate = document.getElementById('timeOffStartDate').value;
+            const endDate = document.getElementById('timeOffEndDate').value;
+            const reason = document.getElementById('timeOffReason').value;
+
+            const successDiv = document.getElementById('timeOffSuccess');
+            const errorDiv = document.getElementById('timeOffError');
+            successDiv.classList.add('hidden');
+            errorDiv.classList.add('hidden');
+
+            if (new Date(startDate) > new Date(endDate)) {
+                errorDiv.textContent = 'End date must be after start date';
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            const result = await submitTimeOffRequest([startDate, endDate], reason);
+            if (result.success) {
+                successDiv.textContent = 'Time off request submitted! Your manager will review it.';
+                successDiv.classList.remove('hidden');
+                document.getElementById('timeOffForm').reset();
+                setTimeout(() => loadTimeOffRequests(), 500);
+            } else {
+                errorDiv.textContent = result.error || 'Failed to submit request';
+                errorDiv.classList.remove('hidden');
+            }
+        });
+
+        function loadTimeOffRequests() {
+            if (!allScheduleData || !allScheduleData.timeOffRequests) {
+                displayTimeOffHistory([]);
+                return;
+            }
+            const employeeRequests = allScheduleData.timeOffRequests.filter(req => req.employeeId === currentEmployee.id);
+            displayTimeOffHistory(employeeRequests);
+        }
+
+        function displayTimeOffHistory(requests) {
+            const list = document.getElementById('historyList');
+            if (requests.length === 0) {
+                list.innerHTML = '<div class="history-empty">No time off requests yet.</div>';
+                return;
+            }
+
+            list.innerHTML = requests.map(req => {
+                const dates = Array.isArray(req.dates) ? req.dates.join(' to ') : req.dates;
+                const statusClass = `status-${req.status}`;
+                return `
+                    <div class="history-item">
+                        <div class="history-info">
+                            <div class="history-dates">${dates}</div>
+                            ${req.reason ? `<div class="history-reason">${req.reason}</div>` : ''}
+                        </div>
+                        <div class="history-status ${statusClass}">${req.status}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ================================================================
+        // PROFILE
+        // ================================================================
+        function updateProfileUI() {
+            const initials = (currentEmployee.name || 'E').split(' ').map(n => n[0]).join('').toUpperCase();
+            document.getElementById('profileAvatar').textContent = initials;
+            document.getElementById('profileName').textContent = currentEmployee.name || 'Employee';
+            document.getElementById('profileRole').textContent = (currentEmployee.primaryRole || 'Staff').toUpperCase();
+            document.getElementById('profileEmail').textContent = currentEmployee.email || 'Not provided';
+
+            document.getElementById('profileDisplayName').textContent = currentEmployee.name || '-';
+            document.getElementById('profileDisplayEmail').textContent = currentEmployee.email || '-';
+            document.getElementById('profileDisplayRole').textContent = currentEmployee.primaryRole || 'Staff';
+        }
+
+        document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const oldPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const statusDiv = document.getElementById('passwordStatus');
+
+            if (newPassword !== confirmPassword) {
+                statusDiv.innerHTML = '<div class="form-error">Passwords do not match</div>';
+                statusDiv.classList.remove('hidden');
+                return;
+            }
+
+            if (newPassword.length < 8) {
+                statusDiv.innerHTML = '<div class="form-error">Password must be at least 8 characters</div>';
+                statusDiv.classList.remove('hidden');
+                return;
+            }
+
+            const result = await changePassword(oldPassword, newPassword);
+            if (result.success) {
+                statusDiv.innerHTML = '<div class="form-success">Password updated successfully!</div>';
+                statusDiv.classList.remove('hidden');
+                document.getElementById('passwordForm').reset();
+            } else {
+                statusDiv.innerHTML = `<div class="form-error">${result.error || 'Failed to update password'}</div>`;
+                statusDiv.classList.remove('hidden');
+            }
+        });
+
+        // ================================================================
+        // NAVIGATION
+        // ================================================================
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const pageName = item.dataset.page;
+                showPage(pageName);
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+            });
+        });
+
+        function showPage(pageName) {
+            document.querySelectorAll('.page-container').forEach(page => {
+                page.classList.remove('active');
+            });
+            const pageEl = document.getElementById(pageName + 'Page');
+            if (pageEl) pageEl.classList.add('active');
+        }
+
+        // ================================================================
+        // NOTIFICATION CLOSE
+        // ================================================================
+        document.getElementById('closeNotification').addEventListener('click', () => {
+            document.getElementById('notificationBanner').classList.add('hidden');
+        });
+
+        // ================================================================
+        // MOBILE MENU
+        // ================================================================
+        document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+            const navCenter = document.querySelector('.navbar-center');
+            if (navCenter.style.display === 'flex') {
+                navCenter.style.display = 'none';
+            } else {
+                navCenter.style.display = 'flex';
+                navCenter.style.flexDirection = 'column';
+                navCenter.style.position = 'absolute';
+                navCenter.style.top = '60px';
+                navCenter.style.left = '0';
+                navCenter.style.right = '0';
+                navCenter.style.background = 'var(--bg-card)';
+                navCenter.style.borderBottom = '1px solid var(--border-subtle)';
+                navCenter.style.padding = '1rem 0';
+                navCenter.style.zIndex = '100';
+            }
+        });
+    </script>
+</body>
+</html>
