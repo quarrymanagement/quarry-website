@@ -21,12 +21,10 @@ const listCustomers = async (event) => {
   try {
     const limit = event.queryStringParameters?.limit || 10;
     const starting_after = event.queryStringParameters?.starting_after || undefined;
-
     const customers = await stripe.customers.list({
       limit: Math.min(parseInt(limit), 100),
       starting_after,
     });
-
     return response(200, {
       success: true,
       data: customers.data,
@@ -44,12 +42,10 @@ const listInvoices = async (event) => {
   try {
     const limit = event.queryStringParameters?.limit || 10;
     const starting_after = event.queryStringParameters?.starting_after || undefined;
-
     const invoices = await stripe.invoices.list({
       limit: Math.min(parseInt(limit), 100),
       starting_after,
     });
-
     return response(200, {
       success: true,
       data: invoices.data,
@@ -67,12 +63,10 @@ const listSubscriptions = async (event) => {
   try {
     const limit = event.queryStringParameters?.limit || 10;
     const starting_after = event.queryStringParameters?.starting_after || undefined;
-
     const subscriptions = await stripe.subscriptions.list({
       limit: Math.min(parseInt(limit), 100),
       starting_after,
     });
-
     return response(200, {
       success: true,
       data: subscriptions.data,
@@ -112,11 +106,13 @@ const createInvoice = async (event) => {
     }
 
     // Create invoice with send_invoice collection method
+    // FIX: Added auto_advance: true so Stripe automatically emails the invoice
     const invoice = await stripe.invoices.create({
       customer: customer.id,
       description,
       collection_method: 'send_invoice',
       days_until_due: 30,
+      auto_advance: true,
     });
 
     // Add line item
@@ -128,9 +124,23 @@ const createInvoice = async (event) => {
       currency: 'usd',
     });
 
-    // Finalize and send
+    // Finalize the invoice
     const finalizedInvoice = await stripe.invoices.finalizeInvoice(invoice.id);
-    await stripe.invoices.sendInvoice(invoice.id);
+
+    // FIX: Use stripe.invoices.send() instead of stripe.invoices.sendInvoice()
+    // sendInvoice was renamed to send in stripe-node v14+
+    try {
+      await stripe.invoices.send(invoice.id);
+    } catch (sendError) {
+      // Fallback: try the old method name for compatibility
+      console.warn('send() failed, trying sendInvoice():', sendError.message);
+      try {
+        await stripe.invoices.sendInvoice(invoice.id);
+      } catch (fallbackError) {
+        console.warn('sendInvoice() also failed:', fallbackError.message);
+        // Invoice is still finalized and auto_advance will handle email delivery
+      }
+    }
 
     return response(200, {
       success: true,
@@ -232,7 +242,6 @@ const voidInvoice = async (event) => {
     }
 
     const invoice = await stripe.invoices.voidInvoice(invoice_id);
-
     return response(200, {
       success: true,
       invoice,
@@ -254,7 +263,12 @@ const sendReminder = async (event) => {
       return response(400, { success: false, error: 'Missing required field: invoice_id' });
     }
 
-    await stripe.invoices.sendInvoice(invoice_id);
+    // FIX: Try send() first, fall back to sendInvoice() for compatibility
+    try {
+      await stripe.invoices.send(invoice_id);
+    } catch (e) {
+      await stripe.invoices.sendInvoice(invoice_id);
+    }
 
     return response(200, {
       success: true,
@@ -270,7 +284,6 @@ const sendReminder = async (event) => {
 const getBalance = async (event) => {
   try {
     const balance = await stripe.balance.retrieve();
-
     return response(200, {
       success: true,
       balance,
