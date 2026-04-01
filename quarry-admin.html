@@ -794,11 +794,14 @@
             <div id="floorplanTab" class="tab-content">
                 <div class="floorplan-header">
                     <h2>Floor Plan</h2>
-                    <div style="display: flex; gap: 0.5rem;">
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <input type="text" id="floorPlanName" class="form-input" placeholder="Floor plan name..." style="width: 200px; height: 36px; font-size: 0.85rem;">
                         <button class="btn-primary" id="addTableBtn">+ Add Table</button>
                         <button class="btn-primary" id="saveFloorPlanBtn" style="background: transparent; color: #d4af37; border: 1px solid #d4af37;">Save Floor Plan</button>
+                        <button class="btn-primary" id="newFloorPlanBtn" style="background: transparent; color: #4ade80; border: 1px solid #4ade80;">New</button>
                     </div>
                 </div>
+                <div id="savedFloorPlansList" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;"></div>
                 <div class="floorplan-toolbar">
                     <button id="fpToolSelect" class="active">Select</button>
                     <button id="fpToolRect">Rectangle</button>
@@ -1174,6 +1177,25 @@
                 <input type="number" class="form-input" id="eventCapacity" min="1" required>
             </div>
             <div class="form-group">
+                <label class="form-label">Use Table Chart</label>
+                <div class="pricing-type-group">
+                    <div class="radio-wrapper">
+                        <input type="radio" name="useTableChart" value="no" id="tableChartNo" checked>
+                        <label for="tableChartNo">No — Normal Registrations</label>
+                    </div>
+                    <div class="radio-wrapper">
+                        <input type="radio" name="useTableChart" value="yes" id="tableChartYes">
+                        <label for="tableChartYes">Yes — Use Table Chart</label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group hidden" id="tableChartSelectGroup">
+                <label class="form-label">Select Floor Plan</label>
+                <select class="form-select" id="eventFloorPlan">
+                    <option value="">Choose a floor plan...</option>
+                </select>
+            </div>
+            <div class="form-group">
                 <label class="form-label">Status</label>
                 <select class="form-select" id="eventStatus">
                     <option value="available">Active</option>
@@ -1247,15 +1269,28 @@
                 </div>
             </div>
 
+            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #333;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                    <h4 style="color: #d4af37; margin: 0;">Email Thread</h4>
+                    <a id="subscriberGmailLink" href="#" target="_blank" style="color: #60a5fa; font-size: 0.8rem; text-decoration: none;">Open in Gmail &rarr;</a>
+                </div>
+                <div id="subscriberEmailThread" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <div style="color: #999; font-size: 0.85rem; text-align: center; padding: 0.75rem;">No emails found</div>
+                </div>
+            </div>
+
             <div class="event-history" style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #333;">
-                <h4 style="color: #d4af37; margin-bottom: 0.75rem;">Registrations & Activity</h4>
+                <h4 style="color: #d4af37; margin-bottom: 0.75rem;">Activity Timeline</h4>
                 <div id="subscriberEventHistory" style="display: flex; flex-direction: column; gap: 0.75rem;">
-                    <div style="color: #999; font-size: 0.9rem; text-align: center;">No event history</div>
+                    <div style="color: #999; font-size: 0.9rem; text-align: center;">No activity yet</div>
                 </div>
             </div>
 
             <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #333;">
-                <h4 style="color: #d4af37; margin-bottom: 0.75rem;">Notes</h4>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                    <h4 style="color: #d4af37; margin: 0;">Notes</h4>
+                    <span id="lastNoteDate" style="color: #666; font-size: 0.75rem;"></span>
+                </div>
                 <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
                     <textarea id="newNoteText" placeholder="Add a note about this contact..." style="flex: 1; background: #0a0a0a; border: 1px solid #333; color: #e0e0e0; padding: 0.5rem; border-radius: 4px; font-size: 0.85rem; min-height: 60px; resize: vertical; font-family: 'Montserrat', sans-serif;"></textarea>
                 </div>
@@ -1389,6 +1424,8 @@
             events: [],
             bands: [],
             floorPlan: { tables: [], labels: [], barSeats: [] },
+            floorPlans: [],
+            currentFloorPlanId: null,
             registrations: {},
             subscribers: [],
             emailHistory: [],
@@ -1504,6 +1541,11 @@
                         app.registrations = eventsData.registrations || {};
                         app.bands = eventsData.bands || [];
                         app.floorPlan = eventsData.floorPlan || { tables: [], labels: [], barSeats: [] };
+                        app.floorPlans = eventsData.floorPlans || [];
+                        // Migrate: if there's a legacy floorPlan and no saved floorPlans, save it as "Default"
+                        if (app.floorPlans.length === 0 && app.floorPlan.tables && app.floorPlan.tables.length > 0) {
+                            app.floorPlans.push({ id: 'fp_default', name: 'Default', ...JSON.parse(JSON.stringify(app.floorPlan)) });
+                        }
                     } else if (Array.isArray(eventsData)) {
                         app.events = eventsData;
                     } else {
@@ -1526,6 +1568,7 @@
                 updateCRM();
                 updateEmailRecipients();
                 drawFloorPlan();
+                renderSavedFloorPlans();
 
                 // Load payments data if on payments tab
                 loadPaymentsData();
@@ -1768,6 +1811,16 @@
                         updateHighlightsTags();
                     }
 
+                    // Table chart toggle
+                    const useChart = event.useTableChart ? 'yes' : 'no';
+                    const chartRadio = document.querySelector(`input[name="useTableChart"][value="${useChart}"]`);
+                    if (chartRadio) chartRadio.checked = true;
+                    document.getElementById('tableChartSelectGroup').classList.toggle('hidden', useChart !== 'yes');
+                    if (useChart === 'yes') {
+                        populateFloorPlanDropdown();
+                        document.getElementById('eventFloorPlan').value = event.floorPlanId || '';
+                    }
+
                     // Show registrations from app.registrations
                     const eventRegs = getEventRegistrations(event.id);
                     if (eventRegs.length > 0) {
@@ -1783,6 +1836,9 @@
                 registrationsSection.classList.add('hidden');
                 document.getElementById('eventHighlights').value = '';
                 updateHighlightsTags();
+                // Reset table chart toggle
+                document.querySelector('input[name="useTableChart"][value="no"]').checked = true;
+                document.getElementById('tableChartSelectGroup').classList.add('hidden');
             }
 
             panel.classList.add('open');
@@ -1891,6 +1947,8 @@
                 pricingType: document.querySelector('input[name="pricingType"]:checked').value,
                 highlights: document.getElementById('eventHighlights').value.split(',').map(h => h.trim()).filter(h => h),
                 slug: app.currentEvent?.slug || document.getElementById('eventName').value.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+                useTableChart: document.querySelector('input[name="useTableChart"]:checked').value === 'yes',
+                floorPlanId: document.querySelector('input[name="useTableChart"]:checked').value === 'yes' ? document.getElementById('eventFloorPlan').value : '',
             };
 
             const pricingType = eventData.pricingType;
@@ -2257,6 +2315,109 @@
         });
 
         // ================================================================
+        // FLOOR PLAN SAVE / LOAD / MULTIPLE LAYOUTS
+        // ================================================================
+        document.getElementById('saveFloorPlanBtn').addEventListener('click', () => {
+            const nameInput = document.getElementById('floorPlanName');
+            const name = nameInput.value.trim() || ('Floor Plan ' + (app.floorPlans.length + 1));
+            nameInput.value = name;
+
+            const fpData = {
+                id: app.currentFloorPlanId || ('fp_' + Date.now()),
+                name,
+                tables: JSON.parse(JSON.stringify(app.floorPlan.tables || [])),
+                labels: JSON.parse(JSON.stringify(app.floorPlan.labels || [])),
+                barSeats: JSON.parse(JSON.stringify(app.floorPlan.barSeats || [])),
+            };
+
+            const existingIdx = app.floorPlans.findIndex(fp => fp.id === fpData.id);
+            if (existingIdx !== -1) {
+                app.floorPlans[existingIdx] = fpData;
+            } else {
+                app.floorPlans.push(fpData);
+            }
+            app.currentFloorPlanId = fpData.id;
+            renderSavedFloorPlans();
+            showSuccess(`Floor plan "${name}" saved!`);
+        });
+
+        document.getElementById('newFloorPlanBtn').addEventListener('click', () => {
+            app.currentFloorPlanId = null;
+            app.floorPlan = { tables: [], labels: [], barSeats: [] };
+            document.getElementById('floorPlanName').value = '';
+            drawFloorPlan();
+            document.getElementById('tablePropsPanel').classList.add('hidden');
+        });
+
+        function renderSavedFloorPlans() {
+            const container = document.getElementById('savedFloorPlansList');
+            if (app.floorPlans.length === 0) {
+                container.innerHTML = '<span style="color:#666;font-size:0.85rem;">No saved floor plans yet.</span>';
+                return;
+            }
+            container.innerHTML = app.floorPlans.map(fp => `
+                <div style="display:inline-flex;align-items:center;gap:4px;background:${fp.id === app.currentFloorPlanId ? '#d4af37' : '#2a2a2a'};color:${fp.id === app.currentFloorPlanId ? '#000' : '#e0e0e0'};padding:4px 12px;border-radius:20px;cursor:pointer;font-size:0.85rem;border:1px solid ${fp.id === app.currentFloorPlanId ? '#d4af37' : '#444'};" onclick="loadFloorPlan('${fp.id}')">
+                    ${escapeHtml(fp.name)} <span style="color:${fp.id === app.currentFloorPlanId ? '#333' : '#999'};font-size:0.75rem;">(${(fp.tables || []).length} tables)</span>
+                    <span onclick="event.stopPropagation();deleteFloorPlan('${fp.id}')" style="margin-left:4px;cursor:pointer;color:${fp.id === app.currentFloorPlanId ? '#600' : '#f87171'};font-weight:bold;">&times;</span>
+                </div>
+            `).join('');
+        }
+
+        function loadFloorPlan(fpId) {
+            const fp = app.floorPlans.find(f => f.id === fpId);
+            if (!fp) return;
+            app.currentFloorPlanId = fpId;
+            app.floorPlan = {
+                tables: JSON.parse(JSON.stringify(fp.tables || [])),
+                labels: JSON.parse(JSON.stringify(fp.labels || [])),
+                barSeats: JSON.parse(JSON.stringify(fp.barSeats || [])),
+            };
+            document.getElementById('floorPlanName').value = fp.name;
+            document.getElementById('tablePropsPanel').classList.add('hidden');
+            app.fpSelectedTable = null;
+            drawFloorPlan();
+            renderSavedFloorPlans();
+        }
+
+        function deleteFloorPlan(fpId) {
+            const fp = app.floorPlans.find(f => f.id === fpId);
+            if (!fp) return;
+            showConfirmModal('Delete Floor Plan?', `Delete "${fp.name}"? This cannot be undone.`, () => {
+                app.floorPlans = app.floorPlans.filter(f => f.id !== fpId);
+                if (app.currentFloorPlanId === fpId) {
+                    app.currentFloorPlanId = null;
+                    app.floorPlan = { tables: [], labels: [], barSeats: [] };
+                    document.getElementById('floorPlanName').value = '';
+                    drawFloorPlan();
+                }
+                renderSavedFloorPlans();
+                showSuccess('Floor plan deleted');
+            });
+        }
+
+        // Table Chart toggle in event editor
+        document.querySelectorAll('input[name="useTableChart"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+                const useChart = document.querySelector('input[name="useTableChart"]:checked').value === 'yes';
+                document.getElementById('tableChartSelectGroup').classList.toggle('hidden', !useChart);
+                if (useChart) populateFloorPlanDropdown();
+            });
+        });
+
+        function populateFloorPlanDropdown() {
+            const select = document.getElementById('eventFloorPlan');
+            const currentVal = select.value;
+            select.innerHTML = '<option value="">Choose a floor plan...</option>';
+            app.floorPlans.forEach(fp => {
+                const opt = document.createElement('option');
+                opt.value = fp.id;
+                opt.textContent = `${fp.name} (${(fp.tables || []).length} tables)`;
+                select.appendChild(opt);
+            });
+            if (currentVal) select.value = currentVal;
+        }
+
+        // ================================================================
         // CRM
         // ================================================================
         function updateCRM() {
@@ -2419,18 +2580,22 @@
         }
 
         function renderContactNotes(email) {
-            const notes = app.crmNotes[email] || [];
+            const notes = (app.crmNotes[email] || []).slice().sort((a, b) => new Date(b.timestamp || b.date || 0) - new Date(a.timestamp || a.date || 0));
             const container = document.getElementById('contactNotesList');
             if (notes.length === 0) {
                 container.innerHTML = '<div style="color: #999; font-size: 0.85rem; text-align: center;">No notes yet</div>';
                 return;
             }
-            container.innerHTML = notes.map(n => `
+            container.innerHTML = notes.map(n => {
+                const d = new Date(n.timestamp || n.date);
+                const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                const timeStr = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                return `
                 <div class="note-item">
-                    <div class="note-meta">${formatDate(n.timestamp)}</div>
+                    <div class="note-meta">${dateStr} at ${timeStr}</div>
                     <div class="note-text">${escapeHtml(n.text)}</div>
-                </div>
-            `).join('');
+                </div>`;
+            }).join('');
         }
 
         function renderContactTags(email) {
@@ -2555,32 +2720,79 @@
             document.getElementById('subscriberCreated').textContent = formatDate(subscriber.created);
             document.getElementById('subscriberLastActivity').textContent = subscriber.lastActivityDate ? formatDate(subscriber.lastActivityDate) : '—';
 
-            // Event history from registrations
+            // Gmail link — opens Gmail search for this contact
+            const gmailLink = document.getElementById('subscriberGmailLink');
+            gmailLink.href = `https://mail.google.com/mail/u/0/#search/from%3A${encodeURIComponent(subscriber.email)}+OR+to%3A${encodeURIComponent(subscriber.email)}`;
+
+            // Email thread section
+            const emailThreadEl = document.getElementById('subscriberEmailThread');
+            emailThreadEl.innerHTML = '<div style="color: #999; font-size: 0.85rem; text-align: center; padding: 0.75rem;"><div class="spinner" style="width:20px;height:20px;margin:0 auto 0.5rem;"></div>Loading emails...</div>';
+            loadContactEmails(subscriber.email);
+
+            // Build activity timeline from registrations + email campaigns + notes
             const eventHistoryEl = document.getElementById('subscriberEventHistory');
-            const eventHistory = [];
+            const timeline = [];
+
+            // Registrations
             const regs = app.registrations || {};
             for (const eventId in regs) {
                 const match = regs[eventId].find(r => r.email === subscriber.email);
                 if (match) {
                     const event = app.events.find(e => e.id === eventId);
-                    eventHistory.push({
-                        eventName: event ? event.name : eventId,
-                        date: match.created || event?.date,
-                        amount: match.amount || '0',
+                    timeline.push({
+                        type: 'registration',
+                        label: event ? event.name : eventId,
+                        detail: `$${parseFloat(match.amount || 0).toFixed(2)}`,
+                        date: match.created || event?.date || '',
+                        icon: '🎟',
                     });
                 }
             }
 
-            if (eventHistory.length === 0) {
-                eventHistoryEl.innerHTML = '<div style="color: #999; font-size: 0.9rem; text-align: center;">No event history</div>';
+            // Email campaigns sent (from emailHistory)
+            (app.emailHistory || []).forEach(campaign => {
+                if (campaign.recipients && campaign.recipients.some(r => (r.email || r) === subscriber.email)) {
+                    timeline.push({
+                        type: 'email',
+                        label: campaign.subject || 'Email Campaign',
+                        detail: campaign.status || 'Sent',
+                        date: campaign.sentAt || campaign.date || '',
+                        icon: '📧',
+                    });
+                }
+            });
+
+            // Subscriber creation
+            if (subscriber.created) {
+                timeline.push({
+                    type: 'joined',
+                    label: 'Joined via ' + (subscriber.source || 'unknown'),
+                    detail: subscriber.emailStatus || '',
+                    date: subscriber.created,
+                    icon: '👤',
+                });
+            }
+
+            // Sort by date descending
+            timeline.sort((a, b) => {
+                const da = new Date(a.date || 0);
+                const db = new Date(b.date || 0);
+                return db - da;
+            });
+
+            if (timeline.length === 0) {
+                eventHistoryEl.innerHTML = '<div style="color: #999; font-size: 0.9rem; text-align: center;">No activity yet</div>';
             } else {
-                eventHistoryEl.innerHTML = eventHistory.map(h => `
+                eventHistoryEl.innerHTML = timeline.map(item => `
                     <div class="history-item">
-                        <div>
-                            <div class="history-event-name">${h.eventName}</div>
-                            <div style="color: #4ade80; font-size: 0.8rem;">$${parseFloat(h.amount).toFixed(2)}</div>
+                        <div style="display:flex;align-items:center;gap:0.5rem;">
+                            <span style="font-size:1.1rem;">${item.icon}</span>
+                            <div>
+                                <div class="history-event-name">${escapeHtml(item.label)}</div>
+                                <div style="color: #4ade80; font-size: 0.8rem;">${escapeHtml(item.detail)}</div>
+                            </div>
                         </div>
-                        <div class="history-date">${formatDate(h.date)}</div>
+                        <div class="history-date">${formatDate(item.date)}</div>
                     </div>
                 `).join('');
             }
@@ -2589,10 +2801,51 @@
             renderContactTags(subscriber.email);
             renderContactNotes(subscriber.email);
 
+            // Last note date
+            const notes = app.crmNotes[subscriber.email] || [];
+            if (notes.length > 0) {
+                const lastNote = notes.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+                document.getElementById('lastNoteDate').textContent = 'Last note: ' + formatDate(lastNote.date);
+            } else {
+                document.getElementById('lastNoteDate').textContent = '';
+            }
+
             // Store current subscriber email for note/tag buttons
             app.currentSubscriberEmail = subscriber.email;
 
             document.getElementById('subscriberDetailPanel').classList.add('open');
+        }
+
+        async function loadContactEmails(contactEmail) {
+            const threadEl = document.getElementById('subscriberEmailThread');
+            try {
+                const res = await fetch(`/.netlify/functions/gmail-threads?email=${encodeURIComponent(contactEmail)}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.threads && data.threads.length > 0) {
+                        threadEl.innerHTML = data.threads.map(thread => `
+                            <a href="${thread.link || '#'}" target="_blank" style="display:block;background:#0a0a0a;border:1px solid #333;border-radius:6px;padding:0.6rem;text-decoration:none;transition:border-color 0.2s;" onmouseover="this.style.borderColor='#d4af37'" onmouseout="this.style.borderColor='#333'">
+                                <div style="display:flex;justify-content:space-between;align-items:start;">
+                                    <div style="color:#e0e0e0;font-size:0.85rem;font-weight:500;">${escapeHtml(thread.subject || '(no subject)')}</div>
+                                    <div style="color:#666;font-size:0.7rem;white-space:nowrap;margin-left:0.5rem;">${formatDate(thread.date)}</div>
+                                </div>
+                                <div style="color:#999;font-size:0.75rem;margin-top:0.25rem;">${escapeHtml(thread.snippet || '')}</div>
+                            </a>
+                        `).join('');
+                    } else {
+                        threadEl.innerHTML = '<div style="color: #999; font-size: 0.85rem; text-align: center; padding: 0.75rem;">No emails found</div>';
+                    }
+                } else {
+                    throw new Error('Not available');
+                }
+            } catch (err) {
+                // Gmail function not set up yet — show Gmail link as fallback
+                threadEl.innerHTML = `
+                    <div style="text-align:center;padding:1rem;">
+                        <div style="color:#999;font-size:0.85rem;margin-bottom:0.75rem;">Email thread loading requires Gmail API setup.</div>
+                        <a href="https://mail.google.com/mail/u/0/#search/from%3A${encodeURIComponent(contactEmail)}+OR+to%3A${encodeURIComponent(contactEmail)}" target="_blank" style="color:#60a5fa;font-size:0.85rem;text-decoration:none;">Search in Gmail &rarr;</a>
+                    </div>`;
+            }
         }
 
         document.getElementById('closeSubscriberBtn').addEventListener('click', () => {
@@ -2849,15 +3102,65 @@
                 const status = inv.status || 'unknown';
                 const invoiceUrl = inv.hosted_invoice_url || '#';
 
+                let actions = '';
+                if (invoiceUrl !== '#') {
+                    actions += `<a href="${invoiceUrl}" target="_blank" style="color:#60a5fa;text-decoration:none;margin-right:0.5rem;">View</a>`;
+                }
+                if (status === 'open') {
+                    actions += `<button class="btn-small" onclick="sendInvoiceReminder('${inv.id}')" style="font-size:0.7rem;padding:2px 8px;margin-right:4px;border-color:#fbbf24;color:#fbbf24;">Remind</button>`;
+                    actions += `<button class="btn-small" onclick="voidInvoice('${inv.id}')" style="font-size:0.7rem;padding:2px 8px;border-color:#f87171;color:#f87171;">Void</button>`;
+                }
+
                 return `<tr>
                     <td>${date}</td>
                     <td>${custName}</td>
                     <td>${email}</td>
                     <td>${amount}</td>
                     <td><span class="status-badge ${status}">${status}</span></td>
-                    <td>${invoiceUrl !== '#' ? `<a href="${invoiceUrl}" target="_blank" style="color:#60a5fa;text-decoration:none;">View</a>` : '—'}</td>
+                    <td>${actions || '—'}</td>
                 </tr>`;
             }).join('');
+        }
+
+        async function voidInvoice(invoiceId) {
+            showConfirmModal('Void Invoice?', 'This will cancel the invoice and the customer will no longer be able to pay it. This cannot be undone.', async () => {
+                try {
+                    const res = await fetch('/.netlify/functions/stripe-data?action=void-invoice', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ invoice_id: invoiceId }),
+                    });
+                    const data = await res.json();
+                    if (res.ok && data.success) {
+                        showSuccess('Invoice voided successfully');
+                        loadPaymentsData();
+                    } else {
+                        throw new Error(data.error || 'Failed to void invoice');
+                    }
+                } catch (err) {
+                    alert('Error voiding invoice: ' + err.message);
+                }
+            });
+        }
+
+        async function sendInvoiceReminder(invoiceId) {
+            showConfirmModal('Send Reminder?', 'A payment reminder email will be sent to the customer.', async () => {
+                try {
+                    const res = await fetch('/.netlify/functions/stripe-data?action=send-reminder', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ invoice_id: invoiceId }),
+                    });
+                    const data = await res.json();
+                    if (res.ok && data.success) {
+                        showSuccess('Reminder sent!');
+                    } else {
+                        throw new Error(data.error || 'Failed to send reminder');
+                    }
+                } catch (err) {
+                    alert('Error sending reminder: ' + err.message);
+                }
+            });
         }
 
         function renderSubscriptions() {
@@ -3011,6 +3314,7 @@
                     events: app.events,
                     bands: app.bands,
                     floorPlan: app.floorPlan,
+                    floorPlans: app.floorPlans,
                     registrations: app.registrations,
                     subscribers: [],
                 };
