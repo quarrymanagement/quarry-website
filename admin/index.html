@@ -1120,12 +1120,13 @@
             display: flex; align-items: center;
         }
         .staff-summary-cell {
-            padding: 0.4rem 0.35rem; font-size: 0.7rem; text-align: center;
+            padding: 0.3rem 0.2rem; font-size: 0.6rem; text-align: center;
             border-left: 1px solid var(--border-subtle); color: var(--text-secondary);
-            display: flex; flex-direction: column; gap: 2px; justify-content: center;
+            display: flex; flex-direction: column; gap: 1px; justify-content: center;
+            overflow: hidden;
         }
-        .staff-summary-cell.closed { color: var(--text-muted); font-style: italic; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; }
-        .count-period { white-space: nowrap; }
+        .staff-summary-cell.closed { color: var(--text-muted); font-style: italic; font-size: 0.6rem; display: flex; align-items: center; justify-content: center; }
+        .count-period { white-space: nowrap; font-size: 0.58rem; line-height: 1.3; }
         .count-label { font-weight: 600; color: var(--gold); }
         .add-row-btn {
             background: none; border: 1px dashed var(--border-medium); color: var(--gold);
@@ -5242,8 +5243,8 @@
                         const isClosed = dk === 'monday' || dk === 'tuesday';
                         if (isClosed) return '<div class="staff-summary-cell closed">Closed</div>';
                         let parts = [];
-                        if (m.total > 0) parts.push('<div class="count-period"><span class="count-label">AM</span> ' + m.total + ' staff' + (m.Bar ? ' · ' + m.Bar + ' bar' : '') + (m.S ? ' · ' + m.S + ' serv' : '') + '</div>');
-                        if (e.total > 0) parts.push('<div class="count-period"><span class="count-label">PM</span> ' + e.total + ' staff' + (e.Bar ? ' · ' + e.Bar + ' bar' : '') + (e.S ? ' · ' + e.S + ' serv' : '') + '</div>');
+                        if (m.total > 0) parts.push('<div class="count-period"><span class="count-label">AM</span> ' + m.total + (m.Bar ? ' · ' + m.Bar + 'b' : '') + (m.S ? ' · ' + m.S + 's' : '') + '</div>');
+                        if (e.total > 0) parts.push('<div class="count-period"><span class="count-label">PM</span> ' + e.total + (e.Bar ? ' · ' + e.Bar + 'b' : '') + (e.S ? ' · ' + e.S + 's' : '') + '</div>');
                         return '<div class="staff-summary-cell">' + (parts.length ? parts.join('') : '<span style="color:var(--text-muted);">—</span>') + '</div>';
                     }).join('')}
                     <div></div>
