@@ -1123,11 +1123,43 @@
             padding: 0.3rem 0.2rem; font-size: 0.6rem; text-align: center;
             border-left: 1px solid var(--border-subtle); color: var(--text-secondary);
             display: flex; flex-direction: column; gap: 1px; justify-content: center;
-            overflow: hidden;
+            overflow: visible; position: relative;
         }
         .staff-summary-cell.closed { color: var(--text-muted); font-style: italic; font-size: 0.6rem; display: flex; align-items: center; justify-content: center; }
         .count-period { white-space: nowrap; font-size: 0.58rem; line-height: 1.3; }
         .count-label { font-weight: 600; color: var(--gold); }
+        .staff-tooltip-wrap {
+            position: relative; cursor: pointer;
+            padding: 1px 3px; border-radius: 3px;
+            transition: background 0.15s;
+        }
+        .staff-tooltip-wrap:hover {
+            background: var(--gold-dim);
+        }
+        .staff-tooltip {
+            display: none; position: absolute; top: 100%; left: 50%;
+            transform: translateX(-50%); margin-top: 6px;
+            background: #1a1a2e; color: #f0f0f0; border: 1px solid var(--gold);
+            border-radius: 8px; padding: 0.5rem 0.65rem;
+            min-width: 160px; max-width: 220px; z-index: 1000;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+            text-align: left; white-space: normal;
+        }
+        .staff-tooltip::after {
+            content: ''; position: absolute; bottom: 100%; left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent; border-bottom-color: #1a1a2e;
+        }
+        .staff-tooltip-wrap:hover .staff-tooltip { display: block; }
+        .staff-tooltip-title {
+            font-size: 0.7rem; font-weight: 700; color: var(--gold);
+            margin-bottom: 4px; padding-bottom: 3px;
+            border-bottom: 1px solid rgba(154,123,42,0.3);
+        }
+        .staff-tooltip-name {
+            font-size: 0.65rem; padding: 1.5px 0; color: #e0e0e0;
+            line-height: 1.4;
+        }
         .add-row-btn {
             background: none; border: 1px dashed var(--border-medium); color: var(--gold);
             padding: 0.35rem 0.75rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem;
@@ -5201,15 +5233,19 @@
 
             const staffCounts = {};
             dayKeys.forEach(dk => {
-                staffCounts[dk] = { morning: { Bar: 0, S: 0, total: 0 }, evening: { Bar: 0, S: 0, total: 0 } };
+                staffCounts[dk] = { morning: { Bar: 0, S: 0, total: 0, names: [] }, evening: { Bar: 0, S: 0, total: 0, names: [] } };
                 Object.keys(weekData.shifts).forEach(eid => {
                     const shift = weekData.shifts[eid]?.[dk];
                     if (!shift || !shift.role) return;
+                    const emp = app.employees.find(e => e.id === eid);
+                    const empName = emp ? (emp.name || (emp.firstName + ' ' + (emp.lastName || '').charAt(0) + '.').trim()) : eid;
+                    const roleLabel = shift.role === 'Bar' ? 'Bar' : shift.role === 'S' ? 'Srv' : shift.role === 'K' ? 'Kit' : shift.role === 'D' ? 'Dish' : shift.role === 'B' ? 'Bus' : shift.role === 'Host' ? 'Host' : shift.role;
                     const periods = getShiftPeriods(shift, dk);
                     periods.forEach(period => {
                         staffCounts[dk][period].total++;
                         if (shift.role === 'Bar') staffCounts[dk][period].Bar++;
                         if (shift.role === 'S') staffCounts[dk][period].S++;
+                        staffCounts[dk][period].names.push(empName + ' (' + roleLabel + ')');
                     });
                 });
             });
@@ -5243,8 +5279,14 @@
                         const isClosed = dk === 'monday' || dk === 'tuesday';
                         if (isClosed) return '<div class="staff-summary-cell closed">Closed</div>';
                         let parts = [];
-                        if (m.total > 0) parts.push('<div class="count-period"><span class="count-label">AM</span> ' + m.total + (m.Bar ? ' · ' + m.Bar + 'b' : '') + (m.S ? ' · ' + m.S + 's' : '') + '</div>');
-                        if (e.total > 0) parts.push('<div class="count-period"><span class="count-label">PM</span> ' + e.total + (e.Bar ? ' · ' + e.Bar + 'b' : '') + (e.S ? ' · ' + e.S + 's' : '') + '</div>');
+                        if (m.total > 0) {
+                            const amNames = m.names.join('\n');
+                            parts.push('<div class="count-period staff-tooltip-wrap"><span class="count-label">AM</span> ' + m.total + (m.Bar ? ' · ' + m.Bar + 'b' : '') + (m.S ? ' · ' + m.S + 's' : '') + '<div class="staff-tooltip"><div class="staff-tooltip-title">AM Staff (' + m.total + ')</div>' + m.names.map(n => '<div class="staff-tooltip-name">' + n + '</div>').join('') + '</div></div>');
+                        }
+                        if (e.total > 0) {
+                            const pmNames = e.names.join('\n');
+                            parts.push('<div class="count-period staff-tooltip-wrap"><span class="count-label">PM</span> ' + e.total + (e.Bar ? ' · ' + e.Bar + 'b' : '') + (e.S ? ' · ' + e.S + 's' : '') + '<div class="staff-tooltip"><div class="staff-tooltip-title">PM Staff (' + e.total + ')</div>' + e.names.map(n => '<div class="staff-tooltip-name">' + n + '</div>').join('') + '</div></div>');
+                        }
                         return '<div class="staff-summary-cell">' + (parts.length ? parts.join('') : '<span style="color:var(--text-muted);">—</span>') + '</div>';
                     }).join('')}
                     <div></div>
