@@ -4980,17 +4980,17 @@
             loadScheduleData();
             
             // Set up tab navigation
-            document.getElementById('prevWeekBtn')?.addEventListener('click', () => {
+            document.getElementById('prevWeekBtn').onclick = () => {
                 app.currentScheduleWeek = new Date(app.currentScheduleWeek);
                 app.currentScheduleWeek.setDate(app.currentScheduleWeek.getDate() - 7);
                 renderScheduleGrid();
-            });
+            };
 
-            document.getElementById('nextWeekBtn')?.addEventListener('click', () => {
+            document.getElementById('nextWeekBtn').onclick = () => {
                 app.currentScheduleWeek = new Date(app.currentScheduleWeek);
                 app.currentScheduleWeek.setDate(app.currentScheduleWeek.getDate() + 7);
                 renderScheduleGrid();
-            });
+            };
 
             document.getElementById('copyWeekBtn')?.addEventListener('click', copyPreviousWeek);
             document.getElementById('submitScheduleBtn')?.addEventListener('click', submitSchedule);
