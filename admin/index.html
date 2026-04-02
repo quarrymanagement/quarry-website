@@ -4888,7 +4888,7 @@
             endDate.setDate(endDate.getDate() + 6);
 
             document.getElementById('weekDisplay').textContent =
-                formatDate(app.currentScheduleWeek) + ' - ' + formatDate(endDate);
+                formatScheduleDate(app.currentScheduleWeek) + ' - ' + formatScheduleDate(endDate);
 
             if (!app.editingScheduleData[weekKey]) {
                 app.editingScheduleData[weekKey] = { shifts: {}, submitted: false };
@@ -5067,7 +5067,7 @@
             const msg = document.getElementById('copyWeekMessage');
             if (msg) {
                 msg.style.display = 'block';
-                msg.textContent = `Copied schedule from ${formatDate(prevStart)}. Make your adjustments and click Submit.`;
+                msg.textContent = `Copied schedule from ${formatScheduleDate(prevStart)}. Make your adjustments and click Submit.`;
             }
             showToast('Schedule copied from previous week');
         }
@@ -5272,7 +5272,7 @@
             return `${year}-${month}-${day}`;
         }
 
-        function formatDate(date) {
+        function formatScheduleDate(date) {
             return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         }
 
