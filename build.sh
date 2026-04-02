@@ -1,19 +1,20 @@
 #!/bin/bash
 
-# ── Restore front-facing site as index.html ──
-# The admin panel was uploaded as index.html, pushing the real site to "index (1).html"
-# This swaps them back so the public site loads at /
-if [ -f "index (1).html" ]; then
-  echo "Restoring front-facing site..."
-  mv "index.html" "admin-schedule.html"
-  mv "index (1).html" "index.html"
-  echo "Front-facing site restored as index.html"
-fi
+# ── Restore the real main homepage ──
+# The admin panel overwrote index.html. The original homepage lives in git history
+# at commit f12f97d. We restore it during build so the public site loads at /
+echo "Restoring main homepage from git history..."
+git show f12f97d:index.html > index.html
+echo "Main homepage restored: The Quarry | Restaurant, Wine Bar & Live Music"
 
-# Clean up index (2).html if it exists (duplicate)
+# Clean up misnamed files if they exist
+if [ -f "index (1).html" ]; then
+  rm "index (1).html"
+  echo "Removed index (1).html (wedding page duplicate)"
+fi
 if [ -f "index (2).html" ]; then
   rm "index (2).html"
-  echo "Removed duplicate index (2).html"
+  echo "Removed index (2).html (robots.txt duplicate)"
 fi
 
 # Inject live Stripe publishable key at build time
