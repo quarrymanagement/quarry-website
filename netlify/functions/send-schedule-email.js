@@ -22,8 +22,8 @@ const signRequest = (method, host, path, payload, accessKeyId, secretAccessKey, 
   const amzDate = now.toISOString().replace(/[:-]|\.\d{3}/g, '');
   const dateStamp = now.toISOString().split('T')[0].replace(/-/g, '');
   const canonicalUri = path;
-  const canonicalHeaders = `host:${host}\nx-amz-date:${amzDate}\n`;
-  const signedHeaders = 'host;x-amz-date';
+  const canonicalHeaders = `content-type:application/x-amz-json-1.0\nhost:${host}\nx-amz-date:${amzDate}\nx-amz-target:SimpleEmailService.SendEmail\n`;
+  const signedHeaders = 'content-type;host;x-amz-date;x-amz-target';
   const payloadHash = crypto.createHash('sha256').update(payload).digest('hex');
   const canonicalRequest = [method, canonicalUri, '', canonicalHeaders, signedHeaders, payloadHash].join('\n');
   const credentialScope = `${dateStamp}/${region}/${service}/aws4_request`;
@@ -36,7 +36,8 @@ const signRequest = (method, host, path, payload, accessKeyId, secretAccessKey, 
   return {
     'Authorization': `${algorithm} Credential=${accessKeyId}/${credentialScope}, SignedHeaders=${signedHeaders}, Signature=${signature}`,
     'X-Amz-Date': amzDate,
-    'Content-Type': 'application/x-amz-json-1.1',
+    'X-Amz-Target': 'SimpleEmailService.SendEmail',
+    'Content-Type': 'application/x-amz-json-1.0',
     'Host': host,
   };
 };
