@@ -1004,11 +1004,11 @@
 
         .schedule-grid-container {
             background: var(--bg-card); border-radius: var(--radius-md);
-            border: 1px solid var(--border-subtle); overflow: hidden;
+            border: 1px solid var(--border-subtle); overflow-x: auto;
             display: flex; flex-direction: column;
         }
         .schedule-grid-header {
-            display: grid; grid-template-columns: 180px repeat(7, 1fr) 36px;
+            display: grid; grid-template-columns: 160px repeat(7, minmax(120px, 1fr)) 36px;
             border-bottom: 2px solid var(--border-medium); font-weight: 600;
             background: var(--bg-elevated);
         }
@@ -1020,21 +1020,21 @@
             overflow-x: auto;
         }
         .schedule-row {
-            display: grid; grid-template-columns: 180px repeat(7, 1fr) 36px;
+            display: grid; grid-template-columns: 160px repeat(7, minmax(120px, 1fr)) 36px;
             border-bottom: 1px solid var(--border-subtle); align-items: stretch;
         }
         .schedule-row:hover { background: var(--bg-hover); }
         .schedule-cell-name {
-            padding: 0.75rem 1rem; display: flex; align-items: center;
+            padding: 0.5rem 0.6rem; display: flex; align-items: center;
             background: var(--bg-elevated); font-weight: 500;
-            font-size: 0.9rem; color: var(--text-primary);
+            font-size: 0.82rem; color: var(--text-primary);
         }
         .schedule-cell {
-            padding: 0.6rem; text-align: center; cursor: pointer;
+            padding: 0.35rem 0.25rem; text-align: center; cursor: pointer;
             border-left: 1px solid var(--border-subtle);
             transition: var(--transition); position: relative;
-            display: flex; align-items: center; justify-content: center;
-            min-height: 50px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 50px; overflow: hidden;
         }
         .schedule-cell:hover { background: rgba(154, 123, 42, 0.05); }
         .schedule-cell.closed {
@@ -1045,15 +1045,15 @@
             background: var(--red-dim);
         }
         .shift-display {
-            font-size: 0.72rem; font-weight: 500; color: var(--text-primary);
-            background: var(--gold-dim); padding: 0.3rem 0.45rem;
+            font-size: 0.68rem; font-weight: 500; color: var(--text-primary);
+            background: var(--gold-dim); padding: 0.2rem 0.3rem;
             border-radius: 4px; white-space: nowrap; line-height: 1.3;
         }
         .shift-hours {
-            font-size: 0.62rem; color: var(--text-muted); margin-top: 2px;
+            font-size: 0.58rem; color: var(--text-muted); margin-top: 1px;
         }
         .shift-role-row {
-            margin-bottom: 1px;
+            margin-top: 2px;
         }
         .shift-role-tag {
             font-size: 0.55rem; padding: 1px 4px; line-height: 1;
@@ -1114,7 +1114,7 @@
         }
         .payroll-day-chip strong { color: var(--text-primary); }
         .staff-summary-row {
-            display: grid; grid-template-columns: 180px repeat(7, 1fr) 36px;
+            display: grid; grid-template-columns: 160px repeat(7, minmax(120px, 1fr)) 36px;
             background: var(--bg-elevated); border-bottom: 2px solid var(--border-medium);
         }
         .staff-summary-label {
@@ -5266,7 +5266,7 @@
                 const roleTag = getRoleTag(emp.primaryRole);
 
                 html += `<div class="schedule-row" data-role="${emp.primaryRole}">
-                    <div class="schedule-cell-name" title="${emp.name || (emp.firstName + ' ' + emp.lastName)}">${displayName} ${roleTag}</div>
+                    <div class="schedule-cell-name" title="${emp.name || (emp.firstName + ' ' + emp.lastName)}">${displayName}</div>
                 `;
 
                 dayKeys.forEach((dayKey, idx) => {
@@ -5286,9 +5286,9 @@
 
                     if (shift && shift.role) {
                         const fmt = formatShiftDisplay(shift, dayKey);
-                        cellHTML += `<div class="shift-role-row">${getShiftRoleTag(shift.role)}</div>`;
                         cellHTML += `<div class="shift-display">${fmt.timeText}</div>`;
                         if (fmt.hoursText) cellHTML += `<div class="shift-hours">${fmt.hoursText}</div>`;
+                        cellHTML += `<div class="shift-role-row">${getShiftRoleTag(shift.role)}</div>`;
                     } else if (!isClosed) {
                         cellHTML += `<div class="shift-off" style="opacity:0.3;">+</div>`;
                     } else {
