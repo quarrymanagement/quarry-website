@@ -2292,8 +2292,8 @@
                     <label class="form-label">End Time</label>
                     <input type="text" id="modalEndTime" class="form-input" placeholder="e.g. 11 PM, CL">
                 </div>
-                <div id="timeoffWarning" class="warning-banner hidden" style="margin-bottom: 1rem;">
-                    Warning: This employee has approved time-off on this date
+                <div id="timeoffWarning" class="warning-banner hidden" style="margin-bottom: 1rem; background: #fde8e8; border: 2px solid var(--red); color: var(--red); padding: 0.75rem; border-radius: 6px; font-weight: 600; text-align: center;">
+                    ⚠️ This employee has APPROVED time off for this date. Are you sure you want to override?
                 </div>
             </div>
             <div class="modal-actions">
@@ -5328,6 +5328,8 @@
                         cellHTML += `<div class="shift-display">${fmt.timeText}</div>`;
                         if (fmt.hoursText) cellHTML += `<div class="shift-hours">${fmt.hoursText}</div>`;
                         cellHTML += `<div class="shift-role-row">${getShiftRoleTag(shift.role)}</div>`;
+                    } else if (hasTimeOff) {
+                        cellHTML += `<div style="font-size:0.55rem;font-weight:700;color:var(--red);text-transform:uppercase;">Time Off</div>`;
                     } else if (!isClosed) {
                         cellHTML += `<div class="shift-off" style="opacity:0.3;">+</div>`;
                     } else {
@@ -5589,6 +5591,20 @@
 
             const { empId, dayKey } = app_currentEditShift;
             const weekKey = formatWeekKey(app.currentScheduleWeek);
+
+            // Check for time-off conflict before saving
+            const timeoffWarning = document.getElementById('timeoffWarning');
+            if (timeoffWarning && !timeoffWarning.classList.contains('hidden')) {
+                const role = document.getElementById('modalRole').value;
+                if (role) {
+                    const emp = app.employees.find(e => e.id === empId);
+                    const empName = emp ? (emp.name || emp.firstName + ' ' + emp.lastName) : empId;
+                    if (!confirm(`${empName} has APPROVED time off for this date.\n\nAre you sure you want to schedule them anyway?`)) {
+                        return;
+                    }
+                }
+            }
+
             const weekData = app.editingScheduleData[weekKey];
             if (!weekData.shifts[empId]) weekData.shifts[empId] = {};
             const role = document.getElementById('modalRole').value;
