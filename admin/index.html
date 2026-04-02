@@ -2212,7 +2212,7 @@
         employees: [],
             schedules: {},
             timeOffRequests: [],
-            currentScheduleWeek: null,
+            currentScheduleWeek: getMonday(new Date()),
         };
 
         // ================================================================
@@ -4728,6 +4728,9 @@
                     app.timeOffRequests = data.timeOffRequests || [];
                     app.editingScheduleData = JSON.parse(JSON.stringify(app.schedules));
                     app.currentScheduleWeek = getMonday(new Date());
+                    renderScheduleGrid();
+                    renderEmployeeList();
+                    renderTimeoffList();
                 } else {
                     console.warn('Could not load schedule data');
                 }
@@ -5291,4 +5294,4 @@
                 </div>
             </div>
 
-></html>
+</html>
