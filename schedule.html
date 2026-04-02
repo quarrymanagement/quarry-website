@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Quarry - Employee Schedule</title>
+    <style>
+        :root {
+            --primary-gold: #8B7535;
+            --dark-text: #2c2c2c;
+            --light-bg: #f9f7f4;
+            --border-color: #d4ccc1;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.15);
+            --success: #4caf50;
+            --error: #f44336;
+            --warning: #ff9800;
+            --time-off-approved: #dc3545;
+            --time-off-pending: #ffc107;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        .header h1 {
+            font-family: Georgia, serif;
+            font-size: 2.5rem;
+            color: var(--primary-gold);
+            margin-bottom: 5px;
+            font-weight: normal;
+            letter-spacing: 2px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: var(--dark-text);
+            opacity: 0.8;
+        }
+
+        /* Login Section */
+        .login-section {
+            max-width: 500px;
+            margin: 60px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .login-section h2 {
+            font-family: Georgia, serif;
+            font-size: 1.8rem;
+            color: var(--primary-gold);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark-text);
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="date"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+            font-family: inherit;
+            background: white;
+            color: var(--dark-text);
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="date"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-gold);
+            box-shadow: 0 0 0 3px rgba(139, 117, 53, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-gold);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background-color: #6d5a2a;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-secondary {
+            background-color: var(--border-color);
+            color: var(--dark-text);
+        }
+
+        .btn-secondary:hover {
+            background-color: #c4bbb0;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+
+        .error-message {
+            background-color: #ffebee;
+            color: var(--error);
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--error);
+        }
+
+        .success-message {
+            background-color: #e8f5e9;
+            color: var(--success);
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--success);
+        }
+
+        .warning-message {
+            background-color: #fff3e0;
+            color: var(--warning);
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--warning);
+        }
+
+        /* Welcome Bar */
+        .welcome-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .welcome-text h2 {
+            font-family: Georgia, serif;
+            font-size: 1.5rem;
+            color: var(--primary-gold);
+        }
+
+        .welcome-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* Week Navigation */
+        .week-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        .week-info {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--dark-text);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            padding: 8px 16px;
+            background-color: var(--primary-gold);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+
+        .nav-btn:hover {
+            background-color: #6d5a2a;
+        }
+
+        /* Schedule Grid */
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .day-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: box-shadow 0.2s;
+        }
+
+        .day-card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .day-header {
+            background: linear-gradient(135deg, var(--primary-gold) 0%, #6d5a2a 100%);
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .day-name {
+            font-family: Georgia, serif;
+            font-size: 1.3rem;
+            font-weight: normal;
+            margin-bottom: 5px;
+        }
+
+        .day-date {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .closed-badge {
+            display: inline-block;
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            margin-top: 8px;
+        }
+
+        .day-content {
+            padding: 20px;
+        }
+
+        .shift-info {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .shift-info:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .shift-time {
+            font-weight: 600;
+            color: var(--primary-gold);
+            font-size: 1.05rem;
+            margin-bottom: 5px;
+        }
+
+        .shift-role {
+            color: var(--dark-text);
+            font-size: 0.95rem;
+            margin-bottom: 5px;
+        }
+
+        .shift-hours {
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        .time-off-badge {
+            display: inline-block;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-top: 8px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .time-off-approved {
+            background-color: var(--time-off-approved);
+            color: white;
+        }
+
+        .time-off-pending {
+            background-color: var(--time-off-pending);
+            color: var(--dark-text);
+        }
+
+        .no-shift {
+            color: #999;
+            font-style: italic;
+            padding: 20px;
+            text-align: center;
+        }
+
+        /* Weekly Hours Summary */
+        .weekly-summary {
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 25px;
+            margin-bottom: 40px;
+        }
+
+        .summary-title {
+            font-family: Georgia, serif;
+            font-size: 1.3rem;
+            color: var(--primary-gold);
+            margin-bottom: 15px;
+        }
+
+        .summary-content {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .summary-item {
+            text-align: center;
+        }
+
+        .summary-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        .summary-value {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--primary-gold);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.2s;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: var(--shadow-lg);
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .modal-header h2 {
+            font-family: Georgia, serif;
+            font-size: 1.5rem;
+            color: var(--primary-gold);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--dark-text);
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            color: var(--primary-gold);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .modal-actions .btn {
+            flex: 1;
+        }
+
+        /* Loading State */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--primary-gold);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .welcome-bar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .welcome-actions {
+                width: 100%;
+            }
+
+            .week-nav {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .week-info {
+                width: 100%;
+                text-align: center;
+            }
+
+            .nav-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .schedule-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-content {
+                flex-direction: column;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 30px;
+            }
+
+            .login-section {
+                margin: 40px auto;
+                padding: 30px 20px;
+            }
+
+            .day-name {
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 12px;
+            }
+
+            .header {
+                padding: 20px 15px;
+                margin-bottom: 30px;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+                letter-spacing: 1px;
+            }
+
+            .login-section {
+                padding: 25px 20px;
+            }
+
+            .btn {
+                padding: 10px 16px;
+                font-size: 0.9rem;
+            }
+
+            .day-content {
+                padding: 15px;
+            }
+
+            .shift-time {
+                font-size: 0.95rem;
+            }
+
+            .modal-content {
+                padding: 25px 20px;
+                width: 95%;
+            }
+
+            .modal-header h2 {
+                font-size: 1.2rem;
+            }
+        }
+
+        /* Hidden by default */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>THE QUARRY</h1>
+            <p>Employee Schedule</p>
+        </div>
+
+        <!-- Login Section -->
+        <div id="loginSection" class="login-section">
+            <h2>Employee Login</h2>
+            <div id="loginError" class="error-message hidden"></div>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="emailInput">Email</label>
+                    <input type="email" id="emailInput" required placeholder="your@email.com">
+                </div>
+                <div class="form-group">
+                    <label for="lastNameInput">Last Name</label>
+                    <input type="text" id="lastNameInput" required placeholder="Your Last Name">
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+        </div>
+
+        <!-- Welcome Section -->
+        <div id="scheduleSection" class="hidden">
+            <div class="welcome-bar">
+                <div class="welcome-text">
+                    <h2>Welcome, <span id="welcomeName"></span>!</h2>
+                </div>
+                <div class="welcome-actions">
+                    <button class="btn btn-primary btn-small" onclick="openTimeOffModal()">Request Time Off</button>
+                    <button class="btn btn-secondary btn-small" onclick="logout()">Logout</button>
+                </div>
+            </div>
+
+            <!-- Messages -->
+            <div id="successMessage" class="success-message hidden"></div>
+            <div id="warningMessage" class="warning-message hidden"></div>
+
+            <!-- Week Navigation -->
+            <div class="week-nav">
+                <button class="nav-btn" onclick="previousWeek()">← Previous Week</button>
+                <div class="week-info">
+                    <span id="weekDisplay"></span>
+                </div>
+                <button class="nav-btn" onclick="nextWeek()">Next Week →</button>
+            </div>
+
+            <!-- Schedule Grid -->
+            <div class="schedule-grid" id="scheduleGrid">
+                <!-- Populated by JavaScript -->
+            </div>
+
+            <!-- Weekly Summary -->
+            <div class="weekly-summary">
+                <div class="summary-title">Weekly Hours</div>
+                <div class="summary-content">
+                    <div class="summary-item">
+                        <div class="summary-label">Total Hours</div>
+                        <div class="summary-value" id="totalHours">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Days Scheduled</div>
+                        <div class="summary-value" id="daysScheduled">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Time Off Modal -->
+    <div id="timeOffModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Request Time Off</h2>
+                <button class="close-btn" onclick="closeTimeOffModal()">×</button>
+            </div>
+            <div id="timeOffError" class="error-message hidden"></div>
+            <div id="timeOffSuccess" class="success-message hidden"></div>
+            <form id="timeOffForm" onsubmit="submitTimeOff(event)">
+                <div class="form-group">
+                    <label for="startDate">Start Date</label>
+                    <input type="date" id="startDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="endDate">End Date</label>
+                    <input type="date" id="endDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="reason">Reason</label>
+                    <textarea id="reason" placeholder="Please provide a reason for your time off request" required></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeTimeOffModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Submit Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let currentUser = null;
+        let scheduleData = null;
+        let currentWeekStart = getMonday(new Date());
+
+        // Date utilities
+        function getMonday(date) {
+            const d = new Date(date);
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            return new Date(d.setDate(diff));
+        }
+
+        function formatDateForKey(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        function getWeekDates(mondayDate) {
+            const dates = {};
+            const dayNames = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(mondayDate);
+                d.setDate(d.getDate() + i);
+                dates[dayNames[i]] = d;
+            }
+            return dates;
+        }
+
+        function formatDate(date) {
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+
+        function parseTimeRaw(str) {
+            if (!str) return null;
+            let raw = str.toString().trim();
+            let forcedAM = /am/i.test(raw);
+            let forcedPM = /pm/i.test(raw);
+            let cleaned = raw.replace(/[^0-9:]/gi, '');
+            if (!cleaned) return null;
+            let h, m = 0;
+            if (cleaned.includes(':')) {
+                const parts = cleaned.split(':');
+                h = parseInt(parts[0]); m = parseInt(parts[1]) || 0;
+            } else if (cleaned.length >= 3) {
+                h = parseInt(cleaned.slice(0, -2)); m = parseInt(cleaned.slice(-2));
+            } else {
+                h = parseInt(cleaned);
+            }
+            if (isNaN(h)) return null;
+            let hour24;
+            if (forcedAM) { hour24 = (h === 12) ? 0 : h; }
+            else if (forcedPM) { hour24 = (h === 12) ? 12 : h + 12; }
+            else {
+                if (h >= 1 && h <= 6) hour24 = h + 12;
+                else if (h === 12) hour24 = 12;
+                else hour24 = h;
+            }
+            let displayH = hour24 > 12 ? hour24 - 12 : hour24;
+            if (displayH === 0) displayH = 12;
+            let ampm = hour24 >= 12 ? 'PM' : 'AM';
+            let label = m > 0 ? `${displayH}:${m.toString().padStart(2,'0')} ${ampm}` : `${displayH} ${ampm}`;
+            return { hour24: hour24 + m/60, label };
+        }
+
+        function formatTime(timeStr) {
+            if (!timeStr || timeStr === 'CL') return 'Close';
+            const parsed = parseTimeRaw(timeStr);
+            return parsed ? parsed.label : timeStr;
+        }
+
+        function calculateHours(startTime, endTime, closeTimeStr) {
+            if (!startTime) return 0;
+            const startP = parseTimeRaw(startTime);
+            if (!startP) return 0;
+            let endH;
+            if (!endTime || endTime.toString().trim().toUpperCase() === 'CL' || endTime === '') {
+                const parts = closeTimeStr.split(':').map(Number);
+                endH = parts[0] + (parts[1] || 0) / 60;
+            } else {
+                const endP = parseTimeRaw(endTime);
+                if (!endP) return 0;
+                endH = endP.hour24;
+            }
+            let hours = endH - startP.hour24;
+            if (hours < 0) hours += 24;
+            return parseFloat(hours.toFixed(1));
+        }
+
+        function getCloseTime(dayName) {
+            const closeTimes = {
+                wednesday: '21:00',
+                thursday: '21:00',
+                friday: '23:00',
+                saturday: '23:00',
+                sunday: '17:00'
+            };
+            return closeTimes[dayName] || '23:00';
+        }
+
+        // API calls
+        async function fetchScheduleData() {
+            try {
+                const response = await fetch(
+                    `https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/schedule.json?t=${Date.now()}`,
+                    { headers: { 'Accept': 'application/json' } }
+                );
+                if (!response.ok) throw new Error('Failed to fetch schedule');
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching schedule:', error);
+                showErrorMessage('Failed to load schedule data. Please try again.', 'login');
+                return null;
+            }
+        }
+
+        async function submitTimeOffRequest(employeeId, dates, reason) {
+            try {
+                const response = await fetch('/.netlify/functions/request-timeoff', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ employeeId, dates, reason })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Failed to submit request');
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('Error submitting time off request:', error);
+                throw error;
+            }
+        }
+
+        // Login
+        async function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('emailInput').value.toLowerCase().trim();
+            const lastName = document.getElementById('lastNameInput').value.toLowerCase().trim();
+
+            clearMessage('loginError');
+
+            scheduleData = await fetchScheduleData();
+            if (!scheduleData) return;
+
+            const employee = scheduleData.employees.find(emp => {
+                const empEmail = emp.email.toLowerCase();
+                const empLastName = (emp.lastName || emp.name?.split(' ').pop() || '').toLowerCase();
+                return empEmail === email && empLastName === lastName;
+            });
+
+            if (!employee) {
+                showErrorMessage('Invalid email or last name. Please try again.', 'loginError');
+                return;
+            }
+
+            currentUser = employee;
+            const firstName = employee.firstName || employee.name?.split(' ')[0] || '';
+            document.getElementById('welcomeName').textContent = firstName;
+
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('scheduleSection').classList.remove('hidden');
+
+            currentWeekStart = getMonday(new Date());
+            renderSchedule();
+        }
+
+        // Logout
+        function logout() {
+            currentUser = null;
+            scheduleData = null;
+            document.getElementById('loginForm').reset();
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('scheduleSection').classList.add('hidden');
+            document.getElementById('emailInput').focus();
+            clearMessage('successMessage');
+            clearMessage('warningMessage');
+        }
+
+        // Schedule rendering
+        function renderSchedule() {
+            const weekDates = getWeekDates(currentWeekStart);
+            const weekStart = formatDateForKey(currentWeekStart);
+            const weekEnd = new Date(currentWeekStart);
+            weekEnd.setDate(weekEnd.getDate() + 6);
+
+            document.getElementById('weekDisplay').textContent =
+                `${formatDate(currentWeekStart)} - ${formatDate(weekEnd)}`;
+
+            const grid = document.getElementById('scheduleGrid');
+            grid.innerHTML = '';
+
+            let totalHours = 0;
+            let daysScheduled = 0;
+
+            const closedDays = ['monday', 'tuesday'];
+
+            for (const [dayKey, date] of Object.entries(weekDates)) {
+                const card = document.createElement('div');
+                card.className = 'day-card';
+
+                const dayName = dayKey.charAt(0).toUpperCase() + dayKey.slice(1);
+                const dateStr = formatDate(date);
+                const dateKeyStr = formatDateForKey(date);
+
+                let headerHTML = `
+                    <div class="day-header">
+                        <div class="day-name">${dayName}</div>
+                        <div class="day-date">${dateStr}</div>
+                `;
+
+                if (closedDays.includes(dayKey)) {
+                    headerHTML += '<div class="closed-badge">CLOSED</div>';
+                }
+
+                headerHTML += '</div>';
+                card.innerHTML = headerHTML;
+
+                const content = document.createElement('div');
+                content.className = 'day-content';
+
+                if (closedDays.includes(dayKey)) {
+                    content.innerHTML = '<div class="no-shift">Restaurant Closed</div>';
+                } else {
+                    const weekSchedules = scheduleData.schedules[weekStart];
+                    const shiftsObj = weekSchedules && weekSchedules.shifts;
+                    const employeeSchedule = shiftsObj && shiftsObj[currentUser.id];
+                    const dayShift = employeeSchedule && employeeSchedule[dayKey];
+
+                    let timeOffRequest = null;
+                    if (scheduleData.timeOffRequests) {
+                        timeOffRequest = scheduleData.timeOffRequests.find(req =>
+                            req.employeeId === currentUser.id &&
+                            req.dates.includes(dateKeyStr)
+                        );
+                    }
+
+                    if (timeOffRequest) {
+                        const badge = document.createElement('div');
+                        badge.className = `time-off-badge ${timeOffRequest.status === 'approved' ? 'time-off-approved' : 'time-off-pending'}`;
+                        badge.textContent = `TIME OFF (${timeOffRequest.status.charAt(0).toUpperCase() + timeOffRequest.status.slice(1)})`;
+                        content.appendChild(badge);
+                    } else if (dayShift && dayShift.startTime) {
+                        const roleMap = {
+                            'Bar': 'Bartender',
+                            'S': 'Server',
+                            'K': 'Kitchen',
+                            'D': 'Dishwasher',
+                            'B': 'Busser',
+                            'Host': 'Host',
+                            'Expo': 'Expo',
+                            'FR': 'Food Runner',
+                            'Train': 'Training'
+                        };
+
+                        const closeTime = getCloseTime(dayKey);
+                        const displayRole = roleMap[dayShift.role] || dayShift.role;
+                        const startTimeStr = formatTime(dayShift.startTime);
+                        const endStr = (dayShift.endTime || '').toString().trim().toUpperCase();
+                        const finalEndTime = (endStr === 'CL' || endStr === '') ? formatTime(closeTime) : formatTime(dayShift.endTime);
+
+                        const hours = calculateHours(dayShift.startTime, dayShift.endTime, closeTime);
+                        totalHours += hours;
+                        daysScheduled += 1;
+
+                        const shiftHTML = `
+                            <div class="shift-info">
+                                <div class="shift-time">${startTimeStr} - ${finalEndTime}</div>
+                                <div class="shift-role">${displayRole}</div>
+                                <div class="shift-hours">${hours} hours</div>
+                            </div>
+                        `;
+                        content.innerHTML = shiftHTML;
+                    } else {
+                        content.innerHTML = '<div class="no-shift">Off</div>';
+                    }
+                }
+
+                card.appendChild(content);
+                grid.appendChild(card);
+            }
+
+            document.getElementById('totalHours').textContent = totalHours.toFixed(1);
+            document.getElementById('daysScheduled').textContent = daysScheduled;
+        }
+
+        // Week navigation
+        function previousWeek() {
+            currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+            currentWeekStart = getMonday(currentWeekStart);
+            renderSchedule();
+        }
+
+        function nextWeek() {
+            currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+            currentWeekStart = getMonday(currentWeekStart);
+            renderSchedule();
+        }
+
+        // Time off modal
+        function openTimeOffModal() {
+            document.getElementById('timeOffModal').classList.add('show');
+            const today = new Date();
+            document.getElementById('startDate').valueAsDate = today;
+            document.getElementById('endDate').valueAsDate = today;
+        }
+
+        function closeTimeOffModal() {
+            document.getElementById('timeOffModal').classList.remove('show');
+            document.getElementById('timeOffForm').reset();
+            clearMessage('timeOffError');
+            clearMessage('timeOffSuccess');
+        }
+
+        async function submitTimeOff(event) {
+            event.preventDefault();
+            clearMessage('timeOffError');
+            clearMessage('timeOffSuccess');
+
+            const startDate = new Date(document.getElementById('startDate').value);
+            const endDate = new Date(document.getElementById('endDate').value);
+            const reason = document.getElementById('reason').value;
+
+            if (endDate < startDate) {
+                showErrorMessage('End date must be after start date', 'timeOffError');
+                return;
+            }
+
+            const dates = [];
+            const current = new Date(startDate);
+            while (current <= endDate) {
+                dates.push(formatDateForKey(current));
+                current.setDate(current.getDate() + 1);
+            }
+
+            try {
+                const response = await submitTimeOffRequest(currentUser.id, dates, reason);
+                showSuccessMessage('Time off request submitted successfully!', 'timeOffSuccess');
+
+                setTimeout(async () => {
+                    closeTimeOffModal();
+                    scheduleData = await fetchScheduleData();
+                    renderSchedule();
+                    showSuccessMessage('Your schedule has been updated.', 'successMessage');
+                }, 1500);
+            } catch (error) {
+                showErrorMessage('Failed to submit request: ' + error.message, 'timeOffError');
+            }
+        }
+
+        // Modal close on background click
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('timeOffModal');
+            if (event.target === modal) {
+                closeTimeOffModal();
+            }
+        });
+
+        // Message utilities
+        function showErrorMessage(message, elementId) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.classList.remove('hidden');
+            setTimeout(() => clearMessage(elementId), 5000);
+        }
+
+        function showSuccessMessage(message, elementId) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.classList.remove('hidden');
+            setTimeout(() => clearMessage(elementId), 5000);
+        }
+
+        function clearMessage(elementId) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.classList.add('hidden');
+                element.textContent = '';
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('emailInput').focus();
+        });
+    </script>
+</body>
+</html>
