@@ -1747,6 +1747,76 @@
                     </div>
                 </div>
             </div>
+
+            <!-- ========================================================
+                 SCHEDULING TAB
+                 ======================================================== -->
+            <div id="schedulingTab" class="tab-content">
+                <div class="schedule-header">
+                    <h2>Weekly Schedule</h2>
+                    <div class="week-navigator">
+                        <button class="nav-btn" id="prevWeekBtn">&lt;</button>
+                        <div class="week-display" id="weekDisplay">Loading...</div>
+                        <button class="nav-btn" id="nextWeekBtn">&gt;</button>
+                    </div>
+                </div>
+                <div style="margin-bottom: 1.5rem; display: flex; gap: 1rem;">
+                    <button class="btn-primary" id="copyWeekBtn">Copy Previous Week</button>
+                    <button class="btn-primary" id="submitScheduleBtn">Submit Schedule & Email</button>
+                    <button class="btn-secondary" id="resetScheduleBtn">Reset Changes</button>
+                </div>
+                <div id="copyWeekMessage" style="margin-bottom: 1rem; padding: 1rem; background: var(--bg-elevated); border-radius: var(--radius-md); display: none; color: var(--text-secondary); font-size: 0.9rem;"></div>
+                <div id="scheduleGrid" class="schedule-grid-container"></div>
+            </div>
+
+            <div id="employeesTab" class="tab-content">
+                <div class="section-header">
+                    <h2>Employee Management</h2>
+                    <button class="btn-primary" id="addEmployeeBtn">+ Add Employee</button>
+                </div>
+                <div class="employee-form-grid">
+                    <div class="form-group">
+                        <label class="form-label">First Name</label>
+                        <input type="text" id="empFirstName" class="form-input" placeholder="First name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Last Name</label>
+                        <input type="text" id="empLastName" class="form-input" placeholder="Last name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" id="empEmail" class="form-input" placeholder="Email address">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone</label>
+                        <input type="tel" id="empPhone" class="form-input" placeholder="Phone number">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Primary Role</label>
+                        <select id="empPrimaryRole" class="form-select">
+                            <option value="Bartender">Bartender</option>
+                            <option value="Server">Server</option>
+                            <option value="Busser/Host">Busser/Host</option>
+                            <option value="Kitchen">Kitchen</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Hire Date</label>
+                        <input type="date" id="empHireDate" class="form-input">
+                    </div>
+                </div>
+                <div class="employee-list" id="employeeList"></div>
+            </div>
+
+            <div id="timeoffTab" class="tab-content">
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">Pending Requests</div>
+                    </div>
+                    <div class="timeoff-list" id="timeoffList"></div>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -5224,74 +5294,4 @@
 
     </script>
 </body>
-</html
-            <!-- ========================================================
-                 SCHEDULING TAB
-                 ======================================================== -->
-            <div id="schedulingTab" class="tab-content">
-                <div class="schedule-header">
-                    <h2>Weekly Schedule</h2>
-                    <div class="week-navigator">
-                        <button class="nav-btn" id="prevWeekBtn">&lt;</button>
-                        <div class="week-display" id="weekDisplay">Loading...</div>
-                        <button class="nav-btn" id="nextWeekBtn">&gt;</button>
-                    </div>
-                </div>
-                <div style="margin-bottom: 1.5rem; display: flex; gap: 1rem;">
-                    <button class="btn-primary" id="copyWeekBtn">Copy Previous Week</button>
-                    <button class="btn-primary" id="submitScheduleBtn">Submit Schedule & Email</button>
-                    <button class="btn-secondary" id="resetScheduleBtn">Reset Changes</button>
-                </div>
-                <div id="copyWeekMessage" style="margin-bottom: 1rem; padding: 1rem; background: var(--bg-elevated); border-radius: var(--radius-md); display: none; color: var(--text-secondary); font-size: 0.9rem;"></div>
-                <div id="scheduleGrid" class="schedule-grid-container"></div>
-            </div>
-
-            <div id="employeesTab" class="tab-content">
-                <div class="section-header">
-                    <h2>Employee Management</h2>
-                    <button class="btn-primary" id="addEmployeeBtn">+ Add Employee</button>
-                </div>
-                <div class="employee-form-grid">
-                    <div class="form-group">
-                        <label class="form-label">First Name</label>
-                        <input type="text" id="empFirstName" class="form-input" placeholder="First name">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Last Name</label>
-                        <input type="text" id="empLastName" class="form-input" placeholder="Last name">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Email</label>
-                        <input type="email" id="empEmail" class="form-input" placeholder="Email address">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Phone</label>
-                        <input type="tel" id="empPhone" class="form-input" placeholder="Phone number">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Primary Role</label>
-                        <select id="empPrimaryRole" class="form-select">
-                            <option value="Bartender">Bartender</option>
-                            <option value="Server">Server</option>
-                            <option value="Busser/Host">Busser/Host</option>
-                            <option value="Kitchen">Kitchen</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Hire Date</label>
-                        <input type="date" id="empHireDate" class="form-input">
-                    </div>
-                </div>
-                <div class="employee-list" id="employeeList"></div>
-            </div>
-
-            <div id="timeoffTab" class="tab-content">
-                <div class="section">
-                    <div class="section-header">
-                        <div class="section-title">Pending Requests</div>
-                    </div>
-                    <div class="timeoff-list" id="timeoffList"></div>
-                </div>
-            </div>
-
 </html>
