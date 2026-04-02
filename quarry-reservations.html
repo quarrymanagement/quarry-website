@@ -527,5 +527,34 @@ nav { display:flex; align-items:center; }
   });
 })();
 </script>
+
+<script>
+/* Catering option selector */
+function selectCatering(value) {
+  document.getElementById('cateringInput').value = value;
+  var yes = document.getElementById('cateringYes');
+  var no = document.getElementById('cateringNo');
+  var checkYes = document.getElementById('checkYes');
+  var checkNo = document.getElementById('checkNo');
+  var reveal = document.getElementById('cateringReveal');
+  if (value === 'Yes') {
+    yes.classList.add('selected');
+    no.classList.remove('selected');
+    checkYes.classList.add('active');
+    checkYes.innerHTML = '&#10003;';
+    checkNo.classList.remove('active');
+    checkNo.innerHTML = '';
+    if (reveal) reveal.style.display = 'block';
+  } else {
+    no.classList.add('selected');
+    yes.classList.remove('selected');
+    checkNo.classList.add('active');
+    checkNo.innerHTML = '&#10003;';
+    checkYes.classList.remove('active');
+    checkYes.innerHTML = '';
+    if (reveal) reveal.style.display = 'none';
+  }
+}
+</script>
 </body>
 </html>
