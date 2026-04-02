@@ -190,12 +190,12 @@
         /* ================================================================
            CONTENT AREA
            ================================================================ */
-        .content { flex: 1; display: flex; overflow: hidden; }
+        .content { flex: 1; display: flex; overflow-y: auto; overflow-x: hidden; }
         .tab-content {
-            display: none; width: 100%; height: 100%;
+            display: none; width: 100%; min-height: 0;
             padding: 1.75rem; overflow-y: auto; animation: fadeIn 0.25s ease;
         }
-        .tab-content.active { display: flex; flex-direction: column; }
+        .tab-content.active { display: flex; flex-direction: column; flex: 1; }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(6px); }
             to { opacity: 1; transform: translateY(0); }
@@ -960,7 +960,7 @@
         }
         .employee-list {
             background: var(--bg-card); border-radius: var(--radius-md);
-            border: 1px solid var(--border-subtle); overflow: hidden;
+            border: 1px solid var(--border-subtle);
         }
         .employee-row {
             display: flex; justify-content: space-between; align-items: center;
@@ -1064,6 +1064,23 @@
         .shift-off {
             color: var(--text-muted); font-size: 0.85rem;
         }
+        .staff-summary-row {
+            display: grid; grid-template-columns: 140px repeat(7, 1fr) 36px;
+            background: var(--bg-elevated); border-bottom: 2px solid var(--border-medium);
+        }
+        .staff-summary-label {
+            padding: 0.5rem 0.75rem; font-size: 0.75rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.5px; color: var(--gold);
+            display: flex; align-items: center;
+        }
+        .staff-summary-cell {
+            padding: 0.4rem 0.35rem; font-size: 0.7rem; text-align: center;
+            border-left: 1px solid var(--border-subtle); color: var(--text-secondary);
+            display: flex; flex-direction: column; gap: 2px; justify-content: center;
+        }
+        .staff-summary-cell.closed { color: var(--text-muted); font-style: italic; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; }
+        .count-period { white-space: nowrap; }
+        .count-label { font-weight: 600; color: var(--gold); }
         .add-row-btn {
             background: none; border: 1px dashed var(--border-medium); color: var(--gold);
             padding: 0.35rem 0.75rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem;
@@ -1772,9 +1789,10 @@
                         <button class="nav-btn" id="nextWeekBtn">&gt;</button>
                     </div>
                 </div>
-                <div style="margin-bottom: 1.5rem; display: flex; gap: 1rem;">
+                <div style="margin-bottom: 1.5rem; display: flex; gap: 0.75rem; flex-wrap: wrap;">
                     <button class="btn-primary" id="copyWeekBtn">Copy Previous Week</button>
-                    <button class="btn-primary" id="submitScheduleBtn">Submit Schedule & Email</button>
+                    <button class="btn-primary" id="submitScheduleBtn">Save Schedule</button>
+                    <button class="btn-primary" id="emailScheduleBtn" style="background: #2e7d32;">Email Schedule</button>
                     <button class="btn-secondary" id="resetScheduleBtn">Reset Changes</button>
                 </div>
                 <div id="copyWeekMessage" style="margin-bottom: 1rem; padding: 1rem; background: var(--bg-elevated); border-radius: var(--radius-md); display: none; color: var(--text-secondary); font-size: 0.9rem;"></div>
@@ -4872,14 +4890,37 @@
         async function sendScheduleEmails() {
             try {
                 const weekKey = formatWeekKey(app.currentScheduleWeek);
+                const weekData = app.editingScheduleData[weekKey];
+                if (!weekData || !weekData.shifts) return false;
+
+                // Build employee list with only those who have shifts
+                const dayKeys = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+                const scheduledEmps = app.employees.filter(emp => {
+                    const s = weekData.shifts[emp.id];
+                    if (!s) return false;
+                    return dayKeys.some(dk => s[dk] && s[dk].role);
+                }).filter(emp => emp.email && emp.email.includes('@'));
+
                 const response = await fetch('/.netlify/functions/send-schedule-email', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ weekStartDate: weekKey })
+                    body: JSON.stringify({
+                        weekOf: weekKey,
+                        allShifts: weekData.shifts,
+                        employees: scheduledEmps.map(e => ({
+                            id: e.id,
+                            name: e.name || (e.firstName + ' ' + e.lastName),
+                            email: e.email,
+                            primaryRole: e.primaryRole
+                        }))
+                    })
                 });
+                const result = await response.json();
+                if (result.message) showToast(result.message);
                 return response.ok;
             } catch (err) {
                 console.error('Error sending emails:', err);
+                showToast('Error sending emails: ' + err.message);
             }
             return false;
         }
@@ -4902,6 +4943,7 @@
 
             document.getElementById('copyWeekBtn')?.addEventListener('click', copyPreviousWeek);
             document.getElementById('submitScheduleBtn')?.addEventListener('click', submitSchedule);
+            document.getElementById('emailScheduleBtn')?.addEventListener('click', emailSchedule);
             document.getElementById('resetScheduleBtn')?.addEventListener('click', resetSchedule);
 
             // Employee tab
@@ -4950,11 +4992,65 @@
                 return dayKeys.some(dk => s[dk] && s[dk].role);
             }
 
+            // Build staff count summary (morning 11a-4p / evening 5p-11p)
+            function classifyShift(shift) {
+                if (!shift || !shift.role) return null;
+                const st = (shift.startTime || '').replace(':','');
+                let startNum = parseInt(st) || 0;
+                // Normalize: single digits like "5" mean PM context usually
+                if (startNum > 0 && startNum <= 12) {
+                    // If start is 11 or 12, could be AM lunch; if <=10, likely AM; if >=1 and <=6, likely PM
+                    if (startNum >= 1 && startNum <= 6) startNum += 12; // PM
+                    else if (startNum >= 7 && startNum <= 10) startNum = startNum; // AM like 9:30
+                    // 11, 12 stay as-is
+                }
+                if (startNum >= 930 && startNum <= 1200) startNum = Math.floor(startNum / 100); // normalize 930->9
+                if (startNum >= 100) startNum = Math.floor(startNum / 100); // 530->5 etc
+
+                // Morning: start before 4pm (startNum < 16 in 24h, or < 4 adjusted)
+                // We'll use a simpler heuristic: starts at or before 12 = morning, starts at or after 3 = evening
+                const raw = parseInt((shift.startTime || '0').replace(':','')) || 0;
+                if (raw >= 7 && raw <= 12) return 'morning';
+                if (raw >= 100 && raw <= 1200) return 'morning';
+                if (raw >= 1 && raw <= 6) return 'evening';
+                if (raw >= 13 && raw <= 23) return 'evening';
+                if (raw > 1200) return raw <= 1600 ? 'morning' : 'evening';
+                return 'evening'; // default
+            }
+
+            const staffCounts = {};
+            dayKeys.forEach(dk => {
+                staffCounts[dk] = { morning: { Bar: 0, S: 0, total: 0 }, evening: { Bar: 0, S: 0, total: 0 } };
+                Object.keys(weekData.shifts).forEach(eid => {
+                    const shift = weekData.shifts[eid]?.[dk];
+                    if (!shift || !shift.role) return;
+                    const period = classifyShift(shift);
+                    if (!period) return;
+                    staffCounts[dk][period].total++;
+                    if (shift.role === 'Bar') staffCounts[dk][period].Bar++;
+                    if (shift.role === 'S') staffCounts[dk][period].S++;
+                });
+            });
+
             let html = `
                 <div class="schedule-grid-header">
                     <div class="schedule-grid-header-cell" style="min-width:140px;"></div>
                     ${days.map(d => `<div class="schedule-grid-header-cell">${d}</div>`).join('')}
                     <div class="schedule-grid-header-cell" style="width:36px;"></div>
+                </div>
+                <div class="staff-summary-row">
+                    <div class="staff-summary-label">Staff Count</div>
+                    ${dayKeys.map(dk => {
+                        const m = staffCounts[dk].morning;
+                        const e = staffCounts[dk].evening;
+                        const isClosed = dk === 'monday' || dk === 'tuesday';
+                        if (isClosed) return '<div class="staff-summary-cell closed">Closed</div>';
+                        let parts = [];
+                        if (m.total > 0) parts.push('<div class="count-period"><span class="count-label">AM</span> ' + m.total + ' staff' + (m.Bar ? ' · ' + m.Bar + ' bar' : '') + (m.S ? ' · ' + m.S + ' serv' : '') + '</div>');
+                        if (e.total > 0) parts.push('<div class="count-period"><span class="count-label">PM</span> ' + e.total + ' staff' + (e.Bar ? ' · ' + e.Bar + ' bar' : '') + (e.S ? ' · ' + e.S + ' serv' : '') + '</div>');
+                        return '<div class="staff-summary-cell">' + (parts.length ? parts.join('') : '<span style="color:var(--text-muted);">—</span>') + '</div>';
+                    }).join('')}
+                    <div></div>
                 </div>
                 <div class="schedule-grid-body">
             `;
@@ -5222,9 +5318,36 @@
                 return;
             }
 
-            const emailed = await sendScheduleEmails();
-            const count = app.employees.length;
-            showToast(`Schedule published! ${count} employees notified of changes.`);
+            app.schedules = JSON.parse(JSON.stringify(app.editingScheduleData));
+            showToast('Schedule saved successfully!');
+            renderScheduleGrid();
+        }
+
+        async function emailSchedule() {
+            const weekKey = formatWeekKey(app.currentScheduleWeek);
+            const weekData = app.editingScheduleData[weekKey];
+            if (!weekData || !weekData.shifts) {
+                showToast('No schedule data to email');
+                return;
+            }
+
+            // Count scheduled employees with emails
+            const dayKeys = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+            const count = app.employees.filter(emp => {
+                const s = weekData.shifts[emp.id];
+                if (!s) return false;
+                return emp.email && emp.email.includes('@') && dayKeys.some(dk => s[dk] && s[dk].role);
+            }).length;
+
+            if (count === 0) {
+                showToast('No scheduled employees with emails to send to');
+                return;
+            }
+
+            if (!confirm(`This will email the schedule to ${count} employees. Continue?`)) return;
+
+            showToast('Sending emails...');
+            const result = await sendScheduleEmails();
         }
 
         function resetSchedule() {
