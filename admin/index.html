@@ -1057,9 +1057,12 @@
             background: var(--red-dim);
         }
         .shift-display {
-            font-size: 0.8rem; font-weight: 500; color: var(--text-primary);
-            background: var(--gold-dim); padding: 0.35rem 0.6rem;
-            border-radius: 4px; white-space: nowrap;
+            font-size: 0.72rem; font-weight: 500; color: var(--text-primary);
+            background: var(--gold-dim); padding: 0.3rem 0.45rem;
+            border-radius: 4px; white-space: nowrap; line-height: 1.3;
+        }
+        .shift-hours {
+            font-size: 0.62rem; color: var(--text-muted); margin-top: 2px;
         }
         .shift-off {
             color: var(--text-muted); font-size: 0.85rem;
@@ -5000,6 +5003,69 @@
             renderTimeoffList();
         }
 
+        // Closing times by day (hour in 24h)
+        const CLOSE_TIMES = {
+            'monday': 0, 'tuesday': 0,
+            'wednesday': 21, 'thursday': 21,
+            'friday': 23, 'saturday': 23,
+            'sunday': 17
+        };
+
+        // Convert raw hour string to { hour24, label } e.g. "930" -> { hour24: 9.5, label: "9:30 AM" }
+        function parseTimeRaw(str) {
+            if (!str) return null;
+            str = str.toString().trim().replace(/[^0-9:]/gi, '');
+            if (!str) return null;
+            let h, m = 0;
+            if (str.includes(':')) {
+                const parts = str.split(':');
+                h = parseInt(parts[0]); m = parseInt(parts[1]) || 0;
+            } else if (str.length >= 3) {
+                h = parseInt(str.slice(0, -2)); m = parseInt(str.slice(-2));
+            } else {
+                h = parseInt(str);
+            }
+            if (isNaN(h)) return null;
+            // Restaurant context: 1-6 = PM, 7-12 = AM/noon
+            let hour24 = h;
+            if (h >= 1 && h <= 6) hour24 = h + 12;
+            let label;
+            let displayH = hour24 > 12 ? hour24 - 12 : hour24;
+            if (displayH === 0) displayH = 12;
+            let ampm = hour24 >= 12 ? 'PM' : 'AM';
+            label = m > 0 ? `${displayH}:${m.toString().padStart(2,'0')} ${ampm}` : `${displayH} ${ampm}`;
+            return { hour24: hour24 + m/60, label };
+        }
+
+        // Format a shift into clean display: "5 PM - 11 PM" + "(6 hrs)"
+        function formatShiftDisplay(shift, dayKey) {
+            if (!shift || !shift.role) return { timeText: '', hoursText: '' };
+
+            let startParsed = parseTimeRaw(shift.startTime);
+            let endStr = (shift.endTime || '').toString().trim().toUpperCase();
+
+            let endParsed;
+            if (endStr === 'CL' || endStr === '') {
+                let closeH = CLOSE_TIMES[dayKey] || 21;
+                let displayH = closeH > 12 ? closeH - 12 : closeH;
+                if (displayH === 0) displayH = 12;
+                let ampm = closeH >= 12 ? 'PM' : 'AM';
+                endParsed = { hour24: closeH, label: `${displayH} ${ampm}` };
+            } else {
+                endParsed = parseTimeRaw(endStr);
+            }
+
+            if (!startParsed) return { timeText: shift.display || shift.role, hoursText: '' };
+            if (!endParsed) return { timeText: startParsed.label, hoursText: '' };
+
+            let hours = endParsed.hour24 - startParsed.hour24;
+            if (hours <= 0) hours = 0;
+            if (hours > 16) hours = 0;
+            let hoursText = hours > 0 ? `${hours % 1 === 0 ? hours : hours.toFixed(1)} hrs` : '';
+
+            return { timeText: `${startParsed.label} - ${endParsed.label}`, hoursText };
+        }
+
         function renderScheduleGrid() {
             const weekKey = formatWeekKey(app.currentScheduleWeek);
             const endDate = new Date(app.currentScheduleWeek);
@@ -5026,30 +5092,12 @@
                 return dayKeys.some(dk => s[dk] && s[dk].role);
             }
 
-            // Build staff count summary (morning 11a-4p / evening 5p-11p)
+            // Build staff count summary (morning before 4pm / evening 4pm+)
             function classifyShift(shift) {
                 if (!shift || !shift.role) return null;
-                const st = (shift.startTime || '').replace(':','');
-                let startNum = parseInt(st) || 0;
-                // Normalize: single digits like "5" mean PM context usually
-                if (startNum > 0 && startNum <= 12) {
-                    // If start is 11 or 12, could be AM lunch; if <=10, likely AM; if >=1 and <=6, likely PM
-                    if (startNum >= 1 && startNum <= 6) startNum += 12; // PM
-                    else if (startNum >= 7 && startNum <= 10) startNum = startNum; // AM like 9:30
-                    // 11, 12 stay as-is
-                }
-                if (startNum >= 930 && startNum <= 1200) startNum = Math.floor(startNum / 100); // normalize 930->9
-                if (startNum >= 100) startNum = Math.floor(startNum / 100); // 530->5 etc
-
-                // Morning: start before 4pm (startNum < 16 in 24h, or < 4 adjusted)
-                // We'll use a simpler heuristic: starts at or before 12 = morning, starts at or after 3 = evening
-                const raw = parseInt((shift.startTime || '0').replace(':','')) || 0;
-                if (raw >= 7 && raw <= 12) return 'morning';
-                if (raw >= 100 && raw <= 1200) return 'morning';
-                if (raw >= 1 && raw <= 6) return 'evening';
-                if (raw >= 13 && raw <= 23) return 'evening';
-                if (raw > 1200) return raw <= 1600 ? 'morning' : 'evening';
-                return 'evening'; // default
+                const p = parseTimeRaw(shift.startTime);
+                if (!p) return 'evening';
+                return p.hour24 < 16 ? 'morning' : 'evening';
             }
 
             const staffCounts = {};
@@ -5131,7 +5179,9 @@
                         `;
 
                         if (shift && shift.role) {
-                            cellHTML += `<div class="shift-display">${shift.display || shift.role}</div>`;
+                            const fmt = formatShiftDisplay(shift, dayKey);
+                            cellHTML += `<div class="shift-display">${fmt.timeText}</div>`;
+                            if (fmt.hoursText) cellHTML += `<div class="shift-hours">${fmt.hoursText}</div>`;
                         } else if (!isClosed) {
                             cellHTML += `<div class="shift-off" style="opacity:0.3;">+</div>`;
                         } else {
@@ -5178,58 +5228,22 @@
             'Train': 6.88,   // Training (server rate)
         };
 
-        // Closing times by day
-        const CLOSING_HOURS = {
-            'monday': 0, 'tuesday': 0,
-            'wednesday': 21, 'thursday': 21,  // 9 PM
-            'friday': 23, 'saturday': 23,     // 11 PM
-            'sunday': 17                       // 5 PM
-        };
-
+        // Reuse CLOSE_TIMES and parseTimeRaw from above for payroll
         function parseShiftHours(shift, dayKey) {
             if (!shift || !shift.role || !shift.startTime) return 0;
-
-            let startStr = (shift.startTime || '').replace(':', '');
-            let endStr = (shift.endTime || 'CL').toUpperCase();
-
-            // Parse start time to decimal hours
-            let startHour = 0;
-            let startNum = parseInt(startStr);
-            if (isNaN(startNum)) return 0;
-
-            if (startStr.length >= 3) {
-                // e.g. "930" -> 9.5, "1030" -> 10.5, "530" -> 5.5
-                let h = parseInt(startStr.slice(0, -2));
-                let m = parseInt(startStr.slice(-2));
-                startHour = h + m / 60;
+            const startP = parseTimeRaw(shift.startTime);
+            if (!startP) return 0;
+            let endH;
+            const endStr = (shift.endTime || '').toString().trim().toUpperCase();
+            if (endStr === 'CL' || endStr === '') {
+                endH = CLOSE_TIMES[dayKey] || 21;
             } else {
-                startHour = startNum;
+                const endP = parseTimeRaw(endStr);
+                if (!endP) return 0;
+                endH = endP.hour24;
             }
-
-            // Normalize AM/PM: if hour is 1-6, assume PM (add 12)
-            // 7-12 stay as-is (could be AM morning shifts)
-            if (startHour >= 1 && startHour < 7) startHour += 12;
-
-            // Parse end time
-            let endHour = 0;
-            if (endStr === 'CL') {
-                endHour = CLOSING_HOURS[dayKey] || 21;
-            } else {
-                let endNum = parseInt(endStr.replace(':', ''));
-                if (isNaN(endNum)) return 0;
-                if (endStr.length >= 3) {
-                    let h = parseInt(endStr.slice(0, -2));
-                    let m = parseInt(endStr.slice(-2));
-                    endHour = h + m / 60;
-                } else {
-                    endHour = endNum;
-                }
-                if (endHour >= 1 && endHour < 7) endHour += 12;
-            }
-
-            let hours = endHour - startHour;
-            if (hours <= 0) hours = 0;
-            if (hours > 16) hours = 0; // sanity cap
+            let hours = endH - startP.hour24;
+            if (hours <= 0 || hours > 16) return 0;
             return hours;
         }
 
