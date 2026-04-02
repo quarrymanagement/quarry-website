@@ -1008,7 +1008,7 @@
             display: flex; flex-direction: column;
         }
         .schedule-grid-header {
-            display: grid; grid-template-columns: 140px repeat(7, 1fr) 36px;
+            display: grid; grid-template-columns: 180px repeat(7, 1fr) 36px;
             border-bottom: 2px solid var(--border-medium); font-weight: 600;
             background: var(--bg-elevated);
         }
@@ -1019,20 +1019,8 @@
         .schedule-grid-body {
             overflow-x: auto;
         }
-        .schedule-role-group {
-            border-bottom: 2px solid var(--border-subtle);
-        }
-        .schedule-role-header {
-            display: grid; grid-template-columns: 140px repeat(7, 1fr) 36px;
-            background: var(--gold-dim); padding: 0.75rem 0;
-            font-weight: 600; color: var(--gold); font-size: 0.8rem;
-            text-transform: uppercase; letter-spacing: 0.5px;
-        }
-        .schedule-role-name {
-            padding: 0.75rem 1rem; display: flex; align-items: center;
-        }
         .schedule-row {
-            display: grid; grid-template-columns: 140px repeat(7, 1fr) 36px;
+            display: grid; grid-template-columns: 180px repeat(7, 1fr) 36px;
             border-bottom: 1px solid var(--border-subtle); align-items: stretch;
         }
         .schedule-row:hover { background: var(--bg-hover); }
@@ -1067,6 +1055,25 @@
         .shift-off {
             color: var(--text-muted); font-size: 0.85rem;
         }
+        .role-filters {
+            display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap;
+        }
+        .role-filter-btn {
+            padding: 0.4rem 0.85rem; border: 1px solid var(--border-medium); border-radius: 20px;
+            background: var(--bg-card); color: var(--text-secondary); font-size: 0.78rem;
+            font-weight: 500; cursor: pointer; transition: var(--transition);
+        }
+        .role-filter-btn:hover { border-color: var(--gold); color: var(--gold); }
+        .role-filter-btn.active { background: var(--gold); color: #fff; border-color: var(--gold); }
+        .schedule-cell-name .role-tag {
+            display: inline-block; font-size: 0.6rem; font-weight: 600; padding: 1px 5px;
+            border-radius: 3px; margin-left: 4px; vertical-align: middle; text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .role-tag-bartender { background: #fef3c7; color: #92400e; }
+        .role-tag-server { background: #dbeafe; color: #1e40af; }
+        .role-tag-busser { background: #d1fae5; color: #065f46; }
+        .role-tag-kitchen { background: #fee2e2; color: #991b1b; }
         .payroll-estimate {
             background: var(--bg-card); border: 1px solid var(--border-subtle);
             border-radius: var(--radius-md); padding: 1rem 1.25rem; margin-bottom: 1rem;
@@ -1101,7 +1108,7 @@
         }
         .payroll-day-chip strong { color: var(--text-primary); }
         .staff-summary-row {
-            display: grid; grid-template-columns: 140px repeat(7, 1fr) 36px;
+            display: grid; grid-template-columns: 180px repeat(7, 1fr) 36px;
             background: var(--bg-elevated); border-bottom: 2px solid var(--border-medium);
         }
         .staff-summary-label {
@@ -1833,6 +1840,13 @@
                 </div>
                 <div id="copyWeekMessage" style="margin-bottom: 1rem; padding: 1rem; background: var(--bg-elevated); border-radius: var(--radius-md); display: none; color: var(--text-secondary); font-size: 0.9rem;"></div>
                 <div id="payrollEstimate" class="payroll-estimate"></div>
+                <div class="role-filters" id="roleFilters">
+                    <button class="role-filter-btn active" onclick="filterScheduleByRole('all')">All</button>
+                    <button class="role-filter-btn" onclick="filterScheduleByRole('Bartender')">Bartender</button>
+                    <button class="role-filter-btn" onclick="filterScheduleByRole('Server')">Server</button>
+                    <button class="role-filter-btn" onclick="filterScheduleByRole('Busser/Host')">Busser/Host</button>
+                    <button class="role-filter-btn" onclick="filterScheduleByRole('Kitchen')">Kitchen</button>
+                </div>
                 <div id="scheduleGrid" class="schedule-grid-container"></div>
             </div>
 
@@ -5014,26 +5028,48 @@
         // Convert raw hour string to { hour24, label } e.g. "930" -> { hour24: 9.5, label: "9:30 AM" }
         function parseTimeRaw(str) {
             if (!str) return null;
-            str = str.toString().trim().replace(/[^0-9:]/gi, '');
-            if (!str) return null;
+            let raw = str.toString().trim();
+
+            // Detect explicit AM/PM BEFORE stripping letters
+            let forcedAM = /am/i.test(raw);
+            let forcedPM = /pm/i.test(raw);
+
+            // Strip everything except digits and colon
+            let cleaned = raw.replace(/[^0-9:]/gi, '');
+            if (!cleaned) return null;
+
             let h, m = 0;
-            if (str.includes(':')) {
-                const parts = str.split(':');
+            if (cleaned.includes(':')) {
+                const parts = cleaned.split(':');
                 h = parseInt(parts[0]); m = parseInt(parts[1]) || 0;
-            } else if (str.length >= 3) {
-                h = parseInt(str.slice(0, -2)); m = parseInt(str.slice(-2));
+            } else if (cleaned.length >= 3) {
+                h = parseInt(cleaned.slice(0, -2)); m = parseInt(cleaned.slice(-2));
             } else {
-                h = parseInt(str);
+                h = parseInt(cleaned);
             }
             if (isNaN(h)) return null;
-            // Restaurant context: 1-6 = PM, 7-12 = AM/noon
-            let hour24 = h;
-            if (h >= 1 && h <= 6) hour24 = h + 12;
-            let label;
+
+            // Convert to 24-hour
+            let hour24;
+            if (forcedAM) {
+                // Explicit AM: 12 AM = 0, 1-11 AM = 1-11
+                hour24 = (h === 12) ? 0 : h;
+            } else if (forcedPM) {
+                // Explicit PM: 12 PM = 12, 1-11 PM = 13-23
+                hour24 = (h === 12) ? 12 : h + 12;
+            } else {
+                // No AM/PM specified — restaurant heuristic:
+                // 7-11 = AM (morning shifts), 12 = noon, 1-6 = PM
+                if (h >= 1 && h <= 6) hour24 = h + 12;
+                else if (h === 12) hour24 = 12;
+                else hour24 = h; // 7-11 stay as AM
+            }
+
+            // Build label
             let displayH = hour24 > 12 ? hour24 - 12 : hour24;
             if (displayH === 0) displayH = 12;
             let ampm = hour24 >= 12 ? 'PM' : 'AM';
-            label = m > 0 ? `${displayH}:${m.toString().padStart(2,'0')} ${ampm}` : `${displayH} ${ampm}`;
+            let label = m > 0 ? `${displayH}:${m.toString().padStart(2,'0')} ${ampm}` : `${displayH} ${ampm}`;
             return { hour24: hour24 + m/60, label };
         }
 
@@ -5066,6 +5102,27 @@
             return { timeText: `${startParsed.label} - ${endParsed.label}`, hoursText };
         }
 
+        let _scheduleRoleFilter = 'all';
+
+        function filterScheduleByRole(role) {
+            _scheduleRoleFilter = role;
+            document.querySelectorAll('.role-filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent === role || (role === 'all' && btn.textContent === 'All'));
+            });
+            renderScheduleGrid();
+        }
+
+        function getRoleTag(role) {
+            const map = {
+                'Bartender': { label: 'BAR', cls: 'role-tag-bartender' },
+                'Server': { label: 'SRV', cls: 'role-tag-server' },
+                'Busser/Host': { label: 'BUS', cls: 'role-tag-busser' },
+                'Kitchen': { label: 'KIT', cls: 'role-tag-kitchen' },
+            };
+            const r = map[role] || { label: role, cls: 'role-tag-server' };
+            return `<span class="role-tag ${r.cls}">${r.label}</span>`;
+        }
+
         function renderScheduleGrid() {
             const weekKey = formatWeekKey(app.currentScheduleWeek);
             const endDate = new Date(app.currentScheduleWeek);
@@ -5082,7 +5139,6 @@
             const grid = document.getElementById('scheduleGrid');
             const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
             const dayKeys = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-            const roles = ['Bartender', 'Server', 'Busser/Host', 'Kitchen'];
 
             // Helper: check if employee has any shift this week or was manually added
             function empHasShifts(empId) {
@@ -5092,12 +5148,35 @@
                 return dayKeys.some(dk => s[dk] && s[dk].role);
             }
 
-            // Build staff count summary (morning before 4pm / evening 4pm+)
-            function classifyShift(shift) {
-                if (!shift || !shift.role) return null;
-                const p = parseTimeRaw(shift.startTime);
-                if (!p) return 'evening';
-                return p.hour24 < 16 ? 'morning' : 'evening';
+            // Build staff count summary
+            // Morning = 11 AM - 4 PM (11:00-16:00), Evening = 5 PM - 11 PM (17:00-23:00)
+            // A shift counts in a period if it overlaps that period
+            // Doubles count in BOTH
+            function getShiftPeriods(shift, dk) {
+                if (!shift || !shift.role) return [];
+                const startP = parseTimeRaw(shift.startTime);
+                if (!startP) return ['evening'];
+                const startH = startP.hour24;
+
+                let endH;
+                const endStr = (shift.endTime || '').toString().trim().toUpperCase();
+                if (endStr === 'CL' || endStr === '') {
+                    endH = CLOSE_TIMES[dk] || 21;
+                } else {
+                    const endP = parseTimeRaw(endStr);
+                    endH = endP ? endP.hour24 : 23;
+                }
+
+                const periods = [];
+                // Morning overlap: shift starts before 4 PM AND ends after 11 AM
+                if (startH < 16 && endH > 11) periods.push('morning');
+                // Evening overlap: shift starts before 11 PM AND ends after 5 PM
+                if (startH < 23 && endH > 17) periods.push('evening');
+                // Fallback: if no periods matched, use start time
+                if (periods.length === 0) {
+                    periods.push(startH < 16 ? 'morning' : 'evening');
+                }
+                return periods;
             }
 
             const staffCounts = {};
@@ -5106,17 +5185,33 @@
                 Object.keys(weekData.shifts).forEach(eid => {
                     const shift = weekData.shifts[eid]?.[dk];
                     if (!shift || !shift.role) return;
-                    const period = classifyShift(shift);
-                    if (!period) return;
-                    staffCounts[dk][period].total++;
-                    if (shift.role === 'Bar') staffCounts[dk][period].Bar++;
-                    if (shift.role === 'S') staffCounts[dk][period].S++;
+                    const periods = getShiftPeriods(shift, dk);
+                    periods.forEach(period => {
+                        staffCounts[dk][period].total++;
+                        if (shift.role === 'Bar') staffCounts[dk][period].Bar++;
+                        if (shift.role === 'S') staffCounts[dk][period].S++;
+                    });
                 });
             });
 
+            // Get all scheduled employees, sorted by role then name
+            const roleOrder = { 'Bartender': 0, 'Server': 1, 'Busser/Host': 2, 'Kitchen': 3 };
+            let scheduledEmps = app.employees
+                .filter(e => e.status === 'active' && empHasShifts(e.id))
+                .sort((a, b) => {
+                    const ro = (roleOrder[a.primaryRole] ?? 9) - (roleOrder[b.primaryRole] ?? 9);
+                    if (ro !== 0) return ro;
+                    return (a.name || a.firstName || '').localeCompare(b.name || b.firstName || '');
+                });
+
+            // Apply role filter
+            if (_scheduleRoleFilter !== 'all') {
+                scheduledEmps = scheduledEmps.filter(e => e.primaryRole === _scheduleRoleFilter);
+            }
+
             let html = `
                 <div class="schedule-grid-header">
-                    <div class="schedule-grid-header-cell" style="min-width:140px;"></div>
+                    <div class="schedule-grid-header-cell" style="min-width:180px;"></div>
                     ${days.map(d => `<div class="schedule-grid-header-cell">${d}</div>`).join('')}
                     <div class="schedule-grid-header-cell" style="width:36px;"></div>
                 </div>
@@ -5137,76 +5232,62 @@
                 <div class="schedule-grid-body">
             `;
 
-            roles.forEach(role => {
-                // Only show employees who are scheduled OR were manually added to this week
-                const allRoleEmps = app.employees.filter(e => e.primaryRole === role && e.status === 'active');
-                const scheduledEmps = allRoleEmps.filter(e => empHasShifts(e.id));
-
-                html += `<div class="schedule-role-group">`;
-                html += `<div class="schedule-role-header">
-                    <div class="schedule-role-name">${role}</div>
-                    ${days.map(() => '<div></div>').join('')}
-                    <div></div>
+            if (scheduledEmps.length === 0) {
+                html += `<div style="padding: 1.5rem; text-align: center; color: var(--text-muted); font-style: italic;">
+                    ${_scheduleRoleFilter !== 'all' ? 'No ' + _scheduleRoleFilter + 's scheduled this week' : 'No one scheduled yet — click "+ Add Employee" below'}
                 </div>`;
+            }
 
-                if (scheduledEmps.length === 0) {
-                    html += `<div class="schedule-row" style="grid-template-columns: 1fr;">
-                        <div style="padding: 0.5rem 0.75rem; color: var(--text-muted); font-size: 0.85rem; font-style: italic;">No one scheduled yet</div>
-                    </div>`;
-                }
+            scheduledEmps.forEach(emp => {
+                const empShifts = weekData.shifts[emp.id] || {};
+                const displayName = emp.name || ((emp.firstName || '') + ' ' + (emp.lastName || '')).trim() || 'Unknown';
+                const roleTag = getRoleTag(emp.primaryRole);
 
-                scheduledEmps.forEach(emp => {
-                    const empShifts = weekData.shifts[emp.id] || {};
-                    const displayName = emp.firstName || emp.name || 'Unknown';
+                html += `<div class="schedule-row" data-role="${emp.primaryRole}">
+                    <div class="schedule-cell-name" title="${emp.name || (emp.firstName + ' ' + emp.lastName)}">${displayName} ${roleTag}</div>
+                `;
 
-                    html += `<div class="schedule-row">
-                        <div class="schedule-cell-name" title="${emp.name || (emp.firstName + ' ' + emp.lastName)}">${displayName}</div>
+                dayKeys.forEach((dayKey, idx) => {
+                    const shiftDate = new Date(app.currentScheduleWeek);
+                    shiftDate.setDate(shiftDate.getDate() + idx);
+                    const dateStr = shiftDate.toISOString().split('T')[0];
+
+                    const isClosed = dayKey === 'monday' || dayKey === 'tuesday';
+                    const shift = empShifts[dayKey];
+                    const hasTimeOff = app.timeOffRequests.some(t =>
+                        t.employeeId === emp.id && t.dates.includes(dateStr) && t.status === 'approved'
+                    );
+
+                    let cellHTML = `<div class="schedule-cell ${isClosed ? 'closed' : ''} ${hasTimeOff ? 'warning' : ''}"
+                        onclick="editShift('${emp.id}', '${dayKey}', '${displayName}', '${emp.primaryRole}')">
                     `;
 
-                    dayKeys.forEach((dayKey, idx) => {
-                        const shiftDate = new Date(app.currentScheduleWeek);
-                        shiftDate.setDate(shiftDate.getDate() + idx);
-                        const dateStr = shiftDate.toISOString().split('T')[0];
+                    if (shift && shift.role) {
+                        const fmt = formatShiftDisplay(shift, dayKey);
+                        cellHTML += `<div class="shift-display">${fmt.timeText}</div>`;
+                        if (fmt.hoursText) cellHTML += `<div class="shift-hours">${fmt.hoursText}</div>`;
+                    } else if (!isClosed) {
+                        cellHTML += `<div class="shift-off" style="opacity:0.3;">+</div>`;
+                    } else {
+                        cellHTML += `<div class="shift-off" style="opacity:0.15;">-</div>`;
+                    }
 
-                        const isClosed = dayKey === 'monday' || dayKey === 'tuesday';
-                        const shift = empShifts[dayKey];
-                        const hasTimeOff = app.timeOffRequests.some(t =>
-                            t.employeeId === emp.id && t.dates.includes(dateStr) && t.status === 'approved'
-                        );
-
-                        let cellHTML = `<div class="schedule-cell ${isClosed ? 'closed' : ''} ${hasTimeOff ? 'warning' : ''}"
-                            onclick="editShift('${emp.id}', '${dayKey}', '${displayName}', '${emp.primaryRole}')">
-                        `;
-
-                        if (shift && shift.role) {
-                            const fmt = formatShiftDisplay(shift, dayKey);
-                            cellHTML += `<div class="shift-display">${fmt.timeText}</div>`;
-                            if (fmt.hoursText) cellHTML += `<div class="shift-hours">${fmt.hoursText}</div>`;
-                        } else if (!isClosed) {
-                            cellHTML += `<div class="shift-off" style="opacity:0.3;">+</div>`;
-                        } else {
-                            cellHTML += `<div class="shift-off" style="opacity:0.15;">-</div>`;
-                        }
-
-                        cellHTML += `</div>`;
-                        html += cellHTML;
-                    });
-
-                    // Remove row button
-                    html += `<div style="display:flex;align-items:center;justify-content:center;">
-                        <button class="remove-row-btn" onclick="removeFromSchedule('${emp.id}')" title="Remove from this week">&times;</button>
-                    </div>`;
-
-                    html += `</div>`;
+                    cellHTML += `</div>`;
+                    html += cellHTML;
                 });
 
-                // Add Employee button row
-                html += `<div style="padding: 0.35rem 0.5rem;">
-                    <button class="add-row-btn" onclick="showAddToSchedule('${role}')">+ Add ${role}</button>
+                // Remove row button
+                html += `<div style="display:flex;align-items:center;justify-content:center;">
+                    <button class="remove-row-btn" onclick="removeFromSchedule('${emp.id}')" title="Remove from this week">&times;</button>
                 </div>`;
 
                 html += `</div>`;
             });
+
+            // Add Employee button
+            html += `<div style="padding: 0.5rem;">
+                <button class="add-row-btn" onclick="showAddToSchedule('${_scheduleRoleFilter !== 'all' ? _scheduleRoleFilter : ''}')">+ Add Employee</button>
+            </div>`;
 
             html += `</div>`;
             if (grid) grid.innerHTML = html;
@@ -5314,13 +5395,13 @@
         // Show modal to add an employee to the schedule for a given role
         let _addSchedRole = '';
         function showAddToSchedule(role) {
-            _addSchedRole = role;
-            document.getElementById('addSchedRole').textContent = role;
+            _addSchedRole = role || '';
+            document.getElementById('addSchedRole').textContent = role || 'Any Role';
             const weekKey = formatWeekKey(app.currentScheduleWeek);
             const weekData = app.editingScheduleData[weekKey];
             const dayKeys = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
-            // Get employees of this role not already on the schedule this week
+            // Get employees not already on the schedule this week
             const scheduled = new Set();
             if (weekData && weekData.shifts) {
                 Object.keys(weekData.shifts).forEach(eid => {
@@ -5330,13 +5411,37 @@
                     }
                 });
             }
-            const available = app.employees.filter(e =>
-                e.primaryRole === role && e.status === 'active' && !scheduled.has(e.id)
-            );
+            const available = app.employees.filter(e => {
+                if (e.status !== 'active' || scheduled.has(e.id)) return false;
+                if (role && e.primaryRole !== role) return false;
+                return true;
+            }).sort((a, b) => {
+                // Sort by role then name
+                if (a.primaryRole !== b.primaryRole) return a.primaryRole.localeCompare(b.primaryRole);
+                return (a.name || '').localeCompare(b.name || '');
+            });
 
             const select = document.getElementById('addSchedEmployee');
-            select.innerHTML = '<option value="">-- Select Employee --</option>' +
-                available.map(e => `<option value="${e.id}">${e.name || (e.firstName + ' ' + e.lastName)}</option>`).join('');
+            let optionsHtml = '<option value="">-- Select Employee --</option>';
+            if (!role) {
+                // Group by role
+                const roles = ['Bartender', 'Server', 'Busser/Host', 'Kitchen'];
+                roles.forEach(r => {
+                    const roleEmps = available.filter(e => e.primaryRole === r);
+                    if (roleEmps.length > 0) {
+                        optionsHtml += `<optgroup label="${r}">`;
+                        roleEmps.forEach(e => {
+                            optionsHtml += `<option value="${e.id}">${e.name || (e.firstName + ' ' + e.lastName)}</option>`;
+                        });
+                        optionsHtml += '</optgroup>';
+                    }
+                });
+            } else {
+                available.forEach(e => {
+                    optionsHtml += `<option value="${e.id}">${e.name || (e.firstName + ' ' + e.lastName)}</option>`;
+                });
+            }
+            select.innerHTML = optionsHtml;
 
             openModal('addToScheduleModal');
         }
@@ -5430,12 +5535,24 @@
             if (!role) {
                 weekData.shifts[empId][dayKey] = null;
             } else {
-                const startTime = document.getElementById('modalStartTime').value.trim();
-                const endTime = document.getElementById('modalEndTime').value.trim();
+                let startTime = document.getElementById('modalStartTime').value.trim();
+                let endTime = document.getElementById('modalEndTime').value.trim();
 
                 if (!startTime || !endTime) {
-                    showToast('Please enter start and end times');
+                    showToast('Please enter start and end times (e.g. 9 AM, 11 PM, CL)');
                     return;
+                }
+
+                // Normalize: store the clean parsed label so it round-trips nicely
+                const startP = parseTimeRaw(startTime);
+                if (startP) startTime = startP.label;
+
+                const endUpper = endTime.toUpperCase().trim();
+                if (endUpper !== 'CL') {
+                    const endP = parseTimeRaw(endTime);
+                    if (endP) endTime = endP.label;
+                } else {
+                    endTime = 'CL';
                 }
 
                 weekData.shifts[empId][dayKey] = {
