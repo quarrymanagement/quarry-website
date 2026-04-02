@@ -1016,9 +1016,6 @@
             padding: 0.85rem; text-align: center; font-size: 0.82rem;
             text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);
         }
-        .schedule-grid-body {
-            overflow-x: auto;
-        }
         .schedule-row {
             display: grid; grid-template-columns: 160px repeat(7, minmax(120px, 1fr)) 36px;
             border-bottom: 1px solid var(--border-subtle); align-items: stretch;
@@ -5233,9 +5230,9 @@
 
             let html = `
                 <div class="schedule-grid-header">
-                    <div class="schedule-grid-header-cell" style="min-width:180px;"></div>
+                    <div class="schedule-grid-header-cell"></div>
                     ${days.map(d => `<div class="schedule-grid-header-cell">${d}</div>`).join('')}
-                    <div class="schedule-grid-header-cell" style="width:36px;"></div>
+                    <div class="schedule-grid-header-cell"></div>
                 </div>
                 <div class="staff-summary-row">
                     <div class="staff-summary-label">Staff Count</div>
@@ -5251,7 +5248,6 @@
                     }).join('')}
                     <div></div>
                 </div>
-                <div class="schedule-grid-body">
             `;
 
             if (scheduledEmps.length === 0) {
@@ -5312,7 +5308,6 @@
                 <button class="add-row-btn" onclick="showAddToSchedule('${_scheduleRoleFilter !== 'all' ? _scheduleRoleFilter : ''}')">+ Add Employee</button>
             </div>`;
 
-            html += `</div>`;
             if (grid) grid.innerHTML = html;
 
             // Update payroll estimate
