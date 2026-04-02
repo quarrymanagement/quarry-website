@@ -1052,6 +1052,12 @@
         .shift-hours {
             font-size: 0.62rem; color: var(--text-muted); margin-top: 2px;
         }
+        .shift-role-row {
+            margin-bottom: 1px;
+        }
+        .shift-role-tag {
+            font-size: 0.55rem; padding: 1px 4px; line-height: 1;
+        }
         .shift-off {
             color: var(--text-muted); font-size: 0.85rem;
         }
@@ -5123,6 +5129,22 @@
             return `<span class="role-tag ${r.cls}">${r.label}</span>`;
         }
 
+        function getShiftRoleTag(shiftRole) {
+            const map = {
+                'Bar': { label: 'BAR', cls: 'role-tag-bartender' },
+                'S': { label: 'SRV', cls: 'role-tag-server' },
+                'K': { label: 'KIT', cls: 'role-tag-kitchen' },
+                'D': { label: 'DISH', cls: 'role-tag-kitchen' },
+                'B': { label: 'BUS', cls: 'role-tag-busser' },
+                'Host': { label: 'HOST', cls: 'role-tag-busser' },
+                'Expo': { label: 'EXPO', cls: 'role-tag-busser' },
+                'FR': { label: 'FR', cls: 'role-tag-busser' },
+                'Train': { label: 'TRAIN', cls: 'role-tag-server' },
+            };
+            const r = map[shiftRole] || { label: shiftRole, cls: 'role-tag-server' };
+            return `<span class="role-tag shift-role-tag ${r.cls}">${r.label}</span>`;
+        }
+
         function renderScheduleGrid() {
             const weekKey = formatWeekKey(app.currentScheduleWeek);
             const endDate = new Date(app.currentScheduleWeek);
@@ -5264,6 +5286,7 @@
 
                     if (shift && shift.role) {
                         const fmt = formatShiftDisplay(shift, dayKey);
+                        cellHTML += `<div class="shift-role-row">${getShiftRoleTag(shift.role)}</div>`;
                         cellHTML += `<div class="shift-display">${fmt.timeText}</div>`;
                         if (fmt.hoursText) cellHTML += `<div class="shift-hours">${fmt.hoursText}</div>`;
                     } else if (!isClosed) {
