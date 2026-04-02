@@ -1064,6 +1064,39 @@
         .shift-off {
             color: var(--text-muted); font-size: 0.85rem;
         }
+        .payroll-estimate {
+            background: var(--bg-card); border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md); padding: 1rem 1.25rem; margin-bottom: 1rem;
+            display: none;
+        }
+        .payroll-estimate.active { display: block; }
+        .payroll-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 0.75rem;
+        }
+        .payroll-title {
+            font-weight: 600; font-size: 0.85rem; text-transform: uppercase;
+            letter-spacing: 0.5px; color: var(--gold);
+        }
+        .payroll-total {
+            font-size: 1.4rem; font-weight: 700; color: var(--text-primary);
+        }
+        .payroll-breakdown {
+            display: flex; gap: 1.5rem; flex-wrap: wrap;
+        }
+        .payroll-item {
+            font-size: 0.82rem; color: var(--text-secondary);
+        }
+        .payroll-item strong { color: var(--text-primary); font-weight: 600; }
+        .payroll-day-row {
+            display: flex; gap: 0.5rem; margin-top: 0.6rem; flex-wrap: wrap;
+        }
+        .payroll-day-chip {
+            background: var(--bg-elevated); border: 1px solid var(--border-subtle);
+            border-radius: 4px; padding: 0.3rem 0.6rem; font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+        .payroll-day-chip strong { color: var(--text-primary); }
         .staff-summary-row {
             display: grid; grid-template-columns: 140px repeat(7, 1fr) 36px;
             background: var(--bg-elevated); border-bottom: 2px solid var(--border-medium);
@@ -1796,6 +1829,7 @@
                     <button class="btn-secondary" id="resetScheduleBtn">Reset Changes</button>
                 </div>
                 <div id="copyWeekMessage" style="margin-bottom: 1rem; padding: 1rem; background: var(--bg-elevated); border-radius: var(--radius-md); display: none; color: var(--text-secondary); font-size: 0.9rem;"></div>
+                <div id="payrollEstimate" class="payroll-estimate"></div>
                 <div id="scheduleGrid" class="schedule-grid-container"></div>
             </div>
 
@@ -5126,6 +5160,141 @@
 
             html += `</div>`;
             if (grid) grid.innerHTML = html;
+
+            // Update payroll estimate
+            updatePayrollEstimate(weekData, dayKeys);
+        }
+
+        // Hourly rates by role code
+        const HOURLY_RATES = {
+            'S': 6.88,       // Server
+            'Bar': 6.88,     // Bartender
+            'K': 17.00,      // Kitchen
+            'D': 16.00,      // Dishwasher
+            'Host': 12.00,   // Host
+            'B': 12.00,      // Busser
+            'Expo': 12.00,   // Expo (busser rate)
+            'FR': 12.00,     // Food Runner (busser rate)
+            'Train': 6.88,   // Training (server rate)
+        };
+
+        // Closing times by day
+        const CLOSING_HOURS = {
+            'monday': 0, 'tuesday': 0,
+            'wednesday': 21, 'thursday': 21,  // 9 PM
+            'friday': 23, 'saturday': 23,     // 11 PM
+            'sunday': 17                       // 5 PM
+        };
+
+        function parseShiftHours(shift, dayKey) {
+            if (!shift || !shift.role || !shift.startTime) return 0;
+
+            let startStr = (shift.startTime || '').replace(':', '');
+            let endStr = (shift.endTime || 'CL').toUpperCase();
+
+            // Parse start time to decimal hours
+            let startHour = 0;
+            let startNum = parseInt(startStr);
+            if (isNaN(startNum)) return 0;
+
+            if (startStr.length >= 3) {
+                // e.g. "930" -> 9.5, "1030" -> 10.5, "530" -> 5.5
+                let h = parseInt(startStr.slice(0, -2));
+                let m = parseInt(startStr.slice(-2));
+                startHour = h + m / 60;
+            } else {
+                startHour = startNum;
+            }
+
+            // Normalize AM/PM: if hour is 1-6, assume PM (add 12)
+            // 7-12 stay as-is (could be AM morning shifts)
+            if (startHour >= 1 && startHour < 7) startHour += 12;
+
+            // Parse end time
+            let endHour = 0;
+            if (endStr === 'CL') {
+                endHour = CLOSING_HOURS[dayKey] || 21;
+            } else {
+                let endNum = parseInt(endStr.replace(':', ''));
+                if (isNaN(endNum)) return 0;
+                if (endStr.length >= 3) {
+                    let h = parseInt(endStr.slice(0, -2));
+                    let m = parseInt(endStr.slice(-2));
+                    endHour = h + m / 60;
+                } else {
+                    endHour = endNum;
+                }
+                if (endHour >= 1 && endHour < 7) endHour += 12;
+            }
+
+            let hours = endHour - startHour;
+            if (hours <= 0) hours = 0;
+            if (hours > 16) hours = 0; // sanity cap
+            return hours;
+        }
+
+        function updatePayrollEstimate(weekData, dayKeys) {
+            const el = document.getElementById('payrollEstimate');
+            if (!el) return;
+            if (!weekData || !weekData.shifts) {
+                el.classList.remove('active');
+                return;
+            }
+
+            const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            let totalCost = 0;
+            let totalHours = 0;
+            let roleTotals = {};
+            let dayCosts = {};
+
+            dayKeys.forEach((dk, i) => {
+                let dayCost = 0;
+                Object.keys(weekData.shifts).forEach(eid => {
+                    const shift = weekData.shifts[eid]?.[dk];
+                    if (!shift || !shift.role) return;
+                    const hours = parseShiftHours(shift, dk);
+                    const rate = HOURLY_RATES[shift.role] || 12.00;
+                    const cost = hours * rate;
+
+                    totalHours += hours;
+                    totalCost += cost;
+                    dayCost += cost;
+
+                    const roleName = shift.role;
+                    if (!roleTotals[roleName]) roleTotals[roleName] = { hours: 0, cost: 0 };
+                    roleTotals[roleName].hours += hours;
+                    roleTotals[roleName].cost += cost;
+                });
+                dayCosts[dk] = dayCost;
+            });
+
+            if (totalHours === 0) {
+                el.classList.remove('active');
+                return;
+            }
+
+            const roleNames = { 'S': 'Servers', 'Bar': 'Bartenders', 'K': 'Kitchen', 'D': 'Dish', 'Host': 'Hosts', 'B': 'Bussers', 'Expo': 'Expo', 'FR': 'Food Run', 'Train': 'Training' };
+
+            let breakdownHtml = Object.keys(roleTotals).map(r => {
+                const rt = roleTotals[r];
+                return `<div class="payroll-item"><strong>${roleNames[r] || r}:</strong> ${rt.hours.toFixed(1)} hrs · $${rt.cost.toFixed(0)}</div>`;
+            }).join('');
+
+            let dayChips = dayKeys.map((dk, i) => {
+                if (dayCosts[dk] === 0) return '';
+                return `<div class="payroll-day-chip"><strong>${dayLabels[i]}:</strong> $${dayCosts[dk].toFixed(0)}</div>`;
+            }).filter(Boolean).join('');
+
+            el.innerHTML = `
+                <div class="payroll-header">
+                    <div class="payroll-title">Est. Weekly Payroll (before tips)</div>
+                    <div class="payroll-total">$${totalCost.toFixed(2)}</div>
+                </div>
+                <div class="payroll-breakdown">${breakdownHtml}</div>
+                <div class="payroll-day-row">${dayChips}</div>
+                <div style="margin-top:0.5rem;font-size:0.72rem;color:var(--text-muted);">${totalHours.toFixed(1)} total hours · Based on scheduled shifts</div>
+            `;
+            el.classList.add('active');
         }
 
         // Show modal to add an employee to the schedule for a given role
