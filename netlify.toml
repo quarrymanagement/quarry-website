@@ -9,3 +9,11 @@
 
 [[plugins]]
   package = "@netlify/plugin-functions-install-core"
+
+
+# Redirect old Wix event URLs to current events page
+[[redirects]]
+  from = "/event-details/80s-neon-music-bingo-fundraiser-for-timberland-wolves"
+  to = "/quarry-events.html#evt-fundraiser-apr10"
+  status = 200
+  force = true
