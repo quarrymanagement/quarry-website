@@ -29,7 +29,7 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { eventId, name, email, phone, partySize, seatType, tableId, ticketTier, successUrl, cancelUrl } = JSON.parse(event.body);
+    const { eventId, name, email, phone, partySize, seatType, tableId, ticketTier, couponCode, successUrl, cancelUrl } = JSON.parse(event.body);
 
     if (!eventId || !name || !email || !seatType) {
       return { statusCode: 400, headers, body: JSON.stringify({ error: 'Missing required fields' }) };
@@ -71,8 +71,28 @@ exports.handler = async (event) => {
       return { statusCode: 400, headers, body: JSON.stringify({ error: 'Could not determine ticket price' }) };
     }
 
+    // Look up promotion code if a coupon was applied on the form
+    let discounts = undefined;
+    let useAllowPromoCodes = true;
+
+    if (couponCode) {
+      try {
+        const promoCodes = await stripe.promotionCodes.list({
+          code: couponCode.toUpperCase().trim(),
+          active: true,
+          limit: 1
+        });
+        if (promoCodes.data.length > 0) {
+          discounts = [{ promotion_code: promoCodes.data[0].id }];
+          useAllowPromoCodes = false; // Can't use both discounts and allow_promotion_codes
+        }
+      } catch (e) {
+        console.log('Coupon lookup failed, continuing without discount:', e.message);
+      }
+    }
+
     // Create Stripe Checkout Session
-    const session = await stripe.checkout.sessions.create({
+    const sessionParams = {
       payment_method_types: ['card'],
       mode: 'payment',
       customer_email: email,
@@ -96,11 +116,21 @@ exports.handler = async (event) => {
         partySize: String(qty),
         seatType: seatType,
         tableId: tableId || '',
-        ticketTier: ticketTier || ''
+        ticketTier: ticketTier || '',
+        couponCode: couponCode || ''
       },
       success_url: (successUrl || siteUrl + '/quarry-events.html') + '?registration=success&event=' + eventId,
       cancel_url: (cancelUrl || siteUrl + '/quarry-events.html') + '?registration=cancelled'
-    });
+    };
+
+    // Apply either pre-selected discount or allow manual promo code entry
+    if (discounts) {
+      sessionParams.discounts = discounts;
+    } else {
+      sessionParams.allow_promotion_codes = true;
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionParams);
 
     return {
       statusCode: 200,

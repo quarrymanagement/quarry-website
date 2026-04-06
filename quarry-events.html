@@ -1548,6 +1548,15 @@
 
                     <input type="hidden" id="selectedTableId" name="selectedTableId" value="">
 
+                    <div id="couponGroup" class="form-group" style="margin-top:8px;">
+                        <label for="couponCode">Coupon Code</label>
+                        <div style="display:flex;gap:8px;">
+                            <input type="text" id="couponCode" name="couponCode" placeholder="Enter coupon code" style="flex:1;text-transform:uppercase;">
+                            <button type="button" id="applyCouponBtn" onclick="applyCoupon()" style="padding:8px 16px;background:#2C1A0E;color:#B8933A;border:1px solid #B8933A;font-size:13px;font-weight:600;letter-spacing:0.05em;cursor:pointer;white-space:nowrap;">APPLY</button>
+                        </div>
+                        <div id="couponStatus" style="font-size:13px;margin-top:6px;display:none;"></div>
+                    </div>
+
                     <div id="orderSummary" style="display:none;background:#faf7f2;border:2px solid #e0d9d0;padding:16px;margin-top:8px;">
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
                             <span style="font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;">Order Summary</span>
@@ -2060,6 +2069,13 @@
             const modal = document.getElementById("registrationModal");
             const form = document.getElementById("registrationForm");
 
+            // Reset coupon state
+            appliedCoupon = null;
+            document.getElementById("couponCode").value = "";
+            document.getElementById("couponCode").disabled = false;
+            document.getElementById("applyCouponBtn").style.display = "inline-block";
+            document.getElementById("couponStatus").style.display = "none";
+
             // Set modal header
             document.getElementById("modalEventName").textContent = currentEventForModal.name;
             document.getElementById("modalEventDate").textContent = currentEventForModal.date;
@@ -2160,6 +2176,82 @@
         }
 
         /**
+         * Coupon state
+         */
+        var appliedCoupon = null; // { code, percent_off, amount_off }
+
+        /**
+         * Apply coupon code
+         */
+        async function applyCoupon() {
+            const input = document.getElementById("couponCode");
+            const statusDiv = document.getElementById("couponStatus");
+            const btn = document.getElementById("applyCouponBtn");
+            const code = input.value.trim().toUpperCase();
+
+            if (!code) {
+                statusDiv.style.display = "block";
+                statusDiv.style.color = "#dc2626";
+                statusDiv.textContent = "Please enter a coupon code.";
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = "Checking...";
+            statusDiv.style.display = "none";
+
+            try {
+                const res = await fetch("/.netlify/functions/validate-coupon", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ code })
+                });
+                const data = await res.json();
+
+                if (data.valid) {
+                    appliedCoupon = {
+                        code: code,
+                        percent_off: data.percent_off || null,
+                        amount_off: data.amount_off || null
+                    };
+                    statusDiv.style.display = "block";
+                    statusDiv.style.color = "#16a34a";
+                    const desc = data.percent_off
+                        ? data.percent_off + "% off"
+                        : "$" + (data.amount_off / 100).toFixed(2) + " off";
+                    statusDiv.innerHTML = '✓ Coupon applied — <b>' + desc + '</b> &nbsp;<a href="#" onclick="removeCoupon();return false;" style="color:#dc2626;font-size:12px;">Remove</a>';
+                    input.disabled = true;
+                    btn.style.display = "none";
+                    updateOrderSummary();
+                } else {
+                    appliedCoupon = null;
+                    statusDiv.style.display = "block";
+                    statusDiv.style.color = "#dc2626";
+                    statusDiv.textContent = data.error || "Invalid coupon code.";
+                }
+            } catch (e) {
+                statusDiv.style.display = "block";
+                statusDiv.style.color = "#dc2626";
+                statusDiv.textContent = "Error validating coupon. Try again.";
+            }
+
+            btn.disabled = false;
+            btn.textContent = "APPLY";
+        }
+
+        function removeCoupon() {
+            appliedCoupon = null;
+            var input = document.getElementById("couponCode");
+            var statusDiv = document.getElementById("couponStatus");
+            var btn = document.getElementById("applyCouponBtn");
+            input.disabled = false;
+            input.value = "";
+            btn.style.display = "inline-block";
+            statusDiv.style.display = "none";
+            updateOrderSummary();
+        }
+
+        /**
          * Update order summary based on selections
          */
         function updateOrderSummary() {
@@ -2187,10 +2279,24 @@
                 seatingLabel = numPeople === 1 ? "1 ticket" : numPeople + " tickets";
             }
 
-            const totalCents = pricePerPerson * numPeople;
+            const subtotalCents = pricePerPerson * numPeople;
+            let discountCents = 0;
+            let discountLabel = "";
+
+            if (appliedCoupon) {
+                if (appliedCoupon.percent_off) {
+                    discountCents = Math.round(subtotalCents * appliedCoupon.percent_off / 100);
+                    discountLabel = appliedCoupon.percent_off + "% off (" + appliedCoupon.code + ")";
+                } else if (appliedCoupon.amount_off) {
+                    discountCents = Math.min(appliedCoupon.amount_off, subtotalCents);
+                    discountLabel = "$" + (discountCents / 100).toFixed(2) + " off (" + appliedCoupon.code + ")";
+                }
+            }
+
+            const totalCents = Math.max(0, subtotalCents - discountCents);
             const totalDollars = (totalCents / 100).toFixed(2);
 
-            detailsDiv.innerHTML = `
+            let html = `
                 <div style="display:flex;justify-content:space-between;">
                     <span>${tierName}</span>
                     <span>$${(pricePerPerson/100).toFixed(2)}/ea</span>
@@ -2200,6 +2306,17 @@
                     <span>× ${numPeople}</span>
                 </div>
             `;
+
+            if (discountCents > 0) {
+                html += `
+                    <div style="display:flex;justify-content:space-between;color:#16a34a;margin-top:4px;">
+                        <span>${discountLabel}</span>
+                        <span>−$${(discountCents/100).toFixed(2)}</span>
+                    </div>
+                `;
+            }
+
+            detailsDiv.innerHTML = html;
             totalDiv.textContent = "$" + totalDollars;
             summaryDiv.style.display = "block";
         }
@@ -2253,6 +2370,7 @@
                     seatType: seatType,
                     tableId: selectedMapTable ? selectedMapTable.id : (formData.get("selectedTableId") || ''),
                     ticketTier: formData.get("ticketTier"),
+                    couponCode: appliedCoupon ? appliedCoupon.code : '',
                     successUrl: window.location.origin + '/quarry-events',
                     cancelUrl: window.location.origin + '/quarry-events'
                 };
