@@ -1,10 +1,62 @@
 // Netlify event-triggered function: fires on every form submission
-// Sends confirmation emails to both the registrant and the owner
+// Sends confirmation emails via Amazon SES (the canonical email path for this site)
+//
+// Handles two forms so far:
+//   - wine-club-registration  -> member confirmation + owner notification
+//   - wedding-tour             -> couple confirmation + Jacqueline + management
+
+const AWS = require('aws-sdk');
+
+const ses = new AWS.SES({
+  region: process.env.SES_REGION || 'us-east-1',
+  accessKeyId: process.env.SES_ACCESS_KEY_ID,
+  secretAccessKey: process.env.SES_SECRET_ACCESS_KEY,
+});
+
+const FROM = 'The Quarry STL <management@thequarrystl.com>';
+
+async function sendEmail({ to, subject, html }) {
+  if (!to) return;
+  try {
+    await ses.sendEmail({
+      Source: FROM,
+      Destination: { ToAddresses: [to] },
+      Message: {
+        Subject: { Data: subject, Charset: 'UTF-8' },
+        Body: { Html: { Data: html, Charset: 'UTF-8' } },
+      },
+    }).promise();
+    console.log('SES sent to', to);
+  } catch (e) {
+    console.error('SES error to', to, e && e.message);
+  }
+}
+
+function buildEmail(heading, bodyContent) {
+  return (
+    '<div style="font-family:Arial,sans-serif;max-width:600px">' +
+    '<div style="background:#1A0E08;padding:24px;text-align:center">' +
+    '<h1 style="color:#B8933A;margin:0">The Quarry</h1>' +
+    '<p style="color:#F5F0E8;font-size:0.8rem;letter-spacing:0.15em;margin:4px 0 0">NEW MELLE, MISSOURI</p></div>' +
+    '<div style="padding:32px 24px">' +
+    '<h2 style="color:#2C1A0E">' + heading + '</h2>' +
+    bodyContent +
+    '</div>' +
+    '<div style="background:#1A0E08;padding:16px;text-align:center">' +
+    '<p style="color:rgba(255,255,255,0.4);font-size:0.75rem;margin:0">3960 Highway Z, New Melle, MO 63385</p></div></div>'
+  );
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 exports.handler = async (event) => {
-  const token = process.env.NETLIFY_AUTH_TOKEN;
-  const siteId = 'roaring-pegasus-444826';
-
   let payload;
   try {
     payload = JSON.parse(event.body).payload;
@@ -15,7 +67,6 @@ exports.handler = async (event) => {
 
   const formName = payload.form_name;
   const data = payload.data || {};
-
   console.log('submission-created fired for form:', formName);
 
   // ── Wine Club Registration ──
@@ -26,9 +77,7 @@ exports.handler = async (event) => {
     const email = data.email || '';
 
     if (email) {
-      // Confirmation to the new member
-      await sendEmail(token, siteId, {
-        from: 'wineclub@thequarrystl.com',
+      await sendEmail({
         to: email,
         subject: 'Registration Confirmed — Rock & Vine Wine Club',
         html: buildEmail(
@@ -45,9 +94,7 @@ exports.handler = async (event) => {
       });
     }
 
-    // Notification to the owner
-    await sendEmail(token, siteId, {
-      from: 'wineclub@thequarrystl.com',
+    await sendEmail({
       to: 'management@thequarrystl.com',
       subject: 'New Wine Club Registration — ' + fullName,
       html: buildEmail(
@@ -75,41 +122,38 @@ exports.handler = async (event) => {
 
     const detailBlock =
       '<div style="background:#FAF7F2;border-left:4px solid #B8933A;padding:16px 20px;margin:20px 0">' +
-      '<p style="margin:4px 0"><b>Name:</b> ' + fullName + '</p>' +
-      '<p style="margin:4px 0"><b>Email:</b> ' + email + '</p>' +
-      '<p style="margin:4px 0"><b>Phone:</b> ' + phone + '</p>' +
-      '<p style="margin:4px 0"><b>Wedding Date:</b> ' + weddingDate + '</p>' +
-      '<p style="margin:4px 0"><b>Package Interest:</b> ' + packageInterest + '</p>' +
+      '<p style="margin:4px 0"><b>Name:</b> ' + escapeHtml(fullName) + '</p>' +
+      '<p style="margin:4px 0"><b>Email:</b> ' + escapeHtml(email) + '</p>' +
+      '<p style="margin:4px 0"><b>Phone:</b> ' + escapeHtml(phone) + '</p>' +
+      '<p style="margin:4px 0"><b>Wedding Date:</b> ' + escapeHtml(weddingDate) + '</p>' +
+      '<p style="margin:4px 0"><b>Package Interest:</b> ' + escapeHtml(packageInterest) + '</p>' +
       (message ? '<p style="margin:12px 0 4px 0"><b>Vision / Notes:</b></p><p style="margin:0;white-space:pre-wrap">' + escapeHtml(message) + '</p>' : '') +
       '</div>';
 
-    // 1. Notify Jacqueline (primary wedding contact)
-    await sendEmail(token, siteId, {
-      from: 'weddings@thequarrystl.com',
+    // 1. Primary notification → Jacqueline
+    await sendEmail({
       to: 'jacqueline@thequarrystl.com',
       subject: 'New Wedding Tour Request — ' + fullName,
       html: buildEmail('New Wedding Tour Request', detailBlock +
-        '<p>Reply directly to ' + (email ? '<a href="mailto:' + email + '" style="color:#B8933A">' + email + '</a>' : 'this couple') + ' to schedule their walkthrough.</p>')
+        '<p>Reply directly to ' + (email ? '<a href="mailto:' + escapeHtml(email) + '" style="color:#B8933A">' + escapeHtml(email) + '</a>' : 'this couple') + ' to schedule their walkthrough.</p>')
     });
 
-    // 2. Notify management (CC for visibility)
-    await sendEmail(token, siteId, {
-      from: 'weddings@thequarrystl.com',
+    // 2. CC → Management for visibility
+    await sendEmail({
       to: 'management@thequarrystl.com',
       subject: 'New Wedding Tour Request — ' + fullName,
       html: buildEmail('New Wedding Tour Request', detailBlock +
         '<p style="font-size:0.85rem;color:#666">Jacqueline has been notified separately and will follow up directly.</p>')
     });
 
-    // 3. Confirmation to the couple
+    // 3. Confirmation back to the couple
     if (email) {
-      await sendEmail(token, siteId, {
-        from: 'weddings@thequarrystl.com',
+      await sendEmail({
         to: email,
         subject: 'Your Tour Request Received — The Quarry Weddings',
         html: buildEmail(
           'Thank You for Reaching Out',
-          '<p>Hi ' + (firstName || 'there') + ',</p>' +
+          '<p>Hi ' + (escapeHtml(firstName) || 'there') + ',</p>' +
           '<p>Thank you for requesting a tour of The Quarry. We have received your inquiry and Jacqueline Hirschbeck, our wedding coordinator, will personally reach out within one business day to schedule your private walkthrough.</p>' +
           '<p>Here is a summary of what you sent us:</p>' +
           detailBlock +
@@ -124,46 +168,3 @@ exports.handler = async (event) => {
 
   return { statusCode: 200, body: 'OK' };
 };
-
-function escapeHtml(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-function buildEmail(heading, bodyContent) {
-  return (
-    '<div style="font-family:Arial,sans-serif;max-width:600px">' +
-    '<div style="background:#1A0E08;padding:24px;text-align:center">' +
-    '<h1 style="color:#B8933A;margin:0">The Quarry</h1>' +
-    '<p style="color:#F5F0E8;font-size:0.8rem;letter-spacing:0.15em;margin:4px 0 0">NEW MELLE, MISSOURI</p></div>' +
-    '<div style="padding:32px 24px">' +
-    '<h2 style="color:#2C1A0E">' + heading + '</h2>' +
-    bodyContent +
-    '</div>' +
-    '<div style="background:#1A0E08;padding:16px;text-align:center">' +
-    '<p style="color:rgba(255,255,255,0.4);font-size:0.75rem;margin:0">3960 Highway Z, New Melle, MO 63385</p></div></div>'
-  );
-}
-
-async function sendEmail(token, siteId, opts) {
-  try {
-    const res = await fetch('https://api.netlify.com/v1/sendEmail', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
-      body: JSON.stringify({
-        from: opts.from,
-        to: opts.to,
-        subject: opts.subject,
-        html: opts.html,
-        siteId
-      })
-    });
-    console.log('Email sent to ' + opts.to + ', status:', res.status);
-  } catch (e) {
-    console.error('sendEmail error to ' + opts.to + ':', e.message);
-  }
-}
