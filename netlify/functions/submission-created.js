@@ -62,8 +62,77 @@ exports.handler = async (event) => {
     });
   }
 
+  // ── Wedding Tour Request ──
+  if (formName === 'wedding-tour') {
+    const firstName = data.first_name || '';
+    const lastName = data.last_name || '';
+    const fullName = (firstName + ' ' + lastName).trim() || 'New Inquiry';
+    const email = data.email || '';
+    const phone = data.phone || 'N/A';
+    const weddingDate = data.wedding_date || 'Not specified';
+    const packageInterest = data.package_interest || 'Not specified';
+    const message = data.message || '';
+
+    const detailBlock =
+      '<div style="background:#FAF7F2;border-left:4px solid #B8933A;padding:16px 20px;margin:20px 0">' +
+      '<p style="margin:4px 0"><b>Name:</b> ' + fullName + '</p>' +
+      '<p style="margin:4px 0"><b>Email:</b> ' + email + '</p>' +
+      '<p style="margin:4px 0"><b>Phone:</b> ' + phone + '</p>' +
+      '<p style="margin:4px 0"><b>Wedding Date:</b> ' + weddingDate + '</p>' +
+      '<p style="margin:4px 0"><b>Package Interest:</b> ' + packageInterest + '</p>' +
+      (message ? '<p style="margin:12px 0 4px 0"><b>Vision / Notes:</b></p><p style="margin:0;white-space:pre-wrap">' + escapeHtml(message) + '</p>' : '') +
+      '</div>';
+
+    // 1. Notify Jacqueline (primary wedding contact)
+    await sendEmail(token, siteId, {
+      from: 'weddings@thequarrystl.com',
+      to: 'jacqueline@thequarrystl.com',
+      subject: 'New Wedding Tour Request — ' + fullName,
+      html: buildEmail('New Wedding Tour Request', detailBlock +
+        '<p>Reply directly to ' + (email ? '<a href="mailto:' + email + '" style="color:#B8933A">' + email + '</a>' : 'this couple') + ' to schedule their walkthrough.</p>')
+    });
+
+    // 2. Notify management (CC for visibility)
+    await sendEmail(token, siteId, {
+      from: 'weddings@thequarrystl.com',
+      to: 'management@thequarrystl.com',
+      subject: 'New Wedding Tour Request — ' + fullName,
+      html: buildEmail('New Wedding Tour Request', detailBlock +
+        '<p style="font-size:0.85rem;color:#666">Jacqueline has been notified separately and will follow up directly.</p>')
+    });
+
+    // 3. Confirmation to the couple
+    if (email) {
+      await sendEmail(token, siteId, {
+        from: 'weddings@thequarrystl.com',
+        to: email,
+        subject: 'Your Tour Request Received — The Quarry Weddings',
+        html: buildEmail(
+          'Thank You for Reaching Out',
+          '<p>Hi ' + (firstName || 'there') + ',</p>' +
+          '<p>Thank you for requesting a tour of The Quarry. We have received your inquiry and Jacqueline Hirschbeck, our wedding coordinator, will personally reach out within one business day to schedule your private walkthrough.</p>' +
+          '<p>Here is a summary of what you sent us:</p>' +
+          detailBlock +
+          '<p>In the meantime, feel free to explore our <a href="https://thequarrystl.com/weddings/gallery.html" style="color:#B8933A">gallery</a> or read more <a href="https://thequarrystl.com/weddings/planning.html" style="color:#B8933A">about our planning services</a>.</p>' +
+          '<p>If you need to reach us sooner, call <a href="tel:6362248257" style="color:#B8933A">636-224-8257</a> or email <a href="mailto:jacqueline@thequarrystl.com" style="color:#B8933A">jacqueline@thequarrystl.com</a>.</p>' +
+          '<p>We look forward to meeting you.</p>' +
+          '<p style="color:#666;font-size:0.9rem">— The Quarry Wedding Team</p>'
+        )
+      });
+    }
+  }
+
   return { statusCode: 200, body: 'OK' };
 };
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 function buildEmail(heading, bodyContent) {
   return (
