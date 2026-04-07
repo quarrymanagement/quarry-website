@@ -17,3 +17,139 @@
   to = "/quarry-events.html#evt-fundraiser-apr10"
   status = 200
   force = true
+
+# ---------------------------------------------------------------------------
+# Short, shareable URLs (301 -> canonical .html pages)
+# These let staff/print/social use clean URLs while preserving link equity.
+# ---------------------------------------------------------------------------
+[[redirects]]
+  from = "/menu"
+  to = "/quarry-menu.html"
+  status = 301
+
+[[redirects]]
+  from = "/drinks"
+  to = "/quarry-drinks.html"
+  status = 301
+
+[[redirects]]
+  from = "/brunch"
+  to = "/quarry-brunch.html"
+  status = 301
+
+[[redirects]]
+  from = "/catering"
+  to = "/quarry-catering.html"
+  status = 301
+
+[[redirects]]
+  from = "/events"
+  to = "/quarry-events.html"
+  status = 301
+
+[[redirects]]
+  from = "/bands"
+  to = "/quarry-bands.html"
+  status = 301
+
+[[redirects]]
+  from = "/wine-club"
+  to = "/quarry-wineclub.html"
+  status = 301
+
+[[redirects]]
+  from = "/wineclub"
+  to = "/quarry-wineclub.html"
+  status = 301
+
+[[redirects]]
+  from = "/beer-garden"
+  to = "/quarry-beergarden.html"
+  status = 301
+
+[[redirects]]
+  from = "/golf"
+  to = "/quarry-golf.html"
+  status = 301
+
+[[redirects]]
+  from = "/reservations"
+  to = "/quarry-reservations.html"
+  status = 301
+
+[[redirects]]
+  from = "/private-events"
+  to = "/quarry-private-events.html"
+  status = 301
+
+[[redirects]]
+  from = "/our-story"
+  to = "/quarry-ourstory.html"
+  status = 301
+
+[[redirects]]
+  from = "/about"
+  to = "/quarry-ourstory.html"
+  status = 301
+
+[[redirects]]
+  from = "/contact"
+  to = "/quarry-contact.html"
+  status = 301
+
+[[redirects]]
+  from = "/press"
+  to = "/quarry-press.html"
+  status = 301
+
+[[redirects]]
+  from = "/careers"
+  to = "/quarry-careers.html"
+  status = 301
+
+[[redirects]]
+  from = "/gift-cards"
+  to = "/quarry-giftcards.html"
+  status = 301
+
+[[redirects]]
+  from = "/giftcards"
+  to = "/quarry-giftcards.html"
+  status = 301
+
+# ---------------------------------------------------------------------------
+# Headers — keep CMS / admin / staging surfaces out of search engines
+# Reinforces robots.txt + per-page <meta name="robots"> noindex
+# ---------------------------------------------------------------------------
+[[headers]]
+  for = "/admin/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow, noarchive"
+
+[[headers]]
+  for = "/about.html"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow, noarchive"
+
+[[headers]]
+  for = "/employee/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow, noarchive"
+
+[[headers]]
+  for = "/netlify/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow, noarchive"
+
+# Block the *.netlify.app preview subdomain from being indexed entirely.
+# (Production thequarrystl.com is unaffected — Netlify only sends this header
+#  on the deploy-preview / branch-deploy hostnames.)
+[[context.deploy-preview.headers]]
+  for = "/*"
+  [context.deploy-preview.headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
+[[context.branch-deploy.headers]]
+  for = "/*"
+  [context.branch-deploy.headers.values]
+    X-Robots-Tag = "noindex, nofollow"
