@@ -47,8 +47,8 @@ SAME_AS = [
 # ---------------------------------------------------------------------------
 PAGES = {
     "quarry-menu.html": {
-        "title": "Menu | Chef-Crafted American Cuisine | The Quarry New Melle MO",
-        "description": "Explore The Quarry's full dinner menu — wood-fired steaks, seafood, hand-crafted appetizers and shareable plates. Locally sourced, chef-driven American cuisine in New Melle, Missouri.",
+        "title": "Dinner Menu | The Quarry New Melle, MO",
+        "description": "Wood-fired steaks, seafood, and chef-crafted American cuisine at The Quarry — a locally sourced restaurant and wine bar in New Melle, Missouri.",
         "slug": "quarry-menu.html",
         "og_image": None,
         "breadcrumbs": [("Home", "/"), ("Menu", "/quarry-menu.html")],
@@ -145,8 +145,8 @@ PAGES = {
         }],
     },
     "quarry-catering.html": {
-        "title": "Catering | On & Off-Site Catering Services | The Quarry New Melle MO",
-        "description": "Full-service catering from The Quarry — weddings, corporate events, private parties. Customizable menus, on-site and off-site catering throughout the St. Louis metro and St. Charles County.",
+        "title": "Catering Services | The Quarry New Melle, MO",
+        "description": "Full-service catering for weddings, corporate events, and private parties. On & off-site catering across St. Charles County and the St. Louis metro.",
         "slug": "quarry-catering.html",
         "og_image": None,
         "breadcrumbs": [("Home", "/"), ("Catering", "/quarry-catering.html")],
@@ -214,8 +214,8 @@ PAGES = {
         "extra_schema": "BANDS_DYNAMIC",
     },
     "quarry-wineclub.html": {
-        "title": "Rock & Vine Wine Club | Monthly Wine Membership | The Quarry MO",
-        "description": "Join The Quarry's Rock & Vine Wine Club — curated monthly wine selections, exclusive member events, tasting nights, and discounts. New Melle, Missouri's premier wine club.",
+        "title": "Rock & Vine Wine Club | The Quarry MO",
+        "description": "Join Rock & Vine — The Quarry's monthly wine club with curated selections, member tastings, exclusive events, and discounts in New Melle, Missouri.",
         "slug": "quarry-wineclub.html",
         "og_image": None,
         "breadcrumbs": [("Home", "/"), ("Rock & Vine Wine Club", "/quarry-wineclub.html")],
@@ -313,8 +313,8 @@ PAGES = {
         }],
     },
     "quarry-private-events.html": {
-        "title": "Private Events | Corporate, Birthday & Rehearsal Dinners | The Quarry",
-        "description": "Host your private event at The Quarry — corporate dinners, birthday parties, rehearsal dinners, holiday gatherings. Customizable menus and dedicated event spaces in New Melle, MO.",
+        "title": "Private Events & Rehearsal Dinners | The Quarry MO",
+        "description": "Host corporate dinners, birthday parties, and rehearsal dinners at The Quarry. Customizable menus and dedicated event spaces in New Melle, MO.",
         "slug": "quarry-private-events.html",
         "og_image": None,
         "breadcrumbs": [("Home", "/"), ("Private Events", "/quarry-private-events.html")],
@@ -352,8 +352,8 @@ PAGES = {
         }],
     },
     "quarry-contact.html": {
-        "title": "Contact The Quarry | Hours, Directions & Phone | New Melle MO",
-        "description": "Contact The Quarry in New Melle, Missouri — phone, email, hours, directions, and reservations. We're at 3960 Highway Z, just minutes from Wentzville and Defiance wine country.",
+        "title": "Contact The Quarry | Hours & Directions | New Melle MO",
+        "description": "Contact The Quarry in New Melle, MO — phone, email, hours, directions, and reservations. 3960 Highway Z, minutes from Wentzville and Defiance.",
         "slug": "quarry-contact.html",
         "og_image": None,
         "breadcrumbs": [("Home", "/"), ("Contact", "/quarry-contact.html")],
@@ -407,8 +407,8 @@ PAGES = {
         "extra_schema": [],
     },
     "quarry-giftcards.html": {
-        "title": "Gift Cards | Restaurant, Golf & Wine | The Quarry New Melle MO",
-        "description": "Give the gift of The Quarry — gift cards good for dining, drinks, golf simulators, brunch, and events. Available in any amount. Buy online or in person in New Melle, MO.",
+        "title": "Gift Cards | The Quarry New Melle, MO",
+        "description": "Give the gift of The Quarry — gift cards for dining, drinks, golf simulators, brunch, and events. Available in any amount. New Melle, MO.",
         "slug": "quarry-giftcards.html",
         "og_image": None,
         "breadcrumbs": [("Home", "/"), ("Gift Cards", "/quarry-giftcards.html")],
