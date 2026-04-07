@@ -11,6 +11,23 @@
   package = "@netlify/plugin-functions-install-core"
 
 
+# ---------------------------------------------------------------------------
+# Canonical host: 301 www.thequarrystl.com → thequarrystl.com (apex)
+# Consolidates link equity, eliminates duplicate-content signal, and matches
+# every <link rel="canonical"> on the site (which all point to the apex).
+# ---------------------------------------------------------------------------
+[[redirects]]
+  from = "https://www.thequarrystl.com/*"
+  to = "https://thequarrystl.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://www.thequarrystl.com/*"
+  to = "https://thequarrystl.com/:splat"
+  status = 301
+  force = true
+
 # Redirect old Wix event URLs to current events page
 [[redirects]]
   from = "/event-details/80s-neon-music-bingo-fundraiser-for-timberland-wolves"
