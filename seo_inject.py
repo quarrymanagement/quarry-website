@@ -50,7 +50,7 @@ PAGES = {
         "title": "Menu | Chef-Crafted American Cuisine | The Quarry New Melle MO",
         "description": "Explore The Quarry's full dinner menu — wood-fired steaks, seafood, hand-crafted appetizers and shareable plates. Locally sourced, chef-driven American cuisine in New Melle, Missouri.",
         "slug": "quarry-menu.html",
-        "og_image": DEFAULT_OG,
+        "og_image": None,
         "breadcrumbs": [("Home", "/"), ("Menu", "/quarry-menu.html")],
         "extra_schema": [{
             "@context": "https://schema.org",
@@ -85,7 +85,7 @@ PAGES = {
         "title": "Drink Menu | Wine, Cocktails & Craft Beer | The Quarry New Melle",
         "description": "Curated wine list, hand-shaken cocktails, local craft beer and rotating taps. The Quarry's full drink menu — wine bar and cocktail lounge in New Melle, MO.",
         "slug": "quarry-drinks.html",
-        "og_image": DEFAULT_OG,
+        "og_image": None,
         "breadcrumbs": [("Home", "/"), ("Drinks", "/quarry-drinks.html")],
         "extra_schema": [{
             "@context": "https://schema.org",
@@ -116,7 +116,7 @@ PAGES = {
         "title": "Sunday Brunch | Bottomless Mimosas & Live Music | The Quarry MO",
         "description": "Sunday brunch at The Quarry — chef-crafted brunch classics, bottomless mimosas, live acoustic music, and waterfront patio seating in New Melle, Missouri.",
         "slug": "quarry-brunch.html",
-        "og_image": DEFAULT_OG,
+        "og_image": None,
         "breadcrumbs": [("Home", "/"), ("Sunday Brunch", "/quarry-brunch.html")],
         "extra_schema": [{
             "@context": "https://schema.org",
@@ -148,7 +148,7 @@ PAGES = {
         "title": "Catering | On & Off-Site Catering Services | The Quarry New Melle MO",
         "description": "Full-service catering from The Quarry — weddings, corporate events, private parties. Customizable menus, on-site and off-site catering throughout the St. Louis metro and St. Charles County.",
         "slug": "quarry-catering.html",
-        "og_image": DEFAULT_OG,
+        "og_image": None,
         "breadcrumbs": [("Home", "/"), ("Catering", "/quarry-catering.html")],
         "extra_schema": [{
             "@context": "https://schema.org",
@@ -188,7 +188,7 @@ PAGES = {
         "title": "Events Calendar | Live Music, Bingo & Special Events | The Quarry",
         "description": "Upcoming events at The Quarry in New Melle, MO — live music nights, music bingo, themed dinners, fundraisers, and seasonal celebrations. Reserve your spot today.",
         "slug": "quarry-events.html",
-        "og_image": "https://static.wixstatic.com/media/f1c1b8_c5a995404a4c4e20aa35de83c9c26bfa~mv2.jpg/v1/fill/w_1200,h_630,al_c,q_85/quarry-events.jpg",
+        "og_image": None,
         "breadcrumbs": [("Home", "/"), ("Events Calendar", "/quarry-events.html")],
         # Event schema injected dynamically in build_event_schemas()
         "extra_schema": "EVENTS_DYNAMIC",
@@ -209,7 +209,7 @@ PAGES = {
         "title": "Live Bands & Music Schedule | The Quarry New Melle, Missouri",
         "description": "Weekly live music at The Quarry — local and regional bands, acoustic afternoons, evening shows. See this week's lineup and plan your visit to New Melle, Missouri.",
         "slug": "quarry-bands.html",
-        "og_image": "https://static.wixstatic.com/media/f1c1b8_c5a995404a4c4e20aa35de83c9c26bfa~mv2.jpg/v1/fill/w_1200,h_630,al_c,q_85/quarry-bands.jpg",
+        "og_image": None,
         "breadcrumbs": [("Home", "/"), ("Live Bands", "/quarry-bands.html")],
         "extra_schema": "BANDS_DYNAMIC",
     },
@@ -217,7 +217,7 @@ PAGES = {
         "title": "Rock & Vine Wine Club | Monthly Wine Membership | The Quarry MO",
         "description": "Join The Quarry's Rock & Vine Wine Club — curated monthly wine selections, exclusive member events, tasting nights, and discounts. New Melle, Missouri's premier wine club.",
         "slug": "quarry-wineclub.html",
-        "og_image": DEFAULT_OG,
+        "og_image": None,
         "breadcrumbs": [("Home", "/"), ("Rock & Vine Wine Club", "/quarry-wineclub.html")],
         "extra_schema": [{
             "@context": "https://schema.org",
@@ -239,7 +239,7 @@ PAGES = {
         "title": "Beer Garden | Outdoor Patio & Craft Beer | The Quarry New Melle",
         "description": "The Quarry's outdoor beer garden — coming 2026. Local craft taps, lakeside patio seating, casual eats, and live music in New Melle, Missouri.",
         "slug": "quarry-beergarden.html",
-        "og_image": DEFAULT_OG,
+        "og_image": None,
         "breadcrumbs": [("Home", "/"), ("Beer Garden", "/quarry-beergarden.html")],
         "extra_schema": [{
             "@context": "https://schema.org",
@@ -257,7 +257,7 @@ PAGES = {
         "title": "Indoor Golf Simulators | Hole-In-One Golf | The Quarry New Melle",
         "description": "Hole-In-One Golf at The Quarry — state-of-the-art TrackMan indoor golf simulators, leagues, lessons, and private bay rentals. Year-round golf in New Melle, Missouri.",
         "slug": "quarry-golf.html",
-        "og_image": "https://static.wixstatic.com/media/f1c1b8_c5a995404a4c4e20aa35de83c9c26bfa~mv2.jpg/v1/fill/w_1200,h_630,al_c,q_85/quarry-golf.jpg",
+        "og_image": None,
         "breadcrumbs": [("Home", "/"), ("Hole-In-One Golf", "/quarry-golf.html")],
         "extra_schema": [{
             "@context": "https://schema.org",
@@ -297,7 +297,7 @@ PAGES = {
         "title": "Reservations | Book a Table or Bay | The Quarry New Melle MO",
         "description": "Reserve your table, golf bay, or private dining experience at The Quarry in New Melle, Missouri. Online booking for dinner, brunch, events, and golf simulators.",
         "slug": "quarry-reservations.html",
-        "og_image": DEFAULT_OG,
+        "og_image": None,
         "breadcrumbs": [("Home", "/"), ("Reservations", "/quarry-reservations.html")],
         "extra_schema": [{
             "@context": "https://schema.org",
@@ -316,7 +316,7 @@ PAGES = {
         "title": "Private Events | Corporate, Birthday & Rehearsal Dinners | The Quarry",
         "description": "Host your private event at The Quarry — corporate dinners, birthday parties, rehearsal dinners, holiday gatherings. Customizable menus and dedicated event spaces in New Melle, MO.",
         "slug": "quarry-private-events.html",
-        "og_image": DEFAULT_OG,
+        "og_image": None,
         "breadcrumbs": [("Home", "/"), ("Private Events", "/quarry-private-events.html")],
         "extra_schema": [{
             "@context": "https://schema.org",
@@ -341,7 +341,7 @@ PAGES = {
         "title": "Our Story | The Quarry — A New Melle, Missouri Original",
         "description": "The story behind The Quarry — a 26-acre lakeside restaurant, wine bar, and event venue in New Melle, Missouri. Family-owned, chef-driven, community-rooted.",
         "slug": "quarry-ourstory.html",
-        "og_image": DEFAULT_OG,
+        "og_image": None,
         "breadcrumbs": [("Home", "/"), ("Our Story", "/quarry-ourstory.html")],
         "extra_schema": [{
             "@context": "https://schema.org",
@@ -355,7 +355,7 @@ PAGES = {
         "title": "Contact The Quarry | Hours, Directions & Phone | New Melle MO",
         "description": "Contact The Quarry in New Melle, Missouri — phone, email, hours, directions, and reservations. We're at 3960 Highway Z, just minutes from Wentzville and Defiance wine country.",
         "slug": "quarry-contact.html",
-        "og_image": DEFAULT_OG,
+        "og_image": None,
         "breadcrumbs": [("Home", "/"), ("Contact", "/quarry-contact.html")],
         "extra_schema": [{
             "@context": "https://schema.org",
@@ -369,7 +369,7 @@ PAGES = {
         "title": "Press & Media | The Quarry New Melle, Missouri",
         "description": "Press releases, media coverage, and brand assets for The Quarry — restaurant, wine bar, and live music venue in New Melle, Missouri.",
         "slug": "quarry-press.html",
-        "og_image": DEFAULT_OG,
+        "og_image": None,
         "breadcrumbs": [("Home", "/"), ("Press & Media", "/quarry-press.html")],
         "extra_schema": [{
             "@context": "https://schema.org",
@@ -382,7 +382,7 @@ PAGES = {
         "title": "Careers | Now Hiring | The Quarry New Melle, Missouri",
         "description": "Join the team at The Quarry. Now hiring servers, bartenders, line cooks, hosts, and event staff in New Melle, Missouri. Apply today.",
         "slug": "quarry-careers.html",
-        "og_image": DEFAULT_OG,
+        "og_image": None,
         "breadcrumbs": [("Home", "/"), ("Careers", "/quarry-careers.html")],
         "extra_schema": [{
             "@context": "https://schema.org",
@@ -402,7 +402,7 @@ PAGES = {
         "title": "Event Details | The Quarry New Melle, Missouri",
         "description": "Event details, schedule, ticketing, and registration for upcoming events at The Quarry — restaurant, wine bar, and live music venue in New Melle, Missouri.",
         "slug": "quarry-event-detail.html",
-        "og_image": "https://static.wixstatic.com/media/f1c1b8_c5a995404a4c4e20aa35de83c9c26bfa~mv2.jpg/v1/fill/w_1200,h_630,al_c,q_85/quarry-events.jpg",
+        "og_image": None,
         "breadcrumbs": [("Home", "/"), ("Events", "/quarry-events.html"), ("Event Details", "/quarry-event-detail.html")],
         "extra_schema": [],
     },
@@ -410,7 +410,7 @@ PAGES = {
         "title": "Gift Cards | Restaurant, Golf & Wine | The Quarry New Melle MO",
         "description": "Give the gift of The Quarry — gift cards good for dining, drinks, golf simulators, brunch, and events. Available in any amount. Buy online or in person in New Melle, MO.",
         "slug": "quarry-giftcards.html",
-        "og_image": DEFAULT_OG,
+        "og_image": None,
         "breadcrumbs": [("Home", "/"), ("Gift Cards", "/quarry-giftcards.html")],
         "extra_schema": [{
             "@context": "https://schema.org",
@@ -594,12 +594,23 @@ def html_escape(s):
     return (s.replace("&", "&amp;").replace('"', "&quot;").replace("<", "&lt;").replace(">", "&gt;"))
 
 
+def og_image_for_slug(slug):
+    """Map a page slug to its branded /assets/og/og-*.jpg file."""
+    import os
+    # quarry-menu.html -> menu, quarry-private-events.html -> private-events
+    base = slug.replace("quarry-", "").replace(".html", "")
+    candidate = f"assets/og/og-{base}.jpg"
+    if os.path.exists(candidate):
+        return f"{SITE}/{candidate}"
+    return f"{SITE}/assets/og/og-default.jpg"
+
+
 def build_block(cfg):
     title = cfg["title"]
     desc = cfg["description"]
     slug = cfg["slug"]
     canonical = f"{SITE}/{slug}"
-    og_image = cfg.get("og_image", DEFAULT_OG)
+    og_image = cfg.get("og_image") or og_image_for_slug(slug)
     bread = cfg.get("breadcrumbs", [])
 
     breadcrumb_schema = {
