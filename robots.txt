@@ -1,4 +1,21 @@
 User-agent: *
 Allow: /
 
+# Block admin / CMS surfaces
+Disallow: /admin/
+Disallow: /about.html
+Disallow: /employee/
+Disallow: /netlify/
+
+# Block internal / utility pages that aren't intended for search
+Disallow: /planning.html
+Disallow: /pricing.html
+Disallow: /schedule.html
+Disallow: /events.json
+Disallow: /schedule.json
+Disallow: /subscribers.json
+
+# Block legacy duplicate of /weddings/
+Disallow: /gallery.html
+
 Sitemap: https://thequarrystl.com/sitemap.xml
