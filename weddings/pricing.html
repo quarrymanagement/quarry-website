@@ -243,9 +243,11 @@ footer{background:#181510;padding:72px 5% 36px}
 
 .pricing-hero-note{text-align:center;padding:60px 5% 0;background:var(--cream)}
 .seasons{padding:80px 5%;background:var(--cream)}
-.season-header{display:flex;align-items:center;gap:20px;margin-bottom:48px}
-.season-line{flex:1;height:1px;background:var(--lg)}
-.season-label{font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);font-family:var(--fb);white-space:nowrap;padding:0 16px}
+.season-header{display:flex;flex-direction:column;align-items:center;gap:14px;margin:72px auto 44px;text-align:center}
+.season-header:first-of-type,.ptab-panel>.season-header:first-child{margin-top:0}
+.season-line{display:none}
+.season-header::after{content:"";width:36px;height:1px;background:var(--gold);opacity:.55}
+.season-label{font-size:.68rem;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);font-family:var(--fb);white-space:nowrap}
 .pricing-table{width:100%;border-collapse:collapse;margin-bottom:60px}
 .pricing-table th{font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:#fff;background:var(--stone);padding:16px 20px;text-align:left;font-family:var(--fb)}
 .pricing-table th:not(:first-child){text-align:center}
@@ -320,9 +322,9 @@ nav.hn.sc .nl{color:#2C2C2C!important}
   .pg,.pricing-grid{grid-template-columns:1fr!important;max-width:100%!important}
   .pc,.pricing-card{padding:26px 18px!important}
   .seasons{padding:32px 5%!important}
-  .season-header{flex-direction:column!important;align-items:center!important;gap:6px!important;margin-bottom:16px!important}
-  .season-line{width:50%!important;flex:none!important}
-  .season-label{font-size:.6rem!important;letter-spacing:.16em!important;padding:0!important;white-space:nowrap!important}
+  .season-header{gap:10px!important;margin:44px auto 26px!important}
+  .season-header::after{width:28px!important}
+  .season-label{font-size:.58rem!important;letter-spacing:.2em!important;white-space:nowrap!important}
   .pricing-table{display:block!important;width:100%!important}
   .pricing-table thead{display:none!important}
   .pricing-table tbody{display:block!important}
