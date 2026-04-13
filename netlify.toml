@@ -35,6 +35,12 @@
   status = 200
   force = true
 
+  [[redirects]]
+    from = "/event-details/boot-scootin-with-the-pack"
+      to = "/quarry-event-detail.html?id=evt-bootscootin-oct17"
+        status = 301
+          force = true
+
 # ---------------------------------------------------------------------------
 # Short, shareable URLs (301 -> canonical .html pages)
 # These let staff/print/social use clean URLs while preserving link equity.
