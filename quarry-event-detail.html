@@ -252,7 +252,7 @@
             .then(function(data) {
                 var evt = null;
                 for (var i = 0; i < data.events.length; i++) {
-                    if (data.events[i].id === eventId) {
+                    if (data.events[i].id === eventId || data.events[i].slug === eventId) {
                         evt = data.events[i];
                         break;
                     }
@@ -286,14 +286,19 @@
 
             // Badge
             var badge = document.getElementById('eventBadge');
-            var isSoldOut = evt.status === 'sold-out' || (evt.registered >= evt.capacity && evt.capacity > 0);
-            var isFree = evt.category === 'Free';
+            var et = evt.eventType || 'ticketed';
+            var isSoldOut = evt.status === 'sold-out' || (et === 'ticketed' && evt.registered >= evt.capacity && evt.capacity > 0);
+            var isFree = et === 'free';
+            var isCover = et === 'cover';
             if (isSoldOut) {
                 badge.textContent = 'Sold Out';
                 badge.className = 'badge badge-soldout';
             } else if (isFree) {
                 badge.textContent = 'Free Event';
                 badge.className = 'badge badge-free';
+            } else if (isCover) {
+                badge.textContent = '$' + ((evt.coverCharge || 0) / 100) + ' Cover';
+                badge.className = 'badge badge-available';
             } else {
                 badge.textContent = 'Tickets Available';
                 badge.className = 'badge badge-available';
@@ -357,15 +362,21 @@
 
         function renderPricingDetails(evt) {
             var container = document.getElementById('pricingDetails');
+            var et = evt.eventType || 'ticketed';
             var html = '';
-            if (evt.pricingType === 'table') {
+
+            if (et === 'free') {
+                html = '<p style="color:#3cb464;font-size:.9rem;line-height:1.6;font-weight:600;">Free — No cover charge or tickets required</p>';
+            } else if (et === 'cover') {
+                html = '<p style="color:#ccc;font-size:.9rem;line-height:1.6;">$' + ((evt.coverCharge || 0) / 100) + ' cover charge at the door</p>';
+            } else if (evt.pricingType === 'table') {
                 html += '<p style="color:#ccc;font-size:.9rem;line-height:1.6;">' + formatPrice(evt.pricePerTable) + ' per table of ' + evt.tableSize + '</p>';
             } else if (evt.pricingType === 'individual') {
                 html += '<p style="color:#ccc;font-size:.9rem;line-height:1.6;">' + formatPrice(evt.pricePerPerson) + ' per person</p>';
             } else if (evt.pricingType === 'both') {
                 html += '<p style="color:#ccc;font-size:.9rem;line-height:1.6;">' + formatPrice(evt.pricePerPerson) + ' per person &mdash; or &mdash; ' + formatPrice(evt.pricePerTable) + ' per table of ' + evt.tableSize + '</p>';
             }
-            if (evt.tiers && evt.tiers.length > 0) {
+            if (et === 'ticketed' && evt.tiers && evt.tiers.length > 0) {
                 for (var i = 0; i < evt.tiers.length; i++) {
                     var t = evt.tiers[i];
                     html += '<p style="color:#999;font-size:.85rem;margin-top:8px;"><strong style="color:#ccc;">' + t.name + '</strong><br>' + (t.description || '') + '</p>';
@@ -376,6 +387,20 @@
 
         function renderRegCard(evt, isSoldOut) {
             var card = document.getElementById('regCard');
+            var et = evt.eventType || 'ticketed';
+
+            // Free / Informational events — no registration
+            if (et === 'free') {
+                card.innerHTML = '<h3>Free Event</h3><p style="color:#ccc;line-height:1.8;margin-bottom:20px;">This is a free event — no registration or tickets required. Just show up and enjoy!</p><a href="/quarry-events" style="display:block;text-align:center;color:#d4af37;margin-top:16px;text-decoration:none;font-size:.85rem;">View All Events &rarr;</a>';
+                return;
+            }
+
+            // Cover charge events — no registration
+            if (et === 'cover') {
+                var coverDollars = ((evt.coverCharge || 0) / 100).toFixed(2);
+                card.innerHTML = '<h3>Cover Charge</h3><div class="price-display"><div class="price-option selected"><div class="price-label"><strong>Pay at the Door</strong><span>No advance registration needed</span></div><div class="price-amount">$' + coverDollars + '</div></div></div><p style="color:#ccc;line-height:1.8;margin-top:16px;">Cover charge is collected at the door. No reservation required.</p><a href="/quarry-events" style="display:block;text-align:center;color:#d4af37;margin-top:16px;text-decoration:none;font-size:.85rem;">View All Events &rarr;</a>';
+                return;
+            }
 
             if (isSoldOut) {
                 card.innerHTML = '<h3>Registration</h3><div class="sold-out-message"><h4>This Event is Sold Out</h4><p>Check back soon for future events or follow us on social media for announcements.</p></div><a href="/quarry-events" style="display:block;text-align:center;color:#d4af37;margin-top:16px;text-decoration:none;font-size:.85rem;">View Other Events &rarr;</a>';
@@ -465,17 +490,26 @@
             var unitPrice = selectedPricing === 'table' ? eventData.pricePerTable : eventData.pricePerPerson;
             var totalCents = unitPrice * quantity;
 
+            // Build the tier name for the selected pricing
+            var ticketTier = '';
+            if (eventData.tiers && eventData.tiers.length > 0) {
+                if (selectedPricing === 'table') {
+                    var tableTier = eventData.tiers.find(function(t) { return t.pricePerPerson === eventData.pricePerTable; }) || eventData.tiers[eventData.tiers.length - 1];
+                    ticketTier = tableTier.name;
+                } else {
+                    var indTier = eventData.tiers.find(function(t) { return t.pricePerPerson === eventData.pricePerPerson; }) || eventData.tiers[0];
+                    ticketTier = indTier.name;
+                }
+            }
+
             var payload = {
                 eventId: eventData.id,
-                eventName: eventData.name,
-                fullName: form.fullName.value,
+                name: form.fullName.value,
                 email: form.email.value,
                 phone: form.phone.value || '',
-                pricingType: selectedPricing,
-                quantity: quantity,
-                unitPrice: unitPrice,
-                totalCents: totalCents,
-                tableSize: eventData.tableSize || 0
+                seatType: selectedPricing || 'individual',
+                partySize: quantity,
+                ticketTier: ticketTier
             };
 
             fetch('/.netlify/functions/event-register', {
@@ -485,8 +519,10 @@
             })
             .then(function(r) { return r.json(); })
             .then(function(data) {
-                if (data.url) {
+                if (data.checkoutUrl) {
                     // Redirect to Stripe checkout
+                    window.location.href = data.checkoutUrl;
+                } else if (data.url) {
                     window.location.href = data.url;
                 } else if (data.success) {
                     // Free event or direct confirmation
