@@ -2000,6 +2000,9 @@
         }
 
         function getStatusInfo(event) {
+            const et = event.eventType || 'ticketed';
+            if (et === 'free') return { class: "available", text: "Free Event" };
+            if (et === 'cover') return { class: "available", text: "Cover: $" + ((event.coverCharge || 0) / 100) };
             const remaining = event.totalCapacity - event.registeredCount;
             const label = getRemainingLabel(event);
             if (event.status === "sold-out" || remaining <= 0) {
@@ -2014,6 +2017,9 @@
          * Get availability text with color class
          */
         function getAvailabilityText(event) {
+            const et = event.eventType || 'ticketed';
+            if (et === 'free') return { text: "Open to All", class: "available" };
+            if (et === 'cover') return { text: "$" + ((event.coverCharge || 0) / 100) + " Cover at Door", class: "available" };
             const remaining = event.totalCapacity - event.registeredCount;
             const label = getRemainingLabel(event);
             if (event.status === "sold-out" || remaining <= 0) {
@@ -2030,6 +2036,63 @@
         function createEventCard(event) {
             const statusInfo = getStatusInfo(event);
             const availabilityInfo = getAvailabilityText(event);
+            const et = event.eventType || 'ticketed';
+            const isTicketed = et === 'ticketed';
+            const isCover = et === 'cover';
+            const isFree = et === 'free';
+
+            // Tiers section — only for ticketed events
+            let tiersHtml = '';
+            if (isTicketed && event.tiers && event.tiers.length > 0) {
+                tiersHtml = `<div class="event-tiers">
+                    ${event.tiers.map(tier => `
+                        <div class="tier">
+                            <div class="tier-name">${tier.name}</div>
+                            <div class="tier-price">${tier.priceLabel}</div>
+                        </div>
+                    `).join('')}
+                    ${event.seatingOptions && event.seatingOptions.length > 0 ? `
+                        <div style="margin-top:8px;font-size:12px;color:#888;font-style:italic;">
+                            Seating: Single Seats, 5-Top, 8-Top & 10-Top Tables
+                        </div>
+                    ` : ''}
+                </div>`;
+            } else if (isCover) {
+                const coverDollars = (event.coverCharge || 0) / 100;
+                tiersHtml = `<div class="event-tiers">
+                    <div class="tier">
+                        <div class="tier-name">Cover Charge</div>
+                        <div class="tier-price">$${coverDollars} at the door</div>
+                    </div>
+                </div>`;
+            } else if (isFree) {
+                tiersHtml = `<div class="event-tiers">
+                    <div class="tier">
+                        <div class="tier-name">Free Event</div>
+                        <div class="tier-price">No cover</div>
+                    </div>
+                </div>`;
+            }
+
+            // Footer buttons — ticketed gets Register, others get More Info only
+            let footerHtml = '';
+            if (isTicketed) {
+                if (event.status === "sold-out") {
+                    footerHtml = `
+                        <span class="availability-text ${availabilityInfo.class}">${availabilityInfo.text}</span>
+                        <button class="event-button" disabled>Sold Out</button>
+                        <a href="quarry-event-detail?id=${event.slug || event.id}" class="more-info-button">More Info</a>`;
+                } else {
+                    footerHtml = `
+                        <span class="availability-text ${availabilityInfo.class}">${availabilityInfo.text}</span>
+                        <button class="event-button" onclick="openModal(${allEvents.indexOf(event)})">Register</button>
+                        <a href="quarry-event-detail?id=${event.slug || event.id}" class="more-info-button">More Info</a>`;
+                }
+            } else {
+                footerHtml = `
+                    <span class="availability-text ${availabilityInfo.class}">${availabilityInfo.text}</span>
+                    <a href="quarry-event-detail?id=${event.slug || event.id}" class="more-info-button" style="flex:1;text-align:center;">More Info</a>`;
+            }
 
             return `
                 <div class="event-card" data-category="${event.category}">
@@ -2050,28 +2113,9 @@
                             <span>🕖 ${formatTime(event.time)}</span>
                         </div>
                         <p class="event-description">${event.description}</p>
-                        <div class="event-tiers">
-                            ${event.tiers.map(tier => `
-                                <div class="tier">
-                                    <div class="tier-name">${tier.name}</div>
-                                    <div class="tier-price">${tier.priceLabel}</div>
-                                </div>
-                            `).join('')}
-                            ${event.seatingOptions && event.seatingOptions.length > 0 ? `
-                                <div style="margin-top:8px;font-size:12px;color:#888;font-style:italic;">
-                                    Seating: Single Seats, 5-Top, 8-Top & 10-Top Tables
-                                </div>
-                            ` : ''}
-                        </div>
+                        ${tiersHtml}
                         <div class="event-footer">
-                            <span class="availability-text ${availabilityInfo.class}">${availabilityInfo.text}</span>
-                            ${event.status === "sold-out" ? `
-                                <button class="event-button" disabled>Sold Out</button>
-                                <a href="quarry-event-detail?id=${event.slug || event.id}" class="more-info-button">More Info</a>
-                            ` : `
-                                <button class="event-button" onclick="openModal(${allEvents.indexOf(event)})">Register</button>
-                                <a href="quarry-event-detail?id=${event.slug || event.id}" class="more-info-button">More Info</a>
-                            `}
+                            ${footerHtml}
                         </div>
                     </div>
                 </div>
