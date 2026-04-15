@@ -1981,17 +1981,33 @@
             return dateString;
         }
 
+        function formatTime(timeStr) {
+            if (!timeStr) return '';
+            const [h, m] = timeStr.split(':');
+            const hour = parseInt(h);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            const hour12 = hour % 12 || 12;
+            return hour12 + ':' + m + ' ' + ampm;
+        }
+
         /**
          * Get status badge info
          */
+        function getRemainingLabel(event) {
+            const pt = event.pricingType || 'individual';
+            if (pt === 'table') return 'tables';
+            return 'seats';
+        }
+
         function getStatusInfo(event) {
             const remaining = event.totalCapacity - event.registeredCount;
+            const label = getRemainingLabel(event);
             if (event.status === "sold-out" || remaining <= 0) {
                 return { class: "sold-out", text: "Sold Out" };
             } else if (remaining <= 5) {
-                return { class: "low", text: `Only ${remaining} spot${remaining !== 1 ? 's' : ''} left!` };
+                return { class: "low", text: `Only ${remaining} ${label} left!` };
             }
-            return { class: "available", text: `${remaining} of ${event.totalCapacity} seats remaining` };
+            return { class: "available", text: `${remaining} of ${event.totalCapacity} ${label} remaining` };
         }
 
         /**
@@ -1999,12 +2015,13 @@
          */
         function getAvailabilityText(event) {
             const remaining = event.totalCapacity - event.registeredCount;
+            const label = getRemainingLabel(event);
             if (event.status === "sold-out" || remaining <= 0) {
                 return { text: "Sold Out", class: "sold-out" };
             } else if (remaining <= 5) {
-                return { text: `Only ${remaining} spot${remaining !== 1 ? 's' : ''} left!`, class: "low" };
+                return { text: `Only ${remaining} ${label} left!`, class: "low" };
             }
-            return { text: `${remaining} of ${event.totalCapacity} seats remaining`, class: "available" };
+            return { text: `${remaining} of ${event.totalCapacity} ${label} remaining`, class: "available" };
         }
 
         /**
@@ -2030,17 +2047,17 @@
                         <h3 class="event-name">${event.name}</h3>
                         <div class="event-meta">
                             <span>📅 ${formatDate(event.date)}</span>
-                            <span>🕖 ${event.time}</span>
+                            <span>🕖 ${formatTime(event.time)}</span>
                         </div>
                         <p class="event-description">${event.description}</p>
                         <div class="event-tiers">
                             ${event.tiers.map(tier => `
                                 <div class="tier">
                                     <div class="tier-name">${tier.name}</div>
-                                    <div class="tier-price">${tier.priceLabel}/person</div>
+                                    <div class="tier-price">${tier.priceLabel}</div>
                                 </div>
                             `).join('')}
-                            ${event.seatingOptions ? `
+                            ${event.seatingOptions && event.seatingOptions.length > 0 ? `
                                 <div style="margin-top:8px;font-size:12px;color:#888;font-style:italic;">
                                     Seating: Single Seats, 5-Top, 8-Top & 10-Top Tables
                                 </div>
@@ -2122,7 +2139,7 @@
             // Populate ticket tier dropdown
             const tierSelect = document.getElementById("ticketTier");
             tierSelect.innerHTML = currentEventForModal.tiers.map(tier =>
-                `<option value="${tier.name}" data-price="${tier.pricePerPerson}">${tier.name} — ${tier.priceLabel}/person</option>`
+                `<option value="${tier.name}" data-price="${tier.pricePerPerson}">${tier.name} — ${tier.priceLabel}</option>`
             ).join("");
 
             // Show seating options if event has them, otherwise show simple quantity
@@ -2131,7 +2148,8 @@
             const seatingSelect = document.getElementById("seatingOption");
             const partySizeInput = document.getElementById("partySize");
 
-            if (currentEventForModal.seatingOptions) {
+            const hasSeatingOptions = currentEventForModal.seatingOptions && currentEventForModal.seatingOptions.length > 0;
+            if (hasSeatingOptions) {
                 // Event has specific seating options (tables, single seats)
                 seatingGroup.style.display = "block";
                 partySizeGroup.style.display = "none";
@@ -2154,7 +2172,7 @@
             form.reset();
             // Re-set the tier select after reset
             tierSelect.selectedIndex = 0;
-            if (currentEventForModal.seatingOptions) {
+            if (hasSeatingOptions) {
                 seatingSelect.selectedIndex = 0;
             } else {
                 partySizeInput.value = 1;
@@ -2173,7 +2191,7 @@
             document.getElementById("modalFooter").style.display = "flex";
 
             // Check if this event has a floor plan — show table map step first
-            const hasFloorPlan = currentEventForModal.floorPlan || currentEventForModal.seatingOptions;
+            const hasFloorPlan = currentEventForModal.floorPlan || hasSeatingOptions;
             const tableMapStep = document.getElementById("tableMapStep");
             const formStepLabel = document.getElementById("formStepLabel");
             const selectTableBtn = document.getElementById("selectTableBtn");
@@ -2308,7 +2326,7 @@
             let numPeople = 1;
             let seatingLabel = "";
 
-            if (currentEventForModal.seatingOptions) {
+            if (currentEventForModal.seatingOptions && currentEventForModal.seatingOptions.length > 0) {
                 const seatingSelect = document.getElementById("seatingOption");
                 const selectedSeating = seatingSelect.options[seatingSelect.selectedIndex];
                 numPeople = parseInt(selectedSeating.dataset.seats) || 1;
@@ -2341,7 +2359,7 @@
                     <span>$${(pricePerPerson/100).toFixed(2)}/ea</span>
                 </div>
                 <div style="display:flex;justify-content:space-between;">
-                    <span>${seatingLabel}${currentEventForModal.seatingOptions ? ' (' + numPeople + ' people)' : ''}</span>
+                    <span>${seatingLabel}${currentEventForModal.seatingOptions && currentEventForModal.seatingOptions.length > 0 ? ' (' + numPeople + ' people)' : ''}</span>
                     <span>× ${numPeople}</span>
                 </div>
             `;
