@@ -370,6 +370,22 @@
             font-size: 0.85rem;
         }
         .registrations-table th { color: #9a7b2a; font-weight: 600; }
+        .registrations-table .status-cancelled { color: #dc3545; font-weight: 600; }
+        .registrations-table .status-paid { color: #28a745; font-weight: 600; }
+        .btn-cancel-reg {
+            background: #dc3545; color: #fff; border: none; padding: 0.3rem 0.6rem;
+            border-radius: 4px; font-size: 0.75rem; cursor: pointer; white-space: nowrap;
+        }
+        .btn-cancel-reg:hover { background: #c82333; }
+        .btn-refund-reg {
+            background: #B8933A; color: #fff; border: none; padding: 0.3rem 0.6rem;
+            border-radius: 4px; font-size: 0.75rem; cursor: pointer; white-space: nowrap;
+        }
+        .btn-refund-reg:hover { background: #9a7b2a; }
+        .btn-cancel-reg:disabled, .btn-refund-reg:disabled {
+            opacity: 0.5; cursor: not-allowed;
+        }
+        .reg-actions { display: flex; gap: 0.4rem; }
         .editor-buttons { display: flex; gap: 1rem; margin-top: 2rem; }
         .btn-save {
             flex: 1; background: #9a7b2a; color: #fff; border: none;
@@ -2080,10 +2096,11 @@
                             <th>Amount</th>
                             <th>Status</th>
                             <th>Method</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="registrationsTable">
-                        <tr><td colspan="7" style="text-align: center; color: #858d9e;">No registrations yet</td></tr>
+                        <tr><td colspan="8" style="text-align: center; color: #858d9e;">No registrations yet</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -3449,21 +3466,84 @@
         function populateRegistrationsTable(registrations) {
             const tbody = document.getElementById('registrationsTable');
             if (!registrations || registrations.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #858d9e;">No registrations yet</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #858d9e;">No registrations yet</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = registrations.map(reg => `
-                <tr>
+            tbody.innerHTML = registrations.map(reg => {
+                const status = (reg.status || 'PAID').toUpperCase();
+                const isCancelled = status === 'CANCELLED' || status === 'REFUNDED';
+                const hasStripe = reg.paymentMethod === 'stripe' && reg.orderNumber;
+                const statusClass = isCancelled ? 'status-cancelled' : 'status-paid';
+
+                let actionsHtml = '';
+                if (!isCancelled) {
+                    actionsHtml = '<div class="reg-actions">';
+                    if (hasStripe) {
+                        actionsHtml += `<button class="btn-refund-reg" onclick="cancelRegistration('${reg.orderNumber}', 'refund_and_cancel')" title="Refund via Stripe & remove registration">Refund</button>`;
+                    }
+                    actionsHtml += `<button class="btn-cancel-reg" onclick="cancelRegistration('${reg.orderNumber}', 'cancel_only')" title="Remove registration without Stripe refund">Cancel</button>`;
+                    actionsHtml += '</div>';
+                } else {
+                    actionsHtml = '<span style="color:#858d9e;font-size:0.8rem">' + status + '</span>';
+                }
+
+                return `<tr${isCancelled ? ' style="opacity:0.5"' : ''}>
                     <td>${reg.name || '—'}</td>
                     <td>${reg.email || '—'}</td>
                     <td>${reg.phone || '—'}</td>
                     <td>${reg.tickets || 1}</td>
                     <td>$${parseFloat(reg.amount || reg.amountPaid || 0).toFixed(2)}</td>
-                    <td>${reg.status || 'PAID'}</td>
+                    <td class="${statusClass}">${status}</td>
                     <td>${reg.paymentMethod || '—'}</td>
-                </tr>
-            `).join('');
+                    <td>${actionsHtml}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        async function cancelRegistration(orderNumber, action) {
+            const eventId = app.currentEvent ? app.currentEvent.id : null;
+            if (!eventId) { alert('No event selected'); return; }
+
+            const actionLabel = action === 'refund_and_cancel' ? 'REFUND & CANCEL' : 'CANCEL (no refund)';
+            if (!confirm('Are you sure you want to ' + actionLabel + ' this registration?')) return;
+
+            try {
+                const resp = await fetch('/.netlify/functions/cancel-registration', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ eventId, orderNumber, action })
+                });
+                const data = await resp.json();
+
+                if (!resp.ok) {
+                    alert('Error: ' + (data.error || 'Unknown error'));
+                    return;
+                }
+
+                // Update local data
+                if (app.registrations[eventId]) {
+                    app.registrations[eventId] = app.registrations[eventId].filter(r => r.orderNumber !== orderNumber);
+                }
+                if (app.currentEvent && data.newRegisteredCount !== null) {
+                    app.currentEvent.registeredCount = data.newRegisteredCount;
+                    app.currentEvent.registered = data.newRegisteredCount;
+                }
+
+                // Refresh table
+                const eventRegs = getEventRegistrations(eventId);
+                populateRegistrationsTable(eventRegs);
+                updateEvents();
+                updateDashboardSummary();
+
+                const msg = action === 'refund_and_cancel'
+                    ? 'Registration refunded & cancelled successfully.'
+                    : 'Registration cancelled (no refund).';
+                alert(msg);
+
+            } catch (err) {
+                alert('Failed to cancel registration: ' + err.message);
+            }
         }
 
         // Image upload handlers
