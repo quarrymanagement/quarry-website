@@ -2021,9 +2021,13 @@
                 <label class="form-label">Seats Per Table</label>
                 <input type="number" class="form-input" id="tableSize" min="1">
             </div>
-            <div class="form-group">
-                <label class="form-label">Capacity</label>
+            <div class="form-group" id="capacityGroup">
+                <label class="form-label" id="capacityLabel">Capacity</label>
                 <input type="number" class="form-input" id="eventCapacity" min="1" required>
+            </div>
+            <div class="form-group hidden" id="tableCapacityGroup">
+                <label class="form-label">Table Capacity</label>
+                <input type="number" class="form-input" id="eventTableCapacity" min="1">
             </div>
             <div class="form-group">
                 <label class="form-label">Use Table Chart</label>
@@ -3349,6 +3353,7 @@
                     document.getElementById('eventDetailDescription').value = event.detailDescription || '';
                     document.getElementById('eventAdditionalInfo').value = event.additionalInfo || '';
                     document.getElementById('eventCapacity').value = event.capacity || event.totalCapacity || '';
+                    document.getElementById('eventTableCapacity').value = event.tableCapacity || '';
                     document.getElementById('eventStatus').value = event.status || 'available';
 
                     if (event.image) {
@@ -3415,6 +3420,17 @@
             document.getElementById('pricePerPersonGroup').classList.toggle('hidden', type !== 'individual' && type !== 'both');
             document.getElementById('pricePerTableGroup').classList.toggle('hidden', type !== 'table' && type !== 'both');
             document.getElementById('tableSizeGroup').classList.toggle('hidden', type !== 'table' && type !== 'both');
+            // Dual capacity for "Both" pricing
+            document.getElementById('tableCapacityGroup').classList.toggle('hidden', type !== 'both');
+            // Update capacity label based on type
+            const capLabel = document.getElementById('capacityLabel');
+            if (type === 'both') {
+                capLabel.textContent = 'Individual Seat Capacity';
+            } else if (type === 'table') {
+                capLabel.textContent = 'Table Capacity';
+            } else {
+                capLabel.textContent = 'Capacity';
+            }
         }
 
         document.querySelectorAll('input[name="pricingType"]').forEach(radio => {
@@ -3528,17 +3544,96 @@
                 eventData.tableSize = parseInt(document.getElementById('tableSize').value || 8);
             }
 
+            // --- Generate display fields for front-end ---
+
+            // Build tiers array based on pricing type
+            eventData.tiers = [];
+            if (pricingType === 'individual') {
+                const dollars = (eventData.pricePerPerson / 100);
+                eventData.tiers.push({
+                    name: eventData.name + ' Admission',
+                    description: eventData.description || '',
+                    pricePerPerson: eventData.pricePerPerson,
+                    priceLabel: '$' + dollars + '/person'
+                });
+                eventData.price = eventData.pricePerPerson;
+            } else if (pricingType === 'table') {
+                const dollars = (eventData.pricePerTable / 100);
+                const seats = eventData.tableSize || 4;
+                eventData.tiers.push({
+                    name: eventData.name + ' (Table of ' + seats + ')',
+                    description: 'Table of ' + seats,
+                    pricePerPerson: eventData.pricePerTable,
+                    priceLabel: '$' + dollars + '/table'
+                });
+                eventData.price = eventData.pricePerTable;
+            } else if (pricingType === 'both') {
+                const personDollars = (eventData.pricePerPerson / 100);
+                const tableDollars = (eventData.pricePerTable / 100);
+                const seats = eventData.tableSize || 4;
+                eventData.tiers.push({
+                    name: 'Individual Admission',
+                    description: 'Individual entry',
+                    pricePerPerson: eventData.pricePerPerson,
+                    priceLabel: '$' + personDollars + '/person'
+                });
+                eventData.tiers.push({
+                    name: 'Table of ' + seats,
+                    description: 'Table of ' + seats,
+                    pricePerPerson: eventData.pricePerTable,
+                    priceLabel: '$' + tableDollars + '/table'
+                });
+                eventData.price = eventData.pricePerPerson;
+            }
+
+            eventData.pricePerSeat = eventData.price || 0;
+            eventData.category = (eventData.price > 0) ? 'Ticketed' : 'Free';
+            eventData.tags = (eventData.price > 0) ? ['Ticketed'] : ['Free'];
+            // For "both" pricing, store table capacity separately and sum for totalCapacity
+            if (pricingType === 'both') {
+                const tableCapEl = document.getElementById('eventTableCapacity');
+                eventData.tableCapacity = parseInt(tableCapEl.value) || 0;
+                eventData.totalCapacity = eventData.capacity + eventData.tableCapacity;
+            } else {
+                eventData.totalCapacity = eventData.capacity;
+            }
+            eventData.title = eventData.name;
+            eventData.seatingOptions = null;
+
+            // Floor plan
+            if (eventData.useTableChart && eventData.floorPlanId) {
+                const fp = (app.floorPlans || []).find(f => f.id === eventData.floorPlanId);
+                eventData.floorPlan = fp || null;
+            } else {
+                eventData.floorPlan = null;
+            }
+
+            eventData.imageAlt = eventData.name;
+            eventData.imageText = eventData.name.split(' ')[0];
+            eventData.imageGradient = 'general';
+
+            // Image
             const imagePreview = document.getElementById('imagePreview');
             if (imagePreview.src && !imagePreview.classList.contains('hidden')) {
                 eventData.image = imagePreview.src;
             }
 
+            // Preserve existing registration data when editing
             if (app.currentEvent) {
+                const existing = app.events.find(e => e.id === app.currentEvent.id);
+                if (existing) {
+                    eventData.registeredCount = existing.registeredCount || 0;
+                    eventData.registered = existing.registered || 0;
+                    eventData.bookedTableIds = existing.bookedTableIds || [];
+                }
                 const index = app.events.findIndex(e => e.id === app.currentEvent.id);
                 if (index !== -1) {
                     app.events[index] = { ...app.events[index], ...eventData };
                 }
             } else {
+                eventData.registeredCount = 0;
+                eventData.registered = 0;
+                eventData.bookedTableIds = [];
                 app.events.push(eventData);
             }
 
