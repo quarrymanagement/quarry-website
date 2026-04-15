@@ -118,14 +118,37 @@ async function handleEventRegistration(session, metadata) {
   };
 
   // 1. Update events.json in GitHub (registration + seat count)
+  // NOTE: events.json is ~6MB (base64 images), so the Contents API returns empty content.
+  // We use the Git Blobs API to read large files, then Contents API to write (which accepts large uploads).
   try {
     const ghToken = process.env.GITHUB_TOKEN;
     if (ghToken) {
       const repo = 'quarrymanagement/quarry-website';
-      const shaRes = await githubRequest('GET', '/repos/' + repo + '/contents/events.json', ghToken);
-      if (shaRes.statusCode === 200 && shaRes.data.content) {
-        const eventsData = JSON.parse(Buffer.from(shaRes.data.content, 'base64').toString('utf-8'));
 
+      // Step A: Get the file's blob SHA from the Contents API (works even for large files)
+      const metaRes = await githubRequest('GET', '/repos/' + repo + '/contents/events.json', ghToken);
+      if (metaRes.statusCode === 200 && metaRes.data.sha) {
+        const fileSha = metaRes.data.sha;
+        let eventsData;
+
+        // Step B: If content is empty (file > 1MB), fetch via Git Blobs API
+        if (metaRes.data.content && metaRes.data.encoding === 'base64') {
+          eventsData = JSON.parse(Buffer.from(metaRes.data.content, 'base64').toString('utf-8'));
+        } else {
+          // Use the raw blob endpoint to download the file content
+          const blobUrl = 'https://raw.githubusercontent.com/' + repo + '/main/events.json';
+          const rawContent = await new Promise(function(resolve, reject) {
+            https.get(blobUrl, function(res) {
+              let data = '';
+              res.on('data', function(chunk) { data += chunk; });
+              res.on('end', function() { resolve(data); });
+            }).on('error', reject);
+          });
+          eventsData = JSON.parse(rawContent);
+          console.log('Fetched events.json via raw URL (file too large for Contents API)');
+        }
+
+        // Step C: Add registration and update count
         if (!eventsData.registrations) eventsData.registrations = {};
         if (!eventsData.registrations[eventId]) eventsData.registrations[eventId] = [];
         eventsData.registrations[eventId].push(newReg);
@@ -140,13 +163,20 @@ async function handleEventRegistration(session, metadata) {
           }
         }
 
+        // Step D: Write back via Contents API (accepts large base64 payloads on PUT)
         const encoded = Buffer.from(JSON.stringify(eventsData, null, 2), 'utf-8').toString('base64');
-        await githubRequest('PUT', '/repos/' + repo + '/contents/events.json', ghToken, {
+        const putRes = await githubRequest('PUT', '/repos/' + repo + '/contents/events.json', ghToken, {
           message: 'Registration: ' + name + ' for ' + (eventName || eventId) + ' (' + qty + ' ticket' + (qty > 1 ? 's' : '') + ')',
           content: encoded,
-          sha: shaRes.data.sha
+          sha: fileSha
         });
-        console.log('events.json updated for', eventId);
+        if (putRes.statusCode === 200 || putRes.statusCode === 201) {
+          console.log('events.json updated for', eventId);
+        } else {
+          console.error('GitHub PUT failed:', putRes.statusCode, JSON.stringify(putRes.data).substring(0, 200));
+        }
+      } else {
+        console.error('Could not get events.json metadata:', metaRes.statusCode);
       }
     }
   } catch (e) {
