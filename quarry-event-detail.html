@@ -409,107 +409,213 @@
 
             var html = '<h3>Register Now</h3>';
 
-            // Price selection
-            if (evt.pricingType === 'both') {
-                html += '<div class="price-display">';
-                html += '<div class="price-option selected" onclick="selectPricing(\'individual\')" id="opt-individual"><input type="radio" name="pricing" checked><div class="price-label"><strong>Individual Ticket</strong><span>Per person admission</span></div><div class="price-amount">' + formatPrice(evt.pricePerPerson) + '</div></div>';
-                html += '<div class="price-option" onclick="selectPricing(\'table\')" id="opt-table"><input type="radio" name="pricing"><div class="price-label"><strong>Full Table (' + evt.tableSize + ' guests)</strong><span>Reserved table seating</span></div><div class="price-amount">' + formatPrice(evt.pricePerTable) + '</div></div>';
-                html += '</div>';
-                selectedPricing = 'individual';
-            } else if (evt.pricingType === 'table') {
-                html += '<div class="price-display"><div class="price-option selected"><div class="price-label"><strong>Table of ' + evt.tableSize + '</strong><span>Reserved table seating</span></div><div class="price-amount">' + formatPrice(evt.pricePerTable) + '</div></div></div>';
-                selectedPricing = 'table';
-            } else {
-                html += '<div class="price-display"><div class="price-option selected"><div class="price-label"><strong>Individual Ticket</strong><span>Per person admission</span></div><div class="price-amount">' + formatPrice(evt.pricePerPerson) + '</div></div></div>';
-                selectedPricing = 'individual';
-            }
-
-            // Quantity
-            html += '<label>Quantity</label>';
-            html += '<div class="quantity-row"><button class="qty-btn" onclick="changeQty(-1)">&minus;</button><span class="qty-value" id="qtyDisplay">1</span><button class="qty-btn" onclick="changeQty(1)">+</button></div>';
-
-            // Form fields
+            // Form — matches the main events page modal exactly
             html += '<form class="reg-form" id="detailRegForm" onsubmit="return handleRegistration(event)">';
-            html += '<input type="hidden" name="form-name" value="event-registration">';
-            html += '<input type="hidden" name="eventId" value="' + evt.id + '">';
-            html += '<label>Full Name *</label><input type="text" name="fullName" required placeholder="Your full name">';
-            html += '<label>Email *</label><input type="email" name="email" required placeholder="your@email.com">';
-            html += '<label>Phone</label><input type="tel" name="phone" placeholder="(555) 555-5555">';
 
-            // Total
-            var unitPrice = selectedPricing === 'table' ? evt.pricePerTable : evt.pricePerPerson;
-            html += '<div class="reg-total"><span class="total-label">Total</span><span class="total-amount" id="totalDisplay">' + formatPrice(unitPrice) + '</span></div>';
+            html += '<label>Full Name *</label>';
+            html += '<input type="text" name="fullName" id="detailFullName" required placeholder="Your full name">';
 
-            html += '<button type="submit" class="reg-submit" id="submitBtn">Proceed to Payment</button>';
+            html += '<label>Email Address *</label>';
+            html += '<input type="email" name="email" id="detailEmail" required placeholder="your@email.com">';
+
+            html += '<label>Phone Number</label>';
+            html += '<input type="tel" name="phone" id="detailPhone" placeholder="(555) 555-5555">';
+
+            // Ticket Tier dropdown
+            html += '<label>Ticket Tier *</label>';
+            html += '<select name="ticketTier" id="detailTicketTier" required onchange="updateDetailSummary()">';
+            if (evt.tiers && evt.tiers.length > 0) {
+                for (var i = 0; i < evt.tiers.length; i++) {
+                    var t = evt.tiers[i];
+                    html += '<option value="' + t.name + '" data-price="' + t.pricePerPerson + '">' + t.name + ' — ' + t.priceLabel + '</option>';
+                }
+            }
+            html += '</select>';
+
+            // Number of Tickets
+            html += '<label>Number of Tickets *</label>';
+            html += '<input type="number" name="partySize" id="detailPartySize" min="1" max="20" value="1" required onchange="updateDetailSummary()">';
+
+            // Coupon Code
+            html += '<div style="margin-top:16px;">';
+            html += '<label>Coupon Code</label>';
+            html += '<div style="display:flex;gap:8px;">';
+            html += '<input type="text" id="detailCouponCode" placeholder="Enter coupon code" style="flex:1;text-transform:uppercase;">';
+            html += '<button type="button" id="detailApplyCouponBtn" onclick="applyDetailCoupon()" style="padding:10px 16px;background:transparent;color:#d4af37;border:1px solid #d4af37;font-size:13px;font-weight:600;letter-spacing:0.05em;cursor:pointer;white-space:nowrap;border-radius:6px;">APPLY</button>';
+            html += '</div>';
+            html += '<div id="detailCouponStatus" style="font-size:13px;margin-top:6px;display:none;"></div>';
+            html += '</div>';
+
+            // Order Summary
+            html += '<div id="detailOrderSummary" style="background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.2);border-radius:10px;padding:16px;margin-top:16px;">';
+            html += '<div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#999;margin-bottom:8px;">Order Summary</div>';
+            html += '<div id="detailSummaryDetails" style="font-size:14px;color:#ccc;line-height:1.8;"></div>';
+            html += '<div style="border-top:1px solid rgba(255,255,255,.1);margin-top:12px;padding-top:12px;display:flex;justify-content:space-between;align-items:center;">';
+            html += '<span style="font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#999;">Total</span>';
+            html += '<span id="detailSummaryTotal" style="font-size:1.5rem;font-weight:700;color:#d4af37;"></span>';
+            html += '</div></div>';
+
+            html += '<p style="font-size:12px;color:#888;margin-top:12px;font-style:italic;">One person can register and pay for their entire table.</p>';
+
+            html += '<div id="detailFormError" style="display:none;color:#e74c3c;font-size:13px;margin-top:8px;"></div>';
+
+            html += '<button type="submit" class="reg-submit" id="detailSubmitBtn">Proceed to Payment</button>';
             html += '</form>';
 
             // Spots left
-            var spotsLeft = evt.capacity - evt.registered;
-            if (spotsLeft > 0 && spotsLeft <= 10) {
-                html += '<p class="spots-left">Only ' + spotsLeft + ' spots left!</p>';
-            } else if (spotsLeft > 10) {
-                html += '<p class="spots-left plenty">' + spotsLeft + ' spots available</p>';
+            var remaining = (evt.totalCapacity || 0) - (evt.registeredCount || 0);
+            if (remaining > 0 && remaining <= 10) {
+                html += '<p class="spots-left">Only ' + remaining + ' spots left!</p>';
+            } else if (remaining > 10) {
+                html += '<p class="spots-left plenty">' + remaining + ' spots available</p>';
             }
 
             card.innerHTML = html;
+
+            // Initialize order summary
+            updateDetailSummary();
         }
 
-        // Global functions
-        window.selectPricing = function(type) {
-            selectedPricing = type;
-            var indOpt = document.getElementById('opt-individual');
-            var tblOpt = document.getElementById('opt-table');
-            if (indOpt) indOpt.classList.toggle('selected', type === 'individual');
-            if (tblOpt) tblOpt.classList.toggle('selected', type === 'table');
-            if (indOpt) indOpt.querySelector('input').checked = type === 'individual';
-            if (tblOpt) tblOpt.querySelector('input').checked = type === 'table';
-            updateTotal();
-        };
+        // ─── Coupon state for detail page ───
+        var detailCoupon = null;
 
-        window.changeQty = function(delta) {
-            quantity = Math.max(1, Math.min(20, quantity + delta));
-            document.getElementById('qtyDisplay').textContent = quantity;
-            updateTotal();
-        };
-
-        function updateTotal() {
+        // ─── Update order summary ───
+        window.updateDetailSummary = function() {
             if (!eventData) return;
-            var unitPrice = selectedPricing === 'table' ? eventData.pricePerTable : eventData.pricePerPerson;
-            var total = unitPrice * quantity;
-            var el = document.getElementById('totalDisplay');
-            if (el) el.textContent = formatPrice(total);
-        }
+            var tierSelect = document.getElementById('detailTicketTier');
+            if (!tierSelect) return;
+            var selectedOption = tierSelect.options[tierSelect.selectedIndex];
+            var pricePerPerson = parseInt(selectedOption.dataset.price) || 0;
+            var tierName = selectedOption.value;
+            var qty = parseInt(document.getElementById('detailPartySize').value) || 1;
 
+            var subtotalCents = pricePerPerson * qty;
+            var discountCents = 0;
+            var discountLabel = '';
+
+            if (detailCoupon) {
+                if (detailCoupon.percent_off) {
+                    discountCents = Math.round(subtotalCents * detailCoupon.percent_off / 100);
+                    discountLabel = detailCoupon.percent_off + '% off (' + detailCoupon.code + ')';
+                } else if (detailCoupon.amount_off) {
+                    discountCents = Math.min(detailCoupon.amount_off, subtotalCents);
+                    discountLabel = '$' + (discountCents / 100).toFixed(2) + ' off (' + detailCoupon.code + ')';
+                }
+            }
+
+            var totalCents = Math.max(0, subtotalCents - discountCents);
+            var detailsDiv = document.getElementById('detailSummaryDetails');
+            var totalDiv = document.getElementById('detailSummaryTotal');
+
+            var html = '<div style="display:flex;justify-content:space-between;"><span>' + tierName + '</span><span>$' + (pricePerPerson / 100).toFixed(2) + '/ea</span></div>';
+            html += '<div style="display:flex;justify-content:space-between;"><span>' + qty + ' ticket' + (qty > 1 ? 's' : '') + '</span><span>&times; ' + qty + '</span></div>';
+
+            if (discountCents > 0) {
+                html += '<div style="display:flex;justify-content:space-between;color:#3cb464;margin-top:4px;"><span>' + discountLabel + '</span><span>-$' + (discountCents / 100).toFixed(2) + '</span></div>';
+            }
+
+            detailsDiv.innerHTML = html;
+            totalDiv.textContent = '$' + (totalCents / 100).toFixed(2);
+        };
+
+        // ─── Apply coupon ───
+        window.applyDetailCoupon = function() {
+            var input = document.getElementById('detailCouponCode');
+            var statusDiv = document.getElementById('detailCouponStatus');
+            var btn = document.getElementById('detailApplyCouponBtn');
+            var code = input.value.trim().toUpperCase();
+
+            if (!code) {
+                statusDiv.style.display = 'block';
+                statusDiv.style.color = '#e74c3c';
+                statusDiv.textContent = 'Please enter a coupon code.';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Checking...';
+            statusDiv.style.display = 'none';
+
+            fetch('/.netlify/functions/validate-coupon', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: code })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.valid) {
+                    detailCoupon = { code: code, percent_off: data.percent_off || null, amount_off: data.amount_off || null };
+                    statusDiv.style.display = 'block';
+                    statusDiv.style.color = '#3cb464';
+                    var desc = data.percent_off ? data.percent_off + '% off' : '$' + (data.amount_off / 100).toFixed(2) + ' off';
+                    statusDiv.innerHTML = '&#10003; Coupon applied — <b>' + desc + '</b> &nbsp;<a href="#" onclick="removeDetailCoupon();return false;" style="color:#e74c3c;font-size:12px;">Remove</a>';
+                    input.disabled = true;
+                    btn.style.display = 'none';
+                    updateDetailSummary();
+                } else {
+                    detailCoupon = null;
+                    statusDiv.style.display = 'block';
+                    statusDiv.style.color = '#e74c3c';
+                    statusDiv.textContent = data.error || 'Invalid coupon code.';
+                }
+                btn.disabled = false;
+                btn.textContent = 'APPLY';
+            })
+            .catch(function() {
+                statusDiv.style.display = 'block';
+                statusDiv.style.color = '#e74c3c';
+                statusDiv.textContent = 'Error validating coupon. Try again.';
+                btn.disabled = false;
+                btn.textContent = 'APPLY';
+            });
+        };
+
+        window.removeDetailCoupon = function() {
+            detailCoupon = null;
+            document.getElementById('detailCouponCode').disabled = false;
+            document.getElementById('detailCouponCode').value = '';
+            document.getElementById('detailApplyCouponBtn').style.display = 'inline-block';
+            document.getElementById('detailCouponStatus').style.display = 'none';
+            updateDetailSummary();
+        };
+
+        // ─── Handle registration form submission ───
         window.handleRegistration = function(e) {
             e.preventDefault();
             var form = document.getElementById('detailRegForm');
-            var btn = document.getElementById('submitBtn');
+            var btn = document.getElementById('detailSubmitBtn');
+            var errorDiv = document.getElementById('detailFormError');
             btn.disabled = true;
             btn.textContent = 'Processing...';
+            errorDiv.style.display = 'none';
 
-            var unitPrice = selectedPricing === 'table' ? eventData.pricePerTable : eventData.pricePerPerson;
-            var totalCents = unitPrice * quantity;
+            var tierSelect = document.getElementById('detailTicketTier');
+            var ticketTier = tierSelect.value;
+            var partySize = parseInt(document.getElementById('detailPartySize').value) || 1;
 
-            // Build the tier name for the selected pricing
-            var ticketTier = '';
-            if (eventData.tiers && eventData.tiers.length > 0) {
-                if (selectedPricing === 'table') {
-                    var tableTier = eventData.tiers.find(function(t) { return t.pricePerPerson === eventData.pricePerTable; }) || eventData.tiers[eventData.tiers.length - 1];
-                    ticketTier = tableTier.name;
-                } else {
-                    var indTier = eventData.tiers.find(function(t) { return t.pricePerPerson === eventData.pricePerPerson; }) || eventData.tiers[0];
-                    ticketTier = indTier.name;
+            // Determine seatType from the selected tier
+            var seatType = 'individual';
+            if (eventData.pricingType === 'table') {
+                seatType = 'table';
+            } else if (eventData.pricingType === 'both') {
+                // Check if the selected tier is the table tier
+                var selectedPrice = parseInt(tierSelect.options[tierSelect.selectedIndex].dataset.price) || 0;
+                if (selectedPrice === eventData.pricePerTable) {
+                    seatType = 'table';
                 }
             }
 
             var payload = {
                 eventId: eventData.id,
-                name: form.fullName.value,
-                email: form.email.value,
-                phone: form.phone.value || '',
-                seatType: selectedPricing || 'individual',
-                partySize: quantity,
-                ticketTier: ticketTier
+                name: document.getElementById('detailFullName').value,
+                email: document.getElementById('detailEmail').value,
+                phone: document.getElementById('detailPhone').value || '',
+                seatType: seatType,
+                partySize: partySize,
+                ticketTier: ticketTier,
+                couponCode: detailCoupon ? detailCoupon.code : '',
+                successUrl: window.location.origin + '/quarry-events',
+                cancelUrl: window.location.href
             };
 
             fetch('/.netlify/functions/event-register', {
@@ -517,24 +623,24 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             })
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                if (data.checkoutUrl) {
-                    // Redirect to Stripe checkout
-                    window.location.href = data.checkoutUrl;
-                } else if (data.url) {
-                    window.location.href = data.url;
-                } else if (data.success) {
-                    // Free event or direct confirmation
-                    document.getElementById('successMessage').textContent = 'You\'re registered for ' + eventData.name + '! A confirmation has been sent to ' + form.email.value;
+            .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+            .then(function(result) {
+                if (!result.ok) {
+                    throw new Error(result.data.error || 'Registration failed');
+                }
+                if (result.data.checkoutUrl) {
+                    window.location.href = result.data.checkoutUrl;
+                } else if (result.data.free) {
+                    document.getElementById('successMessage').textContent = 'You\'re registered for ' + eventData.name + '! A confirmation has been sent to ' + document.getElementById('detailEmail').value;
                     document.getElementById('successModal').classList.add('active');
                     btn.textContent = 'Registered!';
                 } else {
-                    throw new Error(data.error || 'Registration failed');
+                    throw new Error('No checkout URL provided');
                 }
             })
             .catch(function(err) {
-                alert('Registration error: ' + err.message + '. Please try again or contact us at (636) 398-5800.');
+                errorDiv.style.display = 'block';
+                errorDiv.textContent = err.message || 'An error occurred. Please try again.';
                 btn.disabled = false;
                 btn.textContent = 'Proceed to Payment';
             });
