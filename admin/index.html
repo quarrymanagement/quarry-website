@@ -2009,6 +2009,28 @@
                 </div>
             </div>
             <div class="form-group">
+                <label class="form-label">Event Type</label>
+                <div class="pricing-type-group">
+                    <div class="radio-wrapper">
+                        <input type="radio" name="eventType" value="ticketed" id="eventTypeTicketed" checked>
+                        <label for="eventTypeTicketed">Ticketed (Registration Required)</label>
+                    </div>
+                    <div class="radio-wrapper">
+                        <input type="radio" name="eventType" value="cover" id="eventTypeCover">
+                        <label for="eventTypeCover">Cover Charge (Pay at Door)</label>
+                    </div>
+                    <div class="radio-wrapper">
+                        <input type="radio" name="eventType" value="free" id="eventTypeFree">
+                        <label for="eventTypeFree">Free / Informational</label>
+                    </div>
+                </div>
+            </div>
+            <div id="coverChargeGroup" class="form-group hidden">
+                <label class="form-label">Cover Charge Amount ($)</label>
+                <input type="number" class="form-input" id="coverCharge" min="0" step="0.01" placeholder="e.g. 10">
+            </div>
+            <div id="ticketedFieldsWrapper">
+            <div class="form-group">
                 <label class="form-label">Pricing Type</label>
                 <div class="pricing-type-group">
                     <div class="radio-wrapper">
@@ -2064,6 +2086,7 @@
                     <option value="">Choose a floor plan...</option>
                 </select>
             </div>
+            </div><!-- end ticketedFieldsWrapper -->
             <div class="form-group">
                 <label class="form-label">Status</label>
                 <select class="form-select" id="eventStatus">
@@ -3379,6 +3402,15 @@
                         img.classList.remove('hidden');
                     }
 
+                    // Event type (ticketed / cover / free)
+                    const eventType = event.eventType || 'ticketed';
+                    const eventTypeRadio = document.querySelector(`input[name="eventType"][value="${eventType}"]`);
+                    if (eventTypeRadio) eventTypeRadio.checked = true;
+                    if (event.coverCharge) {
+                        document.getElementById('coverCharge').value = event.coverCharge / 100;
+                    }
+                    updateEventTypeFields();
+
                     const pricingType = event.pricingType || 'individual';
                     const radioEl = document.querySelector(`input[name="pricingType"][value="${pricingType}"]`);
                     if (radioEl) radioEl.checked = true;
@@ -3424,6 +3456,10 @@
                 registrationsSection.classList.add('hidden');
                 document.getElementById('eventHighlights').value = '';
                 updateHighlightsTags();
+                // Reset event type
+                document.querySelector('input[name="eventType"][value="ticketed"]').checked = true;
+                document.getElementById('coverCharge').value = '';
+                updateEventTypeFields();
                 // Reset table chart toggle
                 document.querySelector('input[name="useTableChart"][value="no"]').checked = true;
                 document.getElementById('tableChartSelectGroup').classList.add('hidden');
@@ -3452,6 +3488,33 @@
 
         document.querySelectorAll('input[name="pricingType"]').forEach(radio => {
             radio.addEventListener('change', updatePricingFields);
+        });
+
+        // Event type toggle (ticketed / cover / free)
+        function updateEventTypeFields() {
+            const eventType = document.querySelector('input[name="eventType"]:checked').value;
+            const ticketedWrapper = document.getElementById('ticketedFieldsWrapper');
+            const coverGroup = document.getElementById('coverChargeGroup');
+            const capacityGroup = document.getElementById('capacityGroup');
+
+            if (eventType === 'ticketed') {
+                ticketedWrapper.classList.remove('hidden');
+                coverGroup.classList.add('hidden');
+                capacityGroup.querySelector('input').required = true;
+            } else if (eventType === 'cover') {
+                ticketedWrapper.classList.add('hidden');
+                coverGroup.classList.remove('hidden');
+                capacityGroup.querySelector('input').required = false;
+            } else {
+                // free / informational
+                ticketedWrapper.classList.add('hidden');
+                coverGroup.classList.add('hidden');
+                capacityGroup.querySelector('input').required = false;
+            }
+        }
+
+        document.querySelectorAll('input[name="eventType"]').forEach(radio => {
+            radio.addEventListener('change', updateEventTypeFields);
         });
 
         function updateHighlightsTags() {
@@ -3595,6 +3658,8 @@
         });
 
         function saveEvent() {
+            const eventType = document.querySelector('input[name="eventType"]:checked').value;
+
             const eventData = {
                 id: app.currentEvent?.id || 'event_' + Date.now(),
                 name: document.getElementById('eventName').value,
@@ -3604,78 +3669,113 @@
                 description: document.getElementById('eventDescription').value,
                 detailDescription: document.getElementById('eventDetailDescription').value,
                 additionalInfo: document.getElementById('eventAdditionalInfo').value,
-                capacity: parseInt(document.getElementById('eventCapacity').value),
                 status: document.getElementById('eventStatus').value,
-                pricingType: document.querySelector('input[name="pricingType"]:checked').value,
+                eventType: eventType,
                 highlights: document.getElementById('eventHighlights').value.split(',').map(h => h.trim()).filter(h => h),
                 slug: app.currentEvent?.slug || document.getElementById('eventName').value.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-                useTableChart: document.querySelector('input[name="useTableChart"]:checked').value === 'yes',
-                floorPlanId: document.querySelector('input[name="useTableChart"]:checked').value === 'yes' ? document.getElementById('eventFloorPlan').value : '',
             };
 
-            const pricingType = eventData.pricingType;
-            if (pricingType === 'individual' || pricingType === 'both') {
-                const price = parseFloat(document.getElementById('pricePerPerson').value || 0);
-                eventData.pricePerPerson = Math.round(price * 100);
-            }
-            if (pricingType === 'table' || pricingType === 'both') {
-                const price = parseFloat(document.getElementById('pricePerTable').value || 0);
-                eventData.pricePerTable = Math.round(price * 100);
-                eventData.tableSize = parseInt(document.getElementById('tableSize').value || 8);
-            }
-
-            // --- Generate display fields for front-end ---
-
-            // Build tiers array based on pricing type
-            eventData.tiers = [];
-            if (pricingType === 'individual') {
-                const dollars = (eventData.pricePerPerson / 100);
-                eventData.tiers.push({
-                    name: eventData.name + ' Admission',
-                    description: eventData.description || '',
-                    pricePerPerson: eventData.pricePerPerson,
-                    priceLabel: '$' + dollars + '/person'
-                });
-                eventData.price = eventData.pricePerPerson;
-            } else if (pricingType === 'table') {
-                const dollars = (eventData.pricePerTable / 100);
-                const seats = eventData.tableSize || 4;
-                eventData.tiers.push({
-                    name: eventData.name + ' (Table of ' + seats + ')',
-                    description: 'Table of ' + seats,
-                    pricePerPerson: eventData.pricePerTable,
-                    priceLabel: '$' + dollars + '/table'
-                });
-                eventData.price = eventData.pricePerTable;
-            } else if (pricingType === 'both') {
-                const personDollars = (eventData.pricePerPerson / 100);
-                const tableDollars = (eventData.pricePerTable / 100);
-                const seats = eventData.tableSize || 4;
-                eventData.tiers.push({
-                    name: 'Individual Admission',
-                    description: 'Individual entry',
-                    pricePerPerson: eventData.pricePerPerson,
-                    priceLabel: '$' + personDollars + '/person'
-                });
-                eventData.tiers.push({
-                    name: 'Table of ' + seats,
-                    description: 'Table of ' + seats,
-                    pricePerPerson: eventData.pricePerTable,
-                    priceLabel: '$' + tableDollars + '/table'
-                });
-                eventData.price = eventData.pricePerPerson;
+            // ─── FREE / INFORMATIONAL EVENTS ───
+            if (eventType === 'free') {
+                eventData.pricingType = 'none';
+                eventData.price = 0;
+                eventData.pricePerSeat = 0;
+                eventData.tiers = [];
+                eventData.category = 'Free';
+                eventData.tags = ['Free'];
+                eventData.capacity = 0;
+                eventData.totalCapacity = 0;
+                eventData.coverCharge = 0;
+                eventData.useTableChart = false;
+                eventData.floorPlanId = '';
             }
 
-            eventData.pricePerSeat = eventData.price || 0;
-            eventData.category = (eventData.price > 0) ? 'Ticketed' : 'Free';
-            eventData.tags = (eventData.price > 0) ? ['Ticketed'] : ['Free'];
-            // For "both" pricing, store table capacity separately and sum for totalCapacity
-            if (pricingType === 'both') {
-                const tableCapEl = document.getElementById('eventTableCapacity');
-                eventData.tableCapacity = parseInt(tableCapEl.value) || 0;
-                eventData.totalCapacity = eventData.capacity + eventData.tableCapacity;
-            } else {
-                eventData.totalCapacity = eventData.capacity;
+            // ─── COVER CHARGE EVENTS ───
+            else if (eventType === 'cover') {
+                const coverAmount = parseFloat(document.getElementById('coverCharge').value || 0);
+                eventData.coverCharge = Math.round(coverAmount * 100);
+                eventData.pricingType = 'none';
+                eventData.price = eventData.coverCharge;
+                eventData.pricePerSeat = 0;
+                eventData.tiers = [];
+                eventData.category = 'Cover';
+                eventData.tags = ['Cover Charge'];
+                eventData.capacity = 0;
+                eventData.totalCapacity = 0;
+                eventData.useTableChart = false;
+                eventData.floorPlanId = '';
+            }
+
+            // ─── TICKETED EVENTS ───
+            else {
+                eventData.capacity = parseInt(document.getElementById('eventCapacity').value) || 0;
+                eventData.pricingType = document.querySelector('input[name="pricingType"]:checked').value;
+                eventData.useTableChart = document.querySelector('input[name="useTableChart"]:checked').value === 'yes';
+                eventData.floorPlanId = eventData.useTableChart ? document.getElementById('eventFloorPlan').value : '';
+                eventData.coverCharge = 0;
+
+                const pricingType = eventData.pricingType;
+                if (pricingType === 'individual' || pricingType === 'both') {
+                    const price = parseFloat(document.getElementById('pricePerPerson').value || 0);
+                    eventData.pricePerPerson = Math.round(price * 100);
+                }
+                if (pricingType === 'table' || pricingType === 'both') {
+                    const price = parseFloat(document.getElementById('pricePerTable').value || 0);
+                    eventData.pricePerTable = Math.round(price * 100);
+                    eventData.tableSize = parseInt(document.getElementById('tableSize').value || 8);
+                }
+
+                // Build tiers array based on pricing type
+                eventData.tiers = [];
+                if (pricingType === 'individual') {
+                    const dollars = (eventData.pricePerPerson / 100);
+                    eventData.tiers.push({
+                        name: eventData.name + ' Admission',
+                        description: eventData.description || '',
+                        pricePerPerson: eventData.pricePerPerson,
+                        priceLabel: '$' + dollars + '/person'
+                    });
+                    eventData.price = eventData.pricePerPerson;
+                } else if (pricingType === 'table') {
+                    const dollars = (eventData.pricePerTable / 100);
+                    const seats = eventData.tableSize || 4;
+                    eventData.tiers.push({
+                        name: eventData.name + ' (Table of ' + seats + ')',
+                        description: 'Table of ' + seats,
+                        pricePerPerson: eventData.pricePerTable,
+                        priceLabel: '$' + dollars + '/table'
+                    });
+                    eventData.price = eventData.pricePerTable;
+                } else if (pricingType === 'both') {
+                    const personDollars = (eventData.pricePerPerson / 100);
+                    const tableDollars = (eventData.pricePerTable / 100);
+                    const seats = eventData.tableSize || 4;
+                    eventData.tiers.push({
+                        name: 'Individual Admission',
+                        description: 'Individual entry',
+                        pricePerPerson: eventData.pricePerPerson,
+                        priceLabel: '$' + personDollars + '/person'
+                    });
+                    eventData.tiers.push({
+                        name: 'Table of ' + seats,
+                        description: 'Table of ' + seats,
+                        pricePerPerson: eventData.pricePerTable,
+                        priceLabel: '$' + tableDollars + '/table'
+                    });
+                    eventData.price = eventData.pricePerPerson;
+                }
+
+                eventData.pricePerSeat = eventData.price || 0;
+                eventData.category = (eventData.price > 0) ? 'Ticketed' : 'Free';
+                eventData.tags = (eventData.price > 0) ? ['Ticketed'] : ['Free'];
+
+                if (pricingType === 'both') {
+                    const tableCapEl = document.getElementById('eventTableCapacity');
+                    eventData.tableCapacity = parseInt(tableCapEl.value) || 0;
+                    eventData.totalCapacity = eventData.capacity + eventData.tableCapacity;
+                } else {
+                    eventData.totalCapacity = eventData.capacity;
+                }
             }
             eventData.title = eventData.name;
             eventData.seatingOptions = null;
