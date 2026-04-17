@@ -389,11 +389,6 @@ body{font-family:'Montserrat',sans-serif;background:var(--cream);color:var(--bro
 .wc{display:flex;align-items:flex-start;gap:0.75rem;background:var(--brown);padding:1rem 1.25rem;}
 .wc input{margin-top:3px;width:18px;height:18px;cursor:pointer;accent-color:var(--gold);}
 .wc label{font-size:0.72rem;color:rgba(255,255,255,0.9);line-height:1.6;cursor:pointer;}
-.cr{display:flex;gap:0.5rem;}
-.cr input{flex:1;padding:0.65rem 0.75rem;border:2px solid #e0d9d0;font-family:'Montserrat',sans-serif;font-size:0.85rem;}
-.cr input:focus{outline:none;border-color:var(--gold);}
-.cr button{background:var(--gold);color:var(--black);border:none;padding:0 1.25rem;font-family:'Montserrat',sans-serif;font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;}
-#cMsg{font-size:0.72rem;margin-top:0.4rem;min-height:1.1em;}
 #submitBtn{width:100%;padding:1.1rem;background:var(--brown);color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:0.75rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;margin-top:1rem;transition:background 0.2s;}
 #submitBtn:hover:not(:disabled){background:var(--gold);color:var(--black);}
 #submitBtn:disabled{opacity:0.6;cursor:not-allowed;}
@@ -573,15 +568,7 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.65re
 
     <div class="sec">
       <div class="step"><div class="sn">6</div><h2>Payment</h2></div>
-      <p style="font-size:0.75rem;color:#888;font-style:italic;margin-bottom:1rem;">Secure payment processed by Stripe. Your card information is never stored on our servers.</p>
-      <div class="fl">
-        <label>Promo / Coupon Code</label>
-        <div class="cr">
-          <input type="text" id="couponCode" placeholder="Enter code" autocomplete="off"/>
-          <button type="button" onclick="applyCoupon()">Apply</button>
-        </div>
-        <div id="cMsg"></div>
-      </div>
+      <p style="font-size:0.75rem;color:#888;font-style:italic;margin-bottom:1rem;">Secure payment processed by Stripe. Your card information is never stored on our servers. Have a promo code? You can enter it on the Stripe payment page.</p>
       <button type="button" id="submitBtn" onclick="submitBooking()">Complete Reservation &rarr;</button>
       <p style="font-size:0.62rem;color:#aaa;text-align:center;margin-top:0.5rem;">256-bit SSL encrypted &middot; Powered by Stripe</p>
     </div>
@@ -608,8 +595,7 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.65re
 </footer>
 
 <script>
-var S={bay:null,date:null,time:null,extraPrice:0,coupon:null};
-var COUPONS={'QUARRY10':{label:'10% off',pct:10},'QUARRY20':{label:'20% off',pct:20},'GOLF50':{label:'50% off',pct:50},'TESTCODE':{label:'$5 off',flat:5},'TEST1':{label:'$59 off',flat:59},'ADMIN100':{label:'100% off',pct:100}};
+var S={bay:null,date:null,time:null,extraPrice:0};
 var HOURS=['11:00 AM','12:00 PM','1:00 PM','2:00 PM','3:00 PM','4:00 PM','5:00 PM','6:00 PM','7:00 PM','8:00 PM','9:00 PM'];
 var booked=[];
 
@@ -706,24 +692,9 @@ function selectBalls(count,price){
   updateTotal();
 }
 
-function applyCoupon(){
-  var code=(document.getElementById('couponCode').value||'').trim().toUpperCase();
-  var el=document.getElementById('cMsg');
-  if(!code)return;
-  var c=COUPONS[code];
-  if(!c){S.coupon=null;el.textContent='✗ Invalid coupon code';el.style.color='var(--err)';}
-  else{S.coupon={code:code,pct:c.pct,flat:c.flat};el.textContent='✓ Coupon applied: '+c.label;el.style.color='var(--ok)';}
-  updateTotal();
-}
-
 function updateTotal(){
   var base=60+S.extraPrice;
-  var disc=0;
-  if(S.coupon){if(S.coupon.pct)disc=Math.round(base*S.coupon.pct/100);else if(S.coupon.flat)disc=Math.min(base,S.coupon.flat);}
-  var total=Math.max(0,base-disc);
-  var el=document.getElementById('sumTotal');
-  if(disc>0)el.innerHTML='<span style="text-decoration:line-through;font-size:0.9rem;opacity:0.5;margin-right:0.5rem;">$'+base+'.00</span>$'+total+'.00';
-  else el.textContent='$'+total+'.00';
+  document.getElementById('sumTotal').textContent='$'+base+'.00';
 }
 
 function showSuccess(){
@@ -755,7 +726,6 @@ async function submitBooking(){
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         amount:6000+(S.extraPrice*100),
-        coupon:S.coupon?S.coupon.code:null,
         metadata:{customerName:first+' '+last,customerEmail:email,customerPhone:phone,bay:bay,date:date,time:time,duration:'50 Minutes',players:players}
       })
     });
