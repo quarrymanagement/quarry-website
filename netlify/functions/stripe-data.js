@@ -83,7 +83,16 @@ const listSubscriptions = async (event) => {
 const createInvoice = async (event) => {
   try {
     const body = JSON.parse(event.body);
-    const { customer_email, customer_name, description, amount } = body;
+    const {
+      customer_email,
+      customer_name,
+      description,
+      amount,
+      service_charge_enabled,
+      service_charge_percent,
+      cc_fee_enabled,
+      cc_fee_percent,
+    } = body;
 
     if (!customer_email || !customer_name || !description || amount === undefined) {
       return response(400, {
@@ -115,14 +124,47 @@ const createInvoice = async (event) => {
       auto_advance: true,
     });
 
-    // Add line item
+    // Add the base line item
+    const baseAmount = parseInt(amount);
     await stripe.invoiceItems.create({
       customer: customer.id,
       invoice: invoice.id,
-      amount: parseInt(amount),
+      amount: baseAmount,
       description,
       currency: 'usd',
     });
+
+    // Add service charge as a separate line item
+    let serviceChargeAmount = 0;
+    if (service_charge_enabled && service_charge_percent > 0) {
+      const svcPct = parseFloat(service_charge_percent);
+      serviceChargeAmount = Math.round(baseAmount * (svcPct / 100));
+      if (serviceChargeAmount > 0) {
+        await stripe.invoiceItems.create({
+          customer: customer.id,
+          invoice: invoice.id,
+          amount: serviceChargeAmount,
+          currency: 'usd',
+          description: `Service Charge (${svcPct}%)`,
+        });
+      }
+    }
+
+    // Add credit card processing fee, computed on subtotal + service charge
+    if (cc_fee_enabled && cc_fee_percent > 0) {
+      const ccPct = parseFloat(cc_fee_percent);
+      const base = baseAmount + serviceChargeAmount;
+      const ccFeeAmount = Math.round(base * (ccPct / 100));
+      if (ccFeeAmount > 0) {
+        await stripe.invoiceItems.create({
+          customer: customer.id,
+          invoice: invoice.id,
+          amount: ccFeeAmount,
+          currency: 'usd',
+          description: `Credit Card Processing Fee (${ccPct}%)`,
+        });
+      }
+    }
 
     // Finalize the invoice
     const finalizedInvoice = await stripe.invoices.finalizeInvoice(invoice.id);
