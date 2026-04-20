@@ -47,15 +47,13 @@ const githubRequest = (method, path, token, data = null) => {
   });
 };
 
-// Fetch large file content via raw.githubusercontent.com
-function fetchRawFile(repo, filePath) {
-  return new Promise((resolve, reject) => {
-    https.get('https://raw.githubusercontent.com/' + repo + '/main/' + filePath, (res) => {
-      let data = '';
-      res.on('data', (chunk) => { data += chunk; });
-      res.on('end', () => resolve(data));
-    }).on('error', reject);
-  });
+// Fetch file content via the Git Blobs API (always returns fresh content, never cached)
+async function fetchBlobContent(repo, blobSha, token) {
+  const res = await githubRequest('GET', '/repos/' + repo + '/git/blobs/' + blobSha, token);
+  if (res.statusCode === 200 && res.data.content) {
+    return Buffer.from(res.data.content, 'base64').toString('utf-8');
+  }
+  throw new Error('Could not fetch blob: ' + res.statusCode);
 }
 
 exports.handler = async (event) => {
@@ -73,13 +71,28 @@ exports.handler = async (event) => {
   try {
     const incomingData = JSON.parse(event.body);
 
-    // Fetch current events.json from GitHub (handles large files via raw URL)
+    // Get file metadata — this gives us the SHA (always fresh from GitHub API)
+    const metaRes = await githubRequest('GET', `/repos/${repo}/contents/${filePath}`, token);
+    let fileSha = '';
+    let blobSha = '';
+    if (metaRes.statusCode === 200 && metaRes.data.sha) {
+      fileSha = metaRes.data.sha;
+      blobSha = metaRes.data.sha;
+    }
+
+    // Fetch current file content via Blobs API (no caching, always up-to-date)
     let currentData = null;
-    try {
-      const rawContent = await fetchRawFile(repo, filePath);
-      currentData = JSON.parse(rawContent);
-    } catch (e) {
-      console.log('Could not fetch current file, will create fresh:', e.message);
+    if (blobSha) {
+      try {
+        const rawContent = await fetchBlobContent(repo, blobSha, token);
+        currentData = JSON.parse(rawContent);
+      } catch (e) {
+        console.log('Could not fetch blob, trying content field:', e.message);
+        // Fallback: if blob was small enough, content might be in metaRes
+        if (metaRes.data.content && metaRes.data.encoding === 'base64') {
+          currentData = JSON.parse(Buffer.from(metaRes.data.content, 'base64').toString('utf-8'));
+        }
+      }
     }
 
     // Build image map from current file (so we don't lose images stripped by admin)
@@ -92,36 +105,41 @@ exports.handler = async (event) => {
       });
     }
 
+    console.log('Image map built with', Object.keys(currentImageMap).length, 'images');
+
     // Re-attach images to incoming events if they were stripped
     if (incomingData.events) {
       incomingData.events.forEach(evt => {
         if (!evt.image && evt.id && currentImageMap[evt.id]) {
           evt.image = currentImageMap[evt.id];
+          console.log('Re-attached image for event:', evt.id);
         }
       });
     }
 
-    // Preserve registrations from current file if not included in incoming
-    if (!incomingData.registrations && currentData && currentData.registrations) {
-      incomingData.registrations = currentData.registrations;
+    // Preserve registrations from current file if not included or empty in incoming
+    if (currentData && currentData.registrations) {
+      if (!incomingData.registrations || Object.keys(incomingData.registrations).length === 0) {
+        incomingData.registrations = currentData.registrations;
+      } else {
+        // Merge: keep any registration arrays from current that aren't in incoming
+        Object.keys(currentData.registrations).forEach(key => {
+          if (!incomingData.registrations[key]) {
+            incomingData.registrations[key] = currentData.registrations[key];
+          }
+        });
+      }
     }
 
     const content = JSON.stringify(incomingData, null, 2);
     const encoded = Buffer.from(content, 'utf-8').toString('base64');
-
-    // Get current file SHA
-    const shaRes = await githubRequest('GET', `/repos/${repo}/contents/${filePath}`, token);
-    let sha = '';
-    if (shaRes.statusCode === 200 && shaRes.data.sha) {
-      sha = shaRes.data.sha;
-    }
 
     // Push update
     const putData = {
       message: 'Update events.json from admin panel',
       content: encoded,
     };
-    if (sha) putData.sha = sha;
+    if (fileSha) putData.sha = fileSha;
 
     const putRes = await githubRequest('PUT', `/repos/${repo}/contents/${filePath}`, token, putData);
 
