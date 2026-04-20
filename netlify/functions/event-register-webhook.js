@@ -12,7 +12,7 @@ const ses = new AWS.SES({
 async function sendEmail(to, subject, htmlBody) {
   const params = {
     Source: 'The Quarry STL <management@thequarrystl.com>',
-    Destination: { ToAddresses: [to] },
+    Destination: { ToAddresses: Array.isArray(to) ? to : [to] },
     Message: {
       Subject: { Data: subject, Charset: 'UTF-8' },
       Body: { Html: { Data: htmlBody, Charset: 'UTF-8' } },
@@ -25,9 +25,7 @@ async function sendEmail(to, subject, htmlBody) {
 function githubRequest(method, path, token, data) {
   return new Promise((resolve, reject) => {
     const options = {
-      hostname: 'api.github.com',
-      path,
-      method,
+      hostname: 'api.github.com', path, method,
       headers: {
         'Authorization': 'token ' + token,
         'User-Agent': 'Quarry-Webhook',
@@ -47,6 +45,14 @@ function githubRequest(method, path, token, data) {
     if (data) req.write(JSON.stringify(data));
     req.end();
   });
+}
+
+async function fetchBlobContent(repo, blobSha, token) {
+  const res = await githubRequest('GET', '/repos/' + repo + '/git/blobs/' + blobSha, token);
+  if (res.statusCode === 200 && res.data.content) {
+    return Buffer.from(res.data.content, 'base64').toString('utf-8');
+  }
+  throw new Error('Could not fetch blob: ' + res.statusCode);
 }
 
 // ─── Shared email wrapper (header + footer) ───
@@ -80,64 +86,59 @@ function contactLine() {
     '<a href="mailto:management@thequarrystl.com" style="color:#B8933A">management@thequarrystl.com</a></p>';
 }
 
+
 // ═══════════════════════════════════════════════════
 // DETECT PURCHASE TYPE from Stripe metadata
 // ═══════════════════════════════════════════════════
 function detectPurchaseType(metadata) {
+  if (metadata.type === 'vendor_approval') return 'vendor_approval';
   if (metadata.eventId) return 'event';
   if (metadata.bay) return 'golf';
   return 'generic';
 }
 
+
 // ═══════════════════════════════════════════════════
 // EVENT REGISTRATION HANDLER
 // ═══════════════════════════════════════════════════
 async function handleEventRegistration(session, metadata) {
-  const { eventId, eventName, customerName, customerEmail, customerPhone, partySize, seatType, tableId, ticketTier, couponCode, businessName, businessType } = metadata;
-  const name = customerName || '';
-  const email = customerEmail || session.customer_email || '';
-  const phone = customerPhone || '';
-  const qty = parseInt(partySize) || 1;
-  const amountCents = session.amount_total || 0;
+  const { eventId, eventName, customerName, customerEmail, customerPhone,
+          partySize, seatType, tableId, ticketTier, couponCode,
+          businessName, businessType } = metadata;
+
+  const name   = customerName || '';
+  const email  = customerEmail || session.customer_email || '';
+  const phone  = customerPhone || '';
+  const qty    = parseInt(partySize) || 1;
+  const amountCents   = session.amount_total || 0;
   const amountDollars = (amountCents / 100).toFixed(2);
   const amountDisplay = '$' + amountDollars;
 
   const newReg = {
-    orderNumber: session.id,
-    name, email, phone,
-    tickets: qty,
-    amount: amountDollars,
-    status: 'PAID',
+    orderNumber: session.id, name, email, phone,
+    tickets: qty, amount: amountDollars, status: 'PAID',
     paymentMethod: 'stripe',
     transactionId: session.payment_intent || session.id,
     created: new Date().toISOString(),
-    seatType: seatType || '',
-    tableId: tableId || '',
-    ticketTier: ticketTier || '',
-    couponCode: couponCode || '',
-    businessName: businessName || '',
-    businessType: businessType || ''
+    seatType: seatType || '', tableId: tableId || '',
+    ticketTier: ticketTier || '', couponCode: couponCode || '',
+    businessName: businessName || '', businessType: businessType || ''
   };
 
-  // 1. Update events.json in GitHub (registration + seat count)
-  // NOTE: events.json is ~6MB (base64 images), so the Contents API returns empty content.
-  // We use the Git Blobs API to read large files, then Contents API to write (which accepts large uploads).
+  // 1. Update events.json in GitHub
   try {
     const ghToken = process.env.GITHUB_TOKEN;
     if (ghToken) {
       const repo = 'quarrymanagement/quarry-website';
-
-      // Step A: Get the file's blob SHA from the Contents API (works even for large files)
       const metaRes = await githubRequest('GET', '/repos/' + repo + '/contents/events.json', ghToken);
+
       if (metaRes.statusCode === 200 && metaRes.data.sha) {
         const fileSha = metaRes.data.sha;
         let eventsData;
 
-        // Step B: If content is empty (file > 1MB), fetch via Git Blobs API
         if (metaRes.data.content && metaRes.data.encoding === 'base64') {
           eventsData = JSON.parse(Buffer.from(metaRes.data.content, 'base64').toString('utf-8'));
         } else {
-          // Use the raw blob endpoint to download the file content
           const blobUrl = 'https://raw.githubusercontent.com/' + repo + '/main/events.json';
           const rawContent = await new Promise(function(resolve, reject) {
             https.get(blobUrl, function(res) {
@@ -150,7 +151,6 @@ async function handleEventRegistration(session, metadata) {
           console.log('Fetched events.json via raw URL (file too large for Contents API)');
         }
 
-        // Step C: Add registration and update count
         if (!eventsData.registrations) eventsData.registrations = {};
         if (!eventsData.registrations[eventId]) eventsData.registrations[eventId] = [];
         eventsData.registrations[eventId].push(newReg);
@@ -162,13 +162,11 @@ async function handleEventRegistration(session, metadata) {
           eventObj.registeredCount = totalRegs;
           eventObj.registered = totalRegs;
 
-          // Update per-tier registeredCount
           if (eventObj.tiers && eventObj.tiers.length > 0) {
             eventObj.tiers.forEach(function(tier) {
               var tierRegs = allRegs.filter(function(r) { return r.ticketTier === tier.name; });
               tier.registeredCount = tierRegs.reduce(function(sum, r) { return sum + (r.tickets || 1); }, 0);
             });
-            // Check if all tiers with capacity are full
             var allTiersFull = eventObj.tiers.every(function(t) {
               return t.capacity && t.capacity > 0 && t.registeredCount >= t.capacity;
             });
@@ -178,13 +176,13 @@ async function handleEventRegistration(session, metadata) {
           }
         }
 
-        // Step D: Write back via Contents API (accepts large base64 payloads on PUT)
         const encoded = Buffer.from(JSON.stringify(eventsData, null, 2), 'utf-8').toString('base64');
         const putRes = await githubRequest('PUT', '/repos/' + repo + '/contents/events.json', ghToken, {
           message: 'Registration: ' + name + ' for ' + (eventName || eventId) + ' (' + qty + ' ticket' + (qty > 1 ? 's' : '') + ')',
           content: encoded,
           sha: fileSha
         });
+
         if (putRes.statusCode === 200 || putRes.statusCode === 201) {
           console.log('events.json updated for', eventId);
         } else {
@@ -241,7 +239,8 @@ async function handleEventRegistration(session, metadata) {
     ownerRows.push({ label: 'Amount Paid', value: amountDisplay, highlight: true });
     ownerRows.push({ label: 'Transaction', value: session.payment_intent || session.id, small: true });
 
-    await sendEmail('management@thequarrystl.com', 'New Event Registration — ' + (eventName || 'Event') + ' — ' + name,
+    await sendEmail('management@thequarrystl.com',
+      'New Event Registration — ' + (eventName || 'Event') + ' — ' + name,
       wrapEmail(
         '<h2 style="color:#2C1A0E;margin-top:0">New Event Registration</h2>' +
         detailBlock(ownerRows)
@@ -255,19 +254,123 @@ async function handleEventRegistration(session, metadata) {
   console.log('Event registration complete:', name, '—', eventName);
 }
 
+
+// ═══════════════════════════════════════════════════
+// VENDOR APPROVAL PAYMENT HANDLER
+// ═══════════════════════════════════════════════════
+async function handleVendorApproval(session, metadata) {
+  const { formId, submissionId, vendorName, vendorEmail, formName } = metadata;
+  const email = vendorEmail || session.customer_email || '';
+  const name = vendorName || '';
+  const amountCents = session.amount_total || 0;
+  const amountDollars = (amountCents / 100).toFixed(2);
+
+  // 1. Update submission status to "paid" in forms.json
+  try {
+    const ghToken = process.env.GITHUB_TOKEN;
+    if (ghToken) {
+      const repo = 'quarrymanagement/quarry-website';
+      const metaRes = await githubRequest('GET', '/repos/' + repo + '/contents/forms.json', ghToken);
+
+      if (metaRes.statusCode === 200 && metaRes.data.sha) {
+        let formsData;
+        try {
+          formsData = JSON.parse(await fetchBlobContent(repo, metaRes.data.sha, ghToken));
+        } catch (e) {
+          if (metaRes.data.content) {
+            formsData = JSON.parse(Buffer.from(metaRes.data.content, 'base64').toString('utf-8'));
+          }
+        }
+
+        if (formsData && formsData.submissions && formsData.submissions[formId]) {
+          var sub = formsData.submissions[formId].find(function(s) { return s.id === submissionId; });
+          if (sub) {
+            sub.status = 'paid';
+            sub.paidAt = new Date().toISOString();
+            sub.paymentAmount = amountDollars;
+            sub.stripeSessionId = session.id;
+            sub.transactionId = session.payment_intent || session.id;
+          }
+
+          const encoded = Buffer.from(JSON.stringify(formsData, null, 2), 'utf-8').toString('base64');
+          await githubRequest('PUT', '/repos/' + repo + '/contents/forms.json', ghToken, {
+            message: 'Vendor paid: ' + (name || submissionId) + ' — $' + amountDollars,
+            content: encoded,
+            sha: metaRes.data.sha
+          });
+          console.log('forms.json updated — vendor marked as paid');
+        }
+      }
+    }
+  } catch (e) {
+    console.error('GitHub update error (vendor payment):', e.message);
+  }
+
+  // 2. Send payment confirmation to vendor
+  if (email) {
+    try {
+      await sendEmail(email, 'Payment Confirmed — Your Vendor Spot is Reserved!',
+        wrapEmail(
+          '<h2 style="color:#2C1A0E;margin-top:0">You\'re All Set!</h2>' +
+          '<p style="color:#444;line-height:1.7;">Hi ' + (name || 'there') + ',</p>' +
+          '<p style="color:#444;line-height:1.7;">Your payment of <strong>$' + amountDollars + '</strong> has been received and your vendor spot for <strong>' + (formName || 'our upcoming event') + '</strong> is officially reserved!</p>' +
+          detailBlock([
+            { label: 'Event', value: formName || 'The Quarry Event' },
+            { label: 'Vendor', value: name || 'N/A' },
+            { label: 'Amount Paid', value: '$' + amountDollars, highlight: true },
+            { label: 'Status', value: 'Confirmed & Paid' }
+          ]) +
+          '<p style="color:#444;line-height:1.7;"><strong>Jacqueline</strong>, our wedding director, will be reaching out to you with event details and logistics.</p>' +
+          '<p style="color:#444;line-height:1.7;">We\'re looking forward to a fantastic event!</p>' +
+          contactLine()
+        )
+      );
+      console.log('Vendor payment confirmation sent to', email);
+    } catch (e) {
+      console.error('Vendor confirmation email error:', e.message);
+    }
+  }
+
+  // 3. Notify management + Jacqueline that vendor has paid
+  try {
+    await sendEmail(
+      ['management@thequarrystl.com', 'jacqueline@thequarrystl.com'],
+      'Vendor Paid — ' + (name || 'Unknown') + ' — $' + amountDollars,
+      wrapEmail(
+        '<h2 style="color:#2C1A0E;margin-top:0">Vendor Payment Received</h2>' +
+        '<p style="color:#444">A vendor has completed their payment and their spot is now confirmed.</p>' +
+        detailBlock([
+          { label: 'Vendor', value: name || 'N/A' },
+          { label: 'Email', value: email },
+          { label: 'Event/Form', value: formName || 'N/A' },
+          { label: 'Amount Paid', value: '$' + amountDollars, highlight: true },
+          { label: 'Status', value: 'Paid & Confirmed' },
+          { label: 'Transaction', value: session.payment_intent || session.id, small: true }
+        ])
+      )
+    );
+    console.log('Owner notified of vendor payment');
+  } catch (e) {
+    console.error('Owner vendor payment email error:', e.message);
+  }
+
+  console.log('Vendor approval payment complete:', name, '— $' + amountDollars);
+}
+
+
 // ═══════════════════════════════════════════════════
 // GOLF BOOKING HANDLER
 // ═══════════════════════════════════════════════════
 async function handleGolfBooking(session, metadata) {
-  const name = metadata.customerName || '';
-  const email = metadata.customerEmail || session.customer_email || '';
-  const bay = metadata.bay || '';
-  const date = metadata.date || '';
-  const time = metadata.time || '';
+  const name     = metadata.customerName || '';
+  const email    = metadata.customerEmail || session.customer_email || '';
+  const bay      = metadata.bay || '';
+  const date     = metadata.date || '';
+  const time     = metadata.time || '';
   const duration = metadata.duration || '';
-  const players = metadata.players || '';
-  const coupon = metadata.coupon || '';
-  const amountCents = session.amount_total || 0;
+  const players  = metadata.players || '';
+  const coupon   = metadata.coupon || '';
+  const amountCents  = session.amount_total || 0;
   const amountDisplay = '$' + (amountCents / 100).toFixed(2);
 
   // 1. Store booking in Netlify Blobs
@@ -284,13 +387,14 @@ async function handleGolfBooking(session, metadata) {
         });
         if (existing.ok) { bookings = (await existing.json()).bookings || []; }
       } catch (e) {}
+
       bookings.push({
-        bay, time, name, email,
-        players, duration,
+        bay, time, name, email, players, duration,
         stripeSessionId: session.id,
         amountPaid: amountCents,
         bookedAt: new Date().toISOString()
       });
+
       await fetch('https://api.netlify.com/api/v1/blobs/' + siteId + '/' + key, {
         method: 'PUT',
         headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
@@ -342,7 +446,8 @@ async function handleGolfBooking(session, metadata) {
     ownerRows.push({ label: 'Amount Paid', value: amountDisplay, highlight: true });
     ownerRows.push({ label: 'Transaction', value: session.payment_intent || session.id, small: true });
 
-    await sendEmail('management@thequarrystl.com', 'New Golf Booking — ' + bay + ' on ' + date + ' at ' + time,
+    await sendEmail('management@thequarrystl.com',
+      'New Golf Booking — ' + bay + ' on ' + date + ' at ' + time,
       wrapEmail(
         '<h2 style="color:#2C1A0E;margin-top:0">New Golf Bay Booking</h2>' +
         detailBlock(ownerRows)
@@ -356,13 +461,14 @@ async function handleGolfBooking(session, metadata) {
   console.log('Golf booking complete:', name, bay, date, time);
 }
 
+
 // ═══════════════════════════════════════════════════
-// GENERIC PAYMENT HANDLER (catch-all for any other Stripe checkout)
+// GENERIC PAYMENT HANDLER
 // ═══════════════════════════════════════════════════
 async function handleGenericPayment(session, metadata) {
-  const name = metadata.customerName || metadata.name || '';
-  const email = metadata.customerEmail || metadata.email || session.customer_email || '';
-  const amountCents = session.amount_total || 0;
+  const name   = metadata.customerName || metadata.name || '';
+  const email  = metadata.customerEmail || metadata.email || session.customer_email || '';
+  const amountCents  = session.amount_total || 0;
   const amountDisplay = '$' + (amountCents / 100).toFixed(2);
   const description = session.line_items_description || session.metadata.description || 'Purchase';
 
@@ -393,14 +499,14 @@ async function handleGenericPayment(session, metadata) {
     if (email) rows.splice(1, 0, { label: 'Email', value: email });
     rows.push({ label: 'Transaction', value: session.payment_intent || session.id, small: true });
 
-    // Include all metadata fields so nothing is missed
     Object.keys(metadata).forEach(function(key) {
       if (['customerName', 'customerEmail', 'name', 'email'].indexOf(key) === -1) {
         rows.splice(rows.length - 1, 0, { label: key, value: metadata[key] });
       }
     });
 
-    await sendEmail('management@thequarrystl.com', 'New Payment Received — ' + amountDisplay + (name ? ' — ' + name : ''),
+    await sendEmail('management@thequarrystl.com',
+      'New Payment Received — ' + amountDisplay + (name ? ' — ' + name : ''),
       wrapEmail(
         '<h2 style="color:#2C1A0E;margin-top:0">New Payment Received</h2>' +
         detailBlock(rows)
@@ -411,6 +517,7 @@ async function handleGenericPayment(session, metadata) {
     console.error('Generic owner email error:', e.message);
   }
 }
+
 
 // ═══════════════════════════════════════════════════
 // MAIN WEBHOOK HANDLER
@@ -437,7 +544,9 @@ exports.handler = async (event) => {
     console.log('Purchase type detected:', purchaseType, '| Metadata keys:', Object.keys(metadata).join(', '));
 
     try {
-      if (purchaseType === 'event') {
+      if (purchaseType === 'vendor_approval') {
+        await handleVendorApproval(session, metadata);
+      } else if (purchaseType === 'event') {
         await handleEventRegistration(session, metadata);
       } else if (purchaseType === 'golf') {
         await handleGolfBooking(session, metadata);
