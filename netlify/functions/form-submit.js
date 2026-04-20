@@ -10,7 +10,7 @@ const ses = new AWS.SES({
 function sendEmail(to, subject, htmlBody) {
   return ses.sendEmail({
     Source: 'The Quarry STL <management@thequarrystl.com>',
-    Destination: { ToAddresses: [to] },
+    Destination: { ToAddresses: Array.isArray(to) ? to : [to] },
     Message: {
       Subject: { Data: subject, Charset: 'UTF-8' },
       Body: { Html: { Data: htmlBody, Charset: 'UTF-8' } },
@@ -66,8 +66,6 @@ exports.handler = async (event) => {
   try {
     const body = JSON.parse(event.body);
     const { formId, responses, files } = body;
-    // responses = { fieldId: value, ... }
-    // files = { fieldId: { name, type, data (base64) }, ... }
 
     if (!formId || !responses) {
       return { statusCode: 400, headers: HEADERS, body: JSON.stringify({ error: 'Missing formId or responses' }) };
@@ -115,7 +113,7 @@ exports.handler = async (event) => {
       notes: ''
     };
 
-    // Handle file references (store file names, base64 data stays in submission)
+    // Handle file references
     if (files) {
       Object.keys(files).forEach(function(fieldId) {
         var f = files[fieldId];
@@ -161,9 +159,11 @@ exports.handler = async (event) => {
 
     var eventNote = form.eventId ? '<p style="color:#888;font-size:0.85em">Linked to event: ' + (form.eventName || form.eventId) + '</p>' : '';
 
-    // Send owner notification
+    // Send owner notification to management AND Jacqueline
     try {
-      await sendEmail('management@thequarrystl.com', 'New Form Submission — ' + form.name,
+      await sendEmail(
+        ['management@thequarrystl.com', 'jacqueline@thequarrystl.com'],
+        'New Form Submission — ' + form.name,
         '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">' +
         '<div style="background:#1A0E08;padding:24px;text-align:center"><h1 style="color:#B8933A;margin:0;font-size:28px">The Quarry</h1>' +
         '<p style="color:#F5F0E8;font-size:0.8rem;letter-spacing:0.15em;margin:4px 0 0">NEW MELLE, MISSOURI</p></div>' +
