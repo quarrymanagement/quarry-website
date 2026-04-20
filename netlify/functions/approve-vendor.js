@@ -1,0 +1,197 @@
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const https = require('https');
+const AWS = require('aws-sdk');
+
+const ses = new AWS.SES({
+  region: process.env.SES_REGION || 'us-east-1',
+  accessKeyId: process.env.SES_ACCESS_KEY_ID,
+  secretAccessKey: process.env.SES_SECRET_ACCESS_KEY,
+});
+
+function sendEmail(to, subject, htmlBody) {
+  return ses.sendEmail({
+    Source: 'The Quarry STL <management@thequarrystl.com>',
+    Destination: { ToAddresses: Array.isArray(to) ? to : [to] },
+    Message: {
+      Subject: { Data: subject, Charset: 'UTF-8' },
+      Body: { Html: { Data: htmlBody, Charset: 'UTF-8' } },
+    },
+  }).promise();
+}
+
+function githubRequest(method, path, token, data) {
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname: 'api.github.com', path, method,
+      headers: {
+        'Authorization': 'token ' + token,
+        'User-Agent': 'Quarry-Forms',
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json',
+      },
+    };
+    const req = https.request(options, (res) => {
+      let body = '';
+      res.on('data', (chunk) => body += chunk);
+      res.on('end', () => {
+        try { resolve({ statusCode: res.statusCode, data: JSON.parse(body) }); }
+        catch (e) { resolve({ statusCode: res.statusCode, data: body }); }
+      });
+    });
+    req.on('error', reject);
+    if (data) req.write(JSON.stringify(data));
+    req.end();
+  });
+}
+
+async function fetchBlobContent(repo, blobSha, token) {
+  const res = await githubRequest('GET', '/repos/' + repo + '/git/blobs/' + blobSha, token);
+  if (res.statusCode === 200 && res.data.content) {
+    return Buffer.from(res.data.content, 'base64').toString('utf-8');
+  }
+  throw new Error('Could not fetch blob: ' + res.statusCode);
+}
+
+const HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+
+exports.handler = async (event) => {
+  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: HEADERS, body: '' };
+  if (event.httpMethod !== 'POST') return { statusCode: 405, headers: HEADERS, body: JSON.stringify({ error: 'Method not allowed' }) };
+
+  try {
+    const { formId, submissionId, vendorEmail, vendorName, formName, amount } = JSON.parse(event.body);
+    // amount is in dollars (default 150)
+    const amountCents = Math.round((amount || 150) * 100);
+    const amountDollars = (amountCents / 100).toFixed(2);
+
+    if (!formId || !submissionId || !vendorEmail) {
+      return { statusCode: 400, headers: HEADERS, body: JSON.stringify({ error: 'Missing required fields' }) };
+    }
+
+    // Create Stripe Checkout Session for vendor payment
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      mode: 'payment',
+      customer_email: vendorEmail,
+      line_items: [{
+        price_data: {
+          currency: 'usd',
+          unit_amount: amountCents,
+          product_data: {
+            name: 'Vendor Booth — ' + (formName || 'The Quarry Event'),
+            description: 'Vendor spot reservation at The Quarry'
+          }
+        },
+        quantity: 1
+      }],
+      metadata: {
+        type: 'vendor_approval',
+        formId: formId,
+        submissionId: submissionId,
+        vendorName: vendorName || '',
+        vendorEmail: vendorEmail,
+        formName: formName || ''
+      },
+      success_url: 'https://thequarrystl.com/quarry-events?vendor_payment=success',
+      cancel_url: 'https://thequarrystl.com/quarry-events?vendor_payment=cancelled'
+    });
+
+    // Send approval email with payment link
+    const emailHtml =
+      '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">' +
+      '<div style="background:#1A0E08;padding:24px;text-align:center">' +
+      '<h1 style="color:#B8933A;margin:0;font-size:28px">The Quarry</h1>' +
+      '<p style="color:#F5F0E8;font-size:0.8rem;letter-spacing:0.15em;margin:4px 0 0">NEW MELLE, MISSOURI</p></div>' +
+      '<div style="padding:32px 24px;background:#FFFFFF">' +
+      '<h2 style="color:#2C1A0E;margin-top:0">You\'ve Been Accepted!</h2>' +
+      '<p style="color:#444;line-height:1.7;">Hi ' + (vendorName || 'there') + ',</p>' +
+      '<p style="color:#444;line-height:1.7;">Great news — your vendor application for <strong>' + (formName || 'our upcoming event') + '</strong> has been approved!</p>' +
+      '<p style="color:#444;line-height:1.7;">Once your confirmation payment of <strong>$' + amountDollars + '</strong> is received, your spot will be officially reserved.</p>' +
+      '<div style="text-align:center;margin:28px 0;">' +
+      '<a href="' + session.url + '" style="display:inline-block;padding:14px 32px;background:linear-gradient(135deg,#B8933A,#d4af37);color:#1A0E08;text-decoration:none;font-weight:700;font-size:1rem;letter-spacing:0.05em;border-radius:8px;">Pay $' + amountDollars + ' to Reserve Your Spot</a>' +
+      '</div>' +
+      '<p style="color:#444;line-height:1.7;">We\'re extremely excited for this event and are happy that you get to be a part of it!</p>' +
+      '<p style="color:#444;line-height:1.7;">We do recommend some type of giveaway at the event from our vendors — it\'s a great opportunity to generate leads from those who participate!</p>' +
+      '<p style="color:#444;line-height:1.7;"><strong>Jacqueline</strong>, our wedding director, will be reaching out to you with more details.</p>' +
+      '<div style="background:#FAF7F2;border-left:4px solid #B8933A;padding:16px 20px;margin:24px 0;border-radius:4px">' +
+      '<p style="margin:6px 0"><strong>Vendor Fee:</strong> $' + amountDollars + '</p>' +
+      '<p style="margin:6px 0"><strong>Status:</strong> Approved — Pending Payment</p>' +
+      '</div>' +
+      '<p style="color:#444;">Questions? Contact Jacqueline at <a href="mailto:jacqueline@thequarrystl.com" style="color:#B8933A">jacqueline@thequarrystl.com</a> or call <a href="tel:6362248257" style="color:#B8933A">636-224-8257</a></p>' +
+      '</div>' +
+      '<div style="background:#1A0E08;padding:16px;text-align:center">' +
+      '<p style="color:rgba(255,255,255,0.4);font-size:0.75rem;margin:0">The Quarry &bull; 3960 Highway Z, New Melle, MO 63385</p></div></div>';
+
+    await sendEmail(vendorEmail, 'You\'re Approved! — ' + (formName || 'The Quarry Event'), emailHtml);
+    console.log('Approval email sent to', vendorEmail);
+
+    // Notify management + Jacqueline
+    await sendEmail(
+      ['management@thequarrystl.com', 'jacqueline@thequarrystl.com'],
+      'Vendor Approved — ' + (vendorName || 'Unknown') + ' — ' + (formName || 'Event'),
+      '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">' +
+      '<div style="background:#1A0E08;padding:24px;text-align:center"><h1 style="color:#B8933A;margin:0">The Quarry</h1></div>' +
+      '<div style="padding:32px 24px;background:#FFFFFF">' +
+      '<h2 style="color:#2C1A0E;margin-top:0">Vendor Approved</h2>' +
+      '<div style="background:#FAF7F2;border-left:4px solid #B8933A;padding:16px 20px;margin:20px 0;border-radius:4px">' +
+      '<p style="margin:6px 0"><strong>Vendor:</strong> ' + (vendorName || 'N/A') + '</p>' +
+      '<p style="margin:6px 0"><strong>Email:</strong> ' + vendorEmail + '</p>' +
+      '<p style="margin:6px 0"><strong>Form:</strong> ' + (formName || 'N/A') + '</p>' +
+      '<p style="margin:6px 0"><strong>Amount:</strong> $' + amountDollars + '</p>' +
+      '<p style="margin:6px 0"><strong>Status:</strong> Payment link sent — awaiting payment</p>' +
+      '</div></div></div>'
+    );
+
+    // Update submission status in forms.json
+    const ghToken = process.env.GITHUB_TOKEN;
+    if (ghToken) {
+      try {
+        const repo = 'quarrymanagement/quarry-website';
+        const metaRes = await githubRequest('GET', '/repos/' + repo + '/contents/forms.json', ghToken);
+        if (metaRes.statusCode === 200 && metaRes.data.sha) {
+          let formsData;
+          try {
+            formsData = JSON.parse(await fetchBlobContent(repo, metaRes.data.sha, ghToken));
+          } catch (e) {
+            if (metaRes.data.content) {
+              formsData = JSON.parse(Buffer.from(metaRes.data.content, 'base64').toString('utf-8'));
+            }
+          }
+
+          if (formsData && formsData.submissions && formsData.submissions[formId]) {
+            var sub = formsData.submissions[formId].find(function(s) { return s.id === submissionId; });
+            if (sub) {
+              sub.status = 'approved';
+              sub.paymentLink = session.url;
+              sub.paymentSessionId = session.id;
+              sub.approvedAt = new Date().toISOString();
+            }
+
+            const encoded = Buffer.from(JSON.stringify(formsData, null, 2), 'utf-8').toString('base64');
+            await githubRequest('PUT', '/repos/' + repo + '/contents/forms.json', ghToken, {
+              message: 'Vendor approved: ' + (vendorName || submissionId),
+              content: encoded,
+              sha: metaRes.data.sha
+            });
+          }
+        }
+      } catch (e) {
+        console.error('GitHub update error:', e.message);
+      }
+    }
+
+    return {
+      statusCode: 200,
+      headers: HEADERS,
+      body: JSON.stringify({ success: true, checkoutUrl: session.url, message: 'Approval email sent with payment link' })
+    };
+
+  } catch (err) {
+    console.error('Approve vendor error:', err);
+    return { statusCode: 500, headers: HEADERS, body: JSON.stringify({ error: err.message }) };
+  }
+};
