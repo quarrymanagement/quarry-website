@@ -5494,6 +5494,10 @@
             div.style.cssText = 'border:1px solid #e0d9d0;border-radius:8px;padding:12px;margin-bottom:8px;background:#faf7f2;';
 
             var typeLabels = { text: 'Text Input', email: 'Email', phone: 'Phone', dropdown: 'Dropdown', textarea: 'Text Area', file: 'File Upload' };
+            var defaultLabels = { text: '', email: 'Email Address', phone: 'Phone Number', dropdown: '', textarea: '', file: 'File Upload' };
+            var defaultPlaceholders = { text: '', email: 'your@email.com', phone: '(555) 555-5555', dropdown: '', textarea: '', file: '' };
+            var fieldLabel = data ? data.label : (defaultLabels[type] || '');
+            var fieldPlaceholder = data ? (data.placeholder || '') : (defaultPlaceholders[type] || '');
 
             var html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
                 '<span style="font-size:0.7rem;font-weight:700;color:#B8933A;text-transform:uppercase;letter-spacing:0.08em;">' + (typeLabels[type] || type) + '</span>' +
@@ -5505,12 +5509,13 @@
 
             html += '<div style="display:flex;gap:8px;flex-wrap:wrap;">';
             html += '<div style="flex:2;min-width:140px;"><label style="font-size:0.7rem;font-weight:600;display:block;margin-bottom:2px;">Label</label>';
-            html += '<input type="text" class="form-input fb-label" value="' + (data ? data.label : '') + '" placeholder="e.g. Business Name" style="font-size:0.8rem;padding:6px 8px;"></div>';
+            html += '<input type="text" class="form-input fb-label" value="' + fieldLabel + '" placeholder="e.g. Business Name" style="font-size:0.8rem;padding:6px 8px;"></div>';
             html += '<div style="flex:1;min-width:100px;"><label style="font-size:0.7rem;font-weight:600;display:block;margin-bottom:2px;">Placeholder</label>';
-            html += '<input type="text" class="form-input fb-placeholder" value="' + (data ? (data.placeholder || '') : '') + '" placeholder="Optional..." style="font-size:0.8rem;padding:6px 8px;"></div>';
+            html += '<input type="text" class="form-input fb-placeholder" value="' + fieldPlaceholder + '" placeholder="Optional..." style="font-size:0.8rem;padding:6px 8px;"></div>';
             html += '<div style="flex:0 0 auto;display:flex;align-items:end;padding-bottom:4px;">';
             html += '<label style="font-size:0.7rem;font-weight:600;display:flex;align-items:center;gap:4px;cursor:pointer;">';
-            html += '<input type="checkbox" class="fb-required" ' + (data && data.required ? 'checked' : '') + '> Required</label>';
+            var isRequired = data ? data.required : (type === 'email' || type === 'phone');
+            html += '<input type="checkbox" class="fb-required" ' + (isRequired ? 'checked' : '') + '> Required</label>';
             html += '</div></div>';
 
             if (type === 'dropdown') {
