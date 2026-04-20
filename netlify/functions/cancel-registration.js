@@ -114,8 +114,21 @@ exports.handler = async (event) => {
       const totalRegs = eventRegs.reduce(function(sum, r) { return sum + (r.tickets || 1); }, 0);
       eventObj.registeredCount = totalRegs;
       eventObj.registered = totalRegs;
-      // If it was sold out and now has capacity, reopen
-      if (eventObj.status === 'sold-out' && eventObj.totalCapacity && totalRegs < eventObj.totalCapacity) {
+
+      // Update per-tier registeredCount
+      if (eventObj.tiers && eventObj.tiers.length > 0) {
+        eventObj.tiers.forEach(function(tier) {
+          var tierRegs = eventRegs.filter(function(r) { return r.ticketTier === tier.name; });
+          tier.registeredCount = tierRegs.reduce(function(sum, r) { return sum + (r.tickets || 1); }, 0);
+        });
+        // If any tier now has capacity, reopen
+        var anyOpen = eventObj.tiers.some(function(t) {
+          return !t.capacity || t.capacity <= 0 || t.registeredCount < t.capacity;
+        });
+        if (eventObj.status === 'sold-out' && anyOpen) {
+          eventObj.status = 'available';
+        }
+      } else if (eventObj.status === 'sold-out' && eventObj.totalCapacity && totalRegs < eventObj.totalCapacity) {
         eventObj.status = 'available';
       }
     }
