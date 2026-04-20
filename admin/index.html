@@ -3265,9 +3265,9 @@
         async function loadData() {
             try {
                 const [eventsRes, subscribersRes, formsRes] = await Promise.all([
-                    fetch('/events.json'),
+                    fetch('https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/events.json?t=' + Date.now()),
                     fetch('/subscribers.json'),
-                    fetch('/forms.json?t=' + Date.now())
+                    fetch('https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/forms.json?t=' + Date.now())
                 ]);
 
                 if (eventsRes.ok) {
