@@ -2045,7 +2045,17 @@
                         <input type="radio" name="pricingType" value="both" id="pricingBoth">
                         <label for="pricingBoth">Both</label>
                     </div>
+                    <div class="radio-wrapper">
+                        <input type="radio" name="pricingType" value="custom" id="pricingCustom">
+                        <label for="pricingCustom">Custom Tiers</label>
+                    </div>
                 </div>
+            </div>
+            <div id="customTiersGroup" class="form-group hidden">
+                <label class="form-label">Registration Tiers</label>
+                <div id="customTiersList"></div>
+                <button type="button" class="btn-sm" onclick="addCustomTier()" style="margin-top:8px;padding:6px 14px;background:var(--brown-dark);color:var(--gold);border:1px solid var(--gold);cursor:pointer;font-size:0.8rem;border-radius:4px;">+ Add Tier</button>
+                <p style="font-size:0.75rem;color:#888;margin-top:6px;">Each tier has its own name, price, capacity, and optional vendor fields. Use this for events like wedding shows with Vendor + Attendee tiers.</p>
             </div>
             <div id="pricePerPersonGroup" class="form-group">
                 <label class="form-label">Price Per Person ($)</label>
@@ -3453,6 +3463,12 @@
                     if (radioEl) radioEl.checked = true;
                     updatePricingFields();
 
+                    // Load custom tiers if applicable
+                    if (pricingType === 'custom' && event.tiers && event.tiers.length > 0) {
+                        document.getElementById('customTiersList').innerHTML = '';
+                        event.tiers.forEach(function(t) { addCustomTier(t); });
+                    }
+
                     if (event.pricePerPerson) {
                         document.getElementById('pricePerPerson').value = event.pricePerPerson / 100;
                     }
@@ -3507,12 +3523,14 @@
 
         function updatePricingFields() {
             const type = document.querySelector('input[name="pricingType"]:checked').value;
-            document.getElementById('pricePerPersonGroup').classList.toggle('hidden', type !== 'individual' && type !== 'both');
-            document.getElementById('pricePerTableGroup').classList.toggle('hidden', type !== 'table' && type !== 'both');
-            document.getElementById('tableSizeGroup').classList.toggle('hidden', type !== 'table' && type !== 'both');
-            // Dual capacity for "Both" pricing
+            const isCustom = type === 'custom';
+            document.getElementById('pricePerPersonGroup').classList.toggle('hidden', isCustom || (type !== 'individual' && type !== 'both'));
+            document.getElementById('pricePerTableGroup').classList.toggle('hidden', isCustom || (type !== 'table' && type !== 'both'));
+            document.getElementById('tableSizeGroup').classList.toggle('hidden', isCustom || (type !== 'table' && type !== 'both'));
             document.getElementById('tableCapacityGroup').classList.toggle('hidden', type !== 'both');
-            // Update capacity label based on type
+            document.getElementById('customTiersGroup').classList.toggle('hidden', !isCustom);
+            // Hide the global capacity field for custom tiers (each tier has its own)
+            document.getElementById('capacityGroup').classList.toggle('hidden', isCustom);
             const capLabel = document.getElementById('capacityLabel');
             if (type === 'both') {
                 capLabel.textContent = 'Individual Seat Capacity';
@@ -3521,6 +3539,53 @@
             } else {
                 capLabel.textContent = 'Capacity';
             }
+            if (isCustom && document.querySelectorAll('.custom-tier-row').length === 0) {
+                addCustomTier();
+            }
+        }
+
+        // ─── Custom Tiers Management ───
+        function addCustomTier(data) {
+            const list = document.getElementById('customTiersList');
+            const idx = list.querySelectorAll('.custom-tier-row').length;
+            const div = document.createElement('div');
+            div.className = 'custom-tier-row';
+            div.style.cssText = 'border:1px solid #e0d9d0;padding:12px;margin-bottom:8px;border-radius:6px;background:#faf7f2;';
+            div.innerHTML = '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:end;">' +
+                '<div style="flex:2;min-width:140px;"><label style="font-size:0.75rem;font-weight:600;display:block;margin-bottom:2px;">Tier Name</label>' +
+                '<input type="text" class="form-input ct-name" value="' + (data ? data.name : '') + '" placeholder="e.g. Vendor, Attendee" style="font-size:0.85rem;padding:6px 8px;"></div>' +
+                '<div style="flex:1;min-width:80px;"><label style="font-size:0.75rem;font-weight:600;display:block;margin-bottom:2px;">Price ($)</label>' +
+                '<input type="number" class="form-input ct-price" value="' + (data ? (data.pricePerPerson / 100).toFixed(2) : '0') + '" min="0" step="0.01" style="font-size:0.85rem;padding:6px 8px;"></div>' +
+                '<div style="flex:1;min-width:80px;"><label style="font-size:0.75rem;font-weight:600;display:block;margin-bottom:2px;">Capacity</label>' +
+                '<input type="number" class="form-input ct-capacity" value="' + (data ? (data.capacity || '') : '') + '" min="0" placeholder="0=unlimited" style="font-size:0.85rem;padding:6px 8px;"></div>' +
+                '<div style="flex:0 0 auto;display:flex;align-items:center;gap:6px;padding-bottom:2px;">' +
+                '<label style="font-size:0.75rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px;">' +
+                '<input type="checkbox" class="ct-vendor" ' + (data && data.vendorTier ? 'checked' : '') + '> Vendor tier</label>' +
+                '<button type="button" onclick="this.closest(\'.custom-tier-row\').remove()" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:1.1rem;padding:2px 6px;" title="Remove tier">&times;</button>' +
+                '</div></div>';
+            list.appendChild(div);
+        }
+
+        function getCustomTiers() {
+            const rows = document.querySelectorAll('.custom-tier-row');
+            const tiers = [];
+            rows.forEach(function(row) {
+                const name = row.querySelector('.ct-name').value.trim();
+                const price = parseFloat(row.querySelector('.ct-price').value) || 0;
+                const capacity = parseInt(row.querySelector('.ct-capacity').value) || 0;
+                const vendorTier = row.querySelector('.ct-vendor').checked;
+                if (name) {
+                    tiers.push({
+                        name: name,
+                        pricePerPerson: Math.round(price * 100),
+                        priceLabel: price > 0 ? '$' + price.toFixed(2) : 'Free',
+                        capacity: capacity,
+                        registeredCount: 0,
+                        vendorTier: vendorTier
+                    });
+                }
+            });
+            return tiers;
         }
 
         document.querySelectorAll('input[name="pricingType"]').forEach(radio => {
@@ -3764,7 +3829,31 @@
 
                 // Build tiers array based on pricing type
                 eventData.tiers = [];
-                if (pricingType === 'individual') {
+                if (pricingType === 'custom') {
+                    // Custom tiers — each has its own name, price, capacity, vendor flag
+                    eventData.tiers = getCustomTiers();
+                    // Preserve existing registeredCount per tier when editing
+                    if (app.currentEvent) {
+                        const existingEvent = app.events.find(e => e.id === app.currentEvent.id);
+                        if (existingEvent && existingEvent.tiers) {
+                            eventData.tiers.forEach(function(t) {
+                                const old = existingEvent.tiers.find(ot => ot.name === t.name);
+                                if (old) t.registeredCount = old.registeredCount || 0;
+                            });
+                        }
+                    }
+                    // Total capacity = sum of all tier capacities (0 means unlimited)
+                    const tierCaps = eventData.tiers.map(t => t.capacity || 0);
+                    const allHaveCap = tierCaps.every(c => c > 0);
+                    eventData.totalCapacity = allHaveCap ? tierCaps.reduce((a, b) => a + b, 0) : 0;
+                    eventData.capacity = eventData.totalCapacity;
+                    // Price: use the first non-zero tier price (for fallback display)
+                    const firstPriced = eventData.tiers.find(t => t.pricePerPerson > 0);
+                    eventData.price = firstPriced ? firstPriced.pricePerPerson : 0;
+                    eventData.pricePerSeat = eventData.price;
+                    eventData.category = 'Ticketed';
+                    eventData.tags = ['Ticketed'];
+                } else if (pricingType === 'individual') {
                     const dollars = (eventData.pricePerPerson / 100);
                     eventData.tiers.push({
                         name: eventData.name + ' Admission',
@@ -3802,15 +3891,17 @@
                     eventData.price = eventData.pricePerPerson;
                 }
 
-                eventData.pricePerSeat = eventData.price || 0;
-                eventData.category = (eventData.price > 0) ? 'Ticketed' : 'Free';
-                eventData.tags = (eventData.price > 0) ? ['Ticketed'] : ['Free'];
+                if (pricingType !== 'custom') {
+                    eventData.pricePerSeat = eventData.price || 0;
+                    eventData.category = (eventData.price > 0) ? 'Ticketed' : 'Free';
+                    eventData.tags = (eventData.price > 0) ? ['Ticketed'] : ['Free'];
+                }
 
                 if (pricingType === 'both') {
                     const tableCapEl = document.getElementById('eventTableCapacity');
                     eventData.tableCapacity = parseInt(tableCapEl.value) || 0;
                     eventData.totalCapacity = eventData.capacity + eventData.tableCapacity;
-                } else {
+                } else if (pricingType !== 'custom') {
                     eventData.totalCapacity = eventData.capacity;
                 }
             }
