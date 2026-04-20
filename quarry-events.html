@@ -1572,7 +1572,19 @@
 
                     <div class="form-group">
                         <label for="ticketTier">Ticket Tier *</label>
-                        <select id="ticketTier" name="ticketTier" required onchange="updateOrderSummary()"></select>
+                        <select id="ticketTier" name="ticketTier" required onchange="onTierChange()"></select>
+                    </div>
+                    <div id="tierAvailability" style="display:none;font-size:13px;color:#888;margin:-8px 0 12px;"></div>
+
+                    <div id="vendorFieldsGroup" style="display:none;">
+                        <div class="form-group">
+                            <label for="businessName">Business Name *</label>
+                            <input type="text" id="businessName" name="businessName" placeholder="Your business or company name">
+                        </div>
+                        <div class="form-group">
+                            <label for="businessType">Type of Business / Services *</label>
+                            <input type="text" id="businessType" name="businessType" placeholder="e.g. Photography, Catering, Florist">
+                        </div>
                     </div>
 
                     <div class="form-group" id="seatingGroup" style="display:none;">
@@ -2182,9 +2194,14 @@
 
             // Populate ticket tier dropdown
             const tierSelect = document.getElementById("ticketTier");
-            tierSelect.innerHTML = currentEventForModal.tiers.map(tier =>
-                `<option value="${tier.name}" data-price="${tier.pricePerPerson}">${tier.name} — ${tier.priceLabel}</option>`
-            ).join("");
+            tierSelect.innerHTML = currentEventForModal.tiers.map(tier => {
+                const remaining = (tier.capacity && tier.capacity > 0) ? (tier.capacity - (tier.registeredCount || 0)) : null;
+                const soldOut = remaining !== null && remaining <= 0;
+                let label = tier.name + ' — ' + tier.priceLabel;
+                if (remaining !== null && remaining <= 5 && remaining > 0) label += ' (' + remaining + ' left!)';
+                if (soldOut) label += ' (SOLD OUT)';
+                return `<option value="${tier.name}" data-price="${tier.pricePerPerson}" data-vendor="${tier.vendorTier ? '1' : '0'}" data-capacity="${tier.capacity || 0}" data-registered="${tier.registeredCount || 0}" ${soldOut ? 'disabled' : ''}>${label}</option>`;
+            }).join("");
 
             // Show seating options if event has them, otherwise show simple quantity
             const seatingGroup = document.getElementById("seatingGroup");
@@ -2272,7 +2289,7 @@
                 modalCard.classList.remove("wide");
             }
 
-            updateOrderSummary();
+            onTierChange();
             modal.classList.add("active");
         }
 
@@ -2355,6 +2372,40 @@
         /**
          * Update order summary based on selections
          */
+        function onTierChange() {
+            const tierSelect = document.getElementById("ticketTier");
+            const selected = tierSelect.options[tierSelect.selectedIndex];
+            const vendorGroup = document.getElementById("vendorFieldsGroup");
+            const availDiv = document.getElementById("tierAvailability");
+            const bnInput = document.getElementById("businessName");
+            const btInput = document.getElementById("businessType");
+
+            if (selected && selected.dataset.vendor === '1') {
+                vendorGroup.style.display = "block";
+                bnInput.required = true;
+                btInput.required = true;
+            } else {
+                vendorGroup.style.display = "none";
+                bnInput.required = false;
+                btInput.required = false;
+                bnInput.value = "";
+                btInput.value = "";
+            }
+
+            // Show tier-specific availability
+            if (selected && parseInt(selected.dataset.capacity) > 0) {
+                const cap = parseInt(selected.dataset.capacity);
+                const reg = parseInt(selected.dataset.registered) || 0;
+                const remain = cap - reg;
+                availDiv.textContent = remain + ' of ' + cap + ' ' + selected.value + ' spots remaining';
+                availDiv.style.display = "block";
+            } else {
+                availDiv.style.display = "none";
+            }
+
+            updateOrderSummary();
+        }
+
         function updateOrderSummary() {
             if (!currentEventForModal) return;
 
@@ -2472,6 +2523,8 @@
                     tableId: selectedMapTable ? selectedMapTable.id : (formData.get("selectedTableId") || ''),
                     ticketTier: formData.get("ticketTier"),
                     couponCode: appliedCoupon ? appliedCoupon.code : '',
+                    businessName: formData.get("businessName") || '',
+                    businessType: formData.get("businessType") || '',
                     successUrl: window.location.origin + '/quarry-events',
                     cancelUrl: window.location.origin + '/quarry-events'
                 };
