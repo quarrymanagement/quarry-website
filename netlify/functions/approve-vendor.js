@@ -72,7 +72,7 @@ exports.handler = async (event) => {
       return { statusCode: 400, headers: HEADERS, body: JSON.stringify({ error: 'Missing required fields' }) };
     }
 
-    // Create Stripe Checkout Session for vendor payment
+    // 1. Create Stripe Checkout Session for vendor payment
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'payment',
@@ -100,8 +100,10 @@ exports.handler = async (event) => {
       cancel_url: 'https://thequarrystl.com/quarry-events?vendor_payment=cancelled'
     });
 
-    // Send approval email with payment link
-    const emailHtml =
+    console.log('Stripe session created:', session.id, '— URL:', session.url);
+
+    // Build vendor approval email HTML
+    const vendorEmailHtml =
       '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">' +
       '<div style="background:#1A0E08;padding:24px;text-align:center">' +
       '<h1 style="color:#B8933A;margin:0;font-size:28px">The Quarry</h1>' +
@@ -126,27 +128,50 @@ exports.handler = async (event) => {
       '<div style="background:#1A0E08;padding:16px;text-align:center">' +
       '<p style="color:rgba(255,255,255,0.4);font-size:0.75rem;margin:0">The Quarry &bull; 3960 Highway Z, New Melle, MO 63385</p></div></div>';
 
-    await sendEmail(vendorEmail, 'You\'re Approved! — ' + (formName || 'The Quarry Event'), emailHtml);
-    console.log('Approval email sent to', vendorEmail);
+    // 2. Try to send approval email directly to vendor
+    var vendorEmailSent = false;
+    try {
+      await sendEmail(vendorEmail, 'You\'re Approved! — ' + (formName || 'The Quarry Event'), vendorEmailHtml);
+      vendorEmailSent = true;
+      console.log('Approval email sent directly to', vendorEmail);
+    } catch (e) {
+      console.error('Could not send directly to vendor (SES restriction):', e.message);
+      // Will include payment link in management email so they can forward it
+    }
 
-    // Notify management + Jacqueline
-    await sendEmail(
-      ['management@thequarrystl.com', 'jacqueline@thequarrystl.com'],
-      'Vendor Approved — ' + (vendorName || 'Unknown') + ' — ' + (formName || 'Event'),
-      '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">' +
-      '<div style="background:#1A0E08;padding:24px;text-align:center"><h1 style="color:#B8933A;margin:0">The Quarry</h1></div>' +
-      '<div style="padding:32px 24px;background:#FFFFFF">' +
-      '<h2 style="color:#2C1A0E;margin-top:0">Vendor Approved</h2>' +
-      '<div style="background:#FAF7F2;border-left:4px solid #B8933A;padding:16px 20px;margin:20px 0;border-radius:4px">' +
-      '<p style="margin:6px 0"><strong>Vendor:</strong> ' + (vendorName || 'N/A') + '</p>' +
-      '<p style="margin:6px 0"><strong>Email:</strong> ' + vendorEmail + '</p>' +
-      '<p style="margin:6px 0"><strong>Form:</strong> ' + (formName || 'N/A') + '</p>' +
-      '<p style="margin:6px 0"><strong>Amount:</strong> $' + amountDollars + '</p>' +
-      '<p style="margin:6px 0"><strong>Status:</strong> Payment link sent — awaiting payment</p>' +
-      '</div></div></div>'
-    );
+    // 3. Notify management + Jacqueline (always send — include payment link so they can forward if vendor email failed)
+    try {
+      var mgmtNote = vendorEmailSent
+        ? '<p style="color:#3cb464;margin-bottom:16px;">&#10003; Approval email with payment link was sent directly to the vendor.</p>'
+        : '<p style="color:#dc2626;margin-bottom:16px;">&#9888; Could not send email directly to vendor (SES restriction). Please forward this email or share the payment link below with the vendor.</p>';
 
-    // Update submission status in forms.json
+      await sendEmail(
+        ['management@thequarrystl.com', 'jacqueline@thequarrystl.com'],
+        'Vendor Approved — ' + (vendorName || 'Unknown') + ' — ' + (formName || 'Event'),
+        '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">' +
+        '<div style="background:#1A0E08;padding:24px;text-align:center"><h1 style="color:#B8933A;margin:0">The Quarry</h1></div>' +
+        '<div style="padding:32px 24px;background:#FFFFFF">' +
+        '<h2 style="color:#2C1A0E;margin-top:0">Vendor Approved</h2>' +
+        mgmtNote +
+        '<div style="background:#FAF7F2;border-left:4px solid #B8933A;padding:16px 20px;margin:20px 0;border-radius:4px">' +
+        '<p style="margin:6px 0"><strong>Vendor:</strong> ' + (vendorName || 'N/A') + '</p>' +
+        '<p style="margin:6px 0"><strong>Email:</strong> ' + vendorEmail + '</p>' +
+        '<p style="margin:6px 0"><strong>Form:</strong> ' + (formName || 'N/A') + '</p>' +
+        '<p style="margin:6px 0"><strong>Amount:</strong> $' + amountDollars + '</p>' +
+        '<p style="margin:6px 0"><strong>Status:</strong> Payment link sent — awaiting payment</p>' +
+        '</div>' +
+        '<div style="text-align:center;margin:24px 0;">' +
+        '<a href="' + session.url + '" style="display:inline-block;padding:12px 28px;background:linear-gradient(135deg,#B8933A,#d4af37);color:#1A0E08;text-decoration:none;font-weight:700;font-size:0.9rem;border-radius:8px;">Vendor Payment Link ($' + amountDollars + ')</a>' +
+        '</div>' +
+        '<p style="color:#888;font-size:0.8rem;">Payment link: <a href="' + session.url + '" style="color:#B8933A;word-break:break-all;">' + session.url + '</a></p>' +
+        '</div></div>'
+      );
+      console.log('Management notification sent');
+    } catch (e) {
+      console.error('Management email error:', e.message);
+    }
+
+    // 4. Update submission status in forms.json
     const ghToken = process.env.GITHUB_TOKEN;
     if (ghToken) {
       try {
@@ -187,7 +212,14 @@ exports.handler = async (event) => {
     return {
       statusCode: 200,
       headers: HEADERS,
-      body: JSON.stringify({ success: true, checkoutUrl: session.url, message: 'Approval email sent with payment link' })
+      body: JSON.stringify({
+        success: true,
+        checkoutUrl: session.url,
+        vendorEmailSent: vendorEmailSent,
+        message: vendorEmailSent
+          ? 'Approval email sent with payment link'
+          : 'Payment link created. Direct email to vendor failed (SES restriction) — payment link included in management notification email.'
+      })
     };
 
   } catch (err) {
