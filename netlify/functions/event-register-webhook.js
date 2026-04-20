@@ -93,7 +93,7 @@ function detectPurchaseType(metadata) {
 // EVENT REGISTRATION HANDLER
 // ═══════════════════════════════════════════════════
 async function handleEventRegistration(session, metadata) {
-  const { eventId, eventName, customerName, customerEmail, customerPhone, partySize, seatType, tableId, ticketTier, couponCode } = metadata;
+  const { eventId, eventName, customerName, customerEmail, customerPhone, partySize, seatType, tableId, ticketTier, couponCode, businessName, businessType } = metadata;
   const name = customerName || '';
   const email = customerEmail || session.customer_email || '';
   const phone = customerPhone || '';
@@ -114,7 +114,9 @@ async function handleEventRegistration(session, metadata) {
     seatType: seatType || '',
     tableId: tableId || '',
     ticketTier: ticketTier || '',
-    couponCode: couponCode || ''
+    couponCode: couponCode || '',
+    businessName: businessName || '',
+    businessType: businessType || ''
   };
 
   // 1. Update events.json in GitHub (registration + seat count)
@@ -155,10 +157,23 @@ async function handleEventRegistration(session, metadata) {
 
         const eventObj = (eventsData.events || []).find(function(e) { return e.id === eventId; });
         if (eventObj) {
-          const totalRegs = eventsData.registrations[eventId].reduce(function(sum, r) { return sum + (r.tickets || 1); }, 0);
+          const allRegs = eventsData.registrations[eventId];
+          const totalRegs = allRegs.reduce(function(sum, r) { return sum + (r.tickets || 1); }, 0);
           eventObj.registeredCount = totalRegs;
           eventObj.registered = totalRegs;
-          if (eventObj.totalCapacity && totalRegs >= eventObj.totalCapacity) {
+
+          // Update per-tier registeredCount
+          if (eventObj.tiers && eventObj.tiers.length > 0) {
+            eventObj.tiers.forEach(function(tier) {
+              var tierRegs = allRegs.filter(function(r) { return r.ticketTier === tier.name; });
+              tier.registeredCount = tierRegs.reduce(function(sum, r) { return sum + (r.tickets || 1); }, 0);
+            });
+            // Check if all tiers with capacity are full
+            var allTiersFull = eventObj.tiers.every(function(t) {
+              return t.capacity && t.capacity > 0 && t.registeredCount >= t.capacity;
+            });
+            if (allTiersFull) eventObj.status = 'sold-out';
+          } else if (eventObj.totalCapacity && totalRegs >= eventObj.totalCapacity) {
             eventObj.status = 'sold-out';
           }
         }
@@ -190,6 +205,8 @@ async function handleEventRegistration(session, metadata) {
       if (ticketTier) rows.push({ label: 'Ticket', value: ticketTier });
       rows.push({ label: 'Quantity', value: String(qty) });
       rows.push({ label: 'Seat Type', value: seatType || 'General' });
+      if (businessName) rows.push({ label: 'Business', value: businessName });
+      if (businessType) rows.push({ label: 'Services', value: businessType });
       rows.push({ label: 'Total Paid', value: amountDisplay, highlight: true });
 
       await sendEmail(email, 'Registration Confirmed — ' + (eventName || 'The Quarry Event'),
@@ -218,6 +235,8 @@ async function handleEventRegistration(session, metadata) {
     ];
     if (ticketTier) ownerRows.push({ label: 'Ticket Tier', value: ticketTier });
     ownerRows.push({ label: 'Quantity', value: String(qty) });
+    if (businessName) ownerRows.push({ label: 'Business Name', value: businessName });
+    if (businessType) ownerRows.push({ label: 'Business Type', value: businessType });
     if (couponCode) ownerRows.push({ label: 'Coupon Used', value: couponCode });
     ownerRows.push({ label: 'Amount Paid', value: amountDisplay, highlight: true });
     ownerRows.push({ label: 'Transaction', value: session.payment_intent || session.id, small: true });
