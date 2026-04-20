@@ -3513,6 +3513,10 @@
                 document.querySelector('input[name="eventType"][value="ticketed"]').checked = true;
                 document.getElementById('coverCharge').value = '';
                 updateEventTypeFields();
+                // Reset pricing type and custom tiers
+                document.querySelector('input[name="pricingType"][value="individual"]').checked = true;
+                document.getElementById('customTiersList').innerHTML = '';
+                updatePricingFields();
                 // Reset table chart toggle
                 document.querySelector('input[name="useTableChart"][value="no"]').checked = true;
                 document.getElementById('tableChartSelectGroup').classList.add('hidden');
@@ -3531,6 +3535,7 @@
             document.getElementById('customTiersGroup').classList.toggle('hidden', !isCustom);
             // Hide the global capacity field for custom tiers (each tier has its own)
             document.getElementById('capacityGroup').classList.toggle('hidden', isCustom);
+            document.getElementById('eventCapacity').required = !isCustom;
             const capLabel = document.getElementById('capacityLabel');
             if (type === 'both') {
                 capLabel.textContent = 'Individual Seat Capacity';
@@ -3602,7 +3607,9 @@
             if (eventType === 'ticketed') {
                 ticketedWrapper.classList.remove('hidden');
                 coverGroup.classList.add('hidden');
-                capacityGroup.querySelector('input').required = true;
+                // Don't force required if custom tiers (each tier has its own capacity)
+                const currentPricing = document.querySelector('input[name="pricingType"]:checked');
+                capacityGroup.querySelector('input').required = !(currentPricing && currentPricing.value === 'custom');
             } else if (eventType === 'cover') {
                 ticketedWrapper.classList.add('hidden');
                 coverGroup.classList.remove('hidden');
@@ -3810,13 +3817,18 @@
 
             // ─── TICKETED EVENTS ───
             else {
-                eventData.capacity = parseInt(document.getElementById('eventCapacity').value) || 0;
                 eventData.pricingType = document.querySelector('input[name="pricingType"]:checked').value;
                 eventData.useTableChart = document.querySelector('input[name="useTableChart"]:checked').value === 'yes';
                 eventData.floorPlanId = eventData.useTableChart ? document.getElementById('eventFloorPlan').value : '';
                 eventData.coverCharge = 0;
 
                 const pricingType = eventData.pricingType;
+                // For custom tiers, capacity comes from tiers, not the global field
+                if (pricingType !== 'custom') {
+                    eventData.capacity = parseInt(document.getElementById('eventCapacity').value) || 0;
+                } else {
+                    eventData.capacity = 0;
+                }
                 if (pricingType === 'individual' || pricingType === 'both') {
                     const price = parseFloat(document.getElementById('pricePerPerson').value || 0);
                     eventData.pricePerPerson = Math.round(price * 100);
