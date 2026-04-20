@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Quarry — Form</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: #0d0d0d;
+            color: #f5f0e8;
+            min-height: 100vh;
+        }
+        .header {
+            background: #1A0E08;
+            padding: 24px;
+            text-align: center;
+            border-bottom: 1px solid rgba(184,147,58,0.2);
+        }
+        .header h1 {
+            font-family: 'Cormorant Garamond', serif;
+            color: #B8933A;
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+        }
+        .header p {
+            color: rgba(245,240,232,0.5);
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+        .container {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        .form-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #f5f0e8;
+            margin-bottom: 8px;
+        }
+        .form-description {
+            color: #aaa;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+        .event-badge {
+            display: inline-block;
+            background: rgba(184,147,58,0.15);
+            color: #d4af37;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-bottom: 16px;
+        }
+        .field-group {
+            margin-bottom: 20px;
+        }
+        .field-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #ccc;
+            margin-bottom: 6px;
+            letter-spacing: 0.02em;
+        }
+        .field-group label .required {
+            color: #d4af37;
+        }
+        .field-group input[type="text"],
+        .field-group input[type="email"],
+        .field-group input[type="tel"],
+        .field-group input[type="number"],
+        .field-group textarea,
+        .field-group select {
+            width: 100%;
+            padding: 12px 14px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 8px;
+            color: #f5f0e8;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.9rem;
+            transition: border-color 0.2s;
+        }
+        .field-group input:focus,
+        .field-group textarea:focus,
+        .field-group select:focus {
+            outline: none;
+            border-color: #d4af37;
+        }
+        .field-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        .field-group select option {
+            background: #1a1a1a;
+            color: #f5f0e8;
+        }
+        .file-upload {
+            border: 2px dashed rgba(212,175,55,0.3);
+            border-radius: 8px;
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s;
+            position: relative;
+        }
+        .file-upload:hover { border-color: #d4af37; }
+        .file-upload input[type="file"] {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .file-upload .file-label {
+            color: #888;
+            font-size: 0.85rem;
+        }
+        .file-upload .file-name {
+            color: #d4af37;
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-top: 6px;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #B8933A, #d4af37);
+            color: #1A0E08;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-top: 16px;
+            transition: opacity 0.2s;
+        }
+        .submit-btn:hover { opacity: 0.9; }
+        .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .form-error {
+            color: #e74c3c;
+            font-size: 0.85rem;
+            margin-top: 12px;
+            display: none;
+        }
+        .form-error.show { display: block; }
+        .success-card {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        .success-card .check {
+            width: 64px; height: 64px;
+            border-radius: 50%;
+            background: rgba(184,147,58,0.15);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 2rem;
+            color: #d4af37;
+        }
+        .success-card h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.6rem;
+            margin-bottom: 12px;
+        }
+        .success-card p {
+            color: #aaa;
+            line-height: 1.6;
+        }
+        .loading {
+            text-align: center;
+            padding: 80px 20px;
+            color: #888;
+        }
+        .not-found {
+            text-align: center;
+            padding: 80px 20px;
+        }
+        .not-found h2 { color: #888; margin-bottom: 12px; }
+        .not-found a { color: #d4af37; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>The Quarry</h1>
+        <p>New Melle, Missouri</p>
+    </div>
+
+    <div class="container" id="formContainer">
+        <div class="loading" id="loadingState">Loading form...</div>
+    </div>
+
+    <script>
+    (function() {
+        var params = new URLSearchParams(window.location.search);
+        var formSlug = params.get('form') || params.get('id') || '';
+
+        // Also support /quarry-form/slug-name path
+        if (!formSlug) {
+            var pathParts = window.location.pathname.split('/');
+            var lastPart = pathParts[pathParts.length - 1];
+            if (lastPart && lastPart !== 'quarry-form' && lastPart !== 'quarry-form.html') {
+                formSlug = lastPart;
+            }
+        }
+
+        if (!formSlug) {
+            showNotFound();
+            return;
+        }
+
+        var container = document.getElementById('formContainer');
+        var formDef = null;
+        var fileData = {};
+
+        // Fetch forms.json
+        fetch('/forms.json?t=' + Date.now())
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            var forms = data.forms || [];
+            formDef = forms.find(function(f) {
+                return f.slug === formSlug || f.id === formSlug;
+            });
+
+            if (!formDef) {
+                showNotFound();
+                return;
+            }
+
+            if (formDef.status === 'closed') {
+                container.innerHTML = '<div class="not-found"><h2>Form Closed</h2><p>This form is no longer accepting submissions.</p><a href="/quarry-events">View Events</a></div>';
+                return;
+            }
+
+            document.title = formDef.name + ' — The Quarry';
+            renderForm(formDef);
+        })
+        .catch(function(err) {
+            console.error('Error loading form:', err);
+            showNotFound();
+        });
+
+        function showNotFound() {
+            container.innerHTML = '<div class="not-found"><h2>Form Not Found</h2><p>This form doesn\'t exist or has been removed.</p><p><a href="/quarry-events">View Events &rarr;</a></p></div>';
+        }
+
+        function renderForm(form) {
+            var html = '';
+
+            if (form.eventName) {
+                html += '<div class="event-badge">' + form.eventName + '</div>';
+            }
+
+            html += '<h2 class="form-title">' + form.name + '</h2>';
+            if (form.description) {
+                html += '<p class="form-description">' + form.description + '</p>';
+            }
+
+            html += '<form id="publicForm" onsubmit="return false;">';
+
+            for (var i = 0; i < form.fields.length; i++) {
+                var field = form.fields[i];
+                html += '<div class="field-group">';
+                html += '<label>' + field.label + (field.required ? ' <span class="required">*</span>' : '') + '</label>';
+
+                if (field.type === 'text' || field.type === 'number') {
+                    html += '<input type="' + field.type + '" name="' + field.id + '" ' + (field.required ? 'required' : '') + ' placeholder="' + (field.placeholder || '') + '">';
+                } else if (field.type === 'email') {
+                    html += '<input type="email" name="' + field.id + '" ' + (field.required ? 'required' : '') + ' placeholder="' + (field.placeholder || 'your@email.com') + '">';
+                } else if (field.type === 'phone') {
+                    html += '<input type="tel" name="' + field.id + '" ' + (field.required ? 'required' : '') + ' placeholder="' + (field.placeholder || '(555) 555-5555') + '">';
+                } else if (field.type === 'textarea') {
+                    html += '<textarea name="' + field.id + '" ' + (field.required ? 'required' : '') + ' placeholder="' + (field.placeholder || '') + '"></textarea>';
+                } else if (field.type === 'dropdown') {
+                    html += '<select name="' + field.id + '" ' + (field.required ? 'required' : '') + '>';
+                    html += '<option value="">Select...</option>';
+                    var opts = field.options || [];
+                    for (var j = 0; j < opts.length; j++) {
+                        html += '<option value="' + opts[j] + '">' + opts[j] + '</option>';
+                    }
+                    html += '</select>';
+                } else if (field.type === 'file') {
+                    html += '<div class="file-upload" id="fileUpload_' + field.id + '">';
+                    html += '<input type="file" data-field="' + field.id + '" onchange="handleFileSelect(this)">';
+                    html += '<div class="file-label">Click or drag to upload a file<br><span style="font-size:0.75rem;color:#666;">PDF, JPG, PNG up to 5MB</span></div>';
+                    html += '<div class="file-name" id="fileName_' + field.id + '"></div>';
+                    html += '</div>';
+                }
+
+                html += '</div>';
+            }
+
+            html += '<div class="form-error" id="formError"></div>';
+            html += '<button type="button" class="submit-btn" id="submitBtn" onclick="submitForm()">Submit</button>';
+            html += '</form>';
+
+            container.innerHTML = html;
+        }
+
+        window.handleFileSelect = function(input) {
+            var fieldId = input.dataset.field;
+            var file = input.files[0];
+            if (!file) return;
+
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File too large. Maximum 5MB.');
+                input.value = '';
+                return;
+            }
+
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                fileData[fieldId] = {
+                    name: file.name,
+                    type: file.type,
+                    data: e.target.result.split(',')[1] // base64 without prefix
+                };
+                document.getElementById('fileName_' + fieldId).textContent = file.name;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.submitForm = function() {
+            var form = document.getElementById('publicForm');
+            var btn = document.getElementById('submitBtn');
+            var errDiv = document.getElementById('formError');
+            errDiv.classList.remove('show');
+
+            // Validate
+            var inputs = form.querySelectorAll('[required]');
+            for (var i = 0; i < inputs.length; i++) {
+                if (!inputs[i].value.trim()) {
+                    errDiv.textContent = 'Please fill in all required fields.';
+                    errDiv.classList.add('show');
+                    inputs[i].focus();
+                    return;
+                }
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Submitting...';
+
+            // Collect responses
+            var responses = {};
+            formDef.fields.forEach(function(field) {
+                if (field.type !== 'file') {
+                    var input = form.querySelector('[name="' + field.id + '"]');
+                    if (input) responses[field.id] = input.value;
+                }
+            });
+
+            var payload = {
+                formId: formDef.id,
+                responses: responses,
+                files: Object.keys(fileData).length > 0 ? fileData : undefined
+            };
+
+            fetch('/.netlify/functions/form-submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+            .then(function(result) {
+                if (!result.ok) throw new Error(result.data.error || 'Submission failed');
+
+                container.innerHTML = '<div class="success-card">' +
+                    '<div class="check">&#10003;</div>' +
+                    '<h2>Submission Received!</h2>' +
+                    '<p>Thank you for your submission. We\'ll review it and get back to you shortly.</p>' +
+                    '<p style="margin-top:20px;"><a href="/quarry-events" style="color:#d4af37;text-decoration:none;">View Events &rarr;</a></p>' +
+                    '</div>';
+            })
+            .catch(function(err) {
+                errDiv.textContent = err.message || 'Something went wrong. Please try again.';
+                errDiv.classList.add('show');
+                btn.disabled = false;
+                btn.textContent = 'Submit';
+            });
+        };
+    })();
+    </script>
+</body>
+</html>
