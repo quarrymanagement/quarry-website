@@ -433,14 +433,28 @@
 
             // Ticket Tier dropdown
             html += '<label>Ticket Tier *</label>';
-            html += '<select name="ticketTier" id="detailTicketTier" required onchange="updateDetailSummary()">';
+            html += '<select name="ticketTier" id="detailTicketTier" required onchange="onDetailTierChange()">';
             if (evt.tiers && evt.tiers.length > 0) {
                 for (var i = 0; i < evt.tiers.length; i++) {
                     var t = evt.tiers[i];
-                    html += '<option value="' + t.name + '" data-price="' + t.pricePerPerson + '">' + t.name + ' — ' + t.priceLabel + '</option>';
+                    var tierRemain = (t.capacity && t.capacity > 0) ? (t.capacity - (t.registeredCount || 0)) : null;
+                    var tierSoldOut = tierRemain !== null && tierRemain <= 0;
+                    var tierLabel = t.name + ' — ' + t.priceLabel;
+                    if (tierRemain !== null && tierRemain <= 5 && tierRemain > 0) tierLabel += ' (' + tierRemain + ' left!)';
+                    if (tierSoldOut) tierLabel += ' (SOLD OUT)';
+                    html += '<option value="' + t.name + '" data-price="' + t.pricePerPerson + '" data-vendor="' + (t.vendorTier ? '1' : '0') + '" data-capacity="' + (t.capacity || 0) + '" data-registered="' + (t.registeredCount || 0) + '"' + (tierSoldOut ? ' disabled' : '') + '>' + tierLabel + '</option>';
                 }
             }
             html += '</select>';
+            html += '<div id="detailTierAvailability" style="display:none;font-size:13px;color:#888;margin:-4px 0 12px;"></div>';
+
+            // Vendor fields (hidden by default, shown when vendor tier selected)
+            html += '<div id="detailVendorFields" style="display:none;">';
+            html += '<label>Business Name *</label>';
+            html += '<input type="text" name="businessName" id="detailBusinessName" placeholder="Your business or company name">';
+            html += '<label>Type of Business / Services *</label>';
+            html += '<input type="text" name="businessType" id="detailBusinessType" placeholder="e.g. Photography, Catering, Florist">';
+            html += '</div>';
 
             // Number of Tickets
             html += '<label>Number of Tickets *</label>';
@@ -472,19 +486,44 @@
             html += '<button type="submit" class="reg-submit" id="detailSubmitBtn">Proceed to Payment</button>';
             html += '</form>';
 
-            // Spots left
-            var remaining = (evt.totalCapacity || 0) - (evt.registeredCount || 0);
-            if (remaining > 0 && remaining <= 10) {
-                html += '<p class="spots-left">Only ' + remaining + ' spots left!</p>';
-            } else if (remaining > 10) {
-                html += '<p class="spots-left plenty">' + remaining + ' spots available</p>';
-            }
-
             card.innerHTML = html;
 
-            // Initialize order summary
-            updateDetailSummary();
+            // Initialize tier change handler and order summary
+            onDetailTierChange();
         }
+
+        // ─── Tier change handler for detail page ───
+        window.onDetailTierChange = function() {
+            var tierSelect = document.getElementById('detailTicketTier');
+            if (!tierSelect) return;
+            var selected = tierSelect.options[tierSelect.selectedIndex];
+            var vendorFields = document.getElementById('detailVendorFields');
+            var availDiv = document.getElementById('detailTierAvailability');
+            var bnInput = document.getElementById('detailBusinessName');
+            var btInput = document.getElementById('detailBusinessType');
+
+            if (selected && selected.dataset.vendor === '1') {
+                vendorFields.style.display = 'block';
+                bnInput.required = true;
+                btInput.required = true;
+            } else {
+                vendorFields.style.display = 'none';
+                if (bnInput) { bnInput.required = false; bnInput.value = ''; }
+                if (btInput) { btInput.required = false; btInput.value = ''; }
+            }
+
+            if (selected && parseInt(selected.dataset.capacity) > 0) {
+                var cap = parseInt(selected.dataset.capacity);
+                var reg = parseInt(selected.dataset.registered) || 0;
+                var remain = cap - reg;
+                availDiv.textContent = remain + ' of ' + cap + ' ' + selected.value + ' spots remaining';
+                availDiv.style.display = 'block';
+            } else {
+                availDiv.style.display = 'none';
+            }
+
+            updateDetailSummary();
+        };
 
         // ─── Coupon state for detail page ───
         var detailCoupon = null;
@@ -624,6 +663,8 @@
                 partySize: partySize,
                 ticketTier: ticketTier,
                 couponCode: detailCoupon ? detailCoupon.code : '',
+                businessName: (document.getElementById('detailBusinessName') || {}).value || '',
+                businessType: (document.getElementById('detailBusinessType') || {}).value || '',
                 successUrl: window.location.origin + '/quarry-events',
                 cancelUrl: window.location.href
             };
