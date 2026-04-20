@@ -5646,7 +5646,7 @@
             }
 
             list.innerHTML = subs.map(function(sub, idx) {
-                var statusColors = { pending: '#B8933A', approved: '#3cb464', rejected: '#dc2626' };
+                var statusColors = { pending: '#B8933A', approved: '#3cb464', rejected: '#dc2626', paid: '#2563eb' };
                 var statusColor = statusColors[sub.status] || '#888';
 
                 var fieldsHtml = '';
@@ -5665,15 +5665,72 @@
                     '</div>' +
                     fieldsHtml +
                     '<div style="display:flex;gap:6px;margin-top:12px;">' +
-                    (sub.status !== 'approved' ? '<button onclick="updateSubStatus(\'' + formId + '\',\'' + sub.id + '\',\'approved\')" style="padding:5px 12px;font-size:0.75rem;background:#3cb464;color:#fff;border:none;border-radius:4px;cursor:pointer;">Approve</button>' : '') +
-                    (sub.status !== 'rejected' ? '<button onclick="updateSubStatus(\'' + formId + '\',\'' + sub.id + '\',\'rejected\')" style="padding:5px 12px;font-size:0.75rem;background:#dc2626;color:#fff;border:none;border-radius:4px;cursor:pointer;">Reject</button>' : '') +
-                    (sub.status !== 'pending' ? '<button onclick="updateSubStatus(\'' + formId + '\',\'' + sub.id + '\',\'pending\')" style="padding:5px 12px;font-size:0.75rem;background:transparent;color:#888;border:1px solid #888;border-radius:4px;cursor:pointer;">Reset to Pending</button>' : '') +
+                    (sub.status === 'pending' ? '<button onclick="approveVendor(\'' + formId + '\',\'' + sub.id + '\')" style="padding:5px 12px;font-size:0.75rem;background:#3cb464;color:#fff;border:none;border-radius:4px;cursor:pointer;">Approve & Send Payment Link</button>' : '') +
+                    (sub.status === 'approved' ? '<span style="font-size:0.75rem;color:#3cb464;">&#10003; Approval email sent — awaiting payment</span>' : '') +
+                    (sub.status === 'paid' ? '<span style="font-size:0.75rem;color:#2563eb;">&#10003; Paid & Confirmed</span>' : '') +
+                    (sub.status !== 'rejected' && sub.status !== 'paid' ? '<button onclick="updateSubStatus(\'' + formId + '\',\'' + sub.id + '\',\'rejected\')" style="padding:5px 12px;font-size:0.75rem;background:#dc2626;color:#fff;border:none;border-radius:4px;cursor:pointer;">Reject</button>' : '') +
+                    (sub.status !== 'pending' && sub.status !== 'paid' ? '<button onclick="updateSubStatus(\'' + formId + '\',\'' + sub.id + '\',\'pending\')" style="padding:5px 12px;font-size:0.75rem;background:transparent;color:#888;border:1px solid #888;border-radius:4px;cursor:pointer;">Reset to Pending</button>' : '') +
                     '</div></div>';
             }).join('');
         }
 
         function closeSubmissions() {
             document.getElementById('submissionsSection').style.display = 'none';
+        }
+
+        async function approveVendor(formId, subId) {
+            var form = app.forms.find(function(f) { return f.id === formId; });
+            var subs = app.formSubmissions[formId] || [];
+            var sub = subs.find(function(s) { return s.id === subId; });
+            if (!form || !sub) return alert('Submission not found');
+
+            // Find vendor email and name from responses
+            var vendorEmail = '';
+            var vendorName = '';
+            form.fields.forEach(function(field) {
+                if (field.type === 'email' && sub.responses[field.id]) vendorEmail = sub.responses[field.id];
+                if (!vendorName && field.type === 'text' && sub.responses[field.id] && (field.label.toLowerCase().includes('name') || field.label.toLowerCase().includes('business'))) vendorName = sub.responses[field.id];
+            });
+            // Fallback: use first text field as name
+            if (!vendorName) {
+                form.fields.forEach(function(field) {
+                    if (!vendorName && field.type === 'text' && sub.responses[field.id]) vendorName = sub.responses[field.id];
+                });
+            }
+
+            if (!vendorEmail) return alert('No email found for this submission. Cannot send approval.');
+
+            var amount = prompt('Vendor fee amount (in dollars):', '150');
+            if (!amount) return;
+            amount = parseFloat(amount);
+            if (isNaN(amount) || amount <= 0) return alert('Invalid amount');
+
+            if (!confirm('Send approval email with $' + amount.toFixed(2) + ' payment link to ' + vendorEmail + '?')) return;
+
+            try {
+                var res = await fetch('/.netlify/functions/approve-vendor', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        formId: formId,
+                        submissionId: subId,
+                        vendorEmail: vendorEmail,
+                        vendorName: vendorName,
+                        formName: form.eventName || form.name,
+                        amount: amount
+                    })
+                });
+                var data = await res.json();
+                if (res.ok && data.success) {
+                    sub.status = 'approved';
+                    showSuccess('Approval email sent to ' + vendorEmail + ' with $' + amount.toFixed(2) + ' payment link!');
+                    viewSubmissions(formId);
+                } else {
+                    alert('Error: ' + (data.error || 'Unknown error'));
+                }
+            } catch(e) {
+                alert('Error: ' + e.message);
+            }
         }
 
         async function updateSubStatus(formId, subId, newStatus) {
