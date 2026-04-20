@@ -5230,9 +5230,18 @@
             document.body.appendChild(overlay);
 
             try {
-                // Build the complete events.json data
+                // Strip large base64 images to keep payload under Netlify's body limit
+                // The server will re-merge images from the current GitHub file
+                const strippedEvents = app.events.map(evt => {
+                    const copy = Object.assign({}, evt);
+                    if (copy.image && copy.image.length > 500) {
+                        delete copy.image;
+                    }
+                    return copy;
+                });
+
                 const eventsData = {
-                    events: app.events,
+                    events: strippedEvents,
                     bands: app.bands,
                     floorPlan: app.floorPlan,
                     floorPlans: app.floorPlans,
