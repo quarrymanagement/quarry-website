@@ -1362,6 +1362,7 @@
                         <div class="nav-dropdown-item" data-tab="email">Email</div>
                     </div>
                 </div>
+                <div class="nav-tab" data-tab="forms">Forms</div>
                 <div class="nav-tab" data-tab="payments">Payments</div>
                 <div class="nav-dropdown">
                     <div class="nav-tab" data-tab="floorplan" data-dropdown="settings">Settings</div>
@@ -1956,6 +1957,81 @@
                 </div>
             </div>
 
+            <!-- ========================================================
+                 FORMS TAB
+                 ======================================================== -->
+            <div id="formsTab" class="tab-content">
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">Custom Forms</div>
+                        <button class="btn-primary" onclick="openFormBuilder()" style="background:transparent;color:var(--gold);border:1px solid var(--gold);padding:8px 16px;font-size:0.8rem;cursor:pointer;border-radius:6px;">+ New Form</button>
+                    </div>
+                    <p style="color:#888;font-size:0.85rem;margin-bottom:20px;">Create custom forms for vendor applications, event sign-ups, surveys, and more. Each form gets a shareable link.</p>
+                    <div id="formsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;"></div>
+                </div>
+
+                <!-- Submissions Viewer -->
+                <div class="section" id="submissionsSection" style="display:none;margin-top:24px;">
+                    <div class="section-header">
+                        <div class="section-title" id="submissionsTitle">Submissions</div>
+                        <button class="btn-primary" onclick="closeSubmissions()" style="background:transparent;color:#888;border:1px solid #888;padding:6px 14px;font-size:0.75rem;cursor:pointer;border-radius:6px;">&larr; Back to Forms</button>
+                    </div>
+                    <div id="submissionsList"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ================================================================
+         FORM BUILDER PANEL
+         ================================================================ -->
+    <div class="event-editor-panel" id="formBuilderPanel">
+        <div class="event-editor-header">
+            <h3 id="formBuilderTitle">New Form</h3>
+            <button class="btn-close" onclick="closeFormBuilder()">&times;</button>
+        </div>
+        <div style="flex:1;overflow-y:auto;padding:20px;">
+            <div class="form-group">
+                <label class="form-label">Form Name *</label>
+                <input type="text" class="form-input" id="fbName" placeholder="e.g. Wedding Show Vendor Application" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea class="form-textarea" id="fbDescription" placeholder="What is this form for?" style="min-height:60px;"></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Link to Event (optional)</label>
+                <select class="form-select" id="fbEventId" style="width:100%;padding:8px;border-radius:6px;border:1px solid #ddd;font-size:0.85rem;">
+                    <option value="">Standalone — not linked to an event</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Status</label>
+                <select class="form-select" id="fbStatus" style="width:100%;padding:8px;border-radius:6px;border:1px solid #ddd;font-size:0.85rem;">
+                    <option value="active">Active — Accepting submissions</option>
+                    <option value="closed">Closed — No longer accepting</option>
+                </select>
+            </div>
+
+            <hr style="border:none;border-top:1px solid #e0d9d0;margin:20px 0;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                <label class="form-label" style="margin:0;font-size:0.95rem;">Form Fields</label>
+            </div>
+
+            <div id="fbFieldsList"></div>
+
+            <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:6px;">
+                <button type="button" onclick="addFormField('text')" class="btn-sm" style="padding:5px 10px;font-size:0.75rem;background:#f5f0e8;border:1px solid #ddd;border-radius:4px;cursor:pointer;">+ Text</button>
+                <button type="button" onclick="addFormField('email')" class="btn-sm" style="padding:5px 10px;font-size:0.75rem;background:#f5f0e8;border:1px solid #ddd;border-radius:4px;cursor:pointer;">+ Email</button>
+                <button type="button" onclick="addFormField('phone')" class="btn-sm" style="padding:5px 10px;font-size:0.75rem;background:#f5f0e8;border:1px solid #ddd;border-radius:4px;cursor:pointer;">+ Phone</button>
+                <button type="button" onclick="addFormField('dropdown')" class="btn-sm" style="padding:5px 10px;font-size:0.75rem;background:#f5f0e8;border:1px solid #ddd;border-radius:4px;cursor:pointer;">+ Dropdown</button>
+                <button type="button" onclick="addFormField('textarea')" class="btn-sm" style="padding:5px 10px;font-size:0.75rem;background:#f5f0e8;border:1px solid #ddd;border-radius:4px;cursor:pointer;">+ Text Area</button>
+                <button type="button" onclick="addFormField('file')" class="btn-sm" style="padding:5px 10px;font-size:0.75rem;background:#f5f0e8;border:1px solid #ddd;border-radius:4px;cursor:pointer;">+ File Upload</button>
+            </div>
+
+            <hr style="border:none;border-top:1px solid #e0d9d0;margin:20px 0;">
+            <button type="button" onclick="saveForm()" class="btn-save" style="width:100%;padding:12px;font-size:0.9rem;">Save Form</button>
         </div>
     </div>
 
@@ -2479,6 +2555,8 @@
             registrations: {},
             subscribers: [],
             emailHistory: [],
+            forms: [],
+            formSubmissions: {},
             currentEvent: null,
             currentBand: null,
             crmCurrentPage: 1,
@@ -3186,9 +3264,10 @@
         // ================================================================
         async function loadData() {
             try {
-                const [eventsRes, subscribersRes] = await Promise.all([
+                const [eventsRes, subscribersRes, formsRes] = await Promise.all([
                     fetch('/events.json'),
-                    fetch('/subscribers.json')
+                    fetch('/subscribers.json'),
+                    fetch('/forms.json?t=' + Date.now())
                 ]);
 
                 if (eventsRes.ok) {
@@ -3212,6 +3291,13 @@
                 if (subscribersRes.ok) {
                     app.subscribers = await subscribersRes.json();
                 }
+                if (formsRes.ok) {
+                    try {
+                        const formsData = await formsRes.json();
+                        app.forms = formsData.forms || [];
+                        app.formSubmissions = formsData.submissions || {};
+                    } catch(e) { app.forms = []; app.formSubmissions = {}; }
+                }
 
                 // Auto-merge registrations into CRM
                 mergeRegistrationsIntoCRM();
@@ -3226,6 +3312,7 @@
                 updateEmailRecipients();
                 drawFloorPlan();
                 renderSavedFloorPlans();
+                updateFormsGrid();
 
                 // Load payments data if on payments tab
                 loadPaymentsData();
@@ -5324,6 +5411,293 @@
 
         async function autoSaveToGitHub() {
             await saveToGitHub();
+        }
+
+        // ================================================================
+        // FORMS MANAGEMENT
+        // ================================================================
+        var currentEditForm = null;
+
+        function updateFormsGrid() {
+            var grid = document.getElementById('formsGrid');
+            if (!grid) return;
+            if (app.forms.length === 0) {
+                grid.innerHTML = '<div style="text-align:center;padding:40px;color:#888;grid-column:1/-1;"><p>No forms yet. Click "+ New Form" to create one.</p></div>';
+                return;
+            }
+            grid.innerHTML = app.forms.map(function(form) {
+                var subCount = (app.formSubmissions[form.id] || []).length;
+                var pendingCount = (app.formSubmissions[form.id] || []).filter(function(s) { return s.status === 'pending'; }).length;
+                var statusColor = form.status === 'active' ? '#3cb464' : '#888';
+                var statusLabel = form.status === 'active' ? 'Active' : 'Closed';
+                var formUrl = window.location.origin + '/quarry-form?form=' + form.slug;
+                return '<div style="background:#fff;border:1px solid #e0d9d0;border-radius:10px;padding:20px;position:relative;">' +
+                    '<div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px;">' +
+                    '<h4 style="margin:0;font-size:0.95rem;color:#2C1A0E;">' + form.name + '</h4>' +
+                    '<span style="font-size:0.7rem;padding:3px 8px;border-radius:12px;background:' + statusColor + '22;color:' + statusColor + ';font-weight:600;">' + statusLabel + '</span>' +
+                    '</div>' +
+                    (form.eventName ? '<div style="font-size:0.75rem;color:#B8933A;margin-bottom:6px;">Linked to: ' + form.eventName + '</div>' : '') +
+                    '<div style="font-size:0.8rem;color:#888;margin-bottom:12px;">' + form.fields.length + ' fields &bull; ' + subCount + ' submissions' + (pendingCount > 0 ? ' <strong style="color:#B8933A;">(' + pendingCount + ' pending)</strong>' : '') + '</div>' +
+                    '<div style="font-size:0.7rem;background:#faf7f2;padding:6px 10px;border-radius:6px;margin-bottom:12px;word-break:break-all;">' +
+                    '<a href="' + formUrl + '" target="_blank" style="color:#B8933A;text-decoration:none;">' + formUrl + '</a> ' +
+                    '<button onclick="copyFormLink(\'' + form.slug + '\')" style="background:none;border:none;color:#B8933A;cursor:pointer;font-size:0.7rem;text-decoration:underline;">Copy</button>' +
+                    '</div>' +
+                    '<div style="display:flex;gap:6px;">' +
+                    '<button onclick="editForm(\'' + form.id + '\')" style="flex:1;padding:6px;font-size:0.75rem;background:transparent;color:var(--gold);border:1px solid var(--gold);border-radius:4px;cursor:pointer;">Edit</button>' +
+                    '<button onclick="viewSubmissions(\'' + form.id + '\')" style="flex:1;padding:6px;font-size:0.75rem;background:var(--brown-dark);color:var(--gold);border:1px solid var(--gold);border-radius:4px;cursor:pointer;">Submissions (' + subCount + ')</button>' +
+                    '<button onclick="deleteForm(\'' + form.id + '\')" style="padding:6px 10px;font-size:0.75rem;background:transparent;color:#dc2626;border:1px solid #dc2626;border-radius:4px;cursor:pointer;">&times;</button>' +
+                    '</div></div>';
+            }).join('');
+        }
+
+        function copyFormLink(slug) {
+            var url = window.location.origin + '/quarry-form?form=' + slug;
+            navigator.clipboard.writeText(url).then(function() { showSuccess('Link copied!'); });
+        }
+
+        function openFormBuilder(formData) {
+            currentEditForm = formData || null;
+            document.getElementById('formBuilderTitle').textContent = formData ? 'Edit Form' : 'New Form';
+            document.getElementById('fbName').value = formData ? formData.name : '';
+            document.getElementById('fbDescription').value = formData ? (formData.description || '') : '';
+            document.getElementById('fbStatus').value = formData ? formData.status : 'active';
+
+            // Populate event dropdown
+            var eventSelect = document.getElementById('fbEventId');
+            eventSelect.innerHTML = '<option value="">Standalone — not linked to an event</option>';
+            app.events.forEach(function(e) {
+                eventSelect.innerHTML += '<option value="' + e.id + '"' + (formData && formData.eventId === e.id ? ' selected' : '') + '>' + e.name + '</option>';
+            });
+
+            // Populate fields
+            var fieldsList = document.getElementById('fbFieldsList');
+            fieldsList.innerHTML = '';
+            if (formData && formData.fields) {
+                formData.fields.forEach(function(f) { addFormField(f.type, f); });
+            }
+
+            document.getElementById('formBuilderPanel').classList.add('open');
+        }
+
+        function closeFormBuilder() {
+            document.getElementById('formBuilderPanel').classList.remove('open');
+            currentEditForm = null;
+        }
+
+        function addFormField(type, data) {
+            var list = document.getElementById('fbFieldsList');
+            var fieldId = data ? data.id : 'f_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+            var div = document.createElement('div');
+            div.className = 'fb-field-row';
+            div.dataset.fieldId = fieldId;
+            div.dataset.type = type;
+            div.style.cssText = 'border:1px solid #e0d9d0;border-radius:8px;padding:12px;margin-bottom:8px;background:#faf7f2;';
+
+            var typeLabels = { text: 'Text Input', email: 'Email', phone: 'Phone', dropdown: 'Dropdown', textarea: 'Text Area', file: 'File Upload' };
+
+            var html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
+                '<span style="font-size:0.7rem;font-weight:700;color:#B8933A;text-transform:uppercase;letter-spacing:0.08em;">' + (typeLabels[type] || type) + '</span>' +
+                '<div style="display:flex;gap:4px;align-items:center;">' +
+                '<button type="button" onclick="moveFieldUp(this)" style="background:none;border:none;cursor:pointer;font-size:1rem;color:#888;" title="Move up">&uarr;</button>' +
+                '<button type="button" onclick="moveFieldDown(this)" style="background:none;border:none;cursor:pointer;font-size:1rem;color:#888;" title="Move down">&darr;</button>' +
+                '<button type="button" onclick="this.closest(\'.fb-field-row\').remove()" style="background:none;border:none;cursor:pointer;font-size:1.1rem;color:#dc2626;" title="Remove">&times;</button>' +
+                '</div></div>';
+
+            html += '<div style="display:flex;gap:8px;flex-wrap:wrap;">';
+            html += '<div style="flex:2;min-width:140px;"><label style="font-size:0.7rem;font-weight:600;display:block;margin-bottom:2px;">Label</label>';
+            html += '<input type="text" class="form-input fb-label" value="' + (data ? data.label : '') + '" placeholder="e.g. Business Name" style="font-size:0.8rem;padding:6px 8px;"></div>';
+            html += '<div style="flex:1;min-width:100px;"><label style="font-size:0.7rem;font-weight:600;display:block;margin-bottom:2px;">Placeholder</label>';
+            html += '<input type="text" class="form-input fb-placeholder" value="' + (data ? (data.placeholder || '') : '') + '" placeholder="Optional..." style="font-size:0.8rem;padding:6px 8px;"></div>';
+            html += '<div style="flex:0 0 auto;display:flex;align-items:end;padding-bottom:4px;">';
+            html += '<label style="font-size:0.7rem;font-weight:600;display:flex;align-items:center;gap:4px;cursor:pointer;">';
+            html += '<input type="checkbox" class="fb-required" ' + (data && data.required ? 'checked' : '') + '> Required</label>';
+            html += '</div></div>';
+
+            if (type === 'dropdown') {
+                html += '<div style="margin-top:8px;"><label style="font-size:0.7rem;font-weight:600;display:block;margin-bottom:2px;">Options (comma-separated)</label>';
+                html += '<input type="text" class="form-input fb-options" value="' + (data && data.options ? data.options.join(', ') : '') + '" placeholder="Option 1, Option 2, Option 3" style="font-size:0.8rem;padding:6px 8px;"></div>';
+            }
+
+            div.innerHTML = html;
+            list.appendChild(div);
+        }
+
+        function moveFieldUp(btn) {
+            var row = btn.closest('.fb-field-row');
+            var prev = row.previousElementSibling;
+            if (prev) row.parentNode.insertBefore(row, prev);
+        }
+
+        function moveFieldDown(btn) {
+            var row = btn.closest('.fb-field-row');
+            var next = row.nextElementSibling;
+            if (next) row.parentNode.insertBefore(next, row);
+        }
+
+        function getFormFields() {
+            var rows = document.querySelectorAll('.fb-field-row');
+            var fields = [];
+            rows.forEach(function(row) {
+                var label = row.querySelector('.fb-label').value.trim();
+                if (!label) return;
+                var field = {
+                    id: row.dataset.fieldId,
+                    type: row.dataset.type,
+                    label: label,
+                    placeholder: row.querySelector('.fb-placeholder').value.trim(),
+                    required: row.querySelector('.fb-required').checked
+                };
+                if (row.dataset.type === 'dropdown') {
+                    var optInput = row.querySelector('.fb-options');
+                    field.options = optInput ? optInput.value.split(',').map(function(o) { return o.trim(); }).filter(function(o) { return o; }) : [];
+                }
+                fields.push(field);
+            });
+            return fields;
+        }
+
+        async function saveForm() {
+            var name = document.getElementById('fbName').value.trim();
+            if (!name) { alert('Please enter a form name.'); return; }
+
+            var fields = getFormFields();
+            if (fields.length === 0) { alert('Please add at least one field.'); return; }
+
+            var eventId = document.getElementById('fbEventId').value;
+            var eventName = '';
+            if (eventId) {
+                var ev = app.events.find(function(e) { return e.id === eventId; });
+                if (ev) eventName = ev.name;
+            }
+
+            var formData = {
+                id: currentEditForm ? currentEditForm.id : 'form_' + Date.now(),
+                name: name,
+                slug: currentEditForm ? currentEditForm.slug : name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+$/, ''),
+                description: document.getElementById('fbDescription').value.trim(),
+                eventId: eventId || null,
+                eventName: eventName,
+                status: document.getElementById('fbStatus').value,
+                fields: fields,
+                submissionCount: currentEditForm ? (currentEditForm.submissionCount || 0) : 0,
+                created: currentEditForm ? currentEditForm.created : new Date().toISOString()
+            };
+
+            // Update or add
+            if (currentEditForm) {
+                var idx = app.forms.findIndex(function(f) { return f.id === currentEditForm.id; });
+                if (idx >= 0) app.forms[idx] = formData;
+                else app.forms.push(formData);
+            } else {
+                app.forms.push(formData);
+            }
+
+            // Save to GitHub via save-forms function
+            try {
+                var res = await fetch('/.netlify/functions/save-forms', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ forms: app.forms })
+                });
+                var result = await res.json();
+                if (res.ok) {
+                    showSuccess('Form saved! Link is live in ~60 seconds.');
+                    closeFormBuilder();
+                    updateFormsGrid();
+                } else {
+                    alert('Save error: ' + (result.error || 'Unknown error'));
+                }
+            } catch (e) {
+                alert('Save error: ' + e.message);
+            }
+        }
+
+        function editForm(formId) {
+            var form = app.forms.find(function(f) { return f.id === formId; });
+            if (form) openFormBuilder(form);
+        }
+
+        function deleteForm(formId) {
+            if (!confirm('Delete this form? Submissions will also be removed.')) return;
+            app.forms = app.forms.filter(function(f) { return f.id !== formId; });
+            delete app.formSubmissions[formId];
+            fetch('/.netlify/functions/save-forms', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ forms: app.forms })
+            }).then(function() {
+                showSuccess('Form deleted.');
+                updateFormsGrid();
+            });
+        }
+
+        function viewSubmissions(formId) {
+            var form = app.forms.find(function(f) { return f.id === formId; });
+            if (!form) return;
+            var subs = app.formSubmissions[formId] || [];
+
+            document.getElementById('submissionsTitle').textContent = 'Submissions — ' + form.name + ' (' + subs.length + ')';
+            document.getElementById('submissionsSection').style.display = 'block';
+
+            var list = document.getElementById('submissionsList');
+            if (subs.length === 0) {
+                list.innerHTML = '<p style="color:#888;text-align:center;padding:40px;">No submissions yet.</p>';
+                return;
+            }
+
+            list.innerHTML = subs.map(function(sub, idx) {
+                var statusColors = { pending: '#B8933A', approved: '#3cb464', rejected: '#dc2626' };
+                var statusColor = statusColors[sub.status] || '#888';
+
+                var fieldsHtml = '';
+                form.fields.forEach(function(field) {
+                    var val = sub.responses[field.id] || '(empty)';
+                    fieldsHtml += '<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid #f0ede8;font-size:0.8rem;">' +
+                        '<span style="font-weight:600;color:#555;min-width:120px;">' + field.label + '</span>' +
+                        '<span style="color:#333;">' + val + '</span></div>';
+                });
+
+                return '<div style="background:#fff;border:1px solid #e0d9d0;border-radius:8px;padding:16px;margin-bottom:12px;">' +
+                    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">' +
+                    '<div><span style="font-size:0.85rem;font-weight:600;color:#2C1A0E;">Submission #' + (subs.length - idx) + '</span>' +
+                    '<span style="font-size:0.7rem;color:#888;margin-left:8px;">' + new Date(sub.created).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }) + '</span></div>' +
+                    '<span style="font-size:0.7rem;padding:3px 8px;border-radius:12px;background:' + statusColor + '22;color:' + statusColor + ';font-weight:600;text-transform:uppercase;">' + sub.status + '</span>' +
+                    '</div>' +
+                    fieldsHtml +
+                    '<div style="display:flex;gap:6px;margin-top:12px;">' +
+                    (sub.status !== 'approved' ? '<button onclick="updateSubStatus(\'' + formId + '\',\'' + sub.id + '\',\'approved\')" style="padding:5px 12px;font-size:0.75rem;background:#3cb464;color:#fff;border:none;border-radius:4px;cursor:pointer;">Approve</button>' : '') +
+                    (sub.status !== 'rejected' ? '<button onclick="updateSubStatus(\'' + formId + '\',\'' + sub.id + '\',\'rejected\')" style="padding:5px 12px;font-size:0.75rem;background:#dc2626;color:#fff;border:none;border-radius:4px;cursor:pointer;">Reject</button>' : '') +
+                    (sub.status !== 'pending' ? '<button onclick="updateSubStatus(\'' + formId + '\',\'' + sub.id + '\',\'pending\')" style="padding:5px 12px;font-size:0.75rem;background:transparent;color:#888;border:1px solid #888;border-radius:4px;cursor:pointer;">Reset to Pending</button>' : '') +
+                    '</div></div>';
+            }).join('');
+        }
+
+        function closeSubmissions() {
+            document.getElementById('submissionsSection').style.display = 'none';
+        }
+
+        async function updateSubStatus(formId, subId, newStatus) {
+            var subs = app.formSubmissions[formId] || [];
+            var sub = subs.find(function(s) { return s.id === subId; });
+            if (sub) {
+                sub.status = newStatus;
+                // Re-save forms.json with updated submissions
+                try {
+                    // We need to push the full forms.json including submissions
+                    var payload = JSON.stringify({ forms: app.forms, submissions: app.formSubmissions });
+                    var res = await fetch('/.netlify/functions/save-github-file', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ filePath: 'forms.json', content: JSON.stringify({ forms: app.forms, submissions: app.formSubmissions }, null, 2), message: 'Update submission status: ' + newStatus })
+                    });
+                    if (res.ok) {
+                        showSuccess('Status updated to ' + newStatus);
+                        viewSubmissions(formId); // Re-render
+                    }
+                } catch(e) {
+                    alert('Error: ' + e.message);
+                }
+            }
         }
 
         async function saveToGitHub() {
