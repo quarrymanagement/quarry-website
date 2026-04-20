@@ -3107,6 +3107,16 @@
             } catch (e) { return dateStr; }
         }
 
+        function formatEventTime(timeStr) {
+            if (!timeStr) return '';
+            var parts = timeStr.split(':');
+            var hour = parseInt(parts[0]);
+            var min = parts[1];
+            var ampm = hour >= 12 ? 'PM' : 'AM';
+            var hour12 = hour % 12 || 12;
+            return hour12 + ':' + min + ' ' + ampm;
+        }
+
         // ================================================================
         // AUTO-MOVE: Past confirmed events → CRM as customers
         // ================================================================
@@ -3355,7 +3365,7 @@
                     </div>
                     <div class="event-card-content">
                         <div class="event-card-title">${event.name}</div>
-                        <div class="event-card-date">${event.date} at ${event.time}</div>
+                        <div class="event-card-date">${event.date} at ${formatEventTime(event.time)}</div>
                         <div class="event-card-meta">
                             <span class="event-status status-${(event.status || 'available').toLowerCase().replace(/\s+/g, '-')}">${event.status || 'Active'}</span>
                         </div>
