@@ -1,5 +1,4 @@
 const https = require('https');
-const crypto = require('crypto');
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -15,59 +14,42 @@ const response = (statusCode, body) => ({
 
 const handleOptions = () => response(200, { message: 'OK' });
 
-const signRequest = (method, host, path, payload, accessKeyId, secretAccessKey, region) => {
-  const service = 'ses';
-  const algorithm = 'AWS4-HMAC-SHA256';
-  const now = new Date();
-  const amzDate = now.toISOString().replace(/[:-]|\.\d{3}/g, '');
-  const dateStamp = now.toISOString().split('T')[0].replace(/-/g, '');
-  const canonicalUri = path;
-  const canonicalHeaders = `content-type:application/x-amz-json-1.0\nhost:${host}\nx-amz-date:${amzDate}\nx-amz-target:SimpleEmailService.SendEmail\n`;
-  const signedHeaders = 'content-type;host;x-amz-date;x-amz-target';
-  const payloadHash = crypto.createHash('sha256').update(payload).digest('hex');
-  const canonicalRequest = [method, canonicalUri, '', canonicalHeaders, signedHeaders, payloadHash].join('\n');
-  const credentialScope = `${dateStamp}/${region}/${service}/aws4_request`;
-  const stringToSign = [algorithm, amzDate, credentialScope, crypto.createHash('sha256').update(canonicalRequest).digest('hex')].join('\n');
-  const kDate = crypto.createHmac('sha256', `AWS4${secretAccessKey}`).update(dateStamp).digest();
-  const kRegion = crypto.createHmac('sha256', kDate).update(region).digest();
-  const kService = crypto.createHmac('sha256', kRegion).update(service).digest();
-  const kSigning = crypto.createHmac('sha256', kService).update('aws4_request').digest();
-  const signature = crypto.createHmac('sha256', kSigning).update(stringToSign).digest('hex');
-  return {
-    'Authorization': `${algorithm} Credential=${accessKeyId}/${credentialScope}, SignedHeaders=${signedHeaders}, Signature=${signature}`,
-    'X-Amz-Date': amzDate,
-    'X-Amz-Target': 'SimpleEmailService.SendEmail',
-    'Content-Type': 'application/x-amz-json-1.0',
-    'Host': host,
-  };
-};
+function sendGridEmail(to, subject, htmlBody, fromEmail, fromName) {
+  fromEmail = fromEmail || 'management@thequarrystl.com';
+  fromName = fromName || 'The Quarry STL';
+  var toArray = Array.isArray(to) ? to : [to];
+  var payload = JSON.stringify({
+    personalizations: [{ to: toArray.map(function(email) { return { email: email }; }) }],
+    from: { email: fromEmail, name: fromName },
+    subject: subject,
+    content: [{ type: 'text/html', value: htmlBody }],
+  });
 
-const sendEmail = (toEmail, subject, htmlBody, accessKeyId, secretAccessKey, region) => {
-  return new Promise((resolve, reject) => {
-    const fromEmail = 'management@thequarrystl.com';
-    const host = `email.${region}.amazonaws.com`;
-    const payload = JSON.stringify({
-      Source: fromEmail,
-      Destination: { ToAddresses: [toEmail] },
-      Message: {
-        Subject: { Data: subject, Charset: 'UTF-8' },
-        Body: { Html: { Data: htmlBody, Charset: 'UTF-8' } },
+  return new Promise(function(resolve, reject) {
+    var req = https.request({
+      hostname: 'api.sendgrid.com',
+      path: '/v3/mail/send',
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + process.env.SENDGRID_API_KEY,
+        'Content-Type': 'application/json',
       },
-    });
-    const headers = signRequest('POST', host, '/', payload, accessKeyId, secretAccessKey, region);
-    const req = https.request({ hostname: host, path: '/', method: 'POST', headers }, (res) => {
-      let body = '';
-      res.on('data', (chunk) => body += chunk);
-      res.on('end', () => {
-        if (res.statusCode === 200) resolve({ success: true });
-        else reject(new Error(`SES error: ${res.statusCode} - ${body}`));
+    }, function(res) {
+      var body = '';
+      res.on('data', function(chunk) { body += chunk; });
+      res.on('end', function() {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          resolve({ statusCode: res.statusCode, body: body });
+        } else {
+          reject(new Error('SendGrid error ' + res.statusCode + ': ' + body));
+        }
       });
     });
     req.on('error', reject);
     req.write(payload);
     req.end();
   });
-};
+}
 
 const dayLabels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const dayKeys = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -185,12 +167,8 @@ exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return handleOptions();
   if (event.httpMethod !== 'POST') return response(405, { error: 'Method not allowed' });
 
-  const accessKeyId = process.env.SES_ACCESS_KEY_ID;
-  const secretAccessKey = process.env.SES_SECRET_ACCESS_KEY;
-  const region = process.env.SES_REGION || 'us-east-1';
-
-  if (!accessKeyId || !secretAccessKey) {
-    return response(500, { error: 'SES credentials not configured on server' });
+  if (!process.env.SENDGRID_API_KEY) {
+    return response(500, { error: 'SendGrid API key not configured on server' });
   }
 
   try {
@@ -215,7 +193,7 @@ exports.handler = async (event) => {
         const name = emp.name || emp.firstName || 'Team Member';
         const subject = `Your Quarry Schedule - Week of ${weekLabel}`;
         const htmlBody = generateEmailBody(name, weekOf, emp.id, allShifts, empList);
-        await sendEmail(emp.email, subject, htmlBody, accessKeyId, secretAccessKey, region);
+        await sendGridEmail(emp.email, subject, htmlBody);
         results.push({ email: emp.email, success: true });
       } catch (err) {
         console.error(`Error sending to ${emp.email}:`, err);

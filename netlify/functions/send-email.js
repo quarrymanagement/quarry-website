@@ -1,4 +1,4 @@
-const AWS = require('aws-sdk');
+const https = require('https');
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -14,13 +14,6 @@ const response = (statusCode, body) => ({
 
 const handleOptions = () => response(200, { message: 'OK' });
 
-// Initialize AWS SES
-const ses = new AWS.SES({
-  region: process.env.SES_REGION || 'us-east-1',
-  accessKeyId: process.env.SES_ACCESS_KEY_ID,
-  secretAccessKey: process.env.SES_SECRET_ACCESS_KEY,
-});
-
 // Replace merge tags in template
 const replaceMergeTags = (htmlBody, recipientData) => {
   let result = htmlBody;
@@ -30,15 +23,43 @@ const replaceMergeTags = (htmlBody, recipientData) => {
   return result;
 };
 
-// Send individual email via SES
-const sendOneEmail = (params) => {
-  return new Promise((resolve, reject) => {
-    ses.sendEmail(params, (err, data) => {
-      if (err) reject(err);
-      else resolve(data);
-    });
+// Send individual email via SendGrid
+function sendGridEmail(to, subject, htmlBody, fromEmail, fromName) {
+  fromEmail = fromEmail || 'management@thequarrystl.com';
+  fromName = fromName || 'The Quarry STL';
+  var toArray = Array.isArray(to) ? to : [to];
+  var payload = JSON.stringify({
+    personalizations: [{ to: toArray.map(function(email) { return { email: email }; }) }],
+    from: { email: fromEmail, name: fromName },
+    subject: subject,
+    content: [{ type: 'text/html', value: htmlBody }],
   });
-};
+
+  return new Promise(function(resolve, reject) {
+    var req = https.request({
+      hostname: 'api.sendgrid.com',
+      path: '/v3/mail/send',
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + process.env.SENDGRID_API_KEY,
+        'Content-Type': 'application/json',
+      },
+    }, function(res) {
+      var body = '';
+      res.on('data', function(chunk) { body += chunk; });
+      res.on('end', function() {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          resolve({ statusCode: res.statusCode, body: body });
+        } else {
+          reject(new Error('SendGrid error ' + res.statusCode + ': ' + body));
+        }
+      });
+    });
+    req.on('error', reject);
+    req.write(payload);
+    req.end();
+  });
+}
 
 // Main handler
 exports.handler = async (event) => {
@@ -94,16 +115,7 @@ exports.handler = async (event) => {
       try {
         const personalizedHtml = replaceMergeTags(htmlBody, recipient);
 
-        const emailParams = {
-          Source: `${fromName} <${fromEmail}>`,
-          Destination: { ToAddresses: [recipient.email] },
-          Message: {
-            Subject: { Data: subject, Charset: 'UTF-8' },
-            Body: { Html: { Data: personalizedHtml, Charset: 'UTF-8' } },
-          },
-        };
-
-        await sendOneEmail(emailParams);
+        await sendGridEmail(recipient.email, subject, personalizedHtml, fromEmail, fromName);
         sentCount++;
       } catch (error) {
         console.error(`Failed to send to ${recipient.email}:`, error.message);

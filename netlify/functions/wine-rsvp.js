@@ -1,4 +1,42 @@
 const Stripe = require('stripe');
+const https = require('https');
+
+function sendGridEmail(to, subject, htmlBody, fromEmail, fromName) {
+  fromEmail = fromEmail || 'management@thequarrystl.com';
+  fromName = fromName || 'The Quarry STL';
+  var toArray = Array.isArray(to) ? to : [to];
+  var payload = JSON.stringify({
+    personalizations: [{ to: toArray.map(function(email) { return { email: email }; }) }],
+    from: { email: fromEmail, name: fromName },
+    subject: subject,
+    content: [{ type: 'text/html', value: htmlBody }],
+  });
+
+  return new Promise(function(resolve, reject) {
+    var req = https.request({
+      hostname: 'api.sendgrid.com',
+      path: '/v3/mail/send',
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + process.env.SENDGRID_API_KEY,
+        'Content-Type': 'application/json',
+      },
+    }, function(res) {
+      var body = '';
+      res.on('data', function(chunk) { body += chunk; });
+      res.on('end', function() {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          resolve({ statusCode: res.statusCode, body: body });
+        } else {
+          reject(new Error('SendGrid error ' + res.statusCode + ': ' + body));
+        }
+      });
+    });
+    req.on('error', reject);
+    req.write(payload);
+    req.end();
+  });
+}
 
 exports.handler = async (event) => {
   const headers = { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' };
@@ -86,10 +124,10 @@ exports.handler = async (event) => {
     });
 
     // Send confirmation email to the member
-    await sendMemberEmail(token, siteId, { name, email, tasting, date, time });
+    await sendMemberEmail({ name, email, tasting, date, time });
 
     // Send notification email to the owner
-    await sendOwnerRsvpEmail(token, siteId, { name, email, tasting, date, time });
+    await sendOwnerRsvpEmail({ name, email, tasting, date, time });
 
     console.log('RSVP confirmed:', name, email, tasting);
     return { statusCode: 200, headers, body: JSON.stringify({ authorized: true, confirmed: true }) };
@@ -100,68 +138,58 @@ exports.handler = async (event) => {
   }
 };
 
-async function sendMemberEmail(token, siteId, data) {
+async function sendMemberEmail(data) {
   try {
-    const res = await fetch('https://api.netlify.com/v1/sendEmail', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
-      body: JSON.stringify({
-        from: 'wineclub@thequarrystl.com',
-        to: data.email,
-        subject: 'RSVP Confirmed — ' + data.tasting,
-        html:
-          '<div style="font-family:Arial,sans-serif;max-width:600px">' +
-          '<div style="background:#1A0E08;padding:24px;text-align:center">' +
-          '<h1 style="color:#B8933A;margin:0">The Quarry</h1>' +
-          '<p style="color:#F5F0E8;font-size:0.8rem;letter-spacing:0.15em;margin:4px 0 0">NEW MELLE, MISSOURI</p></div>' +
-          '<div style="padding:32px 24px">' +
-          '<h2 style="color:#2C1A0E">RSVP Confirmed!</h2>' +
-          '<p>Hi ' + data.name + ', you\'re all set.</p>' +
-          '<div style="background:#FAF7F2;border-left:4px solid #B8933A;padding:16px 20px;margin:20px 0">' +
-          '<p style="margin:4px 0"><b>Tasting:</b> ' + data.tasting + '</p>' +
-          (data.date ? '<p style="margin:4px 0"><b>Date:</b> ' + data.date + '</p>' : '') +
-          (data.time ? '<p style="margin:4px 0"><b>Time:</b> ' + data.time + '</p>' : '') +
-          '</div>' +
-          '<p>Questions? Call <a href="tel:6362248257" style="color:#B8933A">636-224-8257</a> or email ' +
-          '<a href="mailto:management@thequarrystl.com" style="color:#B8933A">management@thequarrystl.com</a></p></div>' +
-          '<div style="background:#1A0E08;padding:16px;text-align:center">' +
-          '<p style="color:rgba(255,255,255,0.4);font-size:0.75rem;margin:0">3960 Highway Z, New Melle, MO 63385</p></div></div>',
-        siteId
-      })
-    });
-    console.log('Member RSVP email status:', res.status);
+    await sendGridEmail(
+      data.email,
+      'RSVP Confirmed — ' + data.tasting,
+      '<div style="font-family:Arial,sans-serif;max-width:600px">' +
+      '<div style="background:#1A0E08;padding:24px;text-align:center">' +
+      '<h1 style="color:#B8933A;margin:0">The Quarry</h1>' +
+      '<p style="color:#F5F0E8;font-size:0.8rem;letter-spacing:0.15em;margin:4px 0 0">NEW MELLE, MISSOURI</p></div>' +
+      '<div style="padding:32px 24px">' +
+      '<h2 style="color:#2C1A0E">RSVP Confirmed!</h2>' +
+      '<p>Hi ' + data.name + ', you\'re all set.</p>' +
+      '<div style="background:#FAF7F2;border-left:4px solid #B8933A;padding:16px 20px;margin:20px 0">' +
+      '<p style="margin:4px 0"><b>Tasting:</b> ' + data.tasting + '</p>' +
+      (data.date ? '<p style="margin:4px 0"><b>Date:</b> ' + data.date + '</p>' : '') +
+      (data.time ? '<p style="margin:4px 0"><b>Time:</b> ' + data.time + '</p>' : '') +
+      '</div>' +
+      '<p>Questions? Call <a href="tel:6362248257" style="color:#B8933A">636-224-8257</a> or email ' +
+      '<a href="mailto:management@thequarrystl.com" style="color:#B8933A">management@thequarrystl.com</a></p></div>' +
+      '<div style="background:#1A0E08;padding:16px;text-align:center">' +
+      '<p style="color:rgba(255,255,255,0.4);font-size:0.75rem;margin:0">3960 Highway Z, New Melle, MO 63385</p></div></div>',
+      'wineclub@thequarrystl.com',
+      'The Quarry STL'
+    );
+    console.log('Member RSVP email sent via SendGrid');
   } catch (e) {
     console.error('sendMemberEmail error:', e.message);
   }
 }
 
-async function sendOwnerRsvpEmail(token, siteId, data) {
+async function sendOwnerRsvpEmail(data) {
   try {
-    const res = await fetch('https://api.netlify.com/v1/sendEmail', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
-      body: JSON.stringify({
-        from: 'wineclub@thequarrystl.com',
-        to: 'management@thequarrystl.com',
-        subject: 'New Wine RSVP — ' + data.tasting + ' — ' + data.name,
-        html:
-          '<div style="font-family:Arial,sans-serif;max-width:600px">' +
-          '<div style="background:#1A0E08;padding:24px;text-align:center">' +
-          '<h1 style="color:#B8933A;margin:0">The Quarry</h1>' +
-          '<p style="color:#F5F0E8;font-size:0.8rem;letter-spacing:0.15em;margin:4px 0 0">NEW MELLE, MISSOURI</p></div>' +
-          '<div style="padding:32px 24px">' +
-          '<h2 style="color:#2C1A0E">New Wine Club RSVP</h2>' +
-          '<div style="background:#FAF7F2;border-left:4px solid #B8933A;padding:16px 20px;margin:20px 0">' +
-          '<p style="margin:4px 0"><b>Member:</b> ' + data.name + '</p>' +
-          '<p style="margin:4px 0"><b>Email:</b> ' + data.email + '</p>' +
-          '<p style="margin:4px 0"><b>Tasting:</b> ' + data.tasting + '</p>' +
-          (data.date ? '<p style="margin:4px 0"><b>Date:</b> ' + data.date + '</p>' : '') +
-          (data.time ? '<p style="margin:4px 0"><b>Time:</b> ' + data.time + '</p>' : '') +
-          '</div></div></div>',
-        siteId
-      })
-    });
-    console.log('Owner RSVP email status:', res.status);
+    await sendGridEmail(
+      'management@thequarrystl.com',
+      'New Wine RSVP — ' + data.tasting + ' — ' + data.name,
+      '<div style="font-family:Arial,sans-serif;max-width:600px">' +
+      '<div style="background:#1A0E08;padding:24px;text-align:center">' +
+      '<h1 style="color:#B8933A;margin:0">The Quarry</h1>' +
+      '<p style="color:#F5F0E8;font-size:0.8rem;letter-spacing:0.15em;margin:4px 0 0">NEW MELLE, MISSOURI</p></div>' +
+      '<div style="padding:32px 24px">' +
+      '<h2 style="color:#2C1A0E">New Wine Club RSVP</h2>' +
+      '<div style="background:#FAF7F2;border-left:4px solid #B8933A;padding:16px 20px;margin:20px 0">' +
+      '<p style="margin:4px 0"><b>Member:</b> ' + data.name + '</p>' +
+      '<p style="margin:4px 0"><b>Email:</b> ' + data.email + '</p>' +
+      '<p style="margin:4px 0"><b>Tasting:</b> ' + data.tasting + '</p>' +
+      (data.date ? '<p style="margin:4px 0"><b>Date:</b> ' + data.date + '</p>' : '') +
+      (data.time ? '<p style="margin:4px 0"><b>Time:</b> ' + data.time + '</p>' : '') +
+      '</div></div></div>',
+      'wineclub@thequarrystl.com',
+      'The Quarry STL'
+    );
+    console.log('Owner RSVP email sent via SendGrid');
   } catch (e) {
     console.error('sendOwnerRsvpEmail error:', e.message);
   }

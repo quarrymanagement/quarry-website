@@ -1,34 +1,56 @@
 // Netlify event-triggered function: fires on every form submission
-// Sends confirmation emails via Amazon SES (the canonical email path for this site)
+// Sends confirmation emails via SendGrid (the canonical email path for this site)
 //
 // Handles two forms so far:
 //   - wine-club-registration  -> member confirmation + owner notification
 //   - wedding-tour             -> couple confirmation + Jacqueline + management
 
-const AWS = require('aws-sdk');
+const https = require('https');
 
-const ses = new AWS.SES({
-  region: process.env.SES_REGION || 'us-east-1',
-  accessKeyId: process.env.SES_ACCESS_KEY_ID,
-  secretAccessKey: process.env.SES_SECRET_ACCESS_KEY,
-});
+function sendGridEmail(to, subject, htmlBody, fromEmail, fromName) {
+  fromEmail = fromEmail || 'management@thequarrystl.com';
+  fromName = fromName || 'The Quarry STL';
+  var toArray = Array.isArray(to) ? to : [to];
+  var payload = JSON.stringify({
+    personalizations: [{ to: toArray.map(function(email) { return { email: email }; }) }],
+    from: { email: fromEmail, name: fromName },
+    subject: subject,
+    content: [{ type: 'text/html', value: htmlBody }],
+  });
 
-const FROM = 'The Quarry STL <management@thequarrystl.com>';
+  return new Promise(function(resolve, reject) {
+    var req = https.request({
+      hostname: 'api.sendgrid.com',
+      path: '/v3/mail/send',
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + process.env.SENDGRID_API_KEY,
+        'Content-Type': 'application/json',
+      },
+    }, function(res) {
+      var body = '';
+      res.on('data', function(chunk) { body += chunk; });
+      res.on('end', function() {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          resolve({ statusCode: res.statusCode, body: body });
+        } else {
+          reject(new Error('SendGrid error ' + res.statusCode + ': ' + body));
+        }
+      });
+    });
+    req.on('error', reject);
+    req.write(payload);
+    req.end();
+  });
+}
 
 async function sendEmail({ to, subject, html }) {
   if (!to) return;
   try {
-    await ses.sendEmail({
-      Source: FROM,
-      Destination: { ToAddresses: [to] },
-      Message: {
-        Subject: { Data: subject, Charset: 'UTF-8' },
-        Body: { Html: { Data: html, Charset: 'UTF-8' } },
-      },
-    }).promise();
-    console.log('SES sent to', to);
+    await sendGridEmail(to, subject, html);
+    console.log('SendGrid sent to', to);
   } catch (e) {
-    console.error('SES error to', to, e && e.message);
+    console.error('SendGrid error to', to, e && e.message);
   }
 }
 
