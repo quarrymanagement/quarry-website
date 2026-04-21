@@ -370,22 +370,6 @@
             font-size: 0.85rem;
         }
         .registrations-table th { color: #9a7b2a; font-weight: 600; }
-        .registrations-table .status-cancelled { color: #dc3545; font-weight: 600; }
-        .registrations-table .status-paid { color: #28a745; font-weight: 600; }
-        .btn-cancel-reg {
-            background: #dc3545; color: #fff; border: none; padding: 0.3rem 0.6rem;
-            border-radius: 4px; font-size: 0.75rem; cursor: pointer; white-space: nowrap;
-        }
-        .btn-cancel-reg:hover { background: #c82333; }
-        .btn-refund-reg {
-            background: #B8933A; color: #fff; border: none; padding: 0.3rem 0.6rem;
-            border-radius: 4px; font-size: 0.75rem; cursor: pointer; white-space: nowrap;
-        }
-        .btn-refund-reg:hover { background: #9a7b2a; }
-        .btn-cancel-reg:disabled, .btn-refund-reg:disabled {
-            opacity: 0.5; cursor: not-allowed;
-        }
-        .reg-actions { display: flex; gap: 0.4rem; }
         .editor-buttons { display: flex; gap: 1rem; margin-top: 2rem; }
         .btn-save {
             flex: 1; background: #9a7b2a; color: #fff; border: none;
@@ -1362,7 +1346,6 @@
                         <div class="nav-dropdown-item" data-tab="email">Email</div>
                     </div>
                 </div>
-                <div class="nav-tab" data-tab="forms">Forms</div>
                 <div class="nav-tab" data-tab="payments">Payments</div>
                 <div class="nav-dropdown">
                     <div class="nav-tab" data-tab="floorplan" data-dropdown="settings">Settings</div>
@@ -1957,81 +1940,6 @@
                 </div>
             </div>
 
-            <!-- ========================================================
-                 FORMS TAB
-                 ======================================================== -->
-            <div id="formsTab" class="tab-content">
-                <div class="section">
-                    <div class="section-header">
-                        <div class="section-title">Custom Forms</div>
-                        <button class="btn-primary" onclick="openFormBuilder()" style="background:transparent;color:var(--gold);border:1px solid var(--gold);padding:8px 16px;font-size:0.8rem;cursor:pointer;border-radius:6px;">+ New Form</button>
-                    </div>
-                    <p style="color:#888;font-size:0.85rem;margin-bottom:20px;">Create custom forms for vendor applications, event sign-ups, surveys, and more. Each form gets a shareable link.</p>
-                    <div id="formsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;"></div>
-                </div>
-
-                <!-- Submissions Viewer -->
-                <div class="section" id="submissionsSection" style="display:none;margin-top:24px;">
-                    <div class="section-header">
-                        <div class="section-title" id="submissionsTitle">Submissions</div>
-                        <button class="btn-primary" onclick="closeSubmissions()" style="background:transparent;color:#888;border:1px solid #888;padding:6px 14px;font-size:0.75rem;cursor:pointer;border-radius:6px;">&larr; Back to Forms</button>
-                    </div>
-                    <div id="submissionsList"></div>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- ================================================================
-         FORM BUILDER PANEL
-         ================================================================ -->
-    <div class="event-editor-panel" id="formBuilderPanel">
-        <div class="event-editor-header">
-            <h3 id="formBuilderTitle">New Form</h3>
-            <button class="btn-close" onclick="closeFormBuilder()">&times;</button>
-        </div>
-        <div style="flex:1;overflow-y:auto;padding:20px;">
-            <div class="form-group">
-                <label class="form-label">Form Name *</label>
-                <input type="text" class="form-input" id="fbName" placeholder="e.g. Wedding Show Vendor Application" required>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Description</label>
-                <textarea class="form-textarea" id="fbDescription" placeholder="What is this form for?" style="min-height:60px;"></textarea>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Link to Event (optional)</label>
-                <select class="form-select" id="fbEventId" style="width:100%;padding:8px;border-radius:6px;border:1px solid #ddd;font-size:0.85rem;">
-                    <option value="">Standalone — not linked to an event</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Status</label>
-                <select class="form-select" id="fbStatus" style="width:100%;padding:8px;border-radius:6px;border:1px solid #ddd;font-size:0.85rem;">
-                    <option value="active">Active — Accepting submissions</option>
-                    <option value="closed">Closed — No longer accepting</option>
-                </select>
-            </div>
-
-            <hr style="border:none;border-top:1px solid #e0d9d0;margin:20px 0;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-                <label class="form-label" style="margin:0;font-size:0.95rem;">Form Fields</label>
-            </div>
-
-            <div id="fbFieldsList"></div>
-
-            <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:6px;">
-                <button type="button" onclick="addFormField('text')" class="btn-sm" style="padding:5px 10px;font-size:0.75rem;background:#f5f0e8;border:1px solid #ddd;border-radius:4px;cursor:pointer;">+ Text</button>
-                <button type="button" onclick="addFormField('email')" class="btn-sm" style="padding:5px 10px;font-size:0.75rem;background:#f5f0e8;border:1px solid #ddd;border-radius:4px;cursor:pointer;">+ Email</button>
-                <button type="button" onclick="addFormField('phone')" class="btn-sm" style="padding:5px 10px;font-size:0.75rem;background:#f5f0e8;border:1px solid #ddd;border-radius:4px;cursor:pointer;">+ Phone</button>
-                <button type="button" onclick="addFormField('dropdown')" class="btn-sm" style="padding:5px 10px;font-size:0.75rem;background:#f5f0e8;border:1px solid #ddd;border-radius:4px;cursor:pointer;">+ Dropdown</button>
-                <button type="button" onclick="addFormField('textarea')" class="btn-sm" style="padding:5px 10px;font-size:0.75rem;background:#f5f0e8;border:1px solid #ddd;border-radius:4px;cursor:pointer;">+ Text Area</button>
-                <button type="button" onclick="addFormField('file')" class="btn-sm" style="padding:5px 10px;font-size:0.75rem;background:#f5f0e8;border:1px solid #ddd;border-radius:4px;cursor:pointer;">+ File Upload</button>
-            </div>
-
-            <hr style="border:none;border-top:1px solid #e0d9d0;margin:20px 0;">
-            <button type="button" onclick="saveForm()" class="btn-save" style="width:100%;padding:12px;font-size:0.9rem;">Save Form</button>
         </div>
     </div>
 
@@ -2085,28 +1993,6 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="form-label">Event Type</label>
-                <div class="pricing-type-group">
-                    <div class="radio-wrapper">
-                        <input type="radio" name="eventType" value="ticketed" id="eventTypeTicketed" checked>
-                        <label for="eventTypeTicketed">Ticketed (Registration Required)</label>
-                    </div>
-                    <div class="radio-wrapper">
-                        <input type="radio" name="eventType" value="cover" id="eventTypeCover">
-                        <label for="eventTypeCover">Cover Charge (Pay at Door)</label>
-                    </div>
-                    <div class="radio-wrapper">
-                        <input type="radio" name="eventType" value="free" id="eventTypeFree">
-                        <label for="eventTypeFree">Free / Informational</label>
-                    </div>
-                </div>
-            </div>
-            <div id="coverChargeGroup" class="form-group hidden">
-                <label class="form-label">Cover Charge Amount ($)</label>
-                <input type="number" class="form-input" id="coverCharge" min="0" step="0.01" placeholder="e.g. 10">
-            </div>
-            <div id="ticketedFieldsWrapper">
-            <div class="form-group">
                 <label class="form-label">Pricing Type</label>
                 <div class="pricing-type-group">
                     <div class="radio-wrapper">
@@ -2121,17 +2007,7 @@
                         <input type="radio" name="pricingType" value="both" id="pricingBoth">
                         <label for="pricingBoth">Both</label>
                     </div>
-                    <div class="radio-wrapper">
-                        <input type="radio" name="pricingType" value="custom" id="pricingCustom">
-                        <label for="pricingCustom">Custom Tiers</label>
-                    </div>
                 </div>
-            </div>
-            <div id="customTiersGroup" class="form-group hidden">
-                <label class="form-label">Registration Tiers</label>
-                <div id="customTiersList"></div>
-                <button type="button" class="btn-sm" onclick="addCustomTier()" style="margin-top:8px;padding:6px 14px;background:var(--brown-dark);color:var(--gold);border:1px solid var(--gold);cursor:pointer;font-size:0.8rem;border-radius:4px;">+ Add Tier</button>
-                <p style="font-size:0.75rem;color:#888;margin-top:6px;">Each tier has its own name, price, capacity, and optional vendor fields. Use this for events like wedding shows with Vendor + Attendee tiers.</p>
             </div>
             <div id="pricePerPersonGroup" class="form-group">
                 <label class="form-label">Price Per Person ($)</label>
@@ -2145,13 +2021,9 @@
                 <label class="form-label">Seats Per Table</label>
                 <input type="number" class="form-input" id="tableSize" min="1">
             </div>
-            <div class="form-group" id="capacityGroup">
-                <label class="form-label" id="capacityLabel">Capacity</label>
+            <div class="form-group">
+                <label class="form-label">Capacity</label>
                 <input type="number" class="form-input" id="eventCapacity" min="1" required>
-            </div>
-            <div class="form-group hidden" id="tableCapacityGroup">
-                <label class="form-label">Table Capacity</label>
-                <input type="number" class="form-input" id="eventTableCapacity" min="1">
             </div>
             <div class="form-group">
                 <label class="form-label">Use Table Chart</label>
@@ -2172,7 +2044,6 @@
                     <option value="">Choose a floor plan...</option>
                 </select>
             </div>
-            </div><!-- end ticketedFieldsWrapper -->
             <div class="form-group">
                 <label class="form-label">Status</label>
                 <select class="form-select" id="eventStatus">
@@ -2205,11 +2076,10 @@
                             <th>Amount</th>
                             <th>Status</th>
                             <th>Method</th>
-                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="registrationsTable">
-                        <tr><td colspan="8" style="text-align: center; color: #858d9e;">No registrations yet</td></tr>
+                        <tr><td colspan="7" style="text-align: center; color: #858d9e;">No registrations yet</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -2361,41 +2231,6 @@
                     <label class="form-label">Amount ($)</label>
                     <input type="number" class="form-input" id="invoiceAmount" step="0.01" min="0.01" required>
                 </div>
-
-                <!-- Additional Fees -->
-                <div class="form-group" style="margin-top:1rem;padding:1rem;background:#faf7f0;border:1px solid #e8dcc0;border-radius:6px;">
-                    <label class="form-label" style="font-weight:600;margin-bottom:0.75rem;display:block;">Additional Fees</label>
-
-                    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem;">
-                        <input type="checkbox" id="invoiceServiceChargeEnabled" style="width:auto;margin:0;">
-                        <label for="invoiceServiceChargeEnabled" style="margin:0;flex:1;font-weight:500;cursor:pointer;">Service Charge</label>
-                        <input type="number" class="form-input" id="invoiceServiceChargePercent" value="20" min="0" max="100" step="0.1" style="width:90px;" disabled>
-                        <span style="color:#666;">%</span>
-                    </div>
-
-                    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem;">
-                        <input type="checkbox" id="invoiceCcFeeEnabled" style="width:auto;margin:0;">
-                        <label for="invoiceCcFeeEnabled" style="margin:0;flex:1;font-weight:500;cursor:pointer;">Credit Card Processing Fee</label>
-                        <input type="number" class="form-input" id="invoiceCcFeePercent" value="3.5" min="0" max="100" step="0.1" style="width:90px;" disabled>
-                        <span style="color:#666;">%</span>
-                    </div>
-
-                    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
-                        <input type="checkbox" id="invoiceSalesTaxEnabled" checked style="width:auto;margin:0;">
-                        <label for="invoiceSalesTaxEnabled" style="margin:0;flex:1;font-weight:500;cursor:pointer;">Sales Tax</label>
-                        <input type="number" class="form-input" id="invoiceSalesTaxPercent" value="8.45" min="0" max="100" step="0.01" style="width:90px;">
-                        <span style="color:#666;">%</span>
-                    </div>
-
-                    <div id="invoiceTotalPreview" style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid #e8dcc0;font-size:0.85rem;color:#555;">
-                        <div style="display:flex;justify-content:space-between;"><span>Subtotal:</span><span id="previewSubtotal">$0.00</span></div>
-                        <div id="previewServiceRow" style="display:none;justify-content:space-between;"><span id="previewServiceLabel">Service Charge:</span><span id="previewServiceAmount">$0.00</span></div>
-                        <div id="previewCcRow" style="display:none;justify-content:space-between;"><span id="previewCcLabel">CC Processing Fee:</span><span id="previewCcAmount">$0.00</span></div>
-                        <div id="previewTaxRow" style="display:flex;justify-content:space-between;"><span id="previewTaxLabel">Sales Tax (8.45%):</span><span id="previewTaxAmount">$0.00</span></div>
-                        <div style="display:flex;justify-content:space-between;margin-top:0.4rem;padding-top:0.4rem;border-top:1px solid #e8dcc0;font-weight:600;color:#222;"><span>Total:</span><span id="previewTotal">$0.00</span></div>
-                    </div>
-                </div>
-
                 <div class="modal-actions">
                     <button type="button" class="modal-btn modal-btn-secondary" onclick="document.getElementById('invoiceModal').classList.remove('active')">Cancel</button>
                     <button type="submit" class="modal-btn modal-btn-primary">Create & Send Invoice</button>
@@ -2563,8 +2398,6 @@
             registrations: {},
             subscribers: [],
             emailHistory: [],
-            forms: [],
-            formSubmissions: {},
             currentEvent: null,
             currentBand: null,
             crmCurrentPage: 1,
@@ -3203,16 +3036,6 @@
             } catch (e) { return dateStr; }
         }
 
-        function formatEventTime(timeStr) {
-            if (!timeStr) return '';
-            var parts = timeStr.split(':');
-            var hour = parseInt(parts[0]);
-            var min = parts[1];
-            var ampm = hour >= 12 ? 'PM' : 'AM';
-            var hour12 = hour % 12 || 12;
-            return hour12 + ':' + min + ' ' + ampm;
-        }
-
         // ================================================================
         // AUTO-MOVE: Past confirmed events → CRM as customers
         // ================================================================
@@ -3272,10 +3095,9 @@
         // ================================================================
         async function loadData() {
             try {
-                const [eventsRes, subscribersRes, formsRes] = await Promise.all([
-                    fetch('https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/events.json?t=' + Date.now()),
-                    fetch('/subscribers.json'),
-                    fetch('https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/forms.json?t=' + Date.now())
+                const [eventsRes, subscribersRes] = await Promise.all([
+                    fetch('/events.json'),
+                    fetch('/subscribers.json')
                 ]);
 
                 if (eventsRes.ok) {
@@ -3299,13 +3121,6 @@
                 if (subscribersRes.ok) {
                     app.subscribers = await subscribersRes.json();
                 }
-                if (formsRes.ok) {
-                    try {
-                        const formsData = await formsRes.json();
-                        app.forms = formsData.forms || [];
-                        app.formSubmissions = formsData.submissions || {};
-                    } catch(e) { app.forms = []; app.formSubmissions = {}; }
-                }
 
                 // Auto-merge registrations into CRM
                 mergeRegistrationsIntoCRM();
@@ -3320,7 +3135,6 @@
                 updateEmailRecipients();
                 drawFloorPlan();
                 renderSavedFloorPlans();
-                updateFormsGrid();
 
                 // Load payments data if on payments tab
                 loadPaymentsData();
@@ -3470,7 +3284,7 @@
                     </div>
                     <div class="event-card-content">
                         <div class="event-card-title">${event.name}</div>
-                        <div class="event-card-date">${event.date} at ${formatEventTime(event.time)}</div>
+                        <div class="event-card-date">${event.date} at ${event.time}</div>
                         <div class="event-card-meta">
                             <span class="event-status status-${(event.status || 'available').toLowerCase().replace(/\s+/g, '-')}">${event.status || 'Active'}</span>
                         </div>
@@ -3535,7 +3349,6 @@
                     document.getElementById('eventDetailDescription').value = event.detailDescription || '';
                     document.getElementById('eventAdditionalInfo').value = event.additionalInfo || '';
                     document.getElementById('eventCapacity').value = event.capacity || event.totalCapacity || '';
-                    document.getElementById('eventTableCapacity').value = event.tableCapacity || '';
                     document.getElementById('eventStatus').value = event.status || 'available';
 
                     if (event.image) {
@@ -3544,25 +3357,10 @@
                         img.classList.remove('hidden');
                     }
 
-                    // Event type (ticketed / cover / free)
-                    const eventType = event.eventType || 'ticketed';
-                    const eventTypeRadio = document.querySelector(`input[name="eventType"][value="${eventType}"]`);
-                    if (eventTypeRadio) eventTypeRadio.checked = true;
-                    if (event.coverCharge) {
-                        document.getElementById('coverCharge').value = event.coverCharge / 100;
-                    }
-                    updateEventTypeFields();
-
                     const pricingType = event.pricingType || 'individual';
                     const radioEl = document.querySelector(`input[name="pricingType"][value="${pricingType}"]`);
                     if (radioEl) radioEl.checked = true;
                     updatePricingFields();
-
-                    // Load custom tiers if applicable
-                    if (pricingType === 'custom' && event.tiers && event.tiers.length > 0) {
-                        document.getElementById('customTiersList').innerHTML = '';
-                        event.tiers.forEach(function(t) { addCustomTier(t); });
-                    }
 
                     if (event.pricePerPerson) {
                         document.getElementById('pricePerPerson').value = event.pricePerPerson / 100;
@@ -3604,14 +3402,6 @@
                 registrationsSection.classList.add('hidden');
                 document.getElementById('eventHighlights').value = '';
                 updateHighlightsTags();
-                // Reset event type
-                document.querySelector('input[name="eventType"][value="ticketed"]').checked = true;
-                document.getElementById('coverCharge').value = '';
-                updateEventTypeFields();
-                // Reset pricing type and custom tiers
-                document.querySelector('input[name="pricingType"][value="individual"]').checked = true;
-                document.getElementById('customTiersList').innerHTML = '';
-                updatePricingFields();
                 // Reset table chart toggle
                 document.querySelector('input[name="useTableChart"][value="no"]').checked = true;
                 document.getElementById('tableChartSelectGroup').classList.add('hidden');
@@ -3622,103 +3412,13 @@
 
         function updatePricingFields() {
             const type = document.querySelector('input[name="pricingType"]:checked').value;
-            const isCustom = type === 'custom';
-            document.getElementById('pricePerPersonGroup').classList.toggle('hidden', isCustom || (type !== 'individual' && type !== 'both'));
-            document.getElementById('pricePerTableGroup').classList.toggle('hidden', isCustom || (type !== 'table' && type !== 'both'));
-            document.getElementById('tableSizeGroup').classList.toggle('hidden', isCustom || (type !== 'table' && type !== 'both'));
-            document.getElementById('tableCapacityGroup').classList.toggle('hidden', type !== 'both');
-            document.getElementById('customTiersGroup').classList.toggle('hidden', !isCustom);
-            // Hide the global capacity field for custom tiers (each tier has its own)
-            document.getElementById('capacityGroup').classList.toggle('hidden', isCustom);
-            document.getElementById('eventCapacity').required = !isCustom;
-            const capLabel = document.getElementById('capacityLabel');
-            if (type === 'both') {
-                capLabel.textContent = 'Individual Seat Capacity';
-            } else if (type === 'table') {
-                capLabel.textContent = 'Table Capacity';
-            } else {
-                capLabel.textContent = 'Capacity';
-            }
-            if (isCustom && document.querySelectorAll('.custom-tier-row').length === 0) {
-                addCustomTier();
-            }
-        }
-
-        // ─── Custom Tiers Management ───
-        function addCustomTier(data) {
-            const list = document.getElementById('customTiersList');
-            const idx = list.querySelectorAll('.custom-tier-row').length;
-            const div = document.createElement('div');
-            div.className = 'custom-tier-row';
-            div.style.cssText = 'border:1px solid #e0d9d0;padding:12px;margin-bottom:8px;border-radius:6px;background:#faf7f2;';
-            div.innerHTML = '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:end;">' +
-                '<div style="flex:2;min-width:140px;"><label style="font-size:0.75rem;font-weight:600;display:block;margin-bottom:2px;">Tier Name</label>' +
-                '<input type="text" class="form-input ct-name" value="' + (data ? data.name : '') + '" placeholder="e.g. Vendor, Attendee" style="font-size:0.85rem;padding:6px 8px;"></div>' +
-                '<div style="flex:1;min-width:80px;"><label style="font-size:0.75rem;font-weight:600;display:block;margin-bottom:2px;">Price ($)</label>' +
-                '<input type="number" class="form-input ct-price" value="' + (data ? (data.pricePerPerson / 100).toFixed(2) : '0') + '" min="0" step="0.01" style="font-size:0.85rem;padding:6px 8px;"></div>' +
-                '<div style="flex:1;min-width:80px;"><label style="font-size:0.75rem;font-weight:600;display:block;margin-bottom:2px;">Capacity</label>' +
-                '<input type="number" class="form-input ct-capacity" value="' + (data ? (data.capacity || '') : '') + '" min="0" placeholder="0=unlimited" style="font-size:0.85rem;padding:6px 8px;"></div>' +
-                '<div style="flex:0 0 auto;display:flex;align-items:center;gap:6px;padding-bottom:2px;">' +
-                '<label style="font-size:0.75rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px;">' +
-                '<input type="checkbox" class="ct-vendor" ' + (data && data.vendorTier ? 'checked' : '') + '> Vendor tier</label>' +
-                '<button type="button" onclick="this.closest(\'.custom-tier-row\').remove()" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:1.1rem;padding:2px 6px;" title="Remove tier">&times;</button>' +
-                '</div></div>';
-            list.appendChild(div);
-        }
-
-        function getCustomTiers() {
-            const rows = document.querySelectorAll('.custom-tier-row');
-            const tiers = [];
-            rows.forEach(function(row) {
-                const name = row.querySelector('.ct-name').value.trim();
-                const price = parseFloat(row.querySelector('.ct-price').value) || 0;
-                const capacity = parseInt(row.querySelector('.ct-capacity').value) || 0;
-                const vendorTier = row.querySelector('.ct-vendor').checked;
-                if (name) {
-                    tiers.push({
-                        name: name,
-                        pricePerPerson: Math.round(price * 100),
-                        priceLabel: price > 0 ? '$' + price.toFixed(2) : 'Free',
-                        capacity: capacity,
-                        registeredCount: 0,
-                        vendorTier: vendorTier
-                    });
-                }
-            });
-            return tiers;
+            document.getElementById('pricePerPersonGroup').classList.toggle('hidden', type !== 'individual' && type !== 'both');
+            document.getElementById('pricePerTableGroup').classList.toggle('hidden', type !== 'table' && type !== 'both');
+            document.getElementById('tableSizeGroup').classList.toggle('hidden', type !== 'table' && type !== 'both');
         }
 
         document.querySelectorAll('input[name="pricingType"]').forEach(radio => {
             radio.addEventListener('change', updatePricingFields);
-        });
-
-        // Event type toggle (ticketed / cover / free)
-        function updateEventTypeFields() {
-            const eventType = document.querySelector('input[name="eventType"]:checked').value;
-            const ticketedWrapper = document.getElementById('ticketedFieldsWrapper');
-            const coverGroup = document.getElementById('coverChargeGroup');
-            const capacityGroup = document.getElementById('capacityGroup');
-
-            if (eventType === 'ticketed') {
-                ticketedWrapper.classList.remove('hidden');
-                coverGroup.classList.add('hidden');
-                // Don't force required if custom tiers (each tier has its own capacity)
-                const currentPricing = document.querySelector('input[name="pricingType"]:checked');
-                capacityGroup.querySelector('input').required = !(currentPricing && currentPricing.value === 'custom');
-            } else if (eventType === 'cover') {
-                ticketedWrapper.classList.add('hidden');
-                coverGroup.classList.remove('hidden');
-                capacityGroup.querySelector('input').required = false;
-            } else {
-                // free / informational
-                ticketedWrapper.classList.add('hidden');
-                coverGroup.classList.add('hidden');
-                capacityGroup.querySelector('input').required = false;
-            }
-        }
-
-        document.querySelectorAll('input[name="eventType"]').forEach(radio => {
-            radio.addEventListener('change', updateEventTypeFields);
         });
 
         function updateHighlightsTags() {
@@ -3733,84 +3433,21 @@
         function populateRegistrationsTable(registrations) {
             const tbody = document.getElementById('registrationsTable');
             if (!registrations || registrations.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #858d9e;">No registrations yet</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #858d9e;">No registrations yet</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = registrations.map(reg => {
-                const status = (reg.status || 'PAID').toUpperCase();
-                const isCancelled = status === 'CANCELLED' || status === 'REFUNDED';
-                const hasStripe = reg.paymentMethod === 'stripe' && reg.orderNumber;
-                const statusClass = isCancelled ? 'status-cancelled' : 'status-paid';
-
-                let actionsHtml = '';
-                if (!isCancelled) {
-                    actionsHtml = '<div class="reg-actions">';
-                    if (hasStripe) {
-                        actionsHtml += `<button class="btn-refund-reg" onclick="cancelRegistration('${reg.orderNumber}', 'refund_and_cancel')" title="Refund via Stripe & remove registration">Refund</button>`;
-                    }
-                    actionsHtml += `<button class="btn-cancel-reg" onclick="cancelRegistration('${reg.orderNumber}', 'cancel_only')" title="Remove registration without Stripe refund">Cancel</button>`;
-                    actionsHtml += '</div>';
-                } else {
-                    actionsHtml = '<span style="color:#858d9e;font-size:0.8rem">' + status + '</span>';
-                }
-
-                return `<tr${isCancelled ? ' style="opacity:0.5"' : ''}>
+            tbody.innerHTML = registrations.map(reg => `
+                <tr>
                     <td>${reg.name || '—'}</td>
                     <td>${reg.email || '—'}</td>
                     <td>${reg.phone || '—'}</td>
                     <td>${reg.tickets || 1}</td>
                     <td>$${parseFloat(reg.amount || reg.amountPaid || 0).toFixed(2)}</td>
-                    <td class="${statusClass}">${status}</td>
+                    <td>${reg.status || 'PAID'}</td>
                     <td>${reg.paymentMethod || '—'}</td>
-                    <td>${actionsHtml}</td>
-                </tr>`;
-            }).join('');
-        }
-
-        async function cancelRegistration(orderNumber, action) {
-            const eventId = app.currentEvent ? app.currentEvent.id : null;
-            if (!eventId) { alert('No event selected'); return; }
-
-            const actionLabel = action === 'refund_and_cancel' ? 'REFUND & CANCEL' : 'CANCEL (no refund)';
-            if (!confirm('Are you sure you want to ' + actionLabel + ' this registration?')) return;
-
-            try {
-                const resp = await fetch('/.netlify/functions/cancel-registration', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ eventId, orderNumber, action })
-                });
-                const data = await resp.json();
-
-                if (!resp.ok) {
-                    alert('Error: ' + (data.error || 'Unknown error'));
-                    return;
-                }
-
-                // Update local data
-                if (app.registrations[eventId]) {
-                    app.registrations[eventId] = app.registrations[eventId].filter(r => r.orderNumber !== orderNumber);
-                }
-                if (app.currentEvent && data.newRegisteredCount !== null) {
-                    app.currentEvent.registeredCount = data.newRegisteredCount;
-                    app.currentEvent.registered = data.newRegisteredCount;
-                }
-
-                // Refresh table
-                const eventRegs = getEventRegistrations(eventId);
-                populateRegistrationsTable(eventRegs);
-                updateEvents();
-                updateDashboardSummary();
-
-                const msg = action === 'refund_and_cancel'
-                    ? 'Registration refunded & cancelled successfully.'
-                    : 'Registration cancelled (no refund).';
-                alert(msg);
-
-            } catch (err) {
-                alert('Failed to cancel registration: ' + err.message);
-            }
+                </tr>
+            `).join('');
         }
 
         // Image upload handlers
@@ -3862,8 +3499,6 @@
         });
 
         function saveEvent() {
-            const eventType = document.querySelector('input[name="eventType"]:checked').value;
-
             const eventData = {
                 id: app.currentEvent?.id || 'event_' + Date.now(),
                 name: document.getElementById('eventName').value,
@@ -3873,182 +3508,37 @@
                 description: document.getElementById('eventDescription').value,
                 detailDescription: document.getElementById('eventDetailDescription').value,
                 additionalInfo: document.getElementById('eventAdditionalInfo').value,
+                capacity: parseInt(document.getElementById('eventCapacity').value),
                 status: document.getElementById('eventStatus').value,
-                eventType: eventType,
+                pricingType: document.querySelector('input[name="pricingType"]:checked').value,
                 highlights: document.getElementById('eventHighlights').value.split(',').map(h => h.trim()).filter(h => h),
                 slug: app.currentEvent?.slug || document.getElementById('eventName').value.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+                useTableChart: document.querySelector('input[name="useTableChart"]:checked').value === 'yes',
+                floorPlanId: document.querySelector('input[name="useTableChart"]:checked').value === 'yes' ? document.getElementById('eventFloorPlan').value : '',
             };
 
-            // ─── FREE / INFORMATIONAL EVENTS ───
-            if (eventType === 'free') {
-                eventData.pricingType = 'none';
-                eventData.price = 0;
-                eventData.pricePerSeat = 0;
-                eventData.tiers = [];
-                eventData.category = 'Free';
-                eventData.tags = ['Free'];
-                eventData.capacity = 0;
-                eventData.totalCapacity = 0;
-                eventData.coverCharge = 0;
-                eventData.useTableChart = false;
-                eventData.floorPlanId = '';
+            const pricingType = eventData.pricingType;
+            if (pricingType === 'individual' || pricingType === 'both') {
+                const price = parseFloat(document.getElementById('pricePerPerson').value || 0);
+                eventData.pricePerPerson = Math.round(price * 100);
+            }
+            if (pricingType === 'table' || pricingType === 'both') {
+                const price = parseFloat(document.getElementById('pricePerTable').value || 0);
+                eventData.pricePerTable = Math.round(price * 100);
+                eventData.tableSize = parseInt(document.getElementById('tableSize').value || 8);
             }
 
-            // ─── COVER CHARGE EVENTS ───
-            else if (eventType === 'cover') {
-                const coverAmount = parseFloat(document.getElementById('coverCharge').value || 0);
-                eventData.coverCharge = Math.round(coverAmount * 100);
-                eventData.pricingType = 'none';
-                eventData.price = eventData.coverCharge;
-                eventData.pricePerSeat = 0;
-                eventData.tiers = [];
-                eventData.category = 'Cover';
-                eventData.tags = ['Cover Charge'];
-                eventData.capacity = 0;
-                eventData.totalCapacity = 0;
-                eventData.useTableChart = false;
-                eventData.floorPlanId = '';
-            }
-
-            // ─── TICKETED EVENTS ───
-            else {
-                eventData.pricingType = document.querySelector('input[name="pricingType"]:checked').value;
-                eventData.useTableChart = document.querySelector('input[name="useTableChart"]:checked').value === 'yes';
-                eventData.floorPlanId = eventData.useTableChart ? document.getElementById('eventFloorPlan').value : '';
-                eventData.coverCharge = 0;
-
-                const pricingType = eventData.pricingType;
-                // For custom tiers, capacity comes from tiers, not the global field
-                if (pricingType !== 'custom') {
-                    eventData.capacity = parseInt(document.getElementById('eventCapacity').value) || 0;
-                } else {
-                    eventData.capacity = 0;
-                }
-                if (pricingType === 'individual' || pricingType === 'both') {
-                    const price = parseFloat(document.getElementById('pricePerPerson').value || 0);
-                    eventData.pricePerPerson = Math.round(price * 100);
-                }
-                if (pricingType === 'table' || pricingType === 'both') {
-                    const price = parseFloat(document.getElementById('pricePerTable').value || 0);
-                    eventData.pricePerTable = Math.round(price * 100);
-                    eventData.tableSize = parseInt(document.getElementById('tableSize').value || 8);
-                }
-
-                // Build tiers array based on pricing type
-                eventData.tiers = [];
-                if (pricingType === 'custom') {
-                    // Custom tiers — each has its own name, price, capacity, vendor flag
-                    eventData.tiers = getCustomTiers();
-                    // Preserve existing registeredCount per tier when editing
-                    if (app.currentEvent) {
-                        const existingEvent = app.events.find(e => e.id === app.currentEvent.id);
-                        if (existingEvent && existingEvent.tiers) {
-                            eventData.tiers.forEach(function(t) {
-                                const old = existingEvent.tiers.find(ot => ot.name === t.name);
-                                if (old) t.registeredCount = old.registeredCount || 0;
-                            });
-                        }
-                    }
-                    // Total capacity = sum of all tier capacities (0 means unlimited)
-                    const tierCaps = eventData.tiers.map(t => t.capacity || 0);
-                    const allHaveCap = tierCaps.every(c => c > 0);
-                    eventData.totalCapacity = allHaveCap ? tierCaps.reduce((a, b) => a + b, 0) : 0;
-                    eventData.capacity = eventData.totalCapacity;
-                    // Price: use the first non-zero tier price (for fallback display)
-                    const firstPriced = eventData.tiers.find(t => t.pricePerPerson > 0);
-                    eventData.price = firstPriced ? firstPriced.pricePerPerson : 0;
-                    eventData.pricePerSeat = eventData.price;
-                    eventData.category = 'Ticketed';
-                    eventData.tags = ['Ticketed'];
-                } else if (pricingType === 'individual') {
-                    const dollars = (eventData.pricePerPerson / 100);
-                    eventData.tiers.push({
-                        name: eventData.name + ' Admission',
-                        description: eventData.description || '',
-                        pricePerPerson: eventData.pricePerPerson,
-                        priceLabel: '$' + dollars + '/person'
-                    });
-                    eventData.price = eventData.pricePerPerson;
-                } else if (pricingType === 'table') {
-                    const dollars = (eventData.pricePerTable / 100);
-                    const seats = eventData.tableSize || 4;
-                    eventData.tiers.push({
-                        name: eventData.name + ' (Table of ' + seats + ')',
-                        description: 'Table of ' + seats,
-                        pricePerPerson: eventData.pricePerTable,
-                        priceLabel: '$' + dollars + '/table'
-                    });
-                    eventData.price = eventData.pricePerTable;
-                } else if (pricingType === 'both') {
-                    const personDollars = (eventData.pricePerPerson / 100);
-                    const tableDollars = (eventData.pricePerTable / 100);
-                    const seats = eventData.tableSize || 4;
-                    eventData.tiers.push({
-                        name: 'Individual Admission',
-                        description: 'Individual entry',
-                        pricePerPerson: eventData.pricePerPerson,
-                        priceLabel: '$' + personDollars + '/person'
-                    });
-                    eventData.tiers.push({
-                        name: 'Table of ' + seats,
-                        description: 'Table of ' + seats,
-                        pricePerPerson: eventData.pricePerTable,
-                        priceLabel: '$' + tableDollars + '/table'
-                    });
-                    eventData.price = eventData.pricePerPerson;
-                }
-
-                if (pricingType !== 'custom') {
-                    eventData.pricePerSeat = eventData.price || 0;
-                    eventData.category = (eventData.price > 0) ? 'Ticketed' : 'Free';
-                    eventData.tags = (eventData.price > 0) ? ['Ticketed'] : ['Free'];
-                }
-
-                if (pricingType === 'both') {
-                    const tableCapEl = document.getElementById('eventTableCapacity');
-                    eventData.tableCapacity = parseInt(tableCapEl.value) || 0;
-                    eventData.totalCapacity = eventData.capacity + eventData.tableCapacity;
-                } else if (pricingType !== 'custom') {
-                    eventData.totalCapacity = eventData.capacity;
-                }
-            }
-            eventData.title = eventData.name;
-            eventData.seatingOptions = null;
-
-            // Floor plan
-            if (eventData.useTableChart && eventData.floorPlanId) {
-                const fp = (app.floorPlans || []).find(f => f.id === eventData.floorPlanId);
-                eventData.floorPlan = fp || null;
-            } else {
-                eventData.floorPlan = null;
-            }
-
-            eventData.imageAlt = eventData.name;
-            eventData.imageText = eventData.name.split(' ')[0];
-            eventData.imageGradient = 'general';
-
-            // Image
             const imagePreview = document.getElementById('imagePreview');
             if (imagePreview.src && !imagePreview.classList.contains('hidden')) {
                 eventData.image = imagePreview.src;
             }
 
-            // Preserve existing registration data when editing
             if (app.currentEvent) {
-                const existing = app.events.find(e => e.id === app.currentEvent.id);
-                if (existing) {
-                    eventData.registeredCount = existing.registeredCount || 0;
-                    eventData.registered = existing.registered || 0;
-                    eventData.bookedTableIds = existing.bookedTableIds || [];
-                }
                 const index = app.events.findIndex(e => e.id === app.currentEvent.id);
                 if (index !== -1) {
                     app.events[index] = { ...app.events[index], ...eventData };
                 }
             } else {
-                eventData.registeredCount = 0;
-                eventData.registered = 0;
-                eventData.bookedTableIds = [];
                 app.events.push(eventData);
             }
 
@@ -4999,6 +4489,21 @@
             });
         });
 
+        document.getElementById('linkBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            const url = prompt('Enter URL:');
+            if (url) document.execCommand('createLink', false, url);
+            document.getElementById('emailBody').focus();
+            updateEmailPreview();
+        });
+        document.getElementById('imageBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            const url = prompt('Enter image URL:');
+            if (url) document.execCommand('insertImage', false, url);
+            document.getElementById('emailBody').focus();
+            updateEmailPreview();
+        });
+
         document.getElementById('emailBody').addEventListener('input', updateEmailPreview);
         document.getElementById('emailSubject').addEventListener('input', updateEmailPreview);
 
@@ -5017,7 +4522,7 @@
         });
 
         // ================================================================
-        // SES EMAIL SENDING (via Netlify function)
+        // EMAIL SENDING (via SendGrid / Netlify function)
         // ================================================================
         function getEmailRecipients() {
             const type = document.getElementById('recipientType').value;
@@ -5087,7 +4592,7 @@
                     );
                     showSuccess('Test email sent successfully!');
                 } catch (err) {
-                    alert('Error sending test email: ' + err.message + '\n\nMake sure AWS SES environment variables are configured in Netlify.');
+                    alert('Error sending test email: ' + err.message);
                 }
             });
         });
@@ -5100,7 +4605,7 @@
             const recipients = getEmailRecipients();
             if (recipients.length === 0) { alert('No recipients selected'); return; }
 
-            showConfirmModal('Send Campaign?', `This email will be sent to ${recipients.length} recipients via Amazon SES. This action cannot be undone.`, async () => {
+            showConfirmModal('Send Campaign?', `This email will be sent to ${recipients.length} recipients. This action cannot be undone.`, async () => {
                 try {
                     const result = await sendEmailViaSES(recipients, subject, body);
                     const sentCount = result.sent || recipients.length;
@@ -5122,7 +4627,7 @@
 
                     showSuccess('Campaign sent to ' + sentCount + ' recipients!');
                 } catch (err) {
-                    alert('Error sending campaign: ' + err.message + '\n\nMake sure AWS SES environment variables are configured in Netlify.');
+                    alert('Error sending campaign: ' + err.message);
                 }
             });
         });
@@ -5273,50 +4778,6 @@
             document.getElementById('invoiceModal').classList.add('active');
         });
 
-        // Live total preview for the invoice modal
-        function updateInvoicePreview() {
-            var amount = parseFloat(document.getElementById('invoiceAmount').value) || 0;
-            var svcOn = document.getElementById('invoiceServiceChargeEnabled').checked;
-            var ccOn = document.getElementById('invoiceCcFeeEnabled').checked;
-            var taxOn = document.getElementById('invoiceSalesTaxEnabled').checked;
-            var svcPct = parseFloat(document.getElementById('invoiceServiceChargePercent').value) || 0;
-            var ccPct = parseFloat(document.getElementById('invoiceCcFeePercent').value) || 0;
-            var taxPct = parseFloat(document.getElementById('invoiceSalesTaxPercent').value) || 0;
-            var svcAmt = svcOn ? amount * (svcPct / 100) : 0;
-            var ccAmt = ccOn ? (amount + svcAmt) * (ccPct / 100) : 0;
-            var subtotalBeforeTax = amount + svcAmt + ccAmt;
-            var taxAmt = taxOn ? subtotalBeforeTax * (taxPct / 100) : 0;
-            var total = subtotalBeforeTax + taxAmt;
-            document.getElementById('previewSubtotal').textContent = '$' + amount.toFixed(2);
-            document.getElementById('previewServiceLabel').textContent = 'Service Charge (' + svcPct + '%):';
-            document.getElementById('previewServiceAmount').textContent = '$' + svcAmt.toFixed(2);
-            document.getElementById('previewCcLabel').textContent = 'CC Processing Fee (' + ccPct + '%):';
-            document.getElementById('previewCcAmount').textContent = '$' + ccAmt.toFixed(2);
-            document.getElementById('previewTaxLabel').textContent = 'Sales Tax (' + taxPct + '%):';
-            document.getElementById('previewTaxAmount').textContent = '$' + taxAmt.toFixed(2);
-            document.getElementById('previewTotal').textContent = '$' + total.toFixed(2);
-            document.getElementById('previewServiceRow').style.display = svcOn ? 'flex' : 'none';
-            document.getElementById('previewCcRow').style.display = ccOn ? 'flex' : 'none';
-            document.getElementById('previewTaxRow').style.display = taxOn ? 'flex' : 'none';
-        }
-
-        (function wireInvoiceFeeToggles() {
-            var svcToggle = document.getElementById('invoiceServiceChargeEnabled');
-            var ccToggle = document.getElementById('invoiceCcFeeEnabled');
-            var taxToggle = document.getElementById('invoiceSalesTaxEnabled');
-            var svcPct = document.getElementById('invoiceServiceChargePercent');
-            var ccPct = document.getElementById('invoiceCcFeePercent');
-            var taxPct = document.getElementById('invoiceSalesTaxPercent');
-            var amountInput = document.getElementById('invoiceAmount');
-            if (svcToggle) svcToggle.addEventListener('change', function () { svcPct.disabled = !svcToggle.checked; updateInvoicePreview(); });
-            if (ccToggle) ccToggle.addEventListener('change', function () { ccPct.disabled = !ccToggle.checked; updateInvoicePreview(); });
-            if (taxToggle) taxToggle.addEventListener('change', function () { taxPct.disabled = !taxToggle.checked; updateInvoicePreview(); });
-            if (svcPct) svcPct.addEventListener('input', updateInvoicePreview);
-            if (ccPct) ccPct.addEventListener('input', updateInvoicePreview);
-            if (taxPct) taxPct.addEventListener('input', updateInvoicePreview);
-            if (amountInput) amountInput.addEventListener('input', updateInvoicePreview);
-        })();
-
         document.getElementById('invoiceForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = document.getElementById('invoiceCustomerName').value.trim();
@@ -5324,26 +4785,9 @@
             const description = document.getElementById('invoiceDescription').value.trim();
             const amount = parseFloat(document.getElementById('invoiceAmount').value);
 
-            const serviceChargeEnabled = document.getElementById('invoiceServiceChargeEnabled').checked;
-            const serviceChargePercent = parseFloat(document.getElementById('invoiceServiceChargePercent').value) || 0;
-            const ccFeeEnabled = document.getElementById('invoiceCcFeeEnabled').checked;
-            const ccFeePercent = parseFloat(document.getElementById('invoiceCcFeePercent').value) || 0;
-            const salesTaxEnabled = document.getElementById('invoiceSalesTaxEnabled').checked;
-            const salesTaxPercent = parseFloat(document.getElementById('invoiceSalesTaxPercent').value) || 0;
-
             if (!name || !email || !description || !amount) return;
-            if (serviceChargeEnabled && (serviceChargePercent < 0 || serviceChargePercent > 100)) { alert('Service charge must be 0-100%'); return; }
-            if (ccFeeEnabled && (ccFeePercent < 0 || ccFeePercent > 100)) { alert('CC processing fee must be 0-100%'); return; }
-            if (salesTaxEnabled && (salesTaxPercent < 0 || salesTaxPercent > 100)) { alert('Sales tax must be 0-100%'); return; }
 
-            // Compute total for the confirmation message
-            var svcAmt = serviceChargeEnabled ? amount * (serviceChargePercent / 100) : 0;
-            var ccAmt = ccFeeEnabled ? (amount + svcAmt) * (ccFeePercent / 100) : 0;
-            var subtotalBeforeTax = amount + svcAmt + ccAmt;
-            var taxAmt = salesTaxEnabled ? subtotalBeforeTax * (salesTaxPercent / 100) : 0;
-            var total = subtotalBeforeTax + taxAmt;
-
-            showConfirmModal('Create Invoice?', `Send a $${total.toFixed(2)} invoice (subtotal $${amount.toFixed(2)}) to ${email} for "${description}"?`, async () => {
+            showConfirmModal('Create Invoice?', `Send a $${amount.toFixed(2)} invoice to ${email} for "${description}"?`, async () => {
                 try {
                     const invRes = await fetch('/.netlify/functions/stripe-data?action=create-invoice', {
                         method: 'POST',
@@ -5353,12 +4797,6 @@
                             customer_name: name,
                             description,
                             amount: Math.round(amount * 100),
-                            service_charge_enabled: serviceChargeEnabled,
-                            service_charge_percent: serviceChargePercent,
-                            cc_fee_enabled: ccFeeEnabled,
-                            cc_fee_percent: ccFeePercent,
-                            sales_tax_enabled: salesTaxEnabled,
-                            sales_tax_percent: salesTaxPercent,
                         }),
                     });
 
@@ -5367,15 +4805,6 @@
                         showSuccess('Invoice created and sent!');
                         document.getElementById('invoiceModal').classList.remove('active');
                         document.getElementById('invoiceForm').reset();
-                        // Reset fee defaults
-                        document.getElementById('invoiceServiceChargePercent').value = '20';
-                        document.getElementById('invoiceCcFeePercent').value = '3.5';
-                        document.getElementById('invoiceSalesTaxPercent').value = '8.45';
-                        document.getElementById('invoiceServiceChargePercent').disabled = true;
-                        document.getElementById('invoiceCcFeePercent').disabled = true;
-                        document.getElementById('invoiceSalesTaxPercent').disabled = false;
-                        document.getElementById('invoiceSalesTaxEnabled').checked = true;
-                        updateInvoicePreview();
                         loadPaymentsData();
                     } else {
                         throw new Error(invData.error || 'Failed to create invoice');
@@ -5442,355 +4871,6 @@
             await saveToGitHub();
         }
 
-        // ================================================================
-        // FORMS MANAGEMENT
-        // ================================================================
-        var currentEditForm = null;
-
-        function updateFormsGrid() {
-            var grid = document.getElementById('formsGrid');
-            if (!grid) return;
-            if (app.forms.length === 0) {
-                grid.innerHTML = '<div style="text-align:center;padding:40px;color:#888;grid-column:1/-1;"><p>No forms yet. Click "+ New Form" to create one.</p></div>';
-                return;
-            }
-            grid.innerHTML = app.forms.map(function(form) {
-                var subCount = (app.formSubmissions[form.id] || []).length;
-                var pendingCount = (app.formSubmissions[form.id] || []).filter(function(s) { return s.status === 'pending'; }).length;
-                var statusColor = form.status === 'active' ? '#3cb464' : '#888';
-                var statusLabel = form.status === 'active' ? 'Active' : 'Closed';
-                var formUrl = window.location.origin + '/quarry-form?form=' + form.slug;
-                return '<div style="background:#fff;border:1px solid #e0d9d0;border-radius:10px;padding:20px;position:relative;">' +
-                    '<div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px;">' +
-                    '<h4 style="margin:0;font-size:0.95rem;color:#2C1A0E;">' + form.name + '</h4>' +
-                    '<span style="font-size:0.7rem;padding:3px 8px;border-radius:12px;background:' + statusColor + '22;color:' + statusColor + ';font-weight:600;">' + statusLabel + '</span>' +
-                    '</div>' +
-                    (form.eventName ? '<div style="font-size:0.75rem;color:#B8933A;margin-bottom:6px;">Linked to: ' + form.eventName + '</div>' : '') +
-                    '<div style="font-size:0.8rem;color:#888;margin-bottom:12px;">' + form.fields.length + ' fields &bull; ' + subCount + ' submissions' + (pendingCount > 0 ? ' <strong style="color:#B8933A;">(' + pendingCount + ' pending)</strong>' : '') + '</div>' +
-                    '<div style="font-size:0.7rem;background:#faf7f2;padding:6px 10px;border-radius:6px;margin-bottom:12px;word-break:break-all;">' +
-                    '<a href="' + formUrl + '" target="_blank" style="color:#B8933A;text-decoration:none;">' + formUrl + '</a> ' +
-                    '<button onclick="copyFormLink(\'' + form.slug + '\')" style="background:none;border:none;color:#B8933A;cursor:pointer;font-size:0.7rem;text-decoration:underline;">Copy</button>' +
-                    '</div>' +
-                    '<div style="display:flex;gap:6px;">' +
-                    '<button onclick="editForm(\'' + form.id + '\')" style="flex:1;padding:6px;font-size:0.75rem;background:transparent;color:var(--gold);border:1px solid var(--gold);border-radius:4px;cursor:pointer;">Edit</button>' +
-                    '<button onclick="viewSubmissions(\'' + form.id + '\')" style="flex:1;padding:6px;font-size:0.75rem;background:var(--brown-dark);color:var(--gold);border:1px solid var(--gold);border-radius:4px;cursor:pointer;">Submissions (' + subCount + ')</button>' +
-                    '<button onclick="deleteForm(\'' + form.id + '\')" style="padding:6px 10px;font-size:0.75rem;background:transparent;color:#dc2626;border:1px solid #dc2626;border-radius:4px;cursor:pointer;">&times;</button>' +
-                    '</div></div>';
-            }).join('');
-        }
-
-        function copyFormLink(slug) {
-            var url = window.location.origin + '/quarry-form?form=' + slug;
-            navigator.clipboard.writeText(url).then(function() { showSuccess('Link copied!'); });
-        }
-
-        function openFormBuilder(formData) {
-            currentEditForm = formData || null;
-            document.getElementById('formBuilderTitle').textContent = formData ? 'Edit Form' : 'New Form';
-            document.getElementById('fbName').value = formData ? formData.name : '';
-            document.getElementById('fbDescription').value = formData ? (formData.description || '') : '';
-            document.getElementById('fbStatus').value = formData ? formData.status : 'active';
-
-            // Populate event dropdown
-            var eventSelect = document.getElementById('fbEventId');
-            eventSelect.innerHTML = '<option value="">Standalone — not linked to an event</option>';
-            app.events.forEach(function(e) {
-                eventSelect.innerHTML += '<option value="' + e.id + '"' + (formData && formData.eventId === e.id ? ' selected' : '') + '>' + e.name + '</option>';
-            });
-
-            // Populate fields
-            var fieldsList = document.getElementById('fbFieldsList');
-            fieldsList.innerHTML = '';
-            if (formData && formData.fields) {
-                formData.fields.forEach(function(f) { addFormField(f.type, f); });
-            }
-
-            document.getElementById('formBuilderPanel').classList.add('open');
-        }
-
-        function closeFormBuilder() {
-            document.getElementById('formBuilderPanel').classList.remove('open');
-            currentEditForm = null;
-        }
-
-        function addFormField(type, data) {
-            var list = document.getElementById('fbFieldsList');
-            var fieldId = data ? data.id : 'f_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
-            var div = document.createElement('div');
-            div.className = 'fb-field-row';
-            div.dataset.fieldId = fieldId;
-            div.dataset.type = type;
-            div.style.cssText = 'border:1px solid #e0d9d0;border-radius:8px;padding:12px;margin-bottom:8px;background:#faf7f2;';
-
-            var typeLabels = { text: 'Text Input', email: 'Email', phone: 'Phone', dropdown: 'Dropdown', textarea: 'Text Area', file: 'File Upload' };
-            var defaultLabels = { text: '', email: 'Email Address', phone: 'Phone Number', dropdown: '', textarea: '', file: 'File Upload' };
-            var defaultPlaceholders = { text: '', email: 'your@email.com', phone: '(555) 555-5555', dropdown: '', textarea: '', file: '' };
-            var fieldLabel = data ? data.label : (defaultLabels[type] || '');
-            var fieldPlaceholder = data ? (data.placeholder || '') : (defaultPlaceholders[type] || '');
-
-            var html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
-                '<span style="font-size:0.7rem;font-weight:700;color:#B8933A;text-transform:uppercase;letter-spacing:0.08em;">' + (typeLabels[type] || type) + '</span>' +
-                '<div style="display:flex;gap:4px;align-items:center;">' +
-                '<button type="button" onclick="moveFieldUp(this)" style="background:none;border:none;cursor:pointer;font-size:1rem;color:#888;" title="Move up">&uarr;</button>' +
-                '<button type="button" onclick="moveFieldDown(this)" style="background:none;border:none;cursor:pointer;font-size:1rem;color:#888;" title="Move down">&darr;</button>' +
-                '<button type="button" onclick="this.closest(\'.fb-field-row\').remove()" style="background:none;border:none;cursor:pointer;font-size:1.1rem;color:#dc2626;" title="Remove">&times;</button>' +
-                '</div></div>';
-
-            html += '<div style="display:flex;gap:8px;flex-wrap:wrap;">';
-            html += '<div style="flex:2;min-width:140px;"><label style="font-size:0.7rem;font-weight:600;display:block;margin-bottom:2px;">Label</label>';
-            html += '<input type="text" class="form-input fb-label" value="' + fieldLabel + '" placeholder="e.g. Business Name" style="font-size:0.8rem;padding:6px 8px;"></div>';
-            html += '<div style="flex:1;min-width:100px;"><label style="font-size:0.7rem;font-weight:600;display:block;margin-bottom:2px;">Placeholder</label>';
-            html += '<input type="text" class="form-input fb-placeholder" value="' + fieldPlaceholder + '" placeholder="Optional..." style="font-size:0.8rem;padding:6px 8px;"></div>';
-            html += '<div style="flex:0 0 auto;display:flex;align-items:end;padding-bottom:4px;">';
-            html += '<label style="font-size:0.7rem;font-weight:600;display:flex;align-items:center;gap:4px;cursor:pointer;">';
-            var isRequired = data ? data.required : (type === 'email' || type === 'phone');
-            html += '<input type="checkbox" class="fb-required" ' + (isRequired ? 'checked' : '') + '> Required</label>';
-            html += '</div></div>';
-
-            if (type === 'dropdown') {
-                html += '<div style="margin-top:8px;"><label style="font-size:0.7rem;font-weight:600;display:block;margin-bottom:2px;">Options (comma-separated)</label>';
-                html += '<input type="text" class="form-input fb-options" value="' + (data && data.options ? data.options.join(', ') : '') + '" placeholder="Option 1, Option 2, Option 3" style="font-size:0.8rem;padding:6px 8px;"></div>';
-            }
-
-            div.innerHTML = html;
-            list.appendChild(div);
-        }
-
-        function moveFieldUp(btn) {
-            var row = btn.closest('.fb-field-row');
-            var prev = row.previousElementSibling;
-            if (prev) row.parentNode.insertBefore(row, prev);
-        }
-
-        function moveFieldDown(btn) {
-            var row = btn.closest('.fb-field-row');
-            var next = row.nextElementSibling;
-            if (next) row.parentNode.insertBefore(next, row);
-        }
-
-        function getFormFields() {
-            var rows = document.querySelectorAll('.fb-field-row');
-            var fields = [];
-            rows.forEach(function(row) {
-                var label = row.querySelector('.fb-label').value.trim();
-                if (!label) return;
-                var field = {
-                    id: row.dataset.fieldId,
-                    type: row.dataset.type,
-                    label: label,
-                    placeholder: row.querySelector('.fb-placeholder').value.trim(),
-                    required: row.querySelector('.fb-required').checked
-                };
-                if (row.dataset.type === 'dropdown') {
-                    var optInput = row.querySelector('.fb-options');
-                    field.options = optInput ? optInput.value.split(',').map(function(o) { return o.trim(); }).filter(function(o) { return o; }) : [];
-                }
-                fields.push(field);
-            });
-            return fields;
-        }
-
-        async function saveForm() {
-            var name = document.getElementById('fbName').value.trim();
-            if (!name) { alert('Please enter a form name.'); return; }
-
-            var fields = getFormFields();
-            if (fields.length === 0) { alert('Please add at least one field.'); return; }
-
-            var eventId = document.getElementById('fbEventId').value;
-            var eventName = '';
-            if (eventId) {
-                var ev = app.events.find(function(e) { return e.id === eventId; });
-                if (ev) eventName = ev.name;
-            }
-
-            var formData = {
-                id: currentEditForm ? currentEditForm.id : 'form_' + Date.now(),
-                name: name,
-                slug: currentEditForm ? currentEditForm.slug : name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+$/, ''),
-                description: document.getElementById('fbDescription').value.trim(),
-                eventId: eventId || null,
-                eventName: eventName,
-                status: document.getElementById('fbStatus').value,
-                fields: fields,
-                submissionCount: currentEditForm ? (currentEditForm.submissionCount || 0) : 0,
-                created: currentEditForm ? currentEditForm.created : new Date().toISOString()
-            };
-
-            // Update or add
-            if (currentEditForm) {
-                var idx = app.forms.findIndex(function(f) { return f.id === currentEditForm.id; });
-                if (idx >= 0) app.forms[idx] = formData;
-                else app.forms.push(formData);
-            } else {
-                app.forms.push(formData);
-            }
-
-            // Save to GitHub via save-forms function
-            try {
-                var res = await fetch('/.netlify/functions/save-forms', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ forms: app.forms })
-                });
-                var result = await res.json();
-                if (res.ok) {
-                    showSuccess('Form saved! Link is live in ~60 seconds.');
-                    closeFormBuilder();
-                    updateFormsGrid();
-                } else {
-                    alert('Save error: ' + (result.error || 'Unknown error'));
-                }
-            } catch (e) {
-                alert('Save error: ' + e.message);
-            }
-        }
-
-        function editForm(formId) {
-            var form = app.forms.find(function(f) { return f.id === formId; });
-            if (form) openFormBuilder(form);
-        }
-
-        function deleteForm(formId) {
-            if (!confirm('Delete this form? Submissions will also be removed.')) return;
-            app.forms = app.forms.filter(function(f) { return f.id !== formId; });
-            delete app.formSubmissions[formId];
-            fetch('/.netlify/functions/save-forms', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ forms: app.forms })
-            }).then(function() {
-                showSuccess('Form deleted.');
-                updateFormsGrid();
-            });
-        }
-
-        function viewSubmissions(formId) {
-            var form = app.forms.find(function(f) { return f.id === formId; });
-            if (!form) return;
-            var subs = app.formSubmissions[formId] || [];
-
-            document.getElementById('submissionsTitle').textContent = 'Submissions — ' + form.name + ' (' + subs.length + ')';
-            document.getElementById('submissionsSection').style.display = 'block';
-
-            var list = document.getElementById('submissionsList');
-            if (subs.length === 0) {
-                list.innerHTML = '<p style="color:#888;text-align:center;padding:40px;">No submissions yet.</p>';
-                return;
-            }
-
-            list.innerHTML = subs.map(function(sub, idx) {
-                var statusColors = { pending: '#B8933A', approved: '#3cb464', rejected: '#dc2626', paid: '#2563eb' };
-                var statusColor = statusColors[sub.status] || '#888';
-
-                var fieldsHtml = '';
-                form.fields.forEach(function(field) {
-                    var val = sub.responses[field.id] || '(empty)';
-                    fieldsHtml += '<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid #f0ede8;font-size:0.8rem;">' +
-                        '<span style="font-weight:600;color:#555;min-width:120px;">' + field.label + '</span>' +
-                        '<span style="color:#333;">' + val + '</span></div>';
-                });
-
-                return '<div style="background:#fff;border:1px solid #e0d9d0;border-radius:8px;padding:16px;margin-bottom:12px;">' +
-                    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">' +
-                    '<div><span style="font-size:0.85rem;font-weight:600;color:#2C1A0E;">Submission #' + (subs.length - idx) + '</span>' +
-                    '<span style="font-size:0.7rem;color:#888;margin-left:8px;">' + new Date(sub.created).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }) + '</span></div>' +
-                    '<span style="font-size:0.7rem;padding:3px 8px;border-radius:12px;background:' + statusColor + '22;color:' + statusColor + ';font-weight:600;text-transform:uppercase;">' + sub.status + '</span>' +
-                    '</div>' +
-                    fieldsHtml +
-                    '<div style="display:flex;gap:6px;margin-top:12px;">' +
-                    (sub.status === 'pending' ? '<button onclick="approveVendor(\'' + formId + '\',\'' + sub.id + '\')" style="padding:5px 12px;font-size:0.75rem;background:#3cb464;color:#fff;border:none;border-radius:4px;cursor:pointer;">Approve & Send Payment Link</button>' : '') +
-                    (sub.status === 'approved' ? '<span style="font-size:0.75rem;color:#3cb464;">&#10003; Approval email sent — awaiting payment</span>' : '') +
-                    (sub.status === 'paid' ? '<span style="font-size:0.75rem;color:#2563eb;">&#10003; Paid & Confirmed</span>' : '') +
-                    (sub.status !== 'rejected' && sub.status !== 'paid' ? '<button onclick="updateSubStatus(\'' + formId + '\',\'' + sub.id + '\',\'rejected\')" style="padding:5px 12px;font-size:0.75rem;background:#dc2626;color:#fff;border:none;border-radius:4px;cursor:pointer;">Reject</button>' : '') +
-                    (sub.status !== 'pending' && sub.status !== 'paid' ? '<button onclick="updateSubStatus(\'' + formId + '\',\'' + sub.id + '\',\'pending\')" style="padding:5px 12px;font-size:0.75rem;background:transparent;color:#888;border:1px solid #888;border-radius:4px;cursor:pointer;">Reset to Pending</button>' : '') +
-                    '</div></div>';
-            }).join('');
-        }
-
-        function closeSubmissions() {
-            document.getElementById('submissionsSection').style.display = 'none';
-        }
-
-        async function approveVendor(formId, subId) {
-            var form = app.forms.find(function(f) { return f.id === formId; });
-            var subs = app.formSubmissions[formId] || [];
-            var sub = subs.find(function(s) { return s.id === subId; });
-            if (!form || !sub) return alert('Submission not found');
-
-            // Find vendor email and name from responses
-            var vendorEmail = '';
-            var vendorName = '';
-            form.fields.forEach(function(field) {
-                if (field.type === 'email' && sub.responses[field.id]) vendorEmail = sub.responses[field.id];
-                if (!vendorName && field.type === 'text' && sub.responses[field.id] && (field.label.toLowerCase().includes('name') || field.label.toLowerCase().includes('business'))) vendorName = sub.responses[field.id];
-            });
-            // Fallback: use first text field as name
-            if (!vendorName) {
-                form.fields.forEach(function(field) {
-                    if (!vendorName && field.type === 'text' && sub.responses[field.id]) vendorName = sub.responses[field.id];
-                });
-            }
-
-            if (!vendorEmail) return alert('No email found for this submission. Cannot send approval.');
-
-            var amount = prompt('Vendor fee amount (in dollars):', '150');
-            if (!amount) return;
-            amount = parseFloat(amount);
-            if (isNaN(amount) || amount <= 0) return alert('Invalid amount');
-
-            if (!confirm('Send approval email with $' + amount.toFixed(2) + ' payment link to ' + vendorEmail + '?')) return;
-
-            try {
-                var res = await fetch('/.netlify/functions/approve-vendor', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        formId: formId,
-                        submissionId: subId,
-                        vendorEmail: vendorEmail,
-                        vendorName: vendorName,
-                        formName: form.eventName || form.name,
-                        amount: amount
-                    })
-                });
-                var data = await res.json();
-                if (res.ok && data.success) {
-                    sub.status = 'approved';
-                    showSuccess('Approval email sent to ' + vendorEmail + ' with $' + amount.toFixed(2) + ' payment link!');
-                    viewSubmissions(formId);
-                } else {
-                    alert('Error: ' + (data.error || 'Unknown error'));
-                }
-            } catch(e) {
-                alert('Error: ' + e.message);
-            }
-        }
-
-        async function updateSubStatus(formId, subId, newStatus) {
-            var subs = app.formSubmissions[formId] || [];
-            var sub = subs.find(function(s) { return s.id === subId; });
-            if (sub) {
-                sub.status = newStatus;
-                // Re-save forms.json with updated submissions
-                try {
-                    // We need to push the full forms.json including submissions
-                    var payload = JSON.stringify({ forms: app.forms, submissions: app.formSubmissions });
-                    var res = await fetch('/.netlify/functions/save-github-file', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ filePath: 'forms.json', content: JSON.stringify({ forms: app.forms, submissions: app.formSubmissions }, null, 2), message: 'Update submission status: ' + newStatus })
-                    });
-                    if (res.ok) {
-                        showSuccess('Status updated to ' + newStatus);
-                        viewSubmissions(formId); // Re-render
-                    }
-                } catch(e) {
-                    alert('Error: ' + e.message);
-                }
-            }
-        }
-
         async function saveToGitHub() {
             const overlay = document.createElement('div');
             overlay.className = 'saving-overlay';
@@ -5798,18 +4878,9 @@
             document.body.appendChild(overlay);
 
             try {
-                // Strip large base64 images to keep payload under Netlify's body limit
-                // The server will re-merge images from the current GitHub file
-                const strippedEvents = app.events.map(evt => {
-                    const copy = Object.assign({}, evt);
-                    if (copy.image && copy.image.length > 500) {
-                        delete copy.image;
-                    }
-                    return copy;
-                });
-
+                // Build the complete events.json data
                 const eventsData = {
-                    events: strippedEvents,
+                    events: app.events,
                     bands: app.bands,
                     floorPlan: app.floorPlan,
                     floorPlans: app.floorPlans,
