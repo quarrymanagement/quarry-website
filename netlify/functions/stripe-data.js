@@ -92,6 +92,8 @@ const createInvoice = async (event) => {
       service_charge_percent,
       cc_fee_enabled,
       cc_fee_percent,
+      sales_tax_enabled,
+      sales_tax_percent,
     } = body;
 
     if (!customer_email || !customer_name || !description || amount === undefined) {
@@ -151,10 +153,11 @@ const createInvoice = async (event) => {
     }
 
     // Add credit card processing fee, computed on subtotal + service charge
+    let ccFeeAmount = 0;
     if (cc_fee_enabled && cc_fee_percent > 0) {
       const ccPct = parseFloat(cc_fee_percent);
       const base = baseAmount + serviceChargeAmount;
-      const ccFeeAmount = Math.round(base * (ccPct / 100));
+      ccFeeAmount = Math.round(base * (ccPct / 100));
       if (ccFeeAmount > 0) {
         await stripe.invoiceItems.create({
           customer: customer.id,
@@ -162,6 +165,22 @@ const createInvoice = async (event) => {
           amount: ccFeeAmount,
           currency: 'usd',
           description: `Credit Card Processing Fee (${ccPct}%)`,
+        });
+      }
+    }
+
+    // Add sales tax, computed on subtotal + service charge + cc fee
+    if (sales_tax_enabled && sales_tax_percent > 0) {
+      const taxPct = parseFloat(sales_tax_percent);
+      const taxableAmount = baseAmount + serviceChargeAmount + ccFeeAmount;
+      const taxAmount = Math.round(taxableAmount * (taxPct / 100));
+      if (taxAmount > 0) {
+        await stripe.invoiceItems.create({
+          customer: customer.id,
+          invoice: invoice.id,
+          amount: taxAmount,
+          currency: 'usd',
+          description: `Sales Tax (${taxPct}%)`,
         });
       }
     }
@@ -391,3 +410,4 @@ exports.handler = async (event) => {
     return response(500, { success: false, error: 'Internal server error' });
   }
 };
+
