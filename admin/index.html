@@ -2373,10 +2373,17 @@
                         <span style="color:#666;">%</span>
                     </div>
 
-                    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
+                    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem;">
                         <input type="checkbox" id="invoiceCcFeeEnabled" style="width:auto;margin:0;">
                         <label for="invoiceCcFeeEnabled" style="margin:0;flex:1;font-weight:500;cursor:pointer;">Credit Card Processing Fee</label>
                         <input type="number" class="form-input" id="invoiceCcFeePercent" value="3.5" min="0" max="100" step="0.1" style="width:90px;" disabled>
+                        <span style="color:#666;">%</span>
+                    </div>
+
+                    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
+                        <input type="checkbox" id="invoiceSalesTaxEnabled" checked style="width:auto;margin:0;">
+                        <label for="invoiceSalesTaxEnabled" style="margin:0;flex:1;font-weight:500;cursor:pointer;">Sales Tax</label>
+                        <input type="number" class="form-input" id="invoiceSalesTaxPercent" value="8.45" min="0" max="100" step="0.01" style="width:90px;">
                         <span style="color:#666;">%</span>
                     </div>
 
@@ -2384,6 +2391,7 @@
                         <div style="display:flex;justify-content:space-between;"><span>Subtotal:</span><span id="previewSubtotal">$0.00</span></div>
                         <div id="previewServiceRow" style="display:none;justify-content:space-between;"><span id="previewServiceLabel">Service Charge:</span><span id="previewServiceAmount">$0.00</span></div>
                         <div id="previewCcRow" style="display:none;justify-content:space-between;"><span id="previewCcLabel">CC Processing Fee:</span><span id="previewCcAmount">$0.00</span></div>
+                        <div id="previewTaxRow" style="display:flex;justify-content:space-between;"><span id="previewTaxLabel">Sales Tax (8.45%):</span><span id="previewTaxAmount">$0.00</span></div>
                         <div style="display:flex;justify-content:space-between;margin-top:0.4rem;padding-top:0.4rem;border-top:1px solid #e8dcc0;font-weight:600;color:#222;"><span>Total:</span><span id="previewTotal">$0.00</span></div>
                     </div>
                 </div>
@@ -5270,31 +5278,42 @@
             var amount = parseFloat(document.getElementById('invoiceAmount').value) || 0;
             var svcOn = document.getElementById('invoiceServiceChargeEnabled').checked;
             var ccOn = document.getElementById('invoiceCcFeeEnabled').checked;
+            var taxOn = document.getElementById('invoiceSalesTaxEnabled').checked;
             var svcPct = parseFloat(document.getElementById('invoiceServiceChargePercent').value) || 0;
             var ccPct = parseFloat(document.getElementById('invoiceCcFeePercent').value) || 0;
+            var taxPct = parseFloat(document.getElementById('invoiceSalesTaxPercent').value) || 0;
             var svcAmt = svcOn ? amount * (svcPct / 100) : 0;
             var ccAmt = ccOn ? (amount + svcAmt) * (ccPct / 100) : 0;
-            var total = amount + svcAmt + ccAmt;
+            var subtotalBeforeTax = amount + svcAmt + ccAmt;
+            var taxAmt = taxOn ? subtotalBeforeTax * (taxPct / 100) : 0;
+            var total = subtotalBeforeTax + taxAmt;
             document.getElementById('previewSubtotal').textContent = '$' + amount.toFixed(2);
             document.getElementById('previewServiceLabel').textContent = 'Service Charge (' + svcPct + '%):';
             document.getElementById('previewServiceAmount').textContent = '$' + svcAmt.toFixed(2);
             document.getElementById('previewCcLabel').textContent = 'CC Processing Fee (' + ccPct + '%):';
             document.getElementById('previewCcAmount').textContent = '$' + ccAmt.toFixed(2);
+            document.getElementById('previewTaxLabel').textContent = 'Sales Tax (' + taxPct + '%):';
+            document.getElementById('previewTaxAmount').textContent = '$' + taxAmt.toFixed(2);
             document.getElementById('previewTotal').textContent = '$' + total.toFixed(2);
             document.getElementById('previewServiceRow').style.display = svcOn ? 'flex' : 'none';
             document.getElementById('previewCcRow').style.display = ccOn ? 'flex' : 'none';
+            document.getElementById('previewTaxRow').style.display = taxOn ? 'flex' : 'none';
         }
 
         (function wireInvoiceFeeToggles() {
             var svcToggle = document.getElementById('invoiceServiceChargeEnabled');
             var ccToggle = document.getElementById('invoiceCcFeeEnabled');
+            var taxToggle = document.getElementById('invoiceSalesTaxEnabled');
             var svcPct = document.getElementById('invoiceServiceChargePercent');
             var ccPct = document.getElementById('invoiceCcFeePercent');
+            var taxPct = document.getElementById('invoiceSalesTaxPercent');
             var amountInput = document.getElementById('invoiceAmount');
             if (svcToggle) svcToggle.addEventListener('change', function () { svcPct.disabled = !svcToggle.checked; updateInvoicePreview(); });
             if (ccToggle) ccToggle.addEventListener('change', function () { ccPct.disabled = !ccToggle.checked; updateInvoicePreview(); });
+            if (taxToggle) taxToggle.addEventListener('change', function () { taxPct.disabled = !taxToggle.checked; updateInvoicePreview(); });
             if (svcPct) svcPct.addEventListener('input', updateInvoicePreview);
             if (ccPct) ccPct.addEventListener('input', updateInvoicePreview);
+            if (taxPct) taxPct.addEventListener('input', updateInvoicePreview);
             if (amountInput) amountInput.addEventListener('input', updateInvoicePreview);
         })();
 
@@ -5309,15 +5328,20 @@
             const serviceChargePercent = parseFloat(document.getElementById('invoiceServiceChargePercent').value) || 0;
             const ccFeeEnabled = document.getElementById('invoiceCcFeeEnabled').checked;
             const ccFeePercent = parseFloat(document.getElementById('invoiceCcFeePercent').value) || 0;
+            const salesTaxEnabled = document.getElementById('invoiceSalesTaxEnabled').checked;
+            const salesTaxPercent = parseFloat(document.getElementById('invoiceSalesTaxPercent').value) || 0;
 
             if (!name || !email || !description || !amount) return;
             if (serviceChargeEnabled && (serviceChargePercent < 0 || serviceChargePercent > 100)) { alert('Service charge must be 0-100%'); return; }
             if (ccFeeEnabled && (ccFeePercent < 0 || ccFeePercent > 100)) { alert('CC processing fee must be 0-100%'); return; }
+            if (salesTaxEnabled && (salesTaxPercent < 0 || salesTaxPercent > 100)) { alert('Sales tax must be 0-100%'); return; }
 
             // Compute total for the confirmation message
             var svcAmt = serviceChargeEnabled ? amount * (serviceChargePercent / 100) : 0;
             var ccAmt = ccFeeEnabled ? (amount + svcAmt) * (ccFeePercent / 100) : 0;
-            var total = amount + svcAmt + ccAmt;
+            var subtotalBeforeTax = amount + svcAmt + ccAmt;
+            var taxAmt = salesTaxEnabled ? subtotalBeforeTax * (salesTaxPercent / 100) : 0;
+            var total = subtotalBeforeTax + taxAmt;
 
             showConfirmModal('Create Invoice?', `Send a $${total.toFixed(2)} invoice (subtotal $${amount.toFixed(2)}) to ${email} for "${description}"?`, async () => {
                 try {
@@ -5333,6 +5357,8 @@
                             service_charge_percent: serviceChargePercent,
                             cc_fee_enabled: ccFeeEnabled,
                             cc_fee_percent: ccFeePercent,
+                            sales_tax_enabled: salesTaxEnabled,
+                            sales_tax_percent: salesTaxPercent,
                         }),
                     });
 
@@ -5344,8 +5370,11 @@
                         // Reset fee defaults
                         document.getElementById('invoiceServiceChargePercent').value = '20';
                         document.getElementById('invoiceCcFeePercent').value = '3.5';
+                        document.getElementById('invoiceSalesTaxPercent').value = '8.45';
                         document.getElementById('invoiceServiceChargePercent').disabled = true;
                         document.getElementById('invoiceCcFeePercent').disabled = true;
+                        document.getElementById('invoiceSalesTaxPercent').disabled = false;
+                        document.getElementById('invoiceSalesTaxEnabled').checked = true;
                         updateInvoicePreview();
                         loadPaymentsData();
                     } else {
