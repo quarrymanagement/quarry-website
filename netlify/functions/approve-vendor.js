@@ -126,16 +126,15 @@ exports.handler = async (event) => {
       '<h1 style="color:#B8933A;margin:0;font-size:28px">The Quarry</h1>' +
       '<p style="color:#F5F0E8;font-size:0.8rem;letter-spacing:0.15em;margin:4px 0 0">NEW MELLE, MISSOURI</p></div>' +
       '<div style="padding:32px 24px;background:#FFFFFF">' +
-      '<h2 style="color:#2C1A0E;margin-top:0">You\'ve Been Accepted!</h2>' +
+      '<h2 style="color:#2C1A0E;margin-top:0">You\'ve Been Approved!</h2>' +
       '<p style="color:#444;line-height:1.7;">Hi ' + (vendorName || 'there') + ',</p>' +
-      '<p style="color:#444;line-height:1.7;">Great news — your vendor application for <strong>' + (formName || 'our upcoming event') + '</strong> has been approved!</p>' +
-      '<p style="color:#444;line-height:1.7;">Once your confirmation payment of <strong>$' + amountDollars + '</strong> is received, your spot will be officially reserved.</p>' +
+      '<p style="color:#444;line-height:1.7;">Thank you for signing up! We are happy to let you know that your vendor application for <strong>' + (formName || 'our upcoming event') + '</strong> has been approved. We look forward to having you and can\'t wait for a great event!</p>' +
+      '<p style="color:#444;line-height:1.7;">To secure your spot, please complete your confirmation payment of <strong>$' + amountDollars + '</strong> using the button below.</p>' +
       '<div style="text-align:center;margin:28px 0;">' +
       '<a href="' + session.url + '" style="display:inline-block;padding:14px 32px;background:linear-gradient(135deg,#B8933A,#d4af37);color:#1A0E08;text-decoration:none;font-weight:700;font-size:1rem;letter-spacing:0.05em;border-radius:8px;">Pay $' + amountDollars + ' to Reserve Your Spot</a>' +
       '</div>' +
-      '<p style="color:#444;line-height:1.7;">We\'re extremely excited for this event and are happy that you get to be a part of it!</p>' +
+      '<p style="color:#444;line-height:1.7;">If you need any additional information or have questions about the event, please don\'t hesitate to reach out. Our wedding director, <strong>Jacqueline</strong>, will also be in contact with you to coordinate details and make sure everything runs smoothly.</p>' +
       '<p style="color:#444;line-height:1.7;">We do recommend some type of giveaway at the event from our vendors — it\'s a great opportunity to generate leads from those who participate!</p>' +
-      '<p style="color:#444;line-height:1.7;"><strong>Jacqueline</strong>, our wedding director, will be reaching out to you with more details.</p>' +
       '<div style="background:#FAF7F2;border-left:4px solid #B8933A;padding:16px 20px;margin:24px 0;border-radius:4px">' +
       '<p style="margin:6px 0"><strong>Vendor Fee:</strong> $' + amountDollars + '</p>' +
       '<p style="margin:6px 0"><strong>Status:</strong> Approved — Pending Payment</p>' +
