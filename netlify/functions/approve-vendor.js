@@ -67,6 +67,12 @@ exports.handler = async (event) => {
     // amount is in dollars (default 150)
     const amountCents = Math.round((amount || 150) * 100);
     const amountDollars = (amountCents / 100).toFixed(2);
+    // Sales tax at 8.45%
+    const taxRate = 0.0845;
+    const taxCents = Math.round(amountCents * taxRate);
+    const taxDollars = (taxCents / 100).toFixed(2);
+    const totalCents = amountCents + taxCents;
+    const totalDollars = (totalCents / 100).toFixed(2);
 
     if (!formId || !submissionId || !vendorEmail) {
       return { statusCode: 400, headers: HEADERS, body: JSON.stringify({ error: 'Missing required fields' }) };
@@ -77,17 +83,30 @@ exports.handler = async (event) => {
       payment_method_types: ['card'],
       mode: 'payment',
       customer_email: vendorEmail,
-      line_items: [{
-        price_data: {
-          currency: 'usd',
-          unit_amount: amountCents,
-          product_data: {
-            name: 'Vendor Booth — ' + (formName || 'The Quarry Event'),
-            description: 'Vendor spot reservation at The Quarry'
-          }
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            unit_amount: amountCents,
+            product_data: {
+              name: 'Vendor Booth — ' + (formName || 'The Quarry Event'),
+              description: 'Vendor spot reservation at The Quarry'
+            }
+          },
+          quantity: 1
         },
-        quantity: 1
-      }],
+        {
+          price_data: {
+            currency: 'usd',
+            unit_amount: taxCents,
+            product_data: {
+              name: 'Sales Tax (8.45%)',
+              description: 'Missouri sales tax'
+            }
+          },
+          quantity: 1
+        }
+      ],
       metadata: {
         type: 'vendor_approval',
         formId: formId,
@@ -112,15 +131,17 @@ exports.handler = async (event) => {
       '<h2 style="color:#2C1A0E;margin-top:0">You\'ve Been Accepted!</h2>' +
       '<p style="color:#444;line-height:1.7;">Hi ' + (vendorName || 'there') + ',</p>' +
       '<p style="color:#444;line-height:1.7;">Great news — your vendor application for <strong>' + (formName || 'our upcoming event') + '</strong> has been approved!</p>' +
-      '<p style="color:#444;line-height:1.7;">Once your confirmation payment of <strong>$' + amountDollars + '</strong> is received, your spot will be officially reserved.</p>' +
+      '<p style="color:#444;line-height:1.7;">Once your confirmation payment of <strong>$' + totalDollars + '</strong> (includes sales tax) is received, your spot will be officially reserved.</p>' +
       '<div style="text-align:center;margin:28px 0;">' +
-      '<a href="' + session.url + '" style="display:inline-block;padding:14px 32px;background:linear-gradient(135deg,#B8933A,#d4af37);color:#1A0E08;text-decoration:none;font-weight:700;font-size:1rem;letter-spacing:0.05em;border-radius:8px;">Pay $' + amountDollars + ' to Reserve Your Spot</a>' +
+      '<a href="' + session.url + '" style="display:inline-block;padding:14px 32px;background:linear-gradient(135deg,#B8933A,#d4af37);color:#1A0E08;text-decoration:none;font-weight:700;font-size:1rem;letter-spacing:0.05em;border-radius:8px;">Pay $' + totalDollars + ' to Reserve Your Spot</a>' +
       '</div>' +
       '<p style="color:#444;line-height:1.7;">We\'re extremely excited for this event and are happy that you get to be a part of it!</p>' +
       '<p style="color:#444;line-height:1.7;">We do recommend some type of giveaway at the event from our vendors — it\'s a great opportunity to generate leads from those who participate!</p>' +
       '<p style="color:#444;line-height:1.7;"><strong>Jacqueline</strong>, our wedding director, will be reaching out to you with more details.</p>' +
       '<div style="background:#FAF7F2;border-left:4px solid #B8933A;padding:16px 20px;margin:24px 0;border-radius:4px">' +
       '<p style="margin:6px 0"><strong>Vendor Fee:</strong> $' + amountDollars + '</p>' +
+      '<p style="margin:6px 0"><strong>Sales Tax (8.45%):</strong> $' + taxDollars + '</p>' +
+      '<p style="margin:6px 0;border-top:1px solid #e0d6c8;padding-top:8px"><strong>Total:</strong> $' + totalDollars + '</p>' +
       '<p style="margin:6px 0"><strong>Status:</strong> Approved — Pending Payment</p>' +
       '</div>' +
       '<p style="color:#444;">Questions? Contact Jacqueline at <a href="mailto:jacqueline@thequarrystl.com" style="color:#B8933A">jacqueline@thequarrystl.com</a> or call <a href="tel:6362248257" style="color:#B8933A">636-224-8257</a></p>' +
@@ -157,11 +178,13 @@ exports.handler = async (event) => {
         '<p style="margin:6px 0"><strong>Vendor:</strong> ' + (vendorName || 'N/A') + '</p>' +
         '<p style="margin:6px 0"><strong>Email:</strong> ' + vendorEmail + '</p>' +
         '<p style="margin:6px 0"><strong>Form:</strong> ' + (formName || 'N/A') + '</p>' +
-        '<p style="margin:6px 0"><strong>Amount:</strong> $' + amountDollars + '</p>' +
+        '<p style="margin:6px 0"><strong>Vendor Fee:</strong> $' + amountDollars + '</p>' +
+        '<p style="margin:6px 0"><strong>Sales Tax (8.45%):</strong> $' + taxDollars + '</p>' +
+        '<p style="margin:6px 0;border-top:1px solid #e0d6c8;padding-top:8px"><strong>Total:</strong> $' + totalDollars + '</p>' +
         '<p style="margin:6px 0"><strong>Status:</strong> Payment link sent — awaiting payment</p>' +
         '</div>' +
         '<div style="text-align:center;margin:24px 0;">' +
-        '<a href="' + session.url + '" style="display:inline-block;padding:12px 28px;background:linear-gradient(135deg,#B8933A,#d4af37);color:#1A0E08;text-decoration:none;font-weight:700;font-size:0.9rem;border-radius:8px;">Vendor Payment Link ($' + amountDollars + ')</a>' +
+        '<a href="' + session.url + '" style="display:inline-block;padding:12px 28px;background:linear-gradient(135deg,#B8933A,#d4af37);color:#1A0E08;text-decoration:none;font-weight:700;font-size:0.9rem;border-radius:8px;">Vendor Payment Link ($' + totalDollars + ')</a>' +
         '</div>' +
         '<p style="color:#888;font-size:0.8rem;">Payment link: <a href="' + session.url + '" style="color:#B8933A;word-break:break-all;">' + session.url + '</a></p>' +
         '</div></div>'
