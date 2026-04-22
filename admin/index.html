@@ -118,85 +118,278 @@
         /* ================================================================
            MAIN LAYOUT
            ================================================================ */
-        #mainApp { display: flex; flex-direction: column; width: 100%; height: 100%; }
+        #mainApp { display: flex; flex-direction: row; width: 100%; height: 100%; }
 
         /* ================================================================
-           NAVIGATION BAR
+           SIDEBAR NAVIGATION
            ================================================================ */
-        .navbar {
-            background: var(--bg-secondary); border-bottom: 1px solid var(--border-subtle);
-            padding: 0 1.5rem; display: flex; align-items: center;
-            justify-content: space-between; height: var(--nav-height);
-            position: relative; z-index: 200;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        :root {
+            --sidebar-width: 240px;
+            --sidebar-collapsed-width: 60px;
+            --sidebar-bg: #1A0E08;
+            --sidebar-hover: rgba(184, 147, 58, 0.12);
+            --sidebar-active: rgba(184, 147, 58, 0.18);
+            --sidebar-text: #d4cfc7;
+            --sidebar-text-active: #B8933A;
         }
-        .navbar-brand {
-            font-family: var(--font-serif); font-size: 1.15rem;
-            color: var(--gold); font-weight: 700; letter-spacing: 2.5px;
+
+        .sidebar {
+            width: var(--sidebar-width);
+            min-width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--sidebar-bg);
+            display: flex;
+            flex-direction: column;
+            transition: width 0.3s cubic-bezier(0.4,0,0.2,1), min-width 0.3s cubic-bezier(0.4,0,0.2,1);
+            overflow: hidden;
+            z-index: 200;
+            position: relative;
+        }
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-width);
+            min-width: var(--sidebar-collapsed-width);
+        }
+
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 0.75rem;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            min-height: 60px;
+        }
+        .sidebar-brand-text {
+            font-family: var(--font-serif);
+            font-size: 1.1rem;
+            color: #B8933A;
+            font-weight: 700;
+            letter-spacing: 2.5px;
             white-space: nowrap;
+            overflow: hidden;
+            transition: opacity 0.2s ease;
         }
-        .nav-tabs { display: flex; gap: 0; flex: 1; margin-left: 2rem; height: 100%; align-items: stretch; }
-        .nav-tab {
-            color: var(--text-muted); cursor: pointer; padding: 0 0.9rem;
-            border-bottom: 2px solid transparent; transition: var(--transition);
-            font-weight: 500; font-size: 0.82rem; white-space: nowrap;
-            display: flex; align-items: center; letter-spacing: 0.3px;
+        .sidebar.collapsed .sidebar-brand-text .brand-full { display: none; }
+        .sidebar.collapsed .sidebar-brand-text .brand-short { display: inline; }
+        .sidebar-brand-text .brand-full { display: inline; }
+        .sidebar-brand-text .brand-short { display: none; }
+
+        .sidebar-toggle {
+            background: none;
+            border: none;
+            color: var(--sidebar-text);
+            cursor: pointer;
+            padding: 0.3rem;
+            border-radius: 4px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .sidebar-toggle:hover { color: #B8933A; background: var(--sidebar-hover); }
+        .sidebar-toggle svg { width: 18px; height: 18px; }
+
+        .sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 0.5rem 0;
+        }
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: transparent; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 0.6rem 0.75rem;
+            color: var(--sidebar-text);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+            font-size: 0.82rem;
+            font-weight: 500;
+            letter-spacing: 0.2px;
             text-transform: uppercase;
+            position: relative;
+            border-left: 3px solid transparent;
         }
-        .nav-tab:hover { color: var(--text-primary); background: var(--gold-glow); }
-        .nav-tab.active { color: var(--gold); border-bottom: 2px solid var(--gold); }
+        .sidebar-item:hover {
+            background: var(--sidebar-hover);
+            color: #fff;
+        }
+        .sidebar-item.active {
+            background: var(--sidebar-active);
+            color: #B8933A;
+            border-left-color: #B8933A;
+        }
+        .sidebar-item-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-right: 0.75rem;
+            font-size: 1rem;
+        }
+        .sidebar-item-icon svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .sidebar-item-label {
+            overflow: hidden;
+            transition: opacity 0.2s ease;
+        }
+        .sidebar.collapsed .sidebar-item-label { opacity: 0; width: 0; }
+        .sidebar.collapsed .sidebar-item { justify-content: center; padding: 0.6rem 0; }
+        .sidebar.collapsed .sidebar-item-icon { margin-right: 0; }
 
-        /* Dropdown nav items */
-        .nav-dropdown { position: relative; display: flex; }
-        .nav-dropdown > .nav-tab { padding-right: 1.4rem; }
-        .nav-dropdown > .nav-tab::after {
-            content: ''; width: 0; height: 0;
-            border-left: 3.5px solid transparent; border-right: 3.5px solid transparent;
-            border-top: 4px solid currentColor;
-            margin-left: 6px; opacity: 0.5; transition: var(--transition);
+        /* Sidebar parent items with children */
+        .sidebar-parent {}
+        .sidebar-parent-header {
+            display: flex;
+            align-items: center;
+            padding: 0.6rem 0.75rem;
+            color: var(--sidebar-text);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+            font-size: 0.82rem;
+            font-weight: 500;
+            letter-spacing: 0.2px;
+            text-transform: uppercase;
+            border-left: 3px solid transparent;
         }
-        .nav-dropdown:hover > .nav-tab::after { opacity: 1; }
-        .nav-dropdown-menu {
-            display: none; position: absolute; top: 100%; left: 0;
-            background: var(--bg-elevated); border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-md); min-width: 200px; z-index: 300;
-            padding: 6px; box-shadow: var(--shadow-lg); margin-top: 0;
+        .sidebar-parent-header:hover {
+            background: var(--sidebar-hover);
+            color: #fff;
         }
-        .nav-dropdown:hover .nav-dropdown-menu,
-        .nav-dropdown.open .nav-dropdown-menu { display: block; }
-        .nav-dropdown-item {
-            display: block; padding: 0.6rem 0.9rem; color: var(--text-secondary);
-            font-size: 0.82rem; cursor: pointer; transition: var(--transition);
-            border-radius: var(--radius-sm); font-weight: 500;
+        .sidebar-parent-header.active {
+            background: var(--sidebar-active);
+            color: #B8933A;
+            border-left-color: #B8933A;
         }
-        .nav-dropdown-item:hover { background: var(--gold-dim); color: var(--gold); }
-        .nav-dropdown-item.active { color: var(--gold); font-weight: 600; background: var(--gold-dim); }
-        .navbar-actions { display: flex; gap: 0.6rem; align-items: center; }
-        .logout-btn {
-            background: transparent; color: var(--text-muted); border: 1px solid var(--border-subtle);
-            padding: 0.4rem 1rem; border-radius: var(--radius-sm); cursor: pointer;
-            font-weight: 500; font-size: 0.8rem; transition: var(--transition);
-            font-family: var(--font-sans);
+        .sidebar-parent-header .sidebar-item-icon { margin-right: 0.75rem; }
+        .sidebar-parent-chevron {
+            margin-left: auto;
+            transition: transform 0.2s ease;
+            font-size: 0.6rem;
+            opacity: 0.5;
         }
-        .logout-btn:hover { border-color: var(--red); color: var(--red); }
-        .save-github-btn {
-            background: var(--gold); color: var(--bg-primary); border: none;
-            padding: 0.4rem 1rem; border-radius: var(--radius-sm); cursor: pointer;
-            font-weight: 600; font-size: 0.8rem; transition: var(--transition);
-            font-family: var(--font-sans);
-        }
-        .save-github-btn:hover { background: var(--gold-light); }
+        .sidebar-parent.open .sidebar-parent-chevron { transform: rotate(90deg); }
+        .sidebar.collapsed .sidebar-parent-chevron { display: none; }
+        .sidebar.collapsed .sidebar-parent-header { justify-content: center; padding: 0.6rem 0; }
+        .sidebar.collapsed .sidebar-parent-header .sidebar-item-icon { margin-right: 0; }
+        .sidebar.collapsed .sidebar-parent-header .sidebar-item-label { opacity: 0; width: 0; }
 
-        /* Mobile hamburger */
-        .mobile-menu-btn {
-            display: none; background: none; border: none; color: var(--text-primary);
-            font-size: 1.4rem; cursor: pointer; padding: 0.4rem; line-height: 1;
+        .sidebar-children {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.25s ease;
+            background: rgba(0,0,0,0.15);
         }
+        .sidebar-parent.open .sidebar-children {
+            max-height: 300px;
+        }
+        .sidebar.collapsed .sidebar-children { display: none; }
+
+        .sidebar-child {
+            display: flex;
+            align-items: center;
+            padding: 0.45rem 0.75rem 0.45rem 2.75rem;
+            color: rgba(212, 207, 199, 0.75);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 500;
+            letter-spacing: 0.2px;
+        }
+        .sidebar-child:hover { color: #fff; background: var(--sidebar-hover); }
+        .sidebar-child.active { color: #B8933A; }
+
+        .sidebar-footer {
+            border-top: 1px solid rgba(255,255,255,0.08);
+            padding: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+        .sidebar-footer-btn {
+            display: flex;
+            align-items: center;
+            padding: 0.55rem 0.75rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.78rem;
+            transition: var(--transition);
+            font-family: var(--font-sans);
+            white-space: nowrap;
+            gap: 0.5rem;
+        }
+        .sidebar-footer-btn .btn-icon-svg { width: 16px; height: 16px; flex-shrink: 0; }
+        .sidebar-footer-btn .btn-label { overflow: hidden; transition: opacity 0.2s ease; }
+        .sidebar.collapsed .sidebar-footer-btn .btn-label { opacity: 0; width: 0; }
+        .sidebar.collapsed .sidebar-footer-btn { justify-content: center; padding: 0.55rem 0; }
+
+        .sidebar-save-btn {
+            background: #B8933A;
+            color: #1A0E08;
+        }
+        .sidebar-save-btn:hover { background: #d4a843; }
+
+        .sidebar-logout-btn {
+            background: transparent;
+            color: rgba(212, 207, 199, 0.6);
+            border: 1px solid rgba(255,255,255,0.1) !important;
+        }
+        .sidebar-logout-btn:hover { border-color: #dc2626 !important; color: #dc2626; }
+
+        /* Mobile hamburger for sidebar */
+        .mobile-sidebar-toggle {
+            display: none;
+            position: fixed;
+            top: 0.75rem;
+            left: 0.75rem;
+            z-index: 300;
+            background: var(--sidebar-bg);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: #B8933A;
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+        }
+
+        /* Sidebar overlay for mobile */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 199;
+        }
+        .sidebar-overlay.active { display: block; }
+
+        /* Hide old navbar elements */
+        .navbar { display: none !important; }
 
         /* ================================================================
            CONTENT AREA
            ================================================================ */
-        .content { flex: 1; display: flex; overflow-y: auto; overflow-x: hidden; }
+        .content { flex: 1; display: flex; overflow-y: auto; overflow-x: hidden; transition: margin-left 0.3s ease; }
         .tab-content {
             display: none; width: 100%; min-height: 0;
             padding: 1.75rem; overflow-y: auto; animation: fadeIn 0.25s ease;
@@ -896,37 +1089,16 @@
            MOBILE RESPONSIVE
            ================================================================ */
         @media (max-width: 768px) {
-            :root { --nav-height: 56px; }
-
-            .navbar { padding: 0 1rem; }
-            .navbar-brand { font-size: 1rem; letter-spacing: 1.5px; }
-
-            .nav-tabs {
-                display: none; position: fixed; top: var(--nav-height); left: 0;
-                width: 100%; height: calc(100vh - var(--nav-height));
-                background: var(--bg-secondary); flex-direction: column;
-                margin: 0; padding: 1rem; gap: 0; z-index: 199;
-                overflow-y: auto; border-top: 1px solid var(--border-subtle);
+            .sidebar {
+                position: fixed;
+                left: -260px;
+                top: 0;
+                z-index: 250;
+                transition: left 0.3s cubic-bezier(0.4,0,0.2,1);
             }
-            .nav-tabs.mobile-open { display: flex; }
-            .nav-tab {
-                padding: 0.85rem 1rem; font-size: 0.88rem; border-bottom: none;
-                border-radius: var(--radius-sm);
-            }
-            .nav-tab:hover, .nav-tab.active { background: var(--gold-dim); border-bottom: none; }
-
-            .nav-dropdown { display: flex; flex-direction: column; }
-            .nav-dropdown > .nav-tab::after { display: none; }
-            .nav-dropdown-menu {
-                position: static; display: block; background: none;
-                border: none; box-shadow: none; min-width: auto;
-                padding: 0 0 0 1rem; margin: 0;
-            }
-            .nav-dropdown-item { padding: 0.7rem 1rem; font-size: 0.85rem; }
-
-            .mobile-menu-btn { display: flex; align-items: center; justify-content: center; }
-            .navbar-actions { gap: 0.4rem; }
-            .save-github-btn, .logout-btn { padding: 0.35rem 0.7rem; font-size: 0.75rem; }
+            .sidebar.mobile-open { left: 0; }
+            .mobile-sidebar-toggle { display: flex; }
+            .content { margin-left: 0 !important; padding-top: 3.25rem; }
 
             .tab-content { padding: 1rem; }
 
@@ -969,7 +1141,6 @@
             .summary-value { font-size: 1.2rem; }
             .summary-label { font-size: 0.65rem; }
             .crm-stats { grid-template-columns: repeat(3, 1fr); }
-            .navbar-brand { font-size: 0.9rem; }
         }
     
         /* ================================================================
@@ -1309,7 +1480,161 @@
             color: var(--red); padding: 0.85rem 1rem; border-radius: var(--radius-sm);
             margin-bottom: 1rem; font-size: 0.9rem;
         }
-    
+
+        /* ================================================================
+           EMAIL CAMPAIGN ANALYTICS
+           ================================================================ */
+        .campaign-analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.85rem;
+            margin-bottom: 1.5rem;
+        }
+        .campaign-stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 1rem 1.15rem;
+            text-align: center;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        .campaign-stat-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--gold), transparent);
+            opacity: 0;
+            transition: var(--transition);
+        }
+        .campaign-stat-card:hover { border-color: var(--border-medium); box-shadow: var(--shadow-sm); }
+        .campaign-stat-card:hover::before { opacity: 1; }
+        .campaign-stat-label {
+            color: var(--text-muted);
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+        }
+        .campaign-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+        }
+        .campaign-stat-value.green { color: var(--green); }
+        .campaign-stat-value.red { color: var(--red); }
+        .campaign-stat-value.blue { color: var(--blue); }
+
+        .campaign-detail-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            margin-top: 1rem;
+            display: none;
+        }
+        .campaign-detail-panel.active { display: block; }
+        .campaign-detail-panel h4 {
+            font-family: var(--font-serif);
+            color: var(--gold);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        .campaign-detail-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .campaign-detail-tab {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            transition: var(--transition);
+        }
+        .campaign-detail-tab:hover { color: var(--text-primary); }
+        .campaign-detail-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+        .campaign-detail-content { display: none; }
+        .campaign-detail-content.active { display: block; }
+
+        .activity-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.55rem 0;
+            border-bottom: 1px solid var(--border-subtle);
+            font-size: 0.85rem;
+        }
+        .activity-list-item:last-child { border-bottom: none; }
+        .activity-list-email { color: var(--text-primary); font-weight: 500; }
+        .activity-list-action { color: var(--text-muted); font-size: 0.78rem; }
+        .activity-list-time { color: var(--text-muted); font-size: 0.75rem; }
+
+        .unsub-management {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            margin-top: 1.5rem;
+        }
+        .unsub-management h4 {
+            font-family: var(--font-serif);
+            color: var(--gold);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        .unsub-table { width: 100%; border-collapse: collapse; }
+        .unsub-table th, .unsub-table td {
+            padding: 0.55rem 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-subtle);
+            font-size: 0.82rem;
+        }
+        .unsub-table th {
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: var(--bg-elevated);
+        }
+        .btn-resub {
+            background: transparent;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            padding: 0.25rem 0.6rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        .btn-resub:hover { background: var(--gold); color: var(--bg-primary); }
+
+        .enhanced-history-table { width: 100%; border-collapse: collapse; }
+        .enhanced-history-table th, .enhanced-history-table td {
+            padding: 0.5rem 0.65rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-subtle);
+            font-size: 0.82rem;
+        }
+        .enhanced-history-table th {
+            color: var(--gold);
+            font-weight: 600;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .enhanced-history-table tr { cursor: pointer; transition: var(--transition); }
+        .enhanced-history-table tr:hover { background: var(--bg-hover); }
+
     </style>
 </head>
 <body>
@@ -1332,50 +1657,107 @@
          MAIN APPLICATION
          ================================================================ -->
     <div id="mainApp" class="hidden">
-        <!-- NAVIGATION BAR -->
-        <nav class="navbar">
-            <div class="navbar-brand">THE QUARRY</div>
-            <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="document.querySelector('.nav-tabs').classList.toggle('mobile-open'); this.innerHTML = this.innerHTML.trim() === '&#9776;' ? '&#10005;' : '&#9776;'">&#9776;</button>
-            <div class="nav-tabs">
-                <div class="nav-tab active" data-tab="dashboard">Dashboard</div>
-                <div class="nav-dropdown">
-                    <div class="nav-tab" data-tab="events" data-dropdown="entertainment">Entertainment</div>
-                    <div class="nav-dropdown-menu">
-                        <div class="nav-dropdown-item" data-tab="events">Events</div>
-                        <div class="nav-dropdown-item" data-tab="bands">Live Bands</div>
-                    </div>
+        <!-- MOBILE SIDEBAR TOGGLE -->
+        <button class="mobile-sidebar-toggle" id="mobileSidebarToggle" onclick="toggleMobileSidebar()">&#9776;</button>
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
+
+        <!-- SIDEBAR NAVIGATION -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <div class="sidebar-brand-text">
+                    <span class="brand-full">THE QUARRY</span>
+                    <span class="brand-short">TQ</span>
                 </div>
-                <div class="nav-dropdown">
-                    <div class="nav-tab" data-tab="scheduling" data-dropdown="scheduling">Scheduling</div>
-                    <div class="nav-dropdown-menu">
-                        <div class="nav-dropdown-item" data-tab="scheduling">Weekly Schedule</div>
-                        <div class="nav-dropdown-item" data-tab="employees">Employees</div>
-                        <div class="nav-dropdown-item" data-tab="timeoff">Time Off</div>
-                    </div>
-                </div>
-                <div class="nav-dropdown">
-                    <div class="nav-tab" data-tab="crm" data-dropdown="customers">Customer Relations</div>
-                    <div class="nav-dropdown-menu">
-                        <div class="nav-dropdown-item" data-tab="crm">CRM</div>
-                        <div class="nav-dropdown-item" data-tab="potential">Potential Reservations</div>
-                        <div class="nav-dropdown-item" data-tab="confirmed">Confirmed Reservations</div>
-                        <div class="nav-dropdown-item" data-tab="email">Email</div>
-                    </div>
-                </div>
-                <div class="nav-tab" data-tab="forms">Forms</div>
-                <div class="nav-tab" data-tab="payments">Payments</div>
-                <div class="nav-dropdown">
-                    <div class="nav-tab" data-tab="floorplan" data-dropdown="settings">Settings</div>
-                    <div class="nav-dropdown-menu">
-                        <div class="nav-dropdown-item" data-tab="floorplan">Floor Plan</div>
-                    </div>
-                </div>
+                <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="Collapse sidebar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 19l-7-7 7-7"/><path d="M18 19l-7-7 7-7" opacity="0.4"/></svg>
+                </button>
             </div>
-            <div class="navbar-actions">
-                <button class="save-github-btn" id="saveGitHubBtn" title="Save changes to GitHub">Save to GitHub</button>
-                <button class="logout-btn" id="logoutBtn">Logout</button>
+
+            <nav class="sidebar-nav">
+                <!-- Dashboard -->
+                <div class="sidebar-item active" data-tab="dashboard">
+                    <span class="sidebar-item-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+                    <span class="sidebar-item-label">Dashboard</span>
+                </div>
+
+                <!-- Entertainment -->
+                <div class="sidebar-parent" data-parent="entertainment">
+                    <div class="sidebar-parent-header">
+                        <span class="sidebar-item-icon"><svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
+                        <span class="sidebar-item-label">Entertainment</span>
+                        <span class="sidebar-parent-chevron">&#9654;</span>
+                    </div>
+                    <div class="sidebar-children">
+                        <div class="sidebar-child" data-tab="events">Events</div>
+                        <div class="sidebar-child" data-tab="bands">Live Bands</div>
+                    </div>
+                </div>
+
+                <!-- Scheduling -->
+                <div class="sidebar-parent" data-parent="scheduling">
+                    <div class="sidebar-parent-header">
+                        <span class="sidebar-item-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+                        <span class="sidebar-item-label">Scheduling</span>
+                        <span class="sidebar-parent-chevron">&#9654;</span>
+                    </div>
+                    <div class="sidebar-children">
+                        <div class="sidebar-child" data-tab="scheduling">Weekly Schedule</div>
+                        <div class="sidebar-child" data-tab="employees">Employees</div>
+                        <div class="sidebar-child" data-tab="timeoff">Time Off</div>
+                    </div>
+                </div>
+
+                <!-- Customer Relations -->
+                <div class="sidebar-parent" data-parent="customers">
+                    <div class="sidebar-parent-header">
+                        <span class="sidebar-item-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+                        <span class="sidebar-item-label">Customer Relations</span>
+                        <span class="sidebar-parent-chevron">&#9654;</span>
+                    </div>
+                    <div class="sidebar-children">
+                        <div class="sidebar-child" data-tab="crm">CRM</div>
+                        <div class="sidebar-child" data-tab="potential">Potential Reservations</div>
+                        <div class="sidebar-child" data-tab="confirmed">Confirmed Reservations</div>
+                        <div class="sidebar-child" data-tab="email">Email</div>
+                    </div>
+                </div>
+
+                <!-- Forms -->
+                <div class="sidebar-item" data-tab="forms">
+                    <span class="sidebar-item-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span>
+                    <span class="sidebar-item-label">Forms</span>
+                </div>
+
+                <!-- Payments -->
+                <div class="sidebar-item" data-tab="payments">
+                    <span class="sidebar-item-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+                    <span class="sidebar-item-label">Payments</span>
+                </div>
+
+                <!-- Settings -->
+                <div class="sidebar-parent" data-parent="settings">
+                    <div class="sidebar-parent-header">
+                        <span class="sidebar-item-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+                        <span class="sidebar-item-label">Settings</span>
+                        <span class="sidebar-parent-chevron">&#9654;</span>
+                    </div>
+                    <div class="sidebar-children">
+                        <div class="sidebar-child" data-tab="floorplan">Floor Plan</div>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="sidebar-footer-btn sidebar-save-btn" id="saveGitHubBtn" title="Save changes to GitHub">
+                    <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    <span class="btn-label">Save to GitHub</span>
+                </button>
+                <button class="sidebar-footer-btn sidebar-logout-btn" id="logoutBtn">
+                    <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    <span class="btn-label">Logout</span>
+                </button>
             </div>
-        </nav>
+        </aside>
 
         <!-- CONTENT AREA -->
         <div class="content scrollable">
@@ -1788,6 +2170,35 @@
                  EMAIL TAB
                  ======================================================== -->
             <div id="emailTab" class="tab-content">
+                <!-- Campaign Performance Dashboard -->
+                <h3 style="font-family: var(--font-serif); font-size: 1.3rem; color: var(--text-primary); font-weight: 600; margin-bottom: 1rem;">Campaign Analytics</h3>
+                <div class="campaign-analytics-grid" id="campaignAnalyticsGrid">
+                    <div class="campaign-stat-card">
+                        <div class="campaign-stat-label">Total Sent</div>
+                        <div class="campaign-stat-value" id="analyticsTotalSent">0</div>
+                    </div>
+                    <div class="campaign-stat-card">
+                        <div class="campaign-stat-label">Delivery Rate</div>
+                        <div class="campaign-stat-value green" id="analyticsDeliveryRate">--</div>
+                    </div>
+                    <div class="campaign-stat-card">
+                        <div class="campaign-stat-label">Open Rate</div>
+                        <div class="campaign-stat-value" id="analyticsOpenRate">--</div>
+                    </div>
+                    <div class="campaign-stat-card">
+                        <div class="campaign-stat-label">Click Rate</div>
+                        <div class="campaign-stat-value blue" id="analyticsClickRate">--</div>
+                    </div>
+                    <div class="campaign-stat-card">
+                        <div class="campaign-stat-label">Bounce Rate</div>
+                        <div class="campaign-stat-value red" id="analyticsBounceRate">--</div>
+                    </div>
+                    <div class="campaign-stat-card">
+                        <div class="campaign-stat-label">Unsubscribe Rate</div>
+                        <div class="campaign-stat-value red" id="analyticsUnsubRate">--</div>
+                    </div>
+                </div>
+
                 <div class="email-container">
                     <div class="email-editor-section">
                         <h3>Email Editor</h3>
@@ -1843,23 +2254,84 @@
                             <button class="btn-send" id="sendCampaignBtn">Send Campaign</button>
                         </div>
 
+                        <!-- Enhanced Campaign History -->
                         <div class="email-history">
                             <h4>Campaign History</h4>
-                            <table class="history-table">
-                                <thead>
-                                    <tr>
-                                        <th>Date</th>
-                                        <th>Subject</th>
-                                        <th>Recipients</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="emailHistoryTable">
-                                    <tr>
-                                        <td colspan="4" style="text-align: center; color: #858d9e;">No campaigns sent yet</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <div style="overflow-x: auto;">
+                                <table class="enhanced-history-table" id="enhancedHistoryTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Subject</th>
+                                            <th>Recipients</th>
+                                            <th>Opens</th>
+                                            <th>Clicks</th>
+                                            <th>Open Rate</th>
+                                            <th>Click Rate</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="emailHistoryTable">
+                                        <tr>
+                                            <td colspan="8" style="text-align: center; color: #858d9e;">No campaigns sent yet</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Campaign Detail Panel (shown when clicking a campaign row) -->
+                        <div class="campaign-detail-panel" id="campaignDetailPanel">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                                <h4 id="campaignDetailTitle" style="margin: 0;">Campaign Details</h4>
+                                <button class="btn-close" onclick="closeCampaignDetail()" style="font-size: 1.2rem;">&times;</button>
+                            </div>
+                            <div class="campaign-detail-tabs">
+                                <div class="campaign-detail-tab active" data-detail-tab="activity" onclick="switchCampaignDetailTab('activity')">Activity</div>
+                                <div class="campaign-detail-tab" data-detail-tab="bounces" onclick="switchCampaignDetailTab('bounces')">Bounces</div>
+                                <div class="campaign-detail-tab" data-detail-tab="unsubs" onclick="switchCampaignDetailTab('unsubs')">Unsubscribes</div>
+                            </div>
+                            <div class="campaign-detail-content active" id="campaignDetailActivity">
+                                <div id="campaignActivityList" style="max-height: 300px; overflow-y: auto;">
+                                    <div style="text-align: center; color: var(--text-muted); padding: 1rem; font-size: 0.85rem;">No activity data yet. Data will populate when SendGrid webhooks are connected.</div>
+                                </div>
+                            </div>
+                            <div class="campaign-detail-content" id="campaignDetailBounces">
+                                <div id="campaignBounceList" style="max-height: 300px; overflow-y: auto;">
+                                    <div style="text-align: center; color: var(--text-muted); padding: 1rem; font-size: 0.85rem;">No bounces recorded.</div>
+                                </div>
+                            </div>
+                            <div class="campaign-detail-content" id="campaignDetailUnsubs">
+                                <div id="campaignUnsubList" style="max-height: 300px; overflow-y: auto;">
+                                    <div style="text-align: center; color: var(--text-muted); padding: 1rem; font-size: 0.85rem;">No unsubscribes for this campaign.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Unsubscribe Management -->
+                        <div class="unsub-management" id="unsubManagement">
+                            <h4>Unsubscribe Management</h4>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                                <span style="color: var(--text-muted); font-size: 0.82rem;" id="unsubTrendText">Unsubscribe trend: calculating...</span>
+                            </div>
+                            <div style="overflow-x: auto;">
+                                <table class="unsub-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Email</th>
+                                            <th>Name</th>
+                                            <th>Unsubscribed Date</th>
+                                            <th>Reason</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="unsubTableBody">
+                                        <tr>
+                                            <td colspan="5" style="text-align: center; color: #858d9e;">Loading unsubscribed contacts...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
 
@@ -2648,55 +3120,96 @@
         }
 
         function setupNavigation() {
-            // Top-level nav tabs (non-dropdown)
-            document.querySelectorAll('.nav-tab').forEach(tab => {
-                tab.addEventListener('click', (e) => {
-                    const tabName = e.target.dataset.tab;
-                    const dropdown = e.target.dataset.dropdown;
-                    if (tabName && !dropdown) {
-                        switchTab(tabName);
-                    } else if (tabName && dropdown) {
-                        // Clicking the dropdown parent opens its first child
-                        switchTab(tabName);
+            // Sidebar top-level items (no children)
+            document.querySelectorAll('.sidebar-item[data-tab]').forEach(item => {
+                item.addEventListener('click', () => {
+                    const tabName = item.dataset.tab;
+                    if (tabName) switchTab(tabName);
+                });
+            });
+
+            // Sidebar parent headers (toggle children)
+            document.querySelectorAll('.sidebar-parent-header').forEach(header => {
+                header.addEventListener('click', () => {
+                    const parent = header.closest('.sidebar-parent');
+                    const sidebar = document.getElementById('sidebar');
+                    // If collapsed, expand sidebar first
+                    if (sidebar.classList.contains('collapsed')) {
+                        sidebar.classList.remove('collapsed');
+                    }
+                    // Toggle this parent's open state
+                    parent.classList.toggle('open');
+                    // Navigate to the first child tab
+                    const firstChild = parent.querySelector('.sidebar-child');
+                    if (firstChild && !parent.classList.contains('open')) {
+                        // Closing - do nothing to tab
+                    } else if (firstChild && parent.classList.contains('open')) {
+                        const tabName = firstChild.dataset.tab;
+                        if (tabName) switchTab(tabName);
                     }
                 });
             });
-            // Dropdown items
-            document.querySelectorAll('.nav-dropdown-item').forEach(item => {
-                item.addEventListener('click', (e) => {
+
+            // Sidebar child items
+            document.querySelectorAll('.sidebar-child[data-tab]').forEach(child => {
+                child.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    const tabName = e.target.dataset.tab;
+                    const tabName = child.dataset.tab;
                     if (tabName) switchTab(tabName);
-                    // Close all dropdowns
-                    document.querySelectorAll('.nav-dropdown').forEach(d => d.classList.remove('open'));
                 });
             });
         }
 
+        // Sidebar toggle (collapse/expand)
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+            // Close all parent sections when collapsing
+            if (sidebar.classList.contains('collapsed')) {
+                document.querySelectorAll('.sidebar-parent').forEach(p => p.classList.remove('open'));
+            }
+        }
+
+        // Mobile sidebar toggle
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('mobile-open');
+            overlay.classList.toggle('active');
+            const btn = document.getElementById('mobileSidebarToggle');
+            btn.innerHTML = sidebar.classList.contains('mobile-open') ? '&#10005;' : '&#9776;';
+        }
+
         function switchTab(tabName) {
-            // Close mobile menu if open
-            const navTabs = document.querySelector('.nav-tabs');
-            const menuBtn = document.getElementById('mobileMenuBtn');
-            if (navTabs) navTabs.classList.remove('mobile-open');
-            if (menuBtn) menuBtn.innerHTML = '&#9776;';
+            // Close mobile sidebar if open
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (sidebar && sidebar.classList.contains('mobile-open')) {
+                sidebar.classList.remove('mobile-open');
+                if (overlay) overlay.classList.remove('active');
+                const btn = document.getElementById('mobileSidebarToggle');
+                if (btn) btn.innerHTML = '&#9776;';
+            }
 
-            // Clear all active states
-            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.nav-dropdown-item').forEach(t => t.classList.remove('active'));
+            // Clear all active states in sidebar
+            document.querySelectorAll('.sidebar-item').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.sidebar-child').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.sidebar-parent-header').forEach(t => t.classList.remove('active'));
 
-            // Set active on the correct nav element
-            const directTab = document.querySelector(`.nav-tab[data-tab="${tabName}"]:not([data-dropdown])`);
-            const dropdownItem = document.querySelector(`.nav-dropdown-item[data-tab="${tabName}"]`);
+            // Set active on the correct sidebar element
+            const directItem = document.querySelector(`.sidebar-item[data-tab="${tabName}"]`);
+            const childItem = document.querySelector(`.sidebar-child[data-tab="${tabName}"]`);
 
-            if (dropdownItem) {
-                dropdownItem.classList.add('active');
-                // Also highlight the parent dropdown nav-tab
-                const parentDropdown = dropdownItem.closest('.nav-dropdown');
-                if (parentDropdown) {
-                    parentDropdown.querySelector('.nav-tab').classList.add('active');
+            if (childItem) {
+                childItem.classList.add('active');
+                // Also highlight the parent header
+                const parentEl = childItem.closest('.sidebar-parent');
+                if (parentEl) {
+                    parentEl.querySelector('.sidebar-parent-header').classList.add('active');
+                    parentEl.classList.add('open');
                 }
-            } else if (directTab) {
-                directTab.classList.add('active');
+            } else if (directItem) {
+                directItem.classList.add('active');
             }
 
             // Switch tab content
@@ -2720,6 +3233,10 @@
             // Load confirmed reservations data
             if (tabName === 'confirmed') {
                 if (app.confirmedEvents.length === 0) loadConfirmedEvents();
+            }
+            // Load email campaign analytics
+            if (tabName === 'email') {
+                loadCampaignAnalytics();
             }
         }
 
@@ -3324,6 +3841,10 @@
 
                 // Load payments data if on payments tab
                 loadPaymentsData();
+
+                // Inject mock campaign data and load analytics
+                injectMockCampaignData();
+                loadCampaignAnalytics();
             } catch (err) {
                 console.error('Error loading data:', err);
             }
@@ -5120,27 +5641,263 @@
                     const result = await sendEmailViaSES(recipients, subject, body);
                     const sentCount = result.sent || recipients.length;
 
+                    const campaignId = 'camp_' + Date.now();
                     app.emailHistory.push({
+                        id: campaignId,
                         date: new Date().toISOString().split('T')[0],
-                        subject, recipients: sentCount, status: 'Sent',
+                        sentAt: new Date().toISOString(),
+                        subject,
+                        recipientCount: sentCount,
+                        recipients: sentCount,
+                        status: 'Sent',
+                        opens: 0,
+                        clicks: 0,
+                        bounces: 0,
+                        unsubscribes: 0,
+                        openRate: '0%',
+                        clickRate: '0%',
+                        activity: [],
+                        bounceList: [],
+                        unsubList: [],
                     });
 
-                    const tbody = document.getElementById('emailHistoryTable');
-                    tbody.innerHTML = app.emailHistory.map(c => `
-                        <tr>
-                            <td>${c.date}</td>
-                            <td>${c.subject}</td>
-                            <td>${c.recipients}</td>
-                            <td><span style="color: #4ade80;">&#10003; ${c.status}</span></td>
-                        </tr>
-                    `).join('');
-
+                    renderEnhancedCampaignHistory();
+                    loadCampaignAnalytics();
                     showSuccess('Campaign sent to ' + sentCount + ' recipients!');
                 } catch (err) {
                     alert('Error sending campaign: ' + err.message);
                 }
             });
         });
+
+        // ================================================================
+        // EMAIL CAMPAIGN ANALYTICS
+        // ================================================================
+        function loadCampaignAnalytics() {
+            const history = app.emailHistory || [];
+
+            // Compute aggregate stats
+            let totalSent = 0, totalDelivered = 0, totalOpens = 0, totalClicks = 0, totalBounces = 0, totalUnsubs = 0;
+
+            history.forEach(c => {
+                const sent = c.recipientCount || c.recipients || 0;
+                totalSent += sent;
+                totalBounces += (c.bounces || 0);
+                totalDelivered += (sent - (c.bounces || 0));
+                totalOpens += (c.opens || 0);
+                totalClicks += (c.clicks || 0);
+                totalUnsubs += (c.unsubscribes || 0);
+            });
+
+            document.getElementById('analyticsTotalSent').textContent = totalSent.toLocaleString();
+            document.getElementById('analyticsDeliveryRate').textContent = totalSent > 0 ? ((totalDelivered / totalSent) * 100).toFixed(1) + '%' : '--';
+            document.getElementById('analyticsOpenRate').textContent = totalDelivered > 0 ? ((totalOpens / totalDelivered) * 100).toFixed(1) + '%' : '--';
+            document.getElementById('analyticsClickRate').textContent = totalDelivered > 0 ? ((totalClicks / totalDelivered) * 100).toFixed(1) + '%' : '--';
+            document.getElementById('analyticsBounceRate').textContent = totalSent > 0 ? ((totalBounces / totalSent) * 100).toFixed(1) + '%' : '--';
+            document.getElementById('analyticsUnsubRate').textContent = totalDelivered > 0 ? ((totalUnsubs / totalDelivered) * 100).toFixed(1) + '%' : '--';
+
+            // Render enhanced campaign history
+            renderEnhancedCampaignHistory();
+
+            // Render unsubscribe management
+            renderUnsubManagement();
+        }
+
+        function renderEnhancedCampaignHistory() {
+            const tbody = document.getElementById('emailHistoryTable');
+            const history = app.emailHistory || [];
+
+            if (history.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #858d9e;">No campaigns sent yet</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = history.map((c, idx) => {
+                const sent = c.recipientCount || c.recipients || 0;
+                const opens = c.opens || 0;
+                const clicks = c.clicks || 0;
+                const openRate = sent > 0 ? ((opens / sent) * 100).toFixed(1) + '%' : '0%';
+                const clickRate = sent > 0 ? ((clicks / sent) * 100).toFixed(1) + '%' : '0%';
+
+                return `<tr onclick="openCampaignDetail(${idx})" style="cursor:pointer;">
+                    <td>${c.date}</td>
+                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(c.subject || '')}</td>
+                    <td>${sent}</td>
+                    <td>${opens}</td>
+                    <td>${clicks}</td>
+                    <td>${openRate}</td>
+                    <td>${clickRate}</td>
+                    <td><span style="color: #4ade80;">&#10003; ${c.status || 'Sent'}</span></td>
+                </tr>`;
+            }).join('');
+        }
+
+        function openCampaignDetail(index) {
+            const campaign = app.emailHistory[index];
+            if (!campaign) return;
+
+            const panel = document.getElementById('campaignDetailPanel');
+            panel.classList.add('active');
+            document.getElementById('campaignDetailTitle').textContent = campaign.subject || 'Campaign Details';
+
+            // Render activity tab
+            const activityList = document.getElementById('campaignActivityList');
+            const activities = campaign.activity || [];
+            if (activities.length === 0) {
+                activityList.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 1rem; font-size: 0.85rem;">No activity data yet. Data will populate when SendGrid webhooks are connected.</div>';
+            } else {
+                activityList.innerHTML = activities.map(a => `
+                    <div class="activity-list-item">
+                        <div>
+                            <span class="activity-list-email">${escapeHtml(a.email || '')}</span>
+                            <span class="activity-list-action" style="margin-left: 0.5rem;">${escapeHtml(a.action || '')}</span>
+                        </div>
+                        <span class="activity-list-time">${a.timestamp ? new Date(a.timestamp).toLocaleString() : ''}</span>
+                    </div>
+                `).join('');
+            }
+
+            // Render bounces tab
+            const bounceList = document.getElementById('campaignBounceList');
+            const bounces = campaign.bounceList || [];
+            if (bounces.length === 0) {
+                bounceList.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 1rem; font-size: 0.85rem;">No bounces recorded.</div>';
+            } else {
+                bounceList.innerHTML = bounces.map(b => `
+                    <div class="activity-list-item">
+                        <div>
+                            <span class="activity-list-email">${escapeHtml(b.email || '')}</span>
+                            <span class="activity-list-action" style="margin-left: 0.5rem; color: var(--red);">${escapeHtml(b.reason || 'Bounced')}</span>
+                        </div>
+                        <span class="activity-list-time">${b.timestamp ? new Date(b.timestamp).toLocaleString() : ''}</span>
+                    </div>
+                `).join('');
+            }
+
+            // Render unsubs tab
+            const unsubList = document.getElementById('campaignUnsubList');
+            const unsubs = campaign.unsubList || [];
+            if (unsubs.length === 0) {
+                unsubList.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 1rem; font-size: 0.85rem;">No unsubscribes for this campaign.</div>';
+            } else {
+                unsubList.innerHTML = unsubs.map(u => `
+                    <div class="activity-list-item">
+                        <span class="activity-list-email">${escapeHtml(u.email || '')}</span>
+                        <span class="activity-list-time">${u.timestamp ? new Date(u.timestamp).toLocaleString() : ''}</span>
+                    </div>
+                `).join('');
+            }
+
+            // Default to activity tab
+            switchCampaignDetailTab('activity');
+        }
+
+        function closeCampaignDetail() {
+            document.getElementById('campaignDetailPanel').classList.remove('active');
+        }
+
+        function switchCampaignDetailTab(tabName) {
+            document.querySelectorAll('.campaign-detail-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.campaign-detail-content').forEach(c => c.classList.remove('active'));
+
+            const tab = document.querySelector(`.campaign-detail-tab[data-detail-tab="${tabName}"]`);
+            if (tab) tab.classList.add('active');
+
+            const contentMap = { activity: 'campaignDetailActivity', bounces: 'campaignDetailBounces', unsubs: 'campaignDetailUnsubs' };
+            const contentEl = document.getElementById(contentMap[tabName]);
+            if (contentEl) contentEl.classList.add('active');
+        }
+
+        function renderUnsubManagement() {
+            const tbody = document.getElementById('unsubTableBody');
+            const unsubs = (app.subscribers || []).filter(s => s.emailStatus === 'Unsubscribed');
+
+            if (unsubs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #858d9e;">No unsubscribed contacts.</td></tr>';
+                document.getElementById('unsubTrendText').textContent = 'No unsubscribed contacts.';
+                return;
+            }
+
+            const totalContacts = (app.subscribers || []).length;
+            const unsubRate = totalContacts > 0 ? ((unsubs.length / totalContacts) * 100).toFixed(1) : '0.0';
+            document.getElementById('unsubTrendText').textContent = `${unsubs.length} unsubscribed of ${totalContacts} total contacts (${unsubRate}%)`;
+
+            tbody.innerHTML = unsubs.map(s => {
+                const name = ((s.firstName || '') + ' ' + (s.lastName || '')).trim() || '--';
+                const unsubDate = s.unsubscribedDate ? formatDate(s.unsubscribedDate) : (s.lastActivityDate ? formatDate(s.lastActivityDate) : '--');
+                return `<tr>
+                    <td>${escapeHtml(s.email || '')}</td>
+                    <td>${escapeHtml(name)}</td>
+                    <td>${unsubDate}</td>
+                    <td style="color: var(--text-muted);">${escapeHtml(s.unsubReason || '--')}</td>
+                    <td><button class="btn-resub" onclick="resubscribeContact('${escapeHtml(s.email || '')}')">Re-subscribe</button></td>
+                </tr>`;
+            }).join('');
+        }
+
+        function resubscribeContact(email) {
+            showConfirmModal('Re-subscribe Contact?', `Are you sure you want to re-subscribe ${email}? They will start receiving email campaigns again.`, () => {
+                const subscriber = app.subscribers.find(s => s.email === email);
+                if (subscriber) {
+                    subscriber.emailStatus = 'Subscribed';
+                    subscriber.unsubscribedDate = null;
+                    subscriber.unsubReason = null;
+                    renderUnsubManagement();
+                    loadCampaignAnalytics();
+                    showSuccess(`${email} has been re-subscribed.`);
+                }
+            });
+        }
+
+        // Inject mock data for campaign analytics demo
+        function injectMockCampaignData() {
+            if (app.emailHistory.length === 0) {
+                app.emailHistory = [
+                    {
+                        id: 'camp_demo_1', date: '2026-04-10', sentAt: '2026-04-10T14:30:00Z',
+                        subject: 'April Events at The Quarry', recipientCount: 342, recipients: 342,
+                        status: 'Sent', opens: 187, clicks: 43, bounces: 5, unsubscribes: 2,
+                        activity: [
+                            { email: 'jane.doe@example.com', action: 'Opened', timestamp: '2026-04-10T15:02:00Z' },
+                            { email: 'john.smith@example.com', action: 'Clicked: RSVP Link', timestamp: '2026-04-10T15:15:00Z' },
+                            { email: 'sarah.m@example.com', action: 'Opened', timestamp: '2026-04-10T16:30:00Z' },
+                            { email: 'mike.j@example.com', action: 'Clicked: Event Details', timestamp: '2026-04-10T17:00:00Z' },
+                        ],
+                        bounceList: [
+                            { email: 'old.address@invalid.com', reason: 'Mailbox not found', timestamp: '2026-04-10T14:31:00Z' },
+                            { email: 'noreply@temp.com', reason: 'Domain not found', timestamp: '2026-04-10T14:31:00Z' },
+                        ],
+                        unsubList: [
+                            { email: 'optout@example.com', timestamp: '2026-04-10T18:00:00Z' },
+                        ],
+                    },
+                    {
+                        id: 'camp_demo_2', date: '2026-03-28', sentAt: '2026-03-28T11:00:00Z',
+                        subject: 'Spring Fling - This Weekend!', recipientCount: 298, recipients: 298,
+                        status: 'Sent', opens: 156, clicks: 67, bounces: 3, unsubscribes: 1,
+                        activity: [
+                            { email: 'happy@example.com', action: 'Opened', timestamp: '2026-03-28T11:20:00Z' },
+                            { email: 'excited@example.com', action: 'Clicked: Buy Tickets', timestamp: '2026-03-28T12:05:00Z' },
+                        ],
+                        bounceList: [
+                            { email: 'bad@gone.com', reason: 'Mailbox full', timestamp: '2026-03-28T11:01:00Z' },
+                        ],
+                        unsubList: [],
+                    },
+                    {
+                        id: 'camp_demo_3', date: '2026-03-15', sentAt: '2026-03-15T10:00:00Z',
+                        subject: 'St. Patrick\'s Day Specials', recipientCount: 315, recipients: 315,
+                        status: 'Sent', opens: 201, clicks: 89, bounces: 2, unsubscribes: 3,
+                        activity: [],
+                        bounceList: [],
+                        unsubList: [
+                            { email: 'done@example.com', timestamp: '2026-03-15T14:00:00Z' },
+                            { email: 'nomoremail@example.com', timestamp: '2026-03-15T16:30:00Z' },
+                        ],
+                    },
+                ];
+            }
+        }
 
         // ================================================================
         // PAYMENTS TAB (Stripe via Netlify Functions)
