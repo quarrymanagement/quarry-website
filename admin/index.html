@@ -7091,14 +7091,10 @@ var currentCampaignId = null;
 var performanceSortField = 'sentDate';
 var performanceSortAsc = false;
 
-// Add to existing app object if available
-if (typeof app !== 'undefined') {
-    app.campaigns = app.campaigns || [];
-    app.campaignCalendar = app.campaignCalendar || {};
-    app.marketingInsights = app.marketingInsights || {};
-} else {
-    var app = { campaigns: [], campaignCalendar: {}, marketingInsights: {} };
-}
+// Extend the existing app object with campaign data
+app.campaigns = app.campaigns || [];
+app.campaignCalendar = app.campaignCalendar || {};
+app.marketingInsights = app.marketingInsights || {};
 
 var CAMPAIGN_TYPES = {
     'event-promo':        { label: 'Event Promo',    color: '#e85d04' },
@@ -8822,17 +8818,7 @@ function hashCode(str) {
     return Math.abs(hash);
 }
 
-// --------------- Initialize on load ---------------
-// Call initCampaignCalendar() when the campaign calendar tab is activated
-// Or call it immediately if the tab is already active
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() {
-        initCampaignCalendar();
-    });
-} else {
-    initCampaignCalendar();
-}
+// Campaign calendar initializes when its tab is activated via switchTab()
 
     </script>
 </body>
