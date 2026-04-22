@@ -33,7 +33,7 @@
 <meta name="twitter:description" content="Wood-fired steaks, seafood, and chef-crafted American cuisine at The Quarry — a locally sourced restaurant and wine bar in New Melle, Missouri.">
 <meta name="twitter:image" content="https://thequarrystl.com/assets/og/og-menu.jpg">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://thequarrystl.com/"},{"@type":"ListItem","position":2,"name":"Menu","item":"https://thequarrystl.com/quarry-menu.html"}]}</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"Restaurant","@id":"https://thequarrystl.com/#restaurant","name":"The Quarry","url":"https://thequarrystl.com/quarry-menu.html","telephone":"+1-636-224-8257","priceRange":"$$-$$$","servesCuisine":["American","Steakhouse","Seafood","Wine Bar"],"address":{"@type":"PostalAddress","streetAddress":"3960 Highway Z","addressLocality":"New Melle","addressRegion":"MO","postalCode":"63385","addressCountry":"US"},"geo":{"@type":"GeoCoordinates","latitude":"38.8192","longitude":"-90.8683"},"openingHoursSpecification":[{"@type":"OpeningHoursSpecification","dayOfWeek":["Wednesday","Thursday"],"opens":"16:00","closes":"21:00"},{"@type":"OpeningHoursSpecification","dayOfWeek":["Friday","Saturday"],"opens":"16:00","closes":"22:00"},{"@type":"OpeningHoursSpecification","dayOfWeek":"Sunday","opens":"10:00","closes":"20:00"}],"acceptsReservations":true,"hasMenu":{"@type":"Menu","@id":"https://thequarrystl.com/quarry-menu.html#menu","name":"The Quarry Dinner Menu","inLanguage":"en-US","hasMenuSection":[{"@type":"MenuSection","name":"Appetizers","description":"Shareable starters and small plates"},{"@type":"MenuSection","name":"Salads & Soups"},{"@type":"MenuSection","name":"Steaks & Chops","description":"Wood-fired steaks and house-cut chops"},{"@type":"MenuSection","name":"Seafood"},{"@type":"MenuSection","name":"Pasta & Entrées"},{"@type":"MenuSection","name":"Desserts"}]},"aggregateRating":{"@type":"AggregateRating","ratingValue":"4.3","reviewCount":"841","bestRating":"5","worstRating":"1"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Restaurant","@id":"https://thequarrystl.com/#restaurant","name":"The Quarry","url":"https://thequarrystl.com/quarry-menu.html","telephone":"+1-636-224-8257","priceRange":"$$-$$$","servesCuisine":["American","Steakhouse","Seafood","Wine Bar"],"address":{"@type":"PostalAddress","streetAddress":"3960 Highway Z","addressLocality":"New Melle","addressRegion":"MO","postalCode":"63385","addressCountry":"US"},"geo":{"@type":"GeoCoordinates","latitude":"38.8192","longitude":"-90.8683"},"openingHoursSpecification":[{"@type":"OpeningHoursSpecification","dayOfWeek":["Wednesday","Thursday"],"opens":"11:00","closes":"21:00"},{"@type":"OpeningHoursSpecification","dayOfWeek":["Friday","Saturday"],"opens":"11:00","closes":"23:00"},{"@type":"OpeningHoursSpecification","dayOfWeek":"Sunday","opens":"11:00","closes":"18:00"}],"acceptsReservations":true,"hasMenu":{"@type":"Menu","@id":"https://thequarrystl.com/quarry-menu.html#menu","name":"The Quarry Dinner Menu","inLanguage":"en-US","hasMenuSection":[{"@type":"MenuSection","name":"Appetizers","description":"Shareable starters and small plates"},{"@type":"MenuSection","name":"Salads & Soups"},{"@type":"MenuSection","name":"Steaks & Chops","description":"Wood-fired steaks and house-cut chops"},{"@type":"MenuSection","name":"Seafood"},{"@type":"MenuSection","name":"Pasta & Entrées"},{"@type":"MenuSection","name":"Desserts"}]},"aggregateRating":{"@type":"AggregateRating","ratingValue":"4.3","reviewCount":"841","bestRating":"5","worstRating":"1"}}</script>
 <!-- END SEO -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -213,13 +213,16 @@ nav { display:flex; align-items:center; }
   <div class="hero-divider"></div>
 </div>
 <div class="hh-banner">
-  <p>Happy Hour <span>&middot; Wednesday All Day &nbsp;&middot;&nbsp; Thursday & Friday 3&#x201C;6PM</span></p>
+  <p>Twisted Twilight <span>&middot; Wed/Thu 3&ndash;7PM &nbsp;&middot;&nbsp; Fri/Sat 9PM&ndash;Close</span></p>
+</div>
+<div class="hh-banner" style="background:#5C3D2E;">
+  <p><span style="color:#FAF7F2;font-weight:400;">Kitchen serves full menu until 8PM &middot; Flatbread pizzas only after 8PM</span></p>
 </div>
 <div class="menu-tabs">
   <div class="tabs-inner">
     <a class="tab" href="#shareables">Shareables</a>
     <a class="tab" href="#sandwiches">Sandwiches & Wraps</a>
-    <a class="tab" href="#nachos">Nachos</a>
+    <a class="tab" href="#flatbread">Flatbread Pizza</a>
     <a class="tab" href="#salads">Soups & Salads</a>
     <a class="tab" href="#kids">Kids Menu</a>
     <a class="tab" href="#desserts">Heaven</a>
@@ -233,32 +236,38 @@ nav { display:flex; align-items:center; }
       <div class="menu-section">
         <div class="menu-section" id="shareables"><div class="section-header"><div class="section-header-line"></div><h2 class="section-title">Shareables</h2><div class="section-header-line"></div></div>
         <div class="menu-items">
-          <div class="menu-item"><div class="item-row"><span class="item-name">Devils in the Chicken</span><span class="item-price">$10.59</span></div><p class="item-desc">Southern-style deviled eggs with creamy tangy filling, topped with bacon and peach & pepper aioli</p></div>
-          <div class="menu-item"><div class="item-row"><span class="item-name">Adams Pickles</span><span class="item-price">$11.50</span></div><p class="item-desc">Crispy golden-fried dill pickles, chips or spears, with house-made ranch</p></div>
-          <div class="menu-item"><div class="item-row"><span class="item-name">Pick Your Dip</span><span class="item-price">$15.99</span></div><p class="item-desc">House-fried tortilla chips with beer cheese, buffalo dip and pico</p></div>
-          <div class="menu-item"><div class="item-row"><span class="item-name">Feathered Buffalo</span><span class="item-price">$14.05</span></div><p class="item-desc">Buffalo chicken dip baked to perfection, served bubbling hot with tortilla chips and celery sticks</p></div>
-          <div class="menu-item"><div class="item-row"><span class="item-name">Slider Flight</span><span class="item-price">$16.95</span></div><p class="item-desc">A trio of mini sliders &mdash; pulled pork, brisket, roast beef</p></div>
-          <div class="menu-item"><div class="item-row"><span class="item-name">Fried Mac N' Jalape&ntilde;o Bites</span><span class="item-price">$12.10</span></div><p class="item-desc">Served with southwest ranch</p></div>
-          <div class="menu-item"><div class="item-row"><span class="item-name">Buffalo Wings</span><span class="item-price">$16.95</span></div><p class="item-desc">Classic buffalo chicken wings</p></div>
-          <div class="menu-item"><div class="item-row"><span class="item-name">Thaiyaki Chili Wings</span><span class="item-price">$16.35</span></div><p class="item-desc">Sweet, spicy and tangy chicken wings</p></div>
+          <div class="menu-item"><div class="item-row"><span class="item-name">Devils in the Chicken</span><span class="item-price">$10.59</span></div><p class="item-desc">Classic southern-style deviled eggs with a creamy, tangy filling, topped with bacon and a drizzle of peach and pepper aioli &mdash; simple, nostalgic, irresistibly good</p></div>
+          <div class="menu-item"><div class="item-row"><span class="item-name">Pulled Pork Nachos</span><span class="item-price">$16.10</span></div><p class="item-desc">Tortilla chips with BBQ pulled pork, jalape&ntilde;os, cheddar, beer cheese, pickled onions, and crema lima drizzle</p></div>
+          <div class="menu-item"><div class="item-row"><span class="item-name">Butching Twisted Waffles</span><span class="item-price">$13.29</span></div><p class="item-desc">Two golden waffles stacked with crispy chicken tenders, finished with our sweet Hot honey drizzle and powdered sugar</p></div>
+          <div class="menu-item"><div class="item-row"><span class="item-name">Adams Pickles</span><span class="item-price">$11.50</span></div><p class="item-desc">Crispy, golden-fried dill pickles, chips or spears, served with house-made ranch dipping sauce. A crunchy, zesty classic</p></div>
+          <div class="menu-item"><div class="item-row"><span class="item-name">Jumbo Pretzel</span><span class="item-price">$12.29</span></div><p class="item-desc">Over-sized twisted pretzel served with beer cheese</p></div>
+          <div class="menu-item"><div class="item-row"><span class="item-name">Pick Your Dip</span><span class="item-price">$15.99</span></div><p class="item-desc">House-fried tortilla chips with beer cheese or buffalo dip and pico</p></div>
+          <div class="menu-item"><div class="item-row"><span class="item-name">Feathered Buffalo</span><span class="item-price">$14.65</span></div><p class="item-desc">Buffalo chicken dip baked to perfection, served bubbling hot with tortilla chips and celery sticks</p></div>
+          <div class="menu-item"><div class="item-row"><span class="item-name">Slider Flight</span><span class="item-price">$16.85</span></div><p class="item-desc">A trio of mini sliders &mdash; pulled pork, brisket, roast beef</p></div>
+          <div class="menu-item"><div class="item-row"><span class="item-name">Fried Mac N' Jalape&ntilde;o Bites</span><span class="item-price">$12.20</span></div><p class="item-desc">Deliciously served with a southwest ranch</p></div>
+          <div class="menu-item"><div class="item-row"><span class="item-name">Buffalo Wings</span><span class="item-price">$16.85</span></div><p class="item-desc">Classic buffalo chicken wings</p></div>
+          <div class="menu-item"><div class="item-row"><span class="item-name">Thaiyaki Chili Wings</span><span class="item-price">$16.85</span></div><p class="item-desc">Sweet, spicy and tangy chicken wings</p></div>
+          <div class="menu-item"><div class="item-row"><span class="item-name">Twisted Chicken Bites</span><span class="item-price">$11.99</span></div><p class="item-desc">With a Southwest twist</p></div>
+          <div class="menu-item"><div class="item-row"><span class="item-name">Pulled Pork Tacos</span><span class="item-price">$13.29</span></div><p class="item-desc">Two flour tortillas stuffed with slow-pulled pork, topped with creamy coleslaw, crispy fried onions, and finished with our signature peach & pepper sweet sauce</p></div>
+          <div class="menu-item"><div class="item-row"><span class="item-name">Loaded Fries</span><span class="item-price">$7.89</span></div><p class="item-desc">Bacon, queso, ranch</p></div>
           <div class="menu-item"><div class="item-row"><span class="item-name">Basket of Fries</span><span class="item-price">$6.99</span></div></div>
         </div>
       </div>
 
       <div class="menu-section">
         <div class="menu-section" id="sandwiches"><div class="section-header"><div class="section-header-line"></div><h2 class="section-title">Sandwiches, Wraps & Sliders</h2><div class="section-header-line"></div></div>
-        <p class="section-note">Comes with a side of fries or soup</p>
+        <p class="section-note">Comes with a side of fries, soup, or mac and cheese ($1.25 upcharge)</p>
         <div class="menu-items">
-          <div class="menu-item"><div class="item-row"><span class="item-name">California Club Wrap</span><span class="item-price">$15.59</span></div><p class="item-desc">Grilled chicken, bacon, avocado, lettuce, tomato, cheddar and ranch in a tortilla</p></div>
-          <div class="menu-item"><div class="item-row"><span class="item-name">Caesar Wrap</span><span class="item-price">$13.59</span></div><p class="item-desc">Grilled chicken, romaine, parmesan and Caesar dressing in a tortilla</p></div>
-          <div class="menu-item"><div class="item-row"><span class="item-name">The Whole Farm (B.E.L.T.)</span><span class="item-price">$13.25</span></div><p class="item-desc">Toasted wheat bread, dijonaisse, provolone, fried egg, bacon, tomato, and lettuce</p></div>
-          <div class="menu-item"><div class="item-row"><span class="item-name">4 Lotta Ham & Chz</span><span class="item-price">$16.89</span></div><p class="item-desc">Parmesan encrusted sourdough, havarti, cheddar, provolone, ham, sliced tomato, and dijonaisse</p></div>
-          <div class="menu-item"><div class="item-row"><span class="item-name">Black Bean Burger</span><span class="item-price">$16.29</span></div><p class="item-desc">Black bean patty on brioche bun, sliced avocado, fresh pico de gallo, and southwest ranch</p></div>
-          <div class="menu-item"><div class="item-row"><span class="item-name">BBQ Pulled Pork</span><span class="item-price">$15.95</span></div><p class="item-desc">Slow-cooked BBQ pulled pork topped with onion straws and sweet and sour coleslaw</p></div>
+          <div class="menu-item"><div class="item-row"><span class="item-name">California Club Wrap</span><span class="item-price">$15.59</span></div><p class="item-desc">Grilled chicken, bacon, avocado, lettuce, tomato, cheddar cheese, and ranch in a tortilla</p></div>
+          <div class="menu-item"><div class="item-row"><span class="item-name">Caesar Wrap</span><span class="item-price">$13.59</span></div><p class="item-desc">Grilled chicken, romaine lettuce, parmesan cheese, and Caesar dressing in a tortilla</p></div>
+          <div class="menu-item"><div class="item-row"><span class="item-name">BLT Wrap</span><span class="item-price">$14.29</span></div><p class="item-desc">Crisp bacon, fresh sliced tomatoes, and romaine lettuce wrapped in a flour tortilla</p></div>
+          <div class="menu-item"><div class="item-row"><span class="item-name">Lotta Cheese & Ham</span><span class="item-price">$16.59</span></div><p class="item-desc">Havarti cheese, cheddar cheese, provolone cheese, ham, sliced tomato, and dijonaisse</p></div>
+          <div class="menu-item"><div class="item-row"><span class="item-name">Buff Chicken/Bacon Sliders</span><span class="item-price">$13.85</span></div><p class="item-desc">Fried chicken tenders dipped in buffalo sauce and topped with bacon on toasted brioche bun</p></div>
+          <div class="menu-item"><div class="item-row"><span class="item-name">BBQ Pulled Pork</span><span class="item-price">$16.15</span></div><p class="item-desc">Slow-cooked BBQ pulled pork topped with onion straws and sweet coleslaw</p></div>
           <div class="menu-item"><div class="item-row"><span class="item-name">BBQ Chopped Brisket</span><span class="item-price">$16.85</span></div><p class="item-desc">Slow-cooked BBQ brisket topped with onion straws</p></div>
           <div class="menu-item"><div class="item-row"><span class="item-name">The Quarry French Dip</span><span class="item-price">$16.85</span></div><p class="item-desc">A classic french dip</p></div>
-          <div class="menu-item"><div class="item-row"><span class="item-name">Roast Beef Sliders</span><span class="item-price">$15.90</span></div><p class="item-desc">Fresh sliced roast beef with provolone and horseradish, pickled onions on brioche buns</p></div>
-          <div class="menu-item"><div class="item-row"><span class="item-name">Quarry Cheeseburger Sliders</span><span class="item-price">$16.89</span></div><p class="item-desc">Cheeseburger sliders with cheddar and bacon topped with peach and pepper aioli on brioche buns</p></div>
+          <div class="menu-item"><div class="item-row"><span class="item-name">Roast Beef Sliders</span><span class="item-price">$15.90</span></div><p class="item-desc">Fresh sliced roast beef with provolone cheese and horseradish, topped with pickled onions on toasted brioche buns</p></div>
+          <div class="menu-item"><div class="item-row"><span class="item-name">Quarry Cheeseburger Sliders</span><span class="item-price">$16.85</span></div><p class="item-desc">Cheeseburger sliders with cheddar cheese and bacon topped with peach and pepper aioli on toasted brioche buns</p></div>
         </div>
       </div>
     </div>
@@ -268,40 +277,43 @@ nav { display:flex; align-items:center; }
     <!-- RIGHT COLUMN -->
     <div>
       <div class="menu-section">
-        <div class="menu-section" id="nachos"><div class="section-header"><div class="section-header-line"></div><h2 class="section-title">Nachos</h2><div class="section-header-line"></div></div>
+        <div class="menu-section" id="flatbread"><div class="section-header"><div class="section-header-line"></div><h2 class="section-title">Flatbread Pizza</h2><div class="section-header-line"></div></div>
         <div class="menu-items">
-          <div class="menu-item"><div class="item-row"><span class="item-name">Pulled Pork Nachos</span><span class="item-price">$16.10</span></div><p class="item-desc">Tortilla chips with BBQ pulled pork, jalape&ntilde;os, cheddar, beer cheese, pickled onions, and crema lima drizzle</p></div>
-          <div class="menu-item"><div class="item-row"><span class="item-name">Farmhouse Nachos</span><span class="item-price">$15.25</span></div><p class="item-desc">Tortilla chips with black bean corn mix, pico de gallo, avocado, cheddar, beer cheese, sour cream and crema lima drizzle</p></div>
-          <div class="menu-item"><div class="item-row"><span class="item-name">The Nattypocalypse Platter</span><span class="item-price">$13.99</span></div><p class="item-desc">Fries, beer cheese, chicken, sour cream, ranch, and drizzled buffalo, served with an ice-cold Natty Light</p></div>
+          <div class="menu-item"><div class="item-row"><span class="item-name">Cheese</span><span class="item-price">$11.89</span></div></div>
+          <div class="menu-item"><div class="item-row"><span class="item-name">Pepperoni</span><span class="item-price">$13.29</span></div></div>
+          <div class="menu-item"><div class="item-row"><span class="item-name">Meat Lovers</span><span class="item-price">$14.29</span></div><p class="item-desc">Red sauce, bacon, ham, sausage, Twistella cheese</p></div>
+          <div class="menu-item"><div class="item-row"><span class="item-name">Buffalo Dip</span><span class="item-price">$14.29</span></div><p class="item-desc">Buffalo dip base, chicken, Twistella cheese, drizzle of ranch</p></div>
+          <div class="menu-item"><div class="item-row"><span class="item-name">Twisted Lemon Chicken</span><span class="item-price">$13.89</span></div><p class="item-desc">Lemon dressing base, chicken, pickled red onions, Twistella cheese</p></div>
+          <div class="menu-item"><div class="item-row"><span class="item-name">Pulled Pork</span><span class="item-price">$15.29</span></div><p class="item-desc">BBQ sauce base, pulled pork, pineapple, Twistella cheese, drizzled with Mike&rsquo;s Hot BBQ Honey</p></div>
         </div>
       </div>
 
       <div class="menu-section">
         <div class="menu-section" id="salads"><div class="section-header"><div class="section-header-line"></div><h2 class="section-title">Soups & Salads</h2><div class="section-header-line"></div></div>
-        <p class="dressing-note">Dressing Options: Ranch &middot; Bleu Cheese &middot; Chipotle Ranch &middot; Raspberry Vinaigrette</p>
+        <p class="dressing-note">Dressing Options: Bleu Cheese &middot; Chipotle Ranch &middot; Creamy Lemon &middot; Ranch &middot; Raspberry Vinaigrette</p>
         <div class="menu-items">
-          <div class="menu-item"><div class="item-row"><span class="item-name">Chicken Caesar Salad</span><span class="item-price">$14.50 / $10.15</span></div><p class="item-desc">Grilled chicken, romaine, parmesan, croutons and caesar dressing</p></div>
-          <div class="menu-item"><div class="item-row"><span class="item-name">Farmhouse Salad</span><span class="item-price">$14.25 / $9.29</span></div><p class="item-desc">Romaine, tomatoes, cucumber, avocado, bacon, egg, cheddar, croutons, choice of dressing</p></div>
-          <div class="menu-item"><div class="item-row"><span class="item-name">Southwest Salad</span><span class="item-price">$14.25 / $10.29</span></div><p class="item-desc">Romaine, chicken, black bean corn mix, avocado, tomatoes, tortilla strips, chipotle ranch</p></div>
-          <div class="menu-item"><div class="item-row"><span class="item-name">Summer Salad</span><span class="item-price">$14.25 / $10.49</span></div><p class="item-desc">Spring mix, strawberries, blueberries, oranges, chicken, feta, almonds, raspberry vinaigrette</p></div>
-          <div class="menu-item"><div class="item-row"><span class="item-name">Bowl of Soup</span><span class="item-price">$5.99</span></div><p class="item-desc">Broccoli cheddar or tomato basil</p></div>
+          <div class="menu-item"><div class="item-row"><span class="item-name">Chicken Caesar Salad</span><span class="item-price">$14.25 / $10.29</span></div><p class="item-desc">Grilled chicken, romaine lettuce, parmesan, croutons and caesar dressing</p></div>
+          <div class="menu-item"><div class="item-row"><span class="item-name">Farmhouse Salad</span><span class="item-price">$14.25 / $10.29</span></div><p class="item-desc">Romaine lettuce, tomatoes, cucumber, avocado, bacon, egg, Twistella cheese, croutons, and choice of dressing</p></div>
+          <div class="menu-item"><div class="item-row"><span class="item-name">Southwest Salad</span><span class="item-price">$14.25 / $10.39</span></div><p class="item-desc">Romaine lettuce, chicken, black bean corn mix, avocado, tomatoes, tortilla strips, Twistella cheese, and chipotle ranch</p></div>
+          <div class="menu-item"><div class="item-row"><span class="item-name">Bowl of Soup</span><span class="item-price">$5.99</span></div><p class="item-desc">Broccoli cheddar, tomato basil or chili</p></div>
         </div>
       </div>
 
       <div class="menu-section">
         <div class="menu-section" id="kids"><div class="section-header"><div class="section-header-line"></div><h2 class="section-title">Kids Menu</h2><div class="section-header-line"></div></div>
+        <p class="section-note">Includes soda, tea, or milk</p>
         <div class="menu-items">
           <div class="menu-item"><div class="item-row"><span class="item-name">Chicken Tenders</span><span class="item-price">$8.29</span></div><p class="item-desc">Crispy chicken tenders</p></div>
-          <div class="menu-item"><div class="item-row"><span class="item-name">Kid Dog</span><span class="item-price">$7.56</span></div></div>
           <div class="menu-item"><div class="item-row"><span class="item-name">Little Piggy</span><span class="item-price">$8.45</span></div><p class="item-desc">Choice of BBQ pulled pork or brisket sandwich</p></div>
+          <div class="menu-item"><div class="item-row"><span class="item-name">Grilled Cheese</span><span class="item-price">$8.29</span></div></div>
+          <div class="menu-item"><div class="item-row"><span class="item-name">Mac and Cheese</span><span class="item-price">$8.29</span></div></div>
         </div>
       </div>
 
       <div class="menu-section">
         <div class="menu-section" id="desserts"><div class="section-header"><div class="section-header-line"></div><h2 class="section-title">Heaven</h2><div class="section-header-line"></div></div>
         <div class="menu-items">
-          <div class="menu-item"><div class="item-row"><span class="item-name">Cookie Monster</span><span class="item-price">$9.29</span></div><p class="item-desc">New Melle Bakery brownie chunk chocolate chip cookie with a scoop of ice cream and chocolate drizzle</p></div>
-          <div class="menu-item"><div class="item-row"><span class="item-name">Twisted Apple Pie</span><span class="item-price">$10.39</span></div><p class="item-desc">Apple pie made alongside New Melle Bakery, served warm with vanilla ice cream and a buttery caramel drizzle</p></div>
+          <div class="menu-item"><div class="item-row"><span class="item-name">Twisted Waffle</span><span class="item-price">$9.29</span></div><p class="item-desc">Scoop of vanilla on top of a waffle with caramel drizzle</p></div>
         </div>
       </div>
     </div>
