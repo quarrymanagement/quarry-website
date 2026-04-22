@@ -7656,7 +7656,7 @@ function renderCampaignList(year, month) {
     var html = '';
     campaigns.forEach(function(c) {
         html += '<tr onclick="openCampaignDetail(\'' + c.id + '\')">';
-        html += '<td>' + formatDate(c.date) + '</td>';
+        html += '<td>' + campaignFormatDate(c.date) + '</td>';
         html += '<td style="font-weight:600;">' + c.name + '</td>';
         html += '<td><span class="campaign-type-badge ' + c.type + '">' + (CAMPAIGN_TYPES[c.type] ? CAMPAIGN_TYPES[c.type].label : c.type) + '</span></td>';
         html += '<td><span class="campaign-status-badge ' + c.status + '">' + c.status.replace('-', ' ') + '</span></td>';
@@ -7979,7 +7979,7 @@ function openCampaignDetail(campaignId) {
     html += '<div class="campaign-detail-meta">';
     html += '<div class="campaign-detail-meta-item"><label>Type</label><span class="campaign-type-badge ' + campaign.type + '">' + (CAMPAIGN_TYPES[campaign.type] ? CAMPAIGN_TYPES[campaign.type].label : campaign.type) + '</span></div>';
     html += '<div class="campaign-detail-meta-item"><label>Status</label><span class="campaign-status-badge ' + campaign.status + '">' + campaign.status.replace('-', ' ') + '</span></div>';
-    html += '<div class="campaign-detail-meta-item"><label>Scheduled Date</label><span>' + formatDate(campaign.date) + '</span></div>';
+    html += '<div class="campaign-detail-meta-item"><label>Scheduled Date</label><span>' + campaignFormatDate(campaign.date) + '</span></div>';
     html += '<div class="campaign-detail-meta-item"><label>Send Time</label><span>' + campaign.sendTime + '</span></div>';
     html += '</div>';
 
@@ -8095,7 +8095,7 @@ function approveCampaign(campaignId) {
     campaign.approvedAt = new Date().toISOString();
     closeCampaignDetail();
     renderCampaignCalendar(calendarState.year, calendarState.month);
-    showToast('Campaign approved and scheduled for ' + formatDate(campaign.date) + ' at ' + campaign.sendTime, 'success');
+    showToast('Campaign approved and scheduled for ' + campaignFormatDate(campaign.date) + ' at ' + campaign.sendTime, 'success');
 }
 
 function showDenyReason() {
@@ -8694,7 +8694,7 @@ function renderPerformanceTable(sentCampaigns) {
         html += '<tr>';
         html += '<td style="font-weight:600;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + c.name + '</td>';
         html += '<td><span class="campaign-type-badge ' + c.type + '">' + (CAMPAIGN_TYPES[c.type] ? CAMPAIGN_TYPES[c.type].label : c.type) + '</span></td>';
-        html += '<td>' + formatDate(c.date) + '</td>';
+        html += '<td>' + campaignFormatDate(c.date) + '</td>';
         html += '<td>' + c.recipients.toLocaleString() + '</td>';
         html += '<td>' + m.opens.toLocaleString() + '</td>';
         html += '<td>' + m.clicks.toLocaleString() + '</td>';
@@ -9234,8 +9234,10 @@ function isPastDate(dateStr, referenceDate) {
     return new Date(dateStr) < referenceDate;
 }
 
-function formatDate(dateStr) {
+function campaignFormatDate(dateStr) {
+    if (!dateStr) return '—';
     var d = new Date(dateStr + 'T12:00:00');
+    if (isNaN(d.getTime())) return dateStr;
     return MONTH_NAMES[d.getMonth()].substr(0, 3) + ' ' + d.getDate() + ', ' + d.getFullYear();
 }
 
