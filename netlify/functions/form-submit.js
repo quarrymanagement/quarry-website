@@ -1,21 +1,38 @@
 const https = require('https');
-const AWS = require('aws-sdk');
-
-const ses = new AWS.SES({
-  region: process.env.SES_REGION || 'us-east-1',
-  accessKeyId: process.env.SES_ACCESS_KEY_ID,
-  secretAccessKey: process.env.SES_SECRET_ACCESS_KEY,
-});
 
 function sendEmail(to, subject, htmlBody) {
-  return ses.sendEmail({
-    Source: 'The Quarry STL <management@thequarrystl.com>',
-    Destination: { ToAddresses: Array.isArray(to) ? to : [to] },
-    Message: {
-      Subject: { Data: subject, Charset: 'UTF-8' },
-      Body: { Html: { Data: htmlBody, Charset: 'UTF-8' } },
-    },
-  }).promise();
+  var toArray = Array.isArray(to) ? to : [to];
+  var payload = JSON.stringify({
+    personalizations: [{ to: toArray.map(function(email) { return { email: email }; }) }],
+    from: { email: 'management@thequarrystl.com', name: 'The Quarry STL' },
+    subject: subject,
+    content: [{ type: 'text/html', value: htmlBody }],
+  });
+
+  return new Promise(function(resolve, reject) {
+    var req = https.request({
+      hostname: 'api.sendgrid.com',
+      path: '/v3/mail/send',
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + process.env.SENDGRID_API_KEY,
+        'Content-Type': 'application/json',
+      },
+    }, function(res) {
+      var body = '';
+      res.on('data', function(chunk) { body += chunk; });
+      res.on('end', function() {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          resolve({ statusCode: res.statusCode, body: body });
+        } else {
+          reject(new Error('SendGrid error ' + res.statusCode + ': ' + body));
+        }
+      });
+    });
+    req.on('error', reject);
+    req.write(payload);
+    req.end();
+  });
 }
 
 function githubRequest(method, path, token, data) {
