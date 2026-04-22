@@ -294,8 +294,9 @@
             transition: max-height 0.25s ease;
             background: rgba(0,0,0,0.15);
         }
-        .sidebar-parent.open .sidebar-children {
-            max-height: 300px;
+        .sidebar-parent.open > .sidebar-children {
+            max-height: 300px !important;
+            overflow: visible;
         }
         .sidebar.collapsed .sidebar-children { display: none; }
 
