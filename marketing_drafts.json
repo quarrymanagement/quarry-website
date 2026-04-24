@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "updatedAt": "2026-04-24T00:00:00Z",
+  "drafts": [],
+  "history": [],
+  "settings": {
+    "fromEmail": "management@thequarrystl.com",
+    "fromName": "The Quarry STL",
+    "brandVoice": "Upscale-casual, warm, confident",
+    "cadenceCapPerSubscriberPerWeek": 3,
+    "defaultAudience": "Subscribed",
+    "eventCadenceDays": [
+      30,
+      14,
+      7,
+      2
+    ],
+    "rescueTriggerPct": 50,
+    "rescueTriggerDaysOut": 7,
+    "weeklyDigest": {
+      "day": "Tuesday",
+      "hour": 10,
+      "timezone": "America/Chicago"
+    },
+    "weather": {
+      "zip": "63385",
+      "minTempF": 68,
+      "maxTempF": 85,
+      "maxPOPpct": 30,
+      "windowDays": [
+        "Thu",
+        "Fri",
+        "Sat",
+        "Sun"
+      ]
+    },
+    "facebook": {
+      "pageUrl": "https://www.facebook.com/thequarrystl",
+      "mode": "read-only"
+    },
+    "approvalNotifications": {
+      "inAdminBadge": true,
+      "dailySummaryEmailHourCT": 8
+    },
+    "models": {
+      "primary": "claude",
+      "available": [
+        "claude",
+        "gpt-4"
+      ]
+    }
+  }
+}
