@@ -485,7 +485,7 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.65re
   <span><b>50 Minutes</b> Private Bay</span>
   <span><b>75 Balls</b> Included</span>
   <span><b>Food &amp; Drinks</b> Available</span>
-  <span><b>$60</b> Per Bay</span>
+  <span><b>$30</b> Per Bay</span>
   <span><b>Arrive</b> 10 Min Early</span>
 </div>
 
@@ -505,10 +505,10 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.65re
     <div class="sec">
       <div class="step"><div class="sn">1</div><h2>Select Your Bay</h2></div>
       <div class="bay-grid">
-        <div class="bc" id="bay1" onclick="selectBay(1)"><div class="ck" id="ck1"></div><h3>Bay 1</h3><p>Prime lakeside view</p><div class="bp">$60</div></div>
-        <div class="bc" id="bay2" onclick="selectBay(2)"><div class="ck" id="ck2"></div><h3>Bay 2</h3><p>Prime lakeside view</p><div class="bp">$60</div></div>
-        <div class="bc" id="bay3" onclick="selectBay(3)"><div class="ck" id="ck3"></div><h3>Bay 3</h3><p>Prime lakeside view</p><div class="bp">$60</div></div>
-        <div class="bc" id="bay4" onclick="selectBay(4)"><div class="ck" id="ck4"></div><h3>Bay 4</h3><p>Prime lakeside view</p><div class="bp">$60</div></div>
+        <div class="bc" id="bay1" onclick="selectBay(1)"><div class="ck" id="ck1"></div><h3>Bay 1</h3><p>Prime lakeside view</p><div class="bp">$30</div></div>
+        <div class="bc" id="bay2" onclick="selectBay(2)"><div class="ck" id="ck2"></div><h3>Bay 2</h3><p>Prime lakeside view</p><div class="bp">$30</div></div>
+        <div class="bc" id="bay3" onclick="selectBay(3)"><div class="ck" id="ck3"></div><h3>Bay 3</h3><p>Prime lakeside view</p><div class="bp">$30</div></div>
+        <div class="bc" id="bay4" onclick="selectBay(4)"><div class="ck" id="ck4"></div><h3>Bay 4</h3><p>Prime lakeside view</p><div class="bp">$30</div></div>
       </div>
     </div>
 
@@ -584,7 +584,7 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.65re
       <div class="sr"><span class="sl">Duration</span><span class="sv">50 Minutes</span></div>
       <div class="sr"><span class="sl">Includes</span><span class="sv">75 Golf Balls</span></div>
       <div class="sr"><span class="sl">Extra Balls</span><span class="sv" id="sumExtra">None</span></div>
-      <div class="sr str"><span class="sl">Total</span><span id="sumTotal">$60.00</span></div>
+      <div class="sr str"><span class="sl">Total</span><span id="sumTotal">$30.00</span></div>
       <div class="snotes">* Arrive 10 minutes early to check in<br>Late arrivals do not extend reservation time<br>Hole-in-one wins $3,000 cash!<br>Food &amp; drinks available at your bay</div>
     </div>
   </div>
@@ -693,7 +693,7 @@ function selectBalls(count,price){
 }
 
 function updateTotal(){
-  var base=60+S.extraPrice;
+  var base=30+S.extraPrice;
   document.getElementById('sumTotal').textContent='$'+base+'.00';
 }
 
@@ -725,7 +725,7 @@ async function submitBooking(){
     var res=await fetch('/.netlify/functions/create-checkout',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        amount:6000+(S.extraPrice*100),
+        amount:3000+(S.extraPrice*100),
         metadata:{customerName:first+' '+last,customerEmail:email,customerPhone:phone,bay:bay,date:date,time:time,duration:'50 Minutes',players:players}
       })
     });
