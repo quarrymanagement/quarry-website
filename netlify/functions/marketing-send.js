@@ -190,8 +190,7 @@ async function sendDraftToSegment(draft, settings) {
 // Handler
 // ----------------------------------------------------------------------------
 
-exports.config = { schedule: "*/10 * * * *" };
-
+// Schedule: see netlify.toml. Manual trigger from the admin UI also works.
 exports.handler = async (event) => {
     if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: CORS, body: '' };
     if (!SENDGRID_KEY) return respond(500, { error: 'SENDGRID_API_KEY not configured in Netlify env vars' });

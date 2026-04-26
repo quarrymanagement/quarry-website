@@ -131,8 +131,7 @@ async function generateDraft(type, context, instructions, learnings) {
 // Handler
 // ----------------------------------------------------------------------------
 
-exports.config = { schedule: "0 12 * * *" };
-
+// Schedule: see netlify.toml. Manual trigger from the admin UI also works.
 exports.handler = async (event) => {
     if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: CORS, body: '' };
     if (event.httpMethod !== 'POST' && event.httpMethod !== 'GET') {
