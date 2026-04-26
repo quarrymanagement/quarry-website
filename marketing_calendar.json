@@ -1,0 +1,107 @@
+{
+  "version": 1,
+  "updatedAt": "2026-04-26T00:00:00Z",
+  "_schema": {
+    "rules": "Recurring or one-off campaign rules that the daily generator uses to decide what drafts to create. Each rule produces 0..N drafts per day depending on its trigger.",
+    "ruleShape": {
+      "id": "string — stable id (slug)",
+      "name": "string — human label shown on calendar",
+      "type": "weekly_digest | event_cadence | wine_club | golf | menu_spotlight | weather_patio | birthday | win_back | reservation_recap | new_subscriber_welcome | manual",
+      "enabled": "boolean",
+      "schedule": {
+        "kind": "weekly | event_relative | monthly | trigger | one_off",
+        "dayOfWeek": "0-6 (Sun=0) — for weekly",
+        "hourCT": "0-23 — local CT send hour",
+        "monthDay": "1-31 — for monthly",
+        "offsetsDays": "[number] — for event_relative (e.g. [-30,-14,-7,-2,0])",
+        "trigger": "weather_match | inactive_60d | birthday_today | post_visit_2d — for trigger kind",
+        "date": "ISO date — for one_off"
+      },
+      "segment": "Subscribed | Wine Club | Golf | Event Attendees | All",
+      "draftType": "matches ai-draft.js type values",
+      "notes": "freeform"
+    }
+  },
+  "rules": [
+    {
+      "id": "weekly-digest-tuesday",
+      "name": "This Week At The Quarry — Weekly Digest",
+      "type": "weekly_digest",
+      "enabled": true,
+      "schedule": { "kind": "weekly", "dayOfWeek": 2, "hourCT": 10 },
+      "segment": "Subscribed",
+      "draftType": "weekly_digest",
+      "notes": "Roundup of bands + events for the upcoming week. Pulls from events.json + bands schedule."
+    },
+    {
+      "id": "event-cadence-default",
+      "name": "Event 4-Touch Cadence",
+      "type": "event_cadence",
+      "enabled": true,
+      "schedule": { "kind": "event_relative", "offsetsDays": [-30, -14, -7, -2], "hourCT": 10 },
+      "segment": "Subscribed",
+      "draftType": "event_promo_30d|event_promo_14d|event_promo_7d|event_promo_2d",
+      "notes": "Auto-generates 4 drafts per upcoming event in events.json. Uses event_promo_30d -> event_promo_2d types in ai-draft.js."
+    },
+    {
+      "id": "wine-club-monthly",
+      "name": "Wine Club — Monthly Release Notes",
+      "type": "wine_club",
+      "enabled": true,
+      "schedule": { "kind": "monthly", "monthDay": 5, "hourCT": 11 },
+      "segment": "Wine Club",
+      "draftType": "wine_club",
+      "notes": "5th of each month. Member-only voice."
+    },
+    {
+      "id": "patio-weather-trigger",
+      "name": "Patio Weather Alert (Thu-Sun)",
+      "type": "weather_patio",
+      "enabled": false,
+      "schedule": { "kind": "trigger", "trigger": "weather_match", "hourCT": 9 },
+      "segment": "Subscribed",
+      "draftType": "weather_patio",
+      "notes": "Disabled by default — needs weather API integration first. Settings in marketing_drafts.json.weather."
+    },
+    {
+      "id": "birthday-club",
+      "name": "Birthday Club — Treat Yourself",
+      "type": "birthday",
+      "enabled": false,
+      "schedule": { "kind": "trigger", "trigger": "birthday_today", "hourCT": 8 },
+      "segment": "Subscribed",
+      "draftType": "evergreen",
+      "notes": "Disabled — needs birthday field on subscriber records first."
+    },
+    {
+      "id": "win-back-60d",
+      "name": "Win-Back — Haven't Visited in 60 Days",
+      "type": "win_back",
+      "enabled": false,
+      "schedule": { "kind": "trigger", "trigger": "inactive_60d", "hourCT": 14 },
+      "segment": "Subscribed",
+      "draftType": "evergreen",
+      "notes": "Disabled — needs visit tracking. Will activate once POS integration lands."
+    },
+    {
+      "id": "post-visit-thank-you",
+      "name": "Post-Visit Thank You",
+      "type": "reservation_recap",
+      "enabled": false,
+      "schedule": { "kind": "trigger", "trigger": "post_visit_2d", "hourCT": 11 },
+      "segment": "Event Attendees",
+      "draftType": "evergreen",
+      "notes": "Disabled — needs reservation/visit data. Will activate once linked."
+    },
+    {
+      "id": "menu-spotlight-friday",
+      "name": "Menu Spotlight (Fridays)",
+      "type": "menu_spotlight",
+      "enabled": true,
+      "schedule": { "kind": "weekly", "dayOfWeek": 5, "hourCT": 11 },
+      "segment": "Subscribed",
+      "draftType": "menu_spotlight",
+      "notes": "Single dish or new menu launch. Sensory language. Friday late-morning when people are deciding the weekend."
+    }
+  ]
+}
