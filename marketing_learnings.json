@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "updatedAt": "2026-04-26T00:00:00Z",
+  "_schema": {
+    "learnings": "AI-generated insights produced by the nightly optimizer. Injected into the next draft-generator prompt so the AI improves over time.",
+    "learningShape": {
+      "id": "string — stable hash",
+      "category": "timing | subject_line | content_pattern | segment_response | event_type | day_of_week",
+      "insight": "string — concise pattern e.g. 'Tuesday 10am subject lines starting with a question average 38% higher open rate'",
+      "confidence": "low | medium | high — based on sample size",
+      "sampleSize": "number — sends underlying this insight",
+      "createdAt": "ISO ts",
+      "supersededAt": "ISO ts — null if still active"
+    },
+    "eventIdeas": "AI-suggested future event ideas based on engagement signals from past campaigns."
+  },
+  "learnings": [
+    {
+      "id": "seed-tone-warm",
+      "category": "content_pattern",
+      "insight": "Brand voice baseline: upscale-casual, warm, confident. Avoid corporate-speak ('excited to announce', 'leverage', 'synergy'). At most one exclamation point per email.",
+      "confidence": "high",
+      "sampleSize": 0,
+      "createdAt": "2026-04-26T00:00:00Z",
+      "supersededAt": null
+    },
+    {
+      "id": "seed-subject-length",
+      "category": "subject_line",
+      "insight": "Subject lines 40-60 characters perform best on mobile previews. Specific and curiosity-driven, not clickbait.",
+      "confidence": "high",
+      "sampleSize": 0,
+      "createdAt": "2026-04-26T00:00:00Z",
+      "supersededAt": null
+    },
+    {
+      "id": "seed-cadence-cap",
+      "category": "timing",
+      "insight": "Cap at 3 emails per subscriber per week to prevent fatigue. Prioritize weekly digest > event 7d > event 2d > spotlights when over cap.",
+      "confidence": "high",
+      "sampleSize": 0,
+      "createdAt": "2026-04-26T00:00:00Z",
+      "supersededAt": null
+    }
+  ],
+  "eventIdeas": []
+}
