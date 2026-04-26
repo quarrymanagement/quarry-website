@@ -1,53 +1,60 @@
 {
-  "version": 1,
-  "updatedAt": "2026-04-24T00:00:00Z",
+  "version": 2,
+  "updatedAt": "2026-04-26T00:00:00Z",
+  "_schema": {
+    "drafts": "Queue of generated email drafts awaiting approval, scheduled, or sent. Appended by marketing-generate-daily.js, mutated by the admin UI, drained by marketing-send.js.",
+    "draftShape": {
+      "id": "string — uuid",
+      "ruleId": "string — references marketing_calendar.json rules[].id",
+      "type": "string — matches ai-draft.js type",
+      "status": "pending | approved | rejected | sent | failed",
+      "subject": "string",
+      "htmlBody": "string — full HTML including footer",
+      "innerHtml": "string — body without the wrapping container/footer (for editing)",
+      "segment": "Subscribed | Wine Club | Golf | Event Attendees | All",
+      "scheduledFor": "ISO ts — when to send",
+      "createdAt": "ISO ts",
+      "updatedAt": "ISO ts",
+      "approvedAt": "ISO ts | null",
+      "approvedBy": "string | null",
+      "rejectedAt": "ISO ts | null",
+      "rejectionReason": "string | null",
+      "sentAt": "ISO ts | null",
+      "sgMessageId": "string | null — SendGrid x-message-id header",
+      "regenerationCount": "number — how many times Redo was used",
+      "lastInstructions": "string — last user-supplied redo/edit instructions",
+      "context": "object — what fed the prompt (event id, band id, weather, etc.)",
+      "model": "string — which AI model produced this draft"
+    },
+    "history": "Sent or rejected drafts older than 30 days, moved here for archival lookup."
+  },
   "drafts": [],
   "history": [],
   "settings": {
     "fromEmail": "management@thequarrystl.com",
     "fromName": "The Quarry STL",
+    "replyTo": "management@thequarrystl.com",
     "brandVoice": "Upscale-casual, warm, confident",
     "cadenceCapPerSubscriberPerWeek": 3,
     "defaultAudience": "Subscribed",
-    "eventCadenceDays": [
-      30,
-      14,
-      7,
-      2
-    ],
+    "eventCadenceDays": [30, 14, 7, 2],
     "rescueTriggerPct": 50,
     "rescueTriggerDaysOut": 7,
-    "weeklyDigest": {
-      "day": "Tuesday",
-      "hour": 10,
-      "timezone": "America/Chicago"
+    "weeklyDigest": { "day": "Tuesday", "hour": 10, "timezone": "America/Chicago" },
+    "weather": { "zip": "63385", "minTempF": 68, "maxTempF": 85, "maxPOPpct": 30, "windowDays": ["Thu","Fri","Sat","Sun"] },
+    "facebook": { "pageUrl": "https://www.facebook.com/thequarrystl", "mode": "read-only" },
+    "approvalNotifications": { "inAdminBadge": true, "dailySummaryEmailHourCT": 8 },
+    "models": { "primary": "claude", "available": ["claude", "openai"] },
+    "generation": {
+      "lookAheadDays": 7,
+      "skipIfDraftExistsForRuleAndDate": true,
+      "maxDraftsPerDay": 4
     },
-    "weather": {
-      "zip": "63385",
-      "minTempF": 68,
-      "maxTempF": 85,
-      "maxPOPpct": 30,
-      "windowDays": [
-        "Thu",
-        "Fri",
-        "Sat",
-        "Sun"
-      ]
-    },
-    "facebook": {
-      "pageUrl": "https://www.facebook.com/thequarrystl",
-      "mode": "read-only"
-    },
-    "approvalNotifications": {
-      "inAdminBadge": true,
-      "dailySummaryEmailHourCT": 8
-    },
-    "models": {
-      "primary": "claude",
-      "available": [
-        "claude",
-        "gpt-4"
-      ]
+    "sendgrid": {
+      "categoryPrefix": "quarry-marketing",
+      "trackOpens": true,
+      "trackClicks": true,
+      "ipPoolName": null
     }
   }
 }
