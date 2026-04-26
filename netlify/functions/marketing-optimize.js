@@ -105,6 +105,8 @@ function summarizeData(drafts, events, aggregates) {
     return { totalSent: recent.length, perDraft };
 }
 
+exports.config = { schedule: "0 7 * * *" };
+
 exports.handler = async (event) => {
     if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: CORS, body: '' };
     if (!ANTHROPIC_KEY) return respond(500, { error: 'ANTHROPIC_API_KEY not configured' });
