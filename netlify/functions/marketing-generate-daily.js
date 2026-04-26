@@ -90,7 +90,7 @@ function shouldFireMonthly(rule, day) {
 // Discover which event(s) need a touch on `day` based on event_relative offsets
 function eventTouchesForDay(rule, day, events) {
     const touches = [];
-    if (!Array.isArray(events)) return touches;
+    if (!Array.isArray(events) || !events.length) return touches;
     const offsets = (rule.schedule.offsetsDays || []).slice().sort((a, b) => b - a); // -2 fires last
     for (const ev of events) {
         if (!ev.date) continue;
@@ -169,8 +169,14 @@ exports.handler = async (event) => {
 
         const calendar = calendarRes.data;
         const draftsFile = draftsRes.data;
-        const events = (eventsRes.data && (eventsRes.data.events || eventsRes.data)) || [];
-        const learnings = (learningsRes.data && learningsRes.data.learnings) || [];
+        // events.json may be a flat array OR {events: [...]} OR (when too big for GitHub
+        // contents API) an empty/null decoded payload — normalize to an array.
+        let events = [];
+        if (eventsRes && eventsRes.data) {
+            if (Array.isArray(eventsRes.data)) events = eventsRes.data;
+            else if (Array.isArray(eventsRes.data.events)) events = eventsRes.data.events;
+        }
+        const learnings = (learningsRes.data && Array.isArray(learningsRes.data.learnings)) ? learningsRes.data.learnings : [];
 
         const settings = draftsFile.settings || {};
         const lookAheadDays = body.lookAheadDays || (settings.generation && settings.generation.lookAheadDays) || 7;
@@ -207,7 +213,8 @@ exports.handler = async (event) => {
                 const fires = []; // [{draftType, scheduledFor, context, eventId?}]
 
                 if (rule.schedule.kind === 'weekly' && shouldFireWeekly(rule, day)) {
-                    const upcomingWeek = events.filter((e) => {
+                    const upcomingWeek = (Array.isArray(events) ? events : []).filter((e) => {
+                        if (!e || !e.date) return false;
                         const ed = new Date(e.date + 'T00:00:00Z');
                         const diff = (ed - day) / (1000 * 60 * 60 * 24);
                         return diff >= 0 && diff <= 7;
