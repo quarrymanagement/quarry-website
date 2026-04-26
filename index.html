@@ -1310,142 +1310,187 @@
             margin-bottom: 1rem; font-size: 0.9rem;
         }
 
-        /* ================================================================
-           MARKETING TAB (Phase 1 scaffold — Calendar / Drafts / Settings)
-           ================================================================ */
-        .mkt-subnav { display: flex; gap: 0.5rem; border-bottom: 1px solid var(--border-subtle); margin-bottom: 1.5rem; }
-        .mkt-subnav-btn {
-            background: none; border: none; padding: 0.75rem 1.25rem;
-            font-family: var(--font-sans); font-size: 0.85rem; font-weight: 600;
-            color: var(--text-muted); cursor: pointer; letter-spacing: 0.04em;
-            border-bottom: 2px solid transparent; margin-bottom: -1px;
-            transition: var(--transition);
-        }
-        .mkt-subnav-btn:hover { color: var(--text-primary); }
-        .mkt-subnav-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
-        .mkt-subview { display: none; }
-        .mkt-subview.active { display: block; }
+        /* ============================================================
+           MARKETING MODULE
+           ============================================================ */
+        .mkt-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+        .mkt-header h2 { font-family: 'Playfair Display', Georgia, serif; color: var(--text-primary); font-weight: 600; font-size: 1.6rem; }
+        .mkt-sub { margin: 0.35rem 0 0; color: var(--text-muted); font-size: 0.85rem; max-width: 60ch; }
+        .mkt-header-actions { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+        .mkt-icon-btn { padding: 0.4rem 0.7rem; font-weight: 600; }
 
-        .mkt-badge {
-            display: inline-block; background: var(--red); color: white;
-            font-size: 0.65rem; font-weight: 700; padding: 0.1rem 0.4rem;
-            border-radius: 999px; margin-left: 0.4rem; min-width: 1.2rem;
-            text-align: center; line-height: 1.1;
+        .mkt-stats {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.75rem; margin-bottom: 1.25rem;
         }
-        .mkt-badge.hidden { display: none; }
-
-        /* Calendar */
-        .mkt-cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-        .mkt-cal-title { font-family: var(--font-serif); font-size: 1.4rem; color: var(--text-primary); }
-        .mkt-cal-nav { display: flex; gap: 0.5rem; align-items: center; }
-        .mkt-cal-nav button {
+        .mkt-stats .stat-item {
             background: var(--bg-card); border: 1px solid var(--border-subtle);
-            padding: 0.4rem 0.75rem; border-radius: var(--radius-sm);
-            cursor: pointer; color: var(--text-primary); font-family: var(--font-sans);
-            font-size: 0.85rem;
+            border-radius: var(--radius-md); padding: 1rem 1.1rem;
         }
-        .mkt-cal-nav button:hover { background: var(--bg-hover); }
-        .mkt-cal-grid {
+        .mkt-stats .stat-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.4rem; }
+        .mkt-stats .stat-value { font-family: 'Playfair Display', Georgia, serif; color: var(--gold); font-size: 1.6rem; font-weight: 600; }
+
+        .mkt-cal-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.75rem; }
+        .mkt-cal-nav { display: flex; align-items: center; gap: 0.6rem; }
+        .mkt-cal-filters { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+        .mkt-cal-filters select { padding: 0.4rem 0.6rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); background: var(--bg-card); color: var(--text-primary); }
+
+        .mkt-calendar {
             display: grid; grid-template-columns: repeat(7, 1fr);
-            background: var(--border-subtle); gap: 1px;
+            gap: 1px; background: var(--border-subtle);
             border: 1px solid var(--border-subtle); border-radius: var(--radius-md);
-            overflow: hidden;
+            overflow: hidden; min-height: 580px;
         }
-        .mkt-cal-dayname {
-            background: var(--bg-elevated); padding: 0.6rem; text-align: center;
-            font-size: 0.7rem; font-weight: 700; color: var(--text-muted);
-            text-transform: uppercase; letter-spacing: 0.1em;
+        .mkt-cal-weekday { background: var(--bg-elevated); padding: 0.5rem; text-align: center; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+        .mkt-cal-day {
+            background: var(--bg-card); padding: 0.5rem; min-height: 100px;
+            display: flex; flex-direction: column; gap: 0.3rem; cursor: default; position: relative;
         }
-        .mkt-cal-cell {
-            background: var(--bg-card); min-height: 100px; padding: 0.5rem;
-            position: relative; font-size: 0.8rem;
-        }
-        .mkt-cal-cell.muted { background: var(--bg-elevated); color: var(--text-muted); }
-        .mkt-cal-cell.today .mkt-cal-daynum {
-            background: var(--gold); color: white; width: 1.5rem; height: 1.5rem;
-            border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
-            font-weight: 700;
-        }
-        .mkt-cal-daynum { font-weight: 600; color: var(--text-primary); }
-        .mkt-cal-chips { display: flex; flex-direction: column; gap: 0.2rem; margin-top: 0.35rem; }
-        .mkt-chip {
-            display: block; padding: 0.15rem 0.4rem; border-radius: 3px;
-            font-size: 0.7rem; font-weight: 500; cursor: pointer;
+        .mkt-cal-day.is-other-month { background: var(--bg-elevated); opacity: 0.55; }
+        .mkt-cal-day.is-today { box-shadow: inset 0 0 0 2px var(--gold); }
+        .mkt-cal-day .day-num { font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.1rem; }
+        .mkt-cal-day.is-today .day-num { color: var(--gold); }
+        .mkt-cal-event {
+            background: var(--gold-dim); border-left: 3px solid var(--gold);
+            padding: 3px 5px; border-radius: 3px; font-size: 0.72rem;
+            line-height: 1.25; color: var(--text-primary); cursor: pointer;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
-        .mkt-chip:hover { filter: brightness(1.08); }
-        .mkt-chip.type-event_promo { background: var(--gold-dim); color: var(--gold); border-left: 3px solid var(--gold); }
-        .mkt-chip.type-rescue { background: var(--red-dim); color: var(--red); border-left: 3px solid var(--red); }
-        .mkt-chip.type-weekly_digest { background: var(--blue-dim); color: var(--blue); border-left: 3px solid var(--blue); }
-        .mkt-chip.type-wine_club, .mkt-chip.type-golf { background: var(--yellow-dim); color: var(--yellow); border-left: 3px solid var(--yellow); }
-        .mkt-chip.type-menu, .mkt-chip.type-evergreen { background: var(--green-dim); color: var(--green); border-left: 3px solid var(--green); }
-        .mkt-chip.type-weather_patio { background: #e0f2fe; color: #0369a1; border-left: 3px solid #0ea5e9; }
-        .mkt-chip.type-manual { background: var(--bg-elevated); color: var(--text-secondary); border-left: 3px solid var(--text-muted); }
-        .mkt-chip.status-sent { opacity: 0.55; text-decoration: line-through; }
+        .mkt-cal-event:hover { background: var(--gold-glow); }
+        .mkt-cal-event.is-pending  { background: rgba(180,83,9,0.10); border-left-color: #b45309; }
+        .mkt-cal-event.is-approved { background: rgba(37,99,235,0.10); border-left-color: #2563eb; }
+        .mkt-cal-event.is-sent     { background: rgba(22,163,74,0.10); border-left-color: #16a34a; }
+        .mkt-cal-event.is-rejected { background: rgba(220,38,38,0.10); border-left-color: #dc2626; opacity: 0.65; text-decoration: line-through; }
+        .mkt-cal-event.is-failed   { background: rgba(220,38,38,0.18); border-left-color: #dc2626; }
+        .mkt-cal-overflow { font-size: 0.68rem; color: var(--text-muted); cursor: pointer; }
 
-        .mkt-legend {
-            display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem;
-            font-size: 0.75rem; color: var(--text-muted);
-        }
-        .mkt-legend-item { display: flex; gap: 0.4rem; align-items: center; }
-        .mkt-legend-swatch { width: 12px; height: 12px; border-radius: 2px; }
+        .mkt-cal-legend { display: flex; gap: 1rem; margin-top: 0.75rem; font-size: 0.75rem; color: var(--text-muted); flex-wrap: wrap; }
+        .mkt-pill { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: middle; }
+        .mkt-pill-pending  { background: #b45309; }
+        .mkt-pill-approved { background: #2563eb; }
+        .mkt-pill-sent     { background: #16a34a; }
+        .mkt-pill-rejected { background: #dc2626; opacity: 0.55; }
+        .mkt-pill-failed   { background: #dc2626; }
 
-        /* Drafts queue */
-        .mkt-drafts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem; }
-        .mkt-draft-card {
+        .mkt-inbox-list { display: flex; flex-direction: column; gap: 0.6rem; }
+        .mkt-inbox-card {
             background: var(--bg-card); border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-md); padding: 1rem; box-shadow: var(--shadow-sm);
-            display: flex; flex-direction: column; gap: 0.5rem;
+            border-left: 4px solid var(--gold); border-radius: var(--radius-sm);
+            padding: 0.85rem 1rem; cursor: pointer; transition: border-color 0.15s, transform 0.1s;
+            display: flex; justify-content: space-between; align-items: center; gap: 1rem;
         }
-        .mkt-draft-card:hover { box-shadow: var(--shadow-md); }
-        .mkt-draft-type {
-            display: inline-block; font-size: 0.7rem; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 0.08em; padding: 0.15rem 0.5rem;
-            border-radius: 999px; background: var(--gold-dim); color: var(--gold); align-self: flex-start;
-        }
-        .mkt-draft-subject { font-weight: 600; color: var(--text-primary); font-size: 0.95rem; }
-        .mkt-draft-meta { font-size: 0.75rem; color: var(--text-muted); }
-        .mkt-draft-actions { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
-        .mkt-draft-actions button {
-            flex: 1; padding: 0.5rem; border-radius: var(--radius-sm);
-            font-size: 0.8rem; font-weight: 600; cursor: pointer;
-            border: 1px solid var(--border-subtle); background: var(--bg-card);
-            color: var(--text-primary); transition: var(--transition);
-        }
-        .mkt-draft-actions button.primary { background: var(--gold); color: white; border-color: var(--gold); }
-        .mkt-draft-actions button:hover { filter: brightness(0.97); }
+        .mkt-inbox-card:hover { border-color: var(--gold-light); transform: translateX(2px); }
+        .mkt-inbox-card.is-pending  { border-left-color: #b45309; }
+        .mkt-inbox-card.is-approved { border-left-color: #2563eb; }
+        .mkt-inbox-card.is-sent     { border-left-color: #16a34a; }
+        .mkt-inbox-card.is-rejected { border-left-color: #dc2626; opacity: 0.7; }
+        .mkt-inbox-card.is-failed   { border-left-color: #dc2626; }
+        .mkt-inbox-meta { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.3rem; display: flex; gap: 0.7rem; flex-wrap: wrap; }
+        .mkt-inbox-subject { font-weight: 600; color: var(--text-primary); font-size: 0.95rem; }
+        .mkt-inbox-snippet { color: var(--text-secondary); font-size: 0.8rem; margin-top: 0.2rem; max-width: 50ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .mkt-status-chip { font-size: 0.7rem; padding: 2px 8px; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+        .mkt-status-chip.pending  { background: rgba(180,83,9,0.15);  color: #b45309; }
+        .mkt-status-chip.approved { background: rgba(37,99,235,0.15); color: #2563eb; }
+        .mkt-status-chip.sent     { background: rgba(22,163,74,0.15); color: #16a34a; }
+        .mkt-status-chip.rejected { background: rgba(220,38,38,0.12); color: #dc2626; }
+        .mkt-status-chip.failed   { background: rgba(220,38,38,0.18); color: #dc2626; }
 
-        .mkt-empty {
-            text-align: center; padding: 3rem 1rem; color: var(--text-muted);
-            border: 2px dashed var(--border-subtle); border-radius: var(--radius-md);
-        }
-        .mkt-empty h3 { font-family: var(--font-serif); color: var(--text-secondary); margin-bottom: 0.5rem; }
+        .mkt-empty { padding: 1.5rem; text-align: center; color: var(--text-muted); font-size: 0.9rem; }
+        .mkt-empty-cell { padding: 1rem; text-align: center; color: var(--text-muted); }
 
-        /* Settings */
-        .mkt-settings-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;
-        }
-        .mkt-setting-card {
-            background: var(--bg-card); border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-md); padding: 1.25rem;
-        }
-        .mkt-setting-card h4 {
-            font-family: var(--font-serif); font-size: 1.05rem; color: var(--text-primary);
-            margin-bottom: 0.75rem; padding-bottom: 0.5rem;
-            border-bottom: 1px solid var(--border-subtle);
-        }
-        .mkt-setting-row { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0; font-size: 0.85rem; }
-        .mkt-setting-row .label { color: var(--text-muted); }
-        .mkt-setting-row .value { font-weight: 600; color: var(--text-primary); }
-        .mkt-health-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 0.4rem; }
-        .mkt-health-dot.ok { background: var(--green); }
-        .mkt-health-dot.pending { background: var(--yellow); }
-        .mkt-health-dot.missing { background: var(--red); }
+        .mkt-perf-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; }
+        .mkt-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.1rem 1.2rem; }
+        .mkt-card h4 { font-family: 'Playfair Display', Georgia, serif; color: var(--gold); margin: 0 0 0.75rem; font-size: 1.05rem; font-weight: 600; }
+        .mkt-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        .mkt-table th { text-align: left; color: var(--text-muted); font-weight: 600; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--border-subtle); }
+        .mkt-table td { padding: 0.55rem 0.5rem; border-bottom: 1px solid var(--border-subtle); color: var(--text-primary); }
+        .mkt-table tr:last-child td { border-bottom: none; }
 
-        @media (max-width: 768px) {
-            .mkt-cal-cell { min-height: 70px; font-size: 0.7rem; padding: 0.3rem; }
-            .mkt-chip { font-size: 0.62rem; padding: 0.1rem 0.3rem; }
+        .mkt-bars { display: flex; flex-direction: column; gap: 0.4rem; }
+        .mkt-bar-row { display: flex; align-items: center; gap: 0.6rem; font-size: 0.78rem; color: var(--text-secondary); }
+        .mkt-bar-label { width: 70px; flex-shrink: 0; }
+        .mkt-bar-fill { flex: 1; background: var(--bg-elevated); border-radius: 99px; height: 8px; overflow: hidden; }
+        .mkt-bar-fill > span { display: block; height: 100%; background: var(--gold); border-radius: 99px; }
+        .mkt-bar-val { width: 50px; text-align: right; color: var(--text-muted); font-size: 0.72rem; }
+
+        .mkt-form-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; font-size: 0.85rem; }
+        .mkt-form-row label { width: 200px; color: var(--text-secondary); flex-shrink: 0; }
+        .mkt-form-row input, .mkt-form-row select { flex: 1; padding: 0.45rem 0.6rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); background: var(--bg-card); color: var(--text-primary); font-size: 0.85rem; }
+        .mkt-rule-row { display: flex; align-items: center; gap: 0.6rem; padding: 0.55rem 0.6rem; border-bottom: 1px solid var(--border-subtle); font-size: 0.85rem; }
+        .mkt-rule-row:last-child { border-bottom: none; }
+        .mkt-rule-row .rule-name { flex: 1; }
+        .mkt-rule-row .rule-meta { color: var(--text-muted); font-size: 0.75rem; }
+
+        .mkt-learning {
+            padding: 0.7rem 0.85rem; background: var(--gold-glow); border-left: 3px solid var(--gold);
+            border-radius: var(--radius-sm); margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--text-primary);
         }
+        .mkt-learning .lh { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+        .mkt-confidence { font-size: 0.65rem; padding: 1px 6px; border-radius: 4px; }
+        .mkt-confidence.high { background: rgba(22,163,74,0.15); color: #16a34a; }
+        .mkt-confidence.medium { background: rgba(180,83,9,0.15); color: #b45309; }
+        .mkt-confidence.low { background: rgba(133,141,158,0.15); color: var(--text-muted); }
+
+        .mkt-event-idea {
+            padding: 0.85rem 1rem; background: var(--bg-elevated); border-left: 3px solid var(--gold-light);
+            border-radius: var(--radius-sm); margin-bottom: 0.5rem;
+        }
+        .mkt-event-idea .ei-title { font-weight: 600; color: var(--text-primary); font-size: 0.95rem; margin-bottom: 0.3rem; }
+        .mkt-event-idea .ei-rationale { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.45; }
+        .mkt-event-idea .ei-meta { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.4rem; display: flex; gap: 0.6rem; }
+
+        /* ===== Draft Review Modal ===== */
+        .mkt-modal-backdrop {
+            display: none; position: fixed; inset: 0; background: rgba(15,18,24,0.55);
+            z-index: 9000; align-items: stretch; justify-content: center; padding: 2rem;
+            backdrop-filter: blur(2px);
+        }
+        .mkt-modal-backdrop.open { display: flex; }
+        .mkt-modal {
+            background: var(--bg-card); border-radius: var(--radius-md); width: 100%; max-width: 1100px;
+            max-height: 92vh; display: grid; grid-template-rows: auto 1fr auto; overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+        }
+        .mkt-modal-head {
+            padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-subtle);
+            display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+        }
+        .mkt-modal-head h3 { margin: 0; font-family: 'Playfair Display', Georgia, serif; color: var(--gold); font-weight: 600; font-size: 1.15rem; }
+        .mkt-modal-close { background: none; border: none; color: var(--text-muted); font-size: 1.6rem; cursor: pointer; line-height: 1; }
+        .mkt-modal-body {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 0; min-height: 0; overflow: hidden;
+        }
+        .mkt-modal-pane { padding: 1.1rem 1.25rem; overflow: auto; min-height: 0; }
+        .mkt-modal-pane + .mkt-modal-pane { border-left: 1px solid var(--border-subtle); background: var(--bg-elevated); }
+        .mkt-modal-foot {
+            padding: 0.75rem 1.25rem; border-top: 1px solid var(--border-subtle);
+            display: flex; justify-content: flex-end; gap: 0.5rem; flex-wrap: wrap; background: var(--bg-card);
+        }
+        .mkt-meta-grid { display: grid; grid-template-columns: 110px 1fr; gap: 0.4rem 0.75rem; font-size: 0.85rem; margin-bottom: 1rem; }
+        .mkt-meta-grid .k { color: var(--text-muted); font-weight: 500; }
+        .mkt-meta-grid .v { color: var(--text-primary); }
+        .mkt-modal-pane h5 { color: var(--gold); margin: 0 0 0.5rem; font-family: 'Playfair Display', Georgia, serif; font-weight: 600; font-size: 0.95rem; }
+        .mkt-modal-pane input.subject-edit, .mkt-modal-pane textarea.body-edit, .mkt-modal-pane textarea.redo-instructions {
+            width: 100%; padding: 0.6rem 0.75rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);
+            background: var(--bg-card); color: var(--text-primary); font-family: inherit; font-size: 0.9rem; resize: vertical;
+        }
+        .mkt-modal-pane textarea.body-edit { min-height: 220px; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 0.78rem; }
+        .mkt-modal-pane textarea.redo-instructions { min-height: 90px; }
+        .mkt-preview-frame { border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); background: #fff; overflow: auto; height: 460px; }
+        .mkt-mode-tabs { display: flex; gap: 0.4rem; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-subtle); }
+        .mkt-mode-tab { padding: 0.4rem 0.75rem; cursor: pointer; font-size: 0.8rem; color: var(--text-muted); border-bottom: 2px solid transparent; }
+        .mkt-mode-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+        .btn-approve { background: #16a34a; color: #fff; border: none; padding: 0.55rem 1rem; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; }
+        .btn-approve:hover { background: #15803d; }
+        .btn-reject  { background: transparent; color: #dc2626; border: 1px solid #dc2626; padding: 0.55rem 1rem; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; }
+        .btn-reject:hover  { background: rgba(220,38,38,0.08); }
+        .btn-redo    { background: transparent; color: #2563eb; border: 1px solid #2563eb; padding: 0.55rem 1rem; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; }
+        .btn-redo:hover    { background: rgba(37,99,235,0.08); }
+        .btn-edit-save { background: var(--gold); color: #fff; border: none; padding: 0.55rem 1rem; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; }
+        .btn-edit-save:hover { background: var(--gold-light); }
+        .btn-test-send { background: transparent; color: var(--text-secondary); border: 1px solid var(--border-medium); padding: 0.55rem 1rem; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; }
+        .btn-test-send:hover { color: var(--text-primary); border-color: var(--text-primary); }
 
     </style>
 </head>
@@ -1500,11 +1545,13 @@
                     </div>
                 </div>
                 <div class="nav-dropdown">
-                    <div class="nav-tab" data-tab="marketingCalendar" data-dropdown="marketing">Marketing<span id="mktNavBadge" class="mkt-badge hidden">0</span></div>
+                    <div class="nav-tab" data-tab="mktCalendar" data-dropdown="marketing">Marketing</div>
                     <div class="nav-dropdown-menu">
-                        <div class="nav-dropdown-item" data-tab="marketingCalendar">Calendar</div>
-                        <div class="nav-dropdown-item" data-tab="marketingDrafts">Approval Queue</div>
-                        <div class="nav-dropdown-item" data-tab="marketingSettings">Settings</div>
+                        <div class="nav-dropdown-item" data-tab="mktCalendar">Campaign Calendar</div>
+                        <div class="nav-dropdown-item" data-tab="mktInbox">Drafts Inbox <span id="mktInboxBadge" style="display:none;background:var(--gold);color:#fff;border-radius:10px;padding:1px 7px;font-size:0.65rem;margin-left:0.4rem;">0</span></div>
+                        <div class="nav-dropdown-item" data-tab="mktPerformance">Performance</div>
+                        <div class="nav-dropdown-item" data-tab="mktInsights">AI Insights</div>
+                        <div class="nav-dropdown-item" data-tab="mktSettings">Marketing Settings</div>
                     </div>
                 </div>
                 <div class="nav-tab" data-tab="payments">Payments</div>
@@ -2024,79 +2071,209 @@
             </div>
 
             <!-- ========================================================
-                 MARKETING CALENDAR TAB (Phase 1 scaffold)
+                 MARKETING — CAMPAIGN CALENDAR TAB
                  ======================================================== -->
-            <div id="marketingCalendarTab" class="tab-content">
-                <div class="mkt-subnav">
-                    <button class="mkt-subnav-btn active" data-mkt-view="calendar">Calendar</button>
-                    <button class="mkt-subnav-btn" data-mkt-view="drafts">Approval Queue<span id="mktSubBadge" class="mkt-badge hidden">0</span></button>
-                    <button class="mkt-subnav-btn" data-mkt-view="settings">Settings</button>
-                </div>
-
-                <div id="mktViewCalendar" class="mkt-subview active">
-                    <div class="mkt-cal-header">
-                        <div>
-                            <div class="mkt-cal-title" id="mktCalTitle">Marketing Calendar</div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
-                                All scheduled campaigns, auto-triggers, and drafts at a glance.
-                            </div>
-                        </div>
-                        <div class="mkt-cal-nav">
-                            <button id="mktCalPrev" type="button">&lsaquo; Prev</button>
-                            <button id="mktCalToday" type="button">Today</button>
-                            <button id="mktCalNext" type="button">Next &rsaquo;</button>
-                            <button id="mktAddDraftBtn" type="button" style="background: var(--gold); color: white; border-color: var(--gold); margin-left: 0.5rem;">+ Manual Draft</button>
-                        </div>
+            <div id="mktCalendarTab" class="tab-content">
+                <div class="mkt-header">
+                    <div>
+                        <h2 style="margin:0;">Campaign Calendar</h2>
+                        <p class="mkt-sub">AI-generated drafts queued by your calendar rules. Approve, edit, or redo each before send.</p>
                     </div>
-                    <div class="mkt-cal-grid" id="mktCalGrid">
-                        <!-- Calendar is rendered by renderMarketingCalendar() -->
-                    </div>
-                    <div class="mkt-legend">
-                        <div class="mkt-legend-item"><span class="mkt-legend-swatch" style="background: var(--gold);"></span>Event promo (30/14/7/2-day)</div>
-                        <div class="mkt-legend-item"><span class="mkt-legend-swatch" style="background: var(--red);"></span>Under-filled rescue</div>
-                        <div class="mkt-legend-item"><span class="mkt-legend-swatch" style="background: var(--blue);"></span>Weekly digest (Tue)</div>
-                        <div class="mkt-legend-item"><span class="mkt-legend-swatch" style="background: var(--yellow);"></span>Wine Club / Golf</div>
-                        <div class="mkt-legend-item"><span class="mkt-legend-swatch" style="background: var(--green);"></span>Menu / Evergreen</div>
-                        <div class="mkt-legend-item"><span class="mkt-legend-swatch" style="background: #0ea5e9;"></span>Weather-triggered</div>
-                        <div class="mkt-legend-item"><span class="mkt-legend-swatch" style="background: var(--text-muted);"></span>Manual</div>
+                    <div class="mkt-header-actions">
+                        <button class="btn-secondary" id="mktGenerateNowBtn" title="Generate the next 7 days of drafts now">Generate Drafts Now</button>
+                        <button class="btn-primary" id="mktNewCampaignBtn">+ New One-off Campaign</button>
                     </div>
                 </div>
 
-                <div id="mktViewDrafts" class="mkt-subview">
-                    <div class="mkt-cal-header">
-                        <div>
-                            <div class="mkt-cal-title">Approval Queue</div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
-                                Drafts waiting for your review. Approve, edit, or regenerate each one.
-                            </div>
-                        </div>
-                        <div class="mkt-cal-nav">
-                            <button id="mktRefreshDraftsBtn" type="button">Refresh</button>
-                        </div>
+                <div class="mkt-stats">
+                    <div class="stat-item"><div class="stat-label">Pending Approval</div><div class="stat-value" id="mktStatPending">—</div></div>
+                    <div class="stat-item"><div class="stat-label">Approved &amp; Scheduled</div><div class="stat-value" id="mktStatApproved">—</div></div>
+                    <div class="stat-item"><div class="stat-label">Sent (7d)</div><div class="stat-value" id="mktStatSent7d">—</div></div>
+                    <div class="stat-item"><div class="stat-label">Avg Open Rate (30d)</div><div class="stat-value" id="mktStatOpen30d">—</div></div>
+                    <div class="stat-item"><div class="stat-label">Avg Click Rate (30d)</div><div class="stat-value" id="mktStatClick30d">—</div></div>
+                </div>
+
+                <div class="mkt-cal-controls">
+                    <div class="mkt-cal-nav">
+                        <button class="btn-secondary mkt-icon-btn" id="mktCalPrev">&larr;</button>
+                        <h3 id="mktCalLabel" style="margin:0;font-family:'Playfair Display',Georgia,serif;color:var(--gold);">—</h3>
+                        <button class="btn-secondary mkt-icon-btn" id="mktCalNext">&rarr;</button>
+                        <button class="btn-secondary" id="mktCalToday" style="margin-left:0.5rem;">Today</button>
                     </div>
-                    <div id="mktDraftsList" class="mkt-drafts-grid">
-                        <!-- Drafts rendered by renderMarketingDrafts() -->
+                    <div class="mkt-cal-filters">
+                        <label style="font-size:0.8rem;color:var(--text-muted);">Status:</label>
+                        <select id="mktCalStatusFilter">
+                            <option value="">All</option>
+                            <option value="pending">Pending</option>
+                            <option value="approved">Approved</option>
+                            <option value="sent">Sent</option>
+                            <option value="rejected">Rejected</option>
+                            <option value="failed">Failed</option>
+                        </select>
+                        <label style="font-size:0.8rem;color:var(--text-muted);margin-left:0.75rem;">Segment:</label>
+                        <select id="mktCalSegmentFilter">
+                            <option value="">All</option>
+                            <option value="Subscribed">Subscribed</option>
+                            <option value="Wine Club">Wine Club</option>
+                            <option value="Golf">Golf</option>
+                            <option value="Event Attendees">Event Attendees</option>
+                        </select>
                     </div>
                 </div>
 
-                <div id="mktViewSettings" class="mkt-subview">
-                    <div class="mkt-cal-header">
-                        <div>
-                            <div class="mkt-cal-title">Marketing Settings</div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
-                                Phase 1 shows current configuration. Editing UI arrives in Phase 2.
-                            </div>
-                        </div>
+                <div class="mkt-calendar" id="mktCalendarGrid">
+                    <!-- weekday headers + day cells injected by JS -->
+                </div>
+
+                <div class="mkt-cal-legend">
+                    <span><span class="mkt-pill mkt-pill-pending"></span> Pending</span>
+                    <span><span class="mkt-pill mkt-pill-approved"></span> Approved</span>
+                    <span><span class="mkt-pill mkt-pill-sent"></span> Sent</span>
+                    <span><span class="mkt-pill mkt-pill-rejected"></span> Rejected</span>
+                    <span><span class="mkt-pill mkt-pill-failed"></span> Failed</span>
+                </div>
+            </div>
+
+            <!-- ========================================================
+                 MARKETING — DRAFTS INBOX TAB
+                 ======================================================== -->
+            <div id="mktInboxTab" class="tab-content">
+                <div class="mkt-header">
+                    <div>
+                        <h2 style="margin:0;">Drafts Inbox</h2>
+                        <p class="mkt-sub">Approve, reject, edit, or redo each draft. Approved drafts send at their scheduled time automatically.</p>
                     </div>
-                    <div class="mkt-settings-grid" id="mktSettingsGrid">
-                        <!-- Settings rendered by renderMarketingSettings() -->
+                    <div class="mkt-header-actions">
+                        <select id="mktInboxFilter" style="padding:0.5rem 0.75rem;">
+                            <option value="pending">Pending only</option>
+                            <option value="all">All statuses</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                            <option value="sent">Sent</option>
+                        </select>
+                        <button class="btn-secondary" id="mktInboxRefresh">Refresh</button>
+                    </div>
+                </div>
+                <div id="mktInboxList" class="mkt-inbox-list">
+                    <div class="mkt-empty">Loading drafts…</div>
+                </div>
+            </div>
+
+            <!-- ========================================================
+                 MARKETING — PERFORMANCE TAB
+                 ======================================================== -->
+            <div id="mktPerformanceTab" class="tab-content">
+                <div class="mkt-header">
+                    <div>
+                        <h2 style="margin:0;">Performance</h2>
+                        <p class="mkt-sub">Open rates, click rates, and which sends are pulling their weight.</p>
+                    </div>
+                    <div class="mkt-header-actions">
+                        <select id="mktPerfRange">
+                            <option value="7">Last 7 days</option>
+                            <option value="30" selected>Last 30 days</option>
+                            <option value="90">Last 90 days</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mkt-stats">
+                    <div class="stat-item"><div class="stat-label">Sends</div><div class="stat-value" id="mktPerfSends">—</div></div>
+                    <div class="stat-item"><div class="stat-label">Recipients</div><div class="stat-value" id="mktPerfRecipients">—</div></div>
+                    <div class="stat-item"><div class="stat-label">Open Rate</div><div class="stat-value" id="mktPerfOpen">—</div></div>
+                    <div class="stat-item"><div class="stat-label">Click Rate</div><div class="stat-value" id="mktPerfClick">—</div></div>
+                    <div class="stat-item"><div class="stat-label">Unsubscribes</div><div class="stat-value" id="mktPerfUnsub">—</div></div>
+                </div>
+
+                <div class="mkt-perf-grid">
+                    <div class="mkt-card">
+                        <h4>Top-performing subjects</h4>
+                        <table class="mkt-table" id="mktPerfTopSubjects"><thead><tr><th>Subject</th><th>Type</th><th>Open</th><th>Click</th><th>Sent</th></tr></thead><tbody><tr><td colspan="5" class="mkt-empty-cell">—</td></tr></tbody></table>
+                    </div>
+                    <div class="mkt-card">
+                        <h4>Best send hours (CT)</h4>
+                        <div id="mktPerfHours" class="mkt-bars"></div>
+                    </div>
+                    <div class="mkt-card">
+                        <h4>Performance by content type</h4>
+                        <table class="mkt-table" id="mktPerfByType"><thead><tr><th>Type</th><th>Sends</th><th>Open</th><th>Click</th></tr></thead><tbody><tr><td colspan="4" class="mkt-empty-cell">—</td></tr></tbody></table>
                     </div>
                 </div>
             </div>
 
-            <!-- Hidden shells so direct links to these sub-tab names still work via switchTab -->
-            <div id="marketingDraftsTab" class="tab-content"></div>
-            <div id="marketingSettingsTab" class="tab-content"></div>
+            <!-- ========================================================
+                 MARKETING — AI INSIGHTS TAB
+                 ======================================================== -->
+            <div id="mktInsightsTab" class="tab-content">
+                <div class="mkt-header">
+                    <div>
+                        <h2 style="margin:0;">AI Insights &amp; Event Ideas</h2>
+                        <p class="mkt-sub">Patterns the AI has learned from past sends, plus event ideas based on what your audience responds to.</p>
+                    </div>
+                    <div class="mkt-header-actions">
+                        <button class="btn-secondary" id="mktOptimizeNowBtn" title="Re-run the optimizer against the latest send data">Re-analyze Now</button>
+                    </div>
+                </div>
+
+                <div class="mkt-card" style="margin-bottom:1rem;">
+                    <h4>Last analysis</h4>
+                    <div id="mktInsightsSummary" class="mkt-empty">Not run yet.</div>
+                </div>
+
+                <div class="mkt-perf-grid">
+                    <div class="mkt-card">
+                        <h4>Active learnings</h4>
+                        <div id="mktLearningsList"><div class="mkt-empty">—</div></div>
+                    </div>
+                    <div class="mkt-card">
+                        <h4>Suggested event ideas</h4>
+                        <div id="mktEventIdeasList"><div class="mkt-empty">—</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================================
+                 MARKETING — SETTINGS TAB
+                 ======================================================== -->
+            <div id="mktSettingsTab" class="tab-content">
+                <div class="mkt-header">
+                    <div>
+                        <h2 style="margin:0;">Marketing Settings</h2>
+                        <p class="mkt-sub">Calendar rules, cadence caps, sending defaults. Changes save back to the repo on click.</p>
+                    </div>
+                </div>
+
+                <div class="mkt-perf-grid">
+                    <div class="mkt-card">
+                        <h4>Sending defaults</h4>
+                        <div class="mkt-form-row"><label>From email</label><input type="email" id="mktSetFromEmail"></div>
+                        <div class="mkt-form-row"><label>From name</label><input type="text" id="mktSetFromName"></div>
+                        <div class="mkt-form-row"><label>Reply-to</label><input type="email" id="mktSetReplyTo"></div>
+                        <div class="mkt-form-row"><label>Default audience</label>
+                            <select id="mktSetAudience">
+                                <option>Subscribed</option><option>Wine Club</option><option>Golf</option><option>Event Attendees</option><option>All</option>
+                            </select>
+                        </div>
+                        <div class="mkt-form-row"><label>Cap per subscriber / week</label><input type="number" id="mktSetCadenceCap" min="1" max="10"></div>
+                        <div class="mkt-form-row"><label>Look-ahead days (auto-gen)</label><input type="number" id="mktSetLookAhead" min="1" max="30"></div>
+                        <div class="mkt-form-row"><label>Max drafts per day</label><input type="number" id="mktSetMaxPerDay" min="1" max="10"></div>
+                        <div class="mkt-form-row"><label>Primary AI model</label>
+                            <select id="mktSetModel"><option value="claude">Claude (Anthropic)</option><option value="openai">OpenAI</option></select>
+                        </div>
+                        <div style="text-align:right;margin-top:0.75rem;">
+                            <button class="btn-primary" id="mktSetSaveSettingsBtn">Save Settings</button>
+                        </div>
+                    </div>
+
+                    <div class="mkt-card">
+                        <h4>Calendar rules</h4>
+                        <div id="mktRulesList"><div class="mkt-empty">Loading…</div></div>
+                        <div style="margin-top:0.75rem;text-align:right;">
+                            <button class="btn-primary" id="mktSetSaveRulesBtn">Save Rules</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- ========================================================
                  SCHEDULING TAB
@@ -2475,72 +2652,6 @@
         </div>
     </div>
 
-    <!-- Marketing: Generate Draft modal -->
-    <div class="modal-overlay" id="mktGenerateModal">
-        <div class="modal" style="max-width: 560px;">
-            <h2 class="modal-header">Generate Marketing Draft</h2>
-            <div class="modal-content">
-                <div class="form-group">
-                    <label class="form-label">Content type</label>
-                    <select class="form-input" id="mktGenType">
-                        <option value="event_promo_30d">Event promo — 30 days out (Save-the-date)</option>
-                        <option value="event_promo_14d">Event promo — 14 days out (Reminder)</option>
-                        <option value="event_promo_7d" selected>Event promo — 7 days out (Urgency)</option>
-                        <option value="event_promo_2d">Event promo — 2 days out (Last call)</option>
-                        <option value="rescue">Under-filled event rescue</option>
-                        <option value="weekly_digest">Weekly "This Week at the Quarry" digest</option>
-                        <option value="wine_club">Wine Club</option>
-                        <option value="golf">Golf</option>
-                        <option value="menu_spotlight">Menu spotlight</option>
-                        <option value="weather_patio">Weather-triggered patio night</option>
-                        <option value="evergreen">Evergreen brand</option>
-                        <option value="manual">Freeform (use my instructions only)</option>
-                    </select>
-                </div>
-                <div class="form-group" id="mktGenEventGroup">
-                    <label class="form-label">Tie to an event (for event/band/rescue types)</label>
-                    <select class="form-input" id="mktGenEventId">
-                        <option value="">— No specific event —</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">AI model</label>
-                    <select class="form-input" id="mktGenModel">
-                        <option value="openai" selected>OpenAI (gpt-4o-mini)</option>
-                        <option value="claude">Claude (Anthropic) — requires ANTHROPIC_API_KEY</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Additional instructions (optional)</label>
-                    <textarea class="form-input" id="mktGenInstructions" rows="3" placeholder="e.g. 'Keep it under 120 words and mention the patio.'"></textarea>
-                </div>
-                <div id="mktGenStatus" style="font-size: 0.85rem; color: var(--text-muted); min-height: 1.2rem;"></div>
-            </div>
-            <div class="modal-actions">
-                <button class="modal-btn modal-btn-secondary" type="button" onclick="closeModal('mktGenerateModal')">Cancel</button>
-                <button class="modal-btn modal-btn-primary" type="button" id="mktGenGoBtn">Generate</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Marketing: Regenerate modal (quick prompt) -->
-    <div class="modal-overlay" id="mktRegenModal">
-        <div class="modal" style="max-width: 520px;">
-            <h2 class="modal-header">Regenerate Draft</h2>
-            <div class="modal-content">
-                <p style="margin-bottom: 1rem; color: var(--text-muted); font-size: 0.85rem;">Tell the AI what to change. Same model will be used.</p>
-                <div class="form-group">
-                    <label class="form-label">What should change?</label>
-                    <textarea class="form-input" id="mktRegenInstructions" rows="3" placeholder="e.g. 'Make the subject punchier and cut 30%.'"></textarea>
-                </div>
-                <div id="mktRegenStatus" style="font-size: 0.85rem; color: var(--text-muted); min-height: 1.2rem;"></div>
-            </div>
-            <div class="modal-actions">
-                <button class="modal-btn modal-btn-secondary" type="button" onclick="closeModal('mktRegenModal')">Cancel</button>
-                <button class="modal-btn modal-btn-primary" type="button" id="mktRegenGoBtn">Regenerate</button>
-            </div>
-        </div>
-    </div>
 
     <div class="modal-overlay" id="invoiceModal">
         <div class="modal">
@@ -2739,7 +2850,79 @@
         </div>
     </div>
 
-    
+    <!-- =====================================================================
+         MARKETING — DRAFT REVIEW MODAL
+         ===================================================================== -->
+    <div class="mkt-modal-backdrop" id="mktDraftModal" role="dialog" aria-modal="true" aria-hidden="true">
+        <div class="mkt-modal" role="document">
+            <div class="mkt-modal-head">
+                <div>
+                    <h3 id="mktDraftModalTitle">Draft</h3>
+                    <div id="mktDraftModalSub" style="font-size:0.75rem;color:var(--text-muted);margin-top:0.2rem;"></div>
+                </div>
+                <button class="mkt-modal-close" id="mktDraftModalClose" aria-label="Close">&times;</button>
+            </div>
+            <div class="mkt-modal-body">
+                <div class="mkt-modal-pane">
+                    <div class="mkt-mode-tabs">
+                        <div class="mkt-mode-tab active" data-mode="review">Review</div>
+                        <div class="mkt-mode-tab" data-mode="edit">Edit</div>
+                        <div class="mkt-mode-tab" data-mode="redo">Redo with instructions</div>
+                    </div>
+
+                    <!-- REVIEW MODE -->
+                    <div class="mkt-mode-pane" data-mode-pane="review">
+                        <div class="mkt-meta-grid" id="mktDraftMeta"></div>
+                        <h5>Subject</h5>
+                        <div id="mktDraftSubject" style="background:var(--bg-elevated);padding:0.6rem 0.8rem;border-radius:var(--radius-sm);font-size:0.95rem;color:var(--text-primary);margin-bottom:1rem;"></div>
+                        <h5>Why this was generated</h5>
+                        <div id="mktDraftRationale" style="font-size:0.82rem;color:var(--text-secondary);line-height:1.5;"></div>
+                    </div>
+
+                    <!-- EDIT MODE -->
+                    <div class="mkt-mode-pane" data-mode-pane="edit" style="display:none;">
+                        <h5>Subject</h5>
+                        <input type="text" class="subject-edit" id="mktDraftEditSubject" maxlength="120">
+                        <div style="font-size:0.7rem;color:var(--text-muted);margin:0.3rem 0 0.85rem;">40-60 characters performs best on mobile previews.</div>
+                        <h5>Body HTML (inner — wrapper + footer added automatically)</h5>
+                        <textarea class="body-edit" id="mktDraftEditBody"></textarea>
+                        <div style="margin-top:0.75rem;text-align:right;">
+                            <button class="btn-edit-save" id="mktDraftEditSaveBtn">Save Edits</button>
+                        </div>
+                    </div>
+
+                    <!-- REDO MODE -->
+                    <div class="mkt-mode-pane" data-mode-pane="redo" style="display:none;">
+                        <h5>Tell the AI what to change</h5>
+                        <p style="font-size:0.78rem;color:var(--text-muted);margin:0 0 0.6rem;">Be specific. The AI sees the current draft and your instructions. Examples: "Make it shorter and lead with the live music angle." / "Less formal — closer to a personal text from the manager." / "Push the wine pairing more, mention the new Cabernet."</p>
+                        <textarea class="redo-instructions" id="mktDraftRedoInstructions" placeholder="What should change?"></textarea>
+                        <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.4rem;">Regenerated <span id="mktDraftRedoCount">0</span> time(s) so far.</div>
+                        <div style="margin-top:0.85rem;text-align:right;">
+                            <button class="btn-redo" id="mktDraftRedoBtn">Regenerate</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mkt-modal-pane">
+                    <h5 style="display:flex;justify-content:space-between;align-items:center;">
+                        <span>Preview</span>
+                        <span style="font-size:0.7rem;color:var(--text-muted);font-family:'Montserrat',sans-serif;font-weight:400;">Renders exactly as recipients will see it</span>
+                    </h5>
+                    <iframe class="mkt-preview-frame" id="mktDraftPreviewFrame" sandbox="allow-same-origin"></iframe>
+                    <div style="margin-top:0.75rem;display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+                        <input type="email" id="mktTestEmailInput" placeholder="test@youraddress.com" style="flex:1;min-width:180px;padding:0.5rem 0.7rem;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--bg-card);color:var(--text-primary);font-size:0.85rem;">
+                        <button class="btn-test-send" id="mktDraftTestSendBtn">Send Test</button>
+                    </div>
+                </div>
+            </div>
+            <div class="mkt-modal-foot">
+                <button class="btn-reject" id="mktDraftRejectBtn">Reject</button>
+                <button class="modal-btn-secondary" id="mktDraftRescheduleBtn" style="padding:0.55rem 1rem;border-radius:var(--radius-sm);font-weight:600;cursor:pointer;">Reschedule</button>
+                <button class="btn-approve" id="mktDraftApproveBtn">Approve &amp; Schedule</button>
+                <button class="btn-approve" id="mktDraftSendNowBtn" style="background:var(--gold);">Approve &amp; Send Now</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         // ================================================================
@@ -2788,13 +2971,6 @@
             editingScheduleData: {},
             timeOffRequests: [],
             currentScheduleWeek: getMonday(new Date()),
-            // Marketing automation state (Phase 1 scaffold)
-            marketingDrafts: [],
-            marketingHistory: [],
-            marketingSettings: null,
-            marketingCalendarMonth: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-            marketingCurrentView: 'calendar',
-            marketingLoaded: false,
         };
 
         // ================================================================
@@ -2919,19 +3095,9 @@
             if (tabName === 'confirmed') {
                 if (app.confirmedEvents.length === 0) loadConfirmedEvents();
             }
-            // Marketing: all three sub-tabs route to the same container + switch inner view
-            if (tabName === 'marketingCalendar' || tabName === 'marketingDrafts' || tabName === 'marketingSettings') {
-                // Force the shared container to be the active tab-content
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                const sharedEl = document.getElementById('marketingCalendarTab');
-                if (sharedEl) sharedEl.classList.add('active');
-                const view = tabName === 'marketingDrafts' ? 'drafts'
-                           : tabName === 'marketingSettings' ? 'settings'
-                           : 'calendar';
-                switchMarketingView(view);
-                if (!app.marketingLoaded) {
-                    loadMarketingData();
-                }
+            // Marketing module hook
+            if (tabName.startsWith('mkt') && window.MarketingUI && typeof MarketingUI.onTabSwitch === 'function') {
+                MarketingUI.onTabSwitch(tabName);
             }
         }
 
@@ -7208,6 +7374,672 @@
                 alert('Failed to persist: ' + err.message);
             }
         }
+
+
+        // ================================================================
+        // MARKETING MODULE (v2 — calendar + inbox + perf + insights)
+        // Backend: /.netlify/functions/{data-store, marketing-action,
+        //   marketing-generate-daily, marketing-send, marketing-optimize}
+        // ================================================================
+        window.MarketingUI = (() => {
+            const FN = '/.netlify/functions';
+            const STATUS_LIST = ['pending', 'approved', 'sent', 'rejected', 'failed'];
+
+            const state = {
+                calMonth: new Date(),
+                drafts: [],
+                rules: [],
+                learnings: [],
+                eventIdeas: [],
+                lastSummary: '',
+                aggregates: {},
+                eventsLog: [],
+                settings: {},
+                sha: { drafts: null, calendar: null, learnings: null, events: null },
+                currentDraftId: null,
+                modalMode: 'review',
+                loaded: false,
+                loading: false,
+            };
+
+            // ---- Helpers --------------------------------------------------
+            const $ = (id) => document.getElementById(id);
+            const fmtDate = (iso) => {
+                if (!iso) return '—';
+                const d = new Date(iso);
+                return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'America/Chicago' }) + ' CT';
+            };
+            const escHtml = (s) => (s == null ? '' : String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])));
+            const stripHtml = (s) => (s || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+
+            async function fetchData(file) {
+                const r = await fetch(`${FN}/data-store?file=${file}`, { cache: 'no-store' });
+                if (!r.ok) throw new Error(`load ${file}: ${r.status}`);
+                const d = await r.json();
+                return { json: d.decoded || {}, sha: d.sha };
+            }
+            async function putData(file, json, sha, message) {
+                const r = await fetch(`${FN}/data-store?file=${file}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ json, sha, message })
+                });
+                const body = await r.json().catch(() => ({}));
+                if (!r.ok) throw new Error(body.error || ('save ' + file + ': ' + r.status));
+                return body;
+            }
+
+            function toast(msg, kind = 'info') {
+                if (typeof showToast === 'function') return showToast(msg);
+                console.log('[MKT]', kind, msg);
+                // Fallback: tiny alert
+                const el = document.createElement('div');
+                el.textContent = msg;
+                el.style.cssText = 'position:fixed;top:20px;right:20px;background:#1c1f26;color:#fff;padding:0.6rem 1rem;border-radius:6px;z-index:99999;font-size:0.85rem;box-shadow:0 6px 20px rgba(0,0,0,0.3);';
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 3500);
+            }
+
+            // ---- Loading --------------------------------------------------
+            async function loadAll() {
+                if (state.loading) return;
+                state.loading = true;
+                try {
+                    const [dr, cal, lr, ev] = await Promise.all([
+                        fetchData('marketing_drafts.json').catch(() => ({ json: { drafts: [], settings: {} }, sha: null })),
+                        fetchData('marketing_calendar.json').catch(() => ({ json: { rules: [] }, sha: null })),
+                        fetchData('marketing_learnings.json').catch(() => ({ json: { learnings: [], eventIdeas: [] }, sha: null })),
+                        fetchData('marketing_events.json').catch(() => ({ json: { events: [], aggregates: {} }, sha: null })),
+                    ]);
+                    state.drafts = dr.json.drafts || [];
+                    state.settings = dr.json.settings || {};
+                    state.sha.drafts = dr.sha;
+                    state.rules = cal.json.rules || [];
+                    state.sha.calendar = cal.sha;
+                    state.learnings = lr.json.learnings || [];
+                    state.eventIdeas = lr.json.eventIdeas || [];
+                    state.lastSummary = lr.json.lastSummaryNote || '';
+                    state.lastRunAt = lr.json.lastRunAt || null;
+                    state.sha.learnings = lr.sha;
+                    state.aggregates = ev.json.aggregates || {};
+                    state.eventsLog = ev.json.events || [];
+                    state.sha.events = ev.sha;
+                    state.loaded = true;
+                    updateBadge();
+                    renderCalendar(); renderInbox(); renderPerformance(); renderInsights(); renderSettings();
+                } catch (err) {
+                    console.error('MarketingUI load failed', err);
+                    toast('Marketing load failed: ' + err.message);
+                } finally {
+                    state.loading = false;
+                }
+            }
+
+            // ---- Calendar -------------------------------------------------
+            function visibleDrafts() {
+                const sf = $('mktCalStatusFilter')?.value || '';
+                const seg = $('mktCalSegmentFilter')?.value || '';
+                return state.drafts.filter((d) => (!sf || d.status === sf) && (!seg || d.segment === seg));
+            }
+
+            function renderCalendar() {
+                const grid = $('mktCalendarGrid');
+                const label = $('mktCalLabel');
+                if (!grid || !label) return;
+                const m = state.calMonth;
+                const year = m.getFullYear();
+                const mIdx = m.getMonth();
+                label.textContent = m.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+                const firstDay = new Date(year, mIdx, 1);
+                const startOffset = firstDay.getDay();
+                const daysInMonth = new Date(year, mIdx + 1, 0).getDate();
+                const todayKey = new Date().toLocaleDateString('en-CA');
+
+                const byDate = {};
+                visibleDrafts().forEach((d) => {
+                    const key = (d.scheduledFor || d.createdAt || '').slice(0, 10);
+                    if (!key) return;
+                    (byDate[key] = byDate[key] || []).push(d);
+                });
+
+                const html = [];
+                ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach((wd) => {
+                    html.push(`<div class="mkt-cal-weekday">${wd}</div>`);
+                });
+
+                // Leading days from previous month
+                for (let i = 0; i < startOffset; i++) {
+                    const d = new Date(year, mIdx, -startOffset + i + 1);
+                    html.push(`<div class="mkt-cal-day is-other-month"><div class="day-num">${d.getDate()}</div></div>`);
+                }
+                // Days of current month
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const d = new Date(year, mIdx, day);
+                    const key = d.toLocaleDateString('en-CA');
+                    const isToday = key === todayKey;
+                    const items = (byDate[key] || []).sort((a, b) => (a.scheduledFor || '').localeCompare(b.scheduledFor || ''));
+                    const more = items.length > 3 ? items.length - 3 : 0;
+                    const itemsHtml = items.slice(0, 3).map((d) =>
+                        `<div class="mkt-cal-event is-${d.status}" data-draft-id="${escHtml(d.id)}" title="${escHtml(d.subject)}">${escHtml(d.subject || '(no subject)')}</div>`
+                    ).join('');
+                    html.push(`
+                        <div class="mkt-cal-day ${isToday ? 'is-today' : ''}">
+                            <div class="day-num">${day}</div>
+                            ${itemsHtml}
+                            ${more ? `<div class="mkt-cal-overflow" data-day-key="${key}">+${more} more</div>` : ''}
+                        </div>
+                    `);
+                }
+                // Trailing
+                const cellsSoFar = startOffset + daysInMonth;
+                const trailing = (7 - (cellsSoFar % 7)) % 7;
+                for (let i = 1; i <= trailing; i++) {
+                    html.push(`<div class="mkt-cal-day is-other-month"><div class="day-num">${i}</div></div>`);
+                }
+
+                grid.innerHTML = html.join('');
+                // Wire click handlers
+                grid.querySelectorAll('.mkt-cal-event').forEach((el) => {
+                    el.addEventListener('click', (e) => { e.stopPropagation(); openDraftModal(el.dataset.draftId); });
+                });
+                grid.querySelectorAll('.mkt-cal-overflow').forEach((el) => {
+                    el.addEventListener('click', () => { switchTab('mktInbox'); $('mktInboxFilter').value = 'all'; renderInbox(); });
+                });
+
+                // Top-stats
+                const pendingCount = state.drafts.filter((d) => d.status === 'pending').length;
+                const approvedCount = state.drafts.filter((d) => d.status === 'approved').length;
+                const weekAgo = Date.now() - 7 * 86400000;
+                const sent7 = state.drafts.filter((d) => d.status === 'sent' && d.sentAt && new Date(d.sentAt).getTime() >= weekAgo).length;
+                if ($('mktStatPending'))  $('mktStatPending').textContent  = pendingCount;
+                if ($('mktStatApproved')) $('mktStatApproved').textContent = approvedCount;
+                if ($('mktStatSent7d'))   $('mktStatSent7d').textContent   = sent7;
+                const perf30 = computePerf(30);
+                if ($('mktStatOpen30d'))  $('mktStatOpen30d').textContent  = perf30.openRate ? (perf30.openRate * 100).toFixed(1) + '%' : '—';
+                if ($('mktStatClick30d')) $('mktStatClick30d').textContent = perf30.clickRate ? (perf30.clickRate * 100).toFixed(1) + '%' : '—';
+            }
+
+            function updateBadge() {
+                const n = state.drafts.filter((d) => d.status === 'pending').length;
+                const badge = $('mktInboxBadge');
+                if (!badge) return;
+                if (n > 0) { badge.textContent = String(n); badge.style.display = ''; }
+                else { badge.style.display = 'none'; }
+            }
+
+            // ---- Inbox ----------------------------------------------------
+            function renderInbox() {
+                const list = $('mktInboxList');
+                if (!list) return;
+                const filter = $('mktInboxFilter')?.value || 'pending';
+                let drafts = state.drafts.slice();
+                if (filter === 'pending')      drafts = drafts.filter((d) => d.status === 'pending');
+                else if (filter === 'approved')drafts = drafts.filter((d) => d.status === 'approved');
+                else if (filter === 'rejected')drafts = drafts.filter((d) => d.status === 'rejected');
+                else if (filter === 'sent')    drafts = drafts.filter((d) => d.status === 'sent');
+                drafts.sort((a, b) => (a.scheduledFor || '').localeCompare(b.scheduledFor || ''));
+
+                if (!drafts.length) {
+                    list.innerHTML = `<div class="mkt-empty">No drafts ${filter === 'all' ? '' : 'in this status'}. Run "Generate Drafts Now" or wait for the 7 AM cron.</div>`;
+                    return;
+                }
+                list.innerHTML = drafts.map((d) => {
+                    const snip = stripHtml(d.innerHtml || d.htmlBody || '').slice(0, 140);
+                    return `
+                        <div class="mkt-inbox-card is-${d.status}" data-draft-id="${escHtml(d.id)}">
+                            <div style="flex:1;min-width:0;">
+                                <div class="mkt-inbox-meta">
+                                    <span class="mkt-status-chip ${d.status}">${d.status}</span>
+                                    <span>📅 ${fmtDate(d.scheduledFor)}</span>
+                                    <span>👥 ${escHtml(d.segment || 'Subscribed')}</span>
+                                    <span>🏷 ${escHtml(d.type || '')}</span>
+                                    ${d.regenerationCount ? `<span>↻ regen×${d.regenerationCount}</span>` : ''}
+                                </div>
+                                <div class="mkt-inbox-subject">${escHtml(d.subject || '(no subject)')}</div>
+                                <div class="mkt-inbox-snippet">${escHtml(snip)}…</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                list.querySelectorAll('.mkt-inbox-card').forEach((el) => {
+                    el.addEventListener('click', () => openDraftModal(el.dataset.draftId));
+                });
+            }
+
+            // ---- Performance ----------------------------------------------
+            function computePerf(daysBack) {
+                const cutoff = Date.now() - daysBack * 86400000;
+                const sent = state.drafts.filter((d) => d.status === 'sent' && d.sentAt && new Date(d.sentAt).getTime() >= cutoff);
+                let recipients = 0, opens = 0, clicks = 0, unsubs = 0;
+                sent.forEach((d) => {
+                    const a = state.aggregates[d.id] || {};
+                    const r = (d.deliveryStats && d.deliveryStats.recipientCount) || a.delivered || 0;
+                    recipients += r;
+                    opens += a.uniqueOpen || 0;
+                    clicks += a.uniqueClick || 0;
+                    unsubs += a.unsubscribe || 0;
+                });
+                return {
+                    sends: sent.length,
+                    recipients,
+                    openRate: recipients ? opens / recipients : 0,
+                    clickRate: recipients ? clicks / recipients : 0,
+                    unsubs,
+                    sentDrafts: sent
+                };
+            }
+
+            function renderPerformance() {
+                const range = parseInt($('mktPerfRange')?.value || '30', 10);
+                const p = computePerf(range);
+                if ($('mktPerfSends'))      $('mktPerfSends').textContent      = p.sends;
+                if ($('mktPerfRecipients')) $('mktPerfRecipients').textContent = p.recipients.toLocaleString();
+                if ($('mktPerfOpen'))       $('mktPerfOpen').textContent       = p.recipients ? (p.openRate * 100).toFixed(1) + '%' : '—';
+                if ($('mktPerfClick'))      $('mktPerfClick').textContent      = p.recipients ? (p.clickRate * 100).toFixed(1) + '%' : '—';
+                if ($('mktPerfUnsub'))      $('mktPerfUnsub').textContent      = p.unsubs;
+
+                // Top subjects
+                const topT = $('mktPerfTopSubjects')?.querySelector('tbody');
+                if (topT) {
+                    const rows = p.sentDrafts.map((d) => {
+                        const a = state.aggregates[d.id] || {};
+                        const r = (d.deliveryStats && d.deliveryStats.recipientCount) || a.delivered || 0;
+                        return {
+                            subject: d.subject, type: d.type,
+                            openRate: r ? (a.uniqueOpen || 0) / r : 0,
+                            clickRate: r ? (a.uniqueClick || 0) / r : 0,
+                            sent: r
+                        };
+                    }).sort((a, b) => b.openRate - a.openRate).slice(0, 8);
+                    topT.innerHTML = rows.length ? rows.map((r) => `
+                        <tr>
+                            <td style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(r.subject)}</td>
+                            <td style="font-size:0.72rem;color:var(--text-muted);">${escHtml(r.type)}</td>
+                            <td>${(r.openRate * 100).toFixed(1)}%</td>
+                            <td>${(r.clickRate * 100).toFixed(1)}%</td>
+                            <td>${r.sent}</td>
+                        </tr>
+                    `).join('') : '<tr><td colspan="5" class="mkt-empty-cell">No sends in this range yet.</td></tr>';
+                }
+
+                // Best send hours (CT)
+                const hoursDiv = $('mktPerfHours');
+                if (hoursDiv) {
+                    const buckets = Array(24).fill(null).map(() => ({ recipients: 0, opens: 0 }));
+                    p.sentDrafts.forEach((d) => {
+                        const a = state.aggregates[d.id] || {};
+                        const r = (d.deliveryStats && d.deliveryStats.recipientCount) || a.delivered || 0;
+                        const h = ((new Date(d.sentAt).getUTCHours() - 5) + 24) % 24;
+                        buckets[h].recipients += r;
+                        buckets[h].opens += a.uniqueOpen || 0;
+                    });
+                    const max = Math.max(...buckets.map((b) => b.recipients ? b.opens / b.recipients : 0), 0.01);
+                    const rows = buckets
+                        .map((b, h) => ({ h, rate: b.recipients ? b.opens / b.recipients : 0, recipients: b.recipients }))
+                        .filter((r) => r.recipients > 0)
+                        .sort((a, b) => b.rate - a.rate)
+                        .slice(0, 8);
+                    hoursDiv.innerHTML = rows.length ? rows.map((r) => `
+                        <div class="mkt-bar-row">
+                            <span class="mkt-bar-label">${r.h.toString().padStart(2, '0')}:00 CT</span>
+                            <span class="mkt-bar-fill"><span style="width:${Math.max(4, (r.rate / max) * 100).toFixed(1)}%"></span></span>
+                            <span class="mkt-bar-val">${(r.rate * 100).toFixed(1)}%</span>
+                        </div>
+                    `).join('') : '<div class="mkt-empty">No data yet — send a few campaigns first.</div>';
+                }
+
+                // By content type
+                const byTypeT = $('mktPerfByType')?.querySelector('tbody');
+                if (byTypeT) {
+                    const map = {};
+                    p.sentDrafts.forEach((d) => {
+                        const a = state.aggregates[d.id] || {};
+                        const r = (d.deliveryStats && d.deliveryStats.recipientCount) || a.delivered || 0;
+                        const t = d.type || 'unknown';
+                        if (!map[t]) map[t] = { sends: 0, recipients: 0, opens: 0, clicks: 0 };
+                        map[t].sends++; map[t].recipients += r;
+                        map[t].opens += a.uniqueOpen || 0; map[t].clicks += a.uniqueClick || 0;
+                    });
+                    const rows = Object.entries(map).map(([t, v]) => ({
+                        type: t, sends: v.sends,
+                        openRate: v.recipients ? v.opens / v.recipients : 0,
+                        clickRate: v.recipients ? v.clicks / v.recipients : 0
+                    })).sort((a, b) => b.openRate - a.openRate);
+                    byTypeT.innerHTML = rows.length ? rows.map((r) => `
+                        <tr>
+                            <td>${escHtml(r.type)}</td>
+                            <td>${r.sends}</td>
+                            <td>${(r.openRate * 100).toFixed(1)}%</td>
+                            <td>${(r.clickRate * 100).toFixed(1)}%</td>
+                        </tr>
+                    `).join('') : '<tr><td colspan="4" class="mkt-empty-cell">No data yet.</td></tr>';
+                }
+            }
+
+            // ---- Insights -------------------------------------------------
+            function renderInsights() {
+                const sum = $('mktInsightsSummary');
+                if (sum) {
+                    sum.innerHTML = state.lastSummary
+                        ? `<div style="font-size:0.9rem;color:var(--text-primary);line-height:1.5;">${escHtml(state.lastSummary)}</div>
+                           <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.4rem;">Last run: ${state.lastRunAt ? fmtDate(state.lastRunAt) : '—'}</div>`
+                        : '<div class="mkt-empty">Not enough send data yet to derive insights. The optimizer needs at least 3 sends.</div>';
+                    sum.classList.remove('mkt-empty');
+                }
+                const learn = $('mktLearningsList');
+                if (learn) {
+                    const active = state.learnings.filter((l) => !l.supersededAt);
+                    learn.innerHTML = active.length ? active.map((l) => `
+                        <div class="mkt-learning">
+                            <div class="lh">
+                                <span>${escHtml(l.category || 'pattern')}</span>
+                                <span class="mkt-confidence ${l.confidence || 'low'}">${l.confidence || 'low'} · n=${l.sampleSize || 0}</span>
+                            </div>
+                            <div>${escHtml(l.insight)}</div>
+                        </div>
+                    `).join('') : '<div class="mkt-empty">No active learnings yet.</div>';
+                }
+                const ideas = $('mktEventIdeasList');
+                if (ideas) {
+                    ideas.innerHTML = state.eventIdeas.length ? state.eventIdeas.map((e) => `
+                        <div class="mkt-event-idea">
+                            <div class="ei-title">${escHtml(e.title || 'Untitled idea')}</div>
+                            <div class="ei-rationale">${escHtml(e.rationale || '')}</div>
+                            <div class="ei-meta">
+                                <span>📅 ${escHtml(e.suggestedDate || 'TBD')}</span>
+                                <span class="mkt-confidence ${e.confidence || 'low'}">${e.confidence || 'low'} confidence</span>
+                            </div>
+                        </div>
+                    `).join('') : '<div class="mkt-empty">No event ideas suggested yet — check back after a few send cycles.</div>';
+                }
+            }
+
+            // ---- Settings -------------------------------------------------
+            function renderSettings() {
+                const s = state.settings || {};
+                const set = (id, v) => { const el = $(id); if (el) el.value = v == null ? '' : v; };
+                set('mktSetFromEmail', s.fromEmail);
+                set('mktSetFromName', s.fromName);
+                set('mktSetReplyTo', s.replyTo);
+                set('mktSetAudience', s.defaultAudience || 'Subscribed');
+                set('mktSetCadenceCap', s.cadenceCapPerSubscriberPerWeek);
+                set('mktSetLookAhead', s.generation && s.generation.lookAheadDays);
+                set('mktSetMaxPerDay', s.generation && s.generation.maxDraftsPerDay);
+                set('mktSetModel', (s.models && s.models.primary) || 'claude');
+
+                const rulesEl = $('mktRulesList');
+                if (rulesEl) {
+                    rulesEl.innerHTML = state.rules.length ? state.rules.map((r, i) => `
+                        <div class="mkt-rule-row">
+                            <input type="checkbox" data-rule-idx="${i}" ${r.enabled ? 'checked' : ''}>
+                            <div class="rule-name">
+                                <div style="font-weight:600;">${escHtml(r.name)}</div>
+                                <div class="rule-meta">${escHtml(r.type)} · ${escHtml(r.segment || 'Subscribed')} · ${escHtml(JSON.stringify(r.schedule))}</div>
+                            </div>
+                        </div>
+                    `).join('') : '<div class="mkt-empty">No rules. Add some in marketing_calendar.json.</div>';
+                }
+            }
+
+            async function saveSettings() {
+                const s = Object.assign({}, state.settings);
+                s.fromEmail = $('mktSetFromEmail').value.trim();
+                s.fromName = $('mktSetFromName').value.trim();
+                s.replyTo = $('mktSetReplyTo').value.trim();
+                s.defaultAudience = $('mktSetAudience').value;
+                s.cadenceCapPerSubscriberPerWeek = parseInt($('mktSetCadenceCap').value, 10) || 3;
+                s.generation = s.generation || {};
+                s.generation.lookAheadDays = parseInt($('mktSetLookAhead').value, 10) || 7;
+                s.generation.maxDraftsPerDay = parseInt($('mktSetMaxPerDay').value, 10) || 4;
+                s.models = s.models || {};
+                s.models.primary = $('mktSetModel').value;
+                try {
+                    const file = { version: 2, updatedAt: new Date().toISOString(), drafts: state.drafts, history: [], settings: s };
+                    const r = await putData('marketing_drafts.json', file, state.sha.drafts, 'update marketing settings');
+                    state.sha.drafts = r.sha;
+                    state.settings = s;
+                    toast('Marketing settings saved.');
+                } catch (err) { toast('Save failed: ' + err.message); }
+            }
+
+            async function saveRules() {
+                const checks = $('mktRulesList').querySelectorAll('input[type="checkbox"]');
+                checks.forEach((c) => {
+                    const i = parseInt(c.dataset.ruleIdx, 10);
+                    if (state.rules[i]) state.rules[i].enabled = c.checked;
+                });
+                try {
+                    const file = { version: 1, updatedAt: new Date().toISOString(), rules: state.rules };
+                    const r = await putData('marketing_calendar.json', file, state.sha.calendar, 'toggle calendar rules');
+                    state.sha.calendar = r.sha;
+                    toast('Calendar rules saved.');
+                } catch (err) { toast('Save failed: ' + err.message); }
+            }
+
+            // ---- Modal ----------------------------------------------------
+            function openDraftModal(draftId) {
+                const draft = state.drafts.find((d) => d.id === draftId);
+                if (!draft) return toast('Draft not found.');
+                state.currentDraftId = draftId;
+                state.modalMode = 'review';
+                renderModal();
+                $('mktDraftModal').classList.add('open');
+                $('mktDraftModal').setAttribute('aria-hidden', 'false');
+            }
+
+            function closeModal() {
+                $('mktDraftModal').classList.remove('open');
+                $('mktDraftModal').setAttribute('aria-hidden', 'true');
+                state.currentDraftId = null;
+            }
+
+            function setMode(mode) {
+                state.modalMode = mode;
+                document.querySelectorAll('.mkt-mode-tab').forEach((t) => t.classList.toggle('active', t.dataset.mode === mode));
+                document.querySelectorAll('.mkt-mode-pane').forEach((p) => { p.style.display = (p.dataset.modePane === mode) ? '' : 'none'; });
+            }
+
+            function renderModal() {
+                const d = state.drafts.find((x) => x.id === state.currentDraftId);
+                if (!d) return;
+                $('mktDraftModalTitle').textContent = d.subject || '(no subject)';
+                const a = state.aggregates[d.id] || {};
+                const r = (d.deliveryStats && d.deliveryStats.recipientCount) || a.delivered || 0;
+                $('mktDraftModalSub').innerHTML = `
+                    <span class="mkt-status-chip ${d.status}">${d.status}</span>
+                    &nbsp;·&nbsp; ${escHtml(d.type || '')} &nbsp;·&nbsp; ${escHtml(d.segment || 'Subscribed')}
+                    ${d.sentAt ? ` &nbsp;·&nbsp; sent ${fmtDate(d.sentAt)} to ${r.toLocaleString()} recipients` : ''}`;
+                $('mktDraftSubject').textContent = d.subject || '(no subject)';
+
+                $('mktDraftMeta').innerHTML = `
+                    <div class="k">Scheduled</div><div class="v">${fmtDate(d.scheduledFor)}</div>
+                    <div class="k">Segment</div><div class="v">${escHtml(d.segment || 'Subscribed')}</div>
+                    <div class="k">Rule</div><div class="v">${escHtml(d.ruleId || '—')}</div>
+                    <div class="k">Type</div><div class="v">${escHtml(d.type || '—')}</div>
+                    <div class="k">Model</div><div class="v">${escHtml(d.model || '—')}</div>
+                    <div class="k">Created</div><div class="v">${fmtDate(d.createdAt)}</div>
+                    <div class="k">Updated</div><div class="v">${fmtDate(d.updatedAt)}</div>
+                    <div class="k">Regens</div><div class="v">${d.regenerationCount || 0}${d.lastInstructions ? ` &nbsp; <em style="color:var(--text-muted);">last: "${escHtml(d.lastInstructions.slice(0, 80))}…"</em>` : ''}</div>
+                    ${d.sentAt ? `<div class="k">Open rate</div><div class="v">${r ? (((a.uniqueOpen || 0) / r) * 100).toFixed(1) + '%' : '—'} &nbsp; <span style="color:var(--text-muted);">click ${r ? (((a.uniqueClick || 0) / r) * 100).toFixed(1) + '%' : '—'}</span></div>` : ''}
+                `;
+
+                $('mktDraftRationale').textContent = d.context && d.context.event ? `Event: ${d.context.event.title || d.context.eventId} · ${d.context.event.date || ''}` : (d.context ? JSON.stringify(d.context).slice(0, 280) : '—');
+
+                $('mktDraftEditSubject').value = d.subject || '';
+                $('mktDraftEditBody').value = d.innerHtml || '';
+                $('mktDraftRedoCount').textContent = d.regenerationCount || 0;
+                $('mktDraftRedoInstructions').value = '';
+
+                // Preview
+                const iframe = $('mktDraftPreviewFrame');
+                if (iframe) {
+                    const doc = iframe.contentDocument;
+                    doc.open();
+                    doc.write(d.htmlBody || `<div style="padding:20px;font-family:sans-serif;color:#666;">No HTML body.</div>`);
+                    doc.close();
+                }
+
+                // Send Now button enabled only for pending/approved
+                $('mktDraftSendNowBtn').style.display = (d.status === 'pending' || d.status === 'approved') ? '' : 'none';
+                $('mktDraftApproveBtn').style.display = (d.status === 'pending' || d.status === 'rejected') ? '' : 'none';
+                $('mktDraftRejectBtn').style.display = (d.status === 'pending' || d.status === 'approved') ? '' : 'none';
+                setMode('review');
+            }
+
+            // ---- Actions --------------------------------------------------
+            async function action(act, payload) {
+                if (!state.currentDraftId) return;
+                try {
+                    const r = await fetch(`${FN}/marketing-action`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: act, draftId: state.currentDraftId, payload: payload || {} })
+                    });
+                    const body = await r.json();
+                    if (!r.ok) throw new Error(body.error || 'action failed');
+                    // Replace local draft and re-render
+                    const idx = state.drafts.findIndex((d) => d.id === state.currentDraftId);
+                    if (idx >= 0) state.drafts[idx] = body.draft;
+                    renderModal();
+                    renderCalendar(); renderInbox(); updateBadge();
+                    toast(act === 'redo' ? 'Regenerated by AI.' : (act.charAt(0).toUpperCase() + act.slice(1)) + 'd.');
+                    // refresh sha for next save
+                    const fresh = await fetchData('marketing_drafts.json');
+                    state.sha.drafts = fresh.sha;
+                    if (act === 'reject') closeModal();
+                } catch (err) { toast('Action failed: ' + err.message); }
+            }
+
+            async function sendNow() {
+                if (!state.currentDraftId) return;
+                if (!confirm('Send this draft now to its segment? This cannot be undone.')) return;
+                try {
+                    const r = await fetch(`${FN}/marketing-send`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ mode: 'sendNow', draftId: state.currentDraftId })
+                    });
+                    const body = await r.json();
+                    if (!r.ok) throw new Error(body.error || 'send failed');
+                    toast(`Sent to ${body.results?.[0]?.recipientCount || '?'} recipients.`);
+                    await loadAll();
+                    closeModal();
+                } catch (err) { toast('Send failed: ' + err.message); }
+            }
+
+            async function testSend() {
+                if (!state.currentDraftId) return;
+                const to = $('mktTestEmailInput').value.trim();
+                if (!to) return toast('Enter a test email address first.');
+                try {
+                    const r = await fetch(`${FN}/marketing-send`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ mode: 'test', draftId: state.currentDraftId, testEmail: to })
+                    });
+                    const body = await r.json();
+                    if (!r.ok) throw new Error(body.error || 'test send failed');
+                    toast('Test sent to ' + to);
+                } catch (err) { toast('Test failed: ' + err.message); }
+            }
+
+            async function generateNow() {
+                if (!confirm('Generate the next 7 days of drafts now?')) return;
+                toast('Generating… this may take 20–60 seconds.');
+                try {
+                    const r = await fetch(`${FN}/marketing-generate-daily`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({})
+                    });
+                    const body = await r.json();
+                    if (!r.ok) throw new Error(body.error || 'generation failed');
+                    toast(`Generated ${body.generatedCount || 0} draft(s).`);
+                    await loadAll();
+                } catch (err) { toast('Generate failed: ' + err.message); }
+            }
+
+            async function optimizeNow() {
+                toast('Re-analyzing send data…');
+                try {
+                    const r = await fetch(`${FN}/marketing-optimize`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) });
+                    const body = await r.json();
+                    if (!r.ok) throw new Error(body.error || 'optimize failed');
+                    toast(body.message || `+${body.addedLearnings || 0} insights.`);
+                    await loadAll();
+                } catch (err) { toast('Re-analyze failed: ' + err.message); }
+            }
+
+            async function reschedulePrompt() {
+                const d = state.drafts.find((x) => x.id === state.currentDraftId);
+                if (!d) return;
+                const cur = (d.scheduledFor || '').slice(0, 16);
+                const next = prompt('New send time (YYYY-MM-DDTHH:MM, your local CT):', cur);
+                if (!next) return;
+                let iso;
+                try { iso = new Date(next).toISOString(); } catch (_) { return toast('Invalid date.'); }
+                action('reschedule', { scheduledFor: iso });
+            }
+
+            // ---- Init -----------------------------------------------------
+            function init() {
+                // Tab switches handled by parent switchTab() via onTabSwitch
+                // Calendar nav
+                $('mktCalPrev')?.addEventListener('click', () => { state.calMonth = new Date(state.calMonth.getFullYear(), state.calMonth.getMonth() - 1, 1); renderCalendar(); });
+                $('mktCalNext')?.addEventListener('click', () => { state.calMonth = new Date(state.calMonth.getFullYear(), state.calMonth.getMonth() + 1, 1); renderCalendar(); });
+                $('mktCalToday')?.addEventListener('click', () => { state.calMonth = new Date(); renderCalendar(); });
+                $('mktCalStatusFilter')?.addEventListener('change', renderCalendar);
+                $('mktCalSegmentFilter')?.addEventListener('change', renderCalendar);
+                $('mktInboxFilter')?.addEventListener('change', renderInbox);
+                $('mktInboxRefresh')?.addEventListener('click', loadAll);
+                $('mktGenerateNowBtn')?.addEventListener('click', generateNow);
+                $('mktNewCampaignBtn')?.addEventListener('click', () => {
+                    toast('One-off campaigns: open the existing Email tab to draft and send manually. Auto-scheduled one-offs coming next.');
+                });
+                $('mktOptimizeNowBtn')?.addEventListener('click', optimizeNow);
+                $('mktPerfRange')?.addEventListener('change', renderPerformance);
+                $('mktSetSaveSettingsBtn')?.addEventListener('click', saveSettings);
+                $('mktSetSaveRulesBtn')?.addEventListener('click', saveRules);
+                // Modal
+                $('mktDraftModalClose')?.addEventListener('click', closeModal);
+                document.querySelectorAll('.mkt-mode-tab').forEach((t) => t.addEventListener('click', () => setMode(t.dataset.mode)));
+                $('mktDraftApproveBtn')?.addEventListener('click', () => action('approve', { approvedBy: 'admin' }));
+                $('mktDraftRejectBtn')?.addEventListener('click', () => {
+                    const reason = prompt('Optional reason for rejecting (helps the AI learn):') || '';
+                    action('reject', { reason });
+                });
+                $('mktDraftEditSaveBtn')?.addEventListener('click', () => action('edit', { subject: $('mktDraftEditSubject').value, innerHtml: $('mktDraftEditBody').value }));
+                $('mktDraftRedoBtn')?.addEventListener('click', () => {
+                    const inst = $('mktDraftRedoInstructions').value.trim();
+                    if (!inst) return toast('Tell the AI what to change first.');
+                    action('redo', { instructions: inst });
+                });
+                $('mktDraftRescheduleBtn')?.addEventListener('click', reschedulePrompt);
+                $('mktDraftSendNowBtn')?.addEventListener('click', sendNow);
+                $('mktDraftTestSendBtn')?.addEventListener('click', testSend);
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && $('mktDraftModal')?.classList.contains('open')) closeModal();
+                });
+                // Click backdrop closes
+                $('mktDraftModal')?.addEventListener('click', (e) => { if (e.target.id === 'mktDraftModal') closeModal(); });
+            }
+
+            function onTabSwitch(tabName) {
+                if (!state.loaded) loadAll();
+                if (tabName === 'mktCalendar') renderCalendar();
+                else if (tabName === 'mktInbox') renderInbox();
+                else if (tabName === 'mktPerformance') renderPerformance();
+                else if (tabName === 'mktInsights') renderInsights();
+                else if (tabName === 'mktSettings') renderSettings();
+            }
+
+            return { init, loadAll, onTabSwitch, openDraftModal };
+        })();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            try { MarketingUI.init(); } catch (e) { console.error('MarketingUI init failed', e); }
+        });
 
     </script>
 </body>
