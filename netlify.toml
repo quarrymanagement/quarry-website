@@ -1,0 +1,25 @@
+# ============================================================================
+# Netlify config — schedules only.
+# Build command auto-detected (build.sh runs by Netlify convention).
+# Functions live at netlify/functions, deps in root package.json.
+# ============================================================================
+
+[functions]
+  directory = "netlify/functions"
+
+# ----------------------------------------------------------------------------
+# Scheduled functions (cron syntax = UTC)
+# CDT = UTC-5, CST = UTC-6 — pick a UTC time that's reasonable in both.
+# ----------------------------------------------------------------------------
+
+# Daily marketing draft generator — 12:00 UTC = 7am CDT / 6am CST.
+[functions."marketing-generate-daily"]
+  schedule = "0 12 * * *"
+
+# Send-queue poller — every 10 min. Drains 'approved' drafts at scheduledFor.
+[functions."marketing-send"]
+  schedule = "*/10 * * * *"
+
+# Nightly AI optimizer — 7:00 UTC = 2am CDT / 1am CST. Quiet time.
+[functions."marketing-optimize"]
+  schedule = "0 7 * * *"

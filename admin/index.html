@@ -3927,11 +3927,53 @@
             }
         }
 
+        // Restore prior session if a token exists
+        (async () => {
+            const tok = localStorage.getItem('quarryAdminToken');
+            if (!tok) return;
+            try {
+                const r = await fetch('/.netlify/functions/verify-admin-password', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'verify', token: tok })
+                });
+                const body = await r.json();
+                if (body.ok) {
+                    app.authenticated = true;
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.getElementById('adminPanel').style.display = 'flex';
+                    if (typeof loadData === 'function') loadData();
+                }
+            } catch (_) {}
+        })();
         document.getElementById('loginForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const password = document.getElementById('passwordInput').value;
             const errorEl = document.getElementById('loginError');
 
+            // Server-side verification (fallback to legacy plaintext until env var is set)
+            (async () => {
+                try {
+                    const r = await fetch('/.netlify/functions/verify-admin-password', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ password })
+                    });
+                    const body = await r.json();
+                    if (body.ok) {
+                        if (body.token) localStorage.setItem('quarryAdminToken', body.token);
+                        app.authenticated = true;
+                        document.getElementById('loginScreen').style.display = 'none';
+                        document.getElementById('adminPanel').style.display = 'flex';
+                        if (typeof loadData === 'function') loadData();
+                    } else {
+                        document.getElementById('loginError').textContent = 'Invalid password';
+                        document.getElementById('loginError').style.display = 'block';
+                    }
+                } catch (err) {
+                    document.getElementById('loginError').textContent = 'Login error: ' + err.message;
+                    document.getElementById('loginError').style.display = 'block';
+                }
+            })();
+            return; // skip the legacy plaintext branch below
             if (password === 'quarry2026') {
                 sessionStorage.setItem('quarryAuth', 'true');
                 app.authenticated = true;

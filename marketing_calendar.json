@@ -102,6 +102,36 @@
       "segment": "Subscribed",
       "draftType": "menu_spotlight",
       "notes": "Single dish or new menu launch. Sensory language. Friday late-morning when people are deciding the weekend."
+    },
+    {
+      "id": "welcome-day-0",
+      "name": "Welcome — Immediate (Day 0)",
+      "type": "welcome",
+      "enabled": false,
+      "schedule": { "kind": "trigger", "trigger": "new_subscriber", "hourCT": null, "offsetMinutes": 5 },
+      "segment": "Subscribed",
+      "draftType": "evergreen",
+      "notes": "Disabled until you build the new-contact webhook trigger. Goal: warm welcome + venue tour link, no pitch."
+    },
+    {
+      "id": "welcome-day-3",
+      "name": "Welcome — Menu Spotlight (Day 3)",
+      "type": "welcome",
+      "enabled": false,
+      "schedule": { "kind": "trigger", "trigger": "subscriber_age_days", "offsetDays": 3, "hourCT": 11 },
+      "segment": "Subscribed",
+      "draftType": "menu_spotlight",
+      "notes": "Disabled. Day 3 of welcome drip — chef's pick + dish story."
+    },
+    {
+      "id": "welcome-day-7",
+      "name": "Welcome — Your First Event (Day 7)",
+      "type": "welcome",
+      "enabled": false,
+      "schedule": { "kind": "trigger", "trigger": "subscriber_age_days", "offsetDays": 7, "hourCT": 10 },
+      "segment": "Subscribed",
+      "draftType": "event_promo_14d",
+      "notes": "Disabled. Day 7 of welcome drip — invitation to next public event."
     }
   ]
 }
