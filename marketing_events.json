@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-04-26T00:00:00Z",
+  "updatedAt": "2026-04-26T18:32:25.952Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -15,6 +15,14 @@
     },
     "aggregates": "Per-draft rollups updated by webhook handler so dashboard reads are fast."
   },
-  "events": [],
+  "events": [
+    {
+      "ts": "2026-04-26T18:32:25.952Z",
+      "type": "unsubscribe",
+      "draftId": null,
+      "email": "test@example.com",
+      "sgEventId": "unsub:1777228345952:test@example.com"
+    }
+  ],
   "aggregates": {}
 }
