@@ -1,32 +1,11 @@
 # ============================================================================
 # Netlify config for The Quarry portal
-#   - Scheduled functions for marketing automation
-#   - Function bundling defaults
+#
+# Scheduled functions are configured INSIDE each function file via
+# `exports.config = { schedule: "..." }` — see marketing-generate-daily.js,
+# marketing-send.js, and marketing-optimize.js. This file is intentionally
+# minimal so we don't override Netlify's auto-detected publish/build settings.
 # ============================================================================
 
-[build]
-  publish    = "."
-  functions  = "netlify/functions"
-
 [functions]
-  node_bundler = "esbuild"
-
-# ----------------------------------------------------------------------------
-# SCHEDULED FUNCTIONS (cron syntax — UTC)
-# Convert local CT to UTC: CDT = UTC-5, CST = UTC-6
-# ----------------------------------------------------------------------------
-
-# Daily marketing draft generator — 7:00 AM CT (12:00 UTC under CDT, 13:00 UTC under CST).
-# Use 12:00 UTC; we accept being one hour later in winter (still well before
-# the 8 AM CT review email).
-[functions."marketing-generate-daily"]
-  schedule = "0 12 * * *"
-
-# Send-queue poller — every 10 minutes, drains approved drafts whose
-# scheduledFor has arrived. Idempotent.
-[functions."marketing-send"]
-  schedule = "*/10 * * * *"
-
-# Nightly AI optimization — 2:00 AM CT (07:00 UTC) when traffic is quiet.
-[functions."marketing-optimize"]
-  schedule = "0 7 * * *"
+  directory = "netlify/functions"
