@@ -4,6 +4,10 @@
 # Functions live at netlify/functions, deps in root package.json.
 # ============================================================================
 
+[build]
+  command = "bash build.sh"
+  publish = "."
+
 [functions]
   directory = "netlify/functions"
 
