@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "updatedAt": "2026-04-26T00:00:00Z",
+  "_schema": {
+    "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
+    "eventShape": {
+      "ts": "ISO timestamp",
+      "type": "delivered | open | click | bounce | unsubscribe | spamreport | dropped | deferred",
+      "draftId": "id of campaign_emails / drafts entry",
+      "email": "subscriber email (lowercased)",
+      "url": "string — present on click events",
+      "sgEventId": "SendGrid event id (de-dupe key)",
+      "userAgent": "string — present on open/click",
+      "category": "string — campaign category tag"
+    },
+    "aggregates": "Per-draft rollups updated by webhook handler so dashboard reads are fast."
+  },
+  "events": [],
+  "aggregates": {}
+}
