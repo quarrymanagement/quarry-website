@@ -1,3 +1,6 @@
+// Netlify Scheduled Function — runs daily at 12:00 UTC (~7 AM CT in CDT, 6 AM in CST)
+// Tag at top so the new Netlify scheduler picks it up without netlify.toml.
+
 // ============================================================================
 // marketing-generate-daily.js
 //
@@ -127,6 +130,8 @@ async function generateDraft(type, context, instructions, learnings) {
 // ----------------------------------------------------------------------------
 // Handler
 // ----------------------------------------------------------------------------
+
+exports.config = { schedule: "0 12 * * *" };
 
 exports.handler = async (event) => {
     if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: CORS, body: '' };
