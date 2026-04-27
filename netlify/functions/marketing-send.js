@@ -196,7 +196,7 @@ async function sendTest(draft, testEmail) {
         // Add List-Unsubscribe header so Gmail/Apple Mail get one-click compliance
         // without us needing visible auto-injected SendGrid text.
         headers: {
-            'List-Unsubscribe': `<https://www.thequarrystl.com/.netlify/functions/unsubscribe?email=${encodeURIComponent(to.email)}>, <mailto:management@thequarrystl.com?subject=unsubscribe>`,
+            'List-Unsubscribe': `<https://www.thequarrystl.com/.netlify/functions/unsubscribe?email=${encodeURIComponent(testEmail)}>, <mailto:management@thequarrystl.com?subject=unsubscribe>`,
             'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click'
         }
     };
