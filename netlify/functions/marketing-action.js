@@ -65,7 +65,7 @@ function wrapWithFooter(htmlBody) {
     const FB_URL    = 'https://www.facebook.com/thequarrystl';
     const IG_URL    = 'https://www.instagram.com/thequarrystl';
     const UNSUB_URL = 'https://www.thequarrystl.com/.netlify/functions/unsubscribe?email={email}';
-    const RES_URL   = 'https://www.thequarrystl.com/quarry-reservations.html?utm_source=email&utm_medium=marketing&utm_campaign=footer-cta';
+    const RES_URL   = 'https://www.thequarrystl.com/quarry-private-events.html?utm_source=email&utm_medium=marketing&utm_campaign=footer-cta';
     const NAVY     = '#1a2942';
     const NAVY_DK  = '#0f1a2e';
     const CREAM    = '#f5efde';
@@ -99,7 +99,7 @@ function wrapWithFooter(htmlBody) {
 </div></td></tr>
 <tr><td style="padding:0;line-height:0;font-size:0;"><a href="${WEB_URL}" style="display:block;"><img src="${HERO_URL}" alt="The Quarry" width="600" style="display:block;width:100%;max-width:600px;height:auto;border:0;outline:none;"></a></td></tr>
 <tr><td class="qbody" style="background:${CREAM};padding:32px 32px 16px;">${htmlBody}</td></tr>
-<tr><td align="center" style="background:${CREAM};padding:8px 32px 32px;"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td align="center" bgcolor="${GOLD}" style="border-radius:6px;box-shadow:0 4px 12px rgba(154,123,42,0.35);"><a href="${RES_URL}" style="display:inline-block;padding:16px 36px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:15px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#ffffff;text-decoration:none;border-radius:6px;">Reserve a Table &nbsp;→</a></td></tr></table>
+<tr><td align="center" style="background:${CREAM};padding:8px 32px 32px;"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td align="center" bgcolor="${GOLD}" style="border-radius:6px;box-shadow:0 4px 12px rgba(154,123,42,0.35);"><a href="${RES_URL}" style="display:inline-block;padding:16px 36px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:15px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#ffffff;text-decoration:none;border-radius:6px;">Book Your Next Event &nbsp;→</a></td></tr></table>
 <div style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;color:${MUTED};margin-top:14px;letter-spacing:0.04em;">Wed–Sun &nbsp;·&nbsp; New Melle, MO &nbsp;·&nbsp; <a href="tel:6362248257" style="color:${GOLD};text-decoration:none;">(636) 224-8257</a></div></td></tr>
 <tr><td align="center" style="background:${NAVY_DK};padding:24px 24px 22px;">
 <div style="margin-bottom:14px;">
@@ -108,7 +108,7 @@ function wrapWithFooter(htmlBody) {
 <a href="${IG_URL}" style="margin:0 10px;display:inline-block;text-decoration:none;" title="Instagram">${igIcon}</a>
 </div>
 <div style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;color:${CREAM_ON_NAVY};line-height:1.5;margin-bottom:8px;"><strong style="color:${GOLD_LT};">The Quarry</strong> &nbsp;·&nbsp; 3960 Highway Z &nbsp;·&nbsp; New Melle, MO 63385 &nbsp;·&nbsp; (636) 224-8257</div>
-<div style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:11px;color:rgba(243,236,217,0.55);line-height:1.6;">You're receiving this because you signed up, booked a reservation, or attended an event at The Quarry.<br><a href="${UNSUB_URL}" style="color:rgba(243,236,217,0.75);text-decoration:underline;">Unsubscribe</a> &nbsp;·&nbsp; <a href="https://www.thequarrystl.com/privacy.html" style="color:rgba(243,236,217,0.75);text-decoration:underline;">Privacy Policy</a></div>
+<div style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:11px;color:rgba(243,236,217,0.55);line-height:1.6;">You're receiving this because you signed up, booked an event, or attended one at The Quarry.<br><a href="https://www.thequarrystl.com/privacy.html" style="color:rgba(243,236,217,0.75);text-decoration:underline;">Privacy Policy</a></div>
 </td></tr></table>
 <div style="font-family:'Playfair Display',Georgia,serif;color:rgba(243,236,217,0.30);font-size:11px;letter-spacing:0.18em;margin-top:18px;">— THE QUARRY —</div>
 </td></tr></table></body></html>`;
