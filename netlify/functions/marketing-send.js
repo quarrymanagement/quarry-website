@@ -105,20 +105,28 @@ function applyMergeTags(html, contact) {
 }
 
 async function sgSend({ to, subject, html, fromEmail, fromName, replyTo, category, customArgs }) {
+    const unsubGroupId = parseInt(process.env.SENDGRID_UNSUB_GROUP_ID || '0', 10);
+    const payload = {
+        from: { email: fromEmail, name: fromName },
+        reply_to: { email: replyTo || fromEmail },
+        personalizations: [{ to: [{ email: to.email, name: [to.firstName, to.lastName].filter(Boolean).join(' ') || undefined }] }],
+        subject,
+        content: [{ type: 'text/html', value: html }],
+        categories: [category],
+        custom_args: customArgs,
+        tracking_settings: { click_tracking: { enable: true, enable_text: false }, open_tracking: { enable: true }, subscription_tracking: { enable: false } },
+        mail_settings: { sandbox_mode: { enable: false } }
+    };
+    // Attach unsubscribe group so SendGrid auto-handles list-unsubscribe headers
+    // and respects user opt-outs on this group specifically. Required for proper
+    // CAN-SPAM compliance and Gmail/Apple Mail one-click unsubscribe support.
+    if (unsubGroupId) {
+        payload.asm = { group_id: unsubGroupId, groups_to_display: [unsubGroupId] };
+    }
     const r = await fetch('https://api.sendgrid.com/v3/mail/send', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${SENDGRID_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            from: { email: fromEmail, name: fromName },
-            reply_to: { email: replyTo || fromEmail },
-            personalizations: [{ to: [{ email: to.email, name: [to.firstName, to.lastName].filter(Boolean).join(' ') || undefined }] }],
-            subject,
-            content: [{ type: 'text/html', value: html }],
-            categories: [category],
-            custom_args: customArgs,
-            tracking_settings: { click_tracking: { enable: true, enable_text: false }, open_tracking: { enable: true } },
-            mail_settings: { sandbox_mode: { enable: false } }
-        })
+        body: JSON.stringify(payload)
     });
     const messageId = r.headers.get('x-message-id') || null;
     if (!r.ok) {
