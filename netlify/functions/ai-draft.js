@@ -217,11 +217,11 @@ function wrapWithFooter(htmlBody) {
     // Inline-SVG social icons render in Gmail, Apple Mail, modern Outlook, Yahoo. Falls
     // back to nothing in Outlook 2016 desktop — but the surrounding link text + box stays
     // clickable, so functionality is preserved.
-    // SVG social icons in cream so they pop against the navy footer
-    const ICON = (svg) => `<span style="display:inline-block;width:20px;height:20px;vertical-align:middle;line-height:0;">${svg}</span>`;
-    const webIcon = ICON(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="${CREAM_ON_NAVY}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`);
-    const fbIcon  = ICON(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${CREAM_ON_NAVY}" width="20" height="20"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>`);
-    const igIcon  = ICON(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="${CREAM_ON_NAVY}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>`);
+    // PNG icons render in EVERY email client (SVG fails in Outlook desktop, some Yahoo).
+    // Hosted on our domain so they cache fast and stay branded.
+    const webIcon = `<img src="https://thequarrystl.com/assets/email-icons/web.png" alt="Web" width="22" height="22" style="display:inline-block;border:0;outline:none;vertical-align:middle;">`;
+    const fbIcon  = `<img src="https://thequarrystl.com/assets/email-icons/facebook.png" alt="Facebook" width="22" height="22" style="display:inline-block;border:0;outline:none;vertical-align:middle;">`;
+    const igIcon  = `<img src="https://thequarrystl.com/assets/email-icons/instagram.png" alt="Instagram" width="22" height="22" style="display:inline-block;border:0;outline:none;vertical-align:middle;">`;
 
     // Universal styles for AI-generated content (we inject these so AI doesn't have to manage colors)
     const bodyStyles = `
@@ -267,7 +267,7 @@ ${bodyStyles}
         </a>
         <div style="font-family:'Playfair Display',Georgia,serif;font-size:24px;color:${CREAM_ON_NAVY};letter-spacing:0.14em;font-weight:700;line-height:1;">THE QUARRY</div>
         <div style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:10px;color:${GOLD_LT};letter-spacing:0.22em;text-transform:uppercase;margin-top:10px;font-weight:600;">
-          <a href="https://www.thequarrystl.com/quarry-drinks.html?utm_source=email&utm_medium=marketing&utm_campaign=header-tagline&utm_content=wine"   style="color:${GOLD_LT};text-decoration:none;">Wine</a> &nbsp;·&nbsp;
+          <a href="https://www.thequarrystl.com/quarry-drinks.html?utm_source=email&utm_medium=marketing&utm_campaign=header-tagline&utm_content=drinks" style="color:${GOLD_LT};text-decoration:none;">Drinks</a> &nbsp;·&nbsp;
           <a href="https://www.thequarrystl.com/quarry-menu.html?utm_source=email&utm_medium=marketing&utm_campaign=header-tagline&utm_content=bites"   style="color:${GOLD_LT};text-decoration:none;">Bites</a> &nbsp;·&nbsp;
           <a href="https://www.thequarrystl.com/quarry-bands.html?utm_source=email&utm_medium=marketing&utm_campaign=header-tagline&utm_content=music"  style="color:${GOLD_LT};text-decoration:none;">Live Music</a> &nbsp;·&nbsp;
           <a href="https://www.thequarrystl.com/quarry-golf.html?utm_source=email&utm_medium=marketing&utm_campaign=header-tagline&utm_content=golf"    style="color:${GOLD_LT};text-decoration:none;">Golf</a>
