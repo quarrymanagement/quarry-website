@@ -71,7 +71,21 @@ Return an object with these exact keys:
 }
 
 MERGE TAGS (available but use sparingly)
-{firstName} {lastName} {email}`;
+{firstName} {lastName} {email}
+
+PERSONALIZATION (when first names are available in the segment):
+- Subject lines that lead with a first name open at ~2x the rate of generic subjects.
+  When natural, use {firstName} in the subject — e.g. "{firstName}, the patio's open Saturday".
+  Don't force it on every subject; only when it reads naturally and the audience is
+  large enough that personalization will reach most recipients.
+- Opening lines can use {firstName} too — once per email at most.
+
+SUBJECT LINE QUALITY CHECKLIST (apply silently before returning):
+- Length: 30-60 characters preferred (40-50 sweet spot)
+- No ALL CAPS words (one short ALL CAPS word OK if intentional)
+- No excessive punctuation (avoid !!!, ???, multiple emojis)
+- Avoid spam-trigger phrasing: "Free!", "Act now", "Limited time only", "Click here"
+- Lead with specifics, not generic hype`;
 
 function buildUserPrompt(type, context, instructions) {
     const typeGuidance = {
@@ -150,11 +164,12 @@ function wrapWithFooter(htmlBody) {
   </div>
 </div>`;
 
-    const container = `<div style="background:#f4f5f7;padding:2rem 1rem;font-family:'Montserrat',-apple-system,BlinkMacSystemFont,sans-serif;color:#1c1f26;line-height:1.6;">
+    const container = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"></head>
+<body style="margin:0;padding:0;background:#f4f5f7;"><div style="background:#f4f5f7;padding:2rem 1rem;font-family:'Montserrat',-apple-system,BlinkMacSystemFont,sans-serif;color:#1c1f26;line-height:1.6;">
 <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;padding:2rem 1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
 <div style="text-align:center;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:2px solid #9a7b2a;">
   <a href="${WEB_URL}" style="text-decoration:none;display:inline-block;">
-    <img src="${LOGO_URL}" alt="The Quarry" width="72" height="72" style="display:block;margin:0 auto 0.5rem;border:0;outline:none;text-decoration:none;">
+    <img src="${LOGO_URL}" alt="The Quarry — wine, bites, live music, and golf in New Melle, MO" width="72" height="72" style="display:block;margin:0 auto 0.5rem;border:0;outline:none;text-decoration:none;">
   </a>
   <div style="font-family:'Playfair Display',Georgia,serif;font-size:1.4rem;color:#1c1f26;letter-spacing:0.08em;">THE QUARRY</div>
   <div style="font-family:'Montserrat',sans-serif;font-size:0.7rem;color:#858d9e;letter-spacing:0.18em;text-transform:uppercase;margin-top:0.25rem;">Wine &middot; Bites &middot; Live Music &middot; Golf</div>
@@ -162,8 +177,42 @@ function wrapWithFooter(htmlBody) {
 ${htmlBody}
 </div>
 ${footer}
-</div>`;
+</div></body></html>`;
     return container;
+}
+
+// Generate a plain-text version of the HTML for the multipart/alternative body.
+// Spam filters (especially corporate Outlook) downrank HTML-only emails.
+function htmlToPlainText(html) {
+    if (!html) return '';
+    return String(html)
+        .replace(/<style[\s\S]*?<\/style>/gi, '')
+        .replace(/<script[\s\S]*?<\/script>/gi, '')
+        .replace(/<a\s+[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi, (_, url, text) => `${text.replace(/<[^>]+>/g,'').trim()} (${url})`)
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<\/(p|div|h[1-6]|li|tr)>/gi, '\n\n')
+        .replace(/<li[^>]*>/gi, '• ')
+        .replace(/<[^>]+>/g, '')
+        .replace(/&nbsp;/gi, ' ').replace(/&amp;/gi, '&').replace(/&lt;/gi, '<').replace(/&gt;/gi, '>').replace(/&middot;/gi, '·').replace(/&[a-z]+;/gi, '')
+        .replace(/[ \t]+/g, ' ')
+        .replace(/\n[ \t]+/g, '\n')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+}
+
+// Subject-line quality analysis — surfaces warnings the admin UI can show.
+function analyzeSubject(subject) {
+    const s = String(subject || '');
+    const warnings = [];
+    if (s.length < 30) warnings.push(`short (${s.length} chars; sweet spot 40-60)`);
+    else if (s.length > 70) warnings.push(`long (${s.length} chars; mobile preview cuts off ~50)`);
+    const allCapsWords = (s.match(/\b[A-Z]{4,}\b/g) || []);
+    if (allCapsWords.length > 1) warnings.push(`multiple ALL CAPS words: ${allCapsWords.join(', ')}`);
+    if (/!{2,}|\?{2,}/.test(s)) warnings.push('repeated punctuation (!! or ??)');
+    if (/(free|act now|limited time|click here|urgent|guarantee|congratulations|winner|cash|earn \$)/i.test(s)) warnings.push('contains spam-trigger phrasing');
+    const emojiCount = (s.match(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu) || []).length;
+    if (emojiCount > 1) warnings.push(`${emojiCount} emojis (max 1 recommended)`);
+    return { length: s.length, warnings, score: Math.max(0, 100 - warnings.length * 15) };
 }
 
 // ============================================================================
@@ -378,6 +427,8 @@ exports.handler = async (event) => {
         success: true,
         subject: subject,
         htmlBody: htmlBody,
+        plainText: htmlToPlainText(taggedInner),
+        subjectQuality: analyzeSubject(subject),
         innerHtml: taggedInner,
         model: result.model,
         tokensUsed: result.tokens,

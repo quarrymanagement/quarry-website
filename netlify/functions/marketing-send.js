@@ -104,18 +104,40 @@ function applyMergeTags(html, contact) {
         .replace(/\{email\}/g, encodeURIComponent(contact.email));
 }
 
+function htmlToPlainText(html) {
+    if (!html) return '';
+    return String(html)
+        .replace(/<style[\s\S]*?<\/style>/gi, '')
+        .replace(/<script[\s\S]*?<\/script>/gi, '')
+        .replace(/<a\s+[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi, (_, url, text) => `${text.replace(/<[^>]+>/g,'').trim()} (${url})`)
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<\/(p|div|h[1-6]|li|tr)>/gi, '\n\n')
+        .replace(/<li[^>]*>/gi, '• ')
+        .replace(/<[^>]+>/g, '')
+        .replace(/&nbsp;/gi, ' ').replace(/&amp;/gi, '&').replace(/&lt;/gi, '<').replace(/&gt;/gi, '>').replace(/&middot;/gi, '·').replace(/&[a-z]+;/gi, '')
+        .replace(/[ \t]+/g, ' ').replace(/\n[ \t]+/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+}
+
 async function sgSend({ to, subject, html, fromEmail, fromName, replyTo, category, customArgs }) {
     const unsubGroupId = parseInt(process.env.SENDGRID_UNSUB_GROUP_ID || '0', 10);
+    // Multipart: text/plain MUST come before text/html per RFC and SendGrid's docs.
+    const plainText = htmlToPlainText(html);
     const payload = {
         from: { email: fromEmail, name: fromName },
         reply_to: { email: replyTo || fromEmail },
         personalizations: [{ to: [{ email: to.email, name: [to.firstName, to.lastName].filter(Boolean).join(' ') || undefined }] }],
         subject,
-        content: [{ type: 'text/html', value: html }],
+        content: [
+            { type: 'text/plain', value: plainText || ' ' },
+            { type: 'text/html',  value: html }
+        ],
         categories: [category],
         custom_args: customArgs,
         tracking_settings: { click_tracking: { enable: true, enable_text: false }, open_tracking: { enable: true }, subscription_tracking: { enable: false } },
-        mail_settings: { sandbox_mode: { enable: false } }
+        mail_settings: { sandbox_mode: { enable: false } },
+        // Pace large sends so we don't burst-throttle: SendGrid recommends < 100/sec on shared IP.
+        // We're sending sequentially in the caller anyway; this just hints SendGrid.
+        send_at: undefined
     };
     // Attach unsubscribe group so SendGrid auto-handles list-unsubscribe headers
     // and respects user opt-outs on this group specifically. Required for proper

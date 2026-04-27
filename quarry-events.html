@@ -1665,7 +1665,15 @@
                     return evt;
                 });
                 // Filter to only Active events (admin can set Inactive to hide)
-                allEvents = allEvents.filter(evt => evt.status !== 'inactive' && evt.adminStatus !== 'Inactive');
+                // AND drop events whose date has passed (compare in local time, midnight cutoff).
+                const today = new Date(); today.setHours(0,0,0,0);
+                allEvents = allEvents.filter(evt => {
+                    if (evt.status === 'inactive' || evt.adminStatus === 'Inactive') return false;
+                    const dateStr = evt.date || evt.eventDate || evt.startDate;
+                    if (!dateStr) return true; // keep events with no date set
+                    const evtDate = new Date(dateStr + 'T23:59:59'); // event "passes" only after the day ends
+                    return evtDate >= today;
+                });
             } catch (err) {
                 console.error('Could not load events from GitHub:', err);
                 // Show a user-friendly message

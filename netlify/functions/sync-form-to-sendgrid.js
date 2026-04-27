@@ -20,6 +20,10 @@
 const fetch = require('node-fetch');
 
 const SG_KEY = process.env.SENDGRID_API_KEY;
+const SITE_URL = process.env.URL || 'https://thequarrystl.com';
+const FROM_EMAIL = 'management@thequarrystl.com';
+const FROM_NAME  = 'The Quarry STL';
+const UNSUB_GROUP = parseInt(process.env.SENDGRID_UNSUB_GROUP_ID || '0', 10);
 
 const SEGMENT_MAP = {
     'wine-club-registration': 'Wine Club',
@@ -82,16 +86,161 @@ exports.handler = async (event) => {
     Object.keys(contact).forEach((k) => contact[k] === undefined && delete contact[k]);
 
     try {
+        // 1) Push to SendGrid Contacts
         const r = await fetch('https://api.sendgrid.com/v3/marketing/contacts', {
             method: 'PUT',
             headers: { 'Authorization': `Bearer ${SG_KEY}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({ contacts: [contact] })
         });
         const body = await r.json().catch(() => ({}));
+
+        // 2) Append to subscribers.json so the CRM tab in admin stays fresh
+        // (best-effort — failures don't block the form submission flow)
+        appendToCrmFile({ email, firstName, lastName, phone, source: formName, segmentTag })
+            .catch((e) => console.warn('subscribers.json sync failed:', e.message));
+
+        // 3) Fire a one-time welcome email (only for mailing-list signup, to avoid
+        //    sending welcomes to people who just RSVP'd to an event)
+        if (formName === 'mailing-list' || formName === 'wine-club-registration' || formName === 'wine-club-signup') {
+            sendWelcomeEmail({ email, firstName, segmentTag })
+                .catch((e) => console.warn('welcome email failed:', e.message));
+        }
+
         if (!r.ok) return respond(200, { ok: false, sg_status: r.status, sg_body: body });
         return respond(200, { ok: true, segmentTag, formName, jobId: body.job_id, email });
     } catch (err) {
-        // Always 200 to avoid Netlify retrying form submissions endlessly
         return respond(200, { ok: false, error: err.message });
     }
 };
+
+// ---------------------------------------------------------------------------
+// Append the new contact to subscribers.json via data-store (idempotent)
+// ---------------------------------------------------------------------------
+async function appendToCrmFile({ email, firstName, lastName, phone, source, segmentTag }) {
+    const url = `${SITE_URL}/.netlify/functions/data-store?file=subscribers.json`;
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('load subscribers.json: ' + r.status);
+    const data = await r.json();
+    const list = Array.isArray(data.decoded) ? data.decoded : [];
+    const lower = email.toLowerCase();
+    const exists = list.find((s) => (s.email || '').toLowerCase() === lower);
+    if (exists) {
+        // bump lastActivity, add tag if missing
+        exists.lastActivity = `Form: ${source}`;
+        exists.lastActivityDate = new Date().toISOString();
+        exists.tags = Array.isArray(exists.tags) ? exists.tags : [];
+        if (segmentTag && !exists.tags.includes(segmentTag)) exists.tags.push(segmentTag);
+    } else {
+        list.push({
+            firstName: firstName || '',
+            lastName:  lastName  || '',
+            email,
+            phone:     phone || '',
+            birthdate: '',
+            labels:    '',
+            created:   new Date().toISOString(),
+            emailStatus: 'Subscribed',
+            smsStatus:   phone ? 'Never subscribed' : '',
+            source:    source || 'Website form',
+            lastActivity: `Form: ${source}`,
+            lastActivityDate: new Date().toISOString(),
+            address:   { street: '', city: '', state: '', zip: '', country: 'United States' },
+            events:    [],
+            tags:      segmentTag ? [segmentTag] : []
+        });
+    }
+    const put = await fetch(url, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ json: list, sha: data.sha, message: `crm: ${exists ? 'update' : 'add'} ${email}` })
+    });
+    if (!put.ok) throw new Error('save subscribers.json: ' + put.status);
+}
+
+// ---------------------------------------------------------------------------
+// Welcome email — single short message sent immediately on signup. Sets the
+// expectation, gives them something tangible. CAN-SPAM compliant.
+// ---------------------------------------------------------------------------
+async function sendWelcomeEmail({ email, firstName, segmentTag }) {
+    const greeting = firstName ? `Hi ${firstName},` : 'Hi there,';
+    const subject = firstName
+        ? `${firstName}, welcome to The Quarry`
+        : 'Welcome to The Quarry';
+    const inner = `
+<p style="font-size:1rem;color:#1c1f26;margin:0 0 1rem;">${greeting}</p>
+<p style="font-size:1rem;color:#4b5263;line-height:1.6;margin:0 0 1rem;">Thanks for joining our list. We don't crowd inboxes &mdash; expect one weekly update on what's happening here, plus the occasional invite to something special: a new vintage release, a band we're excited about, a perfect-weather patio Saturday.</p>
+<p style="font-size:1rem;color:#4b5263;line-height:1.6;margin:0 0 1.5rem;">If you ever want a table, a tour, or just a recommendation, you can reply directly to any of our emails. A real person on our team reads every one.</p>
+<p style="text-align:center;margin:1.75rem 0 0.5rem;">
+  <a href="https://www.thequarrystl.com/quarry-reservations.html?utm_source=email&utm_medium=marketing&utm_campaign=welcome" style="display:inline-block;background:#9a7b2a;color:#ffffff;padding:0.75rem 1.5rem;border-radius:6px;font-weight:600;text-decoration:none;">Reserve a Table</a>
+</p>
+<p style="font-size:0.85rem;color:#858d9e;text-align:center;margin:0.5rem 0 0;">Wed&ndash;Sun &middot; New Melle, MO</p>
+<p style="font-size:0.95rem;color:#4b5263;line-height:1.6;margin:1.5rem 0 0;">See you soon,<br>The team at The Quarry</p>`;
+
+    const aiResp = await fetch(`${SITE_URL}/.netlify/functions/ai-draft`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            type: 'manual',
+            instructions: '__skip_ai__'
+        })
+    }).catch(() => null);
+    // We don't actually need the AI for welcome — just the wrapper. But to keep
+    // styling consistent we'll pass the inner HTML through ai-draft's wrapWithFooter
+    // by constructing the email locally instead (no AI call to avoid quota burn).
+    const html = wrapWithFooterLocal(inner);
+
+    const payload = {
+        from: { email: FROM_EMAIL, name: FROM_NAME },
+        reply_to: { email: FROM_EMAIL },
+        personalizations: [{ to: [{ email }] }],
+        subject,
+        content: [{ type: 'text/html', value: html }],
+        categories: ['quarry-marketing:welcome'],
+        custom_args: { welcome: 'true', segment: segmentTag || 'Subscribed' },
+        tracking_settings: { click_tracking: { enable: true, enable_text: false }, open_tracking: { enable: true } }
+    };
+    if (UNSUB_GROUP) payload.asm = { group_id: UNSUB_GROUP, groups_to_display: [UNSUB_GROUP] };
+
+    const r = await fetch('https://api.sendgrid.com/v3/mail/send', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${SG_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+    if (!r.ok) {
+        const t = await r.text();
+        throw new Error(`SG welcome send: ${r.status} ${t.slice(0, 150)}`);
+    }
+}
+
+function wrapWithFooterLocal(htmlBody) {
+    const LOGO = 'https://thequarrystl.com/assets/quarry-q-logo.png';
+    const WEB  = 'https://www.thequarrystl.com';
+    const FB   = 'https://www.facebook.com/thequarrystl';
+    const IG   = 'https://www.instagram.com/thequarrystl';
+    const UNSUB = 'https://www.thequarrystl.com/.netlify/functions/unsubscribe?email={email}';
+    const ICON = (svg) => `<span style="display:inline-block;width:18px;height:18px;vertical-align:middle;line-height:0;">${svg}</span>`;
+    const webIcon = ICON('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#9a7b2a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>');
+    const fbIcon  = ICON('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#9a7b2a" width="18" height="18"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>');
+    const igIcon  = ICON('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#9a7b2a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>');
+
+    return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"></head>
+<body style="margin:0;padding:0;background:#f4f5f7;"><div style="background:#f4f5f7;padding:2rem 1rem;font-family:'Montserrat',-apple-system,BlinkMacSystemFont,sans-serif;color:#1c1f26;line-height:1.6;">
+<div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;padding:2rem 1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+<div style="text-align:center;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:2px solid #9a7b2a;">
+  <a href="${WEB}" style="text-decoration:none;display:inline-block;"><img src="${LOGO}" alt="The Quarry" width="72" height="72" style="display:block;margin:0 auto 0.5rem;border:0;outline:none;text-decoration:none;"></a>
+  <div style="font-family:'Playfair Display',Georgia,serif;font-size:1.4rem;color:#1c1f26;letter-spacing:0.08em;">THE QUARRY</div>
+  <div style="font-family:'Montserrat',sans-serif;font-size:0.7rem;color:#858d9e;letter-spacing:0.18em;text-transform:uppercase;margin-top:0.25rem;">Wine &middot; Bites &middot; Live Music &middot; Golf</div>
+</div>
+${htmlBody}
+</div>
+<div style="max-width:600px;margin:2rem auto 0;padding:1.5rem 1rem;border-top:1px solid #e0e3e8;font-family:'Montserrat',-apple-system,sans-serif;font-size:0.75rem;color:#858d9e;text-align:center;line-height:1.5;">
+  <div style="margin-bottom:0.85rem;">
+    <a href="${WEB}" style="color:#9a7b2a;text-decoration:none;margin:0 0.6rem;display:inline-block;" title="thequarrystl.com">${webIcon}</a>
+    <a href="${FB}" style="color:#9a7b2a;text-decoration:none;margin:0 0.6rem;display:inline-block;" title="Facebook">${fbIcon}</a>
+    <a href="${IG}" style="color:#9a7b2a;text-decoration:none;margin:0 0.6rem;display:inline-block;" title="Instagram">${igIcon}</a>
+  </div>
+  <div style="margin-bottom:0.5rem;"><strong style="color:#4b5263;">The Quarry</strong> &middot; 3960 Highway Z, New Melle, MO 63385 &middot; (636) 224-8257</div>
+  <div>You're receiving this because you signed up at thequarrystl.com. <a href="${UNSUB}" style="color:#858d9e;text-decoration:underline;">Unsubscribe</a></div>
+</div>
+</div></body></html>`;
+}
