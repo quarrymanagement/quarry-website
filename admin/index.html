@@ -2340,9 +2340,9 @@
         .mkt-meta-grid .k { color: var(--text-muted); font-weight: 500; }
         .mkt-meta-grid .v { color: var(--text-primary); }
         .mkt-modal-pane h5 { color: var(--gold); margin: 0 0 0.5rem; font-family: 'Playfair Display', Georgia, serif; font-weight: 600; font-size: 0.95rem; }
-        .mkt-modal-pane input.subject-edit, .mkt-modal-pane textarea.body-edit, .mkt-modal-pane textarea.redo-instructions { width: 100%; padding: 0.6rem 0.75rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); background: var(--bg-card); color: var(--text-primary); font-family: inherit; font-size: 0.9rem; resize: vertical; }
-        .mkt-modal-pane textarea.body-edit { min-height: 220px; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 0.78rem; }
-        .mkt-modal-pane textarea.redo-instructions { min-height: 90px; }
+        .mkt-modal-pane input.subject-edit, .mkt-modal-pane textarea.body-edit, .mkt-modal-pane textarea.mkt-redo-input { width: 100% !important; padding: 0.6rem 0.75rem !important; border: 1px solid var(--border-subtle) !important; border-radius: var(--radius-sm) !important; background: var(--bg-card) !important; color: var(--text-primary) !important; font-family: inherit !important; font-size: 0.9rem !important; resize: vertical !important; display: block !important; }
+        .mkt-modal-pane textarea.body-edit { min-height: 220px !important; font-family: 'SFMono-Regular', Consolas, monospace !important; font-size: 0.78rem !important; }
+        .mkt-modal-pane textarea.mkt-redo-input { min-height: 90px !important; }
         .mkt-preview-frame { border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); background: #fff; overflow: auto; height: 460px; }
         .mkt-mode-tabs { display: flex; gap: 0.4rem; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-subtle); }
         .mkt-mode-tab { padding: 0.4rem 0.75rem; cursor: pointer; font-size: 0.8rem; color: var(--text-muted); border-bottom: 2px solid transparent; }
@@ -3840,7 +3840,7 @@
                     <div class="mkt-mode-pane" data-mode-pane="redo" style="display:none;">
                         <h5>Tell the AI what to change</h5>
                         <p style="font-size:0.78rem;color:var(--text-muted);margin:0 0 0.6rem;">Be specific. The AI sees the current draft and your instructions. Examples: "Make it shorter and lead with the live music angle." / "Less formal — closer to a personal text from the manager." / "Push the wine pairing more, mention the new Cabernet."</p>
-                        <textarea class="redo-instructions" id="mktDraftRedoInstructions" placeholder="What should change?"></textarea>
+                        <textarea class="mkt-redo-input" id="mktDraftRedoInstructions" placeholder="What should change?"></textarea>
                         <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.4rem;">Regenerated <span id="mktDraftRedoCount">0</span> time(s) so far.</div>
                         <div style="margin-top:0.85rem;text-align:right;"><button class="btn-redo" id="mktDraftRedoBtn">Regenerate</button></div>
                     </div>
