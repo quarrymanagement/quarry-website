@@ -25,6 +25,24 @@ const FROM_EMAIL = 'management@thequarrystl.com';
 const FROM_NAME  = 'The Quarry STL';
 const UNSUB_GROUP = parseInt(process.env.SENDGRID_UNSUB_GROUP_ID || '0', 10);
 
+// Marketing list memberships — every new signup is added to these so future
+// campaigns actually reach them. Map by form name.
+const LIST_ALL = process.env.SENDGRID_LIST_ALL || '';
+const LIST_SUB = process.env.SENDGRID_LIST_SUBSCRIBED || '';
+
+function listIdsForForm(formName) {
+    // Job applicants: NEVER auto-add to marketing lists.
+    if (formName === 'careers') return [];
+    // Wine Club is implicit consent to marketing — add to ALL + Subscribed.
+    if (formName === 'wine-club-registration' || formName === 'wine-club-signup') {
+        return [LIST_ALL, LIST_SUB].filter(Boolean);
+    }
+    // Mailing list, reservations, contact, event RSVPs, weddings, private events,
+    // golf, beer garden — all get added to ALL + Subscribed (implied or explicit
+    // consent via the transaction). Unsubscribe in every email handles opt-out.
+    return [LIST_ALL, LIST_SUB].filter(Boolean);
+}
+
 const SEGMENT_MAP = {
     'wine-club-registration': 'Wine Club',
     'wine-club-signup':       'Wine Club',
@@ -86,11 +104,16 @@ exports.handler = async (event) => {
     Object.keys(contact).forEach((k) => contact[k] === undefined && delete contact[k]);
 
     try {
-        // 1) Push to SendGrid Contacts
+        // 1) Push to SendGrid Contacts AND add to the right marketing lists.
+        // SendGrid's PUT /v3/marketing/contacts accepts list_ids as a sibling
+        // of contacts — does the upsert + list-add in one call.
+        const listIds = listIdsForForm(formName);
+        const upsertBody = { contacts: [contact] };
+        if (listIds.length) upsertBody.list_ids = listIds;
         const r = await fetch('https://api.sendgrid.com/v3/marketing/contacts', {
             method: 'PUT',
             headers: { 'Authorization': `Bearer ${SG_KEY}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ contacts: [contact] })
+            body: JSON.stringify(upsertBody)
         });
         const body = await r.json().catch(() => ({}));
 
@@ -107,7 +130,7 @@ exports.handler = async (event) => {
         }
 
         if (!r.ok) return respond(200, { ok: false, sg_status: r.status, sg_body: body });
-        return respond(200, { ok: true, segmentTag, formName, jobId: body.job_id, email });
+        return respond(200, { ok: true, segmentTag, formName, jobId: body.job_id, email, addedToLists: listIds });
     } catch (err) {
         return respond(200, { ok: false, error: err.message });
     }
