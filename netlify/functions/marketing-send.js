@@ -184,9 +184,20 @@ async function sendTest(draft, testEmail) {
         ],
         categories: ['quarry-marketing:test'],
         custom_args: { draft_id: draft.id, test: 'true' },
-        tracking_settings: { click_tracking: { enable: true, enable_text: false }, open_tracking: { enable: true } }
+        tracking_settings: {
+            click_tracking: { enable: true, enable_text: false },
+            open_tracking: { enable: true },
+            // Tell SendGrid to use OUR unsubscribe URL via List-Unsubscribe header
+            // and NOT to inject its own visible "Unsubscribe / Manage email preferences" line.
+            subscription_tracking: {
+                enable: true,
+                substitution_tag: '[unsubscribe_url]',
+                text: ' ',  // empty — no visible text auto-added
+                html: ' '   // empty — no visible HTML auto-added
+            }
+        }
     };
-    if (UNSUB_GROUP) payload.asm = { group_id: UNSUB_GROUP, groups_to_display: [UNSUB_GROUP] };
+    // No `asm` block — that's what was injecting the blue auto-footer.
     const r = await fetch('https://api.sendgrid.com/v3/mail/send', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${SG_KEY}`, 'Content-Type': 'application/json' },
