@@ -107,7 +107,7 @@ function wrapWithFooter(htmlBody) {
 <a href="${IG_URL}" style="margin:0 10px;display:inline-block;text-decoration:none;" title="Instagram">${igIcon}</a>
 </div>
 <div style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;color:${CREAM_ON_NAVY};line-height:1.5;margin-bottom:8px;"><strong style="color:${GOLD_LT};">The Quarry</strong> &nbsp;·&nbsp; 3960 Highway Z &nbsp;·&nbsp; New Melle, MO 63385 &nbsp;·&nbsp; (636) 224-8257</div>
-<div style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:11px;color:rgba(243,236,217,0.55);line-height:1.6;">You're receiving this because you signed up, booked an event, or attended one at The Quarry.<br><a href="https://www.thequarrystl.com/privacy.html" style="color:rgba(243,236,217,0.75);text-decoration:underline;">Privacy Policy</a></div>
+<div style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:11px;color:rgba(243,236,217,0.55);line-height:1.6;">You're receiving this because you signed up, booked an event, or attended one at The Quarry.<br><a href="${UNSUB_URL}" style="color:rgba(243,236,217,0.75);text-decoration:underline;">Unsubscribe</a> &nbsp;·&nbsp; <a href="https://www.thequarrystl.com/privacy.html" style="color:rgba(243,236,217,0.75);text-decoration:underline;">Privacy Policy</a></div>
 </td></tr></table>
 <div style="font-family:'Playfair Display',Georgia,serif;color:rgba(243,236,217,0.30);font-size:11px;letter-spacing:0.18em;margin-top:18px;">— THE QUARRY —</div>
 </td></tr></table></body></html>`;
