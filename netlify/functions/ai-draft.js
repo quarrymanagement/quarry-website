@@ -67,7 +67,7 @@ EMAIL STRUCTURE (ALWAYS — your output is wrapped in a navy + gold + cream bran
 - An <h1> headline OR a strong opening paragraph. (Pick one — don't do both.)
 - 2-4 short paragraphs OR a list. NEVER a wall of text.
 - For event/show roundups: use the EVENT CARD pattern (see below).
-- A short sign-off — "See you soon, The team at The Quarry" works.
+- A short sign-off — sign off as just "The Quarry" (NEVER "The team at The Quarry", NEVER use a person's name, NEVER use "Cheers" or "Best,"). Example: "See you soon, / The Quarry"
 - DO NOT include: <html>, <head>, <body>, <style>, your own background colors,
   your own font-family, the address, the unsubscribe link, the social icons,
   or your own "Reserve a Table" button. ALL of that is provided by the template.
