@@ -49,54 +49,69 @@ async function saveJsonFile(file, json, sha, message) {
     return r.json();
 }
 
+function stripOuterWrappers(html) {
+    if (!html) return '';
+    let s = String(html).trim();
+    const m = s.match(/^<div[^>]*>([\s\S]*)<\/div>\s*$/i);
+    if (m && /background|font-family|max-width|padding\s*:/i.test(s.slice(0, s.indexOf('>') + 1))) s = m[1].trim();
+    s = s.replace(/<\/?(html|body|head)[^>]*>/gi, '').replace(/<!doctype[^>]*>/gi, '').replace(/<style[\s\S]*?<\/style>/gi, '');
+    return s.trim();
+}
+
 function wrapWithFooter(htmlBody) {
-    const LOGO_URL = 'https://thequarrystl.com/assets/quarry-q-logo.png';
-    const WEB_URL  = 'https://www.thequarrystl.com';
-    const FB_URL   = 'https://www.facebook.com/thequarrystl';
-    const IG_URL   = 'https://www.instagram.com/thequarrystl';
+    const LOGO_URL  = 'https://thequarrystl.com/assets/quarry-q-logo.png';
+    const HERO_URL  = 'https://thequarrystl.com/assets/img/quarry-hero-1280.jpg';
+    const WEB_URL   = 'https://www.thequarrystl.com';
+    const FB_URL    = 'https://www.facebook.com/thequarrystl';
+    const IG_URL    = 'https://www.instagram.com/thequarrystl';
     const UNSUB_URL = 'https://www.thequarrystl.com/.netlify/functions/unsubscribe?email={email}';
+    const RES_URL   = 'https://www.thequarrystl.com/quarry-reservations.html?utm_source=email&utm_medium=marketing&utm_campaign=footer-cta';
+    const NAVY     = '#1a2942';
+    const NAVY_DK  = '#0f1a2e';
+    const CREAM    = '#f5efde';
+    const GOLD     = '#9a7b2a';
+    const GOLD_LT  = '#c9a44a';
+    const TEXT     = '#2c2c2c';
+    const MUTED    = '#6b6b6b';
+    const CREAM_ON_NAVY = '#f3ecd9';
 
-    const ICON = (svg) => `<span style="display:inline-block;width:18px;height:18px;vertical-align:middle;line-height:0;">${svg}</span>`;
-    const webIcon = ICON('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#9a7b2a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>');
-    const fbIcon  = ICON('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#9a7b2a" width="18" height="18"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>');
-    const igIcon  = ICON('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#9a7b2a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>');
+    htmlBody = stripOuterWrappers(htmlBody);
 
-    const footer = `
-<div style="max-width:600px;margin:2rem auto 0;padding:1.5rem 1rem;border-top:1px solid #e0e3e8;font-family:'Montserrat',-apple-system,sans-serif;font-size:0.75rem;color:#858d9e;text-align:center;line-height:1.5;">
-  <div style="margin-bottom:0.85rem;">
-    <a href="${WEB_URL}" style="color:#9a7b2a;text-decoration:none;margin:0 0.6rem;display:inline-block;" title="thequarrystl.com">${webIcon}</a>
-    <a href="${FB_URL}" style="color:#9a7b2a;text-decoration:none;margin:0 0.6rem;display:inline-block;" title="Facebook">${fbIcon}</a>
-    <a href="${IG_URL}" style="color:#9a7b2a;text-decoration:none;margin:0 0.6rem;display:inline-block;" title="Instagram">${igIcon}</a>
-  </div>
-  <div style="margin-bottom:0.5rem;">
-    <strong style="color:#4b5263;">The Quarry</strong> &middot; 3960 Highway Z, New Melle, MO 63385 &middot; (636) 224-8257
-  </div>
-  <div>
-    You're receiving this because you signed up, booked a reservation, or attended an event at The Quarry.
-    <a href="${UNSUB_URL}" style="color:#858d9e;text-decoration:underline;">Unsubscribe</a> &middot;
-    <a href="https://www.thequarrystl.com/privacy.html" style="color:#858d9e;text-decoration:underline;">Privacy Policy</a>
-  </div>
-</div>`;
+    const ICON = (svg) => `<span style="display:inline-block;width:20px;height:20px;vertical-align:middle;line-height:0;">${svg}</span>`;
+    const webIcon = ICON(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="${CREAM_ON_NAVY}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`);
+    const fbIcon  = ICON(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${CREAM_ON_NAVY}" width="20" height="20"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>`);
+    const igIcon  = ICON(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="${CREAM_ON_NAVY}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>`);
 
-    return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"></head>
-<body style="margin:0;padding:0;background:#f4f5f7;"><div style="background:#f4f5f7;padding:2rem 1rem;font-family:'Montserrat',-apple-system,BlinkMacSystemFont,sans-serif;color:#1c1f26;line-height:1.6;">
-<div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;padding:2rem 1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
-<div style="text-align:center;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:2px solid #9a7b2a;">
-  <a href="${WEB_URL}" style="text-decoration:none;display:inline-block;">
-    <img src="${LOGO_URL}" alt="The Quarry — wine, bites, live music, and golf in New Melle, MO" width="72" height="72" style="display:block;margin:0 auto 0.5rem;border:0;outline:none;text-decoration:none;">
-  </a>
-  <div style="font-family:'Playfair Display',Georgia,serif;font-size:1.4rem;color:#1c1f26;letter-spacing:0.08em;">THE QUARRY</div>
-  <div style="font-family:'Montserrat',sans-serif;font-size:0.7rem;color:#858d9e;letter-spacing:0.18em;text-transform:uppercase;margin-top:0.25rem;">
-    <a href="https://www.thequarrystl.com/quarry-drinks.html?utm_source=email&utm_medium=marketing&utm_campaign=header-tagline&utm_content=wine" style="color:#9a7b2a;text-decoration:none;">Wine</a> &middot;
-    <a href="https://www.thequarrystl.com/quarry-menu.html?utm_source=email&utm_medium=marketing&utm_campaign=header-tagline&utm_content=bites" style="color:#9a7b2a;text-decoration:none;">Bites</a> &middot;
-    <a href="https://www.thequarrystl.com/quarry-bands.html?utm_source=email&utm_medium=marketing&utm_campaign=header-tagline&utm_content=music" style="color:#9a7b2a;text-decoration:none;">Live Music</a> &middot;
-    <a href="https://www.thequarrystl.com/quarry-golf.html?utm_source=email&utm_medium=marketing&utm_campaign=header-tagline&utm_content=golf" style="color:#9a7b2a;text-decoration:none;">Golf</a>
-  </div>
+    const bodyStyles = `<style>.qbody{font-family:'Helvetica Neue',Arial,sans-serif;color:${TEXT};line-height:1.65;}.qbody h1{font-family:'Playfair Display',Georgia,serif;color:${NAVY};font-size:28px;line-height:1.25;margin:0 0 18px;font-weight:700;}.qbody h2{font-family:'Playfair Display',Georgia,serif;color:${NAVY};font-size:22px;line-height:1.3;margin:28px 0 14px;font-weight:700;}.qbody h3{font-family:'Helvetica Neue',Arial,sans-serif;color:${GOLD};font-size:12px;line-height:1.3;margin:24px 0 8px;text-transform:uppercase;letter-spacing:0.16em;font-weight:700;}.qbody p{font-size:16px;line-height:1.7;color:${TEXT};margin:0 0 16px;}.qbody ul,.qbody ol{margin:0 0 16px 18px;padding:0;font-size:16px;line-height:1.7;}.qbody li{margin:0 0 8px;}.qbody a{color:${GOLD};text-decoration:underline;}.qbody hr{border:0;border-top:1px solid #d4ccb3;margin:24px 0;}.qbody .event-card{background:rgba(255,255,255,0.6);border-left:4px solid ${GOLD};padding:14px 16px;margin:0 0 14px;border-radius:4px;}.qbody .event-date{font-size:12px;color:${GOLD};font-weight:700;text-transform:uppercase;letter-spacing:0.12em;margin:0 0 4px;}.qbody .event-title{font-family:'Playfair Display',Georgia,serif;font-size:18px;color:${NAVY};font-weight:700;margin:0 0 4px;}.qbody .event-meta{font-size:13px;color:${MUTED};margin:0;}</style>`;
+
+    return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><meta name="format-detection" content="telephone=no"><title>The Quarry</title>${bodyStyles}</head>
+<body style="margin:0;padding:0;background:${NAVY};-webkit-text-size-adjust:100%;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${NAVY};"><tr><td align="center" style="padding:24px 12px;">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:${CREAM};border-radius:8px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.18);">
+<tr><td align="center" style="background:${NAVY};padding:24px 24px 18px;">
+<a href="${WEB_URL}" style="text-decoration:none;display:inline-block;"><img src="${LOGO_URL}" alt="The Quarry" width="64" height="64" style="display:block;margin:0 auto 8px;border:0;outline:none;"></a>
+<div style="font-family:'Playfair Display',Georgia,serif;font-size:24px;color:${CREAM_ON_NAVY};letter-spacing:0.14em;font-weight:700;line-height:1;">THE QUARRY</div>
+<div style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:10px;color:${GOLD_LT};letter-spacing:0.22em;text-transform:uppercase;margin-top:10px;font-weight:600;">
+<a href="https://www.thequarrystl.com/quarry-drinks.html?utm_source=email&utm_medium=marketing&utm_campaign=header-tagline&utm_content=wine" style="color:${GOLD_LT};text-decoration:none;">Wine</a> &nbsp;·&nbsp;
+<a href="https://www.thequarrystl.com/quarry-menu.html?utm_source=email&utm_medium=marketing&utm_campaign=header-tagline&utm_content=bites" style="color:${GOLD_LT};text-decoration:none;">Bites</a> &nbsp;·&nbsp;
+<a href="https://www.thequarrystl.com/quarry-bands.html?utm_source=email&utm_medium=marketing&utm_campaign=header-tagline&utm_content=music" style="color:${GOLD_LT};text-decoration:none;">Live Music</a> &nbsp;·&nbsp;
+<a href="https://www.thequarrystl.com/quarry-golf.html?utm_source=email&utm_medium=marketing&utm_campaign=header-tagline&utm_content=golf" style="color:${GOLD_LT};text-decoration:none;">Golf</a>
+</div></td></tr>
+<tr><td style="padding:0;line-height:0;font-size:0;"><a href="${WEB_URL}" style="display:block;"><img src="${HERO_URL}" alt="The Quarry" width="600" style="display:block;width:100%;max-width:600px;height:auto;border:0;outline:none;"></a></td></tr>
+<tr><td class="qbody" style="background:${CREAM};padding:32px 32px 16px;">${htmlBody}</td></tr>
+<tr><td align="center" style="background:${CREAM};padding:8px 32px 32px;"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td align="center" bgcolor="${GOLD}" style="border-radius:6px;box-shadow:0 4px 12px rgba(154,123,42,0.35);"><a href="${RES_URL}" style="display:inline-block;padding:16px 36px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:15px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#ffffff;text-decoration:none;border-radius:6px;">Reserve a Table &nbsp;→</a></td></tr></table>
+<div style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;color:${MUTED};margin-top:14px;letter-spacing:0.04em;">Wed–Sun &nbsp;·&nbsp; New Melle, MO &nbsp;·&nbsp; <a href="tel:6362248257" style="color:${GOLD};text-decoration:none;">(636) 224-8257</a></div></td></tr>
+<tr><td align="center" style="background:${NAVY_DK};padding:24px 24px 22px;">
+<div style="margin-bottom:14px;">
+<a href="${WEB_URL}" style="margin:0 10px;display:inline-block;text-decoration:none;" title="thequarrystl.com">${webIcon}</a>
+<a href="${FB_URL}" style="margin:0 10px;display:inline-block;text-decoration:none;" title="Facebook">${fbIcon}</a>
+<a href="${IG_URL}" style="margin:0 10px;display:inline-block;text-decoration:none;" title="Instagram">${igIcon}</a>
 </div>
-${htmlBody}
-</div>
-${footer}
-</div></body></html>`;
+<div style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;color:${CREAM_ON_NAVY};line-height:1.5;margin-bottom:8px;"><strong style="color:${GOLD_LT};">The Quarry</strong> &nbsp;·&nbsp; 3960 Highway Z &nbsp;·&nbsp; New Melle, MO 63385 &nbsp;·&nbsp; (636) 224-8257</div>
+<div style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:11px;color:rgba(243,236,217,0.55);line-height:1.6;">You're receiving this because you signed up, booked a reservation, or attended an event at The Quarry.<br><a href="${UNSUB_URL}" style="color:rgba(243,236,217,0.75);text-decoration:underline;">Unsubscribe</a> &nbsp;·&nbsp; <a href="https://www.thequarrystl.com/privacy.html" style="color:rgba(243,236,217,0.75);text-decoration:underline;">Privacy Policy</a></div>
+</td></tr></table>
+<div style="font-family:'Playfair Display',Georgia,serif;color:rgba(243,236,217,0.30);font-size:11px;letter-spacing:0.18em;margin-top:18px;">— THE QUARRY —</div>
+</td></tr></table></body></html>`;
 }
 
 exports.handler = async (event) => {
