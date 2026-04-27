@@ -10086,6 +10086,334 @@ function hashCode(str) {
 
         document.addEventListener('DOMContentLoaded', () => { try { MarketingUI.init(); } catch (e) { console.error('MarketingUI init failed', e); } });
 
+        // ====================================================================
+        // SocialUI — Facebook + Instagram drafts inbox / calendar / perf / settings
+        // ====================================================================
+        window.SocialUI = (() => {
+            const FN = '/.netlify/functions';
+            const state = {
+                drafts: [], rules: [], aggregates: {}, eventsLog: [],
+                sha: { drafts: null, calendar: null, learnings: null, events: null },
+                currentDraftId: null, modalMode: 'review',
+                loaded: false, loading: false, metaStatus: null,
+            };
+            const $ = (id) => document.getElementById(id);
+            const fmtDate = (iso) => { if (!iso) return '—'; const d = new Date(iso); return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'America/Chicago' }) + ' CT'; };
+            const escHtml = (s) => (s == null ? '' : String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])));
+            const platformBadge = (p) => {
+                const map = { facebook: ['#1877f2', 'FB'], instagram: ['#e1306c', 'IG'] };
+                const [bg, label] = map[p] || ['#888', p];
+                return `<span style="display:inline-block;background:${bg};color:#fff;font-size:0.65rem;padding:1px 6px;border-radius:3px;margin-right:0.25rem;font-weight:600;">${label}</span>`;
+            };
+
+            async function fetchData(file) {
+                const r = await fetch(`${FN}/data-store?file=${file}`, { cache: 'no-store' });
+                if (!r.ok) throw new Error(`load ${file}: ${r.status}`);
+                const d = await r.json();
+                return { json: d.decoded || {}, sha: d.sha };
+            }
+            async function putData(file, json, sha, message) {
+                const r = await fetch(`${FN}/data-store?file=${file}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ json, sha, message }) });
+                const body = await r.json().catch(() => ({}));
+                if (!r.ok) throw new Error(body.error || ('save ' + file + ': ' + r.status));
+                return body;
+            }
+            function toast(msg) {
+                if (typeof showToast === 'function') return showToast(msg);
+                const el = document.createElement('div');
+                el.textContent = msg;
+                el.style.cssText = 'position:fixed;top:20px;right:20px;background:#1c1f26;color:#fff;padding:0.6rem 1rem;border-radius:6px;z-index:99999;font-size:0.85rem;box-shadow:0 6px 20px rgba(0,0,0,0.3);';
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 3500);
+            }
+
+            async function loadAll() {
+                if (state.loading) return;
+                state.loading = true;
+                try {
+                    const [dr, cal, ev] = await Promise.all([
+                        fetchData('social_drafts.json').catch(() => ({ json: { drafts: [] }, sha: null })),
+                        fetchData('social_calendar.json').catch(() => ({ json: { rules: [] }, sha: null })),
+                        fetchData('social_events.json').catch(() => ({ json: { events: [], aggregates: {} }, sha: null })),
+                    ]);
+                    state.drafts = Array.isArray(dr.json.drafts) ? dr.json.drafts : []; state.sha.drafts = dr.sha;
+                    state.rules = Array.isArray(cal.json.rules) ? cal.json.rules : []; state.sha.calendar = cal.sha;
+                    state.aggregates = ev.json.aggregates || {}; state.eventsLog = Array.isArray(ev.json.events) ? ev.json.events : []; state.sha.events = ev.sha;
+                    state.loaded = true;
+                    updateBadge(); renderInbox(); renderCalendar(); renderPerformance(); renderSettings();
+                } catch (err) { console.error('SocialUI load failed', err); toast('Social load failed: ' + err.message); }
+                finally { state.loading = false; }
+            }
+
+            function updateBadge() {
+                const badge = $('socInboxBadge'); if (!badge) return;
+                const pending = state.drafts.filter((d) => d.status === 'pending').length;
+                if (pending > 0) { badge.textContent = pending; badge.style.display = 'inline-block'; }
+                else { badge.style.display = 'none'; }
+            }
+
+            function renderInbox() {
+                const wrap = $('socInboxList'); if (!wrap) return;
+                const filter = $('socInboxFilter')?.value || 'pending';
+                let list = state.drafts.slice();
+                if (filter !== 'all') list = list.filter((d) => d.status === filter);
+                list.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+                if (!list.length) { wrap.innerHTML = '<div class="mkt-empty">No drafts in this view.</div>'; return; }
+                wrap.innerHTML = list.map((d) => {
+                    const platforms = (d.platforms || []).map(platformBadge).join('');
+                    const img = d.imageUrl ? `<img src="${escHtml(d.imageUrl)}" style="width:60px;height:60px;object-fit:cover;border-radius:4px;margin-right:0.6rem;" alt="">` : '';
+                    const captionPreview = (d.caption || '').slice(0, 140) + ((d.caption || '').length > 140 ? '…' : '');
+                    return `<div class="mkt-inbox-item" data-draft-id="${escHtml(d.id)}" style="display:flex;align-items:flex-start;cursor:pointer;">
+                        ${img}
+                        <div style="flex:1;min-width:0;">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.25rem;">
+                                <div style="font-size:0.75rem;">${platforms}<span style="color:var(--text-muted);">${escHtml(d.type || 'post')} · ${fmtDate(d.scheduledFor || d.createdAt)}</span></div>
+                                <div class="mkt-status-pill is-${escHtml(d.status)}">${escHtml(d.status)}</div>
+                            </div>
+                            <div style="font-size:0.85rem;line-height:1.4;color:var(--text-primary);">${escHtml(captionPreview)}</div>
+                        </div>
+                    </div>`;
+                }).join('');
+                wrap.querySelectorAll('.mkt-inbox-item').forEach((el) => el.addEventListener('click', () => openModal(el.dataset.draftId)));
+            }
+
+            function renderCalendar() {
+                const wrap = $('socCalendarList'); if (!wrap) return;
+                const upcoming = state.drafts
+                    .filter((d) => d.status !== 'rejected')
+                    .sort((a, b) => (a.scheduledFor || '').localeCompare(b.scheduledFor || ''));
+                if (!upcoming.length) { wrap.innerHTML = '<div class="mkt-empty">No scheduled or posted social content yet.</div>'; return; }
+                const groups = {};
+                upcoming.forEach((d) => {
+                    const key = (d.scheduledFor || d.postedAt || d.createdAt || '').slice(0, 10) || 'unscheduled';
+                    (groups[key] = groups[key] || []).push(d);
+                });
+                wrap.innerHTML = Object.keys(groups).sort().map((key) => {
+                    const label = key === 'unscheduled' ? 'Unscheduled' : new Date(key + 'T12:00').toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+                    const rows = groups[key].map((d) => {
+                        const platforms = (d.platforms || []).map(platformBadge).join('');
+                        const time = d.scheduledFor ? new Date(d.scheduledFor).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Chicago' }) : '—';
+                        return `<div class="mkt-inbox-item" data-draft-id="${escHtml(d.id)}" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+                            <div style="flex:1;min-width:0;">
+                                <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.2rem;">${platforms}${time}</div>
+                                <div style="font-size:0.85rem;">${escHtml((d.caption || '').slice(0, 120))}</div>
+                            </div>
+                            <div class="mkt-status-pill is-${escHtml(d.status)}" style="margin-left:0.6rem;">${escHtml(d.status)}</div>
+                        </div>`;
+                    }).join('');
+                    return `<div class="mkt-card" style="margin-bottom:0.75rem;"><h4 style="margin:0 0 0.5rem 0;">${escHtml(label)}</h4>${rows}</div>`;
+                }).join('');
+                wrap.querySelectorAll('.mkt-inbox-item').forEach((el) => el.addEventListener('click', () => openModal(el.dataset.draftId)));
+            }
+
+            function renderPerformance() {
+                const cutoff = Date.now() - 30 * 86400000;
+                const posted = state.drafts.filter((d) => d.status === 'posted' && d.postedAt && new Date(d.postedAt).getTime() >= cutoff);
+                let totalReach = 0, totalLikes = 0, totalComments = 0;
+                const rows = [];
+                posted.forEach((d) => {
+                    const agg = state.aggregates[d.id] || {};
+                    ['facebook', 'instagram'].forEach((p) => {
+                        const a = agg[p]; if (!a) return;
+                        totalReach += a.reach || 0;
+                        totalLikes += a.likes || 0;
+                        totalComments += a.comments || 0;
+                        rows.push({ caption: d.caption, platform: p, reach: a.reach || 0, likes: a.likes || 0, comments: a.comments || 0 });
+                    });
+                });
+                if ($('socStatPosts'))    $('socStatPosts').textContent    = posted.length;
+                if ($('socStatReach'))    $('socStatReach').textContent    = totalReach.toLocaleString();
+                if ($('socStatLikes'))    $('socStatLikes').textContent    = totalLikes.toLocaleString();
+                if ($('socStatComments')) $('socStatComments').textContent = totalComments.toLocaleString();
+                const tbody = $('socPerfTable')?.querySelector('tbody'); if (!tbody) return;
+                if (!rows.length) { tbody.innerHTML = '<tr><td colspan="5" class="mkt-empty-cell">No posts yet</td></tr>'; return; }
+                rows.sort((a, b) => b.reach - a.reach);
+                tbody.innerHTML = rows.slice(0, 20).map((r) =>
+                    `<tr><td>${escHtml((r.caption || '').slice(0, 80))}</td><td>${platformBadge(r.platform)}</td><td>${r.reach.toLocaleString()}</td><td>${r.likes.toLocaleString()}</td><td>${r.comments.toLocaleString()}</td></tr>`
+                ).join('');
+            }
+
+            async function renderSettings() {
+                renderRules();
+                const statusEl = $('socMetaStatus'); if (!statusEl) return;
+                statusEl.innerHTML = '<div class="mkt-empty">Checking…</div>';
+                try {
+                    // Force a dry-run probe on meta-post — response.reason tells us if token is configured
+                    const r = await fetch(`${FN}/meta-post`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dryRun: true, platforms: [], caption: '__probe__' }) });
+                    const body = await r.json().catch(() => ({}));
+                    const tokenMissing = body && body.reason && /not configured/i.test(body.reason);
+                    state.metaStatus = body;
+                    if (!tokenMissing && body.dryRun) {
+                        statusEl.innerHTML = `<div style="color:#2e7d32;font-weight:600;">✓ Connected</div>
+                            <div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem;">META_PAGE_ACCESS_TOKEN is set in Netlify. Posts will go live when approved + scheduled.</div>`;
+                    } else {
+                        statusEl.innerHTML = `<div style="color:#c0392b;font-weight:600;">✗ Not configured</div>
+                            <div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem;">Set <code>META_PAGE_ACCESS_TOKEN</code>, <code>META_PAGE_ID</code>, <code>META_IG_USER_ID</code> in Netlify env. See <code>META_SETUP.md</code>. Until then, posts run in dry-run mode.</div>`;
+                    }
+                } catch (err) {
+                    statusEl.innerHTML = `<div style="color:var(--text-muted);">Could not probe meta-post: ${escHtml(err.message)}</div>`;
+                }
+            }
+
+            function renderRules() {
+                const wrap = $('socRulesList'); if (!wrap) return;
+                if (!state.rules.length) {
+                    wrap.innerHTML = `<div class="mkt-empty">No rules yet. Default cadence: daily generator runs 8am CT.</div>`;
+                    return;
+                }
+                wrap.innerHTML = state.rules.map((r, i) =>
+                    `<div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.4rem;">
+                        <input data-rule-idx="${i}" data-field="name" value="${escHtml(r.name || '')}" style="flex:2;padding:0.35rem 0.5rem;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:4px;color:var(--text-primary);">
+                        <input data-rule-idx="${i}" data-field="cadence" value="${escHtml(r.cadence || '')}" placeholder="daily / weekly / event" style="flex:1;padding:0.35rem 0.5rem;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:4px;color:var(--text-primary);">
+                        <input data-rule-idx="${i}" data-field="platforms" value="${escHtml((r.platforms || []).join(','))}" placeholder="facebook,instagram" style="flex:1;padding:0.35rem 0.5rem;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:4px;color:var(--text-primary);">
+                    </div>`
+                ).join('');
+            }
+
+            function openModal(draftId) {
+                state.currentDraftId = draftId;
+                state.modalMode = 'review';
+                const modal = $('socDraftModal'); if (!modal) return;
+                modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false');
+                renderModal(); setMode('review');
+            }
+            function closeModal() {
+                const modal = $('socDraftModal'); if (!modal) return;
+                modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true');
+                state.currentDraftId = null;
+            }
+            function setMode(m) {
+                state.modalMode = m;
+                document.querySelectorAll('#socDraftModal .mkt-mode-tab').forEach((t) => t.classList.toggle('active', t.dataset.mode === m));
+                document.querySelectorAll('#socDraftModal .mkt-mode-pane').forEach((p) => p.style.display = (p.dataset.modePane === m ? '' : 'none'));
+                if (m === 'edit') {
+                    const d = state.drafts.find((x) => x.id === state.currentDraftId);
+                    if (d) {
+                        $('socDraftEditCaption').value = d.caption || '';
+                        $('socDraftEditHashtags').value = (d.hashtags || []).join('\n');
+                    }
+                }
+            }
+            function renderModal() {
+                const d = state.drafts.find((x) => x.id === state.currentDraftId); if (!d) return;
+                $('socDraftModalTitle').textContent = `${(d.type || 'post')} · ${(d.platforms || []).join(' + ')}`;
+                $('socDraftModalSub').textContent = `${d.status} · ${fmtDate(d.scheduledFor || d.createdAt)}`;
+                const img = $('socDraftImagePreview');
+                if (d.imageUrl) img.innerHTML = `<img src="${escHtml(d.imageUrl)}" style="width:100%;height:100%;object-fit:cover;" alt="">`;
+                else img.textContent = 'No image';
+                $('socDraftImagePrompt').value = d.imagePrompt || '';
+                const meta = $('socDraftMeta');
+                meta.innerHTML = [
+                    ['Type', d.type || '—'],
+                    ['Platforms', (d.platforms || []).join(', ') || '—'],
+                    ['Scheduled', fmtDate(d.scheduledFor)],
+                    ['Posted', fmtDate(d.postedAt)],
+                    ['Regenerations', d.regenerationCount || 0],
+                ].map(([k, v]) => `<div class="mkt-meta-cell"><div class="mkt-meta-k">${k}</div><div class="mkt-meta-v">${escHtml(String(v))}</div></div>`).join('');
+                $('socDraftCaption').textContent = d.caption || '(no caption)';
+                $('socDraftHashtags').textContent = (d.hashtags || []).join(' ');
+                const showPostNow = d.status === 'pending' || d.status === 'approved';
+                $('socDraftPostNowBtn').style.display = showPostNow ? '' : 'none';
+                $('socDraftApproveBtn').style.display = (d.status === 'pending') ? '' : 'none';
+                $('socDraftRejectBtn').style.display = (d.status === 'pending' || d.status === 'approved') ? '' : 'none';
+            }
+
+            async function action(act, payload) {
+                if (!state.currentDraftId) return;
+                try {
+                    const r = await fetch(`${FN}/social-action`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: act, draftId: state.currentDraftId, payload: payload || {} }) });
+                    const body = await r.json();
+                    if (!r.ok) throw new Error(body.error || 'action failed');
+                    const idx = state.drafts.findIndex((x) => x.id === state.currentDraftId);
+                    if (idx >= 0) state.drafts[idx] = body.draft;
+                    renderModal(); renderInbox(); renderCalendar(); updateBadge();
+                    toast(act === 'redo' ? 'Regenerated.' : (act === 'regenImage' ? 'Image regenerated.' : (act.charAt(0).toUpperCase() + act.slice(1)) + 'd.'));
+                    const fresh = await fetchData('social_drafts.json'); state.sha.drafts = fresh.sha;
+                    if (act === 'reject') closeModal();
+                } catch (err) { toast('Action failed: ' + err.message); }
+            }
+
+            async function postNow() {
+                if (!state.currentDraftId) return;
+                if (!confirm('Post this to Facebook + Instagram now? This cannot be undone.')) return;
+                try {
+                    const r = await fetch(`${FN}/social-post`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode: 'sendNow', draftId: state.currentDraftId }) });
+                    const body = await r.json();
+                    if (!r.ok) throw new Error(body.error || 'post failed');
+                    const result = (body.results || [])[0];
+                    if (result && !result.ok) throw new Error(result.error || 'post failed');
+                    toast(body.results?.[0]?.dryRun ? 'Posted (dry-run — Meta token not configured)' : 'Posted to social.');
+                    await loadAll(); closeModal();
+                } catch (err) { toast('Post failed: ' + err.message); }
+            }
+
+            async function generateNow() {
+                if (!confirm('Generate today\'s social drafts now?')) return;
+                toast('Generating… this may take 20–60 seconds.');
+                try {
+                    const r = await fetch(`${FN}/social-generate-daily`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) });
+                    const body = await r.json(); if (!r.ok) throw new Error(body.error || 'generation failed');
+                    toast(`Generated ${body.generatedCount || 0} draft(s).`); await loadAll();
+                } catch (err) { toast('Generate failed: ' + err.message); }
+            }
+
+            async function saveRules() {
+                const inputs = document.querySelectorAll('#socRulesList [data-rule-idx]');
+                const rules = state.rules.map((r) => Object.assign({}, r));
+                inputs.forEach((el) => {
+                    const i = parseInt(el.dataset.ruleIdx, 10), f = el.dataset.field;
+                    if (!rules[i]) return;
+                    if (f === 'platforms') rules[i][f] = el.value.split(',').map((s) => s.trim()).filter(Boolean);
+                    else rules[i][f] = el.value;
+                });
+                try {
+                    const cur = await fetchData('social_calendar.json');
+                    const next = Object.assign({}, cur.json, { rules, updatedAt: new Date().toISOString() });
+                    await putData('social_calendar.json', next, cur.sha, 'social: update calendar rules');
+                    state.rules = rules;
+                    toast('Rules saved.');
+                } catch (err) { toast('Save failed: ' + err.message); }
+            }
+
+            function init() {
+                $('socInboxFilter')?.addEventListener('change', renderInbox);
+                $('socInboxRefresh')?.addEventListener('click', loadAll);
+                $('socGenerateNowBtn')?.addEventListener('click', generateNow);
+                $('socSaveRulesBtn')?.addEventListener('click', saveRules);
+                $('socDraftModalClose')?.addEventListener('click', closeModal);
+                document.querySelectorAll('#socDraftModal .mkt-mode-tab').forEach((t) => t.addEventListener('click', () => setMode(t.dataset.mode)));
+                $('socDraftApproveBtn')?.addEventListener('click', () => action('approve', { approvedBy: 'admin' }));
+                $('socDraftRejectBtn')?.addEventListener('click', () => { const reason = prompt('Optional reason for rejecting:') || ''; action('reject', { reason }); });
+                $('socDraftEditSaveBtn')?.addEventListener('click', () => {
+                    const caption = $('socDraftEditCaption').value;
+                    const hashtags = $('socDraftEditHashtags').value.split('\n').map((s) => s.trim()).filter(Boolean);
+                    action('edit', { caption, hashtags });
+                });
+                $('socDraftRedoBtn')?.addEventListener('click', () => {
+                    const inst = $('socDraftRedoInstructions').value.trim();
+                    if (!inst) return toast('Tell the AI what to change first.');
+                    action('redo', { instructions: inst });
+                });
+                $('socRegenImageBtn')?.addEventListener('click', () => {
+                    const newPrompt = $('socDraftImagePrompt').value.trim();
+                    action('regenImage', { imagePrompt: newPrompt });
+                });
+                $('socDraftPostNowBtn')?.addEventListener('click', postNow);
+                $('socDraftModal')?.addEventListener('click', (e) => { if (e.target.id === 'socDraftModal') closeModal(); });
+                document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('socDraftModal')?.classList.contains('open')) closeModal(); });
+            }
+            function onTabSwitch(tabName) {
+                if (!state.loaded) loadAll();
+                if (tabName === 'socInbox') renderInbox();
+                else if (tabName === 'socCalendar') renderCalendar();
+                else if (tabName === 'socPerformance') renderPerformance();
+                else if (tabName === 'socSettings') renderSettings();
+            }
+            return { init, loadAll, onTabSwitch, openModal };
+        })();
+
+        document.addEventListener('DOMContentLoaded', () => { try { SocialUI.init(); } catch (e) { console.error('SocialUI init failed', e); } });
+
     </script>
 </body>
 </html>
