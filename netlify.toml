@@ -32,3 +32,16 @@
 # included on Basic 5k plan). Pulls open/click/bounce stats per Single Send.
 [functions."marketing-poll-stats"]
   schedule = "*/15 * * * *"
+
+# ─── SOCIAL ──────────────────────────────────────────────────────────────────
+# Daily social drafts generator — 13:00 UTC = 8am CDT / 7am CST.
+[functions."social-generate-daily"]
+  schedule = "0 13 * * *"
+
+# Social send-queue poller — every 10 min. Drains 'approved' drafts at scheduledFor.
+[functions."social-post"]
+  schedule = "*/10 * * * *"
+
+# Social engagement stats poller — every 30 min. Reach/likes/comments per post.
+[functions."social-poll-stats"]
+  schedule = "*/30 * * * *"

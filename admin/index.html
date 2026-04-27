@@ -2422,6 +2422,15 @@
                     </div>
                 </div>
                 <div class="nav-dropdown">
+                    <div class="nav-tab" data-tab="socInbox" data-dropdown="social">Social</div>
+                    <div class="nav-dropdown-menu">
+                        <div class="nav-dropdown-item" data-tab="socInbox">Drafts Inbox <span id="socInboxBadge" style="display:none;background:var(--gold);color:#fff;border-radius:10px;padding:1px 7px;font-size:0.65rem;margin-left:0.4rem;">0</span></div>
+                        <div class="nav-dropdown-item" data-tab="socCalendar">Calendar</div>
+                        <div class="nav-dropdown-item" data-tab="socPerformance">Performance</div>
+                        <div class="nav-dropdown-item" data-tab="socSettings">Social Settings</div>
+                    </div>
+                </div>
+                <div class="nav-dropdown">
                     <div class="nav-tab" data-tab="floorplan" data-dropdown="settings">Settings</div>
                     <div class="nav-dropdown-menu">
                         <div class="nav-dropdown-item" data-tab="floorplan">Floor Plan</div>
@@ -3232,6 +3241,122 @@
                         <h4>Calendar rules</h4>
                         <div id="mktRulesList"><div class="mkt-empty">Loading…</div></div>
                         <div style="margin-top:0.75rem;text-align:right;"><button class="btn-primary" id="mktSetSaveRulesBtn">Save Rules</button></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================================
+                 SOCIAL — DRAFTS INBOX TAB
+                 ======================================================== -->
+            <div id="socInboxTab" class="tab-content">
+                <div class="mkt-header">
+                    <div>
+                        <h2 style="margin:0;">Social Drafts</h2>
+                        <p class="mkt-sub">AI-generated Facebook + Instagram posts. Approve / Edit / Redo / Regenerate Image / Schedule.</p>
+                    </div>
+                    <div class="mkt-header-actions">
+                        <select id="socInboxFilter" style="padding:0.5rem 0.75rem;">
+                            <option value="pending">Pending only</option>
+                            <option value="all">All statuses</option>
+                            <option value="approved">Approved</option>
+                            <option value="posted">Posted</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                        <button class="btn-secondary" id="socGenerateNowBtn">Generate Drafts Now</button>
+                        <button class="btn-secondary" id="socInboxRefresh">Refresh</button>
+                    </div>
+                </div>
+                <div id="socInboxList" class="mkt-inbox-list"><div class="mkt-empty">Loading drafts…</div></div>
+            </div>
+
+            <div id="socCalendarTab" class="tab-content">
+                <div class="mkt-header">
+                    <div><h2 style="margin:0;">Social Calendar</h2><p class="mkt-sub">All scheduled / posted social content across Facebook + Instagram.</p></div>
+                </div>
+                <div id="socCalendarList"><div class="mkt-empty">Loading…</div></div>
+            </div>
+
+            <div id="socPerformanceTab" class="tab-content">
+                <div class="mkt-header">
+                    <div><h2 style="margin:0;">Social Performance</h2><p class="mkt-sub">Reach, impressions, likes, comments, shares per post (polled every 30 min from Meta Graph API).</p></div>
+                </div>
+                <div class="mkt-stats">
+                    <div class="stat-item"><div class="stat-label">Posts (30d)</div><div class="stat-value" id="socStatPosts">—</div></div>
+                    <div class="stat-item"><div class="stat-label">Total Reach</div><div class="stat-value" id="socStatReach">—</div></div>
+                    <div class="stat-item"><div class="stat-label">Total Likes</div><div class="stat-value" id="socStatLikes">—</div></div>
+                    <div class="stat-item"><div class="stat-label">Total Comments</div><div class="stat-value" id="socStatComments">—</div></div>
+                </div>
+                <div class="mkt-card"><h4>Top-performing posts (by reach)</h4><table class="mkt-table" id="socPerfTable"><thead><tr><th>Caption</th><th>Platform</th><th>Reach</th><th>Likes</th><th>Comments</th></tr></thead><tbody><tr><td colspan="5" class="mkt-empty-cell">No posts yet</td></tr></tbody></table></div>
+            </div>
+
+            <div id="socSettingsTab" class="tab-content">
+                <div class="mkt-header"><div><h2 style="margin:0;">Social Settings</h2><p class="mkt-sub">Calendar rules + Meta connection status.</p></div></div>
+                <div class="mkt-perf-grid">
+                    <div class="mkt-card">
+                        <h4>Meta Connection</h4>
+                        <div id="socMetaStatus"><div class="mkt-empty">Checking…</div></div>
+                    </div>
+                    <div class="mkt-card">
+                        <h4>Calendar Rules</h4>
+                        <div id="socRulesList"><div class="mkt-empty">Loading…</div></div>
+                        <div style="margin-top:0.75rem;text-align:right;"><button class="btn-primary" id="socSaveRulesBtn">Save Rules</button></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================================
+                 SOCIAL — DRAFT REVIEW MODAL
+                 ======================================================== -->
+            <div class="mkt-modal-backdrop" id="socDraftModal" role="dialog" aria-modal="true" aria-hidden="true">
+                <div class="mkt-modal" role="document" style="max-width:900px;">
+                    <div class="mkt-modal-head">
+                        <div>
+                            <h3 id="socDraftModalTitle">Social Post</h3>
+                            <div id="socDraftModalSub" style="font-size:0.75rem;color:var(--text-muted);margin-top:0.2rem;"></div>
+                        </div>
+                        <button class="mkt-modal-close" id="socDraftModalClose" aria-label="Close">&times;</button>
+                    </div>
+                    <div class="mkt-modal-body">
+                        <div class="mkt-modal-pane">
+                            <h5>Hero Image</h5>
+                            <div id="socDraftImagePreview" style="background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:6px;height:280px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:0.85rem;overflow:hidden;">No image</div>
+                            <div style="margin-top:0.5rem;display:flex;gap:0.4rem;">
+                                <button class="btn-secondary" id="socRegenImageBtn" style="flex:1;font-size:0.8rem;">↻ Regenerate Image (DALL-E)</button>
+                            </div>
+                            <h5 style="margin-top:1rem;">Image Prompt</h5>
+                            <textarea id="socDraftImagePrompt" style="width:100%;min-height:60px;padding:0.5rem;border:1px solid var(--border-subtle);border-radius:4px;font-size:0.8rem;font-family:monospace;background:var(--bg-card);color:var(--text-primary);"></textarea>
+                        </div>
+                        <div class="mkt-modal-pane">
+                            <div class="mkt-mode-tabs">
+                                <div class="mkt-mode-tab active" data-mode="review">Review</div>
+                                <div class="mkt-mode-tab" data-mode="edit">Edit</div>
+                                <div class="mkt-mode-tab" data-mode="redo">Redo</div>
+                            </div>
+                            <div class="mkt-mode-pane" data-mode-pane="review">
+                                <div class="mkt-meta-grid" id="socDraftMeta"></div>
+                                <h5>Caption</h5>
+                                <div id="socDraftCaption" style="background:var(--bg-elevated);padding:0.7rem;border-radius:4px;font-size:0.9rem;line-height:1.5;white-space:pre-wrap;"></div>
+                                <h5 style="margin-top:1rem;">Hashtags</h5>
+                                <div id="socDraftHashtags" style="font-size:0.85rem;color:var(--gold);"></div>
+                            </div>
+                            <div class="mkt-mode-pane" data-mode-pane="edit" style="display:none;">
+                                <h5>Caption</h5>
+                                <textarea id="socDraftEditCaption" class="body-edit" style="min-height:120px;font-family:inherit;font-size:0.9rem;"></textarea>
+                                <h5 style="margin-top:1rem;">Hashtags (one per line, with #)</h5>
+                                <textarea id="socDraftEditHashtags" class="body-edit" style="min-height:80px;font-family:inherit;font-size:0.85rem;"></textarea>
+                                <div style="margin-top:0.75rem;text-align:right;"><button class="btn-edit-save" id="socDraftEditSaveBtn">Save Edits</button></div>
+                            </div>
+                            <div class="mkt-mode-pane" data-mode-pane="redo" style="display:none;">
+                                <h5>Tell the AI what to change</h5>
+                                <textarea id="socDraftRedoInstructions" class="mkt-redo-input" placeholder="e.g. Make it shorter, lead with the band name, add an emoji"></textarea>
+                                <div style="margin-top:0.85rem;text-align:right;"><button class="btn-redo" id="socDraftRedoBtn">Regenerate Caption</button></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mkt-modal-foot">
+                        <button class="btn-reject" id="socDraftRejectBtn">Reject</button>
+                        <button class="btn-approve" id="socDraftApproveBtn">Approve &amp; Schedule</button>
+                        <button class="btn-approve" id="socDraftPostNowBtn" style="background:var(--gold);">Post Now</button>
                     </div>
                 </div>
             </div>
@@ -4107,6 +4232,10 @@
             if (tabName.startsWith('mkt') && window.MarketingUI && typeof MarketingUI.onTabSwitch === 'function') {
                 MarketingUI.onTabSwitch(tabName);
             }
+            // Social module hook
+            if (tabName.startsWith('soc') && window.SocialUI && typeof SocialUI.onTabSwitch === 'function') {
+                SocialUI.onTabSwitch(tabName);
+            }
         }
 
         // ================================================================
@@ -4649,8 +4778,8 @@
         async function loadData() {
             try {
                 const [eventsRes, subscribersRes, formsRes] = await Promise.all([
-                    fetch('/events.json?t=' + Date.now(), { cache: 'no-store' }),
-                    fetch('/subscribers.json?t=' + Date.now(), { cache: 'no-store' }),
+                    fetch('/events.json'),
+                    fetch('/subscribers.json'),
                     fetch('https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/forms.json?t=' + Date.now()).catch(() => null)
                 ]);
 
@@ -4880,10 +5009,7 @@
 
         function formatDate(dateStr) {
             if (!dateStr) return '—';
-            // YYYY-MM-DD strings are parsed as UTC by Date(), causing -1 day shift in CT.
-            // Anchor at noon local so it always lands on the intended calendar day.
-            const safe = /^\d{4}-\d{2}-\d{2}$/.test(dateStr) ? dateStr + 'T12:00:00' : dateStr;
-            const date = new Date(safe);
+            const date = new Date(dateStr);
             if (isNaN(date.getTime())) return dateStr;
             return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         }

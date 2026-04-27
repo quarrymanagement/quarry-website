@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "updatedAt": "2026-04-27T00:00:00Z",
+  "_schema": {
+    "events": "Append-only log of post-engagement events polled from Meta Graph API insights endpoint.",
+    "eventShape": {
+      "ts": "ISO timestamp of poll",
+      "type": "poll | publish_success | publish_fail",
+      "draftId": "string",
+      "platform": "facebook | instagram",
+      "fbPostId": "string | null",
+      "igMediaId": "string | null",
+      "summary": "object — { reach, impressions, likes, comments, shares, saves }"
+    },
+    "aggregates": "Per-draft latest engagement totals so dashboard reads stay fast."
+  },
+  "events": [],
+  "aggregates": {}
+}

@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "updatedAt": "2026-04-27T00:00:00Z",
+  "_schema": {
+    "learnings": "AI-derived patterns from past social engagement. Injected into next-day social drafts.",
+    "learningShape": {
+      "id": "string", "category": "timing | caption_style | image_type | hashtag_set | post_type | platform",
+      "insight": "string", "confidence": "low | medium | high",
+      "sampleSize": "number", "createdAt": "ISO", "supersededAt": "ISO | null"
+    }
+  },
+  "learnings": [
+    {
+      "id": "seed-caption-length",
+      "category": "caption_style",
+      "insight": "Instagram captions of 100-200 characters get the highest engagement on restaurant accounts. Lead with a hook in the first 90 chars (before 'See more' fold).",
+      "confidence": "high",
+      "sampleSize": 0,
+      "createdAt": "2026-04-27T00:00:00Z",
+      "supersededAt": null
+    },
+    {
+      "id": "seed-hashtag-mix",
+      "category": "hashtag_set",
+      "insight": "Mix 3-5 hyper-local hashtags (#NewMelleMO, #StCharlesEats, #DefianceMO) with 3-5 category tags (#WineBar, #LiveMusic, #STLEats). 30 max but 6-10 is the sweet spot.",
+      "confidence": "high",
+      "sampleSize": 0,
+      "createdAt": "2026-04-27T00:00:00Z",
+      "supersededAt": null
+    },
+    {
+      "id": "seed-no-emoji-spam",
+      "category": "caption_style",
+      "insight": "Max 2 emojis per caption. Instagram algorithmically downranks emoji-heavy captions. None is fine.",
+      "confidence": "medium",
+      "sampleSize": 0,
+      "createdAt": "2026-04-27T00:00:00Z",
+      "supersededAt": null
+    },
+    {
+      "id": "seed-cta-soft",
+      "category": "caption_style",
+      "insight": "Restaurant social CTAs work better as invitations than commands. 'See you Friday' beats 'Reserve now'.",
+      "confidence": "high",
+      "sampleSize": 0,
+      "createdAt": "2026-04-27T00:00:00Z",
+      "supersededAt": null
+    },
+    {
+      "id": "seed-best-times",
+      "category": "timing",
+      "insight": "Restaurant posts perform best at 11am (lunch decision time), 4-5pm (dinner planning), and Sunday 7-8pm (week-ahead browsing). Avoid 1-3pm dead zone.",
+      "confidence": "medium",
+      "sampleSize": 0,
+      "createdAt": "2026-04-27T00:00:00Z",
+      "supersededAt": null
+    }
+  ],
+  "eventIdeas": []
+}

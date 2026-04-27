@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "updatedAt": "2026-04-27T00:00:00Z",
+  "_schema": {
+    "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
+    "draftShape": {
+      "id": "string — uuid",
+      "ruleId": "string — references social_calendar.json rules[].id",
+      "type": "string — band_announce | menu_spotlight | weather_patio | event_promo | wine_club | brand_post | manual",
+      "platforms": "['facebook'] | ['instagram'] | ['facebook','instagram']",
+      "status": "pending | approved | posted | rejected | failed",
+      "caption": "string — main post copy",
+      "hashtags": "['#hashtag1','#hashtag2'] — appended to caption for IG, optional for FB",
+      "imageUrl": "string — public URL of the hero image (uploaded or AI-generated)",
+      "imagePrompt": "string — DALL-E prompt used (for re-generation)",
+      "linkUrl": "string — optional link card target (FB only — IG strips links from feed)",
+      "scheduledFor": "ISO ts",
+      "createdAt": "ISO ts",
+      "updatedAt": "ISO ts",
+      "postedAt": "ISO ts | null",
+      "fbPostId": "string | null — Facebook post ID after publish",
+      "igMediaId": "string | null — Instagram media ID after publish",
+      "regenerationCount": "number",
+      "lastInstructions": "string — last redo instructions",
+      "context": "object — what fed the prompt"
+    }
+  },
+  "drafts": [],
+  "history": [],
+  "settings": {
+    "defaultPlatforms": ["facebook", "instagram"],
+    "fbPageUrl": "https://www.facebook.com/thequarrystl",
+    "igHandle": "@thequarrystl",
+    "brandVoice": "Upscale-casual, warm, confident",
+    "imagesDir": "/assets/social-images",
+    "captionMaxChars": { "facebook": 2200, "instagram": 2200, "instagram_recommended": 280 },
+    "hashtagMax": 30,
+    "hashtagRecommended": 8,
+    "generation": {
+      "lookAheadDays": 7,
+      "maxDraftsPerDay": 3,
+      "skipIfDraftExistsForRuleAndDate": true
+    },
+    "models": { "primary": "claude", "image": "dall-e-3" }
+  }
+}

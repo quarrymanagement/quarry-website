@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "updatedAt": "2026-04-27T00:00:00Z",
+  "_schema": {
+    "rules": "Recurring or one-off social-post rules driving daily auto-generation.",
+    "ruleShape": {
+      "id": "string", "name": "string", "type": "string", "enabled": "boolean",
+      "schedule": { "kind": "weekly | event_relative | trigger | one_off | daily", "...": "..." },
+      "platforms": "['facebook','instagram'] etc.",
+      "draftType": "matches social-ai-draft type values",
+      "imageStrategy": "ai_generate | venue_hero | event_supplied | reuse_last",
+      "notes": "freeform"
+    }
+  },
+  "rules": [
+    {
+      "id": "daily-band-announce",
+      "name": "Daily Live-Music Announcement",
+      "type": "band_announce",
+      "enabled": true,
+      "schedule": { "kind": "event_relative", "offsetsDays": [-2, 0], "hourCT": 9 },
+      "platforms": ["facebook", "instagram"],
+      "draftType": "band_announce",
+      "imageStrategy": "ai_generate",
+      "notes": "For each band/show in the schedule, generate a post 2 days out and morning-of."
+    },
+    {
+      "id": "weekly-menu-spotlight",
+      "name": "Friday Menu Spotlight",
+      "type": "menu_spotlight",
+      "enabled": true,
+      "schedule": { "kind": "weekly", "dayOfWeek": 5, "hourCT": 11 },
+      "platforms": ["facebook", "instagram"],
+      "draftType": "menu_spotlight",
+      "imageStrategy": "ai_generate",
+      "notes": "One specific dish, sensory copy, AI-generated food photo."
+    },
+    {
+      "id": "weekly-wineclub",
+      "name": "Wine Wednesday — Wine Club Spotlight",
+      "type": "wine_club",
+      "enabled": true,
+      "schedule": { "kind": "weekly", "dayOfWeek": 3, "hourCT": 16 },
+      "platforms": ["facebook", "instagram"],
+      "draftType": "wine_club",
+      "imageStrategy": "ai_generate",
+      "notes": "Featured bottle of the week. Drives wine club signups."
+    },
+    {
+      "id": "weekend-recap",
+      "name": "Sunday Weekend Recap",
+      "type": "brand_post",
+      "enabled": false,
+      "schedule": { "kind": "weekly", "dayOfWeek": 0, "hourCT": 19 },
+      "platforms": ["facebook", "instagram"],
+      "draftType": "brand_post",
+      "imageStrategy": "venue_hero",
+      "notes": "Disabled until we have user-supplied weekend photos coming in via reservation tags."
+    },
+    {
+      "id": "weather-patio",
+      "name": "Patio Weather Alert",
+      "type": "weather_patio",
+      "enabled": false,
+      "schedule": { "kind": "trigger", "trigger": "weather_match", "hourCT": 10 },
+      "platforms": ["facebook", "instagram"],
+      "draftType": "weather_patio",
+      "imageStrategy": "venue_hero",
+      "notes": "Disabled — needs weather API integration. Same trigger as marketing email weather rule."
+    },
+    {
+      "id": "private-events-monthly",
+      "name": "Monthly Private Events Pitch",
+      "type": "brand_post",
+      "enabled": true,
+      "schedule": { "kind": "monthly", "monthDay": 10, "hourCT": 10 },
+      "platforms": ["facebook", "instagram"],
+      "draftType": "brand_post",
+      "imageStrategy": "ai_generate",
+      "notes": "Once a month, plug the private-events / wedding venue side of the business."
+    }
+  ]
+}
