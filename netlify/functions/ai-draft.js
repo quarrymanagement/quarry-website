@@ -217,11 +217,7 @@ function wrapWithFooter(htmlBody) {
     // Inline-SVG social icons render in Gmail, Apple Mail, modern Outlook, Yahoo. Falls
     // back to nothing in Outlook 2016 desktop — but the surrounding link text + box stays
     // clickable, so functionality is preserved.
-    // PNG icons render in EVERY email client (SVG fails in Outlook desktop, some Yahoo).
-    // Hosted on our domain so they cache fast and stay branded.
-    const webIcon = `<img src="https://thequarrystl.com/assets/email-icons/web.png" alt="Web" width="22" height="22" style="display:inline-block;border:0;outline:none;vertical-align:middle;">`;
-    const fbIcon  = `<img src="https://thequarrystl.com/assets/email-icons/facebook.png" alt="Facebook" width="22" height="22" style="display:inline-block;border:0;outline:none;vertical-align:middle;">`;
-    const igIcon  = `<img src="https://thequarrystl.com/assets/email-icons/instagram.png" alt="Instagram" width="22" height="22" style="display:inline-block;border:0;outline:none;vertical-align:middle;">`;
+    // (Social icons removed — text-based "Follow us" line is more reliable + brand-cohesive)
 
     // Universal styles for AI-generated content (we inject these so AI doesn't have to manage colors)
     const bodyStyles = `
@@ -300,12 +296,13 @@ ${bodyStyles}
         </div>
       </td></tr>
 
-      <!-- ═══ NAVY FOOTER: socials + address + unsub ═══ -->
+      <!-- ═══ NAVY FOOTER: follow us text + address + unsub ═══ -->
       <tr><td align="center" style="background:${NAVY_DK};padding:24px 24px 22px;">
-        <div style="margin-bottom:14px;">
-          <a href="${WEB_URL}" style="margin:0 10px;display:inline-block;text-decoration:none;" title="thequarrystl.com">${webIcon}</a>
-          <a href="${FB_URL}" style="margin:0 10px;display:inline-block;text-decoration:none;" title="Facebook">${fbIcon}</a>
-          <a href="${IG_URL}" style="margin:0 10px;display:inline-block;text-decoration:none;" title="Instagram">${igIcon}</a>
+        <div style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;color:${CREAM_ON_NAVY};letter-spacing:0.08em;text-transform:uppercase;font-weight:600;margin-bottom:14px;">
+          Follow us: &nbsp;
+          <a href="${FB_URL}" style="color:${GOLD_LT};text-decoration:none;font-weight:600;">Facebook</a> &nbsp;·&nbsp;
+          <a href="${IG_URL}" style="color:${GOLD_LT};text-decoration:none;font-weight:600;">Instagram</a> &nbsp;·&nbsp;
+          <a href="${WEB_URL}" style="color:${GOLD_LT};text-decoration:none;font-weight:600;">Website</a>
         </div>
         <div style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;color:${CREAM_ON_NAVY};line-height:1.5;margin-bottom:8px;">
           <strong style="color:${GOLD_LT};">The Quarry</strong> &nbsp;·&nbsp; 3960 Highway Z &nbsp;·&nbsp; New Melle, MO 63385 &nbsp;·&nbsp; (636) 224-8257
