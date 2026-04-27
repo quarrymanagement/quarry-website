@@ -43,7 +43,15 @@ const response = (statusCode, body) => ({
 // BRAND VOICE + CAN-SPAM FOOTER
 // ============================================================================
 
-const BRAND_SYSTEM_PROMPT = `You are the marketing copywriter for The Quarry, an upscale-casual restaurant and event venue at 3960 Highway Z, New Melle, Missouri 63385.
+const BRAND_SYSTEM_PROMPT = `You are the marketing copywriter for The Quarry, an upscale-casual restaurant, wine bar, live music venue, and Hole-In-One Golf entertainment space at 3960 Highway Z, New Melle, Missouri 63385.
+
+CRITICAL FACTS — never get these wrong:
+- The Quarry does NOT take individual table reservations. We are a walk-in venue for dining.
+- We DO book large parties, private events, weddings, corporate gatherings — that's our reservations business.
+- Items in the "events" context array are LIVE MUSIC ACTS / BANDS / SHOWS unless explicitly labeled otherwise.
+  A name like "Janet Martin" or "Dave Caputo" is the BAND OR MUSICIAN performing — never a class, lesson, or instructor.
+- We are open Wednesday through Sunday. Closed Monday and Tuesday.
+- Live music is FREE with a visit. We don't charge a cover.
 
 BRAND VOICE
 - Upscale-casual, warm, confident. Think: refined neighborhood restaurant with personality.
@@ -192,7 +200,7 @@ function wrapWithFooter(htmlBody) {
     const FB_URL   = 'https://www.facebook.com/thequarrystl';
     const IG_URL   = 'https://www.instagram.com/thequarrystl';
     const UNSUB_URL = 'https://www.thequarrystl.com/.netlify/functions/unsubscribe?email={email}';
-    const RES_URL  = 'https://www.thequarrystl.com/quarry-reservations.html?utm_source=email&utm_medium=marketing&utm_campaign=footer-cta';
+    const RES_URL  = 'https://www.thequarrystl.com/quarry-private-events.html?utm_source=email&utm_medium=marketing&utm_campaign=footer-cta';
 
     // Brand palette — matches the Live Bands social flyer aesthetic
     const NAVY     = '#1a2942';
@@ -283,7 +291,7 @@ ${bodyStyles}
         <table role="presentation" cellpadding="0" cellspacing="0" border="0">
           <tr><td align="center" bgcolor="${GOLD}" style="border-radius:6px;box-shadow:0 4px 12px rgba(154,123,42,0.35);">
             <a href="${RES_URL}" style="display:inline-block;padding:16px 36px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:15px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#ffffff;text-decoration:none;border-radius:6px;">
-              Reserve a Table &nbsp;→
+              Book Your Next Event &nbsp;→
             </a>
           </td></tr>
         </table>
@@ -303,8 +311,7 @@ ${bodyStyles}
           <strong style="color:${GOLD_LT};">The Quarry</strong> &nbsp;·&nbsp; 3960 Highway Z &nbsp;·&nbsp; New Melle, MO 63385 &nbsp;·&nbsp; (636) 224-8257
         </div>
         <div style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:11px;color:rgba(243,236,217,0.55);line-height:1.6;">
-          You're receiving this because you signed up, booked a reservation, or attended an event at The Quarry.<br>
-          <a href="${UNSUB_URL}" style="color:rgba(243,236,217,0.75);text-decoration:underline;">Unsubscribe</a> &nbsp;·&nbsp;
+          You're receiving this because you signed up, booked an event, or attended one at The Quarry.<br>
           <a href="https://www.thequarrystl.com/privacy.html" style="color:rgba(243,236,217,0.75);text-decoration:underline;">Privacy Policy</a>
         </div>
       </td></tr>
