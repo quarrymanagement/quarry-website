@@ -240,7 +240,7 @@ ${htmlBody}
     <a href="${IG}" style="color:#9a7b2a;text-decoration:none;margin:0 0.6rem;display:inline-block;" title="Instagram">${igIcon}</a>
   </div>
   <div style="margin-bottom:0.5rem;"><strong style="color:#4b5263;">The Quarry</strong> &middot; 3960 Highway Z, New Melle, MO 63385 &middot; (636) 224-8257</div>
-  <div>You're receiving this because you signed up at thequarrystl.com. <a href="${UNSUB}" style="color:#858d9e;text-decoration:underline;">Unsubscribe</a></div>
+  <div>You're receiving this because you signed up at thequarrystl.com. <a href="${UNSUB}" style="color:#858d9e;text-decoration:underline;">Unsubscribe</a> &middot; <a href="https://www.thequarrystl.com/privacy.html" style="color:#858d9e;text-decoration:underline;">Privacy Policy</a></div>
 </div>
 </div></body></html>`;
 }

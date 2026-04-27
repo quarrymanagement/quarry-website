@@ -160,7 +160,8 @@ function wrapWithFooter(htmlBody) {
   </div>
   <div>
     You're receiving this because you signed up, booked a reservation, or attended an event at The Quarry.
-    <a href="${UNSUB_URL}" style="color:#858d9e;text-decoration:underline;">Unsubscribe</a>
+    <a href="${UNSUB_URL}" style="color:#858d9e;text-decoration:underline;">Unsubscribe</a> &middot;
+    <a href="https://www.thequarrystl.com/privacy.html" style="color:#858d9e;text-decoration:underline;">Privacy Policy</a>
   </div>
 </div>`;
 
