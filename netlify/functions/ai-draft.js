@@ -120,7 +120,7 @@ function tagUtms(html, ruleId) {
 
 function wrapWithFooter(htmlBody) {
     // Brand assets — absolute URLs required for email clients
-    const LOGO_URL = 'https://thequarrystl.com/assets/icons/icon-512.png';
+    const LOGO_URL = 'https://thequarrystl.com/assets/quarry-q-logo.png';
     const WEB_URL  = 'https://www.thequarrystl.com';
     const FB_URL   = 'https://www.facebook.com/thequarrystl';
     const IG_URL   = 'https://www.instagram.com/thequarrystl';
@@ -143,11 +143,6 @@ function wrapWithFooter(htmlBody) {
   </div>
   <div style="margin-bottom:0.5rem;">
     <strong style="color:#4b5263;">The Quarry</strong> &middot; 3960 Highway Z, New Melle, MO 63385 &middot; (636) 224-8257
-  </div>
-  <div style="margin-bottom:0.5rem;">
-    <a href="${WEB_URL}" style="color:#9a7b2a;text-decoration:none;">thequarrystl.com</a> &middot;
-    <a href="${FB_URL}" style="color:#9a7b2a;text-decoration:none;">facebook.com/thequarrystl</a> &middot;
-    <a href="${IG_URL}" style="color:#9a7b2a;text-decoration:none;">@thequarrystl</a>
   </div>
   <div>
     You're receiving this because you signed up, booked a reservation, or attended an event at The Quarry.
