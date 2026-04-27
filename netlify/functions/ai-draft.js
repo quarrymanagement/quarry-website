@@ -306,8 +306,9 @@ ${bodyStyles}
             <a href="${WEB_URL}" style="color:${GOLD_LT};text-decoration:none;">Website</a>
           </div>
         </div>
-        <div style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;color:${CREAM_ON_NAVY};line-height:1.5;margin-bottom:8px;">
-          <strong style="color:${GOLD_LT};">The Quarry</strong> &nbsp;·&nbsp; 3960 Highway Z &nbsp;·&nbsp; New Melle, MO 63385 &nbsp;·&nbsp; (636) 224-8257
+        <div style="text-align:center;margin-bottom:10px;">
+          <div style="font-family:'Playfair Display',Georgia,serif;font-size:16px;color:${GOLD_LT};font-weight:700;letter-spacing:0.06em;margin-bottom:4px;">The Quarry</div>
+          <div style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;color:${CREAM_ON_NAVY};line-height:1.5;">3960 Highway Z &nbsp;·&nbsp; New Melle, MO 63385 &nbsp;·&nbsp; <a href="tel:6362248257" style="color:${CREAM_ON_NAVY};text-decoration:none;">(636) 224-8257</a></div>
         </div>
         <div style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:11px;color:rgba(243,236,217,0.55);line-height:1.6;">
           You're receiving this because you signed up, booked an event, or attended one at The Quarry.<br>
