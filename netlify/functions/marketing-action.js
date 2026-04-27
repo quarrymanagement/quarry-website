@@ -86,7 +86,12 @@ function wrapWithFooter(htmlBody) {
     <img src="${LOGO_URL}" alt="The Quarry — wine, bites, live music, and golf in New Melle, MO" width="72" height="72" style="display:block;margin:0 auto 0.5rem;border:0;outline:none;text-decoration:none;">
   </a>
   <div style="font-family:'Playfair Display',Georgia,serif;font-size:1.4rem;color:#1c1f26;letter-spacing:0.08em;">THE QUARRY</div>
-  <div style="font-family:'Montserrat',sans-serif;font-size:0.7rem;color:#858d9e;letter-spacing:0.18em;text-transform:uppercase;margin-top:0.25rem;">Wine &middot; Bites &middot; Live Music &middot; Golf</div>
+  <div style="font-family:'Montserrat',sans-serif;font-size:0.7rem;color:#858d9e;letter-spacing:0.18em;text-transform:uppercase;margin-top:0.25rem;">
+    <a href="https://www.thequarrystl.com/quarry-drinks.html?utm_source=email&utm_medium=marketing&utm_campaign=header-tagline&utm_content=wine" style="color:#9a7b2a;text-decoration:none;">Wine</a> &middot;
+    <a href="https://www.thequarrystl.com/quarry-menu.html?utm_source=email&utm_medium=marketing&utm_campaign=header-tagline&utm_content=bites" style="color:#9a7b2a;text-decoration:none;">Bites</a> &middot;
+    <a href="https://www.thequarrystl.com/quarry-bands.html?utm_source=email&utm_medium=marketing&utm_campaign=header-tagline&utm_content=music" style="color:#9a7b2a;text-decoration:none;">Live Music</a> &middot;
+    <a href="https://www.thequarrystl.com/quarry-golf.html?utm_source=email&utm_medium=marketing&utm_campaign=header-tagline&utm_content=golf" style="color:#9a7b2a;text-decoration:none;">Golf</a>
+  </div>
 </div>
 ${htmlBody}
 </div>
