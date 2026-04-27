@@ -151,22 +151,45 @@ exports.handler = async (event) => {
             case 'redo': {
                 const instructions = (payload.instructions || '').trim();
                 if (!instructions) return respond(400, { error: 'instructions required for redo' });
-                const aiResp = await fetch(`${SITE_URL}/.netlify/functions/ai-draft`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        type: payload.type || draft.type,
-                        context: draft.context || {},
-                        instructions: `PREVIOUS SUBJECT: ${draft.subject}\nPREVIOUS BODY (excerpt): ${(draft.innerHtml || '').slice(0, 800)}\n\nUSER FEEDBACK FOR REVISION:\n${instructions}`,
-                        model: 'claude'
-                    })
-                });
-                if (!aiResp.ok) {
-                    const t = await aiResp.text();
-                    return respond(500, { error: 'ai-draft failed: ' + t.slice(0, 300) });
+
+                // Strip HTML from the previous body so we don't feed a tag soup
+                // into the AI prompt — that's what was confusing Claude's JSON
+                // output. We just need the gist for context.
+                const prevText = String(draft.innerHtml || '')
+                    .replace(/<[^>]+>/g, ' ')
+                    .replace(/&nbsp;/gi, ' ')
+                    .replace(/&amp;/gi, '&')
+                    .replace(/&[a-z]+;/gi, '')
+                    .replace(/\s+/g, ' ')
+                    .trim()
+                    .slice(0, 600);
+
+                // Up to 2 attempts — Claude occasionally returns malformed JSON
+                // on the first call; a clean retry usually works.
+                let ai = null, lastErr = '';
+                for (let attempt = 0; attempt < 2 && !ai; attempt++) {
+                    try {
+                        const aiResp = await fetch(`${SITE_URL}/.netlify/functions/ai-draft`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                type: payload.type || draft.type,
+                                context: draft.context || {},
+                                instructions: `PREVIOUS SUBJECT: ${draft.subject}\nPREVIOUS BODY (plain text excerpt): ${prevText}\n\nUSER FEEDBACK FOR REVISION:\n${instructions}\n\nIMPORTANT: respond with valid JSON only — no preamble, no code fences.`,
+                                model: 'claude'
+                            })
+                        });
+                        const aiBody = await aiResp.json().catch(() => ({}));
+                        if (aiResp.ok && aiBody.success) {
+                            ai = aiBody;
+                        } else {
+                            lastErr = aiBody.error || `HTTP ${aiResp.status}`;
+                        }
+                    } catch (e) { lastErr = e.message; }
                 }
-                const ai = await aiResp.json();
-                if (!ai.success) return respond(500, { error: 'ai-draft non-success', ai });
+                if (!ai) {
+                    return respond(500, { error: `Redo failed after retries — ${lastErr}. Try simpler instructions or use Edit instead.` });
+                }
                 draft.subject = ai.subject;
                 draft.htmlBody = ai.htmlBody;
                 draft.innerHtml = ai.innerHtml || draft.innerHtml;

@@ -326,20 +326,44 @@ exports.handler = async (event) => {
         return response(500, { success: false, error: err.message });
     }
 
-    // Parse the model's JSON response
+    // Parse the model's JSON response. Models occasionally wrap output in
+    // markdown fences, add a preamble, or trail off mid-token. Try several
+    // recovery strategies before giving up.
     let parsed;
-    try {
-        // Some models wrap JSON in code fences even when asked not to — strip them
-        let clean = result.content.trim();
-        if (clean.startsWith('```')) {
-            clean = clean.replace(/^```(?:json)?\s*/, '').replace(/\s*```$/, '');
+    function tryParse(s) {
+        try { return JSON.parse(s); } catch (_) { return null; }
+    }
+    let clean = (result.content || '').trim();
+    // 1) Strip markdown fences anywhere in the string
+    const fence = clean.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+    if (fence) clean = fence[1].trim();
+    // 2) Direct parse
+    parsed = tryParse(clean);
+    // 3) Extract the first {...} block (greedy, balanced-brace heuristic)
+    if (!parsed) {
+        const firstBrace = clean.indexOf('{');
+        if (firstBrace >= 0) {
+            let depth = 0, end = -1, inStr = false, esc = false;
+            for (let i = firstBrace; i < clean.length; i++) {
+                const ch = clean[i];
+                if (esc) { esc = false; continue; }
+                if (ch === '\\') { esc = true; continue; }
+                if (ch === '"') inStr = !inStr;
+                if (inStr) continue;
+                if (ch === '{') depth++;
+                else if (ch === '}') {
+                    depth--;
+                    if (depth === 0) { end = i; break; }
+                }
+            }
+            if (end > firstBrace) parsed = tryParse(clean.slice(firstBrace, end + 1));
         }
-        parsed = JSON.parse(clean);
-    } catch (e) {
+    }
+    if (!parsed) {
         return response(500, {
             success: false,
-            error: 'AI returned non-JSON output: ' + e.message,
-            raw: result.content.slice(0, 500),
+            error: 'AI returned non-JSON output (after recovery attempts). Try Redo again with simpler instructions.',
+            raw: (result.content || '').slice(0, 600),
         });
     }
 
