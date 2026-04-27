@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-04-27T21:00:47.658Z",
+  "updatedAt": "2026-04-27T21:02:05.304Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -209,6 +209,17 @@
       "sgEventId": "FFnG8zmVRdGe9oztWN57Mg",
       "userAgent": "Mozilla/5.0 (Windows NT 5.1; rv:11.0) Gecko Firefox/11.0 (via ggpht.com GoogleImageProxy)",
       "category": "quarry-marketing:test"
+    },
+    {
+      "ts": "2026-04-27T21:01:51.000Z",
+      "type": "click",
+      "draftId": "f18bae27-7272-450b-a044-b56e3d2b183b",
+      "ruleId": null,
+      "email": "management@thequarrystl.com",
+      "url": "https://www.thequarrystl.com/quarry-drinks.html?utm_source=email&utm_medium=marketing&utm_campaign=header-tagline&utm_content=wine",
+      "sgEventId": "F2dLn-soSBamqRk3U3LRig",
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Mobile/15E148 Safari/604.1",
+      "category": "quarry-marketing:test"
     }
   ],
   "aggregates": {
@@ -216,13 +227,13 @@
       "delivered": 4,
       "open": 8,
       "uniqueOpen": 1,
-      "click": 5,
+      "click": 6,
       "uniqueClick": 1,
       "bounce": 0,
       "unsubscribe": 0,
       "spamreport": 0,
       "dropped": 0,
-      "lastEventAt": "2026-04-27T21:00:34.000Z",
+      "lastEventAt": "2026-04-27T21:01:51.000Z",
       "openersByEmail": {
         "management@thequarrystl.com": "2026-04-27T19:31:03.000Z"
       },
@@ -231,7 +242,8 @@
       },
       "urlsClicked": {
         "https://thequarrynewmelle.com/reservations?utm_source=email&utm_medium=marketing&utm_campaign=weekly_digest": 3,
-        "https://thequarrynewmelle.com/live-music?utm_source=email&utm_medium=marketing&utm_campaign=weekly_digest": 2
+        "https://thequarrynewmelle.com/live-music?utm_source=email&utm_medium=marketing&utm_campaign=weekly_digest": 2,
+        "https://www.thequarrystl.com/quarry-drinks.html?utm_source=email&utm_medium=marketing&utm_campaign=header-tagline&utm_content=wine": 1
       }
     }
   }
