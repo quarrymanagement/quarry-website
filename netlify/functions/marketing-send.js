@@ -187,17 +187,20 @@ async function sendTest(draft, testEmail) {
         tracking_settings: {
             click_tracking: { enable: true, enable_text: false },
             open_tracking: { enable: true },
-            // Tell SendGrid to use OUR unsubscribe URL via List-Unsubscribe header
-            // and NOT to inject its own visible "Unsubscribe / Manage email preferences" line.
-            subscription_tracking: {
-                enable: true,
-                substitution_tag: '[unsubscribe_url]',
-                text: ' ',  // empty — no visible text auto-added
-                html: ' '   // empty — no visible HTML auto-added
-            }
+            // FULLY DISABLE subscription tracking — we provide our own branded
+            // unsubscribe link in the footer using the [unsubscribe_url] tag
+            // is NOT used; we put a real <a href> directly. SendGrid satisfies
+            // CAN-SPAM via the List-Unsubscribe header (also added below).
+            subscription_tracking: { enable: false }
+        },
+        // Add List-Unsubscribe header so Gmail/Apple Mail get one-click compliance
+        // without us needing visible auto-injected SendGrid text.
+        headers: {
+            'List-Unsubscribe': `<https://www.thequarrystl.com/.netlify/functions/unsubscribe?email=${encodeURIComponent(to.email)}>, <mailto:management@thequarrystl.com?subject=unsubscribe>`,
+            'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click'
         }
     };
-    // No `asm` block — that's what was injecting the blue auto-footer.
+    // No `asm` block — that triggers SendGrid's blue "Unsubscribe From This List / Manage Email Preferences" footer block.
     const r = await fetch('https://api.sendgrid.com/v3/mail/send', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${SG_KEY}`, 'Content-Type': 'application/json' },
