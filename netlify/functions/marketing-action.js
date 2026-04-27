@@ -77,9 +77,7 @@ function wrapWithFooter(htmlBody) {
 
     htmlBody = stripOuterWrappers(htmlBody);
 
-    const webIcon = `<img src="https://thequarrystl.com/assets/email-icons/web.png" alt="Web" width="22" height="22" style="display:inline-block;border:0;outline:none;vertical-align:middle;">`;
-    const fbIcon  = `<img src="https://thequarrystl.com/assets/email-icons/facebook.png" alt="Facebook" width="22" height="22" style="display:inline-block;border:0;outline:none;vertical-align:middle;">`;
-    const igIcon  = `<img src="https://thequarrystl.com/assets/email-icons/instagram.png" alt="Instagram" width="22" height="22" style="display:inline-block;border:0;outline:none;vertical-align:middle;">`;
+    // Text-based "Follow us:" — more reliable across email clients than icons.
 
     const bodyStyles = `<style>.qbody{font-family:'Helvetica Neue',Arial,sans-serif;color:${TEXT};line-height:1.65;}.qbody h1{font-family:'Playfair Display',Georgia,serif;color:${NAVY};font-size:28px;line-height:1.25;margin:0 0 18px;font-weight:700;}.qbody h2{font-family:'Playfair Display',Georgia,serif;color:${NAVY};font-size:22px;line-height:1.3;margin:28px 0 14px;font-weight:700;}.qbody h3{font-family:'Helvetica Neue',Arial,sans-serif;color:${GOLD};font-size:12px;line-height:1.3;margin:24px 0 8px;text-transform:uppercase;letter-spacing:0.16em;font-weight:700;}.qbody p{font-size:16px;line-height:1.7;color:${TEXT};margin:0 0 16px;}.qbody ul,.qbody ol{margin:0 0 16px 18px;padding:0;font-size:16px;line-height:1.7;}.qbody li{margin:0 0 8px;}.qbody a{color:${GOLD};text-decoration:underline;}.qbody hr{border:0;border-top:1px solid #d4ccb3;margin:24px 0;}.qbody .event-card{background:rgba(255,255,255,0.6);border-left:4px solid ${GOLD};padding:14px 16px;margin:0 0 14px;border-radius:4px;}.qbody .event-date{font-size:12px;color:${GOLD};font-weight:700;text-transform:uppercase;letter-spacing:0.12em;margin:0 0 4px;}.qbody .event-title{font-family:'Playfair Display',Georgia,serif;font-size:18px;color:${NAVY};font-weight:700;margin:0 0 4px;}.qbody .event-meta{font-size:13px;color:${MUTED};margin:0;}</style>`;
 
@@ -101,11 +99,7 @@ function wrapWithFooter(htmlBody) {
 <tr><td align="center" style="background:${CREAM};padding:8px 32px 32px;"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td align="center" bgcolor="${GOLD}" style="border-radius:6px;box-shadow:0 4px 12px rgba(154,123,42,0.35);"><a href="${RES_URL}" style="display:inline-block;padding:16px 36px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:15px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#ffffff;text-decoration:none;border-radius:6px;">Book Your Next Event &nbsp;→</a></td></tr></table>
 <div style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;color:${MUTED};margin-top:14px;letter-spacing:0.04em;">Wed–Sun &nbsp;·&nbsp; New Melle, MO &nbsp;·&nbsp; <a href="tel:6362248257" style="color:${GOLD};text-decoration:none;">(636) 224-8257</a></div></td></tr>
 <tr><td align="center" style="background:${NAVY_DK};padding:24px 24px 22px;">
-<div style="margin-bottom:14px;">
-<a href="${WEB_URL}" style="margin:0 10px;display:inline-block;text-decoration:none;" title="thequarrystl.com">${webIcon}</a>
-<a href="${FB_URL}" style="margin:0 10px;display:inline-block;text-decoration:none;" title="Facebook">${fbIcon}</a>
-<a href="${IG_URL}" style="margin:0 10px;display:inline-block;text-decoration:none;" title="Instagram">${igIcon}</a>
-</div>
+<div style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;color:${CREAM_ON_NAVY};letter-spacing:0.08em;text-transform:uppercase;font-weight:600;margin-bottom:14px;">Follow us: &nbsp; <a href="${FB_URL}" style="color:${GOLD_LT};text-decoration:none;font-weight:600;">Facebook</a> &nbsp;·&nbsp; <a href="${IG_URL}" style="color:${GOLD_LT};text-decoration:none;font-weight:600;">Instagram</a> &nbsp;·&nbsp; <a href="${WEB_URL}" style="color:${GOLD_LT};text-decoration:none;font-weight:600;">Website</a></div>
 <div style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;color:${CREAM_ON_NAVY};line-height:1.5;margin-bottom:8px;"><strong style="color:${GOLD_LT};">The Quarry</strong> &nbsp;·&nbsp; 3960 Highway Z &nbsp;·&nbsp; New Melle, MO 63385 &nbsp;·&nbsp; (636) 224-8257</div>
 <div style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:11px;color:rgba(243,236,217,0.55);line-height:1.6;">You're receiving this because you signed up, booked an event, or attended one at The Quarry.<br><a href="${UNSUB_URL}" style="color:rgba(243,236,217,0.75);text-decoration:underline;">Unsubscribe</a> &nbsp;·&nbsp; <a href="https://www.thequarrystl.com/privacy.html" style="color:rgba(243,236,217,0.75);text-decoration:underline;">Privacy Policy</a></div>
 </td></tr></table>
