@@ -27,3 +27,8 @@
 # Nightly AI optimizer — 7:00 UTC = 2am CDT / 1am CST. Quiet time.
 [functions."marketing-optimize"]
   schedule = "0 7 * * *"
+
+# Stats poller — every 15 min. Replaces the SendGrid event webhook (not
+# included on Basic 5k plan). Pulls open/click/bounce stats per Single Send.
+[functions."marketing-poll-stats"]
+  schedule = "*/15 * * * *"

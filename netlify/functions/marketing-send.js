@@ -1,31 +1,44 @@
 // ============================================================================
-// marketing-send.js
+// marketing-send.js  (v2 — Marketing Campaigns Single Sends)
 //
-// Two modes:
+// Modes:
+//   (A) poll       — drains 'approved' drafts whose scheduledFor <= now.
+//                    Creates a SendGrid Single Send for each, schedules it
+//                    to send immediately (or at scheduledFor), records the
+//                    Single Send ID on the draft for later stats polling.
 //
-// (A) Cron poll — POST/GET with no body or { mode: 'poll' }
-//     Looks at marketing_drafts.json for drafts where:
-//        status === 'approved' AND scheduledFor <= now
-//     Sends each via SendGrid, marks status='sent' (or 'failed'), saves back.
+//   (B) sendNow    — body { mode:'sendNow', draftId } — same as poll for
+//                    a single draft, ignoring scheduledFor.
 //
-// (B) Send-now — POST { mode: 'sendNow', draftId: '<id>' }
-//     Forces a single draft to send immediately, regardless of scheduledFor.
-//     Marks the draft 'sent' on success.
+//   (C) test       — body { mode:'test', draftId, testEmail } — sends a
+//                    one-off via /v3/mail/send (transactional API, no list).
+//                    Subject auto-prefixed with [TEST].
 //
-// (C) Test — POST { mode: 'test', draftId: '<id>', testEmail: 'x@y.com' }
-//     Sends a one-off test of the rendered draft to a single address.
-//     Does NOT mutate the draft.
+// Why Single Sends?
+//   - Counts against Marketing Campaigns quota (15k/mo on Basic 5k), not
+//     the Email API daily 100-cap.
+//   - Built-in tracking; stats pull-able via /v3/marketing/stats/singlesends.
+//   - Suppression handled automatically (unsubscribed contacts skipped).
+//   - Better deliverability via SendGrid's reputation-managed marketing IPs.
 //
-// Resolves recipients by calling /.netlify/functions/sendgrid-contacts (built
-// alongside this) which queries SendGrid Contacts segments by name.
-//
-// Env: SENDGRID_API_KEY, QUARRY_DATA_KEY (optional auth gate)
+// Required env vars:
+//   SENDGRID_API_KEY         restricted marketing key
+//   SENDGRID_SENDER_ID       verified sender identity ID
+//   SENDGRID_LIST_SUBSCRIBED list ID for Subscribed segment
+//   SENDGRID_LIST_LEGACY     list ID for Wix Legacy segment
+//   SENDGRID_LIST_ALL        list ID for combined ALL list
+//   SENDGRID_UNSUB_GROUP_ID  unsubscribe group id (50859)
 // ============================================================================
 
 const fetch = require('node-fetch');
 
 const SITE_URL = process.env.URL || process.env.DEPLOY_URL || 'https://thequarrystl.com';
-const SENDGRID_KEY = process.env.SENDGRID_API_KEY;
+const SG_KEY   = process.env.SENDGRID_API_KEY;
+const SENDER   = process.env.SENDGRID_SENDER_ID;
+const LIST_ALL = process.env.SENDGRID_LIST_ALL;
+const LIST_SUB = process.env.SENDGRID_LIST_SUBSCRIBED;
+const LIST_LEG = process.env.SENDGRID_LIST_LEGACY;
+const UNSUB_GROUP = parseInt(process.env.SENDGRID_UNSUB_GROUP_ID || '0', 10);
 const QUARRY_DATA_KEY = process.env.QUARRY_DATA_KEY || '';
 
 const CORS = {
@@ -34,75 +47,11 @@ const CORS = {
     'Access-Control-Allow-Headers': 'Content-Type, x-quarry-key',
     'Content-Type': 'application/json'
 };
-const respond = (statusCode, body) => ({ statusCode, headers: CORS, body: JSON.stringify(body) });
+const respond = (s, b) => ({ statusCode: s, headers: CORS, body: JSON.stringify(b) });
 
 // ----------------------------------------------------------------------------
-// SendGrid helpers
+// Helpers
 // ----------------------------------------------------------------------------
-
-async function sgSearchContacts(segment) {
-    // Map our human segment names to SendGrid query expressions.
-    // 'All' / 'Subscribed' is the default — everyone not in unsubscribe groups.
-    // Wine Club / Golf / Event Attendees rely on contact custom fields/tags
-    // managed in SendGrid; if not set up yet, they fall through to the full list.
-    const q = (() => {
-        if (!segment || segment === 'All' || segment === 'Subscribed') return null;
-        // Use SendGrid's contact search syntax — assumes a custom field 'segment_tag'.
-        return `CONTAINS(LOWER(segment_tag), '${segment.toLowerCase().replace(/'/g, "''")}')`;
-    })();
-
-    if (!q) {
-        // Pull all contacts (paginated). For larger lists, prefer creating
-        // a SendGrid List + sending list_ids; v3 mail/send takes list_ids in
-        // personalizations only via the Marketing Campaigns API. For our scale
-        // (low-thousands), iterating contacts is fine.
-        const r = await fetch('https://api.sendgrid.com/v3/marketing/contacts/count', {
-            headers: { 'Authorization': `Bearer ${SENDGRID_KEY}` }
-        });
-        if (!r.ok) throw new Error('Could not query SendGrid contacts count');
-        // For "Subscribed" we use the v3 Marketing Campaigns SingleSend pattern
-        // and pass the all-contacts list — but as we may not have a singleSendId,
-        // we fall back to per-email sends below.
-    }
-
-    // Per-email send list. Cap at 10k to be safe.
-    const out = [];
-    let token = '';
-    while (true) {
-        const url = `https://api.sendgrid.com/v3/marketing/contacts${token ? `?page_token=${encodeURIComponent(token)}` : ''}`;
-        const r = await fetch(url, { headers: { 'Authorization': `Bearer ${SENDGRID_KEY}` } });
-        if (!r.ok) {
-            const body = await r.text();
-            throw new Error(`SendGrid contacts list failed: ${r.status} ${body.slice(0, 200)}`);
-        }
-        const data = await r.json();
-        const contacts = data.result || [];
-        for (const c of contacts) {
-            if (!c.email) continue;
-            // Apply segment filter client-side if needed
-            if (q && c.custom_fields && c.custom_fields.segment_tag) {
-                if (!String(c.custom_fields.segment_tag).toLowerCase().includes(segment.toLowerCase())) continue;
-            }
-            out.push({ email: c.email, firstName: c.first_name || '', lastName: c.last_name || '' });
-            if (out.length >= 10000) break;
-        }
-        if (out.length >= 10000) break;
-        if (data._metadata && data._metadata.next) {
-            // SendGrid returns full URLs in next; extract page_token
-            const u = new URL(data._metadata.next);
-            token = u.searchParams.get('page_token') || '';
-            if (!token) break;
-        } else break;
-    }
-    return out;
-}
-
-function applyMergeTags(html, contact) {
-    return (html || '')
-        .replace(/\{firstName\}/g, contact.firstName || 'there')
-        .replace(/\{lastName\}/g, contact.lastName || '')
-        .replace(/\{email\}/g, encodeURIComponent(contact.email));
-}
 
 function htmlToPlainText(html) {
     if (!html) return '';
@@ -118,112 +67,144 @@ function htmlToPlainText(html) {
         .replace(/[ \t]+/g, ' ').replace(/\n[ \t]+/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
 }
 
-async function sgSend({ to, subject, html, fromEmail, fromName, replyTo, category, customArgs }) {
-    const unsubGroupId = parseInt(process.env.SENDGRID_UNSUB_GROUP_ID || '0', 10);
-    // Multipart: text/plain MUST come before text/html per RFC and SendGrid's docs.
-    const plainText = htmlToPlainText(html);
-    const payload = {
-        from: { email: fromEmail, name: fromName },
-        reply_to: { email: replyTo || fromEmail },
-        personalizations: [{ to: [{ email: to.email, name: [to.firstName, to.lastName].filter(Boolean).join(' ') || undefined }] }],
-        subject,
-        content: [
-            { type: 'text/plain', value: plainText || ' ' },
-            { type: 'text/html',  value: html }
-        ],
-        categories: [category],
-        custom_args: customArgs,
-        tracking_settings: { click_tracking: { enable: true, enable_text: false }, open_tracking: { enable: true }, subscription_tracking: { enable: false } },
-        mail_settings: { sandbox_mode: { enable: false } },
-        // Pace large sends so we don't burst-throttle: SendGrid recommends < 100/sec on shared IP.
-        // We're sending sequentially in the caller anyway; this just hints SendGrid.
-        send_at: undefined
-    };
-    // Attach unsubscribe group so SendGrid auto-handles list-unsubscribe headers
-    // and respects user opt-outs on this group specifically. Required for proper
-    // CAN-SPAM compliance and Gmail/Apple Mail one-click unsubscribe support.
-    if (unsubGroupId) {
-        payload.asm = { group_id: unsubGroupId, groups_to_display: [unsubGroupId] };
+function segmentToListIds(segment) {
+    // Resolve a human segment name to one or more SendGrid list IDs.
+    switch ((segment || 'Subscribed')) {
+        case 'Subscribed':       return LIST_SUB ? [LIST_SUB] : (LIST_ALL ? [LIST_ALL] : []);
+        case 'Wix Legacy':       return LIST_LEG ? [LIST_LEG] : [];
+        case 'All':              return LIST_ALL ? [LIST_ALL] : [];
+        case 'Wine Club':
+        case 'Golf':
+        case 'Event Attendees':
+            // No dedicated list yet — fall back to ALL with a note. When you
+            // create dedicated SG lists for these, add their IDs to env vars.
+            return LIST_ALL ? [LIST_ALL] : [];
+        default:
+            return LIST_ALL ? [LIST_ALL] : [];
     }
-    const r = await fetch('https://api.sendgrid.com/v3/mail/send', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${SENDGRID_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-    });
-    const messageId = r.headers.get('x-message-id') || null;
-    if (!r.ok) {
-        const body = await r.text();
-        throw new Error(`SendGrid send failed: ${r.status} ${body.slice(0, 200)}`);
-    }
-    return { messageId };
 }
 
-// ----------------------------------------------------------------------------
-// Data file helpers
-// ----------------------------------------------------------------------------
-
-async function loadJsonFile(file) {
-    const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=${file}`);
-    if (!r.ok) throw new Error(`load ${file}: ${r.status}`);
+async function loadDraftsFile() {
+    const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=marketing_drafts.json`);
+    if (!r.ok) throw new Error('load drafts: ' + r.status);
     const d = await r.json();
     return { data: d.decoded || {}, sha: d.sha };
 }
-async function saveJsonFile(file, json, sha, message) {
-    const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=${file}`, {
+async function saveDraftsFile(json, sha, message) {
+    const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=marketing_drafts.json`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'x-quarry-key': QUARRY_DATA_KEY },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ json, sha, message })
     });
-    if (!r.ok) throw new Error(`save ${file}: ${r.status}`);
+    if (!r.ok) throw new Error('save drafts: ' + r.status);
     return r.json();
 }
 
 // ----------------------------------------------------------------------------
-// Send a single draft to its segment
+// SendGrid: create + schedule a Single Send
 // ----------------------------------------------------------------------------
 
-async function sendDraftToSegment(draft, settings) {
-    const recipients = await sgSearchContacts(draft.segment || 'Subscribed');
-    if (!recipients.length) throw new Error('no recipients matched segment ' + draft.segment);
+async function createAndScheduleSingleSend(draft, listIds) {
+    const plainText = htmlToPlainText(draft.htmlBody);
+    const sendAt = (draft.scheduledFor && new Date(draft.scheduledFor).getTime() > Date.now())
+        ? new Date(draft.scheduledFor).toISOString()
+        : 'now';
 
-    const fromEmail = settings.fromEmail;
-    const fromName = settings.fromName || 'The Quarry STL';
-    const replyTo = settings.replyTo || fromEmail;
-    const category = ((settings.sendgrid && settings.sendgrid.categoryPrefix) || 'quarry-marketing') + ':' + (draft.type || 'manual');
+    const ssBody = {
+        name: `${draft.subject || 'Quarry campaign'} (${draft.id.slice(0, 8)})`,
+        send_at: sendAt,
+        send_to: { list_ids: listIds, all: false },
+        email_config: {
+            subject: draft.subject,
+            html_content: draft.htmlBody,
+            plain_content: plainText || ' ',
+            generate_plain_content: false,
+            sender_id: parseInt(SENDER, 10),
+            suppression_group_id: UNSUB_GROUP || undefined,
+            // Required when suppression_group_id is omitted; we always have one set, so this is unused
+            custom_unsubscribe_url: UNSUB_GROUP ? undefined : 'https://www.thequarrystl.com/.netlify/functions/unsubscribe?email={email}'
+        },
+        categories: ['quarry-marketing', `type:${draft.type || 'manual'}`]
+    };
 
-    let firstMessageId = null;
-    let sent = 0, failed = 0;
-    const failures = [];
-
-    // Send sequentially to keep rate limits sane.
-    for (const c of recipients) {
-        try {
-            const html = applyMergeTags(draft.htmlBody, c);
-            const subject = applyMergeTags(draft.subject, c);
-            const r = await sgSend({
-                to: c, subject, html, fromEmail, fromName, replyTo,
-                category,
-                customArgs: { draft_id: draft.id, rule_id: draft.ruleId || '', email: c.email }
-            });
-            if (!firstMessageId) firstMessageId = r.messageId;
-            sent++;
-        } catch (e) {
-            failed++;
-            failures.push({ email: c.email, err: e.message });
-            if (failures.length > 10) break; // bail if SendGrid is having a moment
-        }
+    // Step 1: create the Single Send
+    let r = await fetch('https://api.sendgrid.com/v3/marketing/singlesends', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${SG_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(ssBody)
+    });
+    if (!r.ok) {
+        const text = await r.text();
+        throw new Error(`SS create failed (${r.status}): ${text.slice(0, 300)}`);
     }
-    return { sent, failed, failures, sgMessageId: firstMessageId, recipientCount: recipients.length };
+    const created = await r.json();
+    const sendId = created.id;
+
+    // Step 2: schedule it (separate call per the SendGrid API design)
+    r = await fetch(`https://api.sendgrid.com/v3/marketing/singlesends/${sendId}/schedule`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${SG_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ send_at: sendAt })
+    });
+    if (!r.ok) {
+        const text = await r.text();
+        throw new Error(`SS schedule failed (${r.status}): ${text.slice(0, 300)}`);
+    }
+    const scheduled = await r.json();
+    return { sendId, status: scheduled.status, sendAt };
+}
+
+// ----------------------------------------------------------------------------
+// Test mode (single recipient, transactional /v3/mail/send)
+// ----------------------------------------------------------------------------
+
+function applyMergeTags(html, contact) {
+    return (html || '')
+        .replace(/\{firstName\}/g, contact.firstName || 'there')
+        .replace(/\{lastName\}/g,  contact.lastName  || '')
+        .replace(/\{email\}/g,     encodeURIComponent(contact.email));
+}
+
+async function sendTest(draft, testEmail) {
+    const fakeContact = { email: testEmail, firstName: 'Friend', lastName: '' };
+    const html  = applyMergeTags(draft.htmlBody, fakeContact);
+    const plain = htmlToPlainText(html);
+    const subject = '[TEST] ' + applyMergeTags(draft.subject, fakeContact);
+    const payload = {
+        from: { email: 'management@thequarrystl.com', name: 'The Quarry STL' },
+        reply_to: { email: 'management@thequarrystl.com' },
+        personalizations: [{ to: [{ email: testEmail }] }],
+        subject,
+        content: [
+            { type: 'text/plain', value: plain || ' ' },
+            { type: 'text/html',  value: html }
+        ],
+        categories: ['quarry-marketing:test'],
+        custom_args: { draft_id: draft.id, test: 'true' },
+        tracking_settings: { click_tracking: { enable: true, enable_text: false }, open_tracking: { enable: true } }
+    };
+    if (UNSUB_GROUP) payload.asm = { group_id: UNSUB_GROUP, groups_to_display: [UNSUB_GROUP] };
+    const r = await fetch('https://api.sendgrid.com/v3/mail/send', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${SG_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+    const messageId = r.headers.get('x-message-id') || null;
+    if (!r.ok) {
+        const t = await r.text();
+        throw new Error(`Test send failed (${r.status}): ${t.slice(0, 200)}`);
+    }
+    return { messageId };
 }
 
 // ----------------------------------------------------------------------------
 // Handler
 // ----------------------------------------------------------------------------
 
-// Schedule: see netlify.toml. Manual trigger from the admin UI also works.
 exports.handler = async (event) => {
     if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: CORS, body: '' };
-    if (!SENDGRID_KEY) return respond(500, { error: 'SENDGRID_API_KEY not configured in Netlify env vars' });
+    if (!SG_KEY) return respond(500, { error: 'SENDGRID_API_KEY not configured' });
+    if (!SENDER) return respond(500, { error: 'SENDGRID_SENDER_ID not configured' });
 
     const isScheduled = (event.body && /"next_run"/.test(event.body)) ||
                         (event.headers && /netlify/i.test(event.headers['user-agent'] || ''));
@@ -237,29 +218,20 @@ exports.handler = async (event) => {
     const mode = body.mode || 'poll';
 
     try {
-        const draftsRes = await loadJsonFile('marketing_drafts.json');
-        const draftsFile = draftsRes.data;
-        const drafts = Array.isArray(draftsFile.drafts) ? draftsFile.drafts : [];
-        const settings = draftsFile.settings || {};
+        const draftsRes = await loadDraftsFile();
+        const file = draftsRes.data;
+        const drafts = Array.isArray(file.drafts) ? file.drafts : [];
 
-        // ---------- TEST MODE ----------
+        // ---- TEST ----
         if (mode === 'test') {
             const draft = drafts.find((d) => d.id === body.draftId);
             if (!draft) return respond(404, { error: 'draft not found' });
             if (!body.testEmail) return respond(400, { error: 'testEmail required' });
-            const fakeContact = { email: body.testEmail, firstName: 'Friend', lastName: '' };
-            const html = applyMergeTags(draft.htmlBody, fakeContact);
-            const subject = '[TEST] ' + applyMergeTags(draft.subject, fakeContact);
-            const r = await sgSend({
-                to: fakeContact, subject, html,
-                fromEmail: settings.fromEmail, fromName: settings.fromName, replyTo: settings.replyTo,
-                category: 'quarry-marketing:test',
-                customArgs: { draft_id: draft.id, test: 'true' }
-            });
+            const r = await sendTest(draft, body.testEmail);
             return respond(200, { ok: true, mode: 'test', sgMessageId: r.messageId });
         }
 
-        // ---------- POLL or SENDNOW ----------
+        // ---- POLL or SENDNOW ----
         const now = Date.now();
         const queue = mode === 'sendNow'
             ? drafts.filter((d) => d.id === body.draftId && (d.status === 'approved' || d.status === 'pending'))
@@ -272,13 +244,17 @@ exports.handler = async (event) => {
 
         for (const draft of queue) {
             try {
-                const r = await sendDraftToSegment(draft, settings);
+                const listIds = segmentToListIds(draft.segment);
+                if (!listIds.length) {
+                    throw new Error(`no SendGrid list configured for segment "${draft.segment}"`);
+                }
+                const r = await createAndScheduleSingleSend(draft, listIds);
                 draft.status = 'sent';
                 draft.sentAt = new Date().toISOString();
                 draft.updatedAt = draft.sentAt;
-                draft.sgMessageId = r.sgMessageId;
-                draft.deliveryStats = { recipientCount: r.recipientCount, sent: r.sent, failed: r.failed };
-                results.push({ id: draft.id, ok: true, ...r });
+                draft.sgSingleSendId = r.sendId;
+                draft.sgSingleSendStatus = r.status;
+                results.push({ id: draft.id, ok: true, sendId: r.sendId, scheduledFor: r.sendAt });
                 mutated = true;
             } catch (err) {
                 draft.status = 'failed';
@@ -290,10 +266,10 @@ exports.handler = async (event) => {
         }
 
         if (mutated) {
-            draftsFile.drafts = drafts;
-            draftsFile.updatedAt = new Date().toISOString();
-            await saveJsonFile('marketing_drafts.json', draftsFile, draftsRes.sha,
-                `marketing-send: ${results.filter((r) => r.ok).length} sent, ${results.filter((r) => !r.ok).length} failed`);
+            file.drafts = drafts;
+            file.updatedAt = new Date().toISOString();
+            await saveDraftsFile(file, draftsRes.sha,
+                `marketing-send: ${results.filter((r) => r.ok).length} scheduled, ${results.filter((r) => !r.ok).length} failed`);
         }
 
         return respond(200, { ok: true, mode, results, sentCount: results.filter((r) => r.ok).length });
