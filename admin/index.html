@@ -4649,8 +4649,8 @@
         async function loadData() {
             try {
                 const [eventsRes, subscribersRes, formsRes] = await Promise.all([
-                    fetch('/events.json'),
-                    fetch('/subscribers.json'),
+                    fetch('/events.json?t=' + Date.now(), { cache: 'no-store' }),
+                    fetch('/subscribers.json?t=' + Date.now(), { cache: 'no-store' }),
                     fetch('https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/forms.json?t=' + Date.now()).catch(() => null)
                 ]);
 
