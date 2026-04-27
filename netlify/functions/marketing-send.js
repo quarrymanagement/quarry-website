@@ -120,9 +120,12 @@ async function createAndScheduleSingleSend(draft, listIds) {
             plain_content: plainText || ' ',
             generate_plain_content: false,
             sender_id: parseInt(SENDER, 10),
-            suppression_group_id: UNSUB_GROUP || undefined,
-            // Required when suppression_group_id is omitted; we always have one set, so this is unused
-            custom_unsubscribe_url: UNSUB_GROUP ? undefined : 'https://www.thequarrystl.com/.netlify/functions/unsubscribe?email={email}'
+            // Use custom_unsubscribe_url instead of suppression_group_id so SendGrid
+            // does NOT auto-inject the ugly blue "Unsubscribe from this list / manage
+            // email preferences" footer block. Our /unsubscribe Netlify function
+            // suppresses the contact in SendGrid global suppressions, so unsubs are
+            // still honored and the user is still removed from future sends.
+            custom_unsubscribe_url: 'https://www.thequarrystl.com/.netlify/functions/unsubscribe?email={email}'
         },
         categories: ['quarry-marketing', `type:${draft.type || 'manual'}`]
     };
