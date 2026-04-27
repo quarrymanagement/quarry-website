@@ -312,6 +312,7 @@ ${bodyStyles}
         </div>
         <div style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:11px;color:rgba(243,236,217,0.55);line-height:1.6;">
           You're receiving this because you signed up, booked an event, or attended one at The Quarry.<br>
+          <a href="${UNSUB_URL}" style="color:rgba(243,236,217,0.75);text-decoration:underline;">Unsubscribe</a> &nbsp;·&nbsp;
           <a href="https://www.thequarrystl.com/privacy.html" style="color:rgba(243,236,217,0.75);text-decoration:underline;">Privacy Policy</a>
         </div>
       </td></tr>
