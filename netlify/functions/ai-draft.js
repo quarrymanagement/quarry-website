@@ -298,11 +298,13 @@ ${bodyStyles}
 
       <!-- ═══ NAVY FOOTER: follow us text + address + unsub ═══ -->
       <tr><td align="center" style="background:${NAVY_DK};padding:24px 24px 22px;">
-        <div style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;color:${CREAM_ON_NAVY};letter-spacing:0.08em;text-transform:uppercase;font-weight:600;margin-bottom:14px;">
-          Follow us: &nbsp;
-          <a href="${FB_URL}" style="color:${GOLD_LT};text-decoration:none;font-weight:600;">Facebook</a> &nbsp;·&nbsp;
-          <a href="${IG_URL}" style="color:${GOLD_LT};text-decoration:none;font-weight:600;">Instagram</a> &nbsp;·&nbsp;
-          <a href="${WEB_URL}" style="color:${GOLD_LT};text-decoration:none;font-weight:600;">Website</a>
+        <div style="text-align:center;margin-bottom:16px;">
+          <div style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:11px;color:${CREAM_ON_NAVY};letter-spacing:0.18em;text-transform:uppercase;font-weight:600;margin-bottom:8px;">Follow Us</div>
+          <div style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:13px;font-weight:600;letter-spacing:0.04em;">
+            <a href="${FB_URL}" style="color:${GOLD_LT};text-decoration:none;">Facebook</a> &nbsp;·&nbsp;
+            <a href="${IG_URL}" style="color:${GOLD_LT};text-decoration:none;">Instagram</a> &nbsp;·&nbsp;
+            <a href="${WEB_URL}" style="color:${GOLD_LT};text-decoration:none;">Website</a>
+          </div>
         </div>
         <div style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;color:${CREAM_ON_NAVY};line-height:1.5;margin-bottom:8px;">
           <strong style="color:${GOLD_LT};">The Quarry</strong> &nbsp;·&nbsp; 3960 Highway Z &nbsp;·&nbsp; New Melle, MO 63385 &nbsp;·&nbsp; (636) 224-8257
