@@ -2479,29 +2479,33 @@
                  DASHBOARD TAB
                  ======================================================== -->
             <div id="dashboardTab" class="tab-content active">
+                <div style="margin:0 0 1rem;">
+                    <h2 style="margin:0;">Welcome back 👋</h2>
+                    <p style="color:var(--text-muted);font-size:0.88rem;margin:0.25rem 0 0;">Here's a snapshot of The Quarry right now. Click any number to drill into it.</p>
+                </div>
                 <div class="dashboard-grid">
-                    <div class="summary-card">
+                    <div class="summary-card" title="Ticketed events with at least one open seat">
                         <div class="summary-label">Active Events</div>
                         <div class="summary-value" id="totalEvents">0</div>
                     </div>
-                    <div class="summary-card">
-                        <div class="summary-label">Total Registrations</div>
+                    <div class="summary-card" title="Total seats sold across all upcoming events">
+                        <div class="summary-label">Tickets Sold</div>
                         <div class="summary-value" id="totalRegistrations">0</div>
                     </div>
-                    <div class="summary-card">
+                    <div class="summary-card" title="Estimated revenue from sold tickets (excludes refunds)">
                         <div class="summary-label">Est. Revenue</div>
                         <div class="summary-value" id="totalRevenue">$0</div>
                     </div>
-                    <div class="summary-card">
+                    <div class="summary-card" title="Live music acts booked for the next 60 days">
                         <div class="summary-label">Upcoming Bands</div>
                         <div class="summary-value" id="upcomingBands">0</div>
                     </div>
-                    <div class="summary-card">
-                        <div class="summary-label">Total Subscribers</div>
+                    <div class="summary-card" title="Everyone who's ever shared their email with us">
+                        <div class="summary-label">Total Contacts</div>
                         <div class="summary-value" id="totalSubscribers">0</div>
                     </div>
-                    <div class="summary-card">
-                        <div class="summary-label">Email Subscribed</div>
+                    <div class="summary-card" title="Contacts actively subscribed to email marketing (not unsubscribed)">
+                        <div class="summary-label">Email Subscribers</div>
                         <div class="summary-value" id="emailSubscribed">0</div>
                     </div>
                 </div>
@@ -3164,8 +3168,8 @@
             <div id="mktCalendarTab" class="tab-content">
                 <div class="mkt-header">
                     <div>
-                        <h2 style="margin:0;">Campaign Calendar</h2>
-                        <p class="mkt-sub">AI-generated drafts queued by your calendar rules. Approve, edit, or redo each before send.</p>
+                        <h2 style="margin:0;">📅 Email Campaign Calendar</h2>
+                        <p class="mkt-sub">Email drafts your AI has queued up. Click any to approve, edit, or rewrite. Approved emails send automatically at their scheduled time.</p>
                     </div>
                     <div class="mkt-header-actions">
                         <button class="btn-secondary" id="mktGenerateNowBtn" title="Generate the next 7 days of drafts now">Generate Drafts Now</button>
@@ -3209,7 +3213,7 @@
 
             <div id="mktInboxTab" class="tab-content">
                 <div class="mkt-header">
-                    <div><h2 style="margin:0;">Drafts Inbox</h2><p class="mkt-sub">Approve, reject, edit, or redo each draft. Approved drafts send at their scheduled time automatically.</p></div>
+                    <div><h2 style="margin:0;">📥 Email Drafts Inbox</h2><p class="mkt-sub">Email drafts waiting for your sign-off. Approve to schedule, edit to tweak, or rewrite to have the AI try again.</p></div>
                     <div class="mkt-header-actions">
                         <select id="mktInboxFilter" style="padding:0.5rem 0.75rem;">
                             <option value="pending">Pending only</option><option value="all">All statuses</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="sent">Sent</option>
@@ -3222,7 +3226,7 @@
 
             <div id="mktPerformanceTab" class="tab-content">
                 <div class="mkt-header">
-                    <div><h2 style="margin:0;">Performance</h2><p class="mkt-sub">Open rates, click rates, and which sends are pulling their weight.</p></div>
+                    <div><h2 style="margin:0;">📊 Email Performance</h2><p class="mkt-sub">Open rates, click rates, and which campaigns are actually driving traffic. Updates every 15 minutes.</p></div>
                     <div class="mkt-header-actions"><select id="mktPerfRange"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option></select></div>
                 </div>
                 <div class="mkt-stats">
@@ -3241,7 +3245,7 @@
 
             <div id="mktInsightsTab" class="tab-content">
                 <div class="mkt-header">
-                    <div><h2 style="margin:0;">AI Insights &amp; Event Ideas</h2><p class="mkt-sub">Patterns the AI has learned from past sends, plus event ideas based on what your audience responds to.</p></div>
+                    <div><h2 style="margin:0;">🧠 AI Insights &amp; Event Ideas</h2><p class="mkt-sub">What the AI has learned from your past email performance, plus fresh event ideas based on what your audience clicks on.</p></div>
                     <div class="mkt-header-actions"><button class="btn-secondary" id="mktOptimizeNowBtn" title="Re-run the optimizer against the latest send data">Re-analyze Now</button></div>
                 </div>
                 <div class="mkt-card" style="margin-bottom:1rem;"><h4>Last analysis</h4><div id="mktInsightsSummary" class="mkt-empty">Not run yet.</div></div>
@@ -3252,7 +3256,7 @@
             </div>
 
             <div id="mktSettingsTab" class="tab-content">
-                <div class="mkt-header"><div><h2 style="margin:0;">Marketing Settings</h2><p class="mkt-sub">Calendar rules, cadence caps, sending defaults. Changes save back to the repo on click.</p></div></div>
+                <div class="mkt-header"><div><h2 style="margin:0;">⚙️ Email Settings</h2><p class="mkt-sub">When emails go out, who gets them, and how often. Adjust your cadence rules and sending defaults here.</p></div></div>
                 <div class="mkt-perf-grid">
                     <div class="mkt-card">
                         <h4>Sending defaults</h4>
