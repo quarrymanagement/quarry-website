@@ -203,8 +203,10 @@ function groupBandsByWeekend(bands) {
     return weekends;
 }
 
+let _idCounter = 0;
 function shortId(prefix) {
-    return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+    _idCounter++;
+    return `${prefix}-${Date.now().toString(36)}-${_idCounter.toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
 }
 
 // ----------------------------------------------------------------------------
