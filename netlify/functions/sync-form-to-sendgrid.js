@@ -30,17 +30,27 @@ const UNSUB_GROUP = parseInt(process.env.SENDGRID_UNSUB_GROUP_ID || '0', 10);
 const LIST_ALL = process.env.SENDGRID_LIST_ALL || '';
 const LIST_SUB = process.env.SENDGRID_LIST_SUBSCRIBED || '';
 
-function listIdsForForm(formName) {
-    // Job applicants: NEVER auto-add to marketing lists.
+// Determines which SendGrid lists a form submission gets added to.
+// LIST_ALL is the full contact universe (used for ops/CRM purposes — never sent to).
+// LIST_SUB is the opt-in marketing list (gets all promo emails).
+//
+// Rules:
+//   - Careers: never added to ANY list (job applicants, not customers)
+//   - Wine Club / Mailing List: implied marketing consent — both lists
+//   - Everything else: depends on the marketing_opt_in checkbox the customer ticked
+//     - opt-in = true  → both lists
+//     - opt-in = false → LIST_ALL only (we keep the contact for booking purposes,
+//                        but don't send marketing emails to them)
+function listIdsForForm(formName, marketingOptIn) {
     if (formName === 'careers') return [];
-    // Wine Club is implicit consent to marketing — add to ALL + Subscribed.
-    if (formName === 'wine-club-registration' || formName === 'wine-club-signup') {
+    // Implied consent forms (the act of signing up IS the consent)
+    if (formName === 'wine-club-registration' || formName === 'wine-club-signup' ||
+        formName === 'mailing-list') {
         return [LIST_ALL, LIST_SUB].filter(Boolean);
     }
-    // Mailing list, reservations, contact, event RSVPs, weddings, private events,
-    // golf, beer garden — all get added to ALL + Subscribed (implied or explicit
-    // consent via the transaction). Unsubscribe in every email handles opt-out.
-    return [LIST_ALL, LIST_SUB].filter(Boolean);
+    // Everything else: respect the explicit checkbox
+    if (marketingOptIn) return [LIST_ALL, LIST_SUB].filter(Boolean);
+    return [LIST_ALL].filter(Boolean);  // CRM only, no marketing
 }
 
 const SEGMENT_MAP = {
@@ -107,7 +117,9 @@ exports.handler = async (event) => {
         // 1) Push to SendGrid Contacts AND add to the right marketing lists.
         // SendGrid's PUT /v3/marketing/contacts accepts list_ids as a sibling
         // of contacts — does the upsert + list-add in one call.
-        const listIds = listIdsForForm(formName);
+        // Honor explicit marketing opt-in (checkbox on the form)
+        const marketingOptIn = !!(data.marketing_opt_in === 'yes' || data.marketing_opt_in === true || data.marketing_opt_in === 'on');
+        const listIds = listIdsForForm(formName, marketingOptIn);
         const upsertBody = { contacts: [contact] };
         if (listIds.length) upsertBody.list_ids = listIds;
         const r = await fetch('https://api.sendgrid.com/v3/marketing/contacts', {
@@ -118,8 +130,13 @@ exports.handler = async (event) => {
         const body = await r.json().catch(() => ({}));
 
         // 2) Append to subscribers.json so the CRM tab in admin stays fresh
+        const submissionData = {
+            type: formName,
+            timestamp: new Date().toISOString(),
+            details: data  // full form payload — useful for inquiry context, ticket count, message body, etc.
+        };
         // (best-effort — failures don't block the form submission flow)
-        appendToCrmFile({ email, firstName, lastName, phone, source: formName, segmentTag })
+        appendToCrmFile({ email, firstName, lastName, phone, source: formName, segmentTag, marketingOptIn, submission: submissionData })
             .catch((e) => console.warn('subscribers.json sync failed:', e.message));
 
         // 3) Fire a one-time welcome email (only for mailing-list signup, to avoid
@@ -139,7 +156,7 @@ exports.handler = async (event) => {
 // ---------------------------------------------------------------------------
 // Append the new contact to subscribers.json via data-store (idempotent)
 // ---------------------------------------------------------------------------
-async function appendToCrmFile({ email, firstName, lastName, phone, source, segmentTag }) {
+async function appendToCrmFile({ email, firstName, lastName, phone, source, segmentTag, marketingOptIn, submission }) {
     const url = `${SITE_URL}/.netlify/functions/data-store?file=subscribers.json`;
     const r = await fetch(url);
     if (!r.ok) throw new Error('load subscribers.json: ' + r.status);
@@ -147,12 +164,28 @@ async function appendToCrmFile({ email, firstName, lastName, phone, source, segm
     const list = Array.isArray(data.decoded) ? data.decoded : [];
     const lower = email.toLowerCase();
     const exists = list.find((s) => (s.email || '').toLowerCase() === lower);
+    const now = new Date().toISOString();
+    const eventEntry = {
+        type: source || 'form',
+        timestamp: now,
+        marketingOptIn: !!marketingOptIn,
+        // Capture meaningful submission fields (not the full payload) for the CRM activity timeline
+        details: submission && submission.details ? sanitizeSubmissionDetails(submission.details) : null
+    };
     if (exists) {
-        // bump lastActivity, add tag if missing
+        // Update existing contact: log this submission as a discrete event, bump activity
         exists.lastActivity = `Form: ${source}`;
-        exists.lastActivityDate = new Date().toISOString();
+        exists.lastActivityDate = now;
         exists.tags = Array.isArray(exists.tags) ? exists.tags : [];
         if (segmentTag && !exists.tags.includes(segmentTag)) exists.tags.push(segmentTag);
+        // Promote to Subscribed if they ticked opt-in (never demote — they may have separately subscribed)
+        if (marketingOptIn && exists.emailStatus !== 'Subscribed') exists.emailStatus = 'Subscribed';
+        exists.events = Array.isArray(exists.events) ? exists.events : [];
+        exists.events.push(eventEntry);
+        // Update name/phone if we got better info this time
+        if (firstName && !exists.firstName) exists.firstName = firstName;
+        if (lastName && !exists.lastName)  exists.lastName  = lastName;
+        if (phone    && !exists.phone)     exists.phone     = phone;
     } else {
         list.push({
             firstName: firstName || '',
@@ -161,23 +194,43 @@ async function appendToCrmFile({ email, firstName, lastName, phone, source, segm
             phone:     phone || '',
             birthdate: '',
             labels:    '',
-            created:   new Date().toISOString(),
-            emailStatus: 'Subscribed',
+            created:   now,
+            // Honor opt-in: only mark Subscribed if they actually checked the box (or signed up via wine-club / mailing-list which is implied consent)
+            emailStatus: marketingOptIn ? 'Subscribed' : 'Not Subscribed',
             smsStatus:   phone ? 'Never subscribed' : '',
             source:    source || 'Website form',
             lastActivity: `Form: ${source}`,
-            lastActivityDate: new Date().toISOString(),
+            lastActivityDate: now,
             address:   { street: '', city: '', state: '', zip: '', country: 'United States' },
-            events:    [],
+            events:    [eventEntry],
             tags:      segmentTag ? [segmentTag] : []
         });
     }
     const put = await fetch(url, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ json: list, sha: data.sha, message: `crm: ${exists ? 'update' : 'add'} ${email}` })
+        body: JSON.stringify({ json: list, sha: data.sha, message: `crm: ${exists ? 'update' : 'add'} ${email} (${source})` })
     });
     if (!put.ok) throw new Error('save subscribers.json: ' + put.status);
+}
+
+// Strip noise from form submissions so we keep meaningful fields without bloat
+function sanitizeSubmissionDetails(details) {
+    if (!details || typeof details !== 'object') return null;
+    const SKIP = new Set([
+        'form-name', 'bot-field', 'g-recaptcha-response',
+        'first_name', 'firstName', 'last_name', 'lastName', 'name', 'email', 'phone',
+        // Already represented elsewhere — don't duplicate
+        'marketing_opt_in'
+    ]);
+    const out = {};
+    for (const [k, v] of Object.entries(details)) {
+        if (SKIP.has(k)) continue;
+        if (v == null || v === '') continue;
+        if (typeof v === 'string' && v.length > 500) out[k] = v.slice(0, 500) + '…';
+        else out[k] = v;
+    }
+    return Object.keys(out).length ? out : null;
 }
 
 // ---------------------------------------------------------------------------
