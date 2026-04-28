@@ -30,6 +30,7 @@ const ALLOWED_FILES = new Set([
     'social_events.json',
     'social_learnings.json',
     'social_assets.json',
+    'reservations_status.json',
     'events.json'  // mirror github-proxy.js so we have one read/write surface long-term
 ]);
 
