@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-04-27T00:00:00Z",
+  "updatedAt": "2026-04-28T02:21:50.962Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -25,15 +25,97 @@
       "context": "object — what fed the prompt"
     }
   },
-  "drafts": [],
+  "drafts": [
+    {
+      "id": "2007fa40-abb1-4f32-970e-53a68181a7e8",
+      "ruleId": "weekly-wineclub",
+      "type": "wine_club",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "pending",
+      "caption": "Spring reds are pouring at The Quarry. This week's feature is a silky Willamette Valley Pinot Noir — earthy, bright, and built for a long evening on the patio. Rock & Vine members get it by the glass at member pricing, every visit.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLEats",
+        "#WineBar",
+        "#STLWine",
+        "#DateNight",
+        "#FoodieFinds"
+      ],
+      "imageUrl": null,
+      "imagePrompt": "Close-up of a single stemmed wine glass filled with deep ruby Pinot Noir on a weathered oak bar top, warm golden hour light streaming in from the left, soft bokeh of string lights and a blurred patio in the background, no people, no text, rich earthy tones",
+      "linkUrl": null,
+      "scheduledFor": "2026-04-29T21:00:00.000Z",
+      "createdAt": "2026-04-28T02:21:43.193Z",
+      "updatedAt": "2026-04-28T02:21:43.193Z",
+      "approvedAt": null,
+      "postedAt": null,
+      "fbPostId": null,
+      "igMediaId": null,
+      "regenerationCount": 0,
+      "lastInstructions": "",
+      "context": {
+        "weekOf": "2026-04-29"
+      },
+      "model": "claude-sonnet-4-6"
+    },
+    {
+      "id": "daa25e33-52fa-4326-9271-824758ef8677",
+      "ruleId": "weekly-menu-spotlight",
+      "type": "menu_spotlight",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "pending",
+      "caption": "Wood-fired and finished with truffle oil, our mushroom flatbread is earthy, crisp-edged, and built for a glass of something red. On the menu Wednesday through Sunday.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLEats",
+        "#WineBar",
+        "#DateNight",
+        "#FoodieFinds",
+        "#RestaurantStl"
+      ],
+      "imageUrl": null,
+      "imagePrompt": "Close-up overhead photo of a wood-fired flatbread topped with roasted wild mushrooms, fresh thyme, and a drizzle of truffle oil on a dark slate serving board, wisps of steam rising, warm golden restaurant lighting, softly blurred wine glasses and candle in background, rich earthy tones",
+      "linkUrl": null,
+      "scheduledFor": "2026-05-01T16:00:00.000Z",
+      "createdAt": "2026-04-28T02:21:50.962Z",
+      "updatedAt": "2026-04-28T02:21:50.962Z",
+      "approvedAt": null,
+      "postedAt": null,
+      "fbPostId": null,
+      "igMediaId": null,
+      "regenerationCount": 0,
+      "lastInstructions": "",
+      "context": {
+        "weekOf": "2026-05-01"
+      },
+      "model": "claude-sonnet-4-6"
+    }
+  ],
   "history": [],
   "settings": {
-    "defaultPlatforms": ["facebook", "instagram"],
+    "defaultPlatforms": [
+      "facebook",
+      "instagram"
+    ],
     "fbPageUrl": "https://www.facebook.com/thequarrystl",
     "igHandle": "@thequarrystl",
     "brandVoice": "Upscale-casual, warm, confident",
     "imagesDir": "/assets/social-images",
-    "captionMaxChars": { "facebook": 2200, "instagram": 2200, "instagram_recommended": 280 },
+    "captionMaxChars": {
+      "facebook": 2200,
+      "instagram": 2200,
+      "instagram_recommended": 280
+    },
     "hashtagMax": 30,
     "hashtagRecommended": 8,
     "generation": {
@@ -41,6 +123,9 @@
       "maxDraftsPerDay": 3,
       "skipIfDraftExistsForRuleAndDate": true
     },
-    "models": { "primary": "claude", "image": "dall-e-3" }
+    "models": {
+      "primary": "claude",
+      "image": "dall-e-3"
+    }
   }
 }
