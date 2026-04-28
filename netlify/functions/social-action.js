@@ -70,9 +70,14 @@ exports.handler = async (event) => {
                 if (typeof payload.caption === 'string') draft.caption = payload.caption;
                 if (Array.isArray(payload.hashtags)) draft.hashtags = payload.hashtags;
                 if (typeof payload.imageUrl === 'string') draft.imageUrl = payload.imageUrl;
+                if (payload.userImageUrl !== undefined) draft.userImageUrl = payload.userImageUrl;
+                if (payload.imageSource) draft.imageSource = payload.imageSource;
                 if (typeof payload.linkUrl === 'string') draft.linkUrl = payload.linkUrl;
-                draft.status = 'pending';
-                draft.approvedAt = null;
+                // Don't bump back to 'pending' if it was already approved AND the only change was a new image
+                if (!(draft.status === 'approved' && Object.keys(payload).every((k) => ['imageUrl','userImageUrl','imageSource'].includes(k)))) {
+                    draft.status = 'pending';
+                    draft.approvedAt = null;
+                }
                 break;
             case 'reschedule':
                 if (!payload.scheduledFor) return respond(400, { error: 'scheduledFor required' });
