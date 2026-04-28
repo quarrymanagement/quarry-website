@@ -139,9 +139,20 @@ function buildUserPrompt(type, context, instructions) {
 
 // UTM-tag every <a href> inside the inner HTML so we can attribute web traffic
 // + reservations back to specific marketing sends in GA / server logs.
-function tagUtms(html, ruleId) {
+//
+// Cross-channel coordination: when context contains an eventId, the campaign
+// becomes `event-{eventId}-{ruleSuffix}` so it matches the social engine's
+// utm_campaign for the same event. Then in GA you can filter on
+// utm_campaign~="event-evt-bootscootin-oct17" to see ALL touches across email
+// AND social rolling up to that one event.
+function tagUtms(html, ruleId, context) {
     if (!html) return html;
-    const campaign = (ruleId || 'unknown').replace(/[^a-zA-Z0-9_-]/g, '-');
+    let campaign = (ruleId || 'unknown').replace(/[^a-zA-Z0-9_-]/g, '-');
+    if (context && context.eventId) {
+        const evId = String(context.eventId).replace(/[^a-zA-Z0-9_-]/g, '-');
+        const tag = ruleId && ruleId.includes('event_promo_') ? ruleId.replace('event_promo_', 'T-').replace('d', '') : (ruleId || 'event');
+        campaign = `event-${evId}-${tag}`;
+    }
     return String(html).replace(/<a\s+[^>]*href=["']([^"']+)["'][^>]*>/gi, (full, href) => {
         // skip merge tags and tel:/mailto:
         if (/^(mailto:|tel:|#)/i.test(href)) return full;
@@ -566,8 +577,9 @@ exports.handler = async (event) => {
 
     // Tag UTMs into the inner HTML before wrapping (so footer-injected links
     // stay clean and only the AI-generated CTAs get tagged).
-    const ruleHint = (body.context && body.context.ruleId) || (body.context && body.context.eventId) || type;
-    const taggedInner = tagUtms(inner, ruleHint);
+    // Pass full context so cross-channel campaign IDs roll up by event.
+    const ruleHint = (body.context && body.context.ruleId) || type;
+    const taggedInner = tagUtms(inner, ruleHint, body.context);
     const htmlBody = wrapWithFooter(taggedInner);
 
     return response(200, {
