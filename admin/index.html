@@ -2264,8 +2264,11 @@
         .mkt-cal-day.is-today .day-num { color: var(--gold); }
         .mkt-cal-event { background: var(--gold-dim); border-left: 3px solid var(--gold); padding: 3px 5px; border-radius: 3px; font-size: 0.72rem; line-height: 1.25; color: var(--text-primary); cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .mkt-cal-event:hover { background: var(--gold-glow); }
+        .mkt-cal-event.is-skeleton { background: rgba(100,116,139,0.10); border-left-color: #64748b; }
         .mkt-cal-event.is-pending  { background: rgba(180,83,9,0.10); border-left-color: #b45309; }
         .mkt-cal-event.is-approved { background: rgba(37,99,235,0.10); border-left-color: #2563eb; }
+        .mkt-cal-event.is-posted   { background: rgba(21,128,61,0.10); border-left-color: #15803d; }
+        .mkt-cal-event.is-superseded { background: rgba(100,116,139,0.08); border-left-color: #94a3b8; opacity: 0.6; text-decoration: line-through; }
         .mkt-cal-event.is-sent     { background: rgba(22,163,74,0.10); border-left-color: #16a34a; }
         .mkt-cal-event.is-rejected { background: rgba(220,38,38,0.10); border-left-color: #dc2626; opacity: 0.65; text-decoration: line-through; }
         .mkt-cal-event.is-failed   { background: rgba(220,38,38,0.18); border-left-color: #dc2626; }
@@ -2280,8 +2283,31 @@
         .mkt-inbox-list { display: flex; flex-direction: column; gap: 0.6rem; }
         .mkt-inbox-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-left: 4px solid var(--gold); border-radius: var(--radius-sm); padding: 0.85rem 1rem; cursor: pointer; transition: border-color 0.15s, transform 0.1s; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
         .mkt-inbox-card:hover { border-color: var(--gold-light); transform: translateX(2px); }
+        .mkt-inbox-card.is-skeleton { border-left-color: #64748b; }
         .mkt-inbox-card.is-pending  { border-left-color: #b45309; }
         .mkt-inbox-card.is-approved { border-left-color: #2563eb; }
+        .mkt-inbox-card.is-posted   { border-left-color: #15803d; }
+        .mkt-inbox-card.is-superseded { border-left-color: #94a3b8; opacity: 0.55; }
+        /* Status pill — used in inbox/calendar/modal subtitles */
+        .mkt-status-pill {
+            display: inline-block; padding: 0.18rem 0.55rem; border-radius: 999px;
+            font-size: 0.68rem; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase;
+            background: var(--bg-elevated); color: var(--text-muted); white-space: nowrap;
+        }
+        .mkt-status-pill.is-skeleton   { background: rgba(100,116,139,0.18); color: #475569; }
+        .mkt-status-pill.is-pending    { background: rgba(180,83,9,0.18);    color: #b45309; }
+        .mkt-status-pill.is-approved   { background: rgba(37,99,235,0.18);   color: #2563eb; }
+        .mkt-status-pill.is-posted     { background: rgba(21,128,61,0.18);   color: #15803d; }
+        .mkt-status-pill.is-rejected   { background: rgba(148,163,184,0.18); color: #64748b; opacity: 0.75; text-decoration: line-through; }
+        .mkt-status-pill.is-failed     { background: rgba(220,38,38,0.18);   color: #b91c1c; }
+        .mkt-status-pill.is-superseded { background: rgba(148,163,184,0.18); color: #64748b; opacity: 0.6; }
+        /* Empty state illustration */
+        .mkt-empty-friendly {
+            text-align: center; padding: 2rem 1rem; color: var(--text-muted);
+        }
+        .mkt-empty-friendly .ic { font-size: 2rem; display: block; margin-bottom: 0.5rem; opacity: 0.7; }
+        .mkt-empty-friendly .ttl { font-size: 0.95rem; color: var(--text-primary); font-weight: 500; margin-bottom: 0.25rem; }
+        .mkt-empty-friendly .sub { font-size: 0.8rem; }
         .mkt-inbox-card.is-sent     { border-left-color: #16a34a; }
         .mkt-inbox-card.is-rejected { border-left-color: #dc2626; opacity: 0.7; }
         .mkt-inbox-card.is-failed   { border-left-color: #dc2626; }
@@ -3255,15 +3281,16 @@
                         <p class="mkt-sub">AI-generated Facebook + Instagram posts. Approve / Edit / Redo / Regenerate Image / Schedule.</p>
                     </div>
                     <div class="mkt-header-actions">
-                        <select id="socInboxFilter" style="padding:0.5rem 0.75rem;">
-                            <option value="pending">Pending only</option>
-                            <option value="all">All statuses</option>
-                            <option value="approved">Approved</option>
-                            <option value="posted">Posted</option>
+                        <select id="socInboxFilter" style="padding:0.5rem 0.75rem;" title="Filter posts by status">
+                            <option value="pending">Needs my review</option>
+                            <option value="all">All posts</option>
+                            <option value="skeleton">Drafting (scheduled, no caption yet)</option>
+                            <option value="approved">Scheduled to post</option>
+                            <option value="posted">Already posted</option>
                             <option value="rejected">Rejected</option>
                         </select>
-                        <button class="btn-secondary" id="socGenerateNowBtn">Generate Drafts Now</button>
-                        <button class="btn-secondary" id="socInboxRefresh">Refresh</button>
+                        <button class="btn-secondary" id="socGenerateNowBtn" title="Have the AI write captions for the next 7 days of posts">✨ Draft Captions Now</button>
+                        <button class="btn-secondary" id="socInboxRefresh" title="Reload the latest posts">↻ Refresh</button>
                     </div>
                 </div>
                 <div id="socInboxList" class="mkt-inbox-list"><div class="mkt-empty">Loading drafts…</div></div>
@@ -3321,11 +3348,14 @@
                     <div id="socLearningsList"><div class="mkt-empty">Loading…</div></div>
                 </div>
 
-                <div class="mkt-card" style="margin-top:1rem;">
-                    <h4>Cadence Rules (legacy — used by old generator)</h4>
-                    <div id="socRulesList"><div class="mkt-empty">Loading…</div></div>
-                    <div style="margin-top:0.75rem;text-align:right;"><button class="btn-primary" id="socSaveRulesBtn">Save Rules</button></div>
-                </div>
+                <details style="margin-top:1rem;">
+                    <summary style="cursor:pointer;font-size:0.8rem;color:var(--text-muted);padding:0.4rem;">⚙️ Advanced — legacy cadence rules (rarely needed)</summary>
+                    <div class="mkt-card" style="margin-top:0.5rem;">
+                        <p class="mkt-sub" style="margin:0 0 0.5rem;">These were used by the older draft generator. The new system reads from your events list directly — you usually don't need to touch these.</p>
+                        <div id="socRulesList"><div class="mkt-empty">Loading…</div></div>
+                        <div style="margin-top:0.75rem;text-align:right;"><button class="btn-primary" id="socSaveRulesBtn">Save Rules</button></div>
+                    </div>
+                </details>
             </div>
 
             <!-- ========================================================
@@ -10131,12 +10161,62 @@ function hashCode(str) {
             };
             const $ = (id) => document.getElementById(id);
             const fmtDate = (iso) => { if (!iso) return '—'; const d = new Date(iso); return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'America/Chicago' }) + ' CT'; };
+            const fmtDay = (iso) => { if (!iso) return '—'; const d = new Date(iso.length === 10 ? iso + 'T12:00:00' : iso); return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }); };
             const escHtml = (s) => (s == null ? '' : String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])));
             const platformBadge = (p) => {
                 const map = { facebook: ['#1877f2', 'FB'], instagram: ['#e1306c', 'IG'] };
                 const [bg, label] = map[p] || ['#888', p];
                 return `<span style="display:inline-block;background:${bg};color:#fff;font-size:0.65rem;padding:1px 6px;border-radius:3px;margin-right:0.25rem;font-weight:600;">${label}</span>`;
             };
+
+            // ── Friendly labels ────────────────────────────────────────────
+            const STATUS_LABELS = {
+                skeleton:   'Drafting',
+                pending:    'Needs Review',
+                approved:   'Scheduled',
+                posted:     'Posted',
+                rejected:   'Rejected',
+                failed:     'Send Failed',
+                superseded: 'Replaced'
+            };
+            const TYPE_LABELS = {
+                event_promo:    'Event Promo',
+                band_announce:  'Live Music',
+                wine_club:      'Wine Club',
+                atmosphere:     'Vibe Post',
+                menu_spotlight: 'Menu Highlight',
+                weather_patio:  'Weather Vibe',
+                brand_post:     'Brand Post',
+                manual:         'Custom Post'
+            };
+            const friendlyStatus = (s) => STATUS_LABELS[s] || (s || 'unknown').replace(/_/g, ' ');
+            const friendlyType = (t) => TYPE_LABELS[t] || (t || 'post').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+
+            // ── Friendly errors — translate technical messages to plain English ─
+            function friendlyError(action, err) {
+                const msg = (err && err.message) ? err.message : String(err || 'Unknown problem');
+                let translated;
+                if (/Failed to fetch|NetworkError|ECONNRESET/i.test(msg)) {
+                    translated = "Couldn't reach the server — check your internet and try again.";
+                } else if (/billing.hard.limit|insufficient_quota/i.test(msg)) {
+                    translated = "OpenAI credits are out — top them up at platform.openai.com.";
+                } else if (/anthropic|claude/i.test(msg) && /quota|rate|limit/i.test(msg)) {
+                    translated = "AI is rate-limited — give it a minute and retry.";
+                } else if (/META_PAGE_ACCESS_TOKEN|not configured/i.test(msg)) {
+                    translated = "Facebook/Instagram isn't connected yet — see Social Settings.";
+                } else if (/^load .+: 4\d{2}/i.test(msg)) {
+                    translated = "Couldn't find that data — try refreshing the page.";
+                } else if (/^load .+: 5\d{2}|^save .+: 5\d{2}|^.+: 5\d{2}/i.test(msg)) {
+                    translated = "Server hiccup — give it a moment and try again.";
+                } else if (/sha|409|conflict/i.test(msg)) {
+                    translated = "Someone else updated this just now — refresh the page and try again.";
+                } else {
+                    translated = msg.length > 120 ? msg.slice(0, 120) + '…' : msg;
+                }
+                return `${action}: ${translated}`;
+            }
+            const emptyState = (icon, title, subtitle) =>
+                `<div class="mkt-empty-friendly"><span class="ic">${icon}</span><div class="ttl">${escHtml(title)}</div><div class="sub">${escHtml(subtitle || '')}</div></div>`;
 
             async function fetchData(file) {
                 const r = await fetch(`${FN}/data-store?file=${file}`, { cache: 'no-store' });
@@ -10173,7 +10253,7 @@ function hashCode(str) {
                     state.aggregates = ev.json.aggregates || {}; state.eventsLog = Array.isArray(ev.json.events) ? ev.json.events : []; state.sha.events = ev.sha;
                     state.loaded = true;
                     updateBadge(); renderInbox(); renderCalendar(); renderPerformance(); renderSettings();
-                } catch (err) { console.error('SocialUI load failed', err); toast('Social load failed: ' + err.message); }
+                } catch (err) { console.error('SocialUI load failed', err); toast(friendlyError('Could not load Social', err)); }
                 finally { state.loading = false; }
             }
 
@@ -10190,17 +10270,24 @@ function hashCode(str) {
                 let list = state.drafts.slice();
                 if (filter !== 'all') list = list.filter((d) => d.status === filter);
                 list.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
-                if (!list.length) { wrap.innerHTML = '<div class="mkt-empty">No drafts in this view.</div>'; return; }
+                if (!list.length) {
+                    const next = state.drafts.filter((d) => d.scheduledFor && new Date(d.scheduledFor).getTime() > Date.now()).sort((a, b) => (a.scheduledFor || '').localeCompare(b.scheduledFor || ''))[0];
+                    const subtitle = next ? `Next post goes out ${fmtDate(next.scheduledFor)}.` : '';
+                    wrap.innerHTML = emptyState('✓', 'All caught up!', subtitle);
+                    return;
+                }
                 wrap.innerHTML = list.map((d) => {
                     const platforms = (d.platforms || []).map(platformBadge).join('');
-                    const img = d.imageUrl ? `<img src="${escHtml(d.imageUrl)}" style="width:60px;height:60px;object-fit:cover;border-radius:4px;margin-right:0.6rem;" alt="">` : '';
-                    const captionPreview = (d.caption || '').slice(0, 140) + ((d.caption || '').length > 140 ? '…' : '');
+                    const previewSrc = d.userImageUrl || d.imageUrl;
+                    const img = previewSrc ? `<img src="${escHtml(previewSrc)}" style="width:60px;height:60px;object-fit:cover;border-radius:4px;margin-right:0.6rem;" alt="">` : '';
+                    const captionFull = d.caption || (d.status === 'skeleton' ? '✨ AI will draft this caption when the post date gets within 7 days. Open to draft it now if you want.' : '(no caption)');
+                    const captionPreview = captionFull.slice(0, 140) + (captionFull.length > 140 ? '…' : '');
                     return `<div class="mkt-inbox-item" data-draft-id="${escHtml(d.id)}" style="display:flex;align-items:flex-start;cursor:pointer;">
                         ${img}
                         <div style="flex:1;min-width:0;">
                             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.25rem;">
-                                <div style="font-size:0.75rem;">${platforms}<span style="color:var(--text-muted);">${escHtml(d.type || 'post')} · ${fmtDate(d.scheduledFor || d.createdAt)}</span></div>
-                                <div class="mkt-status-pill is-${escHtml(d.status)}">${escHtml(d.status)}</div>
+                                <div style="font-size:0.75rem;">${platforms}<span style="color:var(--text-muted);">${escHtml(friendlyType(d.type))} · ${fmtDate(d.scheduledFor || d.createdAt)}</span></div>
+                                <div class="mkt-status-pill is-${escHtml(d.status)}">${escHtml(friendlyStatus(d.status))}</div>
                             </div>
                             <div style="font-size:0.85rem;line-height:1.4;color:var(--text-primary);">${escHtml(captionPreview)}</div>
                         </div>
@@ -10212,25 +10299,29 @@ function hashCode(str) {
             function renderCalendar() {
                 const wrap = $('socCalendarList'); if (!wrap) return;
                 const upcoming = state.drafts
-                    .filter((d) => d.status !== 'rejected')
+                    .filter((d) => d.status !== 'rejected' && d.status !== 'superseded')
                     .sort((a, b) => (a.scheduledFor || '').localeCompare(b.scheduledFor || ''));
-                if (!upcoming.length) { wrap.innerHTML = '<div class="mkt-empty">No scheduled or posted social content yet.</div>'; return; }
+                if (!upcoming.length) {
+                    wrap.innerHTML = emptyState('📅', 'No posts scheduled yet', 'Click "Rebuild Schedule" in Settings to generate posts from your events.');
+                    return;
+                }
                 const groups = {};
                 upcoming.forEach((d) => {
                     const key = (d.scheduledFor || d.postedAt || d.createdAt || '').slice(0, 10) || 'unscheduled';
                     (groups[key] = groups[key] || []).push(d);
                 });
                 wrap.innerHTML = Object.keys(groups).sort().map((key) => {
-                    const label = key === 'unscheduled' ? 'Unscheduled' : new Date(key + 'T12:00').toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+                    const label = key === 'unscheduled' ? 'Not yet scheduled' : new Date(key + 'T12:00').toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
                     const rows = groups[key].map((d) => {
                         const platforms = (d.platforms || []).map(platformBadge).join('');
                         const time = d.scheduledFor ? new Date(d.scheduledFor).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Chicago' }) : '—';
+                        const captionPrev = d.caption ? d.caption.slice(0, 120) : `${friendlyType(d.type)} — caption coming soon`;
                         return `<div class="mkt-inbox-item" data-draft-id="${escHtml(d.id)}" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
                             <div style="flex:1;min-width:0;">
                                 <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.2rem;">${platforms}${time}</div>
-                                <div style="font-size:0.85rem;">${escHtml((d.caption || '').slice(0, 120))}</div>
+                                <div style="font-size:0.85rem;">${escHtml(captionPrev)}</div>
                             </div>
-                            <div class="mkt-status-pill is-${escHtml(d.status)}" style="margin-left:0.6rem;">${escHtml(d.status)}</div>
+                            <div class="mkt-status-pill is-${escHtml(d.status)}" style="margin-left:0.6rem;">${escHtml(friendlyStatus(d.status))}</div>
                         </div>`;
                     }).join('');
                     return `<div class="mkt-card" style="margin-bottom:0.75rem;"><h4 style="margin:0 0 0.5rem 0;">${escHtml(label)}</h4>${rows}</div>`;
@@ -10297,7 +10388,7 @@ function hashCode(str) {
                     .filter((d) => (d.status === 'skeleton' || d.status === 'pending') && d.graphicBrief && !d.userImageUrl)
                     .filter((d) => d.scheduledFor && new Date(d.scheduledFor).getTime() <= cutoff)
                     .sort((a, b) => (a.graphicBrief?.neededBy || a.scheduledFor || '').localeCompare(b.graphicBrief?.neededBy || b.scheduledFor || ''));
-                if (!queue.length) { wrap.innerHTML = '<div class="mkt-empty">All upcoming posts have graphics ready (or use AI-generated images). 🎉</div>'; return; }
+                if (!queue.length) { wrap.innerHTML = emptyState('🎉', 'No graphics needed right now', 'All upcoming posts already have an image set or will use an AI-generated one.'); return; }
                 wrap.innerHTML = queue.map((d) => {
                     const brief = d.graphicBrief || {};
                     const spec = brief.spec || {};
@@ -10324,7 +10415,7 @@ function hashCode(str) {
                     const body = await r.json();
                     const learnings = (body.decoded && Array.isArray(body.decoded.learnings)) ? body.decoded.learnings : [];
                     const active = learnings.filter((l) => !l.supersededAt);
-                    if (!active.length) { wrap.innerHTML = '<div class="mkt-empty">No learnings yet. Need at least 5 posted+polled posts before the optimizer can find patterns.</div>'; return; }
+                    if (!active.length) { wrap.innerHTML = emptyState('🧠', 'No insights yet', 'After about 5 posts go live and gather engagement, the AI starts spotting patterns and shows them here.'); return; }
                     wrap.innerHTML = active.map((l) => `<div style="padding:0.5rem;border-bottom:1px solid var(--border-subtle);">
                         <div style="font-size:0.85rem;font-weight:500;">${escHtml(l.insight)}</div>
                         <div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.2rem;"><span style="color:var(--gold);">[${escHtml(l.category)}]</span> ${escHtml(l.evidence || '')} · confidence: ${escHtml(l.confidence || 'medium')}</div>
@@ -10339,7 +10430,7 @@ function hashCode(str) {
                     const body = await r.json();
                     const assets = (body.decoded && Array.isArray(body.decoded.assets)) ? body.decoded.assets : [];
                     if (!assets.length) {
-                        wrap.innerHTML = `<div style="color:var(--text-muted);">Empty. Add venue photos here so the AI can use real Quarry shots for atmosphere posts (saves ~$0.04/post vs DALL-E).</div>`;
+                        wrap.innerHTML = `<div style="color:var(--text-muted);font-size:0.85rem;">Empty. Add real Quarry photos (patio, food, sunset, bands) so vibe posts use your actual venue instead of AI-generated images. Saves about $0.04 per post.</div>`;
                         return;
                     }
                     const tags = [...new Set(assets.flatMap((a) => a.tags || []))];
@@ -10349,8 +10440,8 @@ function hashCode(str) {
             }
 
             async function rebuildSchedule() {
-                if (!confirm('Rebuild the 60-day schedule? Will pick up new events, reshuffle if needed. Existing pending/approved drafts stay locked.')) return;
-                toast('Rebuilding schedule…');
+                if (!confirm("Rebuild the next 60 days of posts?\n\nThis picks up any new events, bands, or wine club dates and adds posts for them. Anything you've already reviewed or approved stays put.")) return;
+                toast('Rebuilding schedule — this takes about 10 seconds…');
                 try {
                     const r = await fetch(`${FN}/social-cadence-engine`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -10358,9 +10449,13 @@ function hashCode(str) {
                     });
                     const body = await r.json();
                     if (!r.ok) throw new Error(body.error || 'rebuild failed');
-                    toast(`+${body.added || 0} new, ${body.movedExisting || 0} reshuffled, ${body.supersededExisting || 0} bumped.`);
+                    const parts = [];
+                    if (body.added > 0) parts.push(`Added ${body.added} new post${body.added === 1 ? '' : 's'}`);
+                    if (body.movedExisting > 0) parts.push(`shifted ${body.movedExisting}`);
+                    if (body.supersededExisting > 0) parts.push(`replaced ${body.supersededExisting}`);
+                    toast(parts.length ? parts.join(', ') + '.' : 'Schedule already up to date — nothing new to add.');
                     await loadAll();
-                } catch (err) { toast('Rebuild failed: ' + err.message); }
+                } catch (err) { toast(friendlyError('Rebuild schedule', err)); }
             }
 
             function renderRules() {
@@ -10404,32 +10499,45 @@ function hashCode(str) {
             }
             function renderModal() {
                 const d = state.drafts.find((x) => x.id === state.currentDraftId); if (!d) return;
-                $('socDraftModalTitle').textContent = `${(d.type || 'post')} · ${(d.platforms || []).join(' + ')}`;
-                $('socDraftModalSub').textContent = `${d.status} · ${fmtDate(d.scheduledFor || d.createdAt)}${d.cadenceTag ? ' · ' + d.cadenceTag : ''}`;
+                const platformList = (d.platforms || []).map((p) => p === 'facebook' ? 'Facebook' : p === 'instagram' ? 'Instagram' : p).join(' + ');
+                $('socDraftModalTitle').textContent = `${friendlyType(d.type)} · ${platformList}`;
+                $('socDraftModalSub').innerHTML = `<span class="mkt-status-pill is-${escHtml(d.status)}" style="margin-right:0.5rem;">${escHtml(friendlyStatus(d.status))}</span>${escHtml(fmtDate(d.scheduledFor || d.createdAt))}`;
                 const img = $('socDraftImagePreview');
                 const liveImage = d.userImageUrl || d.imageUrl;
                 if (liveImage) img.innerHTML = `<img src="${escHtml(liveImage)}" style="width:100%;height:100%;object-fit:cover;" alt="">`;
-                else img.textContent = 'No image yet — upload your own poster, pick from library, or generate with DALL-E';
+                else img.textContent = 'No image yet — upload your own poster, pick from the library, or generate with DALL-E';
                 const srcLabel = $('socImageSourceLabel');
                 if (srcLabel) {
                     if (d.userImageUrl) srcLabel.innerHTML = '✓ <span style="color:var(--gold);">Your uploaded poster</span>';
                     else if (d.imageUrl && d.imageSource === 'library') srcLabel.innerHTML = '✓ <span style="color:var(--gold);">From asset library</span>';
-                    else if (d.imageUrl) srcLabel.innerHTML = '✓ <span style="color:#888;">DALL-E generated</span>';
+                    else if (d.imageUrl) srcLabel.innerHTML = '✓ <span style="color:#888;">AI-generated</span>';
                     else srcLabel.textContent = '';
                 }
                 $('socDraftImagePrompt').value = d.imagePrompt || '';
                 renderGraphicBrief(d.graphicBrief);
+                // Source: prefer event/band/wine-club label over technical IDs
+                let sourceLabel = '—';
+                if (d.context?.eventName) sourceLabel = d.context.eventName;
+                else if (d.context?.bands && d.context.bands.length) sourceLabel = d.context.bands.map((b) => b.name).join(', ');
+                else if (d.context?.weekendOf) sourceLabel = 'Weekend of ' + fmtDay(d.context.weekendOf);
+                else if (d.context?.monthLabel) sourceLabel = 'Rock & Vine — ' + d.context.monthLabel;
+                else if (d.context?.weatherMode) sourceLabel = d.context.weatherMode === 'patio' ? 'Patio-perfect day' : 'Cozy weather';
                 const meta = $('socDraftMeta');
                 meta.innerHTML = [
-                    ['Type', d.type || '—'],
-                    ['Platforms', (d.platforms || []).join(', ') || '—'],
-                    ['Scheduled', fmtDate(d.scheduledFor)],
-                    ['Posted', fmtDate(d.postedAt)],
-                    ['Source', d.context?.eventName || d.context?.weekendOf || d.context?.monthLabel || '—'],
-                    ['Arc Step', d.context?.arcLabel || '—'],
-                    ['Regenerations', d.regenerationCount || 0],
-                ].map(([k, v]) => `<div class="mkt-meta-cell"><div class="mkt-meta-k">${k}</div><div class="mkt-meta-v">${escHtml(String(v))}</div></div>`).join('');
-                $('socDraftCaption').textContent = d.caption || '(no caption — still skeleton)';
+                    ['Posts to', platformList || '—'],
+                    ['When', fmtDate(d.scheduledFor)],
+                    ['What about', sourceLabel],
+                    ['Phase', d.context?.arcLabel || '—'],
+                    d.postedAt ? ['Posted', fmtDate(d.postedAt)] : null,
+                    (d.regenerationCount > 0) ? ['Times redrafted', d.regenerationCount] : null,
+                ].filter(Boolean).map(([k, v]) => `<div class="mkt-meta-cell"><div class="mkt-meta-k">${k}</div><div class="mkt-meta-v">${escHtml(String(v))}</div></div>`).join('');
+                if (d.caption) {
+                    $('socDraftCaption').textContent = d.caption;
+                } else if (d.status === 'skeleton') {
+                    $('socDraftCaption').innerHTML = `<em style="color:var(--text-muted);">✨ AI will draft this caption automatically when the post date gets within 7 days. Click "Redo" in the panel above to draft one now.</em>`;
+                } else {
+                    $('socDraftCaption').textContent = '(no caption)';
+                }
                 $('socDraftHashtags').textContent = (d.hashtags || []).join(' ');
                 const showPostNow = d.status === 'pending' || d.status === 'approved';
                 $('socDraftPostNowBtn').style.display = showPostNow ? '' : 'none';
@@ -10442,20 +10550,39 @@ function hashCode(str) {
                 if (!panel || !content) return;
                 if (!brief || !brief.spec) { panel.style.display = 'none'; return; }
                 panel.style.display = 'block';
+                const FRIENDLY_BRIEF_KEYS = {
+                    backgroundIdea: 'Background', title: 'Title', subtitle: 'Subtitle',
+                    date: 'Date', time: 'Time', callout: 'Callout',
+                    footerText: 'Footer text', cards: 'Show these acts', qLogo: 'Logo placement'
+                };
+                const FRIENDLY_BRIEF_TYPE = {
+                    event_poster: 'Event Poster', band_lineup_poster: 'Live Music Lineup',
+                    wine_club_poster: 'Wine Club Poster', atmosphere_photo: 'Atmosphere Photo'
+                };
                 const rows = [];
-                rows.push(`<div><strong>Type:</strong> ${escHtml(brief.type || '')}</div>`);
+                rows.push(`<div><strong>Type:</strong> ${escHtml(FRIENDLY_BRIEF_TYPE[brief.type] || brief.type || '')}</div>`);
                 if (brief.templateRef) rows.push(`<div><strong>Template:</strong> ${escHtml(brief.templateRef)}</div>`);
-                if (brief.dimensions) rows.push(`<div><strong>Dimensions:</strong> ${escHtml(brief.dimensions)}</div>`);
-                if (brief.neededBy) rows.push(`<div><strong>Build by:</strong> ${escHtml(brief.neededBy)}</div>`);
-                if (brief.toneMode) rows.push(`<div><strong>Tone mode:</strong> <span style="color:var(--gold);">${escHtml(brief.toneMode)}</span></div>`);
+                if (brief.dimensions) rows.push(`<div><strong>Size:</strong> ${escHtml(brief.dimensions)}</div>`);
+                if (brief.neededBy) rows.push(`<div><strong>Build by:</strong> ${escHtml(fmtDay(brief.neededBy))}</div>`);
                 rows.push(`<hr style="margin:0.5rem 0;border:none;border-top:1px solid var(--border-subtle);">`);
-                rows.push(`<div style="font-weight:600;margin-bottom:0.3rem;">Spec:</div>`);
+                rows.push(`<div style="font-weight:600;margin-bottom:0.3rem;">What to put on it:</div>`);
                 for (const [k, v] of Object.entries(brief.spec || {})) {
                     if (v == null || v === '') continue;
+                    const label = FRIENDLY_BRIEF_KEYS[k] || k.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase());
                     if (Array.isArray(v)) {
-                        rows.push(`<div><em>${escHtml(k)}:</em></div><ul style="margin:0.2rem 0 0.4rem 1.2rem;padding:0;">${v.map((it) => `<li>${escHtml(typeof it === 'object' ? JSON.stringify(it) : String(it))}</li>`).join('')}</ul>`);
+                        // Pretty-format common arrays (e.g. band cards) instead of dumping JSON
+                        const items = v.map((it) => {
+                            if (typeof it !== 'object') return escHtml(String(it));
+                            // Band card: { day, bandName, time }
+                            if (it.bandName) return `<strong>${escHtml(it.bandName)}</strong> — ${escHtml(it.day || '')}${it.time ? ' · ' + escHtml(it.time) : ''}`;
+                            // Generic: turn into "key: value" pairs
+                            return Object.entries(it).map(([kk, vv]) => `${escHtml(kk)}: ${escHtml(String(vv))}`).join(' · ');
+                        });
+                        rows.push(`<div><em>${escHtml(label)}:</em></div><ul style="margin:0.2rem 0 0.4rem 1.2rem;padding:0;">${items.map((s) => `<li>${s}</li>`).join('')}</ul>`);
+                    } else if (typeof v === 'object') {
+                        rows.push(`<div><em>${escHtml(label)}:</em> ${Object.entries(v).map(([kk, vv]) => `${escHtml(kk)}: ${escHtml(String(vv))}`).join(', ')}</div>`);
                     } else {
-                        rows.push(`<div><em>${escHtml(k)}:</em> ${escHtml(typeof v === 'object' ? JSON.stringify(v) : String(v))}</div>`);
+                        rows.push(`<div><em>${escHtml(label)}:</em> ${escHtml(String(v))}</div>`);
                     }
                 }
                 if (brief.canvasNote) rows.push(`<div style="margin-top:0.5rem;padding:0.4rem;background:rgba(154,123,42,0.1);border-left:3px solid var(--gold);font-size:0.75rem;font-style:italic;">${escHtml(brief.canvasNote)}</div>`);
@@ -10487,7 +10614,7 @@ function hashCode(str) {
                     // Save the URL to the draft via 'edit' action
                     await action('edit', { imageUrl: body.url, userImageUrl: body.url });
                     toast('Poster uploaded.');
-                } catch (err) { toast('Upload failed: ' + err.message); }
+                } catch (err) { toast(friendlyError('Upload', err)); }
             }
 
             async function openLibraryPicker() {
@@ -10534,7 +10661,7 @@ function hashCode(str) {
                         $('socImageFileInput').dataset.libraryUpload = 'true';
                         $('socImageFileInput').click();
                     });
-                } catch (err) { toast('Library load failed: ' + err.message); }
+                } catch (err) { toast(friendlyError('Library load', err)); }
             }
 
             async function action(act, payload) {
@@ -10549,12 +10676,12 @@ function hashCode(str) {
                     toast(act === 'redo' ? 'Regenerated.' : (act === 'regenImage' ? 'Image regenerated.' : (act.charAt(0).toUpperCase() + act.slice(1)) + 'd.'));
                     const fresh = await fetchData('social_drafts.json'); state.sha.drafts = fresh.sha;
                     if (act === 'reject') closeModal();
-                } catch (err) { toast('Action failed: ' + err.message); }
+                } catch (err) { toast(friendlyError('That action', err)); }
             }
 
             async function postNow() {
                 if (!state.currentDraftId) return;
-                if (!confirm('Post this to Facebook + Instagram now? This cannot be undone.')) return;
+                if (!confirm("Post this to Facebook & Instagram right now?\n\nIt'll go live in a few seconds. Posts can't be deleted from Instagram automatically (you'd have to remove from the IG app yourself), so make sure it's right.")) return;
                 try {
                     const r = await fetch(`${FN}/social-post`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode: 'sendNow', draftId: state.currentDraftId }) });
                     const body = await r.json();
@@ -10563,17 +10690,17 @@ function hashCode(str) {
                     if (result && !result.ok) throw new Error(result.error || 'post failed');
                     toast(body.results?.[0]?.dryRun ? 'Posted (dry-run — Meta token not configured)' : 'Posted to social.');
                     await loadAll(); closeModal();
-                } catch (err) { toast('Post failed: ' + err.message); }
+                } catch (err) { toast(friendlyError('Post', err)); }
             }
 
             async function generateNow() {
-                if (!confirm('Generate today\'s social drafts now?')) return;
-                toast('Generating… this may take 20–60 seconds.');
+                if (!confirm("Draft today's social posts now?\n\nThis writes captions and hashtags for any posts coming up in the next 7 days. Takes about a minute. You'll still review each one before it goes live.")) return;
+                toast('Drafting captions — give it 20-60 seconds…');
                 try {
                     const r = await fetch(`${FN}/social-generate-daily`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) });
                     const body = await r.json(); if (!r.ok) throw new Error(body.error || 'generation failed');
                     toast(`Generated ${body.generatedCount || 0} draft(s).`); await loadAll();
-                } catch (err) { toast('Generate failed: ' + err.message); }
+                } catch (err) { toast(friendlyError('Generate', err)); }
             }
 
             async function saveRules() {
@@ -10591,7 +10718,7 @@ function hashCode(str) {
                     await putData('social_calendar.json', next, cur.sha, 'social: update calendar rules');
                     state.rules = rules;
                     toast('Rules saved.');
-                } catch (err) { toast('Save failed: ' + err.message); }
+                } catch (err) { toast(friendlyError('Save', err)); }
             }
 
             function init() {
@@ -10607,7 +10734,7 @@ function hashCode(str) {
                 $('socDraftModalClose')?.addEventListener('click', closeModal);
                 document.querySelectorAll('#socDraftModal .mkt-mode-tab').forEach((t) => t.addEventListener('click', () => setMode(t.dataset.mode)));
                 $('socDraftApproveBtn')?.addEventListener('click', () => action('approve', { approvedBy: 'admin' }));
-                $('socDraftRejectBtn')?.addEventListener('click', () => { const reason = prompt('Optional reason for rejecting:') || ''; action('reject', { reason }); });
+                $('socDraftRejectBtn')?.addEventListener('click', () => { const reason = prompt("Why are you rejecting this? (Optional — but it helps the AI learn for next time.)\n\nExamples: 'too generic', 'wrong tone for our audience', 'event already passed'") || ''; action('reject', { reason }); });
                 $('socDraftEditSaveBtn')?.addEventListener('click', () => {
                     const caption = $('socDraftEditCaption').value;
                     const hashtags = $('socDraftEditHashtags').value.split('\n').map((s) => s.trim()).filter(Boolean);
@@ -10641,9 +10768,9 @@ function hashCode(str) {
             }
 
             async function uploadAssetToLibrary(file) {
-                const title = prompt('Short title for this asset (e.g., "Patio sunset", "Wood-fired flatbread"):', file.name.replace(/\.[^.]+$/, ''));
+                const title = prompt('Give this photo a short name so you can find it later.\n\nExamples: "Patio at sunset", "Wood-fired flatbread", "Friday night band on the deck"', file.name.replace(/\.[^.]+$/, ''));
                 if (!title) return;
-                const tagInput = prompt('Tags (comma-separated, used by AI to pick the right photo). Examples: patio, sunset, food, wine, band, golf', '');
+                const tagInput = prompt('Add tags (separated by commas) so the AI knows when to use this photo.\n\nCommon tags: patio, sunset, food, wine, cocktail, band, golf, fireplace, brunch, dinner', '');
                 const tags = (tagInput || '').split(',').map((s) => s.trim().toLowerCase()).filter(Boolean);
                 toast('Uploading to library…');
                 try {
@@ -10673,7 +10800,7 @@ function hashCode(str) {
                     });
                     if (!saveRes.ok) throw new Error('save asset list failed: ' + saveRes.status);
                     toast('Asset added to library: ' + title);
-                } catch (err) { toast('Library upload failed: ' + err.message); }
+                } catch (err) { toast(friendlyError('Library upload', err)); }
             }
             function onTabSwitch(tabName) {
                 if (!state.loaded) loadAll();
