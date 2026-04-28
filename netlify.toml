@@ -45,3 +45,19 @@
 # Social engagement stats poller — every 30 min. Reach/likes/comments per post.
 [functions."social-poll-stats"]
   schedule = "*/30 * * * *"
+
+# Cadence engine — every 4 hours. Picks up newly added events/bands and
+# rebuilds skeleton drafts; re-prioritizes when new high-priority items appear.
+# Light operation (no AI calls), idempotent.
+[functions."social-cadence-engine"]
+  schedule = "0 */4 * * *"
+
+# Nightly social learning optimizer — 8:00 UTC = 3am CT.
+# Mines engagement patterns into social_learnings.json so future captions improve.
+[functions."social-optimize"]
+  schedule = "0 8 * * *"
+
+# Weather-aware atmosphere posts — 11:00 UTC = 6am CT. Reads forecast and
+# creates patio-perfect or cozy-fireside skeleton drafts for today/tomorrow.
+[functions."social-weather-trigger"]
+  schedule = "0 11 * * *"
