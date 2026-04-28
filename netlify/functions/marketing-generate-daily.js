@@ -171,10 +171,11 @@ exports.handler = async (event) => {
         const draftsFile = draftsRes.data;
         // events.json may be a flat array OR {events: [...]} OR (when too big for GitHub
         // contents API) an empty/null decoded payload — normalize to an array.
-        let events = [];
+        let events = [], bands = [];
         if (eventsRes && eventsRes.data) {
             if (Array.isArray(eventsRes.data)) events = eventsRes.data;
             else if (Array.isArray(eventsRes.data.events)) events = eventsRes.data.events;
+            if (Array.isArray(eventsRes.data.bands)) bands = eventsRes.data.bands;
         }
         const learnings = (learningsRes.data && Array.isArray(learningsRes.data.learnings)) ? learningsRes.data.learnings : [];
 
@@ -218,11 +219,24 @@ exports.handler = async (event) => {
                         const ed = new Date(e.date + 'T00:00:00Z');
                         const diff = (ed - day) / (1000 * 60 * 60 * 24);
                         return diff >= 0 && diff <= 7;
-                    });
+                    }).map((e) => ({
+                        // Slim: marketing-relevant fields only — drop registrations etc.
+                        id: e.id, name: e.name, date: e.date, time: e.time,
+                        description: (e.description || '').slice(0, 400),
+                        pricePerSeat: e.pricePerSeat, totalCapacity: e.totalCapacity,
+                        registeredCount: e.registeredCount
+                    }));
+                    // Pull this week's bands too — same slim shape
+                    const upcomingBands = (Array.isArray(bands) ? bands : []).filter((b) => {
+                        if (!b || !b.date) return false;
+                        const bd = new Date(b.date + 'T00:00:00Z');
+                        const diff = (bd - day) / (1000 * 60 * 60 * 24);
+                        return diff >= 0 && diff <= 7;
+                    }).slice(0, 8).map((b) => ({ name: b.name, date: b.date, timeSlot: b.timeSlot }));
                     fires.push({
                         draftType: rule.draftType,
                         scheduledFor: ctHourToUtcIso(day, rule.schedule.hourCT || 10),
-                        context: { weekOf: dayKey, events: upcomingWeek.slice(0, 8) }
+                        context: { weekOf: dayKey, events: upcomingWeek.slice(0, 8), bands: upcomingBands }
                     });
                 } else if (rule.schedule.kind === 'monthly' && shouldFireMonthly(rule, day)) {
                     fires.push({
@@ -232,11 +246,22 @@ exports.handler = async (event) => {
                     });
                 } else if (rule.schedule.kind === 'event_relative') {
                     for (const t of eventTouchesForDay(rule, day, events)) {
+                        // Slim the event object — strip registrations, large nested fields, etc.
+                        // Otherwise we shove ~6MB of data into every AI prompt and blow the 1M token cap.
+                        const ev = t.event;
+                        const slim = {
+                            id: ev.id, name: ev.name, date: ev.date, time: ev.time,
+                            location: ev.location, description: ev.description, category: ev.category,
+                            pricePerSeat: ev.pricePerSeat, totalCapacity: ev.totalCapacity,
+                            registeredCount: ev.registeredCount, status: ev.status,
+                            highlights: ev.highlights, additionalInfo: ev.additionalInfo,
+                            slug: ev.slug, tags: ev.tags
+                        };
                         fires.push({
                             draftType: t.draftType,
                             scheduledFor: ctHourToUtcIso(day, rule.schedule.hourCT || 10),
-                            context: { eventId: t.event.id, event: t.event, daysUntil: -t.offsetDays },
-                            eventId: t.event.id
+                            context: { eventId: ev.id, event: slim, daysUntil: -t.offsetDays },
+                            eventId: ev.id
                         });
                     }
                 }
