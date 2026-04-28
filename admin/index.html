@@ -2999,45 +2999,58 @@
             </div>
 
             <!-- ========================================================
-                 POTENTIAL EVENTS TAB
+                 RESERVATION INQUIRIES TAB (live from Netlify Forms)
                  ======================================================== -->
             <div id="potentialTab" class="tab-content">
-                <div class="crm-header">
-                    <h2>Potential Reservations</h2>
-                    <button onclick="loadPotentialEvents()" style="background:transparent;border:1px solid #d4af37;color:#9a7b2a;padding:0.5rem 1rem;border-radius:4px;cursor:pointer;font-size:0.85rem;font-weight:500;">Refresh</button>
+                <div class="mkt-header">
+                    <div>
+                        <h2 style="margin:0;">📥 Reservation Inquiries</h2>
+                        <p class="mkt-sub">Every form submission across reservations, private events, and wedding tours — live from the website. Click any row to email the customer or change their status.</p>
+                    </div>
+                    <div class="mkt-header-actions">
+                        <select id="resInqFilter" style="padding:0.5rem 0.75rem;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:6px;color:var(--text-primary);font-size:0.85rem;">
+                            <option value="needs_attention">Needs my attention</option>
+                            <option value="all">All inquiries</option>
+                            <option value="not_contacted">Not contacted</option>
+                            <option value="contacted">Contacted</option>
+                            <option value="needs_followup">Needs follow-up</option>
+                            <option value="contacted_2">Followed up</option>
+                            <option value="confirmed">Confirmed</option>
+                            <option value="lost">Lost</option>
+                        </select>
+                        <button class="btn-secondary" id="resInqRefresh" title="Reload from Netlify">↻ Refresh</button>
+                    </div>
                 </div>
 
-                <div class="crm-stats" style="grid-template-columns: repeat(3, 1fr);">
-                    <div class="stat-item">
-                        <div class="stat-label">Potential Reservations</div>
-                        <div class="stat-value" id="potentialLeadsCount">0</div>
+                <div class="dash-stats-grid" style="margin-bottom:1rem;">
+                    <div class="dash-stat" id="resInqStatTotal">
+                        <div class="dash-stat-ic">📋</div>
+                        <div class="dash-stat-num" id="resInqTotalCount">0</div>
+                        <div class="dash-stat-lbl">Total Inquiries</div>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-label">This Month</div>
-                        <div class="stat-value" id="potentialThisMonth">0</div>
+                    <div class="dash-stat" id="resInqStatNotContacted">
+                        <div class="dash-stat-ic">⏳</div>
+                        <div class="dash-stat-num" id="resInqNotContactedCount" style="color:#b45309;">0</div>
+                        <div class="dash-stat-lbl">Not Contacted</div>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Matched to Confirmed</div>
-                        <div class="stat-value" id="potentialMatched" style="color: #4ade80;">0</div>
+                    <div class="dash-stat" id="resInqStatFollowup">
+                        <div class="dash-stat-ic">⚠️</div>
+                        <div class="dash-stat-num" id="resInqFollowupCount" style="color:#dc2626;">0</div>
+                        <div class="dash-stat-lbl">Need Follow-up</div>
                     </div>
-                </div>
-
-                <div class="crm-filters">
-                    <div class="filter-group" style="flex: 2;">
-                        <input type="text" id="potentialSearch" placeholder="Search potential reservations..." oninput="filterPotentialEvents()">
-                    </div>
-                    <div class="events-crm-status" style="padding-top: 1.2rem;">
-                        <span class="status-count" id="potentialStatusText">Loading...</span>
+                    <div class="dash-stat" id="resInqStatConfirmed">
+                        <div class="dash-stat-ic">✓</div>
+                        <div class="dash-stat-num" id="resInqConfirmedCount" style="color:#16a34a;">0</div>
+                        <div class="dash-stat-lbl">Confirmed</div>
                     </div>
                 </div>
 
                 <div class="crm-table-container">
-                    <table class="crm-table" id="potentialTable">
+                    <table class="crm-table" id="resInqTable">
                         <thead>
                             <tr>
                                 <th>Name</th>
-                                <th>Email</th>
-                                <th>Phone</th>
+                                <th>Type</th>
                                 <th>Occasion</th>
                                 <th>Event Date</th>
                                 <th>Guests</th>
@@ -3046,12 +3059,46 @@
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="potentialTableBody">
-                            <tr>
-                                <td colspan="9" style="text-align: center; color: #858d9e;">Loading potential reservations from Gmail...</td>
-                            </tr>
+                        <tbody id="resInqTableBody">
+                            <tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:2rem;">Loading inquiries…</td></tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            <!-- Inquiry detail modal -->
+            <div class="mkt-modal-backdrop" id="resInqModal" role="dialog" aria-modal="true" aria-hidden="true">
+                <div class="mkt-modal" role="document" style="max-width:720px;">
+                    <div class="mkt-modal-head">
+                        <div>
+                            <h3 id="resInqModalTitle">Inquiry</h3>
+                            <div id="resInqModalSub" style="font-size:0.8rem;color:var(--text-muted);margin-top:0.3rem;display:flex;align-items:center;gap:0.5rem;"></div>
+                        </div>
+                        <button class="mkt-modal-close" id="resInqModalClose" aria-label="Close">&times;</button>
+                    </div>
+                    <div class="mkt-modal-body" style="display:block;">
+                        <div id="resInqDetails" style="padding:0.5rem 0;font-size:0.92rem;line-height:1.6;"></div>
+                        <hr style="border:none;border-top:1px solid var(--border-subtle);margin:1rem 0;">
+                        <div style="font-weight:600;margin-bottom:0.5rem;">Update status:</div>
+                        <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+                            <button class="btn-secondary" data-status="not_contacted">⏳ Not Contacted</button>
+                            <button class="btn-secondary" data-status="contacted">✉️ Contacted</button>
+                            <button class="btn-secondary" data-status="needs_followup">⚠️ Needs Follow-up</button>
+                            <button class="btn-secondary" data-status="contacted_2">📨 Followed Up Again</button>
+                            <button class="btn-approve" data-status="confirmed">✓ Confirmed (in Calendar)</button>
+                            <button class="btn-reject" data-status="lost">✗ Lost</button>
+                        </div>
+                        <div style="margin-top:1rem;">
+                            <label style="font-size:0.78rem;color:var(--text-muted);">Optional note:</label>
+                            <input type="text" id="resInqStatusNote" placeholder='e.g. "Replied with availability for May 10"' style="width:100%;padding:0.5rem;border:1px solid var(--border-subtle);border-radius:6px;background:var(--bg-card);color:var(--text-primary);margin-top:0.25rem;">
+                        </div>
+                        <div id="resInqHistory" style="margin-top:1rem;font-size:0.8rem;color:var(--text-muted);"></div>
+                    </div>
+                    <div class="mkt-modal-foot">
+                        <a id="resInqMailLink" href="#" target="_blank" class="btn-primary" style="text-decoration:none;">✉️ Email Customer</a>
+                        <div style="flex:1;"></div>
+                        <a id="resInqNetlifyLink" href="#" target="_blank" class="btn-secondary" style="text-decoration:none;font-size:0.78rem;">View in Netlify</a>
+                    </div>
                 </div>
             </div>
 
@@ -4576,6 +4623,10 @@
             // Social module hook
             if (tabName.startsWith('soc') && window.SocialUI && typeof SocialUI.onTabSwitch === 'function') {
                 SocialUI.onTabSwitch(tabName);
+            }
+            // Reservation Inquiries module hook (replaces old Gmail-label loader)
+            if (tabName === 'potential' && window.ResInqUI && typeof ResInqUI.onTabSwitch === 'function') {
+                ResInqUI.onTabSwitch(tabName);
             }
         }
 
@@ -11304,6 +11355,176 @@ function hashCode(str) {
         })();
 
         document.addEventListener('DOMContentLoaded', () => { try { SocialUI.init(); } catch (e) { console.error('SocialUI init failed', e); } });
+
+        // ====================================================================
+        // ReservationInquiriesUI — live Netlify Forms reservation tracker
+        // ====================================================================
+        window.ResInqUI = (() => {
+            const FN = '/.netlify/functions';
+            const state = { inquiries: [], current: null, loaded: false, loading: false };
+            const $ = (id) => document.getElementById(id);
+            const escHtml = (s) => (s == null ? '' : String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])));
+            const fmtDate = (iso) => { if (!iso) return '—'; const d = new Date(iso); return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); };
+            const fmtDay = (iso) => { if (!iso) return '—'; try { return new Date(iso.length === 10 ? iso + 'T12:00' : iso).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }); } catch (_) { return iso; } };
+            const STATUS_LABELS = { not_contacted: 'Not Contacted', contacted: 'Contacted', needs_followup: 'Needs Follow-up', contacted_2: 'Followed Up', confirmed: 'Confirmed', lost: 'Lost' };
+            const STATUS_COLORS = { not_contacted: '#b45309', contacted: '#2563eb', needs_followup: '#dc2626', contacted_2: '#7c3aed', confirmed: '#16a34a', lost: '#64748b' };
+            function statusPill(s) { const c = STATUS_COLORS[s] || '#64748b'; return `<span style="display:inline-block;padding:0.18rem 0.55rem;border-radius:999px;font-size:0.68rem;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;background:${c}1f;color:${c};">${escHtml(STATUS_LABELS[s] || s)}</span>`; }
+
+            async function loadAll() {
+                if (state.loading) return;
+                state.loading = true;
+                try {
+                    const r = await fetch(`${FN}/list-reservation-inquiries`, { cache: 'no-store' });
+                    const body = await r.json();
+                    if (!body.ok) throw new Error(body.error || 'load failed');
+                    state.inquiries = body.inquiries || [];
+                    state.loaded = true;
+                    render();
+                } catch (err) {
+                    $('resInqTableBody').innerHTML = `<tr><td colspan="8" style="text-align:center;color:#dc2626;padding:2rem;">Couldn't load inquiries — ${escHtml(err.message)}<br><button class="btn-secondary" onclick="ResInqUI.loadAll()" style="margin-top:0.5rem;">Retry</button></td></tr>`;
+                } finally { state.loading = false; }
+            }
+
+            function render() {
+                // Stats
+                const total = state.inquiries.length;
+                const notContacted = state.inquiries.filter((i) => i.status === 'not_contacted').length;
+                const followup = state.inquiries.filter((i) => i.status === 'needs_followup').length;
+                const confirmed = state.inquiries.filter((i) => i.status === 'confirmed').length;
+                $('resInqTotalCount').textContent = total;
+                $('resInqNotContactedCount').textContent = notContacted;
+                $('resInqFollowupCount').textContent = followup;
+                $('resInqConfirmedCount').textContent = confirmed;
+
+                // Filter
+                const filter = $('resInqFilter')?.value || 'needs_attention';
+                let list = state.inquiries.slice();
+                if (filter === 'needs_attention') {
+                    list = list.filter((i) => ['not_contacted', 'needs_followup'].includes(i.status));
+                } else if (filter !== 'all') {
+                    list = list.filter((i) => i.status === filter);
+                }
+
+                const tbody = $('resInqTableBody');
+                if (list.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:2rem;">No inquiries in this view. ${filter === 'needs_attention' ? "🎉 You're all caught up." : ''}</td></tr>`;
+                    return;
+                }
+                tbody.innerHTML = list.map((i) => `
+                    <tr data-inq-id="${escHtml(i.id)}" class="clickable-row" style="cursor:pointer;">
+                        <td style="font-weight:500;">${escHtml(i.name)}</td>
+                        <td><span style="font-size:0.72rem;background:var(--bg-elevated);padding:0.15rem 0.5rem;border-radius:4px;color:var(--text-muted);">${escHtml(i.formLabel)}</span></td>
+                        <td>${escHtml(i.occasion || '—')}</td>
+                        <td>${escHtml(i.eventDate ? fmtDay(i.eventDate) : '—')}</td>
+                        <td>${escHtml(i.guests || '—')}</td>
+                        <td style="font-size:0.78rem;color:var(--text-muted);">${escHtml(fmtDate(i.submittedAt))}</td>
+                        <td>${statusPill(i.status)}</td>
+                        <td onclick="event.stopPropagation()">
+                            ${i.email ? `<a href="mailto:${encodeURIComponent(i.email)}?subject=${encodeURIComponent('Your inquiry at The Quarry')}" style="color:var(--gold);text-decoration:none;font-size:0.8rem;">✉ Email</a>` : ''}
+                        </td>
+                    </tr>
+                `).join('');
+                tbody.querySelectorAll('[data-inq-id]').forEach((row) => row.addEventListener('click', () => openModal(row.dataset.inqId)));
+            }
+
+            function openModal(id) {
+                const inq = state.inquiries.find((x) => x.id === id);
+                if (!inq) return;
+                state.current = inq;
+                const modal = $('resInqModal');
+                modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false');
+
+                $('resInqModalTitle').textContent = inq.name;
+                $('resInqModalSub').innerHTML = `${statusPill(inq.status)}<span style="color:var(--text-muted);">${escHtml(inq.formLabel)} · received ${escHtml(fmtDate(inq.submittedAt))}</span>`;
+
+                const fields = [
+                    ['Email', inq.email ? `<a href="mailto:${encodeURIComponent(inq.email)}" style="color:var(--gold);">${escHtml(inq.email)}</a>` : '—'],
+                    ['Phone', inq.phone ? `<a href="tel:${encodeURIComponent(inq.phone)}" style="color:var(--gold);">${escHtml(inq.phone)}</a>` : '—'],
+                    inq.company ? ['Company', escHtml(inq.company)] : null,
+                    ['Occasion', escHtml(inq.occasion || '—')],
+                    ['Event Date', escHtml(inq.eventDate ? fmtDay(inq.eventDate) : '—')],
+                    inq.eventTime ? ['Event Time', escHtml(inq.eventTime)] : null,
+                    ['Party Size', escHtml(inq.guests || '—')],
+                    inq.location ? ['Location', escHtml(inq.location)] : null,
+                    ['Marketing Opt-In', inq.marketingOptIn ? '✓ Yes' : '✗ No'],
+                    inq.notes ? ['Notes', `<div style="margin-top:0.25rem;padding:0.5rem;background:var(--bg-elevated);border-radius:4px;white-space:pre-wrap;">${escHtml(inq.notes)}</div>`] : null,
+                ].filter(Boolean);
+                $('resInqDetails').innerHTML = fields.map(([k, v]) =>
+                    `<div style="display:grid;grid-template-columns:140px 1fr;gap:0.5rem;padding:0.35rem 0;border-bottom:1px solid var(--border-subtle);"><div style="color:var(--text-muted);font-weight:500;">${escHtml(k)}</div><div>${v}</div></div>`
+                ).join('');
+
+                // History
+                const hist = $('resInqHistory');
+                if (inq.statusHistory && inq.statusHistory.length) {
+                    hist.innerHTML = '<div style="font-weight:600;color:var(--text-primary);margin-bottom:0.3rem;">Status history:</div>' +
+                        inq.statusHistory.slice().reverse().map((h) =>
+                            `<div>• ${escHtml(fmtDate(h.at))} — ${escHtml(STATUS_LABELS[h.from] || h.from)} → ${escHtml(STATUS_LABELS[h.to] || h.to)}${h.note ? ` <em>(${escHtml(h.note)})</em>` : ''}</div>`
+                        ).join('');
+                } else {
+                    hist.innerHTML = '';
+                }
+
+                $('resInqStatusNote').value = '';
+                if (inq.email) {
+                    const subject = encodeURIComponent(`Your ${inq.formLabel.toLowerCase()} at The Quarry`);
+                    $('resInqMailLink').href = `mailto:${encodeURIComponent(inq.email)}?subject=${subject}`;
+                    $('resInqMailLink').style.display = '';
+                } else {
+                    $('resInqMailLink').style.display = 'none';
+                }
+                $('resInqNetlifyLink').href = inq.netlifyUrl || '#';
+            }
+
+            function closeModal() {
+                const modal = $('resInqModal');
+                modal?.classList.remove('open');
+                modal?.setAttribute('aria-hidden', 'true');
+                state.current = null;
+            }
+
+            async function setStatus(newStatus) {
+                if (!state.current) return;
+                const id = state.current.id;
+                const note = $('resInqStatusNote').value.trim();
+                try {
+                    const r = await fetch(`${FN}/update-reservation-status`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ submissionId: id, status: newStatus, note, by: 'admin' })
+                    });
+                    const body = await r.json();
+                    if (!r.ok || !body.ok) throw new Error(body.error || 'update failed');
+                    // Update local state
+                    const inq = state.inquiries.find((x) => x.id === id);
+                    if (inq) {
+                        inq.status = newStatus;
+                        inq.statusUpdatedAt = body.override.updatedAt;
+                        inq.statusNote = body.override.note;
+                        inq.statusHistory = body.override.history;
+                    }
+                    render();
+                    openModal(id);  // refresh modal with new history
+                    if (typeof showToast === 'function') showToast('Status updated to ' + STATUS_LABELS[newStatus]);
+                } catch (err) {
+                    alert('Could not update status: ' + err.message);
+                }
+            }
+
+            function init() {
+                $('resInqRefresh')?.addEventListener('click', loadAll);
+                $('resInqFilter')?.addEventListener('change', render);
+                $('resInqModalClose')?.addEventListener('click', closeModal);
+                $('resInqModal')?.addEventListener('click', (e) => { if (e.target.id === 'resInqModal') closeModal(); });
+                document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('resInqModal')?.classList.contains('open')) closeModal(); });
+                document.querySelectorAll('#resInqModal [data-status]').forEach((btn) => btn.addEventListener('click', () => setStatus(btn.dataset.status)));
+            }
+
+            function onTabSwitch(tab) {
+                if (tab === 'potential' && !state.loaded) loadAll();
+            }
+
+            return { init, loadAll, openModal, onTabSwitch };
+        })();
+        document.addEventListener('DOMContentLoaded', () => { try { ResInqUI.init(); } catch (e) { console.error('ResInqUI init failed', e); } });
 
     </script>
 </body>
