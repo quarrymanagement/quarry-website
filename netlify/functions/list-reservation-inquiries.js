@@ -16,7 +16,9 @@
 
 const fetch = require('node-fetch');
 
-const NETLIFY_TOKEN = process.env.NETLIFY_API_TOKEN;
+// Use the existing NETLIFY_AUTH_TOKEN env var (set in Netlify console).
+// Fall back to NETLIFY_API_TOKEN if someone sets that name instead.
+const NETLIFY_TOKEN = process.env.NETLIFY_AUTH_TOKEN || process.env.NETLIFY_API_TOKEN;
 const SITE_ID = process.env.NETLIFY_SITE_ID || 'd9496ae2-2b01-4229-b6d2-9203c3be7acb';
 const SITE_URL = process.env.URL || 'https://thequarrystl.com';
 
@@ -94,7 +96,7 @@ function normalize(submission, formName) {
 
 exports.handler = async (event) => {
     if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: CORS, body: '' };
-    if (!NETLIFY_TOKEN) return respond(500, { ok: false, error: 'NETLIFY_API_TOKEN env var not configured' });
+    if (!NETLIFY_TOKEN) return respond(500, { ok: false, error: 'NETLIFY_AUTH_TOKEN env var not configured' });
 
     try {
         const [overrides, ...formResults] = await Promise.all([
