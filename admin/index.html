@@ -2361,7 +2361,8 @@
         .mkt-modal-body { display: grid; grid-template-columns: 1fr 1fr; gap: 0; min-height: 0; overflow: hidden; }
         .mkt-modal-pane { padding: 1.1rem 1.25rem; overflow: auto; min-height: 0; }
         .mkt-modal-pane + .mkt-modal-pane { border-left: 1px solid var(--border-subtle); background: var(--bg-elevated); }
-        .mkt-modal-foot { padding: 0.75rem 1.25rem; border-top: 1px solid var(--border-subtle); display: flex; justify-content: flex-end; gap: 0.5rem; flex-wrap: wrap; background: var(--bg-card); }
+        .mkt-modal-foot { padding: 0.85rem 1.25rem; border-top: 1px solid var(--border-subtle); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; background: var(--bg-card); }
+        .mkt-modal-foot .btn-approve, .mkt-modal-foot .btn-reject { padding: 0.7rem 1.2rem; font-size: 0.92rem; }
         .mkt-meta-grid { display: grid; grid-template-columns: 110px 1fr; gap: 0.4rem 0.75rem; font-size: 0.85rem; margin-bottom: 1rem; }
         .mkt-meta-grid .k { color: var(--text-muted); font-weight: 500; }
         .mkt-meta-grid .v { color: var(--text-primary); }
@@ -2370,9 +2371,11 @@
         .mkt-modal-pane textarea.body-edit { min-height: 220px !important; font-family: 'SFMono-Regular', Consolas, monospace !important; font-size: 0.78rem !important; }
         .mkt-modal-pane textarea.mkt-redo-input { min-height: 90px !important; }
         .mkt-preview-frame { border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); background: #fff; overflow: auto; height: 460px; }
-        .mkt-mode-tabs { display: flex; gap: 0.4rem; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-subtle); }
-        .mkt-mode-tab { padding: 0.4rem 0.75rem; cursor: pointer; font-size: 0.8rem; color: var(--text-muted); border-bottom: 2px solid transparent; }
-        .mkt-mode-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+        .mkt-mode-tabs { display: flex; gap: 0.25rem; margin-bottom: 0.75rem; background: var(--bg-elevated); padding: 0.25rem; border-radius: 6px; }
+        .mkt-mode-tab { flex: 1; text-align: center; padding: 0.5rem 0.75rem; cursor: pointer; font-size: 0.8rem; color: var(--text-muted); border-radius: 4px; transition: all 0.15s; user-select: none; font-weight: 500; }
+        .mkt-mode-tab:hover { background: rgba(154,123,42,0.08); color: var(--text-primary); }
+        .mkt-mode-tab.active { color: #fff; background: var(--gold); }
+        .ex-prompt-chip:hover, .ex-redo-chip:hover { background: var(--gold) !important; color: #fff !important; border-color: var(--gold) !important; }
         .btn-approve { background: #16a34a; color: #fff; border: none; padding: 0.55rem 1rem; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; }
         .btn-approve:hover { background: #15803d; }
         .btn-reject  { background: transparent; color: #dc2626; border: 1px solid #dc2626; padding: 0.55rem 1rem; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; }
@@ -3277,8 +3280,8 @@
             <div id="socInboxTab" class="tab-content">
                 <div class="mkt-header">
                     <div>
-                        <h2 style="margin:0;">Social Drafts</h2>
-                        <p class="mkt-sub">AI-generated Facebook + Instagram posts. Approve / Edit / Redo / Regenerate Image / Schedule.</p>
+                        <h2 style="margin:0;">📥 Drafts Inbox</h2>
+                        <p class="mkt-sub">AI-drafted Facebook &amp; Instagram posts waiting for your sign-off. Click any post to add an image, tweak the caption, then approve.</p>
                     </div>
                     <div class="mkt-header-actions">
                         <select id="socInboxFilter" style="padding:0.5rem 0.75rem;" title="Filter posts by status">
@@ -3298,14 +3301,14 @@
 
             <div id="socCalendarTab" class="tab-content">
                 <div class="mkt-header">
-                    <div><h2 style="margin:0;">Social Calendar</h2><p class="mkt-sub">All scheduled / posted social content across Facebook + Instagram.</p></div>
+                    <div><h2 style="margin:0;">📅 Posting Calendar</h2><p class="mkt-sub">Everything scheduled and posted, grouped by day. Click any post to review or edit.</p></div>
                 </div>
                 <div id="socCalendarList"><div class="mkt-empty">Loading…</div></div>
             </div>
 
             <div id="socPerformanceTab" class="tab-content">
                 <div class="mkt-header">
-                    <div><h2 style="margin:0;">Social Performance</h2><p class="mkt-sub">Reach, impressions, likes, comments, shares per post (polled every 30 min from Meta Graph API).</p></div>
+                    <div><h2 style="margin:0;">📊 Performance</h2><p class="mkt-sub">How posts are doing — reach, likes, comments, shares. Pulled from Facebook & Instagram every 30 minutes.</p></div>
                 </div>
                 <div class="mkt-stats">
                     <div class="stat-item"><div class="stat-label">Posts (30d)</div><div class="stat-value" id="socStatPosts">—</div></div>
@@ -3318,9 +3321,9 @@
 
             <div id="socSettingsTab" class="tab-content">
                 <div class="mkt-header">
-                    <div><h2 style="margin:0;">Social Settings</h2><p class="mkt-sub">Cadence engine + designer queue + Meta connection.</p></div>
+                    <div><h2 style="margin:0;">⚙️ Social Settings</h2><p class="mkt-sub">Designer queue, asset library, AI insights, and connection status. Click "Rebuild Schedule" any time you add new events to refresh the post plan.</p></div>
                     <div class="mkt-header-actions">
-                        <button class="btn-secondary" id="socRebuildScheduleBtn" style="background:var(--gold);color:#fff;">⟳ Rebuild Schedule</button>
+                        <button class="btn-secondary" id="socRebuildScheduleBtn" style="background:var(--gold);color:#fff;" title="Pick up newly added events and add posts for them">⟳ Rebuild Schedule</button>
                     </div>
                 </div>
 
@@ -3362,63 +3365,104 @@
                  SOCIAL — DRAFT REVIEW MODAL
                  ======================================================== -->
             <div class="mkt-modal-backdrop" id="socDraftModal" role="dialog" aria-modal="true" aria-hidden="true">
-                <div class="mkt-modal" role="document" style="max-width:900px;">
+                <div class="mkt-modal" role="document" style="max-width:960px;">
                     <div class="mkt-modal-head">
                         <div>
                             <h3 id="socDraftModalTitle">Social Post</h3>
-                            <div id="socDraftModalSub" style="font-size:0.75rem;color:var(--text-muted);margin-top:0.2rem;"></div>
+                            <div id="socDraftModalSub" style="font-size:0.8rem;color:var(--text-muted);margin-top:0.3rem;display:flex;align-items:center;gap:0.5rem;"></div>
                         </div>
                         <button class="mkt-modal-close" id="socDraftModalClose" aria-label="Close">&times;</button>
                     </div>
+
+                    <!-- Step-by-step "what to do next" banner — shown when this draft needs work -->
+                    <div id="socDraftNextStep" style="margin:0 1.25rem 0.75rem;padding:0.6rem 0.85rem;background:rgba(154,123,42,0.08);border-left:3px solid var(--gold);border-radius:4px;font-size:0.83rem;color:var(--text-primary);display:none;">
+                        <strong>To get this post ready:</strong> <span id="socDraftNextStepText"></span>
+                    </div>
+
                     <div class="mkt-modal-body">
+                        <!-- LEFT: Image — obvious step 1 -->
                         <div class="mkt-modal-pane">
-                            <h5>Hero Image</h5>
-                            <div id="socDraftImagePreview" style="background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:6px;height:280px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:0.85rem;overflow:hidden;">No image</div>
-                            <div style="margin-top:0.5rem;display:flex;gap:0.4rem;flex-wrap:wrap;">
-                                <button class="btn-secondary" id="socUploadImageBtn" style="flex:1;font-size:0.8rem;background:var(--gold);color:#fff;">📤 Upload My Own Poster</button>
-                                <button class="btn-secondary" id="socRegenImageBtn" style="flex:1;font-size:0.8rem;">↻ DALL-E Image ($0.04)</button>
-                                <button class="btn-secondary" id="socPickFromLibraryBtn" style="flex:1;font-size:0.8rem;">📚 Pick from Library</button>
+                            <h5 style="margin-top:0;">📸 The Image</h5>
+                            <p style="font-size:0.78rem;color:var(--text-muted);margin:0 0 0.5rem;">Pick where the picture comes from. You can change this later.</p>
+                            <div id="socDraftImagePreview" style="background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:6px;height:300px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:0.85rem;overflow:hidden;text-align:center;padding:1rem;">No image yet</div>
+                            <div id="socImageSourceLabel" style="margin-top:0.4rem;font-size:0.72rem;color:var(--text-muted);min-height:1em;"></div>
+
+                            <div style="margin-top:0.75rem;display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+                                <button class="btn-secondary" id="socUploadImageBtn" style="background:var(--gold);color:#fff;font-size:0.82rem;padding:0.65rem;font-weight:600;" title="Upload a poster you made in Canva">
+                                    📤 Upload My Poster
+                                </button>
+                                <button class="btn-secondary" id="socPickFromLibraryBtn" style="font-size:0.82rem;padding:0.65rem;" title="Pick from your saved venue photos">
+                                    📚 From Library
+                                </button>
                             </div>
+                            <details id="socAiImageDetails" style="margin-top:0.5rem;">
+                                <summary style="cursor:pointer;font-size:0.75rem;color:var(--text-muted);padding:0.3rem 0;">🎨 ...or have AI generate one (~$0.04)</summary>
+                                <div style="padding:0.5rem;background:var(--bg-elevated);border-radius:4px;margin-top:0.3rem;">
+                                    <p style="font-size:0.75rem;color:var(--text-muted);margin:0 0 0.4rem;">Describe the photo you want. Specific = better. No people's faces, no text in the image.</p>
+                                    <textarea id="socDraftImagePrompt" style="width:100%;min-height:65px;padding:0.5rem;border:1px solid var(--border-subtle);border-radius:4px;font-size:0.78rem;background:var(--bg-card);color:var(--text-primary);box-sizing:border-box;" placeholder="e.g. Sunset on the patio, string lights overhead, two wine glasses on a wooden table, Quarry lake softly out of focus"></textarea>
+                                    <div style="margin-top:0.4rem;display:flex;gap:0.3rem;flex-wrap:wrap;">
+                                        <button class="ex-prompt-chip" data-ex="Sunset over the Quarry lake from the patio, string lights warming the foreground, no people" style="font-size:0.7rem;padding:0.25rem 0.5rem;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:12px;cursor:pointer;color:var(--text-primary);">🌅 Sunset patio</button>
+                                        <button class="ex-prompt-chip" data-ex="Wood-fired flatbread on dark slate at golden hour, restaurant interior softly out of focus, overhead angle, no people" style="font-size:0.7rem;padding:0.25rem 0.5rem;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:12px;cursor:pointer;color:var(--text-primary);">🍕 Food close-up</button>
+                                        <button class="ex-prompt-chip" data-ex="Two wine glasses with deep red wine on a wooden bar top, bokeh of warm bar lights behind, golden hour, no people" style="font-size:0.7rem;padding:0.25rem 0.5rem;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:12px;cursor:pointer;color:var(--text-primary);">🍷 Wine vibe</button>
+                                        <button class="ex-prompt-chip" data-ex="Acoustic guitar leaning against a wooden chair on a string-lit deck at dusk, warm bokeh, no people, hint of stage equipment in background" style="font-size:0.7rem;padding:0.25rem 0.5rem;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:12px;cursor:pointer;color:var(--text-primary);">🎸 Live music</button>
+                                    </div>
+                                    <button class="btn-secondary" id="socRegenImageBtn" style="margin-top:0.5rem;width:100%;font-size:0.78rem;padding:0.5rem;">Generate Image →</button>
+                                </div>
+                            </details>
                             <input type="file" id="socImageFileInput" accept="image/png,image/jpeg,image/webp" style="display:none;">
-                            <div id="socImageSourceLabel" style="margin-top:0.4rem;font-size:0.7rem;color:var(--text-muted);"></div>
-                            <h5 style="margin-top:1rem;">Image Prompt <span style="font-size:0.7rem;color:var(--text-muted);font-weight:normal;">(only used by DALL-E)</span></h5>
-                            <textarea id="socDraftImagePrompt" style="width:100%;min-height:60px;padding:0.5rem;border:1px solid var(--border-subtle);border-radius:4px;font-size:0.8rem;font-family:monospace;background:var(--bg-card);color:var(--text-primary);"></textarea>
+
                             <div id="socGraphicBriefPanel" style="margin-top:1rem;background:var(--bg-elevated);border:1px solid var(--gold);border-radius:6px;padding:0.75rem;display:none;">
-                                <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--gold);font-weight:600;margin-bottom:0.5rem;">📋 Graphic Brief — what to make in Canva</div>
-                                <div id="socGraphicBriefContent" style="font-size:0.8rem;line-height:1.5;color:var(--text-primary);"></div>
+                                <details open>
+                                    <summary style="cursor:pointer;font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--gold);font-weight:600;margin-bottom:0.5rem;list-style:none;">
+                                        <span style="display:inline-block;margin-right:0.3rem;">▾</span>📋 Need to make this in Canva? Here's the brief
+                                    </summary>
+                                    <div id="socGraphicBriefContent" style="font-size:0.8rem;line-height:1.5;color:var(--text-primary);margin-top:0.5rem;"></div>
+                                </details>
                             </div>
                         </div>
+
+                        <!-- RIGHT: Caption + details -->
                         <div class="mkt-modal-pane">
-                            <div class="mkt-mode-tabs">
-                                <div class="mkt-mode-tab active" data-mode="review">Review</div>
-                                <div class="mkt-mode-tab" data-mode="edit">Edit</div>
-                                <div class="mkt-mode-tab" data-mode="redo">Redo</div>
+                            <h5 style="margin-top:0;">✍️ The Caption</h5>
+                            <div class="mkt-mode-tabs" style="margin-bottom:0.5rem;">
+                                <div class="mkt-mode-tab active" data-mode="review">View</div>
+                                <div class="mkt-mode-tab" data-mode="edit">✏️ Edit</div>
+                                <div class="mkt-mode-tab" data-mode="redo">🔄 Redo with AI</div>
                             </div>
                             <div class="mkt-mode-pane" data-mode-pane="review">
-                                <div class="mkt-meta-grid" id="socDraftMeta"></div>
-                                <h5>Caption</h5>
-                                <div id="socDraftCaption" style="background:var(--bg-elevated);padding:0.7rem;border-radius:4px;font-size:0.9rem;line-height:1.5;white-space:pre-wrap;"></div>
-                                <h5 style="margin-top:1rem;">Hashtags</h5>
-                                <div id="socDraftHashtags" style="font-size:0.85rem;color:var(--gold);"></div>
+                                <div id="socDraftCaption" style="background:var(--bg-elevated);padding:0.85rem;border-radius:4px;font-size:0.92rem;line-height:1.55;white-space:pre-wrap;min-height:120px;color:var(--text-primary);"></div>
+                                <div style="margin-top:0.6rem;font-size:0.85rem;color:var(--gold);" id="socDraftHashtags"></div>
                             </div>
                             <div class="mkt-mode-pane" data-mode-pane="edit" style="display:none;">
-                                <h5>Caption</h5>
-                                <textarea id="socDraftEditCaption" class="body-edit" style="min-height:120px;font-family:inherit;font-size:0.9rem;"></textarea>
-                                <h5 style="margin-top:1rem;">Hashtags (one per line, with #)</h5>
-                                <textarea id="socDraftEditHashtags" class="body-edit" style="min-height:80px;font-family:inherit;font-size:0.85rem;"></textarea>
-                                <div style="margin-top:0.75rem;text-align:right;"><button class="btn-edit-save" id="socDraftEditSaveBtn">Save Edits</button></div>
+                                <p style="font-size:0.78rem;color:var(--text-muted);margin:0 0 0.4rem;">Tweak the caption manually. Changes save when you click "Save Edits" below.</p>
+                                <textarea id="socDraftEditCaption" class="body-edit" style="min-height:140px;font-family:inherit;font-size:0.92rem;"></textarea>
+                                <h5 style="margin-top:0.85rem;font-size:0.78rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;">Hashtags <span style="font-weight:normal;text-transform:none;">(one per line)</span></h5>
+                                <textarea id="socDraftEditHashtags" class="body-edit" style="min-height:80px;font-family:inherit;font-size:0.85rem;" placeholder="#NewMelleMO&#10;#StCharlesCounty&#10;#WineBar"></textarea>
+                                <div style="margin-top:0.75rem;text-align:right;"><button class="btn-edit-save" id="socDraftEditSaveBtn">💾 Save Edits</button></div>
                             </div>
                             <div class="mkt-mode-pane" data-mode-pane="redo" style="display:none;">
-                                <h5>Tell the AI what to change</h5>
-                                <textarea id="socDraftRedoInstructions" class="mkt-redo-input" placeholder="e.g. Make it shorter, lead with the band name, add an emoji"></textarea>
-                                <div style="margin-top:0.85rem;text-align:right;"><button class="btn-redo" id="socDraftRedoBtn">Regenerate Caption</button></div>
+                                <p style="font-size:0.78rem;color:var(--text-muted);margin:0 0 0.4rem;">Tell the AI what to change about this caption. The more specific you are, the better the rewrite.</p>
+                                <textarea id="socDraftRedoInstructions" class="mkt-redo-input" placeholder="e.g. Make it shorter and punchier. Lead with 'Tonight at The Quarry' and mention the wine list."></textarea>
+                                <div style="margin-top:0.5rem;display:flex;gap:0.3rem;flex-wrap:wrap;">
+                                    <button class="ex-redo-chip" data-ex="Make it shorter — under 100 characters" style="font-size:0.7rem;padding:0.25rem 0.5rem;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:12px;cursor:pointer;color:var(--text-primary);">Shorter</button>
+                                    <button class="ex-redo-chip" data-ex="More casual and conversational, like talking to a friend" style="font-size:0.7rem;padding:0.25rem 0.5rem;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:12px;cursor:pointer;color:var(--text-primary);">More casual</button>
+                                    <button class="ex-redo-chip" data-ex="Lead with the strongest hook — what's the one thing that makes this special?" style="font-size:0.7rem;padding:0.25rem 0.5rem;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:12px;cursor:pointer;color:var(--text-primary);">Stronger hook</button>
+                                    <button class="ex-redo-chip" data-ex="Add a clear call to action like 'Book your spot' or 'Reserve your seat'" style="font-size:0.7rem;padding:0.25rem 0.5rem;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:12px;cursor:pointer;color:var(--text-primary);">Add CTA</button>
+                                </div>
+                                <div style="margin-top:0.85rem;text-align:right;"><button class="btn-redo" id="socDraftRedoBtn">🔄 Rewrite with AI</button></div>
                             </div>
+
+                            <details style="margin-top:1.25rem;">
+                                <summary style="cursor:pointer;font-size:0.78rem;color:var(--text-muted);padding:0.3rem 0;">📊 Post details</summary>
+                                <div class="mkt-meta-grid" id="socDraftMeta" style="margin-top:0.5rem;"></div>
+                            </details>
                         </div>
                     </div>
                     <div class="mkt-modal-foot">
-                        <button class="btn-reject" id="socDraftRejectBtn">Reject</button>
-                        <button class="btn-approve" id="socDraftApproveBtn">Approve &amp; Schedule</button>
-                        <button class="btn-approve" id="socDraftPostNowBtn" style="background:var(--gold);">Post Now</button>
+                        <button class="btn-reject" id="socDraftRejectBtn">✗ Reject</button>
+                        <div style="flex:1;"></div>
+                        <button class="btn-approve" id="socDraftApproveBtn">✓ Approve &amp; Schedule</button>
+                        <button class="btn-approve" id="socDraftPostNowBtn" style="background:var(--gold);" title="Post immediately to Facebook & Instagram">⚡ Post Now</button>
                     </div>
                 </div>
             </div>
@@ -10501,7 +10545,24 @@ function hashCode(str) {
                 const d = state.drafts.find((x) => x.id === state.currentDraftId); if (!d) return;
                 const platformList = (d.platforms || []).map((p) => p === 'facebook' ? 'Facebook' : p === 'instagram' ? 'Instagram' : p).join(' + ');
                 $('socDraftModalTitle').textContent = `${friendlyType(d.type)} · ${platformList}`;
-                $('socDraftModalSub').innerHTML = `<span class="mkt-status-pill is-${escHtml(d.status)}" style="margin-right:0.5rem;">${escHtml(friendlyStatus(d.status))}</span>${escHtml(fmtDate(d.scheduledFor || d.createdAt))}`;
+                $('socDraftModalSub').innerHTML = `<span class="mkt-status-pill is-${escHtml(d.status)}">${escHtml(friendlyStatus(d.status))}</span><span style="color:var(--text-muted);">${escHtml(fmtDate(d.scheduledFor || d.createdAt))}</span>`;
+
+                // ── "What to do next" banner ──────────────────────────────
+                const banner = $('socDraftNextStep'); const bannerText = $('socDraftNextStepText');
+                if (banner && bannerText) {
+                    const hasImage = d.userImageUrl || d.imageUrl;
+                    const hasCaption = !!(d.caption && d.caption.trim());
+                    const steps = [];
+                    if (!hasImage) steps.push('① Add an image (upload, library, or AI)');
+                    if (!hasCaption) steps.push((steps.length ? '② ' : '① ') + 'Click "Redo with AI" to draft a caption');
+                    if (d.status === 'pending') steps.push((steps.length ? `${steps.length === 1 ? '②' : '③'} ` : '① ') + 'Click "Approve & Schedule" when ready');
+                    if (steps.length && d.status !== 'posted' && d.status !== 'rejected') {
+                        bannerText.innerHTML = '&nbsp;' + steps.join('  →  ');
+                        banner.style.display = 'block';
+                    } else {
+                        banner.style.display = 'none';
+                    }
+                }
                 const img = $('socDraftImagePreview');
                 const liveImage = d.userImageUrl || d.imageUrl;
                 if (liveImage) img.innerHTML = `<img src="${escHtml(liveImage)}" style="width:100%;height:100%;object-fit:cover;" alt="">`;
@@ -10596,25 +10657,60 @@ function hashCode(str) {
 
             async function uploadImage(file) {
                 if (!file) return;
-                if (file.size > 8 * 1024 * 1024) return toast('Image too large — max 8MB.');
-                toast('Uploading…');
+                if (file.size > 8 * 1024 * 1024) return toast('That image is over 8 MB — too big for Instagram. Resize it down (or use a JPG instead of PNG) and try again.');
+                if (!/^image\//i.test(file.type)) return toast('That file type isn\'t supported. Use a PNG, JPG, or WebP image.');
+                // Capture the draft ID NOW so it can't be lost if the modal is reopened mid-upload.
+                const draftId = state.currentDraftId;
+                if (!draftId) return toast('Open a post first, then click Upload.');
+
+                // Show progress in the image preview area
+                const preview = $('socDraftImagePreview');
+                const originalPreview = preview ? preview.innerHTML : '';
+                if (preview) preview.innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:0.85rem;"><div style="font-size:1.5rem;">⏳</div>Uploading your poster…</div>';
+                const sourceLabel = $('socImageSourceLabel');
+                if (sourceLabel) sourceLabel.innerHTML = '<span style="color:var(--text-muted);">Uploading…</span>';
+
                 try {
                     const dataUrl = await new Promise((resolve, reject) => {
                         const r = new FileReader();
                         r.onload = () => resolve(r.result);
-                        r.onerror = reject;
+                        r.onerror = () => reject(new Error('Could not read the file'));
                         r.readAsDataURL(file);
                     });
                     const r = await fetch(`${FN}/upload-social-image`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ imageBase64: dataUrl, draftId: state.currentDraftId, filename: file.name })
+                        body: JSON.stringify({ imageBase64: dataUrl, draftId, filename: file.name })
                     });
                     const body = await r.json();
                     if (!r.ok || !body.success) throw new Error(body.error || 'upload failed');
-                    // Save the URL to the draft via 'edit' action
-                    await action('edit', { imageUrl: body.url, userImageUrl: body.url });
-                    toast('Poster uploaded.');
-                } catch (err) { toast(friendlyError('Upload', err)); }
+
+                    // Save the URL to the draft directly via social-action — pass draftId
+                    // explicitly so we don't depend on state.currentDraftId still being set.
+                    const saveRes = await fetch(`${FN}/social-action`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'edit', draftId,
+                            payload: { imageUrl: body.url, userImageUrl: body.url, imageSource: 'upload' }
+                        })
+                    });
+                    const saveBody = await saveRes.json();
+                    if (!saveRes.ok || !saveBody.ok) throw new Error(saveBody.error || 'could not save image to post');
+
+                    // Update local state if this draft is still the current one
+                    const idx = state.drafts.findIndex((x) => x.id === draftId);
+                    if (idx >= 0) state.drafts[idx] = saveBody.draft;
+                    if (state.currentDraftId === draftId) renderModal();
+                    renderInbox(); renderCalendar(); renderSettings();
+
+                    // Refresh sha for future saves
+                    const fresh = await fetchData('social_drafts.json'); state.sha.drafts = fresh.sha;
+
+                    toast('✓ Poster uploaded and saved to this post.');
+                } catch (err) {
+                    if (preview) preview.innerHTML = originalPreview;
+                    if (sourceLabel) sourceLabel.innerHTML = '';
+                    toast(friendlyError('Upload', err));
+                }
             }
 
             async function openLibraryPicker() {
@@ -10649,11 +10745,25 @@ function hashCode(str) {
                         </div>
                     </div>`;
                     document.body.appendChild(overlay);
+                    const draftIdForPick = state.currentDraftId;
                     overlay.querySelectorAll('[data-asset-url]').forEach((el) => el.addEventListener('click', async () => {
                         const url = el.dataset.assetUrl;
                         document.body.removeChild(overlay);
-                        await action('edit', { imageUrl: url, userImageUrl: null });
-                        toast('Image picked from library.');
+                        if (!draftIdForPick) return toast('Open a post first, then pick from the library.');
+                        try {
+                            const saveRes = await fetch(`${FN}/social-action`, {
+                                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ action: 'edit', draftId: draftIdForPick, payload: { imageUrl: url, userImageUrl: null, imageSource: 'library' } })
+                            });
+                            const saveBody = await saveRes.json();
+                            if (!saveRes.ok || !saveBody.ok) throw new Error(saveBody.error || 'could not save');
+                            const idx = state.drafts.findIndex((x) => x.id === draftIdForPick);
+                            if (idx >= 0) state.drafts[idx] = saveBody.draft;
+                            if (state.currentDraftId === draftIdForPick) renderModal();
+                            renderInbox(); renderCalendar();
+                            const fresh = await fetchData('social_drafts.json'); state.sha.drafts = fresh.sha;
+                            toast('✓ Image picked from library.');
+                        } catch (err) { toast(friendlyError('Pick image', err)); }
                     }));
                     overlay.querySelector('#libCloseBtn').addEventListener('click', () => document.body.removeChild(overlay));
                     overlay.querySelector('#libUploadNewBtn').addEventListener('click', () => {
@@ -10763,6 +10873,19 @@ function hashCode(str) {
                 });
                 $('socPickFromLibraryBtn')?.addEventListener('click', openLibraryPicker);
                 $('socDraftPostNowBtn')?.addEventListener('click', postNow);
+                // Example chips for AI image prompts and caption-redo instructions
+                document.querySelectorAll('#socDraftModal .ex-prompt-chip').forEach((chip) => {
+                    chip.addEventListener('click', () => {
+                        const prompt = $('socDraftImagePrompt');
+                        if (prompt) prompt.value = chip.dataset.ex;
+                    });
+                });
+                document.querySelectorAll('#socDraftModal .ex-redo-chip').forEach((chip) => {
+                    chip.addEventListener('click', () => {
+                        const ti = $('socDraftRedoInstructions');
+                        if (ti) { ti.value = chip.dataset.ex; ti.focus(); }
+                    });
+                });
                 $('socDraftModal')?.addEventListener('click', (e) => { if (e.target.id === 'socDraftModal') closeModal(); });
                 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('socDraftModal')?.classList.contains('open')) closeModal(); });
             }
