@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Google Analytics 4 (injected at build time from GA4_MEASUREMENT_ID env var) -->
+  <script>(function(){var id='__GA4_MEASUREMENT_ID__';if(!id||id.indexOf('__')===0)return;var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id='+id;document.head.appendChild(s);window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments)};gtag('js',new Date());gtag('config',id,{anonymize_ip:true});})();</script>
+
 <meta charset="UTF-8"/>
 <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
@@ -539,7 +542,7 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
   <h1>Rock &amp; Vine<br><em>Wine Club</em></h1>
   <p>Your key to exclusive wine tastings, member events, and priority access at The Quarry — every month, by the lake.</p>
   <div>
-    <a href="#member-form" class="btn-g" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">Get Started — $34.99/mo</a>
+    <a href="#member-form" class="btn-g" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">Get Started — $29.99/mo</a>
     <a href="#tastings" class="btn-o" onclick="event.preventDefault();document.getElementById('tastings').scrollIntoView({behavior:'smooth'})">Already a Member? RSVP Here</a>
   </div>
 </div>
@@ -571,7 +574,7 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
     <div>
       <div class="img-ph">
         <span class="img-ph-text">Wine &amp; Lake Views</span>
-        <div class="img-badge"><span class="big">$34</span><span class="sm">/month</span></div>
+        <div class="img-badge"><span class="big">$29</span><span class="sm">/month</span></div>
       </div>
     </div>
   </div>
@@ -735,7 +738,7 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
   <p class="ssub">Two simple steps to start enjoying all the benefits of Rock &amp; Vine membership.</p>
   <div class="steps" style="grid-template-columns:repeat(2,1fr);max-width:600px;">
     <div class="step"><div class="step-n">1</div><h4>Complete Your Profile</h4><p>Fill out the member registration form below with your contact information.</p></div>
-    <div class="step"><div class="step-n">2</div><h4>Complete Payment</h4><p>After submitting, you'll be redirected to our secure Stripe checkout to start your $34.99/month subscription.</p></div>
+    <div class="step"><div class="step-n">2</div><h4>Complete Payment</h4><p>After submitting, you'll be redirected to our secure Stripe checkout to start your $29.99/month subscription.</p></div>
   </div>
 </div>
 
@@ -784,7 +787,7 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
   </div>
   <div class="faq-item">
     <div class="faq-q" onclick="faq(this)">How much does membership cost?</div>
-    <div class="faq-a">Rock &amp; Vine membership is $34.99 per month. No setup fees, no annual commitments — cancel anytime.</div>
+    <div class="faq-a">Rock &amp; Vine membership is $29.99 per month. No setup fees, no annual commitments — cancel anytime.</div>
   </div>
   <div class="faq-item">
     <div class="faq-q" onclick="faq(this)">How do I RSVP for wine tasting events?</div>
@@ -796,7 +799,7 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
   </div>
   <div class="faq-item">
     <div class="faq-q" onclick="faq(this)">What happens after I submit the form?</div>
-    <div class="faq-a">After submitting your profile, you'll be automatically redirected to our secure Stripe checkout page to complete your $34.99/month subscription payment. Once payment is confirmed, your membership is active immediately.</div>
+    <div class="faq-a">After submitting your profile, you'll be automatically redirected to our secure Stripe checkout page to complete your $29.99/month subscription payment. Once payment is confirmed, your membership is active immediately.</div>
   </div>
   <div class="faq-item">
     <div class="faq-q" onclick="faq(this)">What if my payment fails?</div>
@@ -808,7 +811,7 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
 <div class="cta-s">
   <h2>Ready to Join?</h2>
   <p>Fill out your member profile above and complete payment to start enjoying exclusive access to wine tastings and member events at The Quarry.</p>
-  <a href="#member-form" class="btn-g" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">Get Started — $34.99/mo</a>
+  <a href="#member-form" class="btn-g" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">Get Started — $29.99/mo</a>
 </div>
 
 <!-- MAILING LIST -->
@@ -839,7 +842,7 @@ function handleMemberForm(e){
     .then(function(){
       document.getElementById('member-success').style.display='block';
       btn.textContent='Redirecting to payment...';
-      setTimeout(function(){window.location.href='https://buy.stripe.com/4gM6oI3zV26beT85bnds409';},2000);
+      setTimeout(function(){window.location.href='https://buy.stripe.com/14A00kfiDaCHfXc47jds404';},2000);
     })
     .catch(function(){
       alert('Something went wrong. Please email management@thequarrystl.com to complete registration.');
