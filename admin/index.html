@@ -118,7 +118,150 @@
         /* ================================================================
            MAIN LAYOUT
            ================================================================ */
-        #mainApp { display: flex; flex-direction: column; width: 100%; height: 100%; }
+        #mainApp { display: flex; flex-direction: row; width: 100%; height: 100%; }
+        /* ── SIDEBAR ───────────────────────────────────────────────────── */
+        .sidebar {
+            width: 250px; flex-shrink: 0; height: 100vh;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-subtle);
+            display: flex; flex-direction: column;
+            box-shadow: 1px 0 6px rgba(0,0,0,0.04);
+            position: relative; z-index: 100;
+        }
+        .sb-brand {
+            padding: 1.25rem 1rem; border-bottom: 1px solid var(--border-subtle);
+            display: flex; align-items: center; gap: 0.75rem;
+        }
+        .sb-brand-logo { width: 40px; height: 40px; object-fit: contain; flex-shrink: 0; }
+        .sb-brand-text { line-height: 1.2; min-width: 0; }
+        .sb-brand-name { font-family: var(--font-serif); font-size: 1.1rem; color: var(--gold); font-weight: 700; letter-spacing: 1px; }
+        .sb-brand-sub  { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+        .sb-nav { flex: 1; overflow-y: auto; padding: 0.5rem 0; }
+        .sb-nav::-webkit-scrollbar { width: 4px; }
+        .sb-nav::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 2px; }
+        .sb-nav-section {
+            padding: 0.85rem 1rem 0.3rem; font-size: 0.65rem; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 1.2px; font-weight: 600;
+        }
+        .sb-nav-group { padding: 0 0.5rem; }
+        .sb-nav-item {
+            display: flex; align-items: center; gap: 0.65rem;
+            padding: 0.55rem 0.75rem; margin: 1px 0; border-radius: 6px;
+            font-size: 0.83rem; color: var(--text-secondary); cursor: pointer;
+            transition: background 0.12s, color 0.12s; user-select: none;
+            position: relative;
+        }
+        .sb-nav-item:hover { background: rgba(154,123,42,0.08); color: var(--text-primary); }
+        .sb-nav-item.active {
+            background: var(--gold); color: #fff; font-weight: 600;
+            box-shadow: 0 1px 3px rgba(154,123,42,0.3);
+        }
+        .sb-nav-item.active .sb-ic { filter: brightness(1.4); }
+        .sb-ic { font-size: 1.05rem; width: 22px; text-align: center; flex-shrink: 0; }
+        .sb-lbl { flex: 1; min-width: 0; }
+        .sb-badge {
+            background: #dc2626; color: #fff; border-radius: 999px;
+            font-size: 0.65rem; font-weight: 700; padding: 1px 6px; min-width: 18px; text-align: center;
+        }
+        .sb-nav-item.active .sb-badge { background: #fff; color: var(--gold); }
+
+        .sb-foot {
+            padding: 0.75rem; border-top: 1px solid var(--border-subtle);
+            display: flex; flex-direction: column; gap: 0.4rem;
+        }
+        .sb-foot button {
+            width: 100%; padding: 0.55rem 0.85rem; font-size: 0.78rem;
+            border-radius: 6px; cursor: pointer; transition: all 0.12s;
+            text-align: left; font-weight: 500;
+        }
+
+        /* ── DASHBOARD ────────────────────────────────────────────────── */
+        .dash-hero {
+            display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem;
+            padding-bottom: 1.25rem; border-bottom: 1px solid var(--border-subtle); margin-bottom: 1.5rem;
+        }
+        .dash-greeting {
+            font-family: var(--font-serif); font-size: 1.85rem; color: var(--text-primary); margin: 0;
+            font-weight: 700; letter-spacing: 0.2px;
+        }
+        .dash-date { color: var(--text-muted); font-size: 0.92rem; margin: 0.25rem 0 0; }
+        .dash-quick-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .dash-quick {
+            background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-subtle);
+            padding: 0.55rem 0.95rem; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 500;
+            transition: all 0.15s; white-space: nowrap;
+        }
+        .dash-quick:hover { background: var(--gold); color: #fff; border-color: var(--gold); transform: translateY(-1px); box-shadow: 0 2px 6px rgba(154,123,42,0.25); }
+
+        .dash-section-h {
+            font-size: 1.02rem; color: var(--text-primary); font-weight: 600;
+            margin: 0 0 0.25rem; letter-spacing: 0.2px;
+        }
+        .dash-section-sub { color: var(--text-muted); font-size: 0.82rem; margin: 0 0 0.85rem; }
+
+        .dash-attn-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 0.75rem;
+        }
+        .dash-attn-card {
+            background: var(--bg-card); border: 1px solid var(--border-subtle); border-left: 3px solid var(--gold);
+            border-radius: 8px; padding: 0.95rem 1.1rem; cursor: pointer; transition: all 0.15s;
+            display: flex; flex-direction: column; gap: 0.3rem;
+        }
+        .dash-attn-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); border-left-color: var(--gold-light); }
+        .dash-attn-card .ac-num { font-size: 1.5rem; font-weight: 700; color: var(--gold); line-height: 1; }
+        .dash-attn-card .ac-ttl { font-size: 0.92rem; color: var(--text-primary); font-weight: 500; }
+        .dash-attn-card .ac-sub { font-size: 0.78rem; color: var(--text-muted); }
+        .dash-attn-card.is-zero { border-left-color: #16a34a; opacity: 0.85; }
+        .dash-attn-card.is-zero .ac-num { color: #16a34a; }
+
+        .dash-today-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-top: 0.5rem;
+        }
+        @media (max-width: 700px) { .dash-today-grid { grid-template-columns: 1fr; } }
+        .dash-today-card {
+            background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 10px;
+            padding: 1rem 1.15rem;
+        }
+        .dash-today-h { font-size: 0.92rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.6rem; }
+        .dash-today-body { font-size: 0.88rem; line-height: 1.55; color: var(--text-secondary); }
+        .dash-today-body .dt-row { padding: 0.45rem 0; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; }
+        .dash-today-body .dt-row:last-child { border-bottom: none; }
+        .dash-today-body .dt-name { font-weight: 600; color: var(--text-primary); }
+        .dash-today-body .dt-time { font-size: 0.78rem; color: var(--text-muted); white-space: nowrap; }
+        .dash-today-empty { color: var(--text-muted); font-size: 0.85rem; font-style: italic; }
+
+        .dash-stats-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+            gap: 0.65rem; margin-top: 0.5rem;
+        }
+        .dash-stat {
+            background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 10px;
+            padding: 1rem 1.1rem; cursor: pointer; transition: all 0.15s;
+            display: flex; flex-direction: column; gap: 0.35rem; position: relative;
+        }
+        .dash-stat:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-color: var(--gold); }
+        .dash-stat-ic { font-size: 1.15rem; opacity: 0.7; position: absolute; top: 0.85rem; right: 1rem; }
+        .dash-stat-num { font-size: 1.65rem; font-weight: 700; color: var(--text-primary); line-height: 1; font-variant-numeric: tabular-nums; }
+        .dash-stat-lbl { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; }
+
+        /* Mobile toggle */
+        .sb-mobile-toggle {
+            display: none; position: fixed; top: 0.75rem; left: 0.75rem; z-index: 250;
+            background: var(--bg-card); border: 1px solid var(--border-subtle);
+            border-radius: 6px; padding: 0.5rem 0.7rem; font-size: 1.2rem; cursor: pointer; color: var(--text-primary);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 900px) {
+            .sidebar {
+                position: fixed; left: -260px; top: 0; transition: left 0.25s;
+                z-index: 220; width: 260px;
+            }
+            .sidebar.open { left: 0; box-shadow: 4px 0 20px rgba(0,0,0,0.3); }
+            .sb-mobile-toggle { display: block; }
+            .content { padding-top: 3rem; }
+        }
 
         /* ================================================================
            NAVIGATION BAR
@@ -2409,69 +2552,69 @@
          MAIN APPLICATION
          ================================================================ -->
     <div id="mainApp" class="hidden">
-        <!-- NAVIGATION BAR -->
-        <nav class="navbar">
-            <div class="navbar-brand">THE QUARRY</div>
-            <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="document.querySelector('.nav-tabs').classList.toggle('mobile-open'); this.innerHTML = this.innerHTML.trim() === '&#9776;' ? '&#10005;' : '&#9776;'">&#9776;</button>
-            <div class="nav-tabs">
-                <div class="nav-tab active" data-tab="dashboard">Dashboard</div>
-                <div class="nav-dropdown">
-                    <div class="nav-tab" data-tab="events" data-dropdown="entertainment">Entertainment</div>
-                    <div class="nav-dropdown-menu">
-                        <div class="nav-dropdown-item" data-tab="events">Events</div>
-                        <div class="nav-dropdown-item" data-tab="bands">Live Bands</div>
-                    </div>
-                </div>
-                <div class="nav-dropdown">
-                    <div class="nav-tab" data-tab="scheduling" data-dropdown="scheduling">Scheduling</div>
-                    <div class="nav-dropdown-menu">
-                        <div class="nav-dropdown-item" data-tab="scheduling">Weekly Schedule</div>
-                        <div class="nav-dropdown-item" data-tab="employees">Employees</div>
-                        <div class="nav-dropdown-item" data-tab="timeoff">Time Off</div>
-                    </div>
-                </div>
-                <div class="nav-dropdown">
-                    <div class="nav-tab" data-tab="crm" data-dropdown="customers">Customer Relations</div>
-                    <div class="nav-dropdown-menu">
-                        <div class="nav-dropdown-item" data-tab="crm">CRM</div>
-                        <div class="nav-dropdown-item" data-tab="potential">Potential Reservations</div>
-                        <div class="nav-dropdown-item" data-tab="confirmed">Confirmed Reservations</div>
-                        <div class="nav-dropdown-item" data-tab="email">Email</div>
-                    </div>
-                </div>
-                <div class="nav-tab" data-tab="payments">Payments</div>
-                <div class="nav-dropdown">
-                    <div class="nav-tab" data-tab="mktCalendar" data-dropdown="marketing">Marketing</div>
-                    <div class="nav-dropdown-menu">
-                        <div class="nav-dropdown-item" data-tab="mktCalendar">Campaign Calendar</div>
-                        <div class="nav-dropdown-item" data-tab="mktInbox">Drafts Inbox <span id="mktInboxBadge" style="display:none;background:var(--gold);color:#fff;border-radius:10px;padding:1px 7px;font-size:0.65rem;margin-left:0.4rem;">0</span></div>
-                        <div class="nav-dropdown-item" data-tab="mktPerformance">Performance</div>
-                        <div class="nav-dropdown-item" data-tab="mktInsights">AI Insights</div>
-                        <div class="nav-dropdown-item" data-tab="mktSettings">Marketing Settings</div>
-                    </div>
-                </div>
-                <div class="nav-dropdown">
-                    <div class="nav-tab" data-tab="socInbox" data-dropdown="social">Social</div>
-                    <div class="nav-dropdown-menu">
-                        <div class="nav-dropdown-item" data-tab="socInbox">Drafts Inbox <span id="socInboxBadge" style="display:none;background:var(--gold);color:#fff;border-radius:10px;padding:1px 7px;font-size:0.65rem;margin-left:0.4rem;">0</span></div>
-                        <div class="nav-dropdown-item" data-tab="socCalendar">Calendar</div>
-                        <div class="nav-dropdown-item" data-tab="socPerformance">Performance</div>
-                        <div class="nav-dropdown-item" data-tab="socSettings">Social Settings</div>
-                    </div>
-                </div>
-                <div class="nav-dropdown">
-                    <div class="nav-tab" data-tab="floorplan" data-dropdown="settings">Settings</div>
-                    <div class="nav-dropdown-menu">
-                        <div class="nav-dropdown-item" data-tab="floorplan">Floor Plan</div>
-                        <div class="nav-dropdown-item" data-tab="forms">Forms</div>
-                    </div>
+        <!-- SIDEBAR NAVIGATION -->
+        <button class="sb-mobile-toggle" id="sbMobileToggle" aria-label="Open menu">☰</button>
+        <aside class="sidebar" id="adminSidebar">
+            <div class="sb-brand">
+                <img src="/assets/quarry-q-logo.png" alt="The Quarry" class="sb-brand-logo">
+                <div class="sb-brand-text">
+                    <div class="sb-brand-name">The Quarry</div>
+                    <div class="sb-brand-sub">Admin Portal</div>
                 </div>
             </div>
-            <div class="navbar-actions">
-                <button class="save-github-btn" id="saveGitHubBtn" title="Save changes to GitHub">Save to GitHub</button>
-                <button class="logout-btn" id="logoutBtn">Logout</button>
+
+            <nav class="sb-nav">
+                <div class="sb-nav-group">
+                    <div class="sb-nav-item active" data-tab="dashboard"><span class="sb-ic">🏠</span><span class="sb-lbl">Dashboard</span></div>
+                </div>
+
+                <div class="sb-nav-section">Operations</div>
+                <div class="sb-nav-group">
+                    <div class="sb-nav-item" data-tab="events"><span class="sb-ic">🎫</span><span class="sb-lbl">Events</span></div>
+                    <div class="sb-nav-item" data-tab="bands"><span class="sb-ic">🎵</span><span class="sb-lbl">Live Bands</span></div>
+                    <div class="sb-nav-item" data-tab="scheduling"><span class="sb-ic">📋</span><span class="sb-lbl">Staff Schedule</span></div>
+                    <div class="sb-nav-item" data-tab="employees"><span class="sb-ic">👤</span><span class="sb-lbl">Employees</span></div>
+                    <div class="sb-nav-item" data-tab="timeoff"><span class="sb-ic">🌴</span><span class="sb-lbl">Time Off</span></div>
+                </div>
+
+                <div class="sb-nav-section">Customers</div>
+                <div class="sb-nav-group">
+                    <div class="sb-nav-item" data-tab="crm"><span class="sb-ic">👥</span><span class="sb-lbl">Contacts</span></div>
+                    <div class="sb-nav-item" data-tab="potential"><span class="sb-ic">📥</span><span class="sb-lbl">Reservation Inquiries</span></div>
+                    <div class="sb-nav-item" data-tab="confirmed"><span class="sb-ic">✓</span><span class="sb-lbl">Confirmed Bookings</span></div>
+                    <div class="sb-nav-item" data-tab="payments"><span class="sb-ic">💳</span><span class="sb-lbl">Payments</span></div>
+                </div>
+
+                <div class="sb-nav-section">Marketing</div>
+                <div class="sb-nav-group">
+                    <div class="sb-nav-item" data-tab="email"><span class="sb-ic">✉️</span><span class="sb-lbl">Send Email</span></div>
+                    <div class="sb-nav-item" data-tab="mktInbox"><span class="sb-ic">📧</span><span class="sb-lbl">Email Drafts</span><span id="mktInboxBadge" class="sb-badge" style="display:none;">0</span></div>
+                    <div class="sb-nav-item" data-tab="mktCalendar"><span class="sb-ic">📅</span><span class="sb-lbl">Email Calendar</span></div>
+                    <div class="sb-nav-item" data-tab="mktPerformance"><span class="sb-ic">📊</span><span class="sb-lbl">Email Performance</span></div>
+                    <div class="sb-nav-item" data-tab="mktInsights"><span class="sb-ic">🧠</span><span class="sb-lbl">Email Insights</span></div>
+                    <div class="sb-nav-item" data-tab="mktSettings"><span class="sb-ic">⚙️</span><span class="sb-lbl">Email Settings</span></div>
+                </div>
+
+                <div class="sb-nav-section">Social Media</div>
+                <div class="sb-nav-group">
+                    <div class="sb-nav-item" data-tab="socInbox"><span class="sb-ic">📲</span><span class="sb-lbl">Social Drafts</span><span id="socInboxBadge" class="sb-badge" style="display:none;">0</span></div>
+                    <div class="sb-nav-item" data-tab="socCalendar"><span class="sb-ic">🗓️</span><span class="sb-lbl">Posting Calendar</span></div>
+                    <div class="sb-nav-item" data-tab="socPerformance"><span class="sb-ic">📈</span><span class="sb-lbl">Social Performance</span></div>
+                    <div class="sb-nav-item" data-tab="socSettings"><span class="sb-ic">🛠️</span><span class="sb-lbl">Social Settings</span></div>
+                </div>
+
+                <div class="sb-nav-section">System</div>
+                <div class="sb-nav-group">
+                    <div class="sb-nav-item" data-tab="floorplan"><span class="sb-ic">🪑</span><span class="sb-lbl">Floor Plan</span></div>
+                    <div class="sb-nav-item" data-tab="forms"><span class="sb-ic">📝</span><span class="sb-lbl">Website Forms</span></div>
+                </div>
+            </nav>
+
+            <div class="sb-foot">
+                <button class="save-github-btn" id="saveGitHubBtn" title="Save your changes to the live site">💾 Save Changes</button>
+                <button class="logout-btn" id="logoutBtn" title="Sign out">↩ Sign Out</button>
             </div>
-        </nav>
+        </aside>
 
         <!-- CONTENT AREA -->
         <div class="content scrollable">
@@ -2479,43 +2622,78 @@
                  DASHBOARD TAB
                  ======================================================== -->
             <div id="dashboardTab" class="tab-content active">
-                <div style="margin:0 0 1rem;">
-                    <h2 style="margin:0;">Welcome back 👋</h2>
-                    <p style="color:var(--text-muted);font-size:0.88rem;margin:0.25rem 0 0;">Here's a snapshot of The Quarry right now. Click any number to drill into it.</p>
-                </div>
-                <div class="dashboard-grid">
-                    <div class="summary-card" title="Ticketed events with at least one open seat">
-                        <div class="summary-label">Active Events</div>
-                        <div class="summary-value" id="totalEvents">0</div>
+                <!-- HERO -->
+                <div class="dash-hero">
+                    <div>
+                        <h1 class="dash-greeting" id="dashGreeting">Welcome back</h1>
+                        <p class="dash-date" id="dashDate"></p>
                     </div>
-                    <div class="summary-card" title="Total seats sold across all upcoming events">
-                        <div class="summary-label">Tickets Sold</div>
-                        <div class="summary-value" id="totalRegistrations">0</div>
-                    </div>
-                    <div class="summary-card" title="Estimated revenue from sold tickets (excludes refunds)">
-                        <div class="summary-label">Est. Revenue</div>
-                        <div class="summary-value" id="totalRevenue">$0</div>
-                    </div>
-                    <div class="summary-card" title="Live music acts booked for the next 60 days">
-                        <div class="summary-label">Upcoming Bands</div>
-                        <div class="summary-value" id="upcomingBands">0</div>
-                    </div>
-                    <div class="summary-card" title="Everyone who's ever shared their email with us">
-                        <div class="summary-label">Total Contacts</div>
-                        <div class="summary-value" id="totalSubscribers">0</div>
-                    </div>
-                    <div class="summary-card" title="Contacts actively subscribed to email marketing (not unsubscribed)">
-                        <div class="summary-label">Email Subscribers</div>
-                        <div class="summary-value" id="emailSubscribed">0</div>
+                    <div class="dash-quick-actions">
+                        <button class="dash-quick" data-jump="socInbox">📲 Review Social Posts</button>
+                        <button class="dash-quick" data-jump="mktInbox">📧 Review Emails</button>
                     </div>
                 </div>
 
-                <div class="activity-section">
-                    <h3>Recent Activity</h3>
+                <!-- NEEDS YOUR ATTENTION -->
+                <h2 class="dash-section-h">Needs your attention</h2>
+                <p class="dash-section-sub">Click any card to jump straight there.</p>
+                <div class="dash-attn-grid" id="dashAttnGrid">
+                    <!-- Filled by renderDashboardAttention() -->
+                </div>
+
+                <!-- TONIGHT -->
+                <h2 class="dash-section-h" style="margin-top:1.75rem;">Today at The Quarry</h2>
+                <div class="dash-today-grid">
+                    <div class="dash-today-card" id="dashTodayBands">
+                        <div class="dash-today-h">🎵 Live Music Tonight</div>
+                        <div class="dash-today-body" id="dashTodayBandsBody"><span class="dash-today-empty">Loading…</span></div>
+                    </div>
+                    <div class="dash-today-card" id="dashTodayEvents">
+                        <div class="dash-today-h">🎫 Today's Events</div>
+                        <div class="dash-today-body" id="dashTodayEventsBody"><span class="dash-today-empty">Loading…</span></div>
+                    </div>
+                </div>
+
+                <!-- AT-A-GLANCE STATS -->
+                <h2 class="dash-section-h" style="margin-top:1.75rem;">At a glance</h2>
+                <div class="dash-stats-grid">
+                    <div class="dash-stat" data-jump="events" title="Ticketed events with at least one open seat">
+                        <div class="dash-stat-ic">🎫</div>
+                        <div class="dash-stat-num" id="totalEvents">0</div>
+                        <div class="dash-stat-lbl">Active Events</div>
+                    </div>
+                    <div class="dash-stat" data-jump="events" title="Total seats sold across all upcoming events">
+                        <div class="dash-stat-ic">🎟️</div>
+                        <div class="dash-stat-num" id="totalRegistrations">0</div>
+                        <div class="dash-stat-lbl">Tickets Sold</div>
+                    </div>
+                    <div class="dash-stat" data-jump="events" title="Estimated revenue from sold tickets">
+                        <div class="dash-stat-ic">💰</div>
+                        <div class="dash-stat-num" id="totalRevenue">$0</div>
+                        <div class="dash-stat-lbl">Est. Revenue</div>
+                    </div>
+                    <div class="dash-stat" data-jump="bands" title="Live music acts booked for the next 60 days">
+                        <div class="dash-stat-ic">🎵</div>
+                        <div class="dash-stat-num" id="upcomingBands">0</div>
+                        <div class="dash-stat-lbl">Upcoming Bands</div>
+                    </div>
+                    <div class="dash-stat" data-jump="crm" title="Everyone who's ever shared their email">
+                        <div class="dash-stat-ic">👥</div>
+                        <div class="dash-stat-num" id="totalSubscribers">0</div>
+                        <div class="dash-stat-lbl">Total Contacts</div>
+                    </div>
+                    <div class="dash-stat" data-jump="crm" title="Contacts actively subscribed to email marketing">
+                        <div class="dash-stat-ic">✉️</div>
+                        <div class="dash-stat-num" id="emailSubscribed">0</div>
+                        <div class="dash-stat-lbl">Email Subscribers</div>
+                    </div>
+                </div>
+
+                <!-- RECENT ACTIVITY -->
+                <h2 class="dash-section-h" style="margin-top:1.75rem;">Recent Activity</h2>
+                <div class="activity-section" style="margin-top:0.5rem;">
                     <div class="activity-feed" id="activityFeed">
-                        <div class="activity-item">
-                            <span>Loading activity...</span>
-                        </div>
+                        <div class="activity-item"><span>Loading activity…</span></div>
                     </div>
                 </div>
             </div>
@@ -4251,56 +4429,38 @@
         }
 
         function setupNavigation() {
-            // Top-level nav tabs (non-dropdown)
-            document.querySelectorAll('.nav-tab').forEach(tab => {
-                tab.addEventListener('click', (e) => {
-                    const tabName = e.target.dataset.tab;
-                    const dropdown = e.target.dataset.dropdown;
-                    if (tabName && !dropdown) {
-                        switchTab(tabName);
-                    } else if (tabName && dropdown) {
-                        // Clicking the dropdown parent opens its first child
-                        switchTab(tabName);
-                    }
+            // Sidebar nav items
+            document.querySelectorAll('.sb-nav-item').forEach((item) => {
+                item.addEventListener('click', () => {
+                    const tabName = item.dataset.tab;
+                    if (tabName) switchTab(tabName);
                 });
             });
-            // Dropdown items
-            document.querySelectorAll('.nav-dropdown-item').forEach(item => {
-                item.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const tabName = e.target.dataset.tab;
-                    if (tabName) switchTab(tabName);
-                    // Close all dropdowns
-                    document.querySelectorAll('.nav-dropdown').forEach(d => d.classList.remove('open'));
+            // Mobile sidebar toggle
+            const tg = document.getElementById('sbMobileToggle');
+            const sb = document.getElementById('adminSidebar');
+            if (tg && sb) tg.addEventListener('click', () => sb.classList.toggle('open'));
+            // Click outside sidebar (on content) closes mobile menu
+            document.querySelector('.content')?.addEventListener('click', () => {
+                if (window.innerWidth <= 900 && sb?.classList.contains('open')) sb.classList.remove('open');
+            });
+            // Dashboard quick-action + stat-card jumps
+            document.querySelectorAll('[data-jump]').forEach((el) => {
+                el.addEventListener('click', () => {
+                    const t = el.dataset.jump; if (t) switchTab(t);
                 });
             });
         }
 
         function switchTab(tabName) {
-            // Close mobile menu if open
-            const navTabs = document.querySelector('.nav-tabs');
-            const menuBtn = document.getElementById('mobileMenuBtn');
-            if (navTabs) navTabs.classList.remove('mobile-open');
-            if (menuBtn) menuBtn.innerHTML = '&#9776;';
+            // Close mobile sidebar if open
+            const sidebar = document.getElementById('adminSidebar');
+            if (sidebar) sidebar.classList.remove('open');
 
-            // Clear all active states
-            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.nav-dropdown-item').forEach(t => t.classList.remove('active'));
-
-            // Set active on the correct nav element
-            const directTab = document.querySelector(`.nav-tab[data-tab="${tabName}"]:not([data-dropdown])`);
-            const dropdownItem = document.querySelector(`.nav-dropdown-item[data-tab="${tabName}"]`);
-
-            if (dropdownItem) {
-                dropdownItem.classList.add('active');
-                // Also highlight the parent dropdown nav-tab
-                const parentDropdown = dropdownItem.closest('.nav-dropdown');
-                if (parentDropdown) {
-                    parentDropdown.querySelector('.nav-tab').classList.add('active');
-                }
-            } else if (directTab) {
-                directTab.classList.add('active');
-            }
+            // Clear active state on sidebar items
+            document.querySelectorAll('.sb-nav-item').forEach(t => t.classList.remove('active'));
+            const sbItem = document.querySelector(`.sb-nav-item[data-tab="${tabName}"]`);
+            if (sbItem) sbItem.classList.add('active');
 
             // Switch tab content
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -5008,6 +5168,103 @@
             document.getElementById('upcomingBands').textContent = upcoming;
 
             updateActivityFeed();
+            renderDashboardHero();
+            renderDashboardAttention();
+            renderDashboardToday();
+        }
+
+        function renderDashboardHero() {
+            const greet = document.getElementById('dashGreeting');
+            const dateEl = document.getElementById('dashDate');
+            if (!greet || !dateEl) return;
+            const h = new Date().getHours();
+            const part = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
+            greet.textContent = `Good ${part}, Matthew 👋`;
+            dateEl.textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+        }
+
+        async function renderDashboardAttention() {
+            const grid = document.getElementById('dashAttnGrid');
+            if (!grid) return;
+
+            // Pull live counts from social_drafts.json + marketing_drafts.json + events
+            let socialPending = 0, emailPending = 0;
+            try {
+                const r = await fetch('/.netlify/functions/data-store?file=social_drafts.json', { cache: 'no-store' });
+                const b = await r.json();
+                const drafts = (b.decoded && b.decoded.drafts) || [];
+                socialPending = drafts.filter((d) => d.status === 'pending').length;
+            } catch (_) {}
+            try {
+                const r = await fetch('/.netlify/functions/data-store?file=marketing_drafts.json', { cache: 'no-store' });
+                const b = await r.json();
+                const drafts = (b.decoded && b.decoded.drafts) || [];
+                emailPending = drafts.filter((d) => d.status === 'pending').length;
+            } catch (_) {}
+
+            // Reservation inquiries (potential reservations) — count from app
+            const inquiries = (app.events || []).reduce((acc, e) => acc + ((app.registrations?.[e.id] || []).length), 0);
+
+            // Low-fill events: ticketed events <30% sold within 14 days of date
+            const today = new Date(); today.setHours(0,0,0,0);
+            const lowFillEvents = (app.events || []).filter((e) => {
+                if (!e.date) return false;
+                const d = new Date(e.date + 'T12:00:00');
+                const daysOut = Math.round((d - today) / 86400000);
+                if (daysOut < 0 || daysOut > 14) return false;
+                const cap = e.totalCapacity || 0;
+                if (!cap) return false;
+                return ((e.registeredCount || 0) / cap) < 0.3;
+            }).length;
+
+            const cards = [
+                {
+                    n: socialPending, ttl: socialPending === 1 ? 'Social post needs review' : 'Social posts need review',
+                    sub: socialPending > 0 ? 'Approve, edit, or rewrite to keep posting on schedule' : "You're all caught up on social",
+                    jump: 'socInbox'
+                },
+                {
+                    n: emailPending, ttl: emailPending === 1 ? 'Email draft needs review' : 'Email drafts need review',
+                    sub: emailPending > 0 ? 'Sign off so emails go out at their scheduled time' : 'No emails waiting on you',
+                    jump: 'mktInbox'
+                },
+                {
+                    n: lowFillEvents, ttl: lowFillEvents === 1 ? 'Event is filling slowly' : 'Events filling slowly',
+                    sub: lowFillEvents > 0 ? 'Less than 30% sold and within 2 weeks — consider extra promo' : 'All near-term events on pace',
+                    jump: 'events'
+                },
+            ];
+
+            grid.innerHTML = cards.map((c) => `
+                <div class="dash-attn-card ${c.n === 0 ? 'is-zero' : ''}" data-jump="${c.jump}">
+                    <div class="ac-num">${c.n === 0 ? '✓' : c.n}</div>
+                    <div class="ac-ttl">${c.ttl}</div>
+                    <div class="ac-sub">${c.sub}</div>
+                </div>
+            `).join('');
+            grid.querySelectorAll('[data-jump]').forEach((el) => el.addEventListener('click', () => switchTab(el.dataset.jump)));
+        }
+
+        function renderDashboardToday() {
+            const todayKey = new Date().toISOString().slice(0, 10);
+            const bandsEl = document.getElementById('dashTodayBandsBody');
+            const eventsEl = document.getElementById('dashTodayEventsBody');
+
+            if (bandsEl) {
+                const todayBands = (app.bands || []).filter((b) => b.date === todayKey);
+                if (todayBands.length === 0) bandsEl.innerHTML = '<span class="dash-today-empty">No live music today</span>';
+                else bandsEl.innerHTML = todayBands.map((b) => `<div class="dt-row"><span class="dt-name">${b.name || ''}</span><span class="dt-time">${b.timeSlot || ''}</span></div>`).join('');
+            }
+
+            if (eventsEl) {
+                const todayEvents = (app.events || []).filter((e) => e.date === todayKey);
+                if (todayEvents.length === 0) eventsEl.innerHTML = '<span class="dash-today-empty">No ticketed events today</span>';
+                else eventsEl.innerHTML = todayEvents.map((e) => {
+                    const time = e.time ? new Date('2000-01-01T' + e.time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '';
+                    const filled = e.totalCapacity ? `${e.registeredCount || 0}/${e.totalCapacity} sold` : '';
+                    return `<div class="dt-row"><span class="dt-name">${e.name}</span><span class="dt-time">${time}${filled ? ' · ' + filled : ''}</span></div>`;
+                }).join('');
+            }
         }
 
         function updateActivityFeed() {
