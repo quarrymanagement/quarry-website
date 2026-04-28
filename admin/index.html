@@ -400,13 +400,38 @@
             margin-bottom: 1.5rem;
         }
         .events-header h2 { font-family: var(--font-serif); font-size: 1.5rem; color: var(--text-primary); font-weight: 600; }
-        .btn-primary {
-            background: var(--gold); color: var(--bg-primary); border: none;
-            padding: 0.6rem 1.25rem; border-radius: var(--radius-sm); cursor: pointer;
-            font-weight: 600; font-size: 0.85rem; transition: var(--transition);
-            font-family: var(--font-sans); letter-spacing: 0.3px;
+        /* ── UNIFIED BUTTON SYSTEM ─────────────────────────────────────── */
+        .btn-primary, .btn-secondary, .btn-approve, .btn-reject, .btn-redo, .btn-edit-save {
+            font-family: var(--font-sans); font-weight: 600; font-size: 0.85rem;
+            padding: 0.55rem 1.05rem; border-radius: 6px; cursor: pointer;
+            letter-spacing: 0.2px; line-height: 1.2; display: inline-flex;
+            align-items: center; justify-content: center; gap: 0.4rem;
+            transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+            white-space: nowrap; border: 1px solid transparent;
         }
-        .btn-primary:hover { background: var(--gold-light); }
+        .btn-primary, .btn-secondary, .btn-approve, .btn-reject, .btn-redo, .btn-edit-save { user-select: none; }
+        .btn-primary:focus-visible, .btn-secondary:focus-visible, .btn-approve:focus-visible,
+        .btn-reject:focus-visible, .btn-redo:focus-visible, .btn-edit-save:focus-visible {
+            outline: 2px solid var(--gold); outline-offset: 2px;
+        }
+        .btn-primary:hover, .btn-approve:hover, .btn-edit-save:hover {
+            transform: translateY(-1px); box-shadow: 0 4px 10px rgba(154,123,42,0.18);
+        }
+        .btn-secondary:hover, .btn-reject:hover, .btn-redo:hover {
+            transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+        }
+        .btn-primary:active, .btn-secondary:active, .btn-approve:active,
+        .btn-reject:active, .btn-redo:active, .btn-edit-save:active { transform: translateY(0); box-shadow: none; }
+        .btn-primary:disabled, .btn-secondary:disabled, .btn-approve:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        .btn-primary {
+            background: var(--gold); color: #fff; border-color: var(--gold);
+        }
+        .btn-primary:hover { background: var(--gold-light); border-color: var(--gold-light); }
+        .btn-secondary {
+            background: var(--bg-card); color: var(--text-primary); border-color: var(--border-subtle);
+        }
+        .btn-secondary:hover { background: var(--bg-elevated); border-color: var(--gold); }
         .events-grid {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 1.25rem;
@@ -2519,14 +2544,14 @@
         .mkt-mode-tab:hover { background: rgba(154,123,42,0.08); color: var(--text-primary); }
         .mkt-mode-tab.active { color: #fff; background: var(--gold); }
         .ex-prompt-chip:hover, .ex-redo-chip:hover { background: var(--gold) !important; color: #fff !important; border-color: var(--gold) !important; }
-        .btn-approve { background: #16a34a; color: #fff; border: none; padding: 0.55rem 1rem; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; }
-        .btn-approve:hover { background: #15803d; }
-        .btn-reject  { background: transparent; color: #dc2626; border: 1px solid #dc2626; padding: 0.55rem 1rem; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; }
+        .btn-approve { background: #16a34a; color: #fff; border-color: #16a34a; }
+        .btn-approve:hover { background: #15803d; border-color: #15803d; }
+        .btn-reject  { background: transparent; color: #dc2626; border-color: #dc2626; }
         .btn-reject:hover  { background: rgba(220,38,38,0.08); }
-        .btn-redo    { background: transparent; color: #2563eb; border: 1px solid #2563eb; padding: 0.55rem 1rem; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; }
+        .btn-redo    { background: transparent; color: #2563eb; border-color: #2563eb; }
         .btn-redo:hover    { background: rgba(37,99,235,0.08); }
-        .btn-edit-save { background: var(--gold); color: #fff; border: none; padding: 0.55rem 1rem; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; }
-        .btn-edit-save:hover { background: var(--gold-light); }
+        .btn-edit-save { background: var(--gold); color: #fff; border-color: var(--gold); }
+        .btn-edit-save:hover { background: var(--gold-light); border-color: var(--gold-light); }
         .btn-test-send { background: transparent; color: var(--text-secondary); border: 1px solid var(--border-medium); padding: 0.55rem 1rem; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; }
         .btn-test-send:hover { color: var(--text-primary); border-color: var(--text-primary); }
 
