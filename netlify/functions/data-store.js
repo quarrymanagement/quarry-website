@@ -29,6 +29,7 @@ const ALLOWED_FILES = new Set([
     'social_calendar.json',
     'social_events.json',
     'social_learnings.json',
+    'social_assets.json',
     'events.json'  // mirror github-proxy.js so we have one read/write surface long-term
 ]);
 
@@ -72,8 +73,25 @@ exports.handler = async (event) => {
             let decoded = null;
             if (data.content && data.encoding === 'base64') {
                 try { decoded = JSON.parse(Buffer.from(data.content, 'base64').toString('utf8')); } catch (_) { decoded = null; }
+            } else if (data.git_url) {
+                // Fallback: GitHub Contents API drops `content` for files >1 MB.
+                // Use the Git Data API (blob endpoint) which has a 100 MB limit.
+                try {
+                    const blobResp = await fetch(data.git_url, {
+                        headers: {
+                            'Authorization': `token ${GITHUB_TOKEN}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    });
+                    if (blobResp.ok) {
+                        const blob = await blobResp.json();
+                        if (blob.content && blob.encoding === 'base64') {
+                            try { decoded = JSON.parse(Buffer.from(blob.content, 'base64').toString('utf8')); } catch (_) { decoded = null; }
+                        }
+                    }
+                } catch (_) { /* leave decoded null */ }
             }
-            return respond(200, { sha: data.sha, path: data.path, decoded, raw: data });
+            return respond(200, { sha: data.sha, path: data.path, size: data.size, decoded, raw: data });
         }
 
         if (event.httpMethod === 'PUT') {
