@@ -3290,17 +3290,41 @@
             </div>
 
             <div id="socSettingsTab" class="tab-content">
-                <div class="mkt-header"><div><h2 style="margin:0;">Social Settings</h2><p class="mkt-sub">Calendar rules + Meta connection status.</p></div></div>
+                <div class="mkt-header">
+                    <div><h2 style="margin:0;">Social Settings</h2><p class="mkt-sub">Cadence engine + designer queue + Meta connection.</p></div>
+                    <div class="mkt-header-actions">
+                        <button class="btn-secondary" id="socRebuildScheduleBtn" style="background:var(--gold);color:#fff;">⟳ Rebuild Schedule</button>
+                    </div>
+                </div>
+
+                <div class="mkt-card" style="margin-bottom:1rem;">
+                    <h4>📋 Designer Queue — graphics needed in next 14 days</h4>
+                    <p class="mkt-sub" style="margin:0 0 0.5rem;">All upcoming posts that need a graphic from you. Build them in Canva ahead of time and upload via the draft modal.</p>
+                    <div id="socDesignerQueue"><div class="mkt-empty">Loading…</div></div>
+                </div>
+
                 <div class="mkt-perf-grid">
                     <div class="mkt-card">
                         <h4>Meta Connection</h4>
                         <div id="socMetaStatus"><div class="mkt-empty">Checking…</div></div>
                     </div>
                     <div class="mkt-card">
-                        <h4>Calendar Rules</h4>
-                        <div id="socRulesList"><div class="mkt-empty">Loading…</div></div>
-                        <div style="margin-top:0.75rem;text-align:right;"><button class="btn-primary" id="socSaveRulesBtn">Save Rules</button></div>
+                        <h4>📚 Asset Library</h4>
+                        <div id="socAssetLibraryStatus" style="font-size:0.85rem;"><div class="mkt-empty">Loading…</div></div>
+                        <div style="margin-top:0.5rem;"><button class="btn-secondary" id="socAddAssetBtn" style="font-size:0.8rem;">+ Add Venue Photo</button></div>
                     </div>
+                </div>
+
+                <div class="mkt-card" style="margin-top:1rem;">
+                    <h4>🧠 AI Learnings — what's been learned from past posts</h4>
+                    <p class="mkt-sub" style="margin:0 0 0.5rem;">Generated nightly by the optimizer from engagement data. These rules feed into every new caption.</p>
+                    <div id="socLearningsList"><div class="mkt-empty">Loading…</div></div>
+                </div>
+
+                <div class="mkt-card" style="margin-top:1rem;">
+                    <h4>Cadence Rules (legacy — used by old generator)</h4>
+                    <div id="socRulesList"><div class="mkt-empty">Loading…</div></div>
+                    <div style="margin-top:0.75rem;text-align:right;"><button class="btn-primary" id="socSaveRulesBtn">Save Rules</button></div>
                 </div>
             </div>
 
@@ -3320,11 +3344,19 @@
                         <div class="mkt-modal-pane">
                             <h5>Hero Image</h5>
                             <div id="socDraftImagePreview" style="background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:6px;height:280px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:0.85rem;overflow:hidden;">No image</div>
-                            <div style="margin-top:0.5rem;display:flex;gap:0.4rem;">
-                                <button class="btn-secondary" id="socRegenImageBtn" style="flex:1;font-size:0.8rem;">↻ Regenerate Image (DALL-E)</button>
+                            <div style="margin-top:0.5rem;display:flex;gap:0.4rem;flex-wrap:wrap;">
+                                <button class="btn-secondary" id="socUploadImageBtn" style="flex:1;font-size:0.8rem;background:var(--gold);color:#fff;">📤 Upload My Own Poster</button>
+                                <button class="btn-secondary" id="socRegenImageBtn" style="flex:1;font-size:0.8rem;">↻ DALL-E Image ($0.04)</button>
+                                <button class="btn-secondary" id="socPickFromLibraryBtn" style="flex:1;font-size:0.8rem;">📚 Pick from Library</button>
                             </div>
-                            <h5 style="margin-top:1rem;">Image Prompt</h5>
+                            <input type="file" id="socImageFileInput" accept="image/png,image/jpeg,image/webp" style="display:none;">
+                            <div id="socImageSourceLabel" style="margin-top:0.4rem;font-size:0.7rem;color:var(--text-muted);"></div>
+                            <h5 style="margin-top:1rem;">Image Prompt <span style="font-size:0.7rem;color:var(--text-muted);font-weight:normal;">(only used by DALL-E)</span></h5>
                             <textarea id="socDraftImagePrompt" style="width:100%;min-height:60px;padding:0.5rem;border:1px solid var(--border-subtle);border-radius:4px;font-size:0.8rem;font-family:monospace;background:var(--bg-card);color:var(--text-primary);"></textarea>
+                            <div id="socGraphicBriefPanel" style="margin-top:1rem;background:var(--bg-elevated);border:1px solid var(--gold);border-radius:6px;padding:0.75rem;display:none;">
+                                <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--gold);font-weight:600;margin-bottom:0.5rem;">📋 Graphic Brief — what to make in Canva</div>
+                                <div id="socGraphicBriefContent" style="font-size:0.8rem;line-height:1.5;color:var(--text-primary);"></div>
+                            </div>
                         </div>
                         <div class="mkt-modal-pane">
                             <div class="mkt-mode-tabs">
@@ -10235,6 +10267,9 @@ function hashCode(str) {
 
             async function renderSettings() {
                 renderRules();
+                renderDesignerQueue();
+                renderLearnings();
+                renderAssetLibrary();
                 const statusEl = $('socMetaStatus'); if (!statusEl) return;
                 statusEl.innerHTML = '<div class="mkt-empty">Checking…</div>';
                 try {
@@ -10253,6 +10288,79 @@ function hashCode(str) {
                 } catch (err) {
                     statusEl.innerHTML = `<div style="color:var(--text-muted);">Could not probe meta-post: ${escHtml(err.message)}</div>`;
                 }
+            }
+
+            function renderDesignerQueue() {
+                const wrap = $('socDesignerQueue'); if (!wrap) return;
+                const cutoff = Date.now() + 14 * 86400000;
+                const queue = state.drafts
+                    .filter((d) => (d.status === 'skeleton' || d.status === 'pending') && d.graphicBrief && !d.userImageUrl)
+                    .filter((d) => d.scheduledFor && new Date(d.scheduledFor).getTime() <= cutoff)
+                    .sort((a, b) => (a.graphicBrief?.neededBy || a.scheduledFor || '').localeCompare(b.graphicBrief?.neededBy || b.scheduledFor || ''));
+                if (!queue.length) { wrap.innerHTML = '<div class="mkt-empty">All upcoming posts have graphics ready (or use AI-generated images). 🎉</div>'; return; }
+                wrap.innerHTML = queue.map((d) => {
+                    const brief = d.graphicBrief || {};
+                    const spec = brief.spec || {};
+                    const neededBy = brief.neededBy ? new Date(brief.neededBy + 'T12:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : 'ASAP';
+                    return `<div class="mkt-inbox-item" data-draft-id="${escHtml(d.id)}" style="cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;padding:0.6rem;border-left:3px solid var(--gold);">
+                        <div style="flex:1;min-width:0;">
+                            <div style="font-weight:600;font-size:0.85rem;">${escHtml(spec.title || brief.type || 'Graphic needed')}</div>
+                            <div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.2rem;">${escHtml(brief.templateRef || '')}</div>
+                            <div style="font-size:0.75rem;margin-top:0.3rem;color:var(--text-primary);">${escHtml(brief.canvasNote || '')}</div>
+                        </div>
+                        <div style="text-align:right;margin-left:0.5rem;font-size:0.7rem;">
+                            <div style="font-weight:600;color:var(--gold);">Build by ${escHtml(neededBy)}</div>
+                            <div style="color:var(--text-muted);margin-top:0.2rem;">Posts ${fmtDate(d.scheduledFor)}</div>
+                        </div>
+                    </div>`;
+                }).join('');
+                wrap.querySelectorAll('.mkt-inbox-item').forEach((el) => el.addEventListener('click', () => openModal(el.dataset.draftId)));
+            }
+
+            async function renderLearnings() {
+                const wrap = $('socLearningsList'); if (!wrap) return;
+                try {
+                    const r = await fetch(`${FN}/data-store?file=social_learnings.json`, { cache: 'no-store' });
+                    const body = await r.json();
+                    const learnings = (body.decoded && Array.isArray(body.decoded.learnings)) ? body.decoded.learnings : [];
+                    const active = learnings.filter((l) => !l.supersededAt);
+                    if (!active.length) { wrap.innerHTML = '<div class="mkt-empty">No learnings yet. Need at least 5 posted+polled posts before the optimizer can find patterns.</div>'; return; }
+                    wrap.innerHTML = active.map((l) => `<div style="padding:0.5rem;border-bottom:1px solid var(--border-subtle);">
+                        <div style="font-size:0.85rem;font-weight:500;">${escHtml(l.insight)}</div>
+                        <div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.2rem;"><span style="color:var(--gold);">[${escHtml(l.category)}]</span> ${escHtml(l.evidence || '')} · confidence: ${escHtml(l.confidence || 'medium')}</div>
+                    </div>`).join('');
+                } catch (err) { wrap.innerHTML = `<div class="mkt-empty">Could not load learnings: ${escHtml(err.message)}</div>`; }
+            }
+
+            async function renderAssetLibrary() {
+                const wrap = $('socAssetLibraryStatus'); if (!wrap) return;
+                try {
+                    const r = await fetch(`${FN}/data-store?file=social_assets.json`, { cache: 'no-store' });
+                    const body = await r.json();
+                    const assets = (body.decoded && Array.isArray(body.decoded.assets)) ? body.decoded.assets : [];
+                    if (!assets.length) {
+                        wrap.innerHTML = `<div style="color:var(--text-muted);">Empty. Add venue photos here so the AI can use real Quarry shots for atmosphere posts (saves ~$0.04/post vs DALL-E).</div>`;
+                        return;
+                    }
+                    const tags = [...new Set(assets.flatMap((a) => a.tags || []))];
+                    wrap.innerHTML = `<div><strong>${assets.length}</strong> photo(s) tagged with: ${escHtml(tags.join(', ') || '(none)')}</div>
+                        <div style="display:flex;gap:0.4rem;margin-top:0.5rem;flex-wrap:wrap;">${assets.slice(0, 6).map((a) => `<img src="${escHtml(a.url)}" title="${escHtml(a.title || '')}" style="width:50px;height:50px;object-fit:cover;border-radius:3px;border:1px solid var(--border-subtle);" alt="">`).join('')}${assets.length > 6 ? `<div style="display:flex;align-items:center;justify-content:center;width:50px;height:50px;background:var(--bg-elevated);border-radius:3px;font-size:0.7rem;color:var(--text-muted);">+${assets.length - 6}</div>` : ''}</div>`;
+                } catch (err) { wrap.innerHTML = `<div class="mkt-empty">Could not load assets: ${escHtml(err.message)}</div>`; }
+            }
+
+            async function rebuildSchedule() {
+                if (!confirm('Rebuild the 60-day schedule? Will pick up new events, reshuffle if needed. Existing pending/approved drafts stay locked.')) return;
+                toast('Rebuilding schedule…');
+                try {
+                    const r = await fetch(`${FN}/social-cadence-engine`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ windowDays: 60, dailyCap: 2 })
+                    });
+                    const body = await r.json();
+                    if (!r.ok) throw new Error(body.error || 'rebuild failed');
+                    toast(`+${body.added || 0} new, ${body.movedExisting || 0} reshuffled, ${body.supersededExisting || 0} bumped.`);
+                    await loadAll();
+                } catch (err) { toast('Rebuild failed: ' + err.message); }
             }
 
             function renderRules() {
@@ -10297,25 +10405,136 @@ function hashCode(str) {
             function renderModal() {
                 const d = state.drafts.find((x) => x.id === state.currentDraftId); if (!d) return;
                 $('socDraftModalTitle').textContent = `${(d.type || 'post')} · ${(d.platforms || []).join(' + ')}`;
-                $('socDraftModalSub').textContent = `${d.status} · ${fmtDate(d.scheduledFor || d.createdAt)}`;
+                $('socDraftModalSub').textContent = `${d.status} · ${fmtDate(d.scheduledFor || d.createdAt)}${d.cadenceTag ? ' · ' + d.cadenceTag : ''}`;
                 const img = $('socDraftImagePreview');
-                if (d.imageUrl) img.innerHTML = `<img src="${escHtml(d.imageUrl)}" style="width:100%;height:100%;object-fit:cover;" alt="">`;
-                else img.textContent = 'No image';
+                const liveImage = d.userImageUrl || d.imageUrl;
+                if (liveImage) img.innerHTML = `<img src="${escHtml(liveImage)}" style="width:100%;height:100%;object-fit:cover;" alt="">`;
+                else img.textContent = 'No image yet — upload your own poster, pick from library, or generate with DALL-E';
+                const srcLabel = $('socImageSourceLabel');
+                if (srcLabel) {
+                    if (d.userImageUrl) srcLabel.innerHTML = '✓ <span style="color:var(--gold);">Your uploaded poster</span>';
+                    else if (d.imageUrl && d.imageSource === 'library') srcLabel.innerHTML = '✓ <span style="color:var(--gold);">From asset library</span>';
+                    else if (d.imageUrl) srcLabel.innerHTML = '✓ <span style="color:#888;">DALL-E generated</span>';
+                    else srcLabel.textContent = '';
+                }
                 $('socDraftImagePrompt').value = d.imagePrompt || '';
+                renderGraphicBrief(d.graphicBrief);
                 const meta = $('socDraftMeta');
                 meta.innerHTML = [
                     ['Type', d.type || '—'],
                     ['Platforms', (d.platforms || []).join(', ') || '—'],
                     ['Scheduled', fmtDate(d.scheduledFor)],
                     ['Posted', fmtDate(d.postedAt)],
+                    ['Source', d.context?.eventName || d.context?.weekendOf || d.context?.monthLabel || '—'],
+                    ['Arc Step', d.context?.arcLabel || '—'],
                     ['Regenerations', d.regenerationCount || 0],
                 ].map(([k, v]) => `<div class="mkt-meta-cell"><div class="mkt-meta-k">${k}</div><div class="mkt-meta-v">${escHtml(String(v))}</div></div>`).join('');
-                $('socDraftCaption').textContent = d.caption || '(no caption)';
+                $('socDraftCaption').textContent = d.caption || '(no caption — still skeleton)';
                 $('socDraftHashtags').textContent = (d.hashtags || []).join(' ');
                 const showPostNow = d.status === 'pending' || d.status === 'approved';
                 $('socDraftPostNowBtn').style.display = showPostNow ? '' : 'none';
                 $('socDraftApproveBtn').style.display = (d.status === 'pending') ? '' : 'none';
                 $('socDraftRejectBtn').style.display = (d.status === 'pending' || d.status === 'approved') ? '' : 'none';
+            }
+
+            function renderGraphicBrief(brief) {
+                const panel = $('socGraphicBriefPanel'); const content = $('socGraphicBriefContent');
+                if (!panel || !content) return;
+                if (!brief || !brief.spec) { panel.style.display = 'none'; return; }
+                panel.style.display = 'block';
+                const rows = [];
+                rows.push(`<div><strong>Type:</strong> ${escHtml(brief.type || '')}</div>`);
+                if (brief.templateRef) rows.push(`<div><strong>Template:</strong> ${escHtml(brief.templateRef)}</div>`);
+                if (brief.dimensions) rows.push(`<div><strong>Dimensions:</strong> ${escHtml(brief.dimensions)}</div>`);
+                if (brief.neededBy) rows.push(`<div><strong>Build by:</strong> ${escHtml(brief.neededBy)}</div>`);
+                if (brief.toneMode) rows.push(`<div><strong>Tone mode:</strong> <span style="color:var(--gold);">${escHtml(brief.toneMode)}</span></div>`);
+                rows.push(`<hr style="margin:0.5rem 0;border:none;border-top:1px solid var(--border-subtle);">`);
+                rows.push(`<div style="font-weight:600;margin-bottom:0.3rem;">Spec:</div>`);
+                for (const [k, v] of Object.entries(brief.spec || {})) {
+                    if (v == null || v === '') continue;
+                    if (Array.isArray(v)) {
+                        rows.push(`<div><em>${escHtml(k)}:</em></div><ul style="margin:0.2rem 0 0.4rem 1.2rem;padding:0;">${v.map((it) => `<li>${escHtml(typeof it === 'object' ? JSON.stringify(it) : String(it))}</li>`).join('')}</ul>`);
+                    } else {
+                        rows.push(`<div><em>${escHtml(k)}:</em> ${escHtml(typeof v === 'object' ? JSON.stringify(v) : String(v))}</div>`);
+                    }
+                }
+                if (brief.canvasNote) rows.push(`<div style="margin-top:0.5rem;padding:0.4rem;background:rgba(154,123,42,0.1);border-left:3px solid var(--gold);font-size:0.75rem;font-style:italic;">${escHtml(brief.canvasNote)}</div>`);
+                if (brief.reelBrief) {
+                    rows.push(`<hr style="margin:0.6rem 0;border:none;border-top:1px solid var(--border-subtle);">`);
+                    rows.push(`<div style="font-weight:600;color:#e1306c;">📱 Reel Idea (optional):</div>`);
+                    rows.push(`<div style="font-size:0.78rem;line-height:1.5;">${escHtml(brief.reelBrief)}</div>`);
+                }
+                content.innerHTML = rows.join('');
+            }
+
+            async function uploadImage(file) {
+                if (!file) return;
+                if (file.size > 8 * 1024 * 1024) return toast('Image too large — max 8MB.');
+                toast('Uploading…');
+                try {
+                    const dataUrl = await new Promise((resolve, reject) => {
+                        const r = new FileReader();
+                        r.onload = () => resolve(r.result);
+                        r.onerror = reject;
+                        r.readAsDataURL(file);
+                    });
+                    const r = await fetch(`${FN}/upload-social-image`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ imageBase64: dataUrl, draftId: state.currentDraftId, filename: file.name })
+                    });
+                    const body = await r.json();
+                    if (!r.ok || !body.success) throw new Error(body.error || 'upload failed');
+                    // Save the URL to the draft via 'edit' action
+                    await action('edit', { imageUrl: body.url, userImageUrl: body.url });
+                    toast('Poster uploaded.');
+                } catch (err) { toast('Upload failed: ' + err.message); }
+            }
+
+            async function openLibraryPicker() {
+                try {
+                    const r = await fetch(`${FN}/data-store?file=social_assets.json`, { cache: 'no-store' });
+                    const body = await r.json();
+                    const assets = (body.decoded && body.decoded.assets) || [];
+                    if (!assets.length) {
+                        if (confirm('Asset library is empty. Want to add a venue photo now?')) {
+                            $('socImageFileInput').dataset.libraryUpload = 'true';
+                            $('socImageFileInput').click();
+                        }
+                        return;
+                    }
+                    // Simple quick picker — modal lite
+                    const tags = [...new Set(assets.flatMap((a) => a.tags || []))];
+                    const list = assets.map((a) =>
+                        `<div data-asset-url="${escHtml(a.url)}" style="cursor:pointer;border:1px solid var(--border-subtle);border-radius:4px;padding:0.4rem;display:flex;gap:0.5rem;align-items:center;background:var(--bg-elevated);margin-bottom:0.4rem;">
+                            <img src="${escHtml(a.url)}" style="width:60px;height:60px;object-fit:cover;border-radius:3px;" alt="">
+                            <div style="flex:1;font-size:0.8rem;"><div style="font-weight:600;">${escHtml(a.title || a.filename || 'Untitled')}</div><div style="font-size:0.7rem;color:var(--text-muted);">${escHtml((a.tags || []).join(', '))}</div></div>
+                        </div>`
+                    ).join('');
+                    const overlay = document.createElement('div');
+                    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:99999;display:flex;align-items:center;justify-content:center;';
+                    overlay.innerHTML = `<div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:8px;padding:1.5rem;max-width:520px;width:90%;max-height:80vh;overflow-y:auto;">
+                        <h3 style="margin:0 0 0.5rem;color:var(--text-primary);">Pick from Asset Library</h3>
+                        <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.75rem;">${assets.length} photo(s) · tags: ${escHtml(tags.join(', ') || 'none')}</div>
+                        <div>${list}</div>
+                        <div style="display:flex;gap:0.5rem;margin-top:0.75rem;">
+                            <button class="btn-secondary" id="libCloseBtn" style="flex:1;">Cancel</button>
+                            <button class="btn-primary" id="libUploadNewBtn" style="flex:1;">Upload New Asset</button>
+                        </div>
+                    </div>`;
+                    document.body.appendChild(overlay);
+                    overlay.querySelectorAll('[data-asset-url]').forEach((el) => el.addEventListener('click', async () => {
+                        const url = el.dataset.assetUrl;
+                        document.body.removeChild(overlay);
+                        await action('edit', { imageUrl: url, userImageUrl: null });
+                        toast('Image picked from library.');
+                    }));
+                    overlay.querySelector('#libCloseBtn').addEventListener('click', () => document.body.removeChild(overlay));
+                    overlay.querySelector('#libUploadNewBtn').addEventListener('click', () => {
+                        document.body.removeChild(overlay);
+                        $('socImageFileInput').dataset.libraryUpload = 'true';
+                        $('socImageFileInput').click();
+                    });
+                } catch (err) { toast('Library load failed: ' + err.message); }
             }
 
             async function action(act, payload) {
@@ -10380,6 +10599,11 @@ function hashCode(str) {
                 $('socInboxRefresh')?.addEventListener('click', loadAll);
                 $('socGenerateNowBtn')?.addEventListener('click', generateNow);
                 $('socSaveRulesBtn')?.addEventListener('click', saveRules);
+                $('socRebuildScheduleBtn')?.addEventListener('click', rebuildSchedule);
+                $('socAddAssetBtn')?.addEventListener('click', () => {
+                    $('socImageFileInput').dataset.libraryUpload = 'true';
+                    $('socImageFileInput').click();
+                });
                 $('socDraftModalClose')?.addEventListener('click', closeModal);
                 document.querySelectorAll('#socDraftModal .mkt-mode-tab').forEach((t) => t.addEventListener('click', () => setMode(t.dataset.mode)));
                 $('socDraftApproveBtn')?.addEventListener('click', () => action('approve', { approvedBy: 'admin' }));
@@ -10398,9 +10622,58 @@ function hashCode(str) {
                     const newPrompt = $('socDraftImagePrompt').value.trim();
                     action('regenImage', { imagePrompt: newPrompt });
                 });
+                $('socUploadImageBtn')?.addEventListener('click', () => {
+                    delete $('socImageFileInput').dataset.libraryUpload;
+                    $('socImageFileInput').click();
+                });
+                $('socImageFileInput')?.addEventListener('change', async (e) => {
+                    const file = e.target.files && e.target.files[0]; if (!file) return;
+                    const isLibrary = e.target.dataset.libraryUpload === 'true';
+                    delete e.target.dataset.libraryUpload;
+                    e.target.value = '';
+                    if (isLibrary) await uploadAssetToLibrary(file);
+                    else await uploadImage(file);
+                });
+                $('socPickFromLibraryBtn')?.addEventListener('click', openLibraryPicker);
                 $('socDraftPostNowBtn')?.addEventListener('click', postNow);
                 $('socDraftModal')?.addEventListener('click', (e) => { if (e.target.id === 'socDraftModal') closeModal(); });
                 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('socDraftModal')?.classList.contains('open')) closeModal(); });
+            }
+
+            async function uploadAssetToLibrary(file) {
+                const title = prompt('Short title for this asset (e.g., "Patio sunset", "Wood-fired flatbread"):', file.name.replace(/\.[^.]+$/, ''));
+                if (!title) return;
+                const tagInput = prompt('Tags (comma-separated, used by AI to pick the right photo). Examples: patio, sunset, food, wine, band, golf', '');
+                const tags = (tagInput || '').split(',').map((s) => s.trim().toLowerCase()).filter(Boolean);
+                toast('Uploading to library…');
+                try {
+                    const dataUrl = await new Promise((resolve, reject) => {
+                        const r = new FileReader(); r.onload = () => resolve(r.result); r.onerror = reject; r.readAsDataURL(file);
+                    });
+                    const upRes = await fetch(`${FN}/upload-social-image`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ imageBase64: dataUrl, filename: 'lib-' + file.name })
+                    });
+                    const upBody = await upRes.json();
+                    if (!upRes.ok || !upBody.success) throw new Error(upBody.error || 'upload failed');
+                    // Append to social_assets.json
+                    const cur = await fetch(`${FN}/data-store?file=social_assets.json`, { cache: 'no-store' });
+                    let json = { assets: [] }, sha = null;
+                    try { const d = await cur.json(); json = d.decoded || { assets: [] }; sha = d.sha; } catch (_) {}
+                    json.assets = Array.isArray(json.assets) ? json.assets : [];
+                    json.assets.push({
+                        id: 'asset-' + Date.now().toString(36),
+                        title, tags, url: upBody.url, filename: upBody.filename,
+                        addedAt: new Date().toISOString()
+                    });
+                    json.updatedAt = new Date().toISOString();
+                    const saveRes = await fetch(`${FN}/data-store?file=social_assets.json`, {
+                        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ json, sha, message: `library: add asset "${title}"` })
+                    });
+                    if (!saveRes.ok) throw new Error('save asset list failed: ' + saveRes.status);
+                    toast('Asset added to library: ' + title);
+                } catch (err) { toast('Library upload failed: ' + err.message); }
             }
             function onTabSwitch(tabName) {
                 if (!state.loaded) loadAll();
