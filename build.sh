@@ -35,3 +35,16 @@ if [ ! -z "$STRIPE_PUBLISHABLE_KEY" ]; then
 else
   echo "WARNING: STRIPE_PUBLISHABLE_KEY not set"
 fi
+
+# Inject GA4 Measurement ID across every public page that has the placeholder
+if [ ! -z "$GA4_MEASUREMENT_ID" ]; then
+  COUNT=$(grep -l "__GA4_MEASUREMENT_ID__" *.html 2>/dev/null | wc -l)
+  if [ "$COUNT" -gt 0 ]; then
+    sed -i "s|__GA4_MEASUREMENT_ID__|$GA4_MEASUREMENT_ID|g" *.html
+    echo "GA4 Measurement ID injected into $COUNT pages ($GA4_MEASUREMENT_ID)"
+  else
+    echo "GA4 placeholder not found in any HTML file — already injected or pages don't have snippet"
+  fi
+else
+  echo "WARNING: GA4_MEASUREMENT_ID not set — analytics will not collect data"
+fi
