@@ -129,25 +129,35 @@ exports.handler = async (event) => {
         });
         const body = await r.json().catch(() => ({}));
 
-        // 2) Append to subscribers.json so the CRM tab in admin stays fresh
+        // 2) Append to subscribers.json so the CRM tab in admin stays fresh.
+        // CRITICAL: must AWAIT this — Netlify Functions kills the runtime as soon
+        // as the handler returns, which would terminate any pending fetch calls.
+        // Previously this was fire-and-forget which is why every submission since
+        // April never reached subscribers.json.
         const submissionData = {
             type: formName,
             timestamp: new Date().toISOString(),
-            details: data  // full form payload — useful for inquiry context, ticket count, message body, etc.
+            details: data
         };
-        // (best-effort — failures don't block the form submission flow)
-        appendToCrmFile({ email, firstName, lastName, phone, source: formName, segmentTag, marketingOptIn, submission: submissionData })
-            .catch((e) => console.warn('subscribers.json sync failed:', e.message));
-
-        // 3) Fire a one-time welcome email (only for mailing-list signup, to avoid
-        //    sending welcomes to people who just RSVP'd to an event)
-        if (formName === 'mailing-list' || formName === 'wine-club-registration' || formName === 'wine-club-signup') {
-            sendWelcomeEmail({ email, firstName, segmentTag })
-                .catch((e) => console.warn('welcome email failed:', e.message));
+        let crmResult = null;
+        try {
+            crmResult = await appendToCrmFile({ email, firstName, lastName, phone, source: formName, segmentTag, marketingOptIn, submission: submissionData });
+        } catch (e) {
+            console.warn('subscribers.json sync failed:', e.message);
+            crmResult = { error: e.message };
         }
 
-        if (!r.ok) return respond(200, { ok: false, sg_status: r.status, sg_body: body });
-        return respond(200, { ok: true, segmentTag, formName, jobId: body.job_id, email, addedToLists: listIds });
+        // 3) Fire a one-time welcome email (only for mailing-list signup, to avoid
+        //    sending welcomes to people who just RSVP'd to an event).
+        // Same fix as above: must AWAIT or it gets killed when handler returns.
+        let welcomeStatus = 'skipped';
+        if (formName === 'mailing-list' || formName === 'wine-club-registration' || formName === 'wine-club-signup') {
+            try { await sendWelcomeEmail({ email, firstName, segmentTag }); welcomeStatus = 'sent'; }
+            catch (e) { console.warn('welcome email failed:', e.message); welcomeStatus = 'failed: ' + e.message; }
+        }
+
+        if (!r.ok) return respond(200, { ok: false, sg_status: r.status, sg_body: body, crm: crmResult });
+        return respond(200, { ok: true, segmentTag, formName, jobId: body.job_id, email, addedToLists: listIds, crm: crmResult, welcome: welcomeStatus });
     } catch (err) {
         return respond(200, { ok: false, error: err.message });
     }
@@ -211,7 +221,11 @@ async function appendToCrmFile({ email, firstName, lastName, phone, source, segm
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ json: list, sha: data.sha, message: `crm: ${exists ? 'update' : 'add'} ${email} (${source})` })
     });
-    if (!put.ok) throw new Error('save subscribers.json: ' + put.status);
+    if (!put.ok) {
+        const errText = await put.text().catch(() => '');
+        throw new Error(`save subscribers.json: ${put.status} ${errText.slice(0, 200)}`);
+    }
+    return { action: exists ? 'updated' : 'created', email };
 }
 
 // Strip noise from form submissions so we keep meaningful fields without bloat
