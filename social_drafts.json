@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-04-28T03:33:43.330Z",
+  "updatedAt": "2026-04-28T03:38:22.282Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -109,7 +109,7 @@
         "instagram"
       ],
       "status": "skeleton",
-      "scheduledFor": "2026-05-01T10:00:00-05:00",
+      "scheduledFor": "2026-05-03T10:00:00-05:00",
       "createdAt": "2026-04-28T03:33:43.330Z",
       "createdBy": "cadence-engine",
       "context": {
@@ -137,7 +137,9 @@
       "caption": "",
       "hashtags": [],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "bumpedFromDay": "2026-05-01",
+      "updatedAt": "2026-04-28T03:38:22.282Z"
     },
     {
       "id": "drf-moi2najm-ml6f8",
@@ -250,6 +252,1189 @@
           "footerText": "THE QUARRY  •  ROCK & VINE WINE CLUB"
         },
         "canvasNote": "Member Benefit Spotlight — recurring monthly post for the Rock & Vine Wine Club."
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
+    },
+    {
+      "id": "drf-moi2t9s7-r-d9eca",
+      "cadenceTag": "bands:2026-05-01:T-3",
+      "type": "band_announce",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-04-29T17:00:00-05:00",
+      "createdAt": "2026-04-28T03:38:22.279Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "band",
+        "sourceId": "2026-05-01",
+        "weekendOf": "2026-05-01",
+        "bands": [
+          {
+            "name": "Dave Caputo",
+            "date": "2026-05-02",
+            "timeSlot": "1 PM - 4 PM",
+            "type": "afternoon"
+          },
+          {
+            "name": "Boots and Bourbon (DJ)",
+            "date": "2026-05-02",
+            "timeSlot": "6 PM - 11 PM",
+            "type": "evening"
+          },
+          {
+            "name": "Mixology",
+            "date": "2026-05-03",
+            "timeSlot": "1 PM - 4 PM",
+            "type": "afternoon"
+          },
+          {
+            "name": "Scott and Liz",
+            "date": "2026-05-08",
+            "timeSlot": "7 PM - 10 PM",
+            "type": "evening"
+          }
+        ],
+        "arcStep": "T-3",
+        "arcLabel": "Weekend Lineup"
+      },
+      "graphicBrief": {
+        "type": "band_lineup_poster",
+        "templateRef": "Match the 3-card \"LIVE BANDS AT THE QUARRY\" poster you already use",
+        "neededBy": "2026-04-28",
+        "dimensions": "1080x1080 square",
+        "toneMode": "weekend-hype",
+        "spec": {
+          "backgroundIdea": "Quarry lake/patio at golden hour or evening string lights",
+          "title": "LIVE BANDS THIS WEEKEND",
+          "cards": [
+            {
+              "day": "Saturday, May 2",
+              "bandName": "Dave Caputo",
+              "time": "1 PM - 4 PM"
+            },
+            {
+              "day": "Saturday, May 2",
+              "bandName": "Boots and Bourbon (DJ)",
+              "time": "6 PM - 11 PM"
+            },
+            {
+              "day": "Sunday, May 3",
+              "bandName": "Mixology",
+              "time": "1 PM - 4 PM"
+            },
+            {
+              "day": "Friday, May 8",
+              "bandName": "Scott and Liz",
+              "time": "7 PM - 10 PM"
+            }
+          ],
+          "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
+        },
+        "canvasNote": "Weekend Lineup — covers 4 band(s). Post 3 days before first show."
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
+    },
+    {
+      "id": "drf-moi2t9s7-q-490cu",
+      "cadenceTag": "bands:2026-04-24:T-0",
+      "type": "band_announce",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-05-01T14:00:00-05:00",
+      "createdAt": "2026-04-28T03:38:22.279Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "band",
+        "sourceId": "2026-04-24",
+        "weekendOf": "2026-04-24",
+        "bands": [
+          {
+            "name": "Janet Martin",
+            "date": "2026-05-01",
+            "timeSlot": "7 PM - 10 PM",
+            "type": "evening"
+          }
+        ],
+        "arcStep": "T-0",
+        "arcLabel": "Tonight"
+      },
+      "graphicBrief": {
+        "type": "band_lineup_poster",
+        "templateRef": "Match the 3-card \"LIVE BANDS AT THE QUARRY\" poster you already use",
+        "neededBy": "2026-04-30",
+        "dimensions": "1080x1080 square",
+        "toneMode": "tonight",
+        "spec": {
+          "backgroundIdea": "Quarry lake/patio at golden hour or evening string lights",
+          "title": "TONIGHT — LIVE MUSIC",
+          "cards": [
+            {
+              "day": "Friday, May 1",
+              "bandName": "Janet Martin",
+              "time": "7 PM - 10 PM"
+            }
+          ],
+          "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
+        },
+        "canvasNote": "Tonight — covers 1 band(s). Post 0 days before first show."
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
+    },
+    {
+      "id": "drf-moi2t9s5-l-rp90i",
+      "cadenceTag": "event:event_1776285550837:T-7",
+      "type": "event_promo",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-05-15T18:00:00-05:00",
+      "createdAt": "2026-04-28T03:38:22.277Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "event",
+        "sourceId": "event_1776285550837",
+        "eventName": "70s • 80s • 90s MUSIC BINGO",
+        "eventDate": "2026-05-22",
+        "eventTime": "17:30",
+        "eventDescription": "Our Music Bingo nights have been SELLING OUT… so we’re turning it up 🔥\n\n🎶 70s • 80s • 90s MUSIC BINGO\n📅 May 22nd, 2026\n📍 The Quarry\n👥 Tables of 4\n🍻 Beer bucket OR bottle of wine per table\n🏆 Prizes all night long",
+        "pricePerSeat": 8000,
+        "totalCapacity": 34,
+        "registeredCount": 13,
+        "fillPct": 38,
+        "arcStep": "T-7",
+        "arcLabel": "One Week Away"
+      },
+      "graphicBrief": {
+        "type": "event_poster",
+        "templateRef": "Event poster — match Boots & Bourbon / Live Bands template style",
+        "neededBy": "2026-05-13",
+        "dimensions": "1080x1080 square (Instagram + Facebook safe)",
+        "toneMode": "standard",
+        "spec": {
+          "backgroundIdea": "Use a Quarry-relevant photographic background that matches the event theme (e.g. country/boots for Boot Scootin, bingo balls/80s for Music Bingo, vineyard for Chateau trip, etc.)",
+          "title": "70S • 80S • 90S MUSIC BINGO",
+          "subtitle": "Our Music Bingo nights have been SELLING OUT… so we’re turning it up 🔥\n\n🎶 70s • 80s • 90s MUSIC BI",
+          "date": "FRIDAY, MAY 22",
+          "time": "5:30 PM",
+          "callout": "$80 / SEAT",
+          "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
+          "qLogo": "top-center, gold"
+        },
+        "canvasNote": "One Week Away — Post 7 days before event. "
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
+    },
+    {
+      "id": "drf-moi2t9s5-k-otn3p",
+      "cadenceTag": "event:event_1776285550837:T-14",
+      "type": "event_promo",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-05-08T17:00:00-05:00",
+      "createdAt": "2026-04-28T03:38:22.277Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "event",
+        "sourceId": "event_1776285550837",
+        "eventName": "70s • 80s • 90s MUSIC BINGO",
+        "eventDate": "2026-05-22",
+        "eventTime": "17:30",
+        "eventDescription": "Our Music Bingo nights have been SELLING OUT… so we’re turning it up 🔥\n\n🎶 70s • 80s • 90s MUSIC BINGO\n📅 May 22nd, 2026\n📍 The Quarry\n👥 Tables of 4\n🍻 Beer bucket OR bottle of wine per table\n🏆 Prizes all night long",
+        "pricePerSeat": 8000,
+        "totalCapacity": 34,
+        "registeredCount": 13,
+        "fillPct": 38,
+        "arcStep": "T-14",
+        "arcLabel": "What to Expect"
+      },
+      "graphicBrief": {
+        "type": "event_poster",
+        "templateRef": "Event poster — match Boots & Bourbon / Live Bands template style",
+        "neededBy": "2026-05-06",
+        "dimensions": "1080x1080 square (Instagram + Facebook safe)",
+        "toneMode": "standard",
+        "spec": {
+          "backgroundIdea": "Use a Quarry-relevant photographic background that matches the event theme (e.g. country/boots for Boot Scootin, bingo balls/80s for Music Bingo, vineyard for Chateau trip, etc.)",
+          "title": "70S • 80S • 90S MUSIC BINGO",
+          "subtitle": "Our Music Bingo nights have been SELLING OUT… so we’re turning it up 🔥\n\n🎶 70s • 80s • 90s MUSIC BI",
+          "date": "FRIDAY, MAY 22",
+          "time": "5:30 PM",
+          "callout": "$80 / SEAT",
+          "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
+          "qLogo": "top-center, gold"
+        },
+        "canvasNote": "What to Expect — Post 14 days before event. "
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
+    },
+    {
+      "id": "drf-moi2t9s6-m-xosew",
+      "cadenceTag": "event:event_1776285550837:T-3",
+      "type": "event_promo",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-05-19T18:00:00-05:00",
+      "createdAt": "2026-04-28T03:38:22.278Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "event",
+        "sourceId": "event_1776285550837",
+        "eventName": "70s • 80s • 90s MUSIC BINGO",
+        "eventDate": "2026-05-22",
+        "eventTime": "17:30",
+        "eventDescription": "Our Music Bingo nights have been SELLING OUT… so we’re turning it up 🔥\n\n🎶 70s • 80s • 90s MUSIC BINGO\n📅 May 22nd, 2026\n📍 The Quarry\n👥 Tables of 4\n🍻 Beer bucket OR bottle of wine per table\n🏆 Prizes all night long",
+        "pricePerSeat": 8000,
+        "totalCapacity": 34,
+        "registeredCount": 13,
+        "fillPct": 38,
+        "arcStep": "T-3",
+        "arcLabel": "This Weekend"
+      },
+      "graphicBrief": {
+        "type": "event_poster",
+        "templateRef": "Event poster — match Boots & Bourbon / Live Bands template style",
+        "neededBy": "2026-05-17",
+        "dimensions": "1080x1080 square (Instagram + Facebook safe)",
+        "toneMode": "standard",
+        "spec": {
+          "backgroundIdea": "Use a Quarry-relevant photographic background that matches the event theme (e.g. country/boots for Boot Scootin, bingo balls/80s for Music Bingo, vineyard for Chateau trip, etc.)",
+          "title": "70S • 80S • 90S MUSIC BINGO",
+          "subtitle": "Our Music Bingo nights have been SELLING OUT… so we’re turning it up 🔥\n\n🎶 70s • 80s • 90s MUSIC BI",
+          "date": "FRIDAY, MAY 22",
+          "time": "5:30 PM",
+          "callout": "$80 / SEAT",
+          "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
+          "qLogo": "top-center, gold"
+        },
+        "canvasNote": "This Weekend — Post 3 days before event. "
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
+    },
+    {
+      "id": "drf-moi2t9s6-n-s8qa5",
+      "cadenceTag": "event:event_1776285550837:T-1",
+      "type": "event_promo",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-05-21T11:00:00-05:00",
+      "createdAt": "2026-04-28T03:38:22.278Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "event",
+        "sourceId": "event_1776285550837",
+        "eventName": "70s • 80s • 90s MUSIC BINGO",
+        "eventDate": "2026-05-22",
+        "eventTime": "17:30",
+        "eventDescription": "Our Music Bingo nights have been SELLING OUT… so we’re turning it up 🔥\n\n🎶 70s • 80s • 90s MUSIC BINGO\n📅 May 22nd, 2026\n📍 The Quarry\n👥 Tables of 4\n🍻 Beer bucket OR bottle of wine per table\n🏆 Prizes all night long",
+        "pricePerSeat": 8000,
+        "totalCapacity": 34,
+        "registeredCount": 13,
+        "fillPct": 38,
+        "arcStep": "T-1",
+        "arcLabel": "Tomorrow"
+      },
+      "graphicBrief": {
+        "type": "event_poster",
+        "templateRef": "Event poster — match Boots & Bourbon / Live Bands template style",
+        "neededBy": "2026-05-19",
+        "dimensions": "1080x1080 square (Instagram + Facebook safe)",
+        "toneMode": "standard",
+        "spec": {
+          "backgroundIdea": "Use a Quarry-relevant photographic background that matches the event theme (e.g. country/boots for Boot Scootin, bingo balls/80s for Music Bingo, vineyard for Chateau trip, etc.)",
+          "title": "70S • 80S • 90S MUSIC BINGO",
+          "subtitle": "Our Music Bingo nights have been SELLING OUT… so we’re turning it up 🔥\n\n🎶 70s • 80s • 90s MUSIC BI",
+          "date": "FRIDAY, MAY 22",
+          "time": "5:30 PM",
+          "callout": "$80 / SEAT",
+          "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
+          "qLogo": "top-center, gold"
+        },
+        "canvasNote": "Tomorrow — Post 1 days before event. "
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
+    },
+    {
+      "id": "drf-moi2t9s6-o-yfveb",
+      "cadenceTag": "event:event_1776285550837:T-0",
+      "type": "event_promo",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-05-22T09:00:00-05:00",
+      "createdAt": "2026-04-28T03:38:22.278Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "event",
+        "sourceId": "event_1776285550837",
+        "eventName": "70s • 80s • 90s MUSIC BINGO",
+        "eventDate": "2026-05-22",
+        "eventTime": "17:30",
+        "eventDescription": "Our Music Bingo nights have been SELLING OUT… so we’re turning it up 🔥\n\n🎶 70s • 80s • 90s MUSIC BINGO\n📅 May 22nd, 2026\n📍 The Quarry\n👥 Tables of 4\n🍻 Beer bucket OR bottle of wine per table\n🏆 Prizes all night long",
+        "pricePerSeat": 8000,
+        "totalCapacity": 34,
+        "registeredCount": 13,
+        "fillPct": 38,
+        "arcStep": "T-0",
+        "arcLabel": "Today / Tonight"
+      },
+      "graphicBrief": {
+        "type": "event_poster",
+        "templateRef": "Event poster — match Boots & Bourbon / Live Bands template style",
+        "neededBy": "2026-05-20",
+        "dimensions": "1080x1080 square (Instagram + Facebook safe)",
+        "toneMode": "standard",
+        "spec": {
+          "backgroundIdea": "Use a Quarry-relevant photographic background that matches the event theme (e.g. country/boots for Boot Scootin, bingo balls/80s for Music Bingo, vineyard for Chateau trip, etc.)",
+          "title": "70S • 80S • 90S MUSIC BINGO",
+          "subtitle": "Our Music Bingo nights have been SELLING OUT… so we’re turning it up 🔥\n\n🎶 70s • 80s • 90s MUSIC BI",
+          "date": "FRIDAY, MAY 22",
+          "time": "5:30 PM",
+          "callout": "$80 / SEAT",
+          "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
+          "qLogo": "top-center, gold"
+        },
+        "canvasNote": "Today / Tonight — Post 0 days before event. "
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
+    },
+    {
+      "id": "drf-moi2t9s7-p-33n4f",
+      "cadenceTag": "bands:2026-04-24:T-3",
+      "type": "band_announce",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-04-28T17:00:00-05:00",
+      "createdAt": "2026-04-28T03:38:22.279Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "band",
+        "sourceId": "2026-04-24",
+        "weekendOf": "2026-04-24",
+        "bands": [
+          {
+            "name": "Janet Martin",
+            "date": "2026-05-01",
+            "timeSlot": "7 PM - 10 PM",
+            "type": "evening"
+          }
+        ],
+        "arcStep": "T-3",
+        "arcLabel": "Weekend Lineup"
+      },
+      "graphicBrief": {
+        "type": "band_lineup_poster",
+        "templateRef": "Match the 3-card \"LIVE BANDS AT THE QUARRY\" poster you already use",
+        "neededBy": "2026-04-27",
+        "dimensions": "1080x1080 square",
+        "toneMode": "weekend-hype",
+        "spec": {
+          "backgroundIdea": "Quarry lake/patio at golden hour or evening string lights",
+          "title": "LIVE BANDS THIS WEEKEND",
+          "cards": [
+            {
+              "day": "Friday, May 1",
+              "bandName": "Janet Martin",
+              "time": "7 PM - 10 PM"
+            }
+          ],
+          "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
+        },
+        "canvasNote": "Weekend Lineup — covers 1 band(s). Post 3 days before first show."
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
+    },
+    {
+      "id": "drf-moi2t9s7-s-cmqfb",
+      "cadenceTag": "bands:2026-05-01:T-0",
+      "type": "band_announce",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-05-02T14:00:00-05:00",
+      "createdAt": "2026-04-28T03:38:22.279Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "band",
+        "sourceId": "2026-05-01",
+        "weekendOf": "2026-05-01",
+        "bands": [
+          {
+            "name": "Dave Caputo",
+            "date": "2026-05-02",
+            "timeSlot": "1 PM - 4 PM",
+            "type": "afternoon"
+          },
+          {
+            "name": "Boots and Bourbon (DJ)",
+            "date": "2026-05-02",
+            "timeSlot": "6 PM - 11 PM",
+            "type": "evening"
+          },
+          {
+            "name": "Mixology",
+            "date": "2026-05-03",
+            "timeSlot": "1 PM - 4 PM",
+            "type": "afternoon"
+          },
+          {
+            "name": "Scott and Liz",
+            "date": "2026-05-08",
+            "timeSlot": "7 PM - 10 PM",
+            "type": "evening"
+          }
+        ],
+        "arcStep": "T-0",
+        "arcLabel": "Tonight"
+      },
+      "graphicBrief": {
+        "type": "band_lineup_poster",
+        "templateRef": "Match the 3-card \"LIVE BANDS AT THE QUARRY\" poster you already use",
+        "neededBy": "2026-05-01",
+        "dimensions": "1080x1080 square",
+        "toneMode": "tonight",
+        "spec": {
+          "backgroundIdea": "Quarry lake/patio at golden hour or evening string lights",
+          "title": "TONIGHT — LIVE MUSIC",
+          "cards": [
+            {
+              "day": "Saturday, May 2",
+              "bandName": "Dave Caputo",
+              "time": "1 PM - 4 PM"
+            },
+            {
+              "day": "Saturday, May 2",
+              "bandName": "Boots and Bourbon (DJ)",
+              "time": "6 PM - 11 PM"
+            },
+            {
+              "day": "Sunday, May 3",
+              "bandName": "Mixology",
+              "time": "1 PM - 4 PM"
+            },
+            {
+              "day": "Friday, May 8",
+              "bandName": "Scott and Liz",
+              "time": "7 PM - 10 PM"
+            }
+          ],
+          "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
+        },
+        "canvasNote": "Tonight — covers 4 band(s). Post 0 days before first show."
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
+    },
+    {
+      "id": "drf-moi2t9rw-j-ht14u",
+      "cadenceTag": "event:event_1776285550837:T-21",
+      "type": "event_promo",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-05-02T11:00:00-05:00",
+      "createdAt": "2026-04-28T03:38:22.268Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "event",
+        "sourceId": "event_1776285550837",
+        "eventName": "70s • 80s • 90s MUSIC BINGO",
+        "eventDate": "2026-05-22",
+        "eventTime": "17:30",
+        "eventDescription": "Our Music Bingo nights have been SELLING OUT… so we’re turning it up 🔥\n\n🎶 70s • 80s • 90s MUSIC BINGO\n📅 May 22nd, 2026\n📍 The Quarry\n👥 Tables of 4\n🍻 Beer bucket OR bottle of wine per table\n🏆 Prizes all night long",
+        "pricePerSeat": 8000,
+        "totalCapacity": 34,
+        "registeredCount": 13,
+        "fillPct": 38,
+        "arcStep": "T-21",
+        "arcLabel": "Weekly Hype"
+      },
+      "graphicBrief": {
+        "type": "event_poster",
+        "templateRef": "Event poster — match Boots & Bourbon / Live Bands template style",
+        "neededBy": "2026-04-29",
+        "dimensions": "1080x1080 square (Instagram + Facebook safe)",
+        "toneMode": "standard",
+        "spec": {
+          "backgroundIdea": "Use a Quarry-relevant photographic background that matches the event theme (e.g. country/boots for Boot Scootin, bingo balls/80s for Music Bingo, vineyard for Chateau trip, etc.)",
+          "title": "70S • 80S • 90S MUSIC BINGO",
+          "subtitle": "Our Music Bingo nights have been SELLING OUT… so we’re turning it up 🔥\n\n🎶 70s • 80s • 90s MUSIC BI",
+          "date": "FRIDAY, MAY 22",
+          "time": "5:30 PM",
+          "callout": "$80 / SEAT",
+          "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
+          "qLogo": "top-center, gold"
+        },
+        "canvasNote": "Weekly Hype — Post 21 days before event. "
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null,
+      "bumpedFromDay": "2026-05-01"
+    },
+    {
+      "id": "drf-moi2t9s7-t-f0u28",
+      "cadenceTag": "bands:2026-05-08:T-3",
+      "type": "band_announce",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-05-06T17:00:00-05:00",
+      "createdAt": "2026-04-28T03:38:22.279Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "band",
+        "sourceId": "2026-05-08",
+        "weekendOf": "2026-05-08",
+        "bands": [
+          {
+            "name": "Scott Logan",
+            "date": "2026-05-09",
+            "timeSlot": "1 PM - 4 PM",
+            "type": "afternoon"
+          },
+          {
+            "name": "BP Duo",
+            "date": "2026-05-09",
+            "timeSlot": "7 PM - 10 PM",
+            "type": "evening"
+          },
+          {
+            "name": "Garden Party",
+            "date": "2026-05-10",
+            "timeSlot": "1 PM - 4 PM",
+            "type": "afternoon"
+          },
+          {
+            "name": "Kelli Renee",
+            "date": "2026-05-15",
+            "timeSlot": "7 PM - 10 PM",
+            "type": "evening"
+          }
+        ],
+        "arcStep": "T-3",
+        "arcLabel": "Weekend Lineup"
+      },
+      "graphicBrief": {
+        "type": "band_lineup_poster",
+        "templateRef": "Match the 3-card \"LIVE BANDS AT THE QUARRY\" poster you already use",
+        "neededBy": "2026-05-05",
+        "dimensions": "1080x1080 square",
+        "toneMode": "weekend-hype",
+        "spec": {
+          "backgroundIdea": "Quarry lake/patio at golden hour or evening string lights",
+          "title": "LIVE BANDS THIS WEEKEND",
+          "cards": [
+            {
+              "day": "Saturday, May 9",
+              "bandName": "Scott Logan",
+              "time": "1 PM - 4 PM"
+            },
+            {
+              "day": "Saturday, May 9",
+              "bandName": "BP Duo",
+              "time": "7 PM - 10 PM"
+            },
+            {
+              "day": "Sunday, May 10",
+              "bandName": "Garden Party",
+              "time": "1 PM - 4 PM"
+            },
+            {
+              "day": "Friday, May 15",
+              "bandName": "Kelli Renee",
+              "time": "7 PM - 10 PM"
+            }
+          ],
+          "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
+        },
+        "canvasNote": "Weekend Lineup — covers 4 band(s). Post 3 days before first show."
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
+    },
+    {
+      "id": "drf-moi2t9s8-u-miv9l",
+      "cadenceTag": "bands:2026-05-08:T-0",
+      "type": "band_announce",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-05-09T14:00:00-05:00",
+      "createdAt": "2026-04-28T03:38:22.280Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "band",
+        "sourceId": "2026-05-08",
+        "weekendOf": "2026-05-08",
+        "bands": [
+          {
+            "name": "Scott Logan",
+            "date": "2026-05-09",
+            "timeSlot": "1 PM - 4 PM",
+            "type": "afternoon"
+          },
+          {
+            "name": "BP Duo",
+            "date": "2026-05-09",
+            "timeSlot": "7 PM - 10 PM",
+            "type": "evening"
+          },
+          {
+            "name": "Garden Party",
+            "date": "2026-05-10",
+            "timeSlot": "1 PM - 4 PM",
+            "type": "afternoon"
+          },
+          {
+            "name": "Kelli Renee",
+            "date": "2026-05-15",
+            "timeSlot": "7 PM - 10 PM",
+            "type": "evening"
+          }
+        ],
+        "arcStep": "T-0",
+        "arcLabel": "Tonight"
+      },
+      "graphicBrief": {
+        "type": "band_lineup_poster",
+        "templateRef": "Match the 3-card \"LIVE BANDS AT THE QUARRY\" poster you already use",
+        "neededBy": "2026-05-08",
+        "dimensions": "1080x1080 square",
+        "toneMode": "tonight",
+        "spec": {
+          "backgroundIdea": "Quarry lake/patio at golden hour or evening string lights",
+          "title": "TONIGHT — LIVE MUSIC",
+          "cards": [
+            {
+              "day": "Saturday, May 9",
+              "bandName": "Scott Logan",
+              "time": "1 PM - 4 PM"
+            },
+            {
+              "day": "Saturday, May 9",
+              "bandName": "BP Duo",
+              "time": "7 PM - 10 PM"
+            },
+            {
+              "day": "Sunday, May 10",
+              "bandName": "Garden Party",
+              "time": "1 PM - 4 PM"
+            },
+            {
+              "day": "Friday, May 15",
+              "bandName": "Kelli Renee",
+              "time": "7 PM - 10 PM"
+            }
+          ],
+          "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
+        },
+        "canvasNote": "Tonight — covers 4 band(s). Post 0 days before first show."
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
+    },
+    {
+      "id": "drf-moi2t9s8-v-nd108",
+      "cadenceTag": "bands:2026-05-15:T-3",
+      "type": "band_announce",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-05-13T17:00:00-05:00",
+      "createdAt": "2026-04-28T03:38:22.280Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "band",
+        "sourceId": "2026-05-15",
+        "weekendOf": "2026-05-15",
+        "bands": [
+          {
+            "name": "Mixology",
+            "date": "2026-05-16",
+            "timeSlot": "1 PM - 4 PM",
+            "type": "afternoon"
+          },
+          {
+            "name": "James Jones",
+            "date": "2026-05-16",
+            "timeSlot": "7 PM - 10 PM",
+            "type": "evening"
+          },
+          {
+            "name": "Double D",
+            "date": "2026-05-17",
+            "timeSlot": "1 PM - 4 PM",
+            "type": "afternoon"
+          },
+          {
+            "name": "DJ Earl at The Quarry",
+            "date": "2026-05-22",
+            "timeSlot": "7 PM - 10 PM",
+            "type": "evening"
+          }
+        ],
+        "arcStep": "T-3",
+        "arcLabel": "Weekend Lineup"
+      },
+      "graphicBrief": {
+        "type": "band_lineup_poster",
+        "templateRef": "Match the 3-card \"LIVE BANDS AT THE QUARRY\" poster you already use",
+        "neededBy": "2026-05-12",
+        "dimensions": "1080x1080 square",
+        "toneMode": "weekend-hype",
+        "spec": {
+          "backgroundIdea": "Quarry lake/patio at golden hour or evening string lights",
+          "title": "LIVE BANDS THIS WEEKEND",
+          "cards": [
+            {
+              "day": "Saturday, May 16",
+              "bandName": "Mixology",
+              "time": "1 PM - 4 PM"
+            },
+            {
+              "day": "Saturday, May 16",
+              "bandName": "James Jones",
+              "time": "7 PM - 10 PM"
+            },
+            {
+              "day": "Sunday, May 17",
+              "bandName": "Double D",
+              "time": "1 PM - 4 PM"
+            },
+            {
+              "day": "Friday, May 22",
+              "bandName": "DJ Earl at The Quarry",
+              "time": "7 PM - 10 PM"
+            }
+          ],
+          "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
+        },
+        "canvasNote": "Weekend Lineup — covers 4 band(s). Post 3 days before first show."
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
+    },
+    {
+      "id": "drf-moi2t9s8-w-bpjh8",
+      "cadenceTag": "bands:2026-05-15:T-0",
+      "type": "band_announce",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-05-16T14:00:00-05:00",
+      "createdAt": "2026-04-28T03:38:22.280Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "band",
+        "sourceId": "2026-05-15",
+        "weekendOf": "2026-05-15",
+        "bands": [
+          {
+            "name": "Mixology",
+            "date": "2026-05-16",
+            "timeSlot": "1 PM - 4 PM",
+            "type": "afternoon"
+          },
+          {
+            "name": "James Jones",
+            "date": "2026-05-16",
+            "timeSlot": "7 PM - 10 PM",
+            "type": "evening"
+          },
+          {
+            "name": "Double D",
+            "date": "2026-05-17",
+            "timeSlot": "1 PM - 4 PM",
+            "type": "afternoon"
+          },
+          {
+            "name": "DJ Earl at The Quarry",
+            "date": "2026-05-22",
+            "timeSlot": "7 PM - 10 PM",
+            "type": "evening"
+          }
+        ],
+        "arcStep": "T-0",
+        "arcLabel": "Tonight"
+      },
+      "graphicBrief": {
+        "type": "band_lineup_poster",
+        "templateRef": "Match the 3-card \"LIVE BANDS AT THE QUARRY\" poster you already use",
+        "neededBy": "2026-05-15",
+        "dimensions": "1080x1080 square",
+        "toneMode": "tonight",
+        "spec": {
+          "backgroundIdea": "Quarry lake/patio at golden hour or evening string lights",
+          "title": "TONIGHT — LIVE MUSIC",
+          "cards": [
+            {
+              "day": "Saturday, May 16",
+              "bandName": "Mixology",
+              "time": "1 PM - 4 PM"
+            },
+            {
+              "day": "Saturday, May 16",
+              "bandName": "James Jones",
+              "time": "7 PM - 10 PM"
+            },
+            {
+              "day": "Sunday, May 17",
+              "bandName": "Double D",
+              "time": "1 PM - 4 PM"
+            },
+            {
+              "day": "Friday, May 22",
+              "bandName": "DJ Earl at The Quarry",
+              "time": "7 PM - 10 PM"
+            }
+          ],
+          "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
+        },
+        "canvasNote": "Tonight — covers 4 band(s). Post 0 days before first show."
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
+    },
+    {
+      "id": "drf-moi2t9s9-x-47vis",
+      "cadenceTag": "bands:2026-05-22:T-3",
+      "type": "band_announce",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-05-20T17:00:00-05:00",
+      "createdAt": "2026-04-28T03:38:22.281Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "band",
+        "sourceId": "2026-05-22",
+        "weekendOf": "2026-05-22",
+        "bands": [
+          {
+            "name": "TBD",
+            "date": "2026-05-23",
+            "timeSlot": "1 PM - 4 PM",
+            "type": "afternoon"
+          },
+          {
+            "name": "70s/80s/90s Music Bingo (DJ)",
+            "date": "2026-05-23",
+            "timeSlot": "6 PM - 10 PM",
+            "type": "evening"
+          },
+          {
+            "name": "Ed Callison",
+            "date": "2026-05-24",
+            "timeSlot": "1 PM - 4 PM",
+            "type": "afternoon"
+          }
+        ],
+        "arcStep": "T-3",
+        "arcLabel": "Weekend Lineup"
+      },
+      "graphicBrief": {
+        "type": "band_lineup_poster",
+        "templateRef": "Match the 3-card \"LIVE BANDS AT THE QUARRY\" poster you already use",
+        "neededBy": "2026-05-19",
+        "dimensions": "1080x1080 square",
+        "toneMode": "weekend-hype",
+        "spec": {
+          "backgroundIdea": "Quarry lake/patio at golden hour or evening string lights",
+          "title": "LIVE BANDS THIS WEEKEND",
+          "cards": [
+            {
+              "day": "Saturday, May 23",
+              "bandName": "TBD",
+              "time": "1 PM - 4 PM"
+            },
+            {
+              "day": "Saturday, May 23",
+              "bandName": "70s/80s/90s Music Bingo (DJ)",
+              "time": "6 PM - 10 PM"
+            },
+            {
+              "day": "Sunday, May 24",
+              "bandName": "Ed Callison",
+              "time": "1 PM - 4 PM"
+            }
+          ],
+          "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
+        },
+        "canvasNote": "Weekend Lineup — covers 3 band(s). Post 3 days before first show."
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
+    },
+    {
+      "id": "drf-moi2t9s9-y-d895r",
+      "cadenceTag": "bands:2026-05-22:T-0",
+      "type": "band_announce",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-05-23T14:00:00-05:00",
+      "createdAt": "2026-04-28T03:38:22.281Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "band",
+        "sourceId": "2026-05-22",
+        "weekendOf": "2026-05-22",
+        "bands": [
+          {
+            "name": "TBD",
+            "date": "2026-05-23",
+            "timeSlot": "1 PM - 4 PM",
+            "type": "afternoon"
+          },
+          {
+            "name": "70s/80s/90s Music Bingo (DJ)",
+            "date": "2026-05-23",
+            "timeSlot": "6 PM - 10 PM",
+            "type": "evening"
+          },
+          {
+            "name": "Ed Callison",
+            "date": "2026-05-24",
+            "timeSlot": "1 PM - 4 PM",
+            "type": "afternoon"
+          }
+        ],
+        "arcStep": "T-0",
+        "arcLabel": "Tonight"
+      },
+      "graphicBrief": {
+        "type": "band_lineup_poster",
+        "templateRef": "Match the 3-card \"LIVE BANDS AT THE QUARRY\" poster you already use",
+        "neededBy": "2026-05-22",
+        "dimensions": "1080x1080 square",
+        "toneMode": "tonight",
+        "spec": {
+          "backgroundIdea": "Quarry lake/patio at golden hour or evening string lights",
+          "title": "TONIGHT — LIVE MUSIC",
+          "cards": [
+            {
+              "day": "Saturday, May 23",
+              "bandName": "TBD",
+              "time": "1 PM - 4 PM"
+            },
+            {
+              "day": "Saturday, May 23",
+              "bandName": "70s/80s/90s Music Bingo (DJ)",
+              "time": "6 PM - 10 PM"
+            },
+            {
+              "day": "Sunday, May 24",
+              "bandName": "Ed Callison",
+              "time": "1 PM - 4 PM"
+            }
+          ],
+          "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
+        },
+        "canvasNote": "Tonight — covers 3 band(s). Post 0 days before first show."
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
+    },
+    {
+      "id": "drf-moi2t9s9-z-0vs54",
+      "cadenceTag": "bands:2026-05-29:T-3",
+      "type": "band_announce",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-05-27T17:00:00-05:00",
+      "createdAt": "2026-04-28T03:38:22.281Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "band",
+        "sourceId": "2026-05-29",
+        "weekendOf": "2026-05-29",
+        "bands": [
+          {
+            "name": "Mark Snell",
+            "date": "2026-05-30",
+            "timeSlot": "1 PM - 4 PM",
+            "type": "afternoon"
+          },
+          {
+            "name": "Scott and Liz",
+            "date": "2026-05-31",
+            "timeSlot": "1 PM - 4 PM",
+            "type": "afternoon"
+          }
+        ],
+        "arcStep": "T-3",
+        "arcLabel": "Weekend Lineup"
+      },
+      "graphicBrief": {
+        "type": "band_lineup_poster",
+        "templateRef": "Match the 3-card \"LIVE BANDS AT THE QUARRY\" poster you already use",
+        "neededBy": "2026-05-26",
+        "dimensions": "1080x1080 square",
+        "toneMode": "weekend-hype",
+        "spec": {
+          "backgroundIdea": "Quarry lake/patio at golden hour or evening string lights",
+          "title": "LIVE BANDS THIS WEEKEND",
+          "cards": [
+            {
+              "day": "Saturday, May 30",
+              "bandName": "Mark Snell",
+              "time": "1 PM - 4 PM"
+            },
+            {
+              "day": "Sunday, May 31",
+              "bandName": "Scott and Liz",
+              "time": "1 PM - 4 PM"
+            }
+          ],
+          "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
+        },
+        "canvasNote": "Weekend Lineup — covers 2 band(s). Post 3 days before first show."
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
+    },
+    {
+      "id": "drf-moi2t9s9-10-b6xwl",
+      "cadenceTag": "bands:2026-05-29:T-0",
+      "type": "band_announce",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-05-30T14:00:00-05:00",
+      "createdAt": "2026-04-28T03:38:22.281Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "band",
+        "sourceId": "2026-05-29",
+        "weekendOf": "2026-05-29",
+        "bands": [
+          {
+            "name": "Mark Snell",
+            "date": "2026-05-30",
+            "timeSlot": "1 PM - 4 PM",
+            "type": "afternoon"
+          },
+          {
+            "name": "Scott and Liz",
+            "date": "2026-05-31",
+            "timeSlot": "1 PM - 4 PM",
+            "type": "afternoon"
+          }
+        ],
+        "arcStep": "T-0",
+        "arcLabel": "Tonight"
+      },
+      "graphicBrief": {
+        "type": "band_lineup_poster",
+        "templateRef": "Match the 3-card \"LIVE BANDS AT THE QUARRY\" poster you already use",
+        "neededBy": "2026-05-29",
+        "dimensions": "1080x1080 square",
+        "toneMode": "tonight",
+        "spec": {
+          "backgroundIdea": "Quarry lake/patio at golden hour or evening string lights",
+          "title": "TONIGHT — LIVE MUSIC",
+          "cards": [
+            {
+              "day": "Saturday, May 30",
+              "bandName": "Mark Snell",
+              "time": "1 PM - 4 PM"
+            },
+            {
+              "day": "Sunday, May 31",
+              "bandName": "Scott and Liz",
+              "time": "1 PM - 4 PM"
+            }
+          ],
+          "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
+        },
+        "canvasNote": "Tonight — covers 2 band(s). Post 0 days before first show."
       },
       "caption": "",
       "hashtags": [],
