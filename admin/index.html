@@ -2538,7 +2538,32 @@
         .mkt-modal-pane input.subject-edit, .mkt-modal-pane textarea.body-edit, .mkt-modal-pane textarea.mkt-redo-input { width: 100% !important; padding: 0.6rem 0.75rem !important; border: 1px solid var(--border-subtle) !important; border-radius: var(--radius-sm) !important; background: var(--bg-card) !important; color: var(--text-primary) !important; font-family: inherit !important; font-size: 0.9rem !important; resize: vertical !important; display: block !important; }
         .mkt-modal-pane textarea.body-edit { min-height: 220px !important; font-family: 'SFMono-Regular', Consolas, monospace !important; font-size: 0.78rem !important; }
         .mkt-modal-pane textarea.mkt-redo-input { min-height: 90px !important; }
-        .mkt-preview-frame { border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); background: #fff; overflow: auto; height: 460px; }
+        .mkt-preview-frame { border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); background: #fff; overflow: auto; width: 100%; min-height: 700px; }
+        /* Rich text editor (replaces raw HTML textarea for staff) */
+        .mkt-rich-toolbar {
+            display: flex; gap: 0.2rem; flex-wrap: wrap;
+            padding: 0.4rem; background: var(--bg-elevated);
+            border: 1px solid var(--border-subtle); border-bottom: none;
+            border-radius: 6px 6px 0 0;
+        }
+        .mkt-rich-toolbar button {
+            background: transparent; border: 1px solid transparent; color: var(--text-primary);
+            padding: 0.3rem 0.55rem; border-radius: 4px; cursor: pointer; font-size: 0.85rem;
+            min-width: 28px; transition: background 0.12s;
+        }
+        .mkt-rich-toolbar button:hover { background: rgba(154,123,42,0.12); border-color: var(--gold); }
+        .mkt-rich-sep { width: 1px; background: var(--border-subtle); margin: 0.2rem 0.3rem; }
+        .mkt-rich-editor {
+            min-height: 280px; max-height: 500px; overflow-y: auto;
+            background: #fff; color: #222; padding: 1rem 1.25rem;
+            border: 1px solid var(--border-subtle); border-radius: 0 0 6px 6px;
+            font-family: Georgia, serif; font-size: 0.95rem; line-height: 1.65;
+        }
+        .mkt-rich-editor:focus { outline: 2px solid var(--gold); outline-offset: -2px; }
+        .mkt-rich-editor img { max-width: 100%; height: auto; }
+        .mkt-rich-editor h2 { font-family: 'Playfair Display', Georgia, serif; font-size: 1.3rem; margin: 0.8rem 0 0.4rem; color: #1A0E08; }
+        .mkt-rich-editor p  { margin: 0 0 0.8rem; }
+        .mkt-rich-editor a  { color: #9a7b2a; text-decoration: underline; }
         .mkt-mode-tabs { display: flex; gap: 0.25rem; margin-bottom: 0.75rem; background: var(--bg-elevated); padding: 0.25rem; border-radius: 6px; }
         .mkt-mode-tab { flex: 1; text-align: center; padding: 0.5rem 0.75rem; cursor: pointer; font-size: 0.8rem; color: var(--text-muted); border-radius: 4px; transition: all 0.15s; user-select: none; font-weight: 500; }
         .mkt-mode-tab:hover { background: rgba(154,123,42,0.08); color: var(--text-primary); }
@@ -4268,12 +4293,33 @@
                         <div id="mktDraftRationale" style="font-size:0.82rem;color:var(--text-secondary);line-height:1.5;"></div>
                     </div>
                     <div class="mkt-mode-pane" data-mode-pane="edit" style="display:none;">
-                        <h5>Subject</h5>
+                        <h5>Subject Line</h5>
                         <input type="text" class="subject-edit" id="mktDraftEditSubject" maxlength="120">
                         <div style="font-size:0.7rem;color:var(--text-muted);margin:0.3rem 0 0.85rem;">40-60 characters performs best on mobile previews.</div>
-                        <h5>Body HTML (inner — wrapper + footer added automatically)</h5>
-                        <textarea class="body-edit" id="mktDraftEditBody"></textarea>
-                        <div style="margin-top:0.75rem;text-align:right;"><button class="btn-edit-save" id="mktDraftEditSaveBtn">Save Edits</button></div>
+                        <h5>Email Body</h5>
+                        <p style="font-size:0.78rem;color:var(--text-muted);margin:0 0 0.5rem;">Edit the email visually below — type, delete, format. The brand header &amp; footer are added automatically when sent. For bigger changes, use the "Rewrite with AI" tab instead.</p>
+                        <div class="mkt-rich-toolbar">
+                            <button type="button" data-cmd="bold" title="Bold (Ctrl+B)"><strong>B</strong></button>
+                            <button type="button" data-cmd="italic" title="Italic (Ctrl+I)"><em>I</em></button>
+                            <button type="button" data-cmd="underline" title="Underline"><u>U</u></button>
+                            <span class="mkt-rich-sep"></span>
+                            <button type="button" data-cmd="formatBlock" data-arg="h2" title="Heading">H</button>
+                            <button type="button" data-cmd="formatBlock" data-arg="p" title="Paragraph">¶</button>
+                            <span class="mkt-rich-sep"></span>
+                            <button type="button" data-cmd="insertUnorderedList" title="Bulleted list">•</button>
+                            <button type="button" data-cmd="insertOrderedList" title="Numbered list">1.</button>
+                            <span class="mkt-rich-sep"></span>
+                            <button type="button" data-cmd="createLink" title="Add link">🔗</button>
+                            <button type="button" data-cmd="unlink" title="Remove link">⊘</button>
+                            <span class="mkt-rich-sep"></span>
+                            <button type="button" data-cmd="removeFormat" title="Clear formatting">⌫</button>
+                        </div>
+                        <div id="mktDraftEditBodyVisual" class="mkt-rich-editor" contenteditable="true"></div>
+                        <textarea class="body-edit" id="mktDraftEditBody" style="display:none;"></textarea>
+                        <div style="margin-top:0.5rem;display:flex;justify-content:space-between;align-items:center;">
+                            <span style="font-size:0.72rem;color:var(--text-muted);">Tip: paste images by dragging a file into the editor or copy/paste from elsewhere.</span>
+                            <button class="btn-edit-save" id="mktDraftEditSaveBtn">💾 Save Edits</button>
+                        </div>
                     </div>
                     <div class="mkt-mode-pane" data-mode-pane="redo" style="display:none;">
                         <h5>Tell the AI what to change</h5>
@@ -10373,6 +10419,20 @@ function hashCode(str) {
                 $('mktDraftRationale').textContent = d.context && d.context.event ? `Event: ${d.context.event.title || d.context.eventId} · ${d.context.event.date || ''}` : (d.context ? JSON.stringify(d.context).slice(0, 280) : '—');
                 $('mktDraftEditSubject').value = d.subject || '';
                 $('mktDraftEditBody').value = d.innerHtml || '';
+                // Sync to visual editor (rich text) — staff edits this instead of raw HTML
+                const visual = $('mktDraftEditBodyVisual');
+                if (visual) visual.innerHTML = d.innerHtml || '';
+                // Auto-grow preview iframe to fit the full email body so flyers don't get clipped
+                setTimeout(() => {
+                    const iframe = $('mktDraftPreviewFrame');
+                    if (!iframe || !iframe.contentDocument) return;
+                    try {
+                        const body = iframe.contentDocument.body;
+                        if (!body) return;
+                        const h = Math.max(body.scrollHeight, body.offsetHeight, 700);
+                        iframe.style.height = (h + 30) + 'px';
+                    } catch (_) { /* same-origin guard */ }
+                }, 250);
                 $('mktDraftRedoCount').textContent = d.regenerationCount || 0;
                 $('mktDraftRedoInstructions').value = '';
                 const iframe = $('mktDraftPreviewFrame');
@@ -10457,7 +10517,29 @@ function hashCode(str) {
                 document.querySelectorAll('.mkt-mode-tab').forEach((t) => t.addEventListener('click', () => setMode(t.dataset.mode)));
                 $('mktDraftApproveBtn')?.addEventListener('click', () => action('approve', { approvedBy: 'admin' }));
                 $('mktDraftRejectBtn')?.addEventListener('click', () => { const reason = prompt('Optional reason for rejecting (helps the AI learn):') || ''; action('reject', { reason }); });
-                $('mktDraftEditSaveBtn')?.addEventListener('click', () => action('edit', { subject: $('mktDraftEditSubject').value, innerHtml: $('mktDraftEditBody').value }));
+                $('mktDraftEditSaveBtn')?.addEventListener('click', () => {
+                    const visual = $('mktDraftEditBodyVisual');
+                    const innerHtml = visual ? visual.innerHTML : $('mktDraftEditBody').value;
+                    action('edit', { subject: $('mktDraftEditSubject').value, innerHtml });
+                });
+                // Wire rich-text toolbar
+                document.querySelectorAll('.mkt-rich-toolbar [data-cmd]').forEach((btn) => {
+                    btn.addEventListener('mousedown', (e) => e.preventDefault());  // keep editor focus
+                    btn.addEventListener('click', () => {
+                        const cmd = btn.dataset.cmd; let arg = btn.dataset.arg || null;
+                        if (cmd === 'createLink') {
+                            arg = prompt('Link URL (start with https://):', 'https://');
+                            if (!arg) return;
+                        }
+                        try { document.execCommand(cmd, false, arg); } catch (_) {}
+                        $('mktDraftEditBodyVisual')?.focus();
+                    });
+                });
+                // Keep hidden textarea in sync (legacy fallback if anything still reads it)
+                $('mktDraftEditBodyVisual')?.addEventListener('input', () => {
+                    const visual = $('mktDraftEditBodyVisual');
+                    if (visual) $('mktDraftEditBody').value = visual.innerHTML;
+                });
                 $('mktDraftRedoBtn')?.addEventListener('click', () => { const inst = $('mktDraftRedoInstructions').value.trim(); if (!inst) return toast('Tell the AI what to change first.'); action('redo', { instructions: inst }); });
                 $('mktDraftRescheduleBtn')?.addEventListener('click', reschedulePrompt);
                 $('mktDraftSendNowBtn')?.addEventListener('click', sendNow);
