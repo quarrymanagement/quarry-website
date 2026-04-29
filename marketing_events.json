@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-04-29T14:47:27.583Z",
+  "updatedAt": "2026-04-29T14:47:36.938Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -814,6 +814,17 @@
       "sgEventId": "ZGVsaXZlcmVkLTAtMTA2MDM3NzY1LXJ3VlR0N3JBU0RPWWl4YnVCdmtmQmctMA",
       "userAgent": null,
       "category": "quarry-marketing:test"
+    },
+    {
+      "ts": "2026-04-29T14:47:27.000Z",
+      "type": "delivered",
+      "draftId": "d4d01b90-a7a2-4061-b5d7-dd442f9acf7b",
+      "ruleId": null,
+      "email": "lena31014@icloud.com",
+      "url": null,
+      "sgEventId": "ZGVsaXZlcmVkLTAtMTA2MDM3NzY1LVZvdEJkMVJyUmI2a0RsQzJUb1BWaGctMA",
+      "userAgent": null,
+      "category": "quarry-marketing:test"
     }
   ],
   "aggregates": {
@@ -842,7 +853,7 @@
       }
     },
     "d4d01b90-a7a2-4061-b5d7-dd442f9acf7b": {
-      "delivered": 3,
+      "delivered": 4,
       "open": 0,
       "uniqueOpen": 0,
       "click": 0,
@@ -851,7 +862,7 @@
       "unsubscribe": 0,
       "spamreport": 0,
       "dropped": 0,
-      "lastEventAt": "2026-04-29T14:47:10.000Z",
+      "lastEventAt": "2026-04-29T14:47:27.000Z",
       "openersByEmail": {},
       "clickersByEmail": {},
       "urlsClicked": {}
