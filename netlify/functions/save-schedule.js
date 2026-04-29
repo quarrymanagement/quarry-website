@@ -58,20 +58,37 @@ exports.handler = async (event) => {
 
   try {
     const scheduleData = JSON.parse(event.body);
-    const content = JSON.stringify(scheduleData, null, 2);
-    const encoded = Buffer.from(content, 'utf-8').toString('base64');
 
     const repo = 'quarrymanagement/quarry-website';
     const filePath = 'schedule.json';
 
-    // Get current file SHA
+    // Get current file (sha + content) so we can MERGE rather than overwrite.
+    // This is critical: the old admin client only sent `schedules`, which was
+    // overwriting the entire file and wiping employees + timeOffRequests every
+    // save. The fix: pull existing data, merge in only the fields the client
+    // actually sent, push it back.
     const shaRes = await githubRequest('GET', `/repos/${repo}/contents/${filePath}`, token);
     let sha = '';
+    let existing = { employees: [], schedules: {}, timeOffRequests: [] };
     if (shaRes.statusCode === 200 && shaRes.data.sha) {
       sha = shaRes.data.sha;
+      try {
+        const decoded = Buffer.from(shaRes.data.content, 'base64').toString('utf-8');
+        existing = JSON.parse(decoded);
+      } catch (_) { /* fall through with defaults */ }
     }
 
-    // Push update
+    // Merge: prefer client-provided fields, fall back to existing for anything
+    // the client didn't send. Prevents data loss from buggy or partial saves.
+    const merged = {
+      employees:       Array.isArray(scheduleData.employees)       ? scheduleData.employees       : (existing.employees || []),
+      schedules:       (scheduleData.schedules && typeof scheduleData.schedules === 'object') ? scheduleData.schedules : (existing.schedules || {}),
+      timeOffRequests: Array.isArray(scheduleData.timeOffRequests) ? scheduleData.timeOffRequests : (existing.timeOffRequests || [])
+    };
+
+    const content = JSON.stringify(merged, null, 2);
+    const encoded = Buffer.from(content, 'utf-8').toString('base64');
+
     const putData = {
       message: 'Update schedule from admin panel',
       content: encoded,
