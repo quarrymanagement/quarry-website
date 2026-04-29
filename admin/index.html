@@ -7163,10 +7163,17 @@
 
         async function saveScheduleData() {
             try {
+                // CRITICAL: must include employees + timeOffRequests in every save.
+                // Otherwise the backend overwrites schedule.json with just `schedules`,
+                // wiping the employees array (this was the April-21 data-loss bug).
                 const response = await fetch('/.netlify/functions/save-schedule', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ schedules: app.editingScheduleData })
+                    body: JSON.stringify({
+                        employees: app.employees || [],
+                        schedules: app.editingScheduleData,
+                        timeOffRequests: app.timeOffRequests || []
+                    })
                 });
                 if (response.ok) {
                     app.schedules = JSON.parse(JSON.stringify(app.editingScheduleData));
