@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-04-28T20:13:54.965Z",
+  "updatedAt": "2026-04-29T14:47:21.318Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -781,6 +781,17 @@
       "sgEventId": "KBLDqoeaT2qHlm2IA40X4A",
       "userAgent": "Mozilla/5.0",
       "category": null
+    },
+    {
+      "ts": "2026-04-29T14:47:13.000Z",
+      "type": "delivered",
+      "draftId": "d4d01b90-a7a2-4061-b5d7-dd442f9acf7b",
+      "ruleId": null,
+      "email": "management@thequarrystl.com",
+      "url": null,
+      "sgEventId": "ZGVsaXZlcmVkLTAtMTA2MDM3NzY1LXRTbDdtTUc0UzZtOHBFU3ZYYlY5NmctMA",
+      "userAgent": null,
+      "category": "quarry-marketing:test"
     }
   ],
   "aggregates": {
@@ -807,6 +818,21 @@
         "https://www.thequarrystl.com/quarry-drinks.html?utm_source=email&utm_medium=marketing&utm_campaign=header-tagline&utm_content=wine": 1,
         "https://www.thequarrystl.com/quarry-private-events.html?utm_source=email&utm_medium=marketing&utm_campaign=footer-cta": 1
       }
+    },
+    "d4d01b90-a7a2-4061-b5d7-dd442f9acf7b": {
+      "delivered": 1,
+      "open": 0,
+      "uniqueOpen": 0,
+      "click": 0,
+      "uniqueClick": 0,
+      "bounce": 0,
+      "unsubscribe": 0,
+      "spamreport": 0,
+      "dropped": 0,
+      "lastEventAt": "2026-04-29T14:47:13.000Z",
+      "openersByEmail": {},
+      "clickersByEmail": {},
+      "urlsClicked": {}
     }
   }
 }
