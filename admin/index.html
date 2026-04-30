@@ -5314,8 +5314,9 @@
             document.getElementById('totalRegistrations').textContent = totalRegs;
             document.getElementById('totalRevenue').textContent = '$' + revenue.toLocaleString('en-US', { minimumFractionDigits: 2 });
 
-            // Upcoming bands
-            const today = new Date().toISOString().split('T')[0];
+            // Upcoming bands — use LOCAL date so we don't mark today's bands
+            // as "past" once we tip into UTC tomorrow (anything after 6 PM CT).
+            const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD in local time
             const upcoming = app.bands.filter(b => b.date >= today).length;
             document.getElementById('upcomingBands').textContent = upcoming;
 
@@ -5398,7 +5399,10 @@
         }
 
         function renderDashboardToday() {
-            const todayKey = new Date().toISOString().slice(0, 10);
+            // LOCAL date in YYYY-MM-DD form. toISOString() returns the UTC date,
+            // which after 6 PM CT silently rolls forward to tomorrow and makes
+            // tonight's events disappear from "Today's Lineup".
+            const todayKey = new Date().toLocaleDateString('en-CA');
             const bandsEl = document.getElementById('dashTodayBandsBody');
             const eventsEl = document.getElementById('dashTodayEventsBody');
 
@@ -5412,7 +5416,12 @@
                 const todayEvents = (app.events || []).filter((e) => e.date === todayKey);
                 if (todayEvents.length === 0) eventsEl.innerHTML = '<span class="dash-today-empty">No ticketed events today</span>';
                 else eventsEl.innerHTML = todayEvents.map((e) => {
-                    const time = e.time ? new Date('2000-01-01T' + e.time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '';
+                    // Pure-string time parse — `new Date('2000-01-01T16:00')` would
+                    // attach local TZ and back through `toLocaleTimeString` is fine
+                    // in most browsers, but we already have a no-TZ helper, so use it.
+                    const m = e.time ? /^(\d{1,2}):(\d{2})/.exec(e.time) : null;
+                    let time = '';
+                    if (m) { let h = parseInt(m[1],10); const min=m[2]; const ap = h>=12?'PM':'AM'; h = h%12 || 12; time = `${h}:${min} ${ap}`; }
                     const filled = e.totalCapacity ? `${e.registeredCount || 0}/${e.totalCapacity} sold` : '';
                     return `<div class="dt-row"><span class="dt-name">${e.name}</span><span class="dt-time">${time}${filled ? ' · ' + filled : ''}</span></div>`;
                 }).join('');
@@ -5478,6 +5487,30 @@
             return app.registrations[eventId] || [];
         }
 
+        // Format a YYYY-MM-DD event date for human display.
+        // Anchors to T12:00:00 LOCAL so the date never rolls back a day from
+        // UTC parsing — `new Date("2026-04-23")` would parse as midnight UTC,
+        // which is 7 PM the day BEFORE in Central Time.
+        function formatEventDate(dateStr) {
+            if (!dateStr) return '';
+            if (/[A-Za-z,]/.test(dateStr)) return dateStr; // already humanized
+            const d = new Date(dateStr + 'T12:00:00');
+            if (isNaN(d.getTime())) return dateStr;
+            return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+        }
+        // Format an HH:MM time string into "h:mm AM/PM" — pure string parse,
+        // no Date object so timezone never gets applied.
+        function formatEventTime(timeStr) {
+            if (!timeStr) return '';
+            const m = /^(\d{1,2}):(\d{2})/.exec(timeStr);
+            if (!m) return timeStr;
+            let h = parseInt(m[1], 10);
+            const min = m[2];
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            h = h % 12; if (h === 0) h = 12;
+            return `${h}:${min} ${ampm}`;
+        }
+
         function updateEvents() {
             const grid = document.getElementById('eventsGrid');
 
@@ -5497,7 +5530,7 @@
                     </div>
                     <div class="event-card-content">
                         <div class="event-card-title">${event.name}</div>
-                        <div class="event-card-date">${event.date} at ${event.time}</div>
+                        <div class="event-card-date">${formatEventDate(event.date)}${event.time ? ' at ' + formatEventTime(event.time) : ''}</div>
                         <div class="event-card-meta">
                             <span class="event-status status-${(event.status || 'available').toLowerCase().replace(/\s+/g, '-')}">${event.status || 'Active'}</span>
                         </div>
@@ -5528,7 +5561,10 @@
 
         function formatDate(dateStr) {
             if (!dateStr) return '—';
-            const date = new Date(dateStr);
+            // Anchor bare YYYY-MM-DD strings to noon LOCAL time so they don't
+            // roll back a day from UTC parsing in negative-UTC zones.
+            const isBareDate = /^\d{4}-\d{2}-\d{2}$/.test(dateStr);
+            const date = new Date(isBareDate ? (dateStr + 'T12:00:00') : dateStr);
             if (isNaN(date.getTime())) return dateStr;
             return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         }
