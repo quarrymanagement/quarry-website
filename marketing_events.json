@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-04-30T16:30:51.948Z",
+  "updatedAt": "2026-04-30T16:30:53.195Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -2729,6 +2729,17 @@
       "url": null,
       "sgEventId": "Z4hTz9eoR-WqsmoQcMG6pw",
       "userAgent": "Mozilla/4.0 (compatible; ms-office; MSOffice 16)",
+      "category": "quarry-marketing"
+    },
+    {
+      "ts": "2026-04-30T16:30:42.000Z",
+      "type": "delivered",
+      "draftId": null,
+      "ruleId": null,
+      "email": "rfullin@aol.com",
+      "url": null,
+      "sgEventId": "ZGVsaXZlcmVkLTctMTA2MDM3NzY1LUpLVjltaDdHUVF5VlB2U3dTWGNZOFEtNzg",
+      "userAgent": null,
       "category": "quarry-marketing"
     }
   ],
