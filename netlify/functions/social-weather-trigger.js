@@ -58,9 +58,12 @@ function classifyDay(forecast, dayOffset) {
     const temps = hourly.temperature_2m || [];
     const precs = hourly.precipitation_probability || [];
 
+    // Compute target day in CT, not UTC. Open-Meteo returns hourly slots
+    // already in our requested timezone; we need to match against the same
+    // calendar day The Quarry sees, not whatever day the UTC server is on.
     const targetDay = new Date();
     targetDay.setDate(targetDay.getDate() + dayOffset);
-    const targetKey = targetDay.toISOString().slice(0, 10);
+    const targetKey = targetDay.toLocaleDateString('en-CA', { timeZone: 'America/Chicago' });
 
     let temps11to21 = [], precs11to21 = [];
     for (let i = 0; i < times.length; i++) {
