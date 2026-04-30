@@ -2509,10 +2509,24 @@
         .mkt-perf-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; }
         .mkt-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.1rem 1.2rem; }
         .mkt-card h4 { font-family: 'Playfair Display', Georgia, serif; color: var(--gold); margin: 0 0 0.75rem; font-size: 1.05rem; font-weight: 600; }
-        .mkt-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        .mkt-table th { text-align: left; color: var(--text-muted); font-weight: 600; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--border-subtle); }
-        .mkt-table td { padding: 0.55rem 0.5rem; border-bottom: 1px solid var(--border-subtle); color: var(--text-primary); }
+        .mkt-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; table-layout: fixed; }
+        .mkt-table th { text-align: left; color: var(--text-muted); font-weight: 600; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--border-subtle); white-space: nowrap; }
+        .mkt-table td { padding: 0.55rem 0.5rem; border-bottom: 1px solid var(--border-subtle); color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; }
         .mkt-table tr:last-child td { border-bottom: none; }
+        /* Top-performing subjects: subject column flexes, the rest are narrow numeric columns */
+        #mktPerfTopSubjects col.subj  { width: 50%; }
+        #mktPerfTopSubjects col.type  { width: 18%; }
+        #mktPerfTopSubjects col.num   { width: 10.66%; }
+        #mktPerfByType col.type { width: 40%; }
+        #mktPerfByType col.num  { width: 20%; }
+        #socPerfTable col.cap   { width: 50%; }
+        #socPerfTable col.num   { width: 12.5%; }
+        /* Wrap tables in horizontal-scroll fallback on narrow viewports */
+        .mkt-card > .mkt-table { display: table; }
+        @media (max-width: 600px) {
+            .mkt-table { font-size: 0.78rem; }
+            .mkt-table th, .mkt-table td { padding: 0.4rem 0.35rem; }
+        }
         .mkt-bars { display: flex; flex-direction: column; gap: 0.4rem; }
         .mkt-bar-row { display: flex; align-items: center; gap: 0.6rem; font-size: 0.78rem; color: var(--text-secondary); }
         .mkt-bar-label { width: 70px; flex-shrink: 0; }
@@ -3528,9 +3542,9 @@
                     <div class="stat-item"><div class="stat-label">Unsubscribes</div><div class="stat-value" id="mktPerfUnsub">—</div></div>
                 </div>
                 <div class="mkt-perf-grid">
-                    <div class="mkt-card"><h4>Top-performing subjects</h4><table class="mkt-table" id="mktPerfTopSubjects"><thead><tr><th>Subject</th><th>Type</th><th>Open</th><th>Click</th><th>Sent</th></tr></thead><tbody><tr><td colspan="5" class="mkt-empty-cell">—</td></tr></tbody></table></div>
+                    <div class="mkt-card"><h4>Top-performing subjects</h4><table class="mkt-table" id="mktPerfTopSubjects"><colgroup><col class="subj"><col class="type"><col class="num"><col class="num"><col class="num"></colgroup><thead><tr><th>Subject</th><th>Type</th><th>Open</th><th>Click</th><th>Sent</th></tr></thead><tbody><tr><td colspan="5" class="mkt-empty-cell">—</td></tr></tbody></table></div>
                     <div class="mkt-card"><h4>Best send hours (CT)</h4><div id="mktPerfHours" class="mkt-bars"></div></div>
-                    <div class="mkt-card"><h4>Performance by content type</h4><table class="mkt-table" id="mktPerfByType"><thead><tr><th>Type</th><th>Sends</th><th>Open</th><th>Click</th></tr></thead><tbody><tr><td colspan="4" class="mkt-empty-cell">—</td></tr></tbody></table></div>
+                    <div class="mkt-card"><h4>Performance by content type</h4><table class="mkt-table" id="mktPerfByType"><colgroup><col class="type"><col class="num"><col class="num"><col class="num"></colgroup><thead><tr><th>Type</th><th>Sends</th><th>Open</th><th>Click</th></tr></thead><tbody><tr><td colspan="4" class="mkt-empty-cell">—</td></tr></tbody></table></div>
                 </div>
             </div>
 
@@ -3611,7 +3625,7 @@
                     <div class="stat-item"><div class="stat-label">Total Likes</div><div class="stat-value" id="socStatLikes">—</div></div>
                     <div class="stat-item"><div class="stat-label">Total Comments</div><div class="stat-value" id="socStatComments">—</div></div>
                 </div>
-                <div class="mkt-card"><h4>Top-performing posts (by reach)</h4><table class="mkt-table" id="socPerfTable"><thead><tr><th>Caption</th><th>Platform</th><th>Reach</th><th>Likes</th><th>Comments</th></tr></thead><tbody><tr><td colspan="5" class="mkt-empty-cell">No posts yet</td></tr></tbody></table></div>
+                <div class="mkt-card"><h4>Top-performing posts (by reach)</h4><table class="mkt-table" id="socPerfTable"><colgroup><col class="cap"><col class="num"><col class="num"><col class="num"><col class="num"></colgroup><thead><tr><th>Caption</th><th>Platform</th><th>Reach</th><th>Likes</th><th>Comments</th></tr></thead><tbody><tr><td colspan="5" class="mkt-empty-cell">No posts yet</td></tr></tbody></table></div>
             </div>
 
             <div id="socSettingsTab" class="tab-content">
@@ -10401,7 +10415,7 @@ function hashCode(str) {
                 const topT = $('mktPerfTopSubjects')?.querySelector('tbody');
                 if (topT) {
                     const rows = p.sentDrafts.map((d) => { const a = state.aggregates[d.id] || {}; const r = (d.deliveryStats && d.deliveryStats.recipientCount) || a.delivered || 0; return { subject: d.subject, type: d.type, openRate: r ? (a.uniqueOpen || 0) / r : 0, clickRate: r ? (a.uniqueClick || 0) / r : 0, sent: r }; }).sort((a, b) => b.openRate - a.openRate).slice(0, 8);
-                    topT.innerHTML = rows.length ? rows.map((r) => `<tr><td style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(r.subject)}</td><td style="font-size:0.72rem;color:var(--text-muted);">${escHtml(r.type)}</td><td>${(r.openRate * 100).toFixed(1)}%</td><td>${(r.clickRate * 100).toFixed(1)}%</td><td>${r.sent}</td></tr>`).join('') : '<tr><td colspan="5" class="mkt-empty-cell">No sends in this range yet.</td></tr>';
+                    topT.innerHTML = rows.length ? rows.map((r) => `<tr><td title="${escHtml(r.subject)}">${escHtml(r.subject)}</td><td style="font-size:0.72rem;color:var(--text-muted);">${escHtml(r.type)}</td><td>${(r.openRate * 100).toFixed(1)}%</td><td>${(r.clickRate * 100).toFixed(1)}%</td><td>${r.sent}</td></tr>`).join('') : '<tr><td colspan="5" class="mkt-empty-cell">No sends in this range yet.</td></tr>';
                 }
                 const hoursDiv = $('mktPerfHours');
                 if (hoursDiv) {
