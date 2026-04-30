@@ -106,13 +106,19 @@ async function saveDraftsFile(json, sha, message) {
 
 async function createAndScheduleSingleSend(draft, listIds) {
     const plainText = htmlToPlainText(draft.htmlBody);
-    const sendAt = (draft.scheduledFor && new Date(draft.scheduledFor).getTime() > Date.now())
-        ? new Date(draft.scheduledFor).toISOString()
-        : 'now';
+    // CRITICAL: SendGrid's Single Send CREATE endpoint only accepts ISO timestamps
+    // or null/omitted for send_at. The literal string "now" is ONLY valid on the
+    // separate /schedule endpoint. Sending "now" to create returns
+    // {"errors":[{"field":"","message":"json could not be unmarshalled"}]}.
+    const isFuture = draft.scheduledFor && new Date(draft.scheduledFor).getTime() > Date.now();
+    const sendAtIso = isFuture ? new Date(draft.scheduledFor).toISOString() : null;
+    // What we'll PUT to /schedule: ISO if future, "now" if immediate.
+    const scheduleValue = isFuture ? sendAtIso : 'now';
 
     const ssBody = {
         name: `${draft.subject || 'Quarry campaign'} (${draft.id.slice(0, 8)})`,
-        send_at: sendAt,
+        // Omit send_at entirely if sending immediately (set on /schedule call below)
+        ...(sendAtIso ? { send_at: sendAtIso } : {}),
         send_to: { list_ids: listIds, all: false },
         email_config: {
             subject: draft.subject,
@@ -143,11 +149,12 @@ async function createAndScheduleSingleSend(draft, listIds) {
     const created = await r.json();
     const sendId = created.id;
 
-    // Step 2: schedule it (separate call per the SendGrid API design)
+    // Step 2: schedule it (separate call per the SendGrid API design).
+    // The /schedule endpoint accepts "now" for immediate sending OR an ISO timestamp.
     r = await fetch(`https://api.sendgrid.com/v3/marketing/singlesends/${sendId}/schedule`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${SG_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ send_at: sendAt })
+        body: JSON.stringify({ send_at: scheduleValue })
     });
     if (!r.ok) {
         const text = await r.text();
