@@ -834,7 +834,10 @@
         }
 
         function formatDate(date) {
-            return date.toISOString().split('T')[0];
+            // CT date in YYYY-MM-DD. toISOString() returns the UTC date which
+            // shifts forward to tomorrow after 6 PM CT — would label Monday
+            // shifts as "Tuesday" for any employee checking the schedule late.
+            return date.toLocaleDateString('en-CA', { timeZone: 'America/Chicago' });
         }
 
         function displayScheduleWeek() {
