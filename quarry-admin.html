@@ -1788,7 +1788,7 @@
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `registrations-${state.currentEventId}-${new Date().toISOString().split('T')[0]}.csv`;
+            a.download = `registrations-${state.currentEventId}-${new Date().toLocaleDateString('en-CA', { timeZone: 'America/Chicago' })}.csv`;
             a.click();
             window.URL.revokeObjectURL(url);
             showToast('CSV exported successfully', 'success');
