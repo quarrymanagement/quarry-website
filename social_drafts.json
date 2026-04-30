@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-04-30T15:27:51.536Z",
+  "updatedAt": "2026-04-30T15:28:12.781Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -284,7 +284,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "approved",
+      "status": "posted",
       "scheduledFor": "2026-04-29T17:00:00-05:00",
       "createdAt": "2026-04-28T03:38:22.279Z",
       "createdBy": "cadence-engine",
@@ -379,17 +379,18 @@
       "aiReasoning": "At T-3 the post shifts to 'this Saturday' specificity — the full weekend grid gives followers everything they need to plan, while the 'no cover, come as you are' close keeps the tone as an invitation rather than a pitch, consistent with band post guidance.",
       "model": "claude-sonnet-4-6",
       "hydratedAt": "2026-04-29T13:03:23.305Z",
-      "updatedAt": "2026-04-30T15:27:51.536Z",
+      "updatedAt": "2026-04-30T15:28:12.781Z",
       "imageSource": "library",
       "approvedAt": "2026-04-30T15:27:51.536Z",
       "regenerationCount": 3,
       "lastInstructions": "THIS IS HIGHLIGHTING THE PAINT OUT SHOW AND SALE AT THE QUARRY. THE AUGUST PLAIN AIR PAINTERS IN NEW MELLE AT 1 PM AND THEN WE HAVE THE QUARRY TONIGHT AT 5 PM AND JUDGING STARTS AT 5:30 PM. COME DOWN TO THE QUARRY TODAY",
-      "fbPostId": null,
-      "igMediaId": null,
+      "fbPostId": "122149233771045805",
+      "igMediaId": "18000475727752824",
       "dryRun": false,
       "failureReason": "Meta API auth error: page access token revoked or expired (FB 400 OAuth). Refresh META_PAGE_ACCESS_TOKEN env var.",
       "attemptedPostAt": "2026-04-30T14:51:58.915Z",
-      "approvedBy": "admin"
+      "approvedBy": "admin",
+      "postedAt": "2026-04-30T15:28:12.781Z"
     },
     {
       "id": "drf-moi2t9s7-q-490cu",
