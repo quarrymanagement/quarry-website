@@ -6860,7 +6860,9 @@
                     const sentCount = result.sent || recipients.length;
 
                     app.emailHistory.push({
-                        date: new Date().toISOString().split('T')[0],
+                        // Use America/Chicago, NOT UTC — toISOString() returns the
+                        // UTC date which silently rolls forward to tomorrow after 6 PM CT.
+                        date: new Date().toLocaleDateString('en-CA', { timeZone: 'America/Chicago' }),
                         subject, recipients: sentCount, status: 'Sent',
                     });
 
@@ -7588,7 +7590,9 @@
                 dayKeys.forEach((dayKey, idx) => {
                     const shiftDate = new Date(app.currentScheduleWeek);
                     shiftDate.setDate(shiftDate.getDate() + idx);
-                    const dateStr = shiftDate.toISOString().split('T')[0];
+                    // Build YYYY-MM-DD in CT, NOT UTC. toISOString() shifts the
+                    // calendar date forward in the evenings.
+                    const dateStr = shiftDate.toLocaleDateString('en-CA', { timeZone: 'America/Chicago' });
 
                     const isClosed = dayKey === 'monday' || dayKey === 'tuesday';
                     const shift = empShifts[dayKey];
@@ -7838,7 +7842,8 @@
             const dayIdx = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].indexOf(dayKey);
             const shiftDate = new Date(app.currentScheduleWeek);
             shiftDate.setDate(shiftDate.getDate() + dayIdx);
-            const dateStr = shiftDate.toISOString().split('T')[0];
+            // CT date string — toISOString() leaks UTC and shifts after 6 PM CT.
+            const dateStr = shiftDate.toLocaleDateString('en-CA', { timeZone: 'America/Chicago' });
 
             const hasTimeOff = app.timeOffRequests.some(t =>
                 t.employeeId === empId && t.dates.includes(dateStr) && t.status === 'approved'
@@ -10239,7 +10244,7 @@ function createCampaign(opts) {
         id: 'camp_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 6),
         name: opts.name || 'Untitled Campaign',
         type: opts.type || 'weekly-newsletter',
-        date: opts.date || new Date().toISOString().split('T')[0],
+        date: opts.date || new Date().toLocaleDateString('en-CA', { timeZone: 'America/Chicago' }),
         sendTime: opts.sendTime || '10:00 AM',
         status: opts.status || 'draft',
         recipients: opts.recipients || 3000,
@@ -10456,7 +10461,11 @@ function hashCode(str) {
                 const hoursDiv = $('mktPerfHours');
                 if (hoursDiv) {
                     const buckets = Array(24).fill(null).map(() => ({ recipients: 0, opens: 0 }));
-                    p.sentDrafts.forEach((d) => { const a = state.aggregates[d.id] || {}; const r = (d.deliveryStats && d.deliveryStats.recipientCount) || a.delivered || 0; const h = ((new Date(d.sentAt).getUTCHours() - 5) + 24) % 24; buckets[h].recipients += r; buckets[h].opens += a.uniqueOpen || 0; });
+                    // Bucket sends by hour-of-day in CT. Previously hardcoded as
+                    // `getUTCHours() - 5` which assumed CDT year-round and broke
+                    // every time DST rolled. Intl gives the correct CT hour for any date.
+                    const ctHourFmt = new Intl.DateTimeFormat('en-US', { hour: 'numeric', hour12: false, timeZone: 'America/Chicago' });
+                    p.sentDrafts.forEach((d) => { const a = state.aggregates[d.id] || {}; const r = (d.deliveryStats && d.deliveryStats.recipientCount) || a.delivered || 0; const h = parseInt(ctHourFmt.format(new Date(d.sentAt)), 10) % 24; buckets[h].recipients += r; buckets[h].opens += a.uniqueOpen || 0; });
                     const max = Math.max(...buckets.map((b) => b.recipients ? b.opens / b.recipients : 0), 0.01);
                     const rows = buckets.map((b, h) => ({ h, rate: b.recipients ? b.opens / b.recipients : 0, recipients: b.recipients })).filter((r) => r.recipients > 0).sort((a, b) => b.rate - a.rate).slice(0, 8);
                     hoursDiv.innerHTML = rows.length ? rows.map((r) => `<div class="mkt-bar-row"><span class="mkt-bar-label">${r.h.toString().padStart(2, '0')}:00 CT</span><span class="mkt-bar-fill"><span style="width:${Math.max(4, (r.rate / max) * 100).toFixed(1)}%"></span></span><span class="mkt-bar-val">${(r.rate * 100).toFixed(1)}%</span></div>`).join('') : '<div class="mkt-empty">No data yet — send a few campaigns first.</div>';
