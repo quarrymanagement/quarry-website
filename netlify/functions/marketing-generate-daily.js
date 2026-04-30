@@ -68,14 +68,24 @@ async function saveJsonFile(file, json, sha, message) {
 }
 
 // Convert America/Chicago hour-of-day to UTC ISO for a given local date.
-// Naive but stable for our use: we always send "around" the hour, and the
-// scheduler runs every 5 min so a few minutes of drift is fine.
+//
+// Previously this used a hardcoded DST guess that was wrong for the November
+// switchover (`getUTCDate() < 1` is never true) and at every March/Nov edge.
+// The Intl API knows the real US DST rules, so use it.
 function ctHourToUtcIso(localDate, hourCT) {
-    // CT is UTC-6 (CST) or UTC-5 (CDT). DST in US runs ~Mar second Sunday → Nov first Sunday.
-    const m = localDate.getUTCMonth(); // 0=Jan
-    const isCDT = (m > 2 && m < 10) || (m === 2 && localDate.getUTCDate() >= 8) || (m === 10 && localDate.getUTCDate() < 1);
-    const offsetH = isCDT ? 5 : 6;
-    return new Date(Date.UTC(localDate.getUTCFullYear(), localDate.getUTCMonth(), localDate.getUTCDate(), hourCT + offsetH, 0, 0)).toISOString();
+    const y = localDate.getUTCFullYear();
+    const m = localDate.getUTCMonth();
+    const d = localDate.getUTCDate();
+    // Sample noon CT on the target date; ask Intl what UTC offset CT had at that
+    // moment. Then build the actual send time by subtracting that offset.
+    const probe = new Date(Date.UTC(y, m, d, 17, 0, 0)); // ~noon CT in either DST state
+    const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/Chicago', timeZoneName: 'shortOffset',
+        year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', hour12: false
+    }).formatToParts(probe);
+    const offsetPart = parts.find((p) => p.type === 'timeZoneName')?.value || 'GMT-5';
+    const offsetH = parseInt(offsetPart.replace(/[^\-\d]/g, ''), 10) || -5; // e.g. -5 (CDT) or -6 (CST)
+    return new Date(Date.UTC(y, m, d, hourCT - offsetH, 0, 0)).toISOString();
 }
 
 function dateOnly(d) { return d.toISOString().slice(0, 10); }
