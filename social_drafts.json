@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-04-29T17:32:01.114Z",
+  "updatedAt": "2026-04-30T13:02:59.046Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -935,7 +935,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-05-06T17:00:00-05:00",
       "createdAt": "2026-04-28T03:38:22.279Z",
       "createdBy": "cadence-engine",
@@ -1005,12 +1005,32 @@
           ],
           "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
         },
-        "canvasNote": "Weekend Lineup — covers 4 band(s). Post 3 days before first show."
+        "canvasNote": "Weekend Lineup — covers 4 band(s). Post 3 days before first show.",
+        "reelBrief": "Open with a slow pan across the patio at golden hour — string lights, stone bar, lake in background. Cut to a close-up of a wine glass catching the light. Hold 3s on an empty stage setup with mic and guitar. End on the cliffside lake view at dusk. Suggested audio: warm acoustic indie or light country instrumental. Text overlay: 'Live Music This Weekend — No Cover. The Quarry, New Melle.'"
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "This weekend at The Quarry — four live acts, no cover.\n\nSaturday: Scott Logan (1–4 PM) + BP Duo (7–10 PM)\nSunday: Garden Party (1–4 PM)\n\nPlus Kelli Renee is up next Thursday, May 15 (7–10 PM).\n\nJust show up. 3960 Highway Z, New Melle.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#LiveMusicSTL",
+        "#WineBar",
+        "#STLEats",
+        "#OutdoorDining"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Acoustic guitar leaning against a wooden stool on a stone patio at golden hour, string lights overhead beginning to glow, warm bokeh of a lake and limestone cliffs softly out of focus in the background, no faces, no text",
+      "variants": {
+        "facebook": "Four live acts this weekend — and every one of them is free with your visit.\n\nSaturday: Scott Logan (1–4 PM) and BP Duo (7–10 PM)\nSunday: Garden Party (1–4 PM)\n\nAnd if you're planning ahead — Kelli Renee plays Thursday, May 15 from 7–10 PM.\n\nNo reservations needed for dining. Just come out. We're at 3960 Highway Z in New Melle.",
+        "instagram": "Four live acts this weekend. No cover, no ticket — just show up.\n\nSat: Scott Logan 1–4 PM + BP Duo 7–10 PM\nSun: Garden Party 1–4 PM\n\nNew Melle, MO — link in bio."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "T-3 'Weekend Lineup' arc calls for logistical specificity — day, time, names — framed as a low-friction invitation that reinforces the free live music value without any urgency or hype.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-04-30T13:02:59.046Z",
+      "updatedAt": "2026-04-30T13:02:59.046Z"
     },
     {
       "id": "drf-moi2t9s8-u-miv9l",
