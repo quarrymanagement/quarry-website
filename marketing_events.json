@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-04-30T16:11:48.026Z",
+  "updatedAt": "2026-04-30T16:11:53.644Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -1418,6 +1418,17 @@
       "url": null,
       "sgEventId": "ZGVsaXZlcmVkLTAtMTA2MDM3NzY1LUpLVjltaDdHUVF5VlB2U3dTWGNZOFEtNzA",
       "userAgent": null,
+      "category": "quarry-marketing"
+    },
+    {
+      "ts": "2026-04-30T16:11:39.000Z",
+      "type": "click",
+      "draftId": null,
+      "ruleId": null,
+      "email": "tfarber@bfcenterprises.com",
+      "url": "https://www.thequarrystl.com/.netlify/functions/unsubscribe",
+      "sgEventId": "aR268V7CSTi7VnIVkg6d2Q",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.7444.163 Safari/537.36",
       "category": "quarry-marketing"
     }
   ],
