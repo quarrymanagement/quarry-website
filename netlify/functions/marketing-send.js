@@ -161,7 +161,7 @@ async function createAndScheduleSingleSend(draft, listIds) {
         throw new Error(`SS schedule failed (${r.status}): ${text.slice(0, 300)}`);
     }
     const scheduled = await r.json();
-    return { sendId, status: scheduled.status, sendAt };
+    return { sendId, status: scheduled.status, sendAt: scheduleValue };
 }
 
 // ----------------------------------------------------------------------------
