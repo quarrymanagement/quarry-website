@@ -70,6 +70,13 @@ function dateMinusDays(targetDateStr, n) {
     return t;
 }
 
+// Returns YYYY-MM-DD for "today" in Central Time, regardless of where the
+// server runs (Netlify defaults to UTC). Without this, after 6 PM CT every
+// "today" filter shifts forward to tomorrow because UTC has already rolled.
+function todayCT() {
+    return new Date().toLocaleDateString('en-CA', { timeZone: 'America/Chicago' });
+}
+
 // ----------------------------------------------------------------------------
 // Cadence definitions — easy to tune later
 // ----------------------------------------------------------------------------
@@ -220,7 +227,8 @@ function buildSkeletonDrafts(eventsData, existingDrafts, windowDays) {
     const out = [];
 
     // ---- Events (ticketed) ----
-    const events = (eventsData.events || []).filter((e) => e.date >= today.toISOString().slice(0, 10));
+    const todayKey = todayCT();
+    const events = (eventsData.events || []).filter((e) => e.date >= todayKey);
     for (const event of events) {
         const fillPct = event.totalCapacity ? Math.round((event.registeredCount || 0) / event.totalCapacity * 100) : 0;
         for (const step of EVENT_ARC) {
@@ -268,7 +276,7 @@ function buildSkeletonDrafts(eventsData, existingDrafts, windowDays) {
     }
 
     // ---- Bands (group by weekend) ----
-    const bands = (eventsData.bands || []).filter((b) => b.date >= today.toISOString().slice(0, 10));
+    const bands = (eventsData.bands || []).filter((b) => b.date >= todayKey);
     const weekends = groupBandsByWeekend(bands);
     for (const fridayKey of Object.keys(weekends).sort()) {
         const weekendBands = weekends[fridayKey];
