@@ -1923,10 +1923,45 @@
         }
 
         /**
-         * Format date string for display
+         * Format an ISO date (YYYY-MM-DD) for display.
+         * IMPORTANT: anchor the parse to T12:00:00 (local noon) so the date
+         * never rolls back a day due to UTC midnight parsing in negative-UTC
+         * timezones (Central Time is UTC-5/-6).
          */
         function formatDate(dateString) {
-            return dateString;
+            if (!dateString) return '';
+            // If it's already a human string (has commas or letters), pass through
+            if (/[A-Za-z,]/.test(dateString)) return dateString;
+            const d = new Date(dateString + 'T12:00:00');
+            if (isNaN(d.getTime())) return dateString;
+            return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        /**
+         * Format a 24-hour HH:MM time string into a friendly h:mm AM/PM display.
+         * Stays purely string-based — no Date object — so timezone is never
+         * applied. "16:00" -> "4:00 PM", "11:00" -> "11:00 AM".
+         */
+        function formatTime(timeString) {
+            if (!timeString) return '';
+            const m = /^(\d{1,2}):(\d{2})/.exec(timeString);
+            if (!m) return timeString;
+            let h = parseInt(m[1], 10);
+            const min = m[2];
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            h = h % 12; if (h === 0) h = 12;
+            return `${h}:${min} ${ampm}`;
+        }
+
+        /**
+         * Compact date for the corner badge on each card. "Oct 17"
+         */
+        function formatDateBadge(dateString) {
+            if (!dateString) return '';
+            if (/[A-Za-z,]/.test(dateString)) return dateString.split(',')[0];
+            const d = new Date(dateString + 'T12:00:00');
+            if (isNaN(d.getTime())) return dateString;
+            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
         }
 
         /**
@@ -1966,7 +2001,7 @@
                 <div class="event-card" data-category="${event.category}">
                     <div class="event-image ${event.imageGradient}">
                         <div class="event-image-text">${event.imageText}</div>
-                        <div class="date-badge">${event.date.split(',')[0]}</div>
+                        <div class="date-badge">${formatDateBadge(event.date)}</div>
                         <div class="status-badge ${statusInfo.class}">${statusInfo.text}</div>
                         ${event.status === "sold-out" ? `
                             <div class="sold-out-overlay">
@@ -1978,7 +2013,7 @@
                         <h3 class="event-name">${event.name}</h3>
                         <div class="event-meta">
                             <span>📅 ${formatDate(event.date)}</span>
-                            <span>🕖 ${event.time}</span>
+                            <span>🕖 ${formatTime(event.time)}</span>
                         </div>
                         <p class="event-description">${event.description}</p>
                         <div class="event-tiers">
@@ -2056,7 +2091,7 @@
 
             // Set modal header
             document.getElementById("modalEventName").textContent = currentEventForModal.name;
-            document.getElementById("modalEventDate").textContent = currentEventForModal.date;
+            document.getElementById("modalEventDate").textContent = formatDate(currentEventForModal.date) + (currentEventForModal.time ? ' · ' + formatTime(currentEventForModal.time) : '');
 
             // Populate ticket tier dropdown
             const tierSelect = document.getElementById("ticketTier");
