@@ -4,25 +4,25 @@
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
-      "id": "string — uuid",
-      "ruleId": "string — references social_calendar.json rules[].id",
-      "type": "string — band_announce | menu_spotlight | weather_patio | event_promo | wine_club | brand_post | manual",
+      "id": "string \u2014 uuid",
+      "ruleId": "string \u2014 references social_calendar.json rules[].id",
+      "type": "string \u2014 band_announce | menu_spotlight | weather_patio | event_promo | wine_club | brand_post | manual",
       "platforms": "['facebook'] | ['instagram'] | ['facebook','instagram']",
       "status": "pending | approved | posted | rejected | failed",
-      "caption": "string — main post copy",
-      "hashtags": "['#hashtag1','#hashtag2'] — appended to caption for IG, optional for FB",
-      "imageUrl": "string — public URL of the hero image (uploaded or AI-generated)",
-      "imagePrompt": "string — DALL-E prompt used (for re-generation)",
-      "linkUrl": "string — optional link card target (FB only — IG strips links from feed)",
+      "caption": "string \u2014 main post copy",
+      "hashtags": "['#hashtag1','#hashtag2'] \u2014 appended to caption for IG, optional for FB",
+      "imageUrl": "string \u2014 public URL of the hero image (uploaded or AI-generated)",
+      "imagePrompt": "string \u2014 DALL-E prompt used (for re-generation)",
+      "linkUrl": "string \u2014 optional link card target (FB only \u2014 IG strips links from feed)",
       "scheduledFor": "ISO ts",
       "createdAt": "ISO ts",
       "updatedAt": "ISO ts",
       "postedAt": "ISO ts | null",
-      "fbPostId": "string | null — Facebook post ID after publish",
-      "igMediaId": "string | null — Instagram media ID after publish",
+      "fbPostId": "string | null \u2014 Facebook post ID after publish",
+      "igMediaId": "string | null \u2014 Instagram media ID after publish",
       "regenerationCount": "number",
-      "lastInstructions": "string — last redo instructions",
-      "context": "object — what fed the prompt"
+      "lastInstructions": "string \u2014 last redo instructions",
+      "context": "object \u2014 what fed the prompt"
     }
   },
   "drafts": [
@@ -35,7 +35,7 @@
         "instagram"
       ],
       "status": "pending",
-      "caption": "Spring reds are pouring at The Quarry. This week's feature is a silky Willamette Valley Pinot Noir — earthy, bright, and built for a long evening on the patio. Rock & Vine members get it by the glass at member pricing, every visit.",
+      "caption": "Spring reds are pouring at The Quarry. This week's feature is a silky Willamette Valley Pinot Noir \u2014 earthy, bright, and built for a long evening on the patio. Rock & Vine members get it by the glass at member pricing, every visit.",
       "hashtags": [
         "#NewMelleMO",
         "#StCharlesCounty",
@@ -121,7 +121,7 @@
       },
       "graphicBrief": {
         "type": "wine_club_poster",
-        "templateRef": "Lifestyle poster — wine glass + Quarry view, \"Rock & Vine\" branding",
+        "templateRef": "Lifestyle poster \u2014 wine glass + Quarry view, \"Rock & Vine\" branding",
         "neededBy": null,
         "dimensions": "1080x1080 square",
         "toneMode": "invitation",
@@ -129,10 +129,10 @@
           "backgroundIdea": "Wine glass, sunset over Quarry lake, member tasting moment",
           "title": "JOIN ROCK & VINE",
           "subtitle": "May 2026 membership now open",
-          "callout": "Monthly subscription — start anytime",
-          "footerText": "THE QUARRY  •  ROCK & VINE WINE CLUB"
+          "callout": "Monthly subscription \u2014 start anytime",
+          "footerText": "THE QUARRY  \u2022  ROCK & VINE WINE CLUB"
         },
-        "canvasNote": "Now Accepting Members — recurring monthly post for the Rock & Vine Wine Club."
+        "canvasNote": "Now Accepting Members \u2014 recurring monthly post for the Rock & Vine Wine Club."
       },
       "caption": "May is open for Rock & Vine Wine Club members. Each month: two curated bottles, a private tasting, and member-only events at the Quarry. No commitment beyond the month you're in.",
       "hashtags": [
@@ -149,13 +149,13 @@
       "userImageUrl": null,
       "bumpedFromDay": "2026-05-01",
       "updatedAt": "2026-04-29T13:04:02.640Z",
-      "imagePrompt": "Two bottles of wine — one red, one white — resting on a weathered wooden barrel outdoors, late afternoon golden light, soft bokeh of stone cliff and lake in background, warm neutral tones with a single folded card leaning against the bottles",
+      "imagePrompt": "Two bottles of wine \u2014 one red, one white \u2014 resting on a weathered wooden barrel outdoors, late afternoon golden light, soft bokeh of stone cliff and lake in background, warm neutral tones with a single folded card leaning against the bottles",
       "variants": {
-        "facebook": "May is open for Rock & Vine Wine Club members. Every month you get two hand-picked bottles, access to a private tasting at the Quarry, and invites to member-only events — no long-term commitment required. If you've been thinking about it, this is a good month to start.",
+        "facebook": "May is open for Rock & Vine Wine Club members. Every month you get two hand-picked bottles, access to a private tasting at the Quarry, and invites to member-only events \u2014 no long-term commitment required. If you've been thinking about it, this is a good month to start.",
         "instagram": "May is open for Rock & Vine Wine Club members. Two curated bottles, a private tasting, member events. No long commitment."
       },
       "suggestedTimeHourCT": 16,
-      "aiReasoning": "Arc step is 'Now Accepting Members' — this is a lifestyle-and-belonging open-door moment, so the copy leads with access and low friction rather than urgency or sign-up pressure, matching the brand's 'members get…' guidance for wine club posts.",
+      "aiReasoning": "Arc step is 'Now Accepting Members' \u2014 this is a lifestyle-and-belonging open-door moment, so the copy leads with access and low friction rather than urgency or sign-up pressure, matching the brand's 'members get\u2026' guidance for wine club posts.",
       "model": "claude-sonnet-4-6",
       "hydratedAt": "2026-04-29T13:04:02.640Z"
     },
@@ -180,18 +180,18 @@
       },
       "graphicBrief": {
         "type": "wine_club_poster",
-        "templateRef": "Lifestyle poster — wine glass + Quarry view, \"Rock & Vine\" branding",
+        "templateRef": "Lifestyle poster \u2014 wine glass + Quarry view, \"Rock & Vine\" branding",
         "neededBy": null,
         "dimensions": "1080x1080 square",
         "toneMode": "lifestyle",
         "spec": {
           "backgroundIdea": "Wine glass, sunset over Quarry lake, member tasting moment",
           "title": "LIFE AS A ROCK & VINE MEMBER",
-          "subtitle": "Curated wines • Member tastings • Exclusive events",
-          "callout": "Monthly subscription — start anytime",
-          "footerText": "THE QUARRY  •  ROCK & VINE WINE CLUB"
+          "subtitle": "Curated wines \u2022 Member tastings \u2022 Exclusive events",
+          "callout": "Monthly subscription \u2014 start anytime",
+          "footerText": "THE QUARRY  \u2022  ROCK & VINE WINE CLUB"
         },
-        "canvasNote": "Member Benefit Spotlight — recurring monthly post for the Rock & Vine Wine Club."
+        "canvasNote": "Member Benefit Spotlight \u2014 recurring monthly post for the Rock & Vine Wine Club."
       },
       "caption": "",
       "hashtags": [],
@@ -219,7 +219,7 @@
       },
       "graphicBrief": {
         "type": "wine_club_poster",
-        "templateRef": "Lifestyle poster — wine glass + Quarry view, \"Rock & Vine\" branding",
+        "templateRef": "Lifestyle poster \u2014 wine glass + Quarry view, \"Rock & Vine\" branding",
         "neededBy": null,
         "dimensions": "1080x1080 square",
         "toneMode": "invitation",
@@ -227,10 +227,10 @@
           "backgroundIdea": "Wine glass, sunset over Quarry lake, member tasting moment",
           "title": "JOIN ROCK & VINE",
           "subtitle": "June 2026 membership now open",
-          "callout": "Monthly subscription — start anytime",
-          "footerText": "THE QUARRY  •  ROCK & VINE WINE CLUB"
+          "callout": "Monthly subscription \u2014 start anytime",
+          "footerText": "THE QUARRY  \u2022  ROCK & VINE WINE CLUB"
         },
-        "canvasNote": "Now Accepting Members — recurring monthly post for the Rock & Vine Wine Club."
+        "canvasNote": "Now Accepting Members \u2014 recurring monthly post for the Rock & Vine Wine Club."
       },
       "caption": "",
       "hashtags": [],
@@ -258,18 +258,18 @@
       },
       "graphicBrief": {
         "type": "wine_club_poster",
-        "templateRef": "Lifestyle poster — wine glass + Quarry view, \"Rock & Vine\" branding",
+        "templateRef": "Lifestyle poster \u2014 wine glass + Quarry view, \"Rock & Vine\" branding",
         "neededBy": null,
         "dimensions": "1080x1080 square",
         "toneMode": "lifestyle",
         "spec": {
           "backgroundIdea": "Wine glass, sunset over Quarry lake, member tasting moment",
           "title": "LIFE AS A ROCK & VINE MEMBER",
-          "subtitle": "Curated wines • Member tastings • Exclusive events",
-          "callout": "Monthly subscription — start anytime",
-          "footerText": "THE QUARRY  •  ROCK & VINE WINE CLUB"
+          "subtitle": "Curated wines \u2022 Member tastings \u2022 Exclusive events",
+          "callout": "Monthly subscription \u2014 start anytime",
+          "footerText": "THE QUARRY  \u2022  ROCK & VINE WINE CLUB"
         },
-        "canvasNote": "Member Benefit Spotlight — recurring monthly post for the Rock & Vine Wine Club."
+        "canvasNote": "Member Benefit Spotlight \u2014 recurring monthly post for the Rock & Vine Wine Club."
       },
       "caption": "",
       "hashtags": [],
@@ -284,7 +284,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "posted",
+      "status": "failed",
       "scheduledFor": "2026-04-29T17:00:00-05:00",
       "createdAt": "2026-04-28T03:38:22.279Z",
       "createdBy": "cadence-engine",
@@ -352,12 +352,12 @@
               "time": "7 PM - 10 PM"
             }
           ],
-          "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
+          "footerText": "THE QUARRY  \u2022  GREAT VIEWS  \u2022  GREAT FOOD  \u2022  GOOD TIMES"
         },
-        "canvasNote": "Weekend Lineup — covers 4 band(s). Post 3 days before first show.",
-        "reelBrief": "Open with a slow pan across the stone patio at dusk — string lights just coming on, empty tables set. Cut to a close-up of a wine glass catching the last of the golden hour light. Hold 3s. End on a wide shot of the cliff and lake. Text overlay: 'Live music this weekend. No cover. Just come.' Suggested audio: laid-back acoustic or country-adjacent instrumental."
+        "canvasNote": "Weekend Lineup \u2014 covers 4 band(s). Post 3 days before first show.",
+        "reelBrief": "Open with a slow pan across the stone patio at dusk \u2014 string lights just coming on, empty tables set. Cut to a close-up of a wine glass catching the last of the golden hour light. Hold 3s. End on a wide shot of the cliff and lake. Text overlay: 'Live music this weekend. No cover. Just come.' Suggested audio: laid-back acoustic or country-adjacent instrumental."
       },
-      "caption": "The August Plein Air Painters are here today. Artists paint New Melle starting at 1 PM, then bring their work to The Quarry at 5 PM — judging starts at 5:30. Come see the paintings, stay for the evening.",
+      "caption": "The August Plein Air Painters are here today. Artists paint New Melle starting at 1 PM, then bring their work to The Quarry at 5 PM \u2014 judging starts at 5:30. Come see the paintings, stay for the evening.",
       "hashtags": [
         "#NewMelleMO",
         "#StCharlesCounty",
@@ -372,22 +372,23 @@
       "userImageUrl": null,
       "imagePrompt": "A painter's wooden easel set up near a limestone cliff edge overlooking a still quarry lake, warm afternoon light, lush green Missouri landscape in background, no people, no text, golden hour glow",
       "variants": {
-        "facebook": "Four acts. Two days. No cover charge.\n\nThis Saturday, Dave Caputo plays 1–4 PM — a great reason to grab a table for lunch and stay a while. Then Boots and Bourbon (DJ) keeps it going from 6–11 PM.\n\nSunday, Mixology is on from 1–4 PM. And next Friday, May 8, Scott and Liz close out the week from 7–10 PM.\n\nAll live music is free with your visit. We're open Wed–Sun at 3960 Highway Z, New Melle.",
-        "instagram": "Four acts this weekend. No cover.\n\nSat: Dave Caputo 1–4 PM · Boots and Bourbon (DJ) 6–11 PM\nSun: Mixology 1–4 PM\nFri 5/8: Scott and Liz 7–10 PM\n\nFree with your visit."
+        "facebook": "Four acts. Two days. No cover charge.\n\nThis Saturday, Dave Caputo plays 1\u20134 PM \u2014 a great reason to grab a table for lunch and stay a while. Then Boots and Bourbon (DJ) keeps it going from 6\u201311 PM.\n\nSunday, Mixology is on from 1\u20134 PM. And next Friday, May 8, Scott and Liz close out the week from 7\u201310 PM.\n\nAll live music is free with your visit. We're open Wed\u2013Sun at 3960 Highway Z, New Melle.",
+        "instagram": "Four acts this weekend. No cover.\n\nSat: Dave Caputo 1\u20134 PM \u00b7 Boots and Bourbon (DJ) 6\u201311 PM\nSun: Mixology 1\u20134 PM\nFri 5/8: Scott and Liz 7\u201310 PM\n\nFree with your visit."
       },
       "suggestedTimeHourCT": 16,
-      "aiReasoning": "At T-3 the post shifts to 'this Saturday' specificity — the full weekend grid gives followers everything they need to plan, while the 'no cover, come as you are' close keeps the tone as an invitation rather than a pitch, consistent with band post guidance.",
+      "aiReasoning": "At T-3 the post shifts to 'this Saturday' specificity \u2014 the full weekend grid gives followers everything they need to plan, while the 'no cover, come as you are' close keeps the tone as an invitation rather than a pitch, consistent with band post guidance.",
       "model": "claude-sonnet-4-6",
       "hydratedAt": "2026-04-29T13:03:23.305Z",
-      "updatedAt": "2026-04-30T14:51:58.915Z",
+      "updatedAt": "2026-04-29T15:30:00Z",
       "imageSource": "library",
       "approvedAt": null,
       "regenerationCount": 3,
       "lastInstructions": "THIS IS HIGHLIGHTING THE PAINT OUT SHOW AND SALE AT THE QUARRY. THE AUGUST PLAIN AIR PAINTERS IN NEW MELLE AT 1 PM AND THEN WE HAVE THE QUARRY TONIGHT AT 5 PM AND JUDGING STARTS AT 5:30 PM. COME DOWN TO THE QUARRY TODAY",
-      "postedAt": "2026-04-30T14:51:58.915Z",
       "fbPostId": null,
       "igMediaId": null,
-      "dryRun": false
+      "dryRun": false,
+      "failureReason": "Meta API auth error: page access token revoked or expired (FB 400 OAuth). Refresh META_PAGE_ACCESS_TOKEN env var.",
+      "attemptedPostAt": "2026-04-30T14:51:58.915Z"
     },
     {
       "id": "drf-moi2t9s7-q-490cu",
@@ -424,7 +425,7 @@
         "toneMode": "tonight",
         "spec": {
           "backgroundIdea": "Quarry lake/patio at golden hour or evening string lights",
-          "title": "TONIGHT — LIVE MUSIC",
+          "title": "TONIGHT \u2014 LIVE MUSIC",
           "cards": [
             {
               "day": "Friday, May 1",
@@ -432,12 +433,12 @@
               "time": "7 PM - 10 PM"
             }
           ],
-          "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
+          "footerText": "THE QUARRY  \u2022  GREAT VIEWS  \u2022  GREAT FOOD  \u2022  GOOD TIMES"
         },
-        "canvasNote": "Tonight — covers 1 band(s). Post 0 days before first show.",
-        "reelBrief": "Open with a slow pan across the bar — glasses, candles, warm light. Cut to the empty stage set up and ready. Hold 3s on string lights reflecting off the stone wall. End on a wide patio shot at dusk. Suggested audio: soft acoustic country, upbeat but unhurried. Text overlay: 'Janet Martin — Live Tonight 7 PM'."
+        "canvasNote": "Tonight \u2014 covers 1 band(s). Post 0 days before first show.",
+        "reelBrief": "Open with a slow pan across the bar \u2014 glasses, candles, warm light. Cut to the empty stage set up and ready. Hold 3s on string lights reflecting off the stone wall. End on a wide patio shot at dusk. Suggested audio: soft acoustic country, upbeat but unhurried. Text overlay: 'Janet Martin \u2014 Live Tonight 7 PM'."
       },
-      "caption": "Janet Martin is live tonight, 7–10 PM. No cover, no ticket — just show up and stay a while.",
+      "caption": "Janet Martin is live tonight, 7\u201310 PM. No cover, no ticket \u2014 just show up and stay a while.",
       "hashtags": [
         "#NewMelleMO",
         "#StCharlesCounty",
@@ -451,11 +452,11 @@
       "userImageUrl": null,
       "imagePrompt": "Acoustic guitar leaning against a wooden stool on a warmly lit indoor stage, string lights glowing overhead, stone wall backdrop softly out of focus, golden evening light, no people, no text",
       "variants": {
-        "facebook": "Janet Martin plays tonight from 7 to 10 PM. Live music is always free here — no cover, no reservation needed. Come as you are.",
-        "instagram": "Janet Martin is live tonight, 7–10 PM. No cover. Just show up."
+        "facebook": "Janet Martin plays tonight from 7 to 10 PM. Live music is always free here \u2014 no cover, no reservation needed. Come as you are.",
+        "instagram": "Janet Martin is live tonight, 7\u201310 PM. No cover. Just show up."
       },
       "suggestedTimeHourCT": 16,
-      "aiReasoning": "T-0 calls for short, present-tense energy — 'tonight' specificity with the time, zero friction messaging (no cover, walk in), and an inviting close that fits the vibe-forward tone for a band post.",
+      "aiReasoning": "T-0 calls for short, present-tense energy \u2014 'tonight' specificity with the time, zero friction messaging (no cover, walk in), and an inviting close that fits the vibe-forward tone for a band post.",
       "model": "claude-sonnet-4-6",
       "hydratedAt": "2026-04-29T13:03:32.468Z",
       "updatedAt": "2026-04-29T13:03:32.468Z"
@@ -475,10 +476,10 @@
       "context": {
         "sourceType": "event",
         "sourceId": "event_1776285550837",
-        "eventName": "70s • 80s • 90s MUSIC BINGO",
+        "eventName": "70s \u2022 80s \u2022 90s MUSIC BINGO",
         "eventDate": "2026-05-22",
         "eventTime": "17:30",
-        "eventDescription": "Our Music Bingo nights have been SELLING OUT… so we’re turning it up 🔥\n\n🎶 70s • 80s • 90s MUSIC BINGO\n📅 May 22nd, 2026\n📍 The Quarry\n👥 Tables of 4\n🍻 Beer bucket OR bottle of wine per table\n🏆 Prizes all night long",
+        "eventDescription": "Our Music Bingo nights have been SELLING OUT\u2026 so we\u2019re turning it up \ud83d\udd25\n\n\ud83c\udfb6 70s \u2022 80s \u2022 90s MUSIC BINGO\n\ud83d\udcc5 May 22nd, 2026\n\ud83d\udccd The Quarry\n\ud83d\udc65 Tables of 4\n\ud83c\udf7b Beer bucket OR bottle of wine per table\n\ud83c\udfc6 Prizes all night long",
         "pricePerSeat": 8000,
         "totalCapacity": 34,
         "registeredCount": 13,
@@ -488,21 +489,21 @@
       },
       "graphicBrief": {
         "type": "event_poster",
-        "templateRef": "Event poster — match Boots & Bourbon / Live Bands template style",
+        "templateRef": "Event poster \u2014 match Boots & Bourbon / Live Bands template style",
         "neededBy": "2026-05-13",
         "dimensions": "1080x1080 square (Instagram + Facebook safe)",
         "toneMode": "standard",
         "spec": {
           "backgroundIdea": "Use a Quarry-relevant photographic background that matches the event theme (e.g. country/boots for Boot Scootin, bingo balls/80s for Music Bingo, vineyard for Chateau trip, etc.)",
-          "title": "70S • 80S • 90S MUSIC BINGO",
-          "subtitle": "Our Music Bingo nights have been SELLING OUT… so we’re turning it up 🔥\n\n🎶 70s • 80s • 90s MUSIC BI",
+          "title": "70S \u2022 80S \u2022 90S MUSIC BINGO",
+          "subtitle": "Our Music Bingo nights have been SELLING OUT\u2026 so we\u2019re turning it up \ud83d\udd25\n\n\ud83c\udfb6 70s \u2022 80s \u2022 90s MUSIC BI",
           "date": "FRIDAY, MAY 22",
           "time": "5:30 PM",
           "callout": "$80 / SEAT",
-          "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
+          "footerText": "THE QUARRY  \u2022  EAT  \u2022  DRINK  \u2022  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "One Week Away — Post 7 days before event. "
+        "canvasNote": "One Week Away \u2014 Post 7 days before event. "
       },
       "caption": "",
       "hashtags": [],
@@ -524,10 +525,10 @@
       "context": {
         "sourceType": "event",
         "sourceId": "event_1776285550837",
-        "eventName": "70s • 80s • 90s MUSIC BINGO",
+        "eventName": "70s \u2022 80s \u2022 90s MUSIC BINGO",
         "eventDate": "2026-05-22",
         "eventTime": "17:30",
-        "eventDescription": "Our Music Bingo nights have been SELLING OUT… so we’re turning it up 🔥\n\n🎶 70s • 80s • 90s MUSIC BINGO\n📅 May 22nd, 2026\n📍 The Quarry\n👥 Tables of 4\n🍻 Beer bucket OR bottle of wine per table\n🏆 Prizes all night long",
+        "eventDescription": "Our Music Bingo nights have been SELLING OUT\u2026 so we\u2019re turning it up \ud83d\udd25\n\n\ud83c\udfb6 70s \u2022 80s \u2022 90s MUSIC BINGO\n\ud83d\udcc5 May 22nd, 2026\n\ud83d\udccd The Quarry\n\ud83d\udc65 Tables of 4\n\ud83c\udf7b Beer bucket OR bottle of wine per table\n\ud83c\udfc6 Prizes all night long",
         "pricePerSeat": 8000,
         "totalCapacity": 34,
         "registeredCount": 13,
@@ -537,21 +538,21 @@
       },
       "graphicBrief": {
         "type": "event_poster",
-        "templateRef": "Event poster — match Boots & Bourbon / Live Bands template style",
+        "templateRef": "Event poster \u2014 match Boots & Bourbon / Live Bands template style",
         "neededBy": "2026-05-06",
         "dimensions": "1080x1080 square (Instagram + Facebook safe)",
         "toneMode": "standard",
         "spec": {
           "backgroundIdea": "Use a Quarry-relevant photographic background that matches the event theme (e.g. country/boots for Boot Scootin, bingo balls/80s for Music Bingo, vineyard for Chateau trip, etc.)",
-          "title": "70S • 80S • 90S MUSIC BINGO",
-          "subtitle": "Our Music Bingo nights have been SELLING OUT… so we’re turning it up 🔥\n\n🎶 70s • 80s • 90s MUSIC BI",
+          "title": "70S \u2022 80S \u2022 90S MUSIC BINGO",
+          "subtitle": "Our Music Bingo nights have been SELLING OUT\u2026 so we\u2019re turning it up \ud83d\udd25\n\n\ud83c\udfb6 70s \u2022 80s \u2022 90s MUSIC BI",
           "date": "FRIDAY, MAY 22",
           "time": "5:30 PM",
           "callout": "$80 / SEAT",
-          "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
+          "footerText": "THE QUARRY  \u2022  EAT  \u2022  DRINK  \u2022  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "What to Expect — Post 14 days before event. "
+        "canvasNote": "What to Expect \u2014 Post 14 days before event. "
       },
       "caption": "",
       "hashtags": [],
@@ -573,10 +574,10 @@
       "context": {
         "sourceType": "event",
         "sourceId": "event_1776285550837",
-        "eventName": "70s • 80s • 90s MUSIC BINGO",
+        "eventName": "70s \u2022 80s \u2022 90s MUSIC BINGO",
         "eventDate": "2026-05-22",
         "eventTime": "17:30",
-        "eventDescription": "Our Music Bingo nights have been SELLING OUT… so we’re turning it up 🔥\n\n🎶 70s • 80s • 90s MUSIC BINGO\n📅 May 22nd, 2026\n📍 The Quarry\n👥 Tables of 4\n🍻 Beer bucket OR bottle of wine per table\n🏆 Prizes all night long",
+        "eventDescription": "Our Music Bingo nights have been SELLING OUT\u2026 so we\u2019re turning it up \ud83d\udd25\n\n\ud83c\udfb6 70s \u2022 80s \u2022 90s MUSIC BINGO\n\ud83d\udcc5 May 22nd, 2026\n\ud83d\udccd The Quarry\n\ud83d\udc65 Tables of 4\n\ud83c\udf7b Beer bucket OR bottle of wine per table\n\ud83c\udfc6 Prizes all night long",
         "pricePerSeat": 8000,
         "totalCapacity": 34,
         "registeredCount": 13,
@@ -586,21 +587,21 @@
       },
       "graphicBrief": {
         "type": "event_poster",
-        "templateRef": "Event poster — match Boots & Bourbon / Live Bands template style",
+        "templateRef": "Event poster \u2014 match Boots & Bourbon / Live Bands template style",
         "neededBy": "2026-05-17",
         "dimensions": "1080x1080 square (Instagram + Facebook safe)",
         "toneMode": "standard",
         "spec": {
           "backgroundIdea": "Use a Quarry-relevant photographic background that matches the event theme (e.g. country/boots for Boot Scootin, bingo balls/80s for Music Bingo, vineyard for Chateau trip, etc.)",
-          "title": "70S • 80S • 90S MUSIC BINGO",
-          "subtitle": "Our Music Bingo nights have been SELLING OUT… so we’re turning it up 🔥\n\n🎶 70s • 80s • 90s MUSIC BI",
+          "title": "70S \u2022 80S \u2022 90S MUSIC BINGO",
+          "subtitle": "Our Music Bingo nights have been SELLING OUT\u2026 so we\u2019re turning it up \ud83d\udd25\n\n\ud83c\udfb6 70s \u2022 80s \u2022 90s MUSIC BI",
           "date": "FRIDAY, MAY 22",
           "time": "5:30 PM",
           "callout": "$80 / SEAT",
-          "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
+          "footerText": "THE QUARRY  \u2022  EAT  \u2022  DRINK  \u2022  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "This Weekend — Post 3 days before event. "
+        "canvasNote": "This Weekend \u2014 Post 3 days before event. "
       },
       "caption": "",
       "hashtags": [],
@@ -622,10 +623,10 @@
       "context": {
         "sourceType": "event",
         "sourceId": "event_1776285550837",
-        "eventName": "70s • 80s • 90s MUSIC BINGO",
+        "eventName": "70s \u2022 80s \u2022 90s MUSIC BINGO",
         "eventDate": "2026-05-22",
         "eventTime": "17:30",
-        "eventDescription": "Our Music Bingo nights have been SELLING OUT… so we’re turning it up 🔥\n\n🎶 70s • 80s • 90s MUSIC BINGO\n📅 May 22nd, 2026\n📍 The Quarry\n👥 Tables of 4\n🍻 Beer bucket OR bottle of wine per table\n🏆 Prizes all night long",
+        "eventDescription": "Our Music Bingo nights have been SELLING OUT\u2026 so we\u2019re turning it up \ud83d\udd25\n\n\ud83c\udfb6 70s \u2022 80s \u2022 90s MUSIC BINGO\n\ud83d\udcc5 May 22nd, 2026\n\ud83d\udccd The Quarry\n\ud83d\udc65 Tables of 4\n\ud83c\udf7b Beer bucket OR bottle of wine per table\n\ud83c\udfc6 Prizes all night long",
         "pricePerSeat": 8000,
         "totalCapacity": 34,
         "registeredCount": 13,
@@ -635,21 +636,21 @@
       },
       "graphicBrief": {
         "type": "event_poster",
-        "templateRef": "Event poster — match Boots & Bourbon / Live Bands template style",
+        "templateRef": "Event poster \u2014 match Boots & Bourbon / Live Bands template style",
         "neededBy": "2026-05-19",
         "dimensions": "1080x1080 square (Instagram + Facebook safe)",
         "toneMode": "standard",
         "spec": {
           "backgroundIdea": "Use a Quarry-relevant photographic background that matches the event theme (e.g. country/boots for Boot Scootin, bingo balls/80s for Music Bingo, vineyard for Chateau trip, etc.)",
-          "title": "70S • 80S • 90S MUSIC BINGO",
-          "subtitle": "Our Music Bingo nights have been SELLING OUT… so we’re turning it up 🔥\n\n🎶 70s • 80s • 90s MUSIC BI",
+          "title": "70S \u2022 80S \u2022 90S MUSIC BINGO",
+          "subtitle": "Our Music Bingo nights have been SELLING OUT\u2026 so we\u2019re turning it up \ud83d\udd25\n\n\ud83c\udfb6 70s \u2022 80s \u2022 90s MUSIC BI",
           "date": "FRIDAY, MAY 22",
           "time": "5:30 PM",
           "callout": "$80 / SEAT",
-          "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
+          "footerText": "THE QUARRY  \u2022  EAT  \u2022  DRINK  \u2022  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "Tomorrow — Post 1 days before event. "
+        "canvasNote": "Tomorrow \u2014 Post 1 days before event. "
       },
       "caption": "",
       "hashtags": [],
@@ -671,10 +672,10 @@
       "context": {
         "sourceType": "event",
         "sourceId": "event_1776285550837",
-        "eventName": "70s • 80s • 90s MUSIC BINGO",
+        "eventName": "70s \u2022 80s \u2022 90s MUSIC BINGO",
         "eventDate": "2026-05-22",
         "eventTime": "17:30",
-        "eventDescription": "Our Music Bingo nights have been SELLING OUT… so we’re turning it up 🔥\n\n🎶 70s • 80s • 90s MUSIC BINGO\n📅 May 22nd, 2026\n📍 The Quarry\n👥 Tables of 4\n🍻 Beer bucket OR bottle of wine per table\n🏆 Prizes all night long",
+        "eventDescription": "Our Music Bingo nights have been SELLING OUT\u2026 so we\u2019re turning it up \ud83d\udd25\n\n\ud83c\udfb6 70s \u2022 80s \u2022 90s MUSIC BINGO\n\ud83d\udcc5 May 22nd, 2026\n\ud83d\udccd The Quarry\n\ud83d\udc65 Tables of 4\n\ud83c\udf7b Beer bucket OR bottle of wine per table\n\ud83c\udfc6 Prizes all night long",
         "pricePerSeat": 8000,
         "totalCapacity": 34,
         "registeredCount": 13,
@@ -684,21 +685,21 @@
       },
       "graphicBrief": {
         "type": "event_poster",
-        "templateRef": "Event poster — match Boots & Bourbon / Live Bands template style",
+        "templateRef": "Event poster \u2014 match Boots & Bourbon / Live Bands template style",
         "neededBy": "2026-05-20",
         "dimensions": "1080x1080 square (Instagram + Facebook safe)",
         "toneMode": "standard",
         "spec": {
           "backgroundIdea": "Use a Quarry-relevant photographic background that matches the event theme (e.g. country/boots for Boot Scootin, bingo balls/80s for Music Bingo, vineyard for Chateau trip, etc.)",
-          "title": "70S • 80S • 90S MUSIC BINGO",
-          "subtitle": "Our Music Bingo nights have been SELLING OUT… so we’re turning it up 🔥\n\n🎶 70s • 80s • 90s MUSIC BI",
+          "title": "70S \u2022 80S \u2022 90S MUSIC BINGO",
+          "subtitle": "Our Music Bingo nights have been SELLING OUT\u2026 so we\u2019re turning it up \ud83d\udd25\n\n\ud83c\udfb6 70s \u2022 80s \u2022 90s MUSIC BI",
           "date": "FRIDAY, MAY 22",
           "time": "5:30 PM",
           "callout": "$80 / SEAT",
-          "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
+          "footerText": "THE QUARRY  \u2022  EAT  \u2022  DRINK  \u2022  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "Today / Tonight — Post 0 days before event. "
+        "canvasNote": "Today / Tonight \u2014 Post 0 days before event. "
       },
       "caption": "",
       "hashtags": [],
@@ -748,9 +749,9 @@
               "time": "7 PM - 10 PM"
             }
           ],
-          "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
+          "footerText": "THE QUARRY  \u2022  GREAT VIEWS  \u2022  GREAT FOOD  \u2022  GOOD TIMES"
         },
-        "canvasNote": "Weekend Lineup — covers 1 band(s). Post 3 days before first show."
+        "canvasNote": "Weekend Lineup \u2014 covers 1 band(s). Post 3 days before first show."
       },
       "caption": "",
       "hashtags": [],
@@ -812,7 +813,7 @@
         "toneMode": "tonight",
         "spec": {
           "backgroundIdea": "Quarry lake/patio at golden hour or evening string lights",
-          "title": "TONIGHT — LIVE MUSIC",
+          "title": "TONIGHT \u2014 LIVE MUSIC",
           "cards": [
             {
               "day": "Saturday, May 2",
@@ -835,12 +836,12 @@
               "time": "7 PM - 10 PM"
             }
           ],
-          "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
+          "footerText": "THE QUARRY  \u2022  GREAT VIEWS  \u2022  GREAT FOOD  \u2022  GOOD TIMES"
         },
-        "canvasNote": "Tonight — covers 4 band(s). Post 0 days before first show.",
-        "reelBrief": "Open with a slow pan across the empty patio as afternoon light hits the stone — 3s hold. Cut to a close-up of a wine glass being set on the bar top. End on a wide shot of the cliff and lake, string lights beginning to glow at dusk. Suggested audio: upbeat acoustic country instrumental. Text overlay: 'Dave Caputo 1–4 PM / Boots & Bourbon 6–11 PM / No cover. Just show up.'"
+        "canvasNote": "Tonight \u2014 covers 4 band(s). Post 0 days before first show.",
+        "reelBrief": "Open with a slow pan across the empty patio as afternoon light hits the stone \u2014 3s hold. Cut to a close-up of a wine glass being set on the bar top. End on a wide shot of the cliff and lake, string lights beginning to glow at dusk. Suggested audio: upbeat acoustic country instrumental. Text overlay: 'Dave Caputo 1\u20134 PM / Boots & Bourbon 6\u201311 PM / No cover. Just show up.'"
       },
-      "caption": "Live music starts at 1 PM today — Dave Caputo plays the afternoon, then Boots and Bourbon (DJ) takes it into the night from 6 to 11. No cover, ever. Just show up.",
+      "caption": "Live music starts at 1 PM today \u2014 Dave Caputo plays the afternoon, then Boots and Bourbon (DJ) takes it into the night from 6 to 11. No cover, ever. Just show up.",
       "hashtags": [
         "#NewMelleMO",
         "#StCharlesCounty",
@@ -854,11 +855,11 @@
       "userImageUrl": null,
       "imagePrompt": "Acoustic guitar leaning against a wooden stool on a sunlit stone patio, warm afternoon light casting long shadows, string lights overhead not yet lit, soft blur of a lake and limestone cliff in the background",
       "variants": {
-        "facebook": "Two sets of live music today at The Quarry. Dave Caputo plays 1–4 PM, then Boots and Bourbon (DJ) keeps things going from 6 to 11. No cover charge — it's just part of the experience. Come for lunch, stay for the evening.",
-        "instagram": "Live music all day — Dave Caputo at 1 PM, Boots and Bourbon (DJ) at 6. No cover, ever. Just show up."
+        "facebook": "Two sets of live music today at The Quarry. Dave Caputo plays 1\u20134 PM, then Boots and Bourbon (DJ) keeps things going from 6 to 11. No cover charge \u2014 it's just part of the experience. Come for lunch, stay for the evening.",
+        "instagram": "Live music all day \u2014 Dave Caputo at 1 PM, Boots and Bourbon (DJ) at 6. No cover, ever. Just show up."
       },
       "suggestedTimeHourCT": 11,
-      "aiReasoning": "T-0 calls for 'tonight/today' specificity with time and act names front-loaded — no urgency needed for live music, so the tone stays vibe-forward and inviting with a clean logistical close.",
+      "aiReasoning": "T-0 calls for 'tonight/today' specificity with time and act names front-loaded \u2014 no urgency needed for live music, so the tone stays vibe-forward and inviting with a clean logistical close.",
       "model": "claude-sonnet-4-6",
       "hydratedAt": "2026-04-29T13:03:53.223Z",
       "updatedAt": "2026-04-29T13:03:53.223Z"
@@ -878,10 +879,10 @@
       "context": {
         "sourceType": "event",
         "sourceId": "event_1776285550837",
-        "eventName": "70s • 80s • 90s MUSIC BINGO",
+        "eventName": "70s \u2022 80s \u2022 90s MUSIC BINGO",
         "eventDate": "2026-05-22",
         "eventTime": "17:30",
-        "eventDescription": "Our Music Bingo nights have been SELLING OUT… so we’re turning it up 🔥\n\n🎶 70s • 80s • 90s MUSIC BINGO\n📅 May 22nd, 2026\n📍 The Quarry\n👥 Tables of 4\n🍻 Beer bucket OR bottle of wine per table\n🏆 Prizes all night long",
+        "eventDescription": "Our Music Bingo nights have been SELLING OUT\u2026 so we\u2019re turning it up \ud83d\udd25\n\n\ud83c\udfb6 70s \u2022 80s \u2022 90s MUSIC BINGO\n\ud83d\udcc5 May 22nd, 2026\n\ud83d\udccd The Quarry\n\ud83d\udc65 Tables of 4\n\ud83c\udf7b Beer bucket OR bottle of wine per table\n\ud83c\udfc6 Prizes all night long",
         "pricePerSeat": 8000,
         "totalCapacity": 34,
         "registeredCount": 13,
@@ -891,24 +892,24 @@
       },
       "graphicBrief": {
         "type": "event_poster",
-        "templateRef": "Event poster — match Boots & Bourbon / Live Bands template style",
+        "templateRef": "Event poster \u2014 match Boots & Bourbon / Live Bands template style",
         "neededBy": "2026-04-29",
         "dimensions": "1080x1080 square (Instagram + Facebook safe)",
         "toneMode": "standard",
         "spec": {
           "backgroundIdea": "Use a Quarry-relevant photographic background that matches the event theme (e.g. country/boots for Boot Scootin, bingo balls/80s for Music Bingo, vineyard for Chateau trip, etc.)",
-          "title": "70S • 80S • 90S MUSIC BINGO",
-          "subtitle": "Our Music Bingo nights have been SELLING OUT… so we’re turning it up 🔥\n\n🎶 70s • 80s • 90s MUSIC BI",
+          "title": "70S \u2022 80S \u2022 90S MUSIC BINGO",
+          "subtitle": "Our Music Bingo nights have been SELLING OUT\u2026 so we\u2019re turning it up \ud83d\udd25\n\n\ud83c\udfb6 70s \u2022 80s \u2022 90s MUSIC BI",
           "date": "FRIDAY, MAY 22",
           "time": "5:30 PM",
           "callout": "$80 / SEAT",
-          "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
+          "footerText": "THE QUARRY  \u2022  EAT  \u2022  DRINK  \u2022  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "Weekly Hype — Post 21 days before event. ",
-        "reelBrief": "Open with a slow pan across bingo cards on a wood table, cut to a wine bottle being uncorked, hold 3s on a close-up of a bingo dauber hitting a card. Suggested audio: upbeat 80s synth-pop instrumental. Text overlay: '70s • 80s • 90s Music Bingo / May 22 / Tables of 4 / theQuarryNewMelle.com'"
+        "canvasNote": "Weekly Hype \u2014 Post 21 days before event. ",
+        "reelBrief": "Open with a slow pan across bingo cards on a wood table, cut to a wine bottle being uncorked, hold 3s on a close-up of a bingo dauber hitting a card. Suggested audio: upbeat 80s synth-pop instrumental. Text overlay: '70s \u2022 80s \u2022 90s Music Bingo / May 22 / Tables of 4 / theQuarryNewMelle.com'"
       },
-      "caption": "Music Bingo is back — and these nights fill up fast. 70s, 80s, and 90s hits on May 22nd. Tables of 4, $80/table, includes a beer bucket or bottle of wine. Prizes all night. Grab your table before it's gone.",
+      "caption": "Music Bingo is back \u2014 and these nights fill up fast. 70s, 80s, and 90s hits on May 22nd. Tables of 4, $80/table, includes a beer bucket or bottle of wine. Prizes all night. Grab your table before it's gone.",
       "hashtags": [
         "#NewMelleMO",
         "#StCharlesCounty",
@@ -924,11 +925,11 @@
       "bumpedFromDay": "2026-05-01",
       "imagePrompt": "Four vintage-style bingo cards spread on a warm wood table, a bucket of iced beer bottles and a glass of red wine alongside, string lights glowing softly overhead in a stone-walled patio setting, golden evening light, no text, no faces",
       "variants": {
-        "facebook": "Music Bingo is back — and these nights have been selling out. On May 22nd we're doing a full 70s, 80s, and 90s set. Tables of 4, $80/table, and every table gets a beer bucket or bottle of wine included. Prizes all night long. Tickets at the link below.",
-        "instagram": "Music Bingo is back. 70s, 80s, 90s — May 22nd. Tables of 4, wine or beer included, prizes all night. Link in bio."
+        "facebook": "Music Bingo is back \u2014 and these nights have been selling out. On May 22nd we're doing a full 70s, 80s, and 90s set. Tables of 4, $80/table, and every table gets a beer bucket or bottle of wine included. Prizes all night long. Tickets at the link below.",
+        "instagram": "Music Bingo is back. 70s, 80s, 90s \u2014 May 22nd. Tables of 4, wine or beer included, prizes all night. Link in bio."
       },
       "suggestedTimeHourCT": 11,
-      "aiReasoning": "At T-21 with 38% fill, this is an announcement post — the tone establishes what the event is and plants the date clearly without urgency, while the value (drink included, prizes) does the quiet selling.",
+      "aiReasoning": "At T-21 with 38% fill, this is an announcement post \u2014 the tone establishes what the event is and plants the date clearly without urgency, while the value (drink included, prizes) does the quiet selling.",
       "model": "claude-sonnet-4-6",
       "hydratedAt": "2026-04-29T13:03:43.146Z",
       "updatedAt": "2026-04-29T13:03:43.146Z"
@@ -1009,12 +1010,12 @@
               "time": "7 PM - 10 PM"
             }
           ],
-          "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
+          "footerText": "THE QUARRY  \u2022  GREAT VIEWS  \u2022  GREAT FOOD  \u2022  GOOD TIMES"
         },
-        "canvasNote": "Weekend Lineup — covers 4 band(s). Post 3 days before first show.",
-        "reelBrief": "Open with a slow pan across the patio at golden hour — string lights, stone bar, lake in background. Cut to a close-up of a wine glass catching the light. Hold 3s on an empty stage setup with mic and guitar. End on the cliffside lake view at dusk. Suggested audio: warm acoustic indie or light country instrumental. Text overlay: 'Live Music This Weekend — No Cover. The Quarry, New Melle.'"
+        "canvasNote": "Weekend Lineup \u2014 covers 4 band(s). Post 3 days before first show.",
+        "reelBrief": "Open with a slow pan across the patio at golden hour \u2014 string lights, stone bar, lake in background. Cut to a close-up of a wine glass catching the light. Hold 3s on an empty stage setup with mic and guitar. End on the cliffside lake view at dusk. Suggested audio: warm acoustic indie or light country instrumental. Text overlay: 'Live Music This Weekend \u2014 No Cover. The Quarry, New Melle.'"
       },
-      "caption": "This weekend at The Quarry — four live acts, no cover.\n\nSaturday: Scott Logan (1–4 PM) + BP Duo (7–10 PM)\nSunday: Garden Party (1–4 PM)\n\nPlus Kelli Renee is up next Thursday, May 15 (7–10 PM).\n\nJust show up. 3960 Highway Z, New Melle.",
+      "caption": "This weekend at The Quarry \u2014 four live acts, no cover.\n\nSaturday: Scott Logan (1\u20134 PM) + BP Duo (7\u201310 PM)\nSunday: Garden Party (1\u20134 PM)\n\nPlus Kelli Renee is up next Thursday, May 15 (7\u201310 PM).\n\nJust show up. 3960 Highway Z, New Melle.",
       "hashtags": [
         "#NewMelleMO",
         "#StCharlesCounty",
@@ -1029,11 +1030,11 @@
       "userImageUrl": null,
       "imagePrompt": "Acoustic guitar leaning against a wooden stool on a stone patio at golden hour, string lights overhead beginning to glow, warm bokeh of a lake and limestone cliffs softly out of focus in the background, no faces, no text",
       "variants": {
-        "facebook": "Four live acts this weekend — and every one of them is free with your visit.\n\nSaturday: Scott Logan (1–4 PM) and BP Duo (7–10 PM)\nSunday: Garden Party (1–4 PM)\n\nAnd if you're planning ahead — Kelli Renee plays Thursday, May 15 from 7–10 PM.\n\nNo reservations needed for dining. Just come out. We're at 3960 Highway Z in New Melle.",
-        "instagram": "Four live acts this weekend. No cover, no ticket — just show up.\n\nSat: Scott Logan 1–4 PM + BP Duo 7–10 PM\nSun: Garden Party 1–4 PM\n\nNew Melle, MO — link in bio."
+        "facebook": "Four live acts this weekend \u2014 and every one of them is free with your visit.\n\nSaturday: Scott Logan (1\u20134 PM) and BP Duo (7\u201310 PM)\nSunday: Garden Party (1\u20134 PM)\n\nAnd if you're planning ahead \u2014 Kelli Renee plays Thursday, May 15 from 7\u201310 PM.\n\nNo reservations needed for dining. Just come out. We're at 3960 Highway Z in New Melle.",
+        "instagram": "Four live acts this weekend. No cover, no ticket \u2014 just show up.\n\nSat: Scott Logan 1\u20134 PM + BP Duo 7\u201310 PM\nSun: Garden Party 1\u20134 PM\n\nNew Melle, MO \u2014 link in bio."
       },
       "suggestedTimeHourCT": 16,
-      "aiReasoning": "T-3 'Weekend Lineup' arc calls for logistical specificity — day, time, names — framed as a low-friction invitation that reinforces the free live music value without any urgency or hype.",
+      "aiReasoning": "T-3 'Weekend Lineup' arc calls for logistical specificity \u2014 day, time, names \u2014 framed as a low-friction invitation that reinforces the free live music value without any urgency or hype.",
       "model": "claude-sonnet-4-6",
       "hydratedAt": "2026-04-30T13:02:59.046Z",
       "updatedAt": "2026-04-30T13:02:59.046Z"
@@ -1091,7 +1092,7 @@
         "toneMode": "tonight",
         "spec": {
           "backgroundIdea": "Quarry lake/patio at golden hour or evening string lights",
-          "title": "TONIGHT — LIVE MUSIC",
+          "title": "TONIGHT \u2014 LIVE MUSIC",
           "cards": [
             {
               "day": "Saturday, May 9",
@@ -1114,9 +1115,9 @@
               "time": "7 PM - 10 PM"
             }
           ],
-          "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
+          "footerText": "THE QUARRY  \u2022  GREAT VIEWS  \u2022  GREAT FOOD  \u2022  GOOD TIMES"
         },
-        "canvasNote": "Tonight — covers 4 band(s). Post 0 days before first show."
+        "canvasNote": "Tonight \u2014 covers 4 band(s). Post 0 days before first show."
       },
       "caption": "",
       "hashtags": [],
@@ -1199,9 +1200,9 @@
               "time": "7 PM - 10 PM"
             }
           ],
-          "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
+          "footerText": "THE QUARRY  \u2022  GREAT VIEWS  \u2022  GREAT FOOD  \u2022  GOOD TIMES"
         },
-        "canvasNote": "Weekend Lineup — covers 4 band(s). Post 3 days before first show."
+        "canvasNote": "Weekend Lineup \u2014 covers 4 band(s). Post 3 days before first show."
       },
       "caption": "",
       "hashtags": [],
@@ -1261,7 +1262,7 @@
         "toneMode": "tonight",
         "spec": {
           "backgroundIdea": "Quarry lake/patio at golden hour or evening string lights",
-          "title": "TONIGHT — LIVE MUSIC",
+          "title": "TONIGHT \u2014 LIVE MUSIC",
           "cards": [
             {
               "day": "Saturday, May 16",
@@ -1284,9 +1285,9 @@
               "time": "7 PM - 10 PM"
             }
           ],
-          "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
+          "footerText": "THE QUARRY  \u2022  GREAT VIEWS  \u2022  GREAT FOOD  \u2022  GOOD TIMES"
         },
-        "canvasNote": "Tonight — covers 4 band(s). Post 0 days before first show."
+        "canvasNote": "Tonight \u2014 covers 4 band(s). Post 0 days before first show."
       },
       "caption": "",
       "hashtags": [],
@@ -1358,9 +1359,9 @@
               "time": "1 PM - 4 PM"
             }
           ],
-          "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
+          "footerText": "THE QUARRY  \u2022  GREAT VIEWS  \u2022  GREAT FOOD  \u2022  GOOD TIMES"
         },
-        "canvasNote": "Weekend Lineup — covers 3 band(s). Post 3 days before first show."
+        "canvasNote": "Weekend Lineup \u2014 covers 3 band(s). Post 3 days before first show."
       },
       "caption": "",
       "hashtags": [],
@@ -1414,7 +1415,7 @@
         "toneMode": "tonight",
         "spec": {
           "backgroundIdea": "Quarry lake/patio at golden hour or evening string lights",
-          "title": "TONIGHT — LIVE MUSIC",
+          "title": "TONIGHT \u2014 LIVE MUSIC",
           "cards": [
             {
               "day": "Saturday, May 23",
@@ -1432,9 +1433,9 @@
               "time": "1 PM - 4 PM"
             }
           ],
-          "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
+          "footerText": "THE QUARRY  \u2022  GREAT VIEWS  \u2022  GREAT FOOD  \u2022  GOOD TIMES"
         },
-        "canvasNote": "Tonight — covers 3 band(s). Post 0 days before first show."
+        "canvasNote": "Tonight \u2014 covers 3 band(s). Post 0 days before first show."
       },
       "caption": "",
       "hashtags": [],
@@ -1495,9 +1496,9 @@
               "time": "1 PM - 4 PM"
             }
           ],
-          "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
+          "footerText": "THE QUARRY  \u2022  GREAT VIEWS  \u2022  GREAT FOOD  \u2022  GOOD TIMES"
         },
-        "canvasNote": "Weekend Lineup — covers 2 band(s). Post 3 days before first show."
+        "canvasNote": "Weekend Lineup \u2014 covers 2 band(s). Post 3 days before first show."
       },
       "caption": "",
       "hashtags": [],
@@ -1545,7 +1546,7 @@
         "toneMode": "tonight",
         "spec": {
           "backgroundIdea": "Quarry lake/patio at golden hour or evening string lights",
-          "title": "TONIGHT — LIVE MUSIC",
+          "title": "TONIGHT \u2014 LIVE MUSIC",
           "cards": [
             {
               "day": "Saturday, May 30",
@@ -1558,9 +1559,9 @@
               "time": "1 PM - 4 PM"
             }
           ],
-          "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
+          "footerText": "THE QUARRY  \u2022  GREAT VIEWS  \u2022  GREAT FOOD  \u2022  GOOD TIMES"
         },
-        "canvasNote": "Tonight — covers 2 band(s). Post 0 days before first show."
+        "canvasNote": "Tonight \u2014 covers 2 band(s). Post 0 days before first show."
       },
       "caption": "",
       "hashtags": [],
