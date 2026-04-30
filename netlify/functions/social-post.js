@@ -109,16 +109,28 @@ exports.handler = async (event) => {
         for (const draft of queue) {
             try {
                 const r = await fireMetaPostPerPlatform(draft);
-                draft.status = 'posted';
-                draft.postedAt = new Date().toISOString();
-                draft.updatedAt = draft.postedAt;
-                // Pull post IDs from the meta-post response
+                // Only mark "posted" if at least one platform ACTUALLY succeeded
+                // (returned a postId or mediaId). Otherwise mark "failed" with the
+                // real error so admin shows the correct state.
                 const fbResult = (r.results || []).find((x) => x.platform === 'facebook');
                 const igResult = (r.results || []).find((x) => x.platform === 'instagram');
-                if (fbResult) draft.fbPostId = fbResult.postId || null;
-                if (igResult) draft.igMediaId = igResult.mediaId || null;
-                draft.dryRun = !!r.dryRun;
-                results.push({ id: draft.id, ok: true, platforms: r.results, dryRun: r.dryRun });
+                const anyRealSuccess = (fbResult && fbResult.postId) || (igResult && igResult.mediaId) || (r.dryRun && r.results.length > 0);
+                draft.updatedAt = new Date().toISOString();
+                if (anyRealSuccess) {
+                    draft.status = 'posted';
+                    draft.postedAt = draft.updatedAt;
+                    if (fbResult) draft.fbPostId = fbResult.postId || null;
+                    if (igResult) draft.igMediaId = igResult.mediaId || null;
+                    draft.dryRun = !!r.dryRun;
+                    results.push({ id: draft.id, ok: true, platforms: r.results, dryRun: r.dryRun });
+                } else {
+                    // Collect platform errors into a single human-friendly message
+                    const errMsgs = (r.results || []).filter((x) => x.error).map((x) => `${x.platform}: ${x.error}`);
+                    draft.status = 'failed';
+                    draft.failureReason = errMsgs.length ? errMsgs.join(' | ') : 'no platforms reported success';
+                    draft.platformErrors = r.results || [];
+                    results.push({ id: draft.id, ok: false, error: draft.failureReason, platforms: r.results });
+                }
                 mutated = true;
             } catch (err) {
                 draft.status = 'failed';
