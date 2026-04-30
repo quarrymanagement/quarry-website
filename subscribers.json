@@ -18526,8 +18526,8 @@
     "emailStatus": "Subscribed",
     "smsStatus": "",
     "source": "Form Submission",
-    "lastActivity": "",
-    "lastActivityDate": "",
+    "lastActivity": "Form: mailing-list",
+    "lastActivityDate": "2026-04-30T11:44:31.746Z",
     "address": {
       "street": "",
       "city": "",
@@ -18535,9 +18535,21 @@
       "zip": "",
       "country": ""
     },
-    "events": [],
+    "events": [
+      {
+        "type": "mailing-list",
+        "timestamp": "2026-04-30T11:44:31.746Z",
+        "marketingOptIn": false,
+        "details": {
+          "ip": "67.6.67.50",
+          "user_agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Mobile Safari/537.36",
+          "referrer": "https://thequarrystl.com/"
+        }
+      }
+    ],
     "tags": [
-      "Subscriptions"
+      "Subscriptions",
+      "Subscribed"
     ]
   },
   {
