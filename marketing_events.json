@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-01T13:13:02.305Z",
+  "updatedAt": "2026-05-01T13:16:53.223Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -9621,6 +9621,18 @@
       "sgEventId": "jh0aRZ8iRO2L4Ug1hT0v7g",
       "userAgent": "YahooMailProxy; https://help.yahoo.com/kb/yahoo-mail-proxy-SLN28749.html",
       "category": "quarry-marketing"
+    },
+    {
+      "ts": "2026-05-01T13:16:53.223Z",
+      "type": "poll",
+      "draftId": "d4d01b90-a7a2-4061-b5d7-dd442f9acf7b",
+      "sendId": "92c78bd3-44af-11f1-81cc-0a22d60890ee",
+      "summary": {
+        "opens": 168,
+        "clicks": 3,
+        "bounces": 9,
+        "unsubs": 0
+      }
     }
   ],
   "aggregates": {
@@ -9650,8 +9662,8 @@
     },
     "d4d01b90-a7a2-4061-b5d7-dd442f9acf7b": {
       "delivered": 422,
-      "open": 222,
-      "uniqueOpen": 166,
+      "open": 224,
+      "uniqueOpen": 168,
       "click": 6,
       "uniqueClick": 3,
       "bounce": 9,
@@ -9667,7 +9679,7 @@
       "urlsClicked": {},
       "requests": 483,
       "block": 0,
-      "lastPolledAt": "2026-05-01T13:02:53.682Z"
+      "lastPolledAt": "2026-05-01T13:16:53.223Z"
     }
   }
 }
