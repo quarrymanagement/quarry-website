@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-01T19:43:31.629Z",
+  "updatedAt": "2026-05-01T19:46:27.697Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -10703,6 +10703,18 @@
       "sgEventId": "dgqB4b7MQk66bBnfM_hU7A",
       "userAgent": "Mozilla/5.0",
       "category": "quarry-marketing"
+    },
+    {
+      "ts": "2026-05-01T19:46:27.697Z",
+      "type": "poll",
+      "draftId": "d4d01b90-a7a2-4061-b5d7-dd442f9acf7b",
+      "sendId": "92c78bd3-44af-11f1-81cc-0a22d60890ee",
+      "summary": {
+        "opens": 183,
+        "clicks": 4,
+        "bounces": 9,
+        "unsubs": 0
+      }
     }
   ],
   "aggregates": {
@@ -10731,8 +10743,8 @@
       }
     },
     "d4d01b90-a7a2-4061-b5d7-dd442f9acf7b": {
-      "delivered": 431,
-      "open": 249,
+      "delivered": 432,
+      "open": 250,
       "uniqueOpen": 183,
       "click": 7,
       "uniqueClick": 4,
@@ -10749,7 +10761,7 @@
       "urlsClicked": {},
       "requests": 483,
       "block": 0,
-      "lastPolledAt": "2026-05-01T19:32:32.679Z"
+      "lastPolledAt": "2026-05-01T19:46:27.697Z"
     }
   }
 }
