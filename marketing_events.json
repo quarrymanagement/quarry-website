@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-01T12:16:43.129Z",
+  "updatedAt": "2026-05-01T12:28:22.023Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -9464,6 +9464,17 @@
         "bounces": 9,
         "unsubs": 0
       }
+    },
+    {
+      "ts": "2026-05-01T12:28:09.000Z",
+      "type": "open",
+      "draftId": null,
+      "ruleId": null,
+      "email": "countryoak@yahoo.com",
+      "url": null,
+      "sgEventId": "4f9oj1-nRPCbf5xrJWeCjg",
+      "userAgent": "Mozilla/5.0",
+      "category": "quarry-marketing"
     }
   ],
   "aggregates": {
