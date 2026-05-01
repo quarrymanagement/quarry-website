@@ -2667,6 +2667,7 @@
 
                 <div class="sb-nav-section">Customers</div>
                 <div class="sb-nav-group">
+                    <div class="sb-nav-item" data-tab="members"><span class="sb-ic">⭐</span><span class="sb-lbl">Rewards Members</span></div>
                     <div class="sb-nav-item" data-tab="crm"><span class="sb-ic">👥</span><span class="sb-lbl">Contacts</span></div>
                     <div class="sb-nav-item" data-tab="potential"><span class="sb-ic">📥</span><span class="sb-lbl">Reservation Inquiries</span></div>
                     <div class="sb-nav-item" data-tab="confirmed"><span class="sb-ic">✓</span><span class="sb-lbl">Confirmed Bookings</span></div>
@@ -2886,15 +2887,57 @@
             <div id="appRewardsTab" class="tab-content">
                 <div class="bands-header">
                     <h2>Rewards Setup</h2>
+                    <div style="display:flex;gap:12px;align-items:center;">
+                        <span id="rewardsStatus" style="font-size:0.85rem;color:var(--text-muted);"></span>
+                        <button class="btn-primary" id="saveRewardsBtn" style="opacity:0.5;pointer-events:none;">Save Changes</button>
+                    </div>
                 </div>
-                <div style="background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:24px;max-width:720px;">
-                    <div style="font-weight:600;margin-bottom:8px;">Editor coming next</div>
-                    <p style="color:var(--text-secondary);font-size:0.95rem;line-height:1.6;margin-bottom:16px;">
-                        This will let you tune the loyalty program without code: earn rate (currently 10 pts per $1), tier thresholds (Standard / Gold at 3,000 lifetime / Platinum at 6,000), and the reward catalog ($5 off at 500 pts, free appetizer at 750, $20 wine credit at 1,500, birthday entrée at 2,000, private event priority at 5,000). Every change saves to <code style="background:var(--bg-card);padding:1px 5px;border-radius:3px;">rewards.json</code> and updates the app's Rewards screen.
-                    </p>
-                    <p style="color:var(--text-secondary);font-size:0.95rem;line-height:1.6;margin:0;">
-                        Pairs with the eventual member database and redemption console — once those are in place, this tab is where you adjust the program's economics over time.
-                    </p>
+
+                <div id="rewardsLoading" style="text-align:center;padding:40px;color:var(--text-muted);">Loading rewards configuration…</div>
+
+                <div id="rewardsEditor" style="display:none;max-width:920px;">
+                    <!-- Earn Rate -->
+                    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:20px;margin-bottom:20px;">
+                        <h3 style="margin-bottom:8px;font-size:1rem;font-weight:600;">Earn Rate</h3>
+                        <p style="color:var(--text-secondary);font-size:0.88rem;line-height:1.55;margin-bottom:14px;">
+                            Base points earned per $1 spent on a closed tab. Tier multipliers below stack on this rate.
+                        </p>
+                        <div style="display:flex;gap:12px;align-items:center;">
+                            <input type="number" id="earnRateInput" step="0.5" min="0" data-rewards-dirty
+                                style="width:110px;padding:9px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:1rem;font-family:var(--font-sans);">
+                            <span style="color:var(--text-muted);font-size:0.9rem;">points per $1 spent</span>
+                        </div>
+                    </div>
+
+                    <!-- Tiers -->
+                    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:20px;margin-bottom:20px;">
+                        <h3 style="margin-bottom:8px;font-size:1rem;font-weight:600;">Membership Tiers</h3>
+                        <p style="color:var(--text-secondary);font-size:0.88rem;line-height:1.55;margin-bottom:14px;">
+                            Members are promoted to a tier when their lifetime points cross the threshold. Each tier can adjust the earn multiplier.
+                        </p>
+                        <div id="tiersTable" style="display:grid;gap:10px;"></div>
+                    </div>
+
+                    <!-- Reward Catalog -->
+                    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:20px;margin-bottom:20px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                            <h3 style="font-size:1rem;font-weight:600;">Reward Catalog</h3>
+                            <button class="btn-secondary" id="addRewardBtn" style="font-size:0.82rem;">+ Add Reward</button>
+                        </div>
+                        <p style="color:var(--text-secondary);font-size:0.88rem;line-height:1.55;margin-bottom:14px;">
+                            What members can redeem with points. Toggle off to hide from the app without deleting.
+                        </p>
+                        <div id="catalogTable" style="display:grid;gap:8px;"></div>
+                    </div>
+
+                    <!-- Bonus Earning -->
+                    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:20px;">
+                        <h3 style="margin-bottom:8px;font-size:1rem;font-weight:600;">Bonus Earning</h3>
+                        <p style="color:var(--text-secondary);font-size:0.88rem;line-height:1.55;margin-bottom:14px;">
+                            Points awarded for non-spend behaviors — RSVPs, referrals, birthday visits.
+                        </p>
+                        <div id="bonusesTable" style="display:grid;gap:8px;"></div>
+                    </div>
                 </div>
             </div>
 
@@ -2913,6 +2956,119 @@
                     <p style="color:var(--text-secondary);font-size:0.95rem;line-height:1.6;margin:0;">
                         Also where the welcome greeting, onboarding three-step copy, and program rules text get edited if you ever want to refine the wording.
                     </p>
+                </div>
+            </div>
+
+            <!-- ========================================================
+                 CUSTOMERS — REWARDS MEMBERS
+                 ======================================================== -->
+            <div id="membersTab" class="tab-content">
+                <div class="bands-header">
+                    <h2>Rewards Members</h2>
+                    <button class="btn-primary" id="addMemberBtn">+ Add Member</button>
+                </div>
+
+                <div id="membersLoading" style="text-align:center;padding:40px;color:var(--text-muted);">Loading members…</div>
+
+                <div id="membersContent" style="display:none;">
+                    <!-- Stats summary -->
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));gap:12px;margin-bottom:24px;">
+                        <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:16px;">
+                            <div style="font-size:0.72rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--text-muted);font-weight:600;margin-bottom:6px;">Total Members</div>
+                            <div id="memTotal" style="font-size:1.6rem;font-weight:600;color:var(--text-primary);">0</div>
+                        </div>
+                        <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:16px;">
+                            <div style="font-size:0.72rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--text-muted);font-weight:600;margin-bottom:6px;">Quarry Gold</div>
+                            <div id="memGold" style="font-size:1.6rem;font-weight:600;color:var(--gold);">0</div>
+                        </div>
+                        <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:16px;">
+                            <div style="font-size:0.72rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--text-muted);font-weight:600;margin-bottom:6px;">Quarry Platinum</div>
+                            <div id="memPlat" style="font-size:1.6rem;font-weight:600;color:#7c3aed;">0</div>
+                        </div>
+                        <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:16px;">
+                            <div style="font-size:0.72rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--text-muted);font-weight:600;margin-bottom:6px;">Joined This Month</div>
+                            <div id="memNew" style="font-size:1.6rem;font-weight:600;color:var(--green);">0</div>
+                        </div>
+                    </div>
+
+                    <!-- Empty state -->
+                    <div id="membersEmpty" style="display:none;text-align:center;padding:48px 24px;background:var(--bg-card);border:1px dashed var(--border-subtle);border-radius:var(--radius-md);">
+                        <div style="font-size:2rem;margin-bottom:8px;opacity:0.6;">⭐</div>
+                        <div style="font-weight:600;margin-bottom:6px;">No members yet</div>
+                        <div style="color:var(--text-secondary);font-size:0.92rem;line-height:1.55;max-width:520px;margin:0 auto;">
+                            When real auth ships in the app, members who sign up will land here automatically. Until then, use the <strong>Add Member</strong> button above to manually create accounts for friends, family, and early regulars.
+                        </div>
+                    </div>
+
+                    <!-- Members table -->
+                    <div id="membersTableWrap" style="overflow-x:auto;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md);">
+                        <table class="bands-table" style="margin:0;">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Contact</th>
+                                    <th>Tier</th>
+                                    <th style="text-align:right;">Points</th>
+                                    <th>Joined</th>
+                                    <th>Last Visit</th>
+                                    <th style="text-align:right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="membersTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================================
+                 ADD MEMBER MODAL
+                 ======================================================== -->
+            <div id="addMemberModal" class="modal" style="display:none;">
+                <div class="modal-overlay" onclick="closeAddMemberModal()"></div>
+                <div class="modal-content" style="max-width:520px;">
+                    <div class="modal-header">
+                        <h3>Add Member</h3>
+                        <button class="modal-close" onclick="closeAddMemberModal()">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="addMemberForm" style="display:grid;gap:14px;">
+                            <div>
+                                <label style="display:block;font-size:0.78rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Full Name *</label>
+                                <input type="text" id="memName" required style="width:100%;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;">
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:0.78rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Email *</label>
+                                <input type="email" id="memEmail" required style="width:100%;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;">
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:0.78rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Phone</label>
+                                <input type="tel" id="memPhone" placeholder="(636) 555-0000" style="width:100%;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;">
+                            </div>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+                                <div>
+                                    <label style="display:block;font-size:0.78rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Birthday (MM-DD)</label>
+                                    <input type="text" id="memBirthday" placeholder="07-15" pattern="\d{2}-\d{2}" style="width:100%;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;">
+                                </div>
+                                <div>
+                                    <label style="display:block;font-size:0.78rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Starting Points</label>
+                                    <input type="number" id="memStartPoints" value="0" min="0" style="width:100%;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;">
+                                </div>
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:0.78rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Notes</label>
+                                <textarea id="memNotes" rows="3" placeholder="Friends &amp; family, regular Wednesday brunch, allergic to shellfish..." style="width:100%;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;font-family:var(--font-sans);resize:vertical;"></textarea>
+                            </div>
+                            <div style="display:flex;gap:18px;font-size:0.88rem;">
+                                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="memMktOptIn" checked> Marketing email opt-in</label>
+                                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="memSmsOptIn"> SMS opt-in</label>
+                            </div>
+                            <div id="addMemberError" style="color:var(--red);font-size:0.88rem;display:none;"></div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn-secondary" onclick="closeAddMemberModal()">Cancel</button>
+                        <button class="btn-primary" id="addMemberSubmit">Add Member</button>
+                    </div>
                 </div>
             </div>
 
@@ -11704,6 +11860,427 @@ function hashCode(str) {
             return { init, loadAll, openModal, onTabSwitch };
         })();
         document.addEventListener('DOMContentLoaded', () => { try { ResInqUI.init(); } catch (e) { console.error('ResInqUI init failed', e); } });
+
+        /* ================================================================
+           REWARDS SETUP TAB
+           Loads + saves rewards.json through save-github-file Netlify fn.
+           ================================================================ */
+        (function(){
+            const FEED = 'https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/rewards.json';
+            const SAVE_FN = '/.netlify/functions/save-github-file';
+            let data = null;
+            let dirty = false;
+
+            const $ = (id) => document.getElementById(id);
+            const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+            function setStatus(msg, color) {
+                const el = $('rewardsStatus');
+                if (el) { el.textContent = msg; el.style.color = color || 'var(--text-muted)'; }
+            }
+            function setDirty(d) {
+                dirty = d;
+                const btn = $('saveRewardsBtn');
+                if (btn) {
+                    btn.style.opacity = d ? '1' : '0.5';
+                    btn.style.pointerEvents = d ? 'auto' : 'none';
+                }
+                if (d) setStatus('Unsaved changes', 'var(--yellow)');
+            }
+
+            async function load() {
+                setStatus('Loading…');
+                try {
+                    const r = await fetch(FEED + '?t=' + Date.now());
+                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                    data = await r.json();
+                    render();
+                    $('rewardsLoading').style.display = 'none';
+                    $('rewardsEditor').style.display = 'block';
+                    setStatus('Synced with GitHub', 'var(--green)');
+                    setDirty(false);
+                } catch (e) {
+                    setStatus('Load failed: ' + e.message, 'var(--red)');
+                    $('rewardsLoading').textContent = 'Could not load rewards.json: ' + e.message;
+                }
+            }
+
+            function render() {
+                if (!data) return;
+                $('earnRateInput').value = data.earnRate || 10;
+
+                // Tiers
+                $('tiersTable').innerHTML = (data.tiers || []).map((t, i) => `
+                    <div style="display:grid;grid-template-columns:160px 1fr 130px 90px;gap:12px;align-items:center;padding:10px;background:var(--bg-elevated);border-radius:6px;">
+                        <input type="text" value="${esc(t.name)}" data-tier-i="${i}" data-tier-k="name"
+                            style="padding:7px 10px;border:1px solid var(--border-subtle);border-radius:4px;font-size:0.9rem;">
+                        <input type="text" value="${esc(t.perks || '')}" placeholder="Perks (free text)" data-tier-i="${i}" data-tier-k="perks"
+                            style="padding:7px 10px;border:1px solid var(--border-subtle);border-radius:4px;font-size:0.9rem;">
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <input type="number" value="${t.minPoints || 0}" min="0" step="100" data-tier-i="${i}" data-tier-k="minPoints"
+                                style="width:90px;padding:7px 10px;border:1px solid var(--border-subtle);border-radius:4px;font-size:0.9rem;">
+                            <span style="font-size:0.78rem;color:var(--text-muted);">pts</span>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <input type="number" value="${t.earnMultiplier || 1}" min="0.5" max="3" step="0.05" data-tier-i="${i}" data-tier-k="earnMultiplier"
+                                style="width:60px;padding:7px 10px;border:1px solid var(--border-subtle);border-radius:4px;font-size:0.9rem;">
+                            <span style="font-size:0.78rem;color:var(--text-muted);">×</span>
+                        </div>
+                    </div>
+                `).join('');
+
+                // Catalog
+                $('catalogTable').innerHTML = (data.catalog || []).map((r, i) => `
+                    <div style="display:grid;grid-template-columns:1fr 2fr 110px 70px 70px;gap:10px;align-items:center;padding:10px;background:var(--bg-elevated);border-radius:6px;">
+                        <input type="text" value="${esc(r.name)}" placeholder="Name" data-cat-i="${i}" data-cat-k="name"
+                            style="padding:7px 10px;border:1px solid var(--border-subtle);border-radius:4px;font-size:0.9rem;">
+                        <input type="text" value="${esc(r.description)}" placeholder="Description" data-cat-i="${i}" data-cat-k="description"
+                            style="padding:7px 10px;border:1px solid var(--border-subtle);border-radius:4px;font-size:0.9rem;">
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <input type="number" value="${r.points || 0}" min="0" step="50" data-cat-i="${i}" data-cat-k="points"
+                                style="width:80px;padding:7px 10px;border:1px solid var(--border-subtle);border-radius:4px;font-size:0.9rem;">
+                            <span style="font-size:0.78rem;color:var(--text-muted);">pts</span>
+                        </div>
+                        <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer;color:var(--text-secondary);">
+                            <input type="checkbox" data-cat-i="${i}" data-cat-k="active" ${r.active !== false ? 'checked' : ''}>
+                            Active
+                        </label>
+                        <button class="btn-small" data-cat-del="${i}" style="padding:6px 10px;background:var(--red-dim);color:var(--red);border:1px solid var(--red);border-radius:4px;font-size:0.78rem;cursor:pointer;">Delete</button>
+                    </div>
+                `).join('');
+
+                // Bonuses
+                $('bonusesTable').innerHTML = (data.bonuses || []).map((b, i) => `
+                    <div style="display:grid;grid-template-columns:1fr 2fr 110px;gap:10px;align-items:center;padding:10px;background:var(--bg-elevated);border-radius:6px;">
+                        <input type="text" value="${esc(b.name)}" data-bon-i="${i}" data-bon-k="name"
+                            style="padding:7px 10px;border:1px solid var(--border-subtle);border-radius:4px;font-size:0.9rem;">
+                        <input type="text" value="${esc(b.description)}" data-bon-i="${i}" data-bon-k="description"
+                            style="padding:7px 10px;border:1px solid var(--border-subtle);border-radius:4px;font-size:0.9rem;">
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <input type="number" value="${b.points || 0}" min="0" step="25" data-bon-i="${i}" data-bon-k="points"
+                                style="width:80px;padding:7px 10px;border:1px solid var(--border-subtle);border-radius:4px;font-size:0.9rem;">
+                            <span style="font-size:0.78rem;color:var(--text-muted);">pts</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Wire up change events on inputs (event delegation)
+            document.addEventListener('input', (e) => {
+                const t = e.target;
+                if (!data) return;
+                if (t.dataset.tierI != null) {
+                    const idx = +t.dataset.tierI, k = t.dataset.tierK;
+                    if (!data.tiers[idx]) return;
+                    data.tiers[idx][k] = (k === 'minPoints' || k === 'earnMultiplier') ? parseFloat(t.value) || 0 : t.value;
+                    setDirty(true);
+                } else if (t.dataset.catI != null) {
+                    const idx = +t.dataset.catI, k = t.dataset.catK;
+                    if (!data.catalog[idx]) return;
+                    if (k === 'active') data.catalog[idx][k] = t.checked;
+                    else data.catalog[idx][k] = (k === 'points') ? parseInt(t.value) || 0 : t.value;
+                    setDirty(true);
+                } else if (t.dataset.bonI != null) {
+                    const idx = +t.dataset.bonI, k = t.dataset.bonK;
+                    if (!data.bonuses[idx]) return;
+                    data.bonuses[idx][k] = (k === 'points') ? parseInt(t.value) || 0 : t.value;
+                    setDirty(true);
+                } else if (t.id === 'earnRateInput') {
+                    data.earnRate = parseFloat(t.value) || 10;
+                    setDirty(true);
+                }
+            });
+            document.addEventListener('change', (e) => {
+                const t = e.target;
+                if (data && t.dataset.catK === 'active') {
+                    const idx = +t.dataset.catI;
+                    if (data.catalog[idx]) { data.catalog[idx].active = t.checked; setDirty(true); }
+                }
+            });
+            document.addEventListener('click', (e) => {
+                if (e.target.dataset.catDel != null && data) {
+                    if (confirm('Delete this reward? You can also just toggle Active off to hide it.')) {
+                        data.catalog.splice(+e.target.dataset.catDel, 1);
+                        render();
+                        setDirty(true);
+                    }
+                }
+            });
+
+            // Add Reward button
+            const addRewardBtn = document.getElementById('addRewardBtn');
+            if (addRewardBtn) {
+                addRewardBtn.addEventListener('click', () => {
+                    if (!data) return;
+                    if (!data.catalog) data.catalog = [];
+                    data.catalog.push({
+                        id: 'r-' + Date.now().toString(36),
+                        name: 'New Reward',
+                        description: '',
+                        points: 500,
+                        active: true
+                    });
+                    render();
+                    setDirty(true);
+                });
+            }
+
+            // Save button
+            const saveBtn = document.getElementById('saveRewardsBtn');
+            if (saveBtn) {
+                saveBtn.addEventListener('click', async () => {
+                    if (!data || !dirty) return;
+                    setStatus('Saving…', 'var(--yellow)');
+                    saveBtn.disabled = true;
+                    try {
+                        data.lastUpdated = new Date().toISOString().split('T')[0];
+                        const r = await fetch(SAVE_FN, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                filePath: 'rewards.json',
+                                content: JSON.stringify(data, null, 2),
+                                message: 'rewards: update via admin'
+                            })
+                        });
+                        const body = await r.json();
+                        if (!r.ok || body.error) throw new Error(body.error || 'HTTP ' + r.status);
+                        setStatus('Saved · live in app within ~60s', 'var(--green)');
+                        setDirty(false);
+                    } catch (e) {
+                        setStatus('Save failed: ' + e.message, 'var(--red)');
+                    } finally {
+                        saveBtn.disabled = false;
+                    }
+                });
+            }
+
+            // Hook into tab switching — load on first open
+            const origSwitch = window.switchTab;
+            if (typeof origSwitch === 'function') {
+                window.switchTab = function(name) {
+                    origSwitch.apply(this, arguments);
+                    if (name === 'appRewards' && !data) load();
+                };
+            }
+        })();
+
+        /* ================================================================
+           REWARDS MEMBERS TAB
+           Loads + saves members.json through save-github-file Netlify fn.
+           ================================================================ */
+        (function(){
+            const FEED = 'https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/members.json';
+            const SAVE_FN = '/.netlify/functions/save-github-file';
+            let data = null;
+
+            const $ = (id) => document.getElementById(id);
+            const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+            function fmtDate(iso) {
+                if (!iso) return '—';
+                try { return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
+                catch { return iso; }
+            }
+
+            function tierBadge(tier) {
+                const colors = {
+                    standard: { bg: 'var(--bg-elevated)', fg: 'var(--text-secondary)', label: 'Standard' },
+                    gold:     { bg: 'rgba(154,123,42,0.12)', fg: 'var(--gold)', label: 'Gold' },
+                    platinum: { bg: 'rgba(124,58,237,0.12)', fg: '#7c3aed', label: 'Platinum' }
+                };
+                const c = colors[tier] || colors.standard;
+                return `<span style="display:inline-block;padding:3px 9px;border-radius:999px;font-size:0.72rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;background:${c.bg};color:${c.fg};">${c.label}</span>`;
+            }
+
+            function tierFromPoints(lifetimePts) {
+                if (lifetimePts >= 6000) return 'platinum';
+                if (lifetimePts >= 3000) return 'gold';
+                return 'standard';
+            }
+
+            async function load() {
+                try {
+                    const r = await fetch(FEED + '?t=' + Date.now());
+                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                    data = await r.json();
+                    render();
+                    $('membersLoading').style.display = 'none';
+                    $('membersContent').style.display = 'block';
+                } catch (e) {
+                    $('membersLoading').textContent = 'Could not load members.json: ' + e.message;
+                }
+            }
+
+            function render() {
+                if (!data) return;
+                const list = data.members || [];
+
+                // Stats
+                const now = new Date();
+                const thisMonth = list.filter(m => {
+                    if (!m.joinedAt) return false;
+                    const d = new Date(m.joinedAt);
+                    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+                }).length;
+                $('memTotal').textContent = list.length;
+                $('memGold').textContent = list.filter(m => m.tier === 'gold').length;
+                $('memPlat').textContent = list.filter(m => m.tier === 'platinum').length;
+                $('memNew').textContent = thisMonth;
+
+                // Empty state
+                const emptyEl = $('membersEmpty');
+                const tableEl = $('membersTableWrap');
+                if (list.length === 0) {
+                    emptyEl.style.display = 'block';
+                    tableEl.style.display = 'none';
+                    return;
+                }
+                emptyEl.style.display = 'none';
+                tableEl.style.display = '';
+
+                // Sort by joinedAt desc
+                const sorted = [...list].sort((a, b) => (b.joinedAt || '').localeCompare(a.joinedAt || ''));
+                $('membersTableBody').innerHTML = sorted.map(m => `
+                    <tr>
+                        <td style="font-weight:500;">${esc(m.name || '—')}</td>
+                        <td style="font-size:0.85rem;color:var(--text-secondary);">
+                            ${m.email ? `<a href="mailto:${esc(m.email)}" style="color:var(--gold);text-decoration:none;">${esc(m.email)}</a>` : ''}
+                            ${m.phone ? `<br><span style="color:var(--text-muted);">${esc(m.phone)}</span>` : ''}
+                        </td>
+                        <td>${tierBadge(m.tier || 'standard')}</td>
+                        <td style="text-align:right;font-weight:500;">
+                            ${(m.currentPoints || 0).toLocaleString()}
+                            <div style="font-size:0.75rem;color:var(--text-muted);font-weight:400;">${(m.lifetimePoints || 0).toLocaleString()} lifetime</div>
+                        </td>
+                        <td style="font-size:0.85rem;color:var(--text-secondary);">${fmtDate(m.joinedAt)}</td>
+                        <td style="font-size:0.85rem;color:var(--text-secondary);">${fmtDate(m.lastVisitAt)}</td>
+                        <td style="text-align:right;">
+                            <button class="btn-small" data-mem-points="${esc(m.id)}" style="padding:4px 8px;font-size:0.75rem;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:4px;cursor:pointer;">+/− Pts</button>
+                            <button class="btn-small" data-mem-del="${esc(m.id)}" style="padding:4px 8px;font-size:0.75rem;background:var(--red-dim);color:var(--red);border:1px solid var(--red);border-radius:4px;cursor:pointer;margin-left:4px;">Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            async function save(message) {
+                try {
+                    data.lastUpdated = new Date().toISOString().split('T')[0];
+                    const r = await fetch(SAVE_FN, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            filePath: 'members.json',
+                            content: JSON.stringify(data, null, 2),
+                            message: message || 'members: update via admin'
+                        })
+                    });
+                    const body = await r.json();
+                    if (!r.ok || body.error) throw new Error(body.error || 'HTTP ' + r.status);
+                    return true;
+                } catch (e) {
+                    alert('Save failed: ' + e.message);
+                    return false;
+                }
+            }
+
+            // Add Member button
+            document.addEventListener('click', (e) => {
+                if (e.target.id === 'addMemberBtn') {
+                    $('addMemberForm').reset();
+                    $('addMemberError').style.display = 'none';
+                    $('addMemberModal').style.display = 'flex';
+                } else if (e.target.id === 'addMemberSubmit') {
+                    handleAdd();
+                } else if (e.target.dataset.memPoints) {
+                    handleAdjustPoints(e.target.dataset.memPoints);
+                } else if (e.target.dataset.memDel) {
+                    handleDelete(e.target.dataset.memDel);
+                }
+            });
+
+            window.closeAddMemberModal = function() {
+                $('addMemberModal').style.display = 'none';
+            };
+
+            async function handleAdd() {
+                const errEl = $('addMemberError');
+                errEl.style.display = 'none';
+                const name = $('memName').value.trim();
+                const email = $('memEmail').value.trim().toLowerCase();
+                if (!name || !email) {
+                    errEl.textContent = 'Name and email are required.';
+                    errEl.style.display = 'block';
+                    return;
+                }
+                if ((data.members || []).some(m => (m.email || '').toLowerCase() === email)) {
+                    errEl.textContent = 'A member with that email already exists.';
+                    errEl.style.display = 'block';
+                    return;
+                }
+                const startPts = parseInt($('memStartPoints').value) || 0;
+                const member = {
+                    id: 'm_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 5),
+                    name,
+                    email,
+                    phone: $('memPhone').value.trim(),
+                    birthday: $('memBirthday').value.trim(),
+                    joinedAt: new Date().toISOString(),
+                    lastVisitAt: null,
+                    tier: tierFromPoints(startPts),
+                    currentPoints: startPts,
+                    lifetimePoints: startPts,
+                    totalRedemptions: 0,
+                    marketingOptIn: $('memMktOptIn').checked,
+                    smsOptIn: $('memSmsOptIn').checked,
+                    notes: $('memNotes').value.trim(),
+                    history: [{ at: new Date().toISOString(), action: 'created', delta: startPts, by: 'admin', note: 'Manual admin add' }]
+                };
+                if (!data.members) data.members = [];
+                data.members.push(member);
+                const ok = await save(`members: add ${name}`);
+                if (ok) {
+                    render();
+                    closeAddMemberModal();
+                }
+            }
+
+            async function handleAdjustPoints(memId) {
+                const m = (data.members || []).find(x => x.id === memId);
+                if (!m) return;
+                const delta = prompt(`Adjust points for ${m.name}\nCurrent: ${m.currentPoints} pts\n\nEnter +N to add, -N to subtract, or a reason note (e.g. "+250 birthday bonus"):`);
+                if (!delta) return;
+                const match = delta.match(/^([+-]?\d+)\s*(.*)$/);
+                if (!match) { alert('Format: +250 reason  or  -100 reason'); return; }
+                const n = parseInt(match[1]);
+                const note = match[2].trim() || 'manual adjustment';
+                m.currentPoints = Math.max(0, (m.currentPoints || 0) + n);
+                if (n > 0) m.lifetimePoints = (m.lifetimePoints || 0) + n;
+                m.tier = tierFromPoints(m.lifetimePoints);
+                if (!m.history) m.history = [];
+                m.history.push({ at: new Date().toISOString(), action: 'adjust', delta: n, by: 'admin', note });
+                const ok = await save(`members: ${n > 0 ? '+' : ''}${n} pts for ${m.name} (${note})`);
+                if (ok) render();
+            }
+
+            async function handleDelete(memId) {
+                const m = (data.members || []).find(x => x.id === memId);
+                if (!m) return;
+                if (!confirm(`Delete member "${m.name}"? This cannot be undone (the audit history will be lost).`)) return;
+                data.members = data.members.filter(x => x.id !== memId);
+                const ok = await save(`members: delete ${m.name}`);
+                if (ok) render();
+            }
+
+            // Hook into tab switching
+            const origSwitch = window.switchTab;
+            if (typeof origSwitch === 'function') {
+                window.switchTab = function(name) {
+                    origSwitch.apply(this, arguments);
+                    if (name === 'members' && !data) load();
+                };
+            }
+        })();
 
     </script>
 </body>
