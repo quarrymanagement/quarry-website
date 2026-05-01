@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-01T08:16:39.808Z",
+  "updatedAt": "2026-05-01T08:29:03.846Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -8810,6 +8810,17 @@
         "bounces": 9,
         "unsubs": 0
       }
+    },
+    {
+      "ts": "2026-05-01T08:29:00.000Z",
+      "type": "open",
+      "draftId": null,
+      "ruleId": null,
+      "email": "klauck@midashospitality.com",
+      "url": null,
+      "sgEventId": "brxAl83EQ-SIE6ctbdp2BA",
+      "userAgent": "Mozilla/5.0",
+      "category": "quarry-marketing"
     }
   ],
   "aggregates": {
