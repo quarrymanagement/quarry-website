@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-01T02:31:22.786Z",
+  "updatedAt": "2026-05-01T02:31:36.280Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -7269,6 +7269,17 @@
         "bounces": 9,
         "unsubs": 0
       }
+    },
+    {
+      "ts": "2026-05-01T02:31:30.000Z",
+      "type": "delivered",
+      "draftId": null,
+      "ruleId": null,
+      "email": "papaladb@aol.com",
+      "url": null,
+      "sgEventId": "ZGVsaXZlcmVkLTE3LTEwNjAzNzc2NS1WOGZSRUR5TlFIQzlaSXZHenJYV0tnLTI2",
+      "userAgent": null,
+      "category": "quarry-marketing"
     }
   ],
   "aggregates": {
