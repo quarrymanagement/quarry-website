@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-01T00:29:14.582Z",
+  "updatedAt": "2026-05-01T00:29:25.712Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -6545,6 +6545,17 @@
       "sgEventId": "ZGVsaXZlcmVkLTAtMTA2MDM3NzY1LUlPTU52c0RMU3VXMWUzeTNPeDVLSWctMA",
       "userAgent": null,
       "category": "quarry-marketing:welcome"
+    },
+    {
+      "ts": "2026-05-01T00:29:18.000Z",
+      "type": "open",
+      "draftId": null,
+      "ruleId": null,
+      "email": "sandra@knowledgetransferco.com",
+      "url": null,
+      "sgEventId": "kNsAjN7ZR1O04Y2ZghIxdA",
+      "userAgent": "Mozilla/5.0",
+      "category": "quarry-marketing"
     }
   ],
   "aggregates": {
