@@ -11560,4 +11560,151 @@ function hashCode(str) {
                     state.loaded = true;
                     render();
                 } catch (err) {
-                    $('re
+                    $('resInqTableBody').innerHTML = `<tr><td colspan="8" style="text-align:center;color:#dc2626;padding:2rem;">Couldn't load inquiries — ${escHtml(err.message)}<br><button class="btn-secondary" onclick="ResInqUI.loadAll()" style="margin-top:0.5rem;">Retry</button></td></tr>`;
+                } finally { state.loading = false; }
+            }
+
+            function render() {
+                // Stats
+                const total = state.inquiries.length;
+                const notContacted = state.inquiries.filter((i) => i.status === 'not_contacted').length;
+                const followup = state.inquiries.filter((i) => i.status === 'needs_followup').length;
+                const confirmed = state.inquiries.filter((i) => i.status === 'confirmed').length;
+                $('resInqTotalCount').textContent = total;
+                $('resInqNotContactedCount').textContent = notContacted;
+                $('resInqFollowupCount').textContent = followup;
+                $('resInqConfirmedCount').textContent = confirmed;
+
+                // Filter
+                const filter = $('resInqFilter')?.value || 'needs_attention';
+                let list = state.inquiries.slice();
+                if (filter === 'needs_attention') {
+                    list = list.filter((i) => ['not_contacted', 'needs_followup'].includes(i.status));
+                } else if (filter !== 'all') {
+                    list = list.filter((i) => i.status === filter);
+                }
+
+                const tbody = $('resInqTableBody');
+                if (list.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:2rem;">No inquiries in this view. ${filter === 'needs_attention' ? "🎉 You're all caught up." : ''}</td></tr>`;
+                    return;
+                }
+                tbody.innerHTML = list.map((i) => `
+                    <tr data-inq-id="${escHtml(i.id)}" class="clickable-row" style="cursor:pointer;">
+                        <td style="font-weight:500;">${escHtml(i.name)}</td>
+                        <td><span style="font-size:0.72rem;background:var(--bg-elevated);padding:0.15rem 0.5rem;border-radius:4px;color:var(--text-muted);">${escHtml(i.formLabel)}</span></td>
+                        <td>${escHtml(i.occasion || '—')}</td>
+                        <td>${escHtml(i.eventDate ? fmtDay(i.eventDate) : '—')}</td>
+                        <td>${escHtml(i.guests || '—')}</td>
+                        <td style="font-size:0.78rem;color:var(--text-muted);">${escHtml(fmtDate(i.submittedAt))}</td>
+                        <td>${statusPill(i.status)}</td>
+                        <td onclick="event.stopPropagation()">
+                            ${i.email ? `<a href="mailto:${encodeURIComponent(i.email)}?subject=${encodeURIComponent('Your inquiry at The Quarry')}" style="color:var(--gold);text-decoration:none;font-size:0.8rem;">✉ Email</a>` : ''}
+                        </td>
+                    </tr>
+                `).join('');
+                tbody.querySelectorAll('[data-inq-id]').forEach((row) => row.addEventListener('click', () => openModal(row.dataset.inqId)));
+            }
+
+            function openModal(id) {
+                const inq = state.inquiries.find((x) => x.id === id);
+                if (!inq) return;
+                state.current = inq;
+                const modal = $('resInqModal');
+                modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false');
+
+                $('resInqModalTitle').textContent = inq.name;
+                $('resInqModalSub').innerHTML = `${statusPill(inq.status)}<span style="color:var(--text-muted);">${escHtml(inq.formLabel)} · received ${escHtml(fmtDate(inq.submittedAt))}</span>`;
+
+                const fields = [
+                    ['Email', inq.email ? `<a href="mailto:${encodeURIComponent(inq.email)}" style="color:var(--gold);">${escHtml(inq.email)}</a>` : '—'],
+                    ['Phone', inq.phone ? `<a href="tel:${encodeURIComponent(inq.phone)}" style="color:var(--gold);">${escHtml(inq.phone)}</a>` : '—'],
+                    inq.company ? ['Company', escHtml(inq.company)] : null,
+                    ['Occasion', escHtml(inq.occasion || '—')],
+                    ['Event Date', escHtml(inq.eventDate ? fmtDay(inq.eventDate) : '—')],
+                    inq.eventTime ? ['Event Time', escHtml(inq.eventTime)] : null,
+                    ['Party Size', escHtml(inq.guests || '—')],
+                    inq.location ? ['Location', escHtml(inq.location)] : null,
+                    ['Marketing Opt-In', inq.marketingOptIn ? '✓ Yes' : '✗ No'],
+                    inq.notes ? ['Notes', `<div style="margin-top:0.25rem;padding:0.5rem;background:var(--bg-elevated);border-radius:4px;white-space:pre-wrap;">${escHtml(inq.notes)}</div>`] : null,
+                ].filter(Boolean);
+                $('resInqDetails').innerHTML = fields.map(([k, v]) =>
+                    `<div style="display:grid;grid-template-columns:140px 1fr;gap:0.5rem;padding:0.35rem 0;border-bottom:1px solid var(--border-subtle);"><div style="color:var(--text-muted);font-weight:500;">${escHtml(k)}</div><div>${v}</div></div>`
+                ).join('');
+
+                // History
+                const hist = $('resInqHistory');
+                if (inq.statusHistory && inq.statusHistory.length) {
+                    hist.innerHTML = '<div style="font-weight:600;color:var(--text-primary);margin-bottom:0.3rem;">Status history:</div>' +
+                        inq.statusHistory.slice().reverse().map((h) =>
+                            `<div>• ${escHtml(fmtDate(h.at))} — ${escHtml(STATUS_LABELS[h.from] || h.from)} → ${escHtml(STATUS_LABELS[h.to] || h.to)}${h.note ? ` <em>(${escHtml(h.note)})</em>` : ''}</div>`
+                        ).join('');
+                } else {
+                    hist.innerHTML = '';
+                }
+
+                $('resInqStatusNote').value = '';
+                if (inq.email) {
+                    const subject = encodeURIComponent(`Your ${inq.formLabel.toLowerCase()} at The Quarry`);
+                    $('resInqMailLink').href = `mailto:${encodeURIComponent(inq.email)}?subject=${subject}`;
+                    $('resInqMailLink').style.display = '';
+                } else {
+                    $('resInqMailLink').style.display = 'none';
+                }
+                $('resInqNetlifyLink').href = inq.netlifyUrl || '#';
+            }
+
+            function closeModal() {
+                const modal = $('resInqModal');
+                modal?.classList.remove('open');
+                modal?.setAttribute('aria-hidden', 'true');
+                state.current = null;
+            }
+
+            async function setStatus(newStatus) {
+                if (!state.current) return;
+                const id = state.current.id;
+                const note = $('resInqStatusNote').value.trim();
+                try {
+                    const r = await fetch(`${FN}/update-reservation-status`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ submissionId: id, status: newStatus, note, by: 'admin' })
+                    });
+                    const body = await r.json();
+                    if (!r.ok || !body.ok) throw new Error(body.error || 'update failed');
+                    // Update local state
+                    const inq = state.inquiries.find((x) => x.id === id);
+                    if (inq) {
+                        inq.status = newStatus;
+                        inq.statusUpdatedAt = body.override.updatedAt;
+                        inq.statusNote = body.override.note;
+                        inq.statusHistory = body.override.history;
+                    }
+                    render();
+                    openModal(id);  // refresh modal with new history
+                    if (typeof showToast === 'function') showToast('Status updated to ' + STATUS_LABELS[newStatus]);
+                } catch (err) {
+                    alert('Could not update status: ' + err.message);
+                }
+            }
+
+            function init() {
+                $('resInqRefresh')?.addEventListener('click', loadAll);
+                $('resInqFilter')?.addEventListener('change', render);
+                $('resInqModalClose')?.addEventListener('click', closeModal);
+                $('resInqModal')?.addEventListener('click', (e) => { if (e.target.id === 'resInqModal') closeModal(); });
+                document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('resInqModal')?.classList.contains('open')) closeModal(); });
+                document.querySelectorAll('#resInqModal [data-status]').forEach((btn) => btn.addEventListener('click', () => setStatus(btn.dataset.status)));
+            }
+
+            function onTabSwitch(tab) {
+                if (tab === 'potential' && !state.loaded) loadAll();
+            }
+
+            return { init, loadAll, openModal, onTabSwitch };
+        })();
+        document.addEventListener('DOMContentLoaded', () => { try { ResInqUI.init(); } catch (e) { console.error('ResInqUI init failed', e); } });
+
+    </script>
+</body>
+</html>
