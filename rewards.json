@@ -1,0 +1,22 @@
+{
+  "earnRate": 10,
+  "earnRateNote": "Points earned per $1 spent at The Quarry (closed tab).",
+  "tiers": [
+    { "id": "standard",  "name": "Quarry Standard",  "minPoints": 0,    "earnMultiplier": 1.00, "perks": "Full access to all rewards." },
+    { "id": "gold",      "name": "Quarry Gold",      "minPoints": 3000, "earnMultiplier": 1.25, "perks": "1.25× earn rate. Early access to event RSVPs. Priority on busy nights." },
+    { "id": "platinum",  "name": "Quarry Platinum",  "minPoints": 6000, "earnMultiplier": 1.50, "perks": "1.5× earn rate. Hosted tastings invitation. Concierge holiday booking." }
+  ],
+  "catalog": [
+    { "id": "r-bill5",   "name": "$5 Off Your Bill",         "description": "Applied to any check at the bar.",       "points": 500,  "active": true },
+    { "id": "r-app",     "name": "Free Appetizer",           "description": "Jumbo Pretzel · Devils · Wings.",        "points": 750,  "active": true },
+    { "id": "r-wine20",  "name": "$20 Wine Bottle Credit",   "description": "Toward any bottle on the list.",         "points": 1500, "active": true },
+    { "id": "r-bday",    "name": "Birthday Entrée",          "description": "On us during your birthday month.",      "points": 2000, "active": true },
+    { "id": "r-private", "name": "Private Event Priority",   "description": "First access to open event dates.",      "points": 5000, "active": true }
+  ],
+  "bonuses": [
+    { "id": "b-rsvp",    "name": "Public Event RSVP",        "description": "Earn bonus points for RSVPing public events on the app.", "points": 50 },
+    { "id": "b-refer",   "name": "Refer a Friend",           "description": "When a referred friend's first visit closes a tab.",     "points": 500 },
+    { "id": "b-bday",    "name": "Birthday Month Bonus",     "description": "Free dessert during your birthday month.",                "points": 0  }
+  ],
+  "lastUpdated": "2026-05-01"
+}
