@@ -2657,6 +2657,14 @@
                     <div class="sb-nav-item" data-tab="timeoff"><span class="sb-ic">🌴</span><span class="sb-lbl">Time Off</span></div>
                 </div>
 
+                <div class="sb-nav-section">Member App</div>
+                <div class="sb-nav-group">
+                    <div class="sb-nav-item" data-tab="appOverview"><span class="sb-ic">📱</span><span class="sb-lbl">App Overview</span></div>
+                    <div class="sb-nav-item" data-tab="appMenu"><span class="sb-ic">🍽️</span><span class="sb-lbl">Menu</span></div>
+                    <div class="sb-nav-item" data-tab="appRewards"><span class="sb-ic">⭐</span><span class="sb-lbl">Rewards Setup</span></div>
+                    <div class="sb-nav-item" data-tab="appContent"><span class="sb-ic">🎯</span><span class="sb-lbl">Home Content</span></div>
+                </div>
+
                 <div class="sb-nav-section">Customers</div>
                 <div class="sb-nav-group">
                     <div class="sb-nav-item" data-tab="crm"><span class="sb-ic">👥</span><span class="sb-lbl">Contacts</span></div>
@@ -2816,6 +2824,95 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            <!-- ========================================================
+                 MEMBER APP — OVERVIEW
+                 ======================================================== -->
+            <div id="appOverviewTab" class="tab-content">
+                <div class="bands-header">
+                    <h2>Member App</h2>
+                    <a href="/quarry-app-customized.html" target="_blank" class="btn-primary" style="text-decoration:none;">↗ Open App Preview</a>
+                </div>
+                <p style="color:var(--text-secondary);margin-bottom:24px;max-width:680px;">
+                    The Quarry member app at <code style="background:var(--bg-elevated);padding:2px 6px;border-radius:4px;">/quarry-app-customized.html</code> already shares Events and Live Bands with this admin (any change made under Operations appears in the app within a minute). The sections below let you manage the parts of the app that don't go through the calendar.
+                </p>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-bottom:32px;">
+                    <div class="dash-stat" data-jump="appMenu" style="cursor:pointer;">
+                        <div class="dash-stat-label">🍽️ Menu</div>
+                        <div class="dash-stat-help" style="font-size:0.85rem;color:var(--text-muted);margin-top:6px;">Food, drinks, wine, cocktails. Today: hardcoded in two HTML files. Goal: edit in one place, both website and app pick it up.</div>
+                    </div>
+                    <div class="dash-stat" data-jump="appRewards" style="cursor:pointer;">
+                        <div class="dash-stat-label">⭐ Rewards Setup</div>
+                        <div class="dash-stat-help" style="font-size:0.85rem;color:var(--text-muted);margin-top:6px;">Tier thresholds, earn rate, reward catalog (e.g. $5 off / 500 pts). Drives the loyalty economics.</div>
+                    </div>
+                    <div class="dash-stat" data-jump="appContent" style="cursor:pointer;">
+                        <div class="dash-stat-label">🎯 Home Content</div>
+                        <div class="dash-stat-help" style="font-size:0.85rem;color:var(--text-muted);margin-top:6px;">Happy Hour wording, Staff Pick of the week. The two cards on the app's home screen that change frequently.</div>
+                    </div>
+                </div>
+                <div style="background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:20px;max-width:680px;">
+                    <div style="font-weight:600;margin-bottom:8px;">Already managed from elsewhere</div>
+                    <div style="font-size:0.9rem;color:var(--text-secondary);line-height:1.6;">
+                        <strong>Events &amp; Live Bands</strong> — manage under Operations · Events / Live Bands. The app reads the same <code style="background:var(--bg-card);padding:1px 5px;border-radius:3px;">events.json</code> as the website.<br>
+                        <strong>Golf bookings</strong> — flow from <code style="background:var(--bg-card);padding:1px 5px;border-radius:3px;">/.netlify/functions/get-bookings</code> automatically; bay availability shows live in the app.<br>
+                        <strong>Contact info / hours</strong> — static in the app; if your phone or hours change, edit them in the app HTML directly.
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================================
+                 MEMBER APP — MENU
+                 ======================================================== -->
+            <div id="appMenuTab" class="tab-content">
+                <div class="bands-header">
+                    <h2>Menu</h2>
+                </div>
+                <div style="background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:24px;max-width:720px;">
+                    <div style="font-weight:600;margin-bottom:8px;">Editor coming next</div>
+                    <p style="color:var(--text-secondary);font-size:0.95rem;line-height:1.6;margin-bottom:16px;">
+                        This will load <code style="background:var(--bg-card);padding:1px 5px;border-radius:3px;">menu.json</code> from your repo and let you add, edit, reorder, and remove items across categories (Cocktails, Wine, Beer, Shareables, Sandwiches, Flatbreads, Salads, Kids, Desserts, etc.). One edit updates both <code style="background:var(--bg-card);padding:1px 5px;border-radius:3px;">quarry-menu.html</code> on the website and the Menu screen in the app.
+                    </p>
+                    <p style="color:var(--text-secondary);font-size:0.95rem;line-height:1.6;margin:0;">
+                        Today the menu lives as hardcoded HTML inside <code style="background:var(--bg-card);padding:1px 5px;border-radius:3px;">quarry-menu.html</code> and <code style="background:var(--bg-card);padding:1px 5px;border-radius:3px;">quarry-drinks.html</code>. The first build step is extracting that into <code style="background:var(--bg-card);padding:1px 5px;border-radius:3px;">menu.json</code> and updating both consumers to read from it.
+                    </p>
+                </div>
+            </div>
+
+            <!-- ========================================================
+                 MEMBER APP — REWARDS SETUP
+                 ======================================================== -->
+            <div id="appRewardsTab" class="tab-content">
+                <div class="bands-header">
+                    <h2>Rewards Setup</h2>
+                </div>
+                <div style="background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:24px;max-width:720px;">
+                    <div style="font-weight:600;margin-bottom:8px;">Editor coming next</div>
+                    <p style="color:var(--text-secondary);font-size:0.95rem;line-height:1.6;margin-bottom:16px;">
+                        This will let you tune the loyalty program without code: earn rate (currently 10 pts per $1), tier thresholds (Standard / Gold at 3,000 lifetime / Platinum at 6,000), and the reward catalog ($5 off at 500 pts, free appetizer at 750, $20 wine credit at 1,500, birthday entrée at 2,000, private event priority at 5,000). Every change saves to <code style="background:var(--bg-card);padding:1px 5px;border-radius:3px;">rewards.json</code> and updates the app's Rewards screen.
+                    </p>
+                    <p style="color:var(--text-secondary);font-size:0.95rem;line-height:1.6;margin:0;">
+                        Pairs with the eventual member database and redemption console — once those are in place, this tab is where you adjust the program's economics over time.
+                    </p>
+                </div>
+            </div>
+
+            <!-- ========================================================
+                 MEMBER APP — HOME CONTENT
+                 ======================================================== -->
+            <div id="appContentTab" class="tab-content">
+                <div class="bands-header">
+                    <h2>Home Content</h2>
+                </div>
+                <div style="background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:24px;max-width:720px;">
+                    <div style="font-weight:600;margin-bottom:8px;">Editor coming next</div>
+                    <p style="color:var(--text-secondary);font-size:0.95rem;line-height:1.6;margin-bottom:16px;">
+                        Two pieces of copy on the app's home screen change weekly and need an editor: the <strong>Happy Hour</strong> card (currently "3 – 6 PM · All day Wednesday · Thu &amp; Fri 3 – 6") and the <strong>Staff Pick</strong> card (currently "New Melle Well Water — Gray Whale Gin, 7up &amp; Squirt · $12"). This editor will save those to <code style="background:var(--bg-card);padding:1px 5px;border-radius:3px;">app-content.json</code> and the app picks them up on next open.
+                    </p>
+                    <p style="color:var(--text-secondary);font-size:0.95rem;line-height:1.6;margin:0;">
+                        Also where the welcome greeting, onboarding three-step copy, and program rules text get edited if you ever want to refine the wording.
+                    </p>
                 </div>
             </div>
 
@@ -11463,151 +11560,4 @@ function hashCode(str) {
                     state.loaded = true;
                     render();
                 } catch (err) {
-                    $('resInqTableBody').innerHTML = `<tr><td colspan="8" style="text-align:center;color:#dc2626;padding:2rem;">Couldn't load inquiries — ${escHtml(err.message)}<br><button class="btn-secondary" onclick="ResInqUI.loadAll()" style="margin-top:0.5rem;">Retry</button></td></tr>`;
-                } finally { state.loading = false; }
-            }
-
-            function render() {
-                // Stats
-                const total = state.inquiries.length;
-                const notContacted = state.inquiries.filter((i) => i.status === 'not_contacted').length;
-                const followup = state.inquiries.filter((i) => i.status === 'needs_followup').length;
-                const confirmed = state.inquiries.filter((i) => i.status === 'confirmed').length;
-                $('resInqTotalCount').textContent = total;
-                $('resInqNotContactedCount').textContent = notContacted;
-                $('resInqFollowupCount').textContent = followup;
-                $('resInqConfirmedCount').textContent = confirmed;
-
-                // Filter
-                const filter = $('resInqFilter')?.value || 'needs_attention';
-                let list = state.inquiries.slice();
-                if (filter === 'needs_attention') {
-                    list = list.filter((i) => ['not_contacted', 'needs_followup'].includes(i.status));
-                } else if (filter !== 'all') {
-                    list = list.filter((i) => i.status === filter);
-                }
-
-                const tbody = $('resInqTableBody');
-                if (list.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:2rem;">No inquiries in this view. ${filter === 'needs_attention' ? "🎉 You're all caught up." : ''}</td></tr>`;
-                    return;
-                }
-                tbody.innerHTML = list.map((i) => `
-                    <tr data-inq-id="${escHtml(i.id)}" class="clickable-row" style="cursor:pointer;">
-                        <td style="font-weight:500;">${escHtml(i.name)}</td>
-                        <td><span style="font-size:0.72rem;background:var(--bg-elevated);padding:0.15rem 0.5rem;border-radius:4px;color:var(--text-muted);">${escHtml(i.formLabel)}</span></td>
-                        <td>${escHtml(i.occasion || '—')}</td>
-                        <td>${escHtml(i.eventDate ? fmtDay(i.eventDate) : '—')}</td>
-                        <td>${escHtml(i.guests || '—')}</td>
-                        <td style="font-size:0.78rem;color:var(--text-muted);">${escHtml(fmtDate(i.submittedAt))}</td>
-                        <td>${statusPill(i.status)}</td>
-                        <td onclick="event.stopPropagation()">
-                            ${i.email ? `<a href="mailto:${encodeURIComponent(i.email)}?subject=${encodeURIComponent('Your inquiry at The Quarry')}" style="color:var(--gold);text-decoration:none;font-size:0.8rem;">✉ Email</a>` : ''}
-                        </td>
-                    </tr>
-                `).join('');
-                tbody.querySelectorAll('[data-inq-id]').forEach((row) => row.addEventListener('click', () => openModal(row.dataset.inqId)));
-            }
-
-            function openModal(id) {
-                const inq = state.inquiries.find((x) => x.id === id);
-                if (!inq) return;
-                state.current = inq;
-                const modal = $('resInqModal');
-                modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false');
-
-                $('resInqModalTitle').textContent = inq.name;
-                $('resInqModalSub').innerHTML = `${statusPill(inq.status)}<span style="color:var(--text-muted);">${escHtml(inq.formLabel)} · received ${escHtml(fmtDate(inq.submittedAt))}</span>`;
-
-                const fields = [
-                    ['Email', inq.email ? `<a href="mailto:${encodeURIComponent(inq.email)}" style="color:var(--gold);">${escHtml(inq.email)}</a>` : '—'],
-                    ['Phone', inq.phone ? `<a href="tel:${encodeURIComponent(inq.phone)}" style="color:var(--gold);">${escHtml(inq.phone)}</a>` : '—'],
-                    inq.company ? ['Company', escHtml(inq.company)] : null,
-                    ['Occasion', escHtml(inq.occasion || '—')],
-                    ['Event Date', escHtml(inq.eventDate ? fmtDay(inq.eventDate) : '—')],
-                    inq.eventTime ? ['Event Time', escHtml(inq.eventTime)] : null,
-                    ['Party Size', escHtml(inq.guests || '—')],
-                    inq.location ? ['Location', escHtml(inq.location)] : null,
-                    ['Marketing Opt-In', inq.marketingOptIn ? '✓ Yes' : '✗ No'],
-                    inq.notes ? ['Notes', `<div style="margin-top:0.25rem;padding:0.5rem;background:var(--bg-elevated);border-radius:4px;white-space:pre-wrap;">${escHtml(inq.notes)}</div>`] : null,
-                ].filter(Boolean);
-                $('resInqDetails').innerHTML = fields.map(([k, v]) =>
-                    `<div style="display:grid;grid-template-columns:140px 1fr;gap:0.5rem;padding:0.35rem 0;border-bottom:1px solid var(--border-subtle);"><div style="color:var(--text-muted);font-weight:500;">${escHtml(k)}</div><div>${v}</div></div>`
-                ).join('');
-
-                // History
-                const hist = $('resInqHistory');
-                if (inq.statusHistory && inq.statusHistory.length) {
-                    hist.innerHTML = '<div style="font-weight:600;color:var(--text-primary);margin-bottom:0.3rem;">Status history:</div>' +
-                        inq.statusHistory.slice().reverse().map((h) =>
-                            `<div>• ${escHtml(fmtDate(h.at))} — ${escHtml(STATUS_LABELS[h.from] || h.from)} → ${escHtml(STATUS_LABELS[h.to] || h.to)}${h.note ? ` <em>(${escHtml(h.note)})</em>` : ''}</div>`
-                        ).join('');
-                } else {
-                    hist.innerHTML = '';
-                }
-
-                $('resInqStatusNote').value = '';
-                if (inq.email) {
-                    const subject = encodeURIComponent(`Your ${inq.formLabel.toLowerCase()} at The Quarry`);
-                    $('resInqMailLink').href = `mailto:${encodeURIComponent(inq.email)}?subject=${subject}`;
-                    $('resInqMailLink').style.display = '';
-                } else {
-                    $('resInqMailLink').style.display = 'none';
-                }
-                $('resInqNetlifyLink').href = inq.netlifyUrl || '#';
-            }
-
-            function closeModal() {
-                const modal = $('resInqModal');
-                modal?.classList.remove('open');
-                modal?.setAttribute('aria-hidden', 'true');
-                state.current = null;
-            }
-
-            async function setStatus(newStatus) {
-                if (!state.current) return;
-                const id = state.current.id;
-                const note = $('resInqStatusNote').value.trim();
-                try {
-                    const r = await fetch(`${FN}/update-reservation-status`, {
-                        method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ submissionId: id, status: newStatus, note, by: 'admin' })
-                    });
-                    const body = await r.json();
-                    if (!r.ok || !body.ok) throw new Error(body.error || 'update failed');
-                    // Update local state
-                    const inq = state.inquiries.find((x) => x.id === id);
-                    if (inq) {
-                        inq.status = newStatus;
-                        inq.statusUpdatedAt = body.override.updatedAt;
-                        inq.statusNote = body.override.note;
-                        inq.statusHistory = body.override.history;
-                    }
-                    render();
-                    openModal(id);  // refresh modal with new history
-                    if (typeof showToast === 'function') showToast('Status updated to ' + STATUS_LABELS[newStatus]);
-                } catch (err) {
-                    alert('Could not update status: ' + err.message);
-                }
-            }
-
-            function init() {
-                $('resInqRefresh')?.addEventListener('click', loadAll);
-                $('resInqFilter')?.addEventListener('change', render);
-                $('resInqModalClose')?.addEventListener('click', closeModal);
-                $('resInqModal')?.addEventListener('click', (e) => { if (e.target.id === 'resInqModal') closeModal(); });
-                document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('resInqModal')?.classList.contains('open')) closeModal(); });
-                document.querySelectorAll('#resInqModal [data-status]').forEach((btn) => btn.addEventListener('click', () => setStatus(btn.dataset.status)));
-            }
-
-            function onTabSwitch(tab) {
-                if (tab === 'potential' && !state.loaded) loadAll();
-            }
-
-            return { init, loadAll, openModal, onTabSwitch };
-        })();
-        document.addEventListener('DOMContentLoaded', () => { try { ResInqUI.init(); } catch (e) { console.error('ResInqUI init failed', e); } });
-
-    </script>
-</body>
-</html>
+                    $('re
