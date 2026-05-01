@@ -143,11 +143,31 @@
         .sb-nav-section {
             padding: 0.85rem 1rem 0.3rem; font-size: 0.65rem; color: var(--text-muted);
             text-transform: uppercase; letter-spacing: 1.2px; font-weight: 600;
+            display: flex; align-items: center; justify-content: space-between;
+            cursor: pointer; user-select: none;
+            transition: color 0.12s;
+        }
+        .sb-nav-section:hover { color: var(--text-secondary); }
+        .sb-nav-section::after {
+            content: '';
+            width: 7px; height: 7px;
+            border-right: 1.5px solid currentColor;
+            border-bottom: 1.5px solid currentColor;
+            transform: rotate(45deg) translate(-2px, -2px);
+            transition: transform 0.18s ease;
+            opacity: 0.55;
+            margin-right: 4px;
+        }
+        .sb-nav-section.collapsed::after {
+            transform: rotate(-45deg) translate(0, -2px);
+        }
+        .sb-nav-section.collapsed + .sb-nav-group {
+            display: none;
         }
         .sb-nav-group { padding: 0 0.5rem; }
         .sb-nav-item {
             display: flex; align-items: center; gap: 0.65rem;
-            padding: 0.55rem 0.75rem; margin: 1px 0; border-radius: 6px;
+            padding: 0.55rem 0.85rem; margin: 1px 0; border-radius: 6px;
             font-size: 0.83rem; color: var(--text-secondary); cursor: pointer;
             transition: background 0.12s, color 0.12s; user-select: none;
             position: relative;
@@ -157,8 +177,8 @@
             background: var(--gold); color: #fff; font-weight: 600;
             box-shadow: 0 1px 3px rgba(154,123,42,0.3);
         }
-        .sb-nav-item.active .sb-ic { filter: brightness(1.4); }
-        .sb-ic { font-size: 1.05rem; width: 22px; text-align: center; flex-shrink: 0; }
+        /* Hide emoji icons site-wide for a cleaner, professional sidebar */
+        .sb-ic { display: none; }
         .sb-lbl { flex: 1; min-width: 0; }
         .sb-badge {
             background: #dc2626; color: #fff; border-radius: 999px;
@@ -4837,6 +4857,31 @@
                     if (tabName) switchTab(tabName);
                 });
             });
+            // Sidebar section headers — collapse / expand groups, persist in localStorage
+            const COLLAPSE_KEY = 'quarrySidebarCollapsed_v1';
+            let collapsed = {};
+            try { collapsed = JSON.parse(localStorage.getItem(COLLAPSE_KEY) || '{}'); } catch (_) {}
+            document.querySelectorAll('.sb-nav-section').forEach((section) => {
+                const key = (section.textContent || '').trim();
+                if (collapsed[key]) section.classList.add('collapsed');
+                section.addEventListener('click', () => {
+                    section.classList.toggle('collapsed');
+                    collapsed[key] = section.classList.contains('collapsed');
+                    try { localStorage.setItem(COLLAPSE_KEY, JSON.stringify(collapsed)); } catch (_) {}
+                });
+            });
+            // Auto-expand section containing the currently-active tab so it's never hidden behind a collapse
+            const activeItem = document.querySelector('.sb-nav-item.active');
+            if (activeItem) {
+                const group = activeItem.closest('.sb-nav-group');
+                const sectionHeader = group ? group.previousElementSibling : null;
+                if (sectionHeader && sectionHeader.classList.contains('sb-nav-section') && sectionHeader.classList.contains('collapsed')) {
+                    sectionHeader.classList.remove('collapsed');
+                    const k = (sectionHeader.textContent || '').trim();
+                    delete collapsed[k];
+                    try { localStorage.setItem(COLLAPSE_KEY, JSON.stringify(collapsed)); } catch (_) {}
+                }
+            }
             // Mobile sidebar toggle
             const tg = document.getElementById('sbMobileToggle');
             const sb = document.getElementById('adminSidebar');
@@ -4861,7 +4906,13 @@
             // Clear active state on sidebar items
             document.querySelectorAll('.sb-nav-item').forEach(t => t.classList.remove('active'));
             const sbItem = document.querySelector(`.sb-nav-item[data-tab="${tabName}"]`);
-            if (sbItem) sbItem.classList.add('active');
+            if (sbItem) {
+                sbItem.classList.add('active');
+                // Auto-expand the parent section if collapsed (e.g. when reached via dashboard quick-jump)
+                const group = sbItem.closest('.sb-nav-group');
+                const header = group ? group.previousElementSibling : null;
+                if (header && header.classList.contains('sb-nav-section')) header.classList.remove('collapsed');
+            }
 
             // Switch tab content
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
