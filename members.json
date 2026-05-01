@@ -1,0 +1,22 @@
+{
+  "members": [],
+  "lastUpdated": "2026-05-01",
+  "schemaVersion": 1,
+  "fields": {
+    "id": "Internal stable id (e.g. m_1730468400_3a2)",
+    "name": "Full name",
+    "email": "Primary email (lowercase)",
+    "phone": "E.164 or human form",
+    "joinedAt": "ISO date the account was created",
+    "lastVisitAt": "ISO date of most recent closed tab",
+    "tier": "standard | gold | platinum",
+    "currentPoints": "Live point balance",
+    "lifetimePoints": "Total points ever earned (drives tier promotion)",
+    "totalRedemptions": "Count of rewards redeemed all-time",
+    "birthday": "MM-DD",
+    "marketingOptIn": "boolean",
+    "smsOptIn": "boolean",
+    "notes": "Internal staff notes",
+    "history": "[{at, action, delta, by, note}] audit trail"
+  }
+}
