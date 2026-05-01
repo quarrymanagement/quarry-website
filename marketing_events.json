@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-01T11:45:22.507Z",
+  "updatedAt": "2026-05-01T11:50:27.243Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -9374,6 +9374,17 @@
         "bounces": 9,
         "unsubs": 0
       }
+    },
+    {
+      "ts": "2026-05-01T11:50:18.000Z",
+      "type": "open",
+      "draftId": null,
+      "ruleId": null,
+      "email": "bredenkoetter@sbcglobal.net",
+      "url": null,
+      "sgEventId": "MOQZUGQdQC6wyekAQPZvJg",
+      "userAgent": "YahooMailProxy; https://help.yahoo.com/kb/yahoo-mail-proxy-SLN28749.html",
+      "category": "quarry-marketing"
     }
   ],
   "aggregates": {
