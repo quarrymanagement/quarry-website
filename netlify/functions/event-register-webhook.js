@@ -153,11 +153,30 @@ exports.handler = async (event) => {
         const repo = 'quarrymanagement/quarry-website';
         const filePath = 'events.json';
 
-        // Get current events.json
-        const shaRes = await githubRequest('GET', `/repos/${repo}/contents/${filePath}`, ghToken);
-        if (shaRes.statusCode === 200 && shaRes.data.content) {
-          const currentContent = Buffer.from(shaRes.data.content, 'base64').toString('utf-8');
-          const eventsData = JSON.parse(currentContent);
+        // Get current events.json metadata (need the sha for the PUT)
+        const metaRes = await githubRequest('GET', `/repos/${repo}/contents/${filePath}`, ghToken);
+        if (metaRes.statusCode !== 200 || !metaRes.data.sha) {
+          console.error('Could not get events.json metadata:', metaRes.statusCode, JSON.stringify(metaRes.data).substring(0, 200));
+        } else {
+          const fileSha = metaRes.data.sha;
+          let eventsData;
+
+          // Contents API returns empty `content` when file > 1MB. events.json is ~6MB,
+          // so fall back to the raw URL whenever content is missing.
+          if (metaRes.data.content && metaRes.data.encoding === 'base64' && metaRes.data.content.length > 0) {
+            eventsData = JSON.parse(Buffer.from(metaRes.data.content, 'base64').toString('utf-8'));
+          } else {
+            const blobUrl = 'https://raw.githubusercontent.com/' + repo + '/main/events.json';
+            const rawContent = await new Promise(function(resolve, reject) {
+              https.get(blobUrl, { headers: { 'User-Agent': 'Quarry-Webhook' } }, function(res) {
+                let data = '';
+                res.on('data', function(chunk) { data += chunk; });
+                res.on('end', function() { resolve(data); });
+              }).on('error', reject);
+            });
+            eventsData = JSON.parse(rawContent);
+            console.log('Fetched events.json via raw URL (file too large for Contents API)');
+          }
 
           // Add registration to the registrations object
           if (!eventsData.registrations) eventsData.registrations = {};
@@ -179,18 +198,22 @@ exports.handler = async (event) => {
 
           // Push updated file back to GitHub
           const encoded = Buffer.from(JSON.stringify(eventsData, null, 2), 'utf-8').toString('base64');
-          await githubRequest('PUT', `/repos/${repo}/contents/${filePath}`, ghToken, {
+          const putRes = await githubRequest('PUT', `/repos/${repo}/contents/${filePath}`, ghToken, {
             message: 'New registration: ' + name + ' for ' + (eventName || eventId),
             content: encoded,
-            sha: shaRes.data.sha
+            sha: fileSha
           });
-          console.log('events.json updated with new registration for', eventId);
+          if (putRes.statusCode === 200 || putRes.statusCode === 201) {
+            console.log('events.json updated with new registration for', eventId);
+          } else {
+            console.error('GitHub PUT failed:', putRes.statusCode, JSON.stringify(putRes.data).substring(0, 200));
+          }
         }
       } else {
         console.log('No GITHUB_TOKEN — skipping events.json update');
       }
     } catch (e) {
-      console.error('GitHub events.json update error:', e.message);
+      console.error('GitHub events.json update error:', e.message, e.stack);
     }
 
     // 3. Submit to Netlify Forms
