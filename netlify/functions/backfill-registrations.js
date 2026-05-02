@@ -80,117 +80,126 @@ function fetchRaw(url) {
   });
 }
 
-async function processSession(session, results) {
+function sessionToReg(session) {
   const md = session.metadata || {};
-  const eventId = md.eventId;
-  const eventName = md.eventName || '';
-  const customerName = md.customerName || '';
-  const customerEmail = md.customerEmail || session.customer_email || '';
-  const customerPhone = md.customerPhone || '';
-  const partySize = parseInt(md.partySize) || 1;
-  const seatType = md.seatType || '';
-  const tableId = md.tableId || '';
-  const ticketTier = md.ticketTier || '';
-  const couponCode = md.couponCode || '';
-
-  if (!eventId) {
-    results.push({ session: session.id, status: 'skipped', reason: 'no eventId' });
-    return;
-  }
-
-  const amountDollars = session.amount_total ? (session.amount_total / 100).toFixed(2) : '0.00';
-  const amountDisplay = '$' + amountDollars;
-
-  const newReg = {
-    orderNumber: session.id,
-    name: customerName,
-    email: customerEmail,
-    phone: customerPhone,
-    tickets: partySize,
-    amount: amountDollars,
-    status: 'PAID',
-    paymentMethod: 'stripe',
-    transactionId: session.payment_intent || session.id,
-    created: new Date(session.created * 1000).toISOString(),
-    seatType,
-    tableId,
-    ticketTier,
-    couponCode,
-    backfilled: true
+  return {
+    eventId: md.eventId || null,
+    eventName: md.eventName || '',
+    customerName: md.customerName || '',
+    customerEmail: md.customerEmail || session.customer_email || '',
+    customerPhone: md.customerPhone || '',
+    partySize: parseInt(md.partySize) || 1,
+    seatType: md.seatType || '',
+    tableId: md.tableId || '',
+    ticketTier: md.ticketTier || '',
+    couponCode: md.couponCode || '',
+    amountCents: session.amount_total || 0,
+    sessionId: session.id,
+    paymentIntent: session.payment_intent || session.id,
+    sessionCreated: session.created
   };
+}
 
-  // 1. GitHub events.json update (with raw URL fallback for large file)
-  try {
-    const ghToken = process.env.GITHUB_TOKEN;
-    if (ghToken) {
-      const repo = 'quarrymanagement/quarry-website';
-      const metaRes = await githubRequest('GET', '/repos/' + repo + '/contents/events.json', ghToken);
-      if (metaRes.statusCode !== 200 || !metaRes.data.sha) {
-        throw new Error('events.json metadata fetch failed: ' + metaRes.statusCode);
-      }
-      const fileSha = metaRes.data.sha;
-      let eventsData;
-      if (metaRes.data.content && metaRes.data.encoding === 'base64' && metaRes.data.content.length > 0) {
-        eventsData = JSON.parse(Buffer.from(metaRes.data.content, 'base64').toString('utf-8'));
-      } else {
-        const raw = await fetchRaw('https://raw.githubusercontent.com/' + repo + '/main/events.json');
-        eventsData = JSON.parse(raw);
-      }
+async function batchUpdateEventsJson(parsedRegs) {
+  // Single read-modify-write, one commit, no race condition.
+  const ghToken = process.env.GITHUB_TOKEN;
+  if (!ghToken) throw new Error('GITHUB_TOKEN env var not set');
+  const repo = 'quarrymanagement/quarry-website';
 
-      // De-dupe: skip if this orderNumber is already recorded
-      if (!eventsData.registrations) eventsData.registrations = {};
-      if (!eventsData.registrations[eventId]) eventsData.registrations[eventId] = [];
-      const existing = eventsData.registrations[eventId].find(r => r.orderNumber === session.id);
-      if (existing) {
-        results.push({ session: session.id, status: 'already_recorded', email: customerEmail });
-        return;
-      }
-
-      eventsData.registrations[eventId].push(newReg);
-      const eventObj = (eventsData.events || []).find(e => e.id === eventId);
-      if (eventObj) {
-        const totalRegs = eventsData.registrations[eventId].reduce((sum, r) => sum + (r.tickets || 1), 0);
-        eventObj.registeredCount = totalRegs;
-        eventObj.registered = totalRegs;
-        if (eventObj.totalCapacity && totalRegs >= eventObj.totalCapacity) {
-          eventObj.status = 'sold-out';
-        }
-      }
-      const encoded = Buffer.from(JSON.stringify(eventsData, null, 2), 'utf-8').toString('base64');
-      const putRes = await githubRequest('PUT', '/repos/' + repo + '/contents/events.json', ghToken, {
-        message: 'Backfill registration: ' + customerName + ' for ' + (eventName || eventId),
-        content: encoded,
-        sha: fileSha
-      });
-      if (putRes.statusCode !== 200 && putRes.statusCode !== 201) {
-        throw new Error('GitHub PUT failed: ' + putRes.statusCode + ' ' + JSON.stringify(putRes.data).substring(0, 200));
-      }
-    }
-  } catch (e) {
-    results.push({ session: session.id, status: 'github_error', error: e.message });
-    return;
+  const metaRes = await githubRequest('GET', '/repos/' + repo + '/contents/events.json', ghToken);
+  if (metaRes.statusCode !== 200 || !metaRes.data.sha) {
+    throw new Error('events.json metadata fetch failed: ' + metaRes.statusCode);
+  }
+  const fileSha = metaRes.data.sha;
+  let eventsData;
+  if (metaRes.data.content && metaRes.data.encoding === 'base64' && metaRes.data.content.length > 0) {
+    eventsData = JSON.parse(Buffer.from(metaRes.data.content, 'base64').toString('utf-8'));
+  } else {
+    const raw = await fetchRaw('https://raw.githubusercontent.com/' + repo + '/main/events.json');
+    eventsData = JSON.parse(raw);
   }
 
-  // 2. Send emails
-  const emailResults = { customer: 'pending', owner: 'pending' };
+  if (!eventsData.registrations) eventsData.registrations = {};
+  const dispositions = [];
 
-  if (customerEmail) {
+  for (const r of parsedRegs) {
+    if (!r.eventId) {
+      dispositions.push({ session: r.sessionId, status: 'skipped_no_eventId' });
+      continue;
+    }
+    if (!eventsData.registrations[r.eventId]) eventsData.registrations[r.eventId] = [];
+    const arr = eventsData.registrations[r.eventId];
+    if (arr.find(x => x.orderNumber === r.sessionId)) {
+      dispositions.push({ session: r.sessionId, status: 'already_recorded', name: r.customerName });
+      continue;
+    }
+    const newReg = {
+      orderNumber: r.sessionId,
+      name: r.customerName,
+      email: r.customerEmail,
+      phone: r.customerPhone,
+      tickets: r.partySize,
+      amount: (r.amountCents / 100).toFixed(2),
+      status: 'PAID',
+      paymentMethod: 'stripe',
+      transactionId: r.paymentIntent,
+      created: new Date(r.sessionCreated * 1000).toISOString(),
+      seatType: r.seatType,
+      tableId: r.tableId,
+      ticketTier: r.ticketTier,
+      couponCode: r.couponCode,
+      backfilled: true
+    };
+    arr.push(newReg);
+    dispositions.push({ session: r.sessionId, status: 'added', name: r.customerName });
+
+    // Update event aggregates
+    const eventObj = (eventsData.events || []).find(e => e.id === r.eventId);
+    if (eventObj) {
+      const totalRegs = arr.reduce((sum, x) => sum + (x.tickets || 1), 0);
+      eventObj.registeredCount = totalRegs;
+      eventObj.registered = totalRegs;
+      if (eventObj.totalCapacity && totalRegs >= eventObj.totalCapacity) eventObj.status = 'sold-out';
+    }
+  }
+
+  const anyAdded = dispositions.some(d => d.status === 'added');
+  if (!anyAdded) {
+    return { committed: false, dispositions, sha: fileSha };
+  }
+  const encoded = Buffer.from(JSON.stringify(eventsData, null, 2), 'utf-8').toString('base64');
+  const putRes = await githubRequest('PUT', '/repos/' + repo + '/contents/events.json', ghToken, {
+    message: 'Backfill ' + dispositions.filter(d => d.status === 'added').length + ' missed registration(s)',
+    content: encoded,
+    sha: fileSha
+  });
+  if (putRes.statusCode !== 200 && putRes.statusCode !== 201) {
+    throw new Error('GitHub PUT failed: ' + putRes.statusCode + ' ' + JSON.stringify(putRes.data).substring(0, 300));
+  }
+  return { committed: true, dispositions, newSha: putRes.data.commit && putRes.data.commit.sha };
+}
+
+async function sendConfirmationEmails(r) {
+  const out = { customer: 'pending', owner: 'pending' };
+  const amountDisplay = '$' + (r.amountCents / 100).toFixed(2);
+
+  if (r.customerEmail) {
     try {
       await sendGridEmail(
-        customerEmail,
-        'Registration Confirmed — ' + (eventName || 'The Quarry Event'),
+        r.customerEmail,
+        'Registration Confirmed — ' + (r.eventName || 'The Quarry Event'),
         '<div style="font-family:Arial,sans-serif;max-width:600px">' +
         '<div style="background:#1A0E08;padding:24px;text-align:center">' +
         '<h1 style="color:#B8933A;margin:0">The Quarry</h1>' +
         '<p style="color:#F5F0E8;font-size:0.8rem;letter-spacing:0.15em;margin:4px 0 0">NEW MELLE, MISSOURI</p></div>' +
         '<div style="padding:32px 24px"><h2 style="color:#2C1A0E">You\'re Registered!</h2>' +
-        '<p>Hi ' + customerName + ', your registration is confirmed.</p>' +
-        '<p style="color:#666;font-size:.85em;font-style:italic">Note: this confirmation is being re-sent — your payment processed successfully on ' + new Date(session.created * 1000).toLocaleDateString() + '. Thanks for your patience.</p>' +
+        '<p>Hi ' + r.customerName + ', your registration is confirmed.</p>' +
+        '<p style="color:#666;font-size:.85em;font-style:italic">Note: this confirmation is being re-sent — your payment processed successfully on ' + new Date(r.sessionCreated * 1000).toLocaleDateString() + '. Thanks for your patience.</p>' +
         '<div style="background:#FAF7F2;border-left:4px solid #B8933A;padding:16px 20px;margin:20px 0">' +
-        '<p style="margin:4px 0"><b>Event:</b> ' + (eventName || 'The Quarry Event') + '</p>' +
-        '<p style="margin:4px 0"><b>Seat Type:</b> ' + (seatType || 'N/A') + '</p>' +
-        (ticketTier ? '<p style="margin:4px 0"><b>Ticket:</b> ' + ticketTier + '</p>' : '') +
-        '<p style="margin:4px 0"><b>Party Size:</b> ' + partySize + '</p>' +
+        '<p style="margin:4px 0"><b>Event:</b> ' + (r.eventName || 'The Quarry Event') + '</p>' +
+        '<p style="margin:4px 0"><b>Seat Type:</b> ' + (r.seatType || 'N/A') + '</p>' +
+        (r.ticketTier ? '<p style="margin:4px 0"><b>Ticket:</b> ' + r.ticketTier + '</p>' : '') +
+        '<p style="margin:4px 0"><b>Party Size:</b> ' + r.partySize + '</p>' +
         '<p style="margin:4px 0;color:#B8933A"><b>Total Paid: ' + amountDisplay + '</b></p></div>' +
         '<p>Questions? Call <a href="tel:6362480426" style="color:#B8933A">(636) 248-0426</a> or email ' +
         '<a href="mailto:management@thequarrystl.com" style="color:#B8933A">management@thequarrystl.com</a></p></div>' +
@@ -199,51 +208,37 @@ async function processSession(session, results) {
         'events@thequarrystl.com',
         'The Quarry STL'
       );
-      emailResults.customer = 'sent';
-    } catch (e) {
-      emailResults.customer = 'error: ' + e.message;
-    }
+      out.customer = 'sent';
+    } catch (e) { out.customer = 'error: ' + e.message; }
   } else {
-    emailResults.customer = 'no_email';
+    out.customer = 'no_email';
   }
 
   try {
     await sendGridEmail(
       'management@thequarrystl.com',
-      'Backfilled Event Registration — ' + (eventName || 'Event'),
+      'Backfilled Event Registration — ' + (r.eventName || 'Event'),
       '<div style="font-family:Arial,sans-serif;max-width:600px">' +
       '<div style="background:#1A0E08;padding:24px;text-align:center">' +
       '<h1 style="color:#B8933A;margin:0">The Quarry</h1></div>' +
-      '<div style="padding:32px 24px">' +
-      '<h2 style="color:#2C1A0E">Backfilled Registration</h2>' +
-      '<p style="color:#666;font-size:.9em">This is a reprocessed registration that was missed by the webhook between Apr 22 and May 2.</p>' +
+      '<div style="padding:32px 24px"><h2>Backfilled Registration</h2>' +
       '<div style="background:#FAF7F2;border-left:4px solid #B8933A;padding:16px 20px;margin:20px 0">' +
-      '<p style="margin:4px 0"><b>Event:</b> ' + (eventName || 'N/A') + '</p>' +
-      '<p style="margin:4px 0"><b>Name:</b> ' + customerName + '</p>' +
-      '<p style="margin:4px 0"><b>Email:</b> ' + customerEmail + '</p>' +
-      '<p style="margin:4px 0"><b>Phone:</b> ' + (customerPhone || 'N/A') + '</p>' +
-      (ticketTier ? '<p style="margin:4px 0"><b>Ticket:</b> ' + ticketTier + '</p>' : '') +
-      '<p style="margin:4px 0"><b>Party Size:</b> ' + partySize + '</p>' +
+      '<p style="margin:4px 0"><b>Event:</b> ' + (r.eventName || 'N/A') + '</p>' +
+      '<p style="margin:4px 0"><b>Name:</b> ' + r.customerName + '</p>' +
+      '<p style="margin:4px 0"><b>Email:</b> ' + r.customerEmail + '</p>' +
+      '<p style="margin:4px 0"><b>Phone:</b> ' + (r.customerPhone || 'N/A') + '</p>' +
+      (r.ticketTier ? '<p style="margin:4px 0"><b>Ticket:</b> ' + r.ticketTier + '</p>' : '') +
+      '<p style="margin:4px 0"><b>Party Size:</b> ' + r.partySize + '</p>' +
       '<p style="margin:4px 0;color:#B8933A"><b>Total: ' + amountDisplay + '</b></p>' +
-      '<p style="margin:4px 0;font-size:.8em;color:#666">Stripe session: ' + session.id + '</p></div>' +
+      '<p style="margin:4px 0;font-size:.8em;color:#666">Stripe: ' + r.sessionId + '</p></div>' +
       '</div></div>',
       'events@thequarrystl.com',
       'The Quarry STL'
     );
-    emailResults.owner = 'sent';
-  } catch (e) {
-    emailResults.owner = 'error: ' + e.message;
-  }
+    out.owner = 'sent';
+  } catch (e) { out.owner = 'error: ' + e.message; }
 
-  results.push({
-    session: session.id,
-    status: 'backfilled',
-    name: customerName,
-    email: customerEmail,
-    eventName,
-    amount: amountDisplay,
-    emails: emailResults
-  });
+  return out;
 }
 
 exports.handler = async (event) => {
@@ -276,21 +271,54 @@ exports.handler = async (event) => {
     sessionIds = DEFAULT_SESSIONS;
   }
 
+  const skipEmails = !!(event.queryStringParameters && event.queryStringParameters.skipEmails === '1');
   const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
-  const results = [];
 
+  // Phase 1: fetch all sessions from Stripe
+  const fetched = [];
+  const fetchErrors = [];
   for (const sid of sessionIds) {
     try {
       const session = await stripe.checkout.sessions.retrieve(sid);
-      await processSession(session, results);
+      fetched.push(sessionToReg(session));
     } catch (e) {
-      results.push({ session: sid, status: 'fetch_error', error: e.message });
+      fetchErrors.push({ session: sid, error: e.message });
+    }
+  }
+
+  // Phase 2: ONE atomic batch update of events.json
+  let batchResult;
+  try {
+    batchResult = await batchUpdateEventsJson(fetched);
+  } catch (e) {
+    return { statusCode: 500, headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: 'batch_update_failed', message: e.message, fetchErrors }) };
+  }
+
+  // Phase 3: send emails for newly added rows (skip already_recorded ones)
+  const emailReports = [];
+  if (!skipEmails) {
+    const addedIds = new Set(batchResult.dispositions.filter(d => d.status === 'added').map(d => d.session));
+    for (const r of fetched) {
+      if (addedIds.has(r.sessionId)) {
+        const out = await sendConfirmationEmails(r);
+        emailReports.push({ session: r.sessionId, name: r.customerName, email: r.customerEmail, ...out });
+      }
     }
   }
 
   return {
     statusCode: 200,
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ processed: sessionIds.length, results }, null, 2)
+    body: JSON.stringify({
+      processed: sessionIds.length,
+      fetched: fetched.length,
+      fetchErrors,
+      committed: batchResult.committed,
+      newSha: batchResult.newSha,
+      dispositions: batchResult.dispositions,
+      emails: emailReports,
+      skippedEmails: skipEmails
+    }, null, 2)
   };
 };
