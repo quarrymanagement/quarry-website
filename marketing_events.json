@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-02T01:32:09.077Z",
+  "updatedAt": "2026-05-02T01:33:48.598Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -11684,6 +11684,17 @@
         "bounces": 9,
         "unsubs": 0
       }
+    },
+    {
+      "ts": "2026-05-02T01:33:34.000Z",
+      "type": "delivered",
+      "draftId": null,
+      "ruleId": null,
+      "email": "stlouismicrotool@yahoo.com",
+      "url": null,
+      "sgEventId": "ZGVsaXZlcmVkLTQ0LTEwNjAzNzc2NS02c004dTBEQVM0T3dpQ0lOWko1V1BnLTA",
+      "userAgent": null,
+      "category": "quarry-marketing"
     }
   ],
   "aggregates": {
