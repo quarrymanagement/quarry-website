@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-02T19:35:10.315Z",
+  "updatedAt": "2026-05-02T19:35:15.285Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -14515,6 +14515,17 @@
       "email": "sherryhigg@me.com",
       "url": null,
       "sgEventId": "ZGVsaXZlcmVkLTAtMTA2MDM3NzY1LTlMd2NwcDZMVHUyUWtfUGhRVE9YbnctMA",
+      "userAgent": null,
+      "category": null
+    },
+    {
+      "ts": "2026-05-02T19:35:07.000Z",
+      "type": "delivered",
+      "draftId": null,
+      "ruleId": null,
+      "email": "carla@catalafacialretreat.com",
+      "url": null,
+      "sgEventId": "ZGVsaXZlcmVkLTAtMTA2MDM3NzY1LUtSTGdXZFNiUjd5Qm9yWUdMQ2dlbmctMA",
       "userAgent": null,
       "category": null
     }
