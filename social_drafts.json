@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-02T00:02:46.746Z",
+  "updatedAt": "2026-05-02T13:01:29.374Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -520,7 +520,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-05-08T17:00:00-05:00",
       "createdAt": "2026-04-28T03:38:22.277Z",
       "createdBy": "cadence-engine",
@@ -554,12 +554,33 @@
           "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "What to Expect — Post 14 days before event. "
+        "canvasNote": "What to Expect — Post 14 days before event. ",
+        "reelBrief": "Open with a slow pan across a table set with a wine bottle, beer bucket, and bingo cards under string lights (3s). Cut to a close-up of a hand marking a bingo card. End on the patio at dusk, wide shot. Suggested audio: upbeat 80s synth-pop instrumental. Text overlay: '70s • 80s • 90s Music Bingo / May 22 / Tables of 4 / $80 includes drinks'."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Music Bingo is back — and these nights fill up fast.\n\nMay 22 at 5:30pm we're playing 70s, 80s, and 90s hits. Tables of 4, beer bucket or bottle of wine included, prizes all night. $80/table.\n\nSnag your seats before they're gone — link in bio.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#STLEvents",
+        "#MusicBingo",
+        "#STLEats",
+        "#OFallonMO",
+        "#WentzvilleMO"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Four friends laughing around a high-top table on a warmly lit stone patio at dusk, wine bottle and beer bucket in the center, string lights overhead casting golden light, no faces visible, vintage warm tones, soft cliff and water in background",
+      "variants": {
+        "facebook": "Music Bingo is back — and these nights sell out.\n\nMay 22 at 5:30pm: 70s, 80s, and 90s hits on the bingo card. Tables of 4, beer bucket or bottle of wine included, prizes all night long. $80 per table.\n\nAbout a third of seats are already claimed. Grab yours: [LINK]",
+        "instagram": "Music Bingo is back — and these nights fill up fast.\n\nMay 22 · 5:30pm · 70s/80s/90s hits · $80/table includes drinks. Link in bio."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "At T-14 with 38% fill, the copy leads with the proven sellout credibility from past nights, details exactly what's included (the value push the guidelines call for under 50% fill), and closes with a soft-but-clear action nudge appropriate for the 'what to expect' arc step.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-05-02T13:01:29.374Z",
+      "updatedAt": "2026-05-02T13:01:29.374Z"
     },
     {
       "id": "drf-moi2t9s6-m-xosew",
