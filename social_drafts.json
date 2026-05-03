@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-02T13:01:29.374Z",
+  "updatedAt": "2026-05-03T13:04:16.351Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -1070,7 +1070,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-05-09T14:00:00-05:00",
       "createdAt": "2026-04-28T03:38:22.280Z",
       "createdBy": "cadence-engine",
@@ -1140,12 +1140,31 @@
           ],
           "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
         },
-        "canvasNote": "Tonight — covers 4 band(s). Post 0 days before first show."
+        "canvasNote": "Tonight — covers 4 band(s). Post 0 days before first show.",
+        "reelBrief": "Open with a slow pan across the sun-drenched patio (2s), cut to a close-up of a wine glass catching afternoon light on the stone bar (3s), end on a wide shot of the cliff and lake view (3s). Suggested audio: upbeat acoustic folk instrumental. Text overlay: 'Scott Logan // Today 1–4 PM // The Quarry, New Melle'."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Scott Logan plays this afternoon 1–4 PM. No cover, no ticket — just show up.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#LiveMusicSTL",
+        "#WineBar",
+        "#STLEats"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Acoustic guitar leaning against a wooden stool on a sunlit stone patio, warm afternoon light filtering through overhead string bulbs, blurred lake and limestone cliff in the soft background, golden hour tones",
+      "variants": {
+        "facebook": "Scott Logan is live on the patio today from 1–4 PM. Free with your visit — no cover, no ticket needed. Come for lunch, stay for the music. We're open at 3960 Highway Z, New Melle.",
+        "instagram": "Scott Logan plays this afternoon 1–4 PM. No cover — just show up."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "T-0 calls for a short, specific, present-tense nudge — band name, time, and the one friction-removing fact (free, walk in) is all this post needs.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-05-03T13:04:16.351Z",
+      "updatedAt": "2026-05-03T13:04:16.351Z"
     },
     {
       "id": "drf-moi2t9s8-v-nd108",
