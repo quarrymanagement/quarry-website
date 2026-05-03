@@ -110,7 +110,11 @@ exports.handler = async (event) => {
         }
 
         if (file.events.length > 5000) file.events = file.events.slice(-5000);
-        if (polled > 0 || errors.length > 0) {
+        // Only commit when we actually got fresh insights. Errors land in the
+        // Netlify function logs and the response payload — no need to
+        // persist them to GitHub on every cron tick. Was committing every
+        // 30 min for a posted draft whose insights API consistently fails.
+        if (polled > 0) {
             file.updatedAt = new Date().toISOString();
             await saveFile('social_events.json', file, eventsRes.sha, `social-poll: ${polled} polled, ${errors.length} errors`);
         }

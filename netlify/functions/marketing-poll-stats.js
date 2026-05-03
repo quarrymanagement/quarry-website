@@ -106,16 +106,21 @@ exports.handler = async (event) => {
                 const deltaOpen = (stats.uniqueOpen || 0) - (prev.uniqueOpen || 0);
                 const deltaClick = (stats.uniqueClick || 0) - (prev.uniqueClick || 0);
                 const deltaUnsub = (stats.unsubscribe || 0) - (prev.unsubscribe || 0);
-                if (deltaOpen + deltaClick + deltaUnsub > 0) updated++;
+                const hasDelta = deltaOpen + deltaClick + deltaUnsub > 0;
+                if (hasDelta) updated++;
                 file.aggregates[d.id] = next;
-                // Add lightweight summary events so the activity log shows the latest poll
-                file.events.push({
-                    ts: new Date().toISOString(),
-                    type: 'poll',
-                    draftId: d.id,
-                    sendId: d.sgSingleSendId,
-                    summary: { opens: stats.uniqueOpen, clicks: stats.uniqueClick, bounces: stats.bounce, unsubs: stats.unsubscribe }
-                });
+                // Only log a poll event when something actually moved. Otherwise
+                // we were committing a fresh poll log every 15 min for stats
+                // that hadn't changed in days — pure noise.
+                if (hasDelta) {
+                    file.events.push({
+                        ts: new Date().toISOString(),
+                        type: 'poll',
+                        draftId: d.id,
+                        sendId: d.sgSingleSendId,
+                        summary: { opens: stats.uniqueOpen, clicks: stats.uniqueClick, bounces: stats.bounce, unsubs: stats.unsubscribe }
+                    });
+                }
             } catch (err) {
                 errors.push({ draftId: d.id, sendId: d.sgSingleSendId, err: err.message });
             }
@@ -124,7 +129,10 @@ exports.handler = async (event) => {
         // Trim events log to last 5,000 entries
         if (file.events.length > 5000) file.events = file.events.slice(-5000);
 
-        if (polled > 0 || errors.length > 0) {
+        // Only commit when we have NEW data. Errors get logged in the
+        // function logs and surfaced in the API response — they don't need to
+        // be persisted to GitHub on every cron tick (was ~93% noise commits).
+        if (updated > 0) {
             file.updatedAt = new Date().toISOString();
             await saveJsonFile('marketing_events.json', file, eventsRes.sha,
                 `poll-stats: ${polled} polled, ${updated} updated, ${errors.length} errors`);

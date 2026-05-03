@@ -33,10 +33,12 @@
 [functions."marketing-optimize"]
   schedule = "0 7 * * *"
 
-# Stats poller — every 15 min. Replaces the SendGrid event webhook (not
-# included on Basic 5k plan). Pulls open/click/bounce stats per Single Send.
+# Stats poller — once daily at 16:00 UTC = 11 AM CDT / 10 AM CST.
+# Used to be every 15 min (96/day) — way more than needed for our send
+# volume. Manual "Refresh now" button on the Performance tab handles
+# fresher reads when actually wanted.
 [functions."marketing-poll-stats"]
-  schedule = "*/15 * * * *"
+  schedule = "0 16 * * *"
 
 # ─── SOCIAL ──────────────────────────────────────────────────────────────────
 # Daily social drafts generator — 13:00 UTC = 8am CDT / 7am CST.
@@ -47,9 +49,11 @@
 [functions."social-post"]
   schedule = "*/10 * * * *"
 
-# Social engagement stats poller — every 30 min. Reach/likes/comments per post.
+# Social engagement stats poller — once daily at 17:00 UTC = 12 PM CDT.
+# Was every 30 min (48/day) — Meta insights take 30+ min to populate so
+# polling more often was useless. Manual refresh button on Performance tab.
 [functions."social-poll-stats"]
-  schedule = "*/30 * * * *"
+  schedule = "0 17 * * *"
 
 # Cadence engine — every 4 hours. Picks up newly added events/bands and
 # rebuilds skeleton drafts; re-prioritizes when new high-priority items appear.
