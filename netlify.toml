@@ -7,6 +7,11 @@
 [build]
   command = "bash build.sh"
   publish = "."
+  # Skip the build entirely when only data JSON files changed (these are
+  # read directly from raw.githubusercontent.com — no rebuild needed).
+  # See build-ignore.sh for the logic. Was burning ~1500 build minutes/month
+  # before this; now should be well under 100.
+  ignore = "bash build-ignore.sh"
 
 [functions]
   directory = "netlify/functions"
@@ -61,8 +66,3 @@
 # creates patio-perfect or cozy-fireside skeleton drafts for today/tomorrow.
 [functions."social-weather-trigger"]
   schedule = "0 11 * * *"
-
-# deploy trigger: 2026-04-28 09:34 (GA4 env var added)
-# trigger: NETLIFY_API_TOKEN added 12:31
-# trigger: META_PAGE_ACCESS_TOKEN refreshed 10:18
-# meta token retry 102235
