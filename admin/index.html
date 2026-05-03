@@ -118,186 +118,7 @@
         /* ================================================================
            MAIN LAYOUT
            ================================================================ */
-        #mainApp { display: flex; flex-direction: row; width: 100%; height: 100%; }
-        /* ── SIDEBAR ───────────────────────────────────────────────────── */
-        .sidebar {
-            width: 250px; flex-shrink: 0; height: 100vh;
-            background: var(--bg-secondary);
-            border-right: 1px solid var(--border-subtle);
-            display: flex; flex-direction: column;
-            box-shadow: 1px 0 6px rgba(0,0,0,0.04);
-            position: relative; z-index: 100;
-        }
-        .sb-brand {
-            padding: 1.25rem 1rem; border-bottom: 1px solid var(--border-subtle);
-            display: flex; align-items: center; gap: 0.75rem;
-        }
-        .sb-brand-logo { width: 40px; height: 40px; object-fit: contain; flex-shrink: 0; }
-        .sb-brand-text { line-height: 1.2; min-width: 0; }
-        .sb-brand-name { font-family: var(--font-serif); font-size: 1.1rem; color: var(--gold); font-weight: 700; letter-spacing: 1px; }
-        .sb-brand-sub  { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
-
-        .sb-nav { flex: 1; overflow-y: auto; padding: 0.5rem 0; }
-        .sb-nav::-webkit-scrollbar { width: 4px; }
-        .sb-nav::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 2px; }
-        .sb-nav-section {
-            padding: 0.85rem 1rem 0.3rem; font-size: 0.65rem; color: var(--text-muted);
-            text-transform: uppercase; letter-spacing: 1.2px; font-weight: 600;
-            display: flex; align-items: center; justify-content: space-between;
-            cursor: pointer; user-select: none;
-            transition: color 0.12s;
-        }
-        .sb-nav-section:hover { color: var(--text-secondary); }
-        .sb-nav-section::after {
-            content: '';
-            width: 7px; height: 7px;
-            border-right: 1.5px solid currentColor;
-            border-bottom: 1.5px solid currentColor;
-            transform: rotate(45deg) translate(-2px, -2px);
-            transition: transform 0.18s ease;
-            opacity: 0.55;
-            margin-right: 4px;
-        }
-        .sb-nav-section.collapsed::after {
-            transform: rotate(-45deg) translate(0, -2px);
-        }
-        .sb-nav-section.collapsed + .sb-nav-group {
-            display: none;
-        }
-        .sb-nav-group { padding: 0 0.5rem; }
-        .sb-nav-item {
-            display: flex; align-items: center; gap: 0.65rem;
-            padding: 0.55rem 0.85rem; margin: 1px 0; border-radius: 6px;
-            font-size: 0.83rem; color: var(--text-secondary); cursor: pointer;
-            transition: background 0.12s, color 0.12s; user-select: none;
-            position: relative;
-        }
-        .sb-nav-item:hover { background: rgba(154,123,42,0.08); color: var(--text-primary); }
-        .sb-nav-item.active {
-            background: var(--gold); color: #fff; font-weight: 600;
-            box-shadow: 0 1px 3px rgba(154,123,42,0.3);
-        }
-        /* Hide emoji icons site-wide for a cleaner, professional sidebar */
-        .sb-ic { display: none; }
-        .sb-lbl { flex: 1; min-width: 0; }
-        .sb-badge {
-            background: #dc2626; color: #fff; border-radius: 999px;
-            font-size: 0.65rem; font-weight: 700; padding: 1px 6px; min-width: 18px; text-align: center;
-        }
-        .sb-nav-item.active .sb-badge { background: #fff; color: var(--gold); }
-
-        .sb-foot {
-            padding: 0.75rem; border-top: 1px solid var(--border-subtle);
-            display: flex; flex-direction: column; gap: 0.4rem;
-        }
-        .sb-foot button {
-            width: 100%; padding: 0.55rem 0.85rem; font-size: 0.78rem;
-            border-radius: 6px; cursor: pointer; transition: all 0.12s;
-            text-align: left; font-weight: 500;
-        }
-
-        /* ── DASHBOARD ────────────────────────────────────────────────── */
-        .dash-hero {
-            display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; flex-wrap: wrap;
-            padding-bottom: 1.25rem; border-bottom: 1px solid var(--border-subtle); margin-bottom: 1.5rem;
-        }
-        .dash-hero > div:first-child { min-width: 0; flex: 1; }
-        @media (max-width: 600px) {
-            .dash-hero { align-items: flex-start; }
-            .dash-quick-actions { width: 100%; }
-            .dash-quick { flex: 1; min-width: 0; font-size: 0.78rem; padding: 0.5rem 0.6rem; }
-        }
-        .dash-greeting {
-            font-family: var(--font-serif); font-size: 1.85rem; color: var(--text-primary); margin: 0;
-            font-weight: 700; letter-spacing: 0.2px;
-        }
-        .dash-date { color: var(--text-muted); font-size: 0.92rem; margin: 0.25rem 0 0; }
-        .dash-quick-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-        .dash-quick {
-            background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-subtle);
-            padding: 0.55rem 0.95rem; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 500;
-            transition: all 0.15s; white-space: nowrap;
-        }
-        .dash-quick:hover { background: var(--gold); color: #fff; border-color: var(--gold); transform: translateY(-1px); box-shadow: 0 2px 6px rgba(154,123,42,0.25); }
-
-        .dash-section-h {
-            font-size: 1.02rem; color: var(--text-primary); font-weight: 600;
-            margin: 0 0 0.25rem; letter-spacing: 0.2px;
-        }
-        .dash-section-sub { color: var(--text-muted); font-size: 0.82rem; margin: 0 0 0.85rem; }
-
-        .dash-attn-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-            gap: 0.75rem;
-        }
-        .dash-attn-card {
-            background: var(--bg-card); border: 1px solid var(--border-subtle); border-left: 3px solid var(--gold);
-            border-radius: 8px; padding: 0.95rem 1.1rem; cursor: pointer; transition: all 0.15s;
-            display: flex; flex-direction: column; gap: 0.3rem;
-            min-width: 0; overflow: hidden;
-        }
-        .dash-attn-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); border-left-color: var(--gold-light); }
-        .dash-attn-card .ac-num { font-size: 1.5rem; font-weight: 700; color: var(--gold); line-height: 1; }
-        .dash-attn-card .ac-ttl { font-size: 0.92rem; color: var(--text-primary); font-weight: 500; word-wrap: break-word; overflow-wrap: anywhere; line-height: 1.3; }
-        .dash-attn-card .ac-sub { font-size: 0.78rem; color: var(--text-muted); word-wrap: break-word; overflow-wrap: break-word; line-height: 1.4; }
-        .dash-attn-card.is-zero { border-left-color: #16a34a; opacity: 0.85; }
-        .dash-attn-card.is-zero .ac-num { color: #16a34a; }
-
-        .dash-today-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-top: 0.5rem;
-        }
-        @media (max-width: 700px) { .dash-today-grid { grid-template-columns: 1fr; } }
-        .dash-today-card {
-            background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 10px;
-            padding: 1rem 1.15rem; min-width: 0; overflow: hidden;
-        }
-        .dash-today-h { font-size: 0.92rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.6rem; }
-        .dash-today-body { font-size: 0.88rem; line-height: 1.55; color: var(--text-secondary); }
-        .dash-today-body .dt-row { padding: 0.45rem 0; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; min-width: 0; }
-        .dash-today-body .dt-row:last-child { border-bottom: none; }
-        .dash-today-body .dt-name { font-weight: 600; color: var(--text-primary); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
-        .dash-today-body .dt-time { font-size: 0.78rem; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; }
-        .dash-today-empty { color: var(--text-muted); font-size: 0.85rem; font-style: italic; }
-
-        .dash-stats-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-            gap: 0.65rem; margin-top: 0.5rem;
-        }
-        .dash-stat {
-            background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 10px;
-            padding: 1rem 1.1rem; cursor: pointer; transition: all 0.15s;
-            display: flex; flex-direction: column; gap: 0.35rem; position: relative;
-            min-width: 0; overflow: hidden;
-        }
-        .dash-stat:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-color: var(--gold); }
-        .dash-stat-ic { font-size: 1.15rem; opacity: 0.7; position: absolute; top: 0.85rem; right: 1rem; pointer-events: none; }
-        .dash-stat-num {
-            font-size: 1.65rem; font-weight: 700; color: var(--text-primary);
-            line-height: 1.1; font-variant-numeric: tabular-nums;
-            padding-right: 1.8rem; /* leave room for the absolutely-positioned icon */
-            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-        }
-        .dash-stat-lbl {
-            font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; font-weight: 500;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-
-        /* Mobile toggle */
-        .sb-mobile-toggle {
-            display: none; position: fixed; top: 0.75rem; left: 0.75rem; z-index: 250;
-            background: var(--bg-card); border: 1px solid var(--border-subtle);
-            border-radius: 6px; padding: 0.5rem 0.7rem; font-size: 1.2rem; cursor: pointer; color: var(--text-primary);
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        }
-        @media (max-width: 900px) {
-            .sidebar {
-                position: fixed; left: -260px; top: 0; transition: left 0.25s;
-                z-index: 220; width: 260px;
-            }
-            .sidebar.open { left: 0; box-shadow: 4px 0 20px rgba(0,0,0,0.3); }
-            .sb-mobile-toggle { display: block; }
-            .content { padding-top: 3rem; }
-        }
+        #mainApp { display: flex; flex-direction: column; width: 100%; height: 100%; }
 
         /* ================================================================
            NAVIGATION BAR
@@ -436,38 +257,13 @@
             margin-bottom: 1.5rem;
         }
         .events-header h2 { font-family: var(--font-serif); font-size: 1.5rem; color: var(--text-primary); font-weight: 600; }
-        /* ── UNIFIED BUTTON SYSTEM ─────────────────────────────────────── */
-        .btn-primary, .btn-secondary, .btn-approve, .btn-reject, .btn-redo, .btn-edit-save {
-            font-family: var(--font-sans); font-weight: 600; font-size: 0.85rem;
-            padding: 0.55rem 1.05rem; border-radius: 6px; cursor: pointer;
-            letter-spacing: 0.2px; line-height: 1.2; display: inline-flex;
-            align-items: center; justify-content: center; gap: 0.4rem;
-            transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
-            white-space: nowrap; border: 1px solid transparent;
-        }
-        .btn-primary, .btn-secondary, .btn-approve, .btn-reject, .btn-redo, .btn-edit-save { user-select: none; }
-        .btn-primary:focus-visible, .btn-secondary:focus-visible, .btn-approve:focus-visible,
-        .btn-reject:focus-visible, .btn-redo:focus-visible, .btn-edit-save:focus-visible {
-            outline: 2px solid var(--gold); outline-offset: 2px;
-        }
-        .btn-primary:hover, .btn-approve:hover, .btn-edit-save:hover {
-            transform: translateY(-1px); box-shadow: 0 4px 10px rgba(154,123,42,0.18);
-        }
-        .btn-secondary:hover, .btn-reject:hover, .btn-redo:hover {
-            transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.06);
-        }
-        .btn-primary:active, .btn-secondary:active, .btn-approve:active,
-        .btn-reject:active, .btn-redo:active, .btn-edit-save:active { transform: translateY(0); box-shadow: none; }
-        .btn-primary:disabled, .btn-secondary:disabled, .btn-approve:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
-
         .btn-primary {
-            background: var(--gold); color: #fff; border-color: var(--gold);
+            background: var(--gold); color: var(--bg-primary); border: none;
+            padding: 0.6rem 1.25rem; border-radius: var(--radius-sm); cursor: pointer;
+            font-weight: 600; font-size: 0.85rem; transition: var(--transition);
+            font-family: var(--font-sans); letter-spacing: 0.3px;
         }
-        .btn-primary:hover { background: var(--gold-light); border-color: var(--gold-light); }
-        .btn-secondary {
-            background: var(--bg-card); color: var(--text-primary); border-color: var(--border-subtle);
-        }
-        .btn-secondary:hover { background: var(--bg-elevated); border-color: var(--gold); }
+        .btn-primary:hover { background: var(--gold-light); }
         .events-grid {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 1.25rem;
@@ -2468,11 +2264,8 @@
         .mkt-cal-day.is-today .day-num { color: var(--gold); }
         .mkt-cal-event { background: var(--gold-dim); border-left: 3px solid var(--gold); padding: 3px 5px; border-radius: 3px; font-size: 0.72rem; line-height: 1.25; color: var(--text-primary); cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .mkt-cal-event:hover { background: var(--gold-glow); }
-        .mkt-cal-event.is-skeleton { background: rgba(100,116,139,0.10); border-left-color: #64748b; }
         .mkt-cal-event.is-pending  { background: rgba(180,83,9,0.10); border-left-color: #b45309; }
         .mkt-cal-event.is-approved { background: rgba(37,99,235,0.10); border-left-color: #2563eb; }
-        .mkt-cal-event.is-posted   { background: rgba(21,128,61,0.10); border-left-color: #15803d; }
-        .mkt-cal-event.is-superseded { background: rgba(100,116,139,0.08); border-left-color: #94a3b8; opacity: 0.6; text-decoration: line-through; }
         .mkt-cal-event.is-sent     { background: rgba(22,163,74,0.10); border-left-color: #16a34a; }
         .mkt-cal-event.is-rejected { background: rgba(220,38,38,0.10); border-left-color: #dc2626; opacity: 0.65; text-decoration: line-through; }
         .mkt-cal-event.is-failed   { background: rgba(220,38,38,0.18); border-left-color: #dc2626; }
@@ -2487,31 +2280,8 @@
         .mkt-inbox-list { display: flex; flex-direction: column; gap: 0.6rem; }
         .mkt-inbox-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-left: 4px solid var(--gold); border-radius: var(--radius-sm); padding: 0.85rem 1rem; cursor: pointer; transition: border-color 0.15s, transform 0.1s; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
         .mkt-inbox-card:hover { border-color: var(--gold-light); transform: translateX(2px); }
-        .mkt-inbox-card.is-skeleton { border-left-color: #64748b; }
         .mkt-inbox-card.is-pending  { border-left-color: #b45309; }
         .mkt-inbox-card.is-approved { border-left-color: #2563eb; }
-        .mkt-inbox-card.is-posted   { border-left-color: #15803d; }
-        .mkt-inbox-card.is-superseded { border-left-color: #94a3b8; opacity: 0.55; }
-        /* Status pill — used in inbox/calendar/modal subtitles */
-        .mkt-status-pill {
-            display: inline-block; padding: 0.18rem 0.55rem; border-radius: 999px;
-            font-size: 0.68rem; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase;
-            background: var(--bg-elevated); color: var(--text-muted); white-space: nowrap;
-        }
-        .mkt-status-pill.is-skeleton   { background: rgba(100,116,139,0.18); color: #475569; }
-        .mkt-status-pill.is-pending    { background: rgba(180,83,9,0.18);    color: #b45309; }
-        .mkt-status-pill.is-approved   { background: rgba(37,99,235,0.18);   color: #2563eb; }
-        .mkt-status-pill.is-posted     { background: rgba(21,128,61,0.18);   color: #15803d; }
-        .mkt-status-pill.is-rejected   { background: rgba(148,163,184,0.18); color: #64748b; opacity: 0.75; text-decoration: line-through; }
-        .mkt-status-pill.is-failed     { background: rgba(220,38,38,0.18);   color: #b91c1c; }
-        .mkt-status-pill.is-superseded { background: rgba(148,163,184,0.18); color: #64748b; opacity: 0.6; }
-        /* Empty state illustration */
-        .mkt-empty-friendly {
-            text-align: center; padding: 2rem 1rem; color: var(--text-muted);
-        }
-        .mkt-empty-friendly .ic { font-size: 2rem; display: block; margin-bottom: 0.5rem; opacity: 0.7; }
-        .mkt-empty-friendly .ttl { font-size: 0.95rem; color: var(--text-primary); font-weight: 500; margin-bottom: 0.25rem; }
-        .mkt-empty-friendly .sub { font-size: 0.8rem; }
         .mkt-inbox-card.is-sent     { border-left-color: #16a34a; }
         .mkt-inbox-card.is-rejected { border-left-color: #dc2626; opacity: 0.7; }
         .mkt-inbox-card.is-failed   { border-left-color: #dc2626; }
@@ -2529,24 +2299,10 @@
         .mkt-perf-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; }
         .mkt-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.1rem 1.2rem; }
         .mkt-card h4 { font-family: 'Playfair Display', Georgia, serif; color: var(--gold); margin: 0 0 0.75rem; font-size: 1.05rem; font-weight: 600; }
-        .mkt-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; table-layout: fixed; }
-        .mkt-table th { text-align: left; color: var(--text-muted); font-weight: 600; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--border-subtle); white-space: nowrap; }
-        .mkt-table td { padding: 0.55rem 0.5rem; border-bottom: 1px solid var(--border-subtle); color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; }
+        .mkt-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        .mkt-table th { text-align: left; color: var(--text-muted); font-weight: 600; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--border-subtle); }
+        .mkt-table td { padding: 0.55rem 0.5rem; border-bottom: 1px solid var(--border-subtle); color: var(--text-primary); }
         .mkt-table tr:last-child td { border-bottom: none; }
-        /* Top-performing subjects: subject column flexes, the rest are narrow numeric columns */
-        #mktPerfTopSubjects col.subj  { width: 50%; }
-        #mktPerfTopSubjects col.type  { width: 18%; }
-        #mktPerfTopSubjects col.num   { width: 10.66%; }
-        #mktPerfByType col.type { width: 40%; }
-        #mktPerfByType col.num  { width: 20%; }
-        #socPerfTable col.cap   { width: 50%; }
-        #socPerfTable col.num   { width: 12.5%; }
-        /* Wrap tables in horizontal-scroll fallback on narrow viewports */
-        .mkt-card > .mkt-table { display: table; }
-        @media (max-width: 600px) {
-            .mkt-table { font-size: 0.78rem; }
-            .mkt-table th, .mkt-table td { padding: 0.4rem 0.35rem; }
-        }
         .mkt-bars { display: flex; flex-direction: column; gap: 0.4rem; }
         .mkt-bar-row { display: flex; align-items: center; gap: 0.6rem; font-size: 0.78rem; color: var(--text-secondary); }
         .mkt-bar-label { width: 70px; flex-shrink: 0; }
@@ -2579,8 +2335,7 @@
         .mkt-modal-body { display: grid; grid-template-columns: 1fr 1fr; gap: 0; min-height: 0; overflow: hidden; }
         .mkt-modal-pane { padding: 1.1rem 1.25rem; overflow: auto; min-height: 0; }
         .mkt-modal-pane + .mkt-modal-pane { border-left: 1px solid var(--border-subtle); background: var(--bg-elevated); }
-        .mkt-modal-foot { padding: 0.85rem 1.25rem; border-top: 1px solid var(--border-subtle); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; background: var(--bg-card); }
-        .mkt-modal-foot .btn-approve, .mkt-modal-foot .btn-reject { padding: 0.7rem 1.2rem; font-size: 0.92rem; }
+        .mkt-modal-foot { padding: 0.75rem 1.25rem; border-top: 1px solid var(--border-subtle); display: flex; justify-content: flex-end; gap: 0.5rem; flex-wrap: wrap; background: var(--bg-card); }
         .mkt-meta-grid { display: grid; grid-template-columns: 110px 1fr; gap: 0.4rem 0.75rem; font-size: 0.85rem; margin-bottom: 1rem; }
         .mkt-meta-grid .k { color: var(--text-muted); font-weight: 500; }
         .mkt-meta-grid .v { color: var(--text-primary); }
@@ -2588,45 +2343,18 @@
         .mkt-modal-pane input.subject-edit, .mkt-modal-pane textarea.body-edit, .mkt-modal-pane textarea.mkt-redo-input { width: 100% !important; padding: 0.6rem 0.75rem !important; border: 1px solid var(--border-subtle) !important; border-radius: var(--radius-sm) !important; background: var(--bg-card) !important; color: var(--text-primary) !important; font-family: inherit !important; font-size: 0.9rem !important; resize: vertical !important; display: block !important; }
         .mkt-modal-pane textarea.body-edit { min-height: 220px !important; font-family: 'SFMono-Regular', Consolas, monospace !important; font-size: 0.78rem !important; }
         .mkt-modal-pane textarea.mkt-redo-input { min-height: 90px !important; }
-        .mkt-preview-frame { border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); background: #fff; overflow: auto; width: 100%; min-height: 700px; }
-        /* Rich text editor (replaces raw HTML textarea for staff) */
-        .mkt-rich-toolbar {
-            display: flex; gap: 0.2rem; flex-wrap: wrap;
-            padding: 0.4rem; background: var(--bg-elevated);
-            border: 1px solid var(--border-subtle); border-bottom: none;
-            border-radius: 6px 6px 0 0;
-        }
-        .mkt-rich-toolbar button {
-            background: transparent; border: 1px solid transparent; color: var(--text-primary);
-            padding: 0.3rem 0.55rem; border-radius: 4px; cursor: pointer; font-size: 0.85rem;
-            min-width: 28px; transition: background 0.12s;
-        }
-        .mkt-rich-toolbar button:hover { background: rgba(154,123,42,0.12); border-color: var(--gold); }
-        .mkt-rich-sep { width: 1px; background: var(--border-subtle); margin: 0.2rem 0.3rem; }
-        .mkt-rich-editor {
-            min-height: 280px; max-height: 500px; overflow-y: auto;
-            background: #fff; color: #222; padding: 1rem 1.25rem;
-            border: 1px solid var(--border-subtle); border-radius: 0 0 6px 6px;
-            font-family: Georgia, serif; font-size: 0.95rem; line-height: 1.65;
-        }
-        .mkt-rich-editor:focus { outline: 2px solid var(--gold); outline-offset: -2px; }
-        .mkt-rich-editor img { max-width: 100%; height: auto; }
-        .mkt-rich-editor h2 { font-family: 'Playfair Display', Georgia, serif; font-size: 1.3rem; margin: 0.8rem 0 0.4rem; color: #1A0E08; }
-        .mkt-rich-editor p  { margin: 0 0 0.8rem; }
-        .mkt-rich-editor a  { color: #9a7b2a; text-decoration: underline; }
-        .mkt-mode-tabs { display: flex; gap: 0.25rem; margin-bottom: 0.75rem; background: var(--bg-elevated); padding: 0.25rem; border-radius: 6px; }
-        .mkt-mode-tab { flex: 1; text-align: center; padding: 0.5rem 0.75rem; cursor: pointer; font-size: 0.8rem; color: var(--text-muted); border-radius: 4px; transition: all 0.15s; user-select: none; font-weight: 500; }
-        .mkt-mode-tab:hover { background: rgba(154,123,42,0.08); color: var(--text-primary); }
-        .mkt-mode-tab.active { color: #fff; background: var(--gold); }
-        .ex-prompt-chip:hover, .ex-redo-chip:hover { background: var(--gold) !important; color: #fff !important; border-color: var(--gold) !important; }
-        .btn-approve { background: #16a34a; color: #fff; border-color: #16a34a; }
-        .btn-approve:hover { background: #15803d; border-color: #15803d; }
-        .btn-reject  { background: transparent; color: #dc2626; border-color: #dc2626; }
+        .mkt-preview-frame { border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); background: #fff; overflow: auto; height: 460px; }
+        .mkt-mode-tabs { display: flex; gap: 0.4rem; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-subtle); }
+        .mkt-mode-tab { padding: 0.4rem 0.75rem; cursor: pointer; font-size: 0.8rem; color: var(--text-muted); border-bottom: 2px solid transparent; }
+        .mkt-mode-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+        .btn-approve { background: #16a34a; color: #fff; border: none; padding: 0.55rem 1rem; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; }
+        .btn-approve:hover { background: #15803d; }
+        .btn-reject  { background: transparent; color: #dc2626; border: 1px solid #dc2626; padding: 0.55rem 1rem; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; }
         .btn-reject:hover  { background: rgba(220,38,38,0.08); }
-        .btn-redo    { background: transparent; color: #2563eb; border-color: #2563eb; }
+        .btn-redo    { background: transparent; color: #2563eb; border: 1px solid #2563eb; padding: 0.55rem 1rem; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; }
         .btn-redo:hover    { background: rgba(37,99,235,0.08); }
-        .btn-edit-save { background: var(--gold); color: #fff; border-color: var(--gold); }
-        .btn-edit-save:hover { background: var(--gold-light); border-color: var(--gold-light); }
+        .btn-edit-save { background: var(--gold); color: #fff; border: none; padding: 0.55rem 1rem; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; }
+        .btn-edit-save:hover { background: var(--gold-light); }
         .btn-test-send { background: transparent; color: var(--text-secondary); border: 1px solid var(--border-medium); padding: 0.55rem 1rem; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; }
         .btn-test-send:hover { color: var(--text-primary); border-color: var(--text-primary); }
 
@@ -2652,78 +2380,60 @@
          MAIN APPLICATION
          ================================================================ -->
     <div id="mainApp" class="hidden">
-        <!-- SIDEBAR NAVIGATION -->
-        <button class="sb-mobile-toggle" id="sbMobileToggle" aria-label="Open menu">☰</button>
-        <aside class="sidebar" id="adminSidebar">
-            <div class="sb-brand">
-                <img src="/assets/quarry-q-logo.png" alt="The Quarry" class="sb-brand-logo">
-                <div class="sb-brand-text">
-                    <div class="sb-brand-name">The Quarry</div>
-                    <div class="sb-brand-sub">Admin Portal</div>
+        <!-- NAVIGATION BAR -->
+        <nav class="navbar">
+            <div class="navbar-brand">THE QUARRY</div>
+            <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="document.querySelector('.nav-tabs').classList.toggle('mobile-open'); this.innerHTML = this.innerHTML.trim() === '&#9776;' ? '&#10005;' : '&#9776;'">&#9776;</button>
+            <div class="nav-tabs">
+                <div class="nav-tab active" data-tab="dashboard">Dashboard</div>
+                <div class="nav-dropdown">
+                    <div class="nav-tab" data-tab="events" data-dropdown="entertainment">Entertainment</div>
+                    <div class="nav-dropdown-menu">
+                        <div class="nav-dropdown-item" data-tab="events">Events</div>
+                        <div class="nav-dropdown-item" data-tab="bands">Live Bands</div>
+                    </div>
+                </div>
+                <div class="nav-dropdown">
+                    <div class="nav-tab" data-tab="scheduling" data-dropdown="scheduling">Scheduling</div>
+                    <div class="nav-dropdown-menu">
+                        <div class="nav-dropdown-item" data-tab="scheduling">Weekly Schedule</div>
+                        <div class="nav-dropdown-item" data-tab="employees">Employees</div>
+                        <div class="nav-dropdown-item" data-tab="timeoff">Time Off</div>
+                    </div>
+                </div>
+                <div class="nav-dropdown">
+                    <div class="nav-tab" data-tab="crm" data-dropdown="customers">Customer Relations</div>
+                    <div class="nav-dropdown-menu">
+                        <div class="nav-dropdown-item" data-tab="crm">CRM</div>
+                        <div class="nav-dropdown-item" data-tab="potential">Potential Reservations</div>
+                        <div class="nav-dropdown-item" data-tab="confirmed">Confirmed Reservations</div>
+                        <div class="nav-dropdown-item" data-tab="email">Email</div>
+                    </div>
+                </div>
+                <div class="nav-tab" data-tab="payments">Payments</div>
+                <div class="nav-dropdown">
+                    <div class="nav-tab" data-tab="mktCalendar" data-dropdown="marketing">Marketing</div>
+                    <div class="nav-dropdown-menu">
+                        <div class="nav-dropdown-item" data-tab="mktCalendar">Campaign Calendar</div>
+                        <div class="nav-dropdown-item" data-tab="mktInbox">Drafts Inbox <span id="mktInboxBadge" style="display:none;background:var(--gold);color:#fff;border-radius:10px;padding:1px 7px;font-size:0.65rem;margin-left:0.4rem;">0</span></div>
+                        <div class="nav-dropdown-item" data-tab="mktPerformance">Performance</div>
+                        <div class="nav-dropdown-item" data-tab="mktInsights">AI Insights</div>
+                        <div class="nav-dropdown-item" data-tab="mktSettings">Marketing Settings</div>
+                    </div>
+                </div>
+                <div class="nav-dropdown">
+                    <div class="nav-tab" data-tab="floorplan" data-dropdown="settings">Settings</div>
+                    <div class="nav-dropdown-menu">
+                        <div class="nav-dropdown-item" data-tab="floorplan">Floor Plan</div>
+                        <div class="nav-dropdown-item" data-tab="forms">Forms</div>
+                    </div>
                 </div>
             </div>
-
-            <nav class="sb-nav">
-                <div class="sb-nav-group">
-                    <div class="sb-nav-item active" data-tab="dashboard"><span class="sb-ic">🏠</span><span class="sb-lbl">Dashboard</span></div>
-                </div>
-
-                <div class="sb-nav-section">Operations</div>
-                <div class="sb-nav-group">
-                    <div class="sb-nav-item" data-tab="events"><span class="sb-ic">🎫</span><span class="sb-lbl">Events</span></div>
-                    <div class="sb-nav-item" data-tab="bands"><span class="sb-ic">🎵</span><span class="sb-lbl">Live Bands</span></div>
-                    <div class="sb-nav-item" data-tab="scheduling"><span class="sb-ic">📋</span><span class="sb-lbl">Staff Schedule</span></div>
-                    <div class="sb-nav-item" data-tab="employees"><span class="sb-ic">👤</span><span class="sb-lbl">Employees</span></div>
-                    <div class="sb-nav-item" data-tab="timeoff"><span class="sb-ic">🌴</span><span class="sb-lbl">Time Off</span></div>
-                </div>
-
-                <div class="sb-nav-section">Member App</div>
-                <div class="sb-nav-group">
-                    <div class="sb-nav-item" data-tab="appOverview"><span class="sb-ic">📱</span><span class="sb-lbl">App Overview</span></div>
-                    <div class="sb-nav-item" data-tab="appMenu"><span class="sb-ic">🍽️</span><span class="sb-lbl">Menu</span></div>
-                    <div class="sb-nav-item" data-tab="appRewards"><span class="sb-ic">⭐</span><span class="sb-lbl">Rewards Setup</span></div>
-                    <div class="sb-nav-item" data-tab="appContent"><span class="sb-ic">🎯</span><span class="sb-lbl">Home Content</span></div>
-                </div>
-
-                <div class="sb-nav-section">Customers</div>
-                <div class="sb-nav-group">
-                    <div class="sb-nav-item" data-tab="members"><span class="sb-ic">⭐</span><span class="sb-lbl">Rewards Members</span></div>
-                    <div class="sb-nav-item" data-tab="crm"><span class="sb-ic">👥</span><span class="sb-lbl">Contacts</span></div>
-                    <div class="sb-nav-item" data-tab="potential"><span class="sb-ic">📥</span><span class="sb-lbl">Reservation Inquiries</span></div>
-                    <div class="sb-nav-item" data-tab="confirmed"><span class="sb-ic">✓</span><span class="sb-lbl">Confirmed Bookings</span></div>
-                    <div class="sb-nav-item" data-tab="payments"><span class="sb-ic">💳</span><span class="sb-lbl">Payments</span></div>
-                </div>
-
-                <div class="sb-nav-section">Marketing</div>
-                <div class="sb-nav-group">
-                    <div class="sb-nav-item" data-tab="email"><span class="sb-ic">✉️</span><span class="sb-lbl">Send Email</span></div>
-                    <div class="sb-nav-item" data-tab="mktInbox"><span class="sb-ic">📧</span><span class="sb-lbl">Email Drafts</span><span id="mktInboxBadge" class="sb-badge" style="display:none;">0</span></div>
-                    <div class="sb-nav-item" data-tab="mktCalendar"><span class="sb-ic">📅</span><span class="sb-lbl">Email Calendar</span></div>
-                    <div class="sb-nav-item" data-tab="mktPerformance"><span class="sb-ic">📊</span><span class="sb-lbl">Email Performance</span></div>
-                    <div class="sb-nav-item" data-tab="mktInsights"><span class="sb-ic">🧠</span><span class="sb-lbl">Email Insights</span></div>
-                    <div class="sb-nav-item" data-tab="mktSettings"><span class="sb-ic">⚙️</span><span class="sb-lbl">Email Settings</span></div>
-                </div>
-
-                <div class="sb-nav-section">Social Media</div>
-                <div class="sb-nav-group">
-                    <div class="sb-nav-item" data-tab="socInbox"><span class="sb-ic">📲</span><span class="sb-lbl">Social Drafts</span><span id="socInboxBadge" class="sb-badge" style="display:none;">0</span></div>
-                    <div class="sb-nav-item" data-tab="socCalendar"><span class="sb-ic">🗓️</span><span class="sb-lbl">Posting Calendar</span></div>
-                    <div class="sb-nav-item" data-tab="socPerformance"><span class="sb-ic">📈</span><span class="sb-lbl">Social Performance</span></div>
-                    <div class="sb-nav-item" data-tab="socSettings"><span class="sb-ic">🛠️</span><span class="sb-lbl">Social Settings</span></div>
-                </div>
-
-                <div class="sb-nav-section">System</div>
-                <div class="sb-nav-group">
-                    <div class="sb-nav-item" data-tab="floorplan"><span class="sb-ic">🪑</span><span class="sb-lbl">Floor Plan</span></div>
-                    <div class="sb-nav-item" data-tab="forms"><span class="sb-ic">📝</span><span class="sb-lbl">Website Forms</span></div>
-                </div>
-            </nav>
-
-            <div class="sb-foot">
-                <button class="save-github-btn" id="saveGitHubBtn" title="Save your changes to the live site">💾 Save Changes</button>
-                <button class="logout-btn" id="logoutBtn" title="Sign out">↩ Sign Out</button>
+            <div class="navbar-actions">
+                <button class="save-github-btn" id="saveGitHubBtn" title="Save changes to GitHub">Save to GitHub</button>
+                <button class="logout-btn" id="logoutBtn">Logout</button>
             </div>
-        </aside>
+        </nav>
 
         <!-- CONTENT AREA -->
         <div class="content scrollable">
@@ -2731,78 +2441,39 @@
                  DASHBOARD TAB
                  ======================================================== -->
             <div id="dashboardTab" class="tab-content active">
-                <!-- HERO -->
-                <div class="dash-hero">
-                    <div>
-                        <h1 class="dash-greeting" id="dashGreeting">Welcome back</h1>
-                        <p class="dash-date" id="dashDate"></p>
+                <div class="dashboard-grid">
+                    <div class="summary-card">
+                        <div class="summary-label">Active Events</div>
+                        <div class="summary-value" id="totalEvents">0</div>
                     </div>
-                    <div class="dash-quick-actions">
-                        <button class="dash-quick" data-jump="socInbox">📲 Review Social Posts</button>
-                        <button class="dash-quick" data-jump="mktInbox">📧 Review Emails</button>
+                    <div class="summary-card">
+                        <div class="summary-label">Total Registrations</div>
+                        <div class="summary-value" id="totalRegistrations">0</div>
                     </div>
-                </div>
-
-                <!-- NEEDS YOUR ATTENTION -->
-                <h2 class="dash-section-h">Needs your attention</h2>
-                <p class="dash-section-sub">Click any card to jump straight there.</p>
-                <div class="dash-attn-grid" id="dashAttnGrid">
-                    <!-- Filled by renderDashboardAttention() -->
-                </div>
-
-                <!-- TONIGHT -->
-                <h2 class="dash-section-h" style="margin-top:1.75rem;">Today at The Quarry</h2>
-                <div class="dash-today-grid">
-                    <div class="dash-today-card" id="dashTodayBands">
-                        <div class="dash-today-h">🎵 Live Music Tonight</div>
-                        <div class="dash-today-body" id="dashTodayBandsBody"><span class="dash-today-empty">Loading…</span></div>
+                    <div class="summary-card">
+                        <div class="summary-label">Est. Revenue</div>
+                        <div class="summary-value" id="totalRevenue">$0</div>
                     </div>
-                    <div class="dash-today-card" id="dashTodayEvents">
-                        <div class="dash-today-h">🎫 Today's Events</div>
-                        <div class="dash-today-body" id="dashTodayEventsBody"><span class="dash-today-empty">Loading…</span></div>
+                    <div class="summary-card">
+                        <div class="summary-label">Upcoming Bands</div>
+                        <div class="summary-value" id="upcomingBands">0</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">Total Subscribers</div>
+                        <div class="summary-value" id="totalSubscribers">0</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">Email Subscribed</div>
+                        <div class="summary-value" id="emailSubscribed">0</div>
                     </div>
                 </div>
 
-                <!-- AT-A-GLANCE STATS -->
-                <h2 class="dash-section-h" style="margin-top:1.75rem;">At a glance</h2>
-                <div class="dash-stats-grid">
-                    <div class="dash-stat" data-jump="events" title="Ticketed events with at least one open seat">
-                        <div class="dash-stat-ic">🎫</div>
-                        <div class="dash-stat-num" id="totalEvents">0</div>
-                        <div class="dash-stat-lbl">Active Events</div>
-                    </div>
-                    <div class="dash-stat" data-jump="events" title="Total seats sold across all upcoming events">
-                        <div class="dash-stat-ic">🎟️</div>
-                        <div class="dash-stat-num" id="totalRegistrations">0</div>
-                        <div class="dash-stat-lbl">Tickets Sold</div>
-                    </div>
-                    <div class="dash-stat" data-jump="events" title="Estimated revenue from sold tickets">
-                        <div class="dash-stat-ic">💰</div>
-                        <div class="dash-stat-num" id="totalRevenue">$0</div>
-                        <div class="dash-stat-lbl">Est. Revenue</div>
-                    </div>
-                    <div class="dash-stat" data-jump="bands" title="Live music acts booked for the next 60 days">
-                        <div class="dash-stat-ic">🎵</div>
-                        <div class="dash-stat-num" id="upcomingBands">0</div>
-                        <div class="dash-stat-lbl">Upcoming Bands</div>
-                    </div>
-                    <div class="dash-stat" data-jump="crm" title="Everyone who's ever shared their email">
-                        <div class="dash-stat-ic">👥</div>
-                        <div class="dash-stat-num" id="totalSubscribers">0</div>
-                        <div class="dash-stat-lbl">Total Contacts</div>
-                    </div>
-                    <div class="dash-stat" data-jump="crm" title="Contacts actively subscribed to email marketing">
-                        <div class="dash-stat-ic">✉️</div>
-                        <div class="dash-stat-num" id="emailSubscribed">0</div>
-                        <div class="dash-stat-lbl">Email Subscribers</div>
-                    </div>
-                </div>
-
-                <!-- RECENT ACTIVITY -->
-                <h2 class="dash-section-h" style="margin-top:1.75rem;">Recent Activity</h2>
-                <div class="activity-section" style="margin-top:0.5rem;">
+                <div class="activity-section">
+                    <h3>Recent Activity</h3>
                     <div class="activity-feed" id="activityFeed">
-                        <div class="activity-item"><span>Loading activity…</span></div>
+                        <div class="activity-item">
+                            <span>Loading activity...</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2845,250 +2516,6 @@
                             </tr>
                         </tbody>
                     </table>
-                </div>
-            </div>
-
-            <!-- ========================================================
-                 MEMBER APP — OVERVIEW
-                 ======================================================== -->
-            <div id="appOverviewTab" class="tab-content">
-                <div class="bands-header">
-                    <h2>Member App</h2>
-                    <a href="/quarry-app-customized.html" target="_blank" class="btn-primary" style="text-decoration:none;">↗ Open App Preview</a>
-                </div>
-                <p style="color:var(--text-secondary);margin-bottom:24px;max-width:680px;">
-                    The Quarry member app at <code style="background:var(--bg-elevated);padding:2px 6px;border-radius:4px;">/quarry-app-customized.html</code> already shares Events and Live Bands with this admin (any change made under Operations appears in the app within a minute). The sections below let you manage the parts of the app that don't go through the calendar.
-                </p>
-                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-bottom:32px;">
-                    <div class="dash-stat" data-jump="appMenu" style="cursor:pointer;">
-                        <div class="dash-stat-label">🍽️ Menu</div>
-                        <div class="dash-stat-help" style="font-size:0.85rem;color:var(--text-muted);margin-top:6px;">Food, drinks, wine, cocktails. Today: hardcoded in two HTML files. Goal: edit in one place, both website and app pick it up.</div>
-                    </div>
-                    <div class="dash-stat" data-jump="appRewards" style="cursor:pointer;">
-                        <div class="dash-stat-label">⭐ Rewards Setup</div>
-                        <div class="dash-stat-help" style="font-size:0.85rem;color:var(--text-muted);margin-top:6px;">Tier thresholds, earn rate, reward catalog (e.g. $5 off / 500 pts). Drives the loyalty economics.</div>
-                    </div>
-                    <div class="dash-stat" data-jump="appContent" style="cursor:pointer;">
-                        <div class="dash-stat-label">🎯 Home Content</div>
-                        <div class="dash-stat-help" style="font-size:0.85rem;color:var(--text-muted);margin-top:6px;">Happy Hour wording, Staff Pick of the week. The two cards on the app's home screen that change frequently.</div>
-                    </div>
-                </div>
-                <div style="background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:20px;max-width:680px;">
-                    <div style="font-weight:600;margin-bottom:8px;">Already managed from elsewhere</div>
-                    <div style="font-size:0.9rem;color:var(--text-secondary);line-height:1.6;">
-                        <strong>Events &amp; Live Bands</strong> — manage under Operations · Events / Live Bands. The app reads the same <code style="background:var(--bg-card);padding:1px 5px;border-radius:3px;">events.json</code> as the website.<br>
-                        <strong>Golf bookings</strong> — flow from <code style="background:var(--bg-card);padding:1px 5px;border-radius:3px;">/.netlify/functions/get-bookings</code> automatically; bay availability shows live in the app.<br>
-                        <strong>Contact info / hours</strong> — static in the app; if your phone or hours change, edit them in the app HTML directly.
-                    </div>
-                </div>
-            </div>
-
-            <!-- ========================================================
-                 MEMBER APP — MENU
-                 ======================================================== -->
-            <div id="appMenuTab" class="tab-content">
-                <div class="bands-header">
-                    <h2>Menu</h2>
-                </div>
-                <div style="background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:24px;max-width:720px;">
-                    <div style="font-weight:600;margin-bottom:8px;">Editor coming next</div>
-                    <p style="color:var(--text-secondary);font-size:0.95rem;line-height:1.6;margin-bottom:16px;">
-                        This will load <code style="background:var(--bg-card);padding:1px 5px;border-radius:3px;">menu.json</code> from your repo and let you add, edit, reorder, and remove items across categories (Cocktails, Wine, Beer, Shareables, Sandwiches, Flatbreads, Salads, Kids, Desserts, etc.). One edit updates both <code style="background:var(--bg-card);padding:1px 5px;border-radius:3px;">quarry-menu.html</code> on the website and the Menu screen in the app.
-                    </p>
-                    <p style="color:var(--text-secondary);font-size:0.95rem;line-height:1.6;margin:0;">
-                        Today the menu lives as hardcoded HTML inside <code style="background:var(--bg-card);padding:1px 5px;border-radius:3px;">quarry-menu.html</code> and <code style="background:var(--bg-card);padding:1px 5px;border-radius:3px;">quarry-drinks.html</code>. The first build step is extracting that into <code style="background:var(--bg-card);padding:1px 5px;border-radius:3px;">menu.json</code> and updating both consumers to read from it.
-                    </p>
-                </div>
-            </div>
-
-            <!-- ========================================================
-                 MEMBER APP — REWARDS SETUP
-                 ======================================================== -->
-            <div id="appRewardsTab" class="tab-content">
-                <div class="bands-header">
-                    <h2>Rewards Setup</h2>
-                    <div style="display:flex;gap:12px;align-items:center;">
-                        <span id="rewardsStatus" style="font-size:0.85rem;color:var(--text-muted);"></span>
-                        <button class="btn-primary" id="saveRewardsBtn" style="opacity:0.5;pointer-events:none;">Save Changes</button>
-                    </div>
-                </div>
-
-                <div id="rewardsLoading" style="text-align:center;padding:40px;color:var(--text-muted);">Loading rewards configuration…</div>
-
-                <div id="rewardsEditor" style="display:none;max-width:920px;">
-                    <!-- Earn Rate -->
-                    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:20px;margin-bottom:20px;">
-                        <h3 style="margin-bottom:8px;font-size:1rem;font-weight:600;">Earn Rate</h3>
-                        <p style="color:var(--text-secondary);font-size:0.88rem;line-height:1.55;margin-bottom:14px;">
-                            Base points earned per $1 spent on a closed tab. Tier multipliers below stack on this rate.
-                        </p>
-                        <div style="display:flex;gap:12px;align-items:center;">
-                            <input type="number" id="earnRateInput" step="0.5" min="0" data-rewards-dirty
-                                style="width:110px;padding:9px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:1rem;font-family:var(--font-sans);">
-                            <span style="color:var(--text-muted);font-size:0.9rem;">points per $1 spent</span>
-                        </div>
-                    </div>
-
-                    <!-- Tiers -->
-                    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:20px;margin-bottom:20px;">
-                        <h3 style="margin-bottom:8px;font-size:1rem;font-weight:600;">Membership Tiers</h3>
-                        <p style="color:var(--text-secondary);font-size:0.88rem;line-height:1.55;margin-bottom:14px;">
-                            Members are promoted to a tier when their lifetime points cross the threshold. Each tier can adjust the earn multiplier.
-                        </p>
-                        <div id="tiersTable" style="display:grid;gap:10px;"></div>
-                    </div>
-
-                    <!-- Reward Catalog -->
-                    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:20px;margin-bottom:20px;">
-                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-                            <h3 style="font-size:1rem;font-weight:600;">Reward Catalog</h3>
-                            <button class="btn-secondary" id="addRewardBtn" style="font-size:0.82rem;">+ Add Reward</button>
-                        </div>
-                        <p style="color:var(--text-secondary);font-size:0.88rem;line-height:1.55;margin-bottom:14px;">
-                            What members can redeem with points. Toggle off to hide from the app without deleting.
-                        </p>
-                        <div id="catalogTable" style="display:grid;gap:8px;"></div>
-                    </div>
-
-                    <!-- Bonus Earning -->
-                    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:20px;">
-                        <h3 style="margin-bottom:8px;font-size:1rem;font-weight:600;">Bonus Earning</h3>
-                        <p style="color:var(--text-secondary);font-size:0.88rem;line-height:1.55;margin-bottom:14px;">
-                            Points awarded for non-spend behaviors — RSVPs, referrals, birthday visits.
-                        </p>
-                        <div id="bonusesTable" style="display:grid;gap:8px;"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ========================================================
-                 MEMBER APP — HOME CONTENT
-                 ======================================================== -->
-            <div id="appContentTab" class="tab-content">
-                <div class="bands-header">
-                    <h2>Home Content</h2>
-                </div>
-                <div style="background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:24px;max-width:720px;">
-                    <div style="font-weight:600;margin-bottom:8px;">Editor coming next</div>
-                    <p style="color:var(--text-secondary);font-size:0.95rem;line-height:1.6;margin-bottom:16px;">
-                        Two pieces of copy on the app's home screen change weekly and need an editor: the <strong>Happy Hour</strong> card (currently "3 – 6 PM · All day Wednesday · Thu &amp; Fri 3 – 6") and the <strong>Staff Pick</strong> card (currently "New Melle Well Water — Gray Whale Gin, 7up &amp; Squirt · $12"). This editor will save those to <code style="background:var(--bg-card);padding:1px 5px;border-radius:3px;">app-content.json</code> and the app picks them up on next open.
-                    </p>
-                    <p style="color:var(--text-secondary);font-size:0.95rem;line-height:1.6;margin:0;">
-                        Also where the welcome greeting, onboarding three-step copy, and program rules text get edited if you ever want to refine the wording.
-                    </p>
-                </div>
-            </div>
-
-            <!-- ========================================================
-                 CUSTOMERS — REWARDS MEMBERS
-                 ======================================================== -->
-            <div id="membersTab" class="tab-content">
-                <div class="bands-header">
-                    <h2>Rewards Members</h2>
-                    <button class="btn-primary" id="addMemberBtn">+ Add Member</button>
-                </div>
-
-                <div id="membersLoading" style="text-align:center;padding:40px;color:var(--text-muted);">Loading members…</div>
-
-                <div id="membersContent" style="display:none;">
-                    <!-- Stats summary -->
-                    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));gap:12px;margin-bottom:24px;">
-                        <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:16px;">
-                            <div style="font-size:0.72rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--text-muted);font-weight:600;margin-bottom:6px;">Total Members</div>
-                            <div id="memTotal" style="font-size:1.6rem;font-weight:600;color:var(--text-primary);">0</div>
-                        </div>
-                        <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:16px;">
-                            <div style="font-size:0.72rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--text-muted);font-weight:600;margin-bottom:6px;">Quarry Gold</div>
-                            <div id="memGold" style="font-size:1.6rem;font-weight:600;color:var(--gold);">0</div>
-                        </div>
-                        <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:16px;">
-                            <div style="font-size:0.72rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--text-muted);font-weight:600;margin-bottom:6px;">Quarry Platinum</div>
-                            <div id="memPlat" style="font-size:1.6rem;font-weight:600;color:#7c3aed;">0</div>
-                        </div>
-                        <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:16px;">
-                            <div style="font-size:0.72rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--text-muted);font-weight:600;margin-bottom:6px;">Joined This Month</div>
-                            <div id="memNew" style="font-size:1.6rem;font-weight:600;color:var(--green);">0</div>
-                        </div>
-                    </div>
-
-                    <!-- Empty state -->
-                    <div id="membersEmpty" style="display:none;text-align:center;padding:48px 24px;background:var(--bg-card);border:1px dashed var(--border-subtle);border-radius:var(--radius-md);">
-                        <div style="font-size:2rem;margin-bottom:8px;opacity:0.6;">⭐</div>
-                        <div style="font-weight:600;margin-bottom:6px;">No members yet</div>
-                        <div style="color:var(--text-secondary);font-size:0.92rem;line-height:1.55;max-width:520px;margin:0 auto;">
-                            When real auth ships in the app, members who sign up will land here automatically. Until then, use the <strong>Add Member</strong> button above to manually create accounts for friends, family, and early regulars.
-                        </div>
-                    </div>
-
-                    <!-- Members table -->
-                    <div id="membersTableWrap" style="overflow-x:auto;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md);">
-                        <table class="bands-table" style="margin:0;">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Contact</th>
-                                    <th>Tier</th>
-                                    <th style="text-align:right;">Points</th>
-                                    <th>Joined</th>
-                                    <th>Last Visit</th>
-                                    <th style="text-align:right;">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="membersTableBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ========================================================
-                 ADD MEMBER MODAL
-                 ======================================================== -->
-            <div id="addMemberModal" class="modal" style="display:none;">
-                <div class="modal-overlay" onclick="closeAddMemberModal()"></div>
-                <div class="modal-content" style="max-width:520px;">
-                    <div class="modal-header">
-                        <h3>Add Member</h3>
-                        <button class="modal-close" onclick="closeAddMemberModal()">&times;</button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="addMemberForm" style="display:grid;gap:14px;">
-                            <div>
-                                <label style="display:block;font-size:0.78rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Full Name *</label>
-                                <input type="text" id="memName" required style="width:100%;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;">
-                            </div>
-                            <div>
-                                <label style="display:block;font-size:0.78rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Email *</label>
-                                <input type="email" id="memEmail" required style="width:100%;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;">
-                            </div>
-                            <div>
-                                <label style="display:block;font-size:0.78rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Phone</label>
-                                <input type="tel" id="memPhone" placeholder="(636) 555-0000" style="width:100%;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;">
-                            </div>
-                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-                                <div>
-                                    <label style="display:block;font-size:0.78rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Birthday (MM-DD)</label>
-                                    <input type="text" id="memBirthday" placeholder="07-15" pattern="\d{2}-\d{2}" style="width:100%;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;">
-                                </div>
-                                <div>
-                                    <label style="display:block;font-size:0.78rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Starting Points</label>
-                                    <input type="number" id="memStartPoints" value="0" min="0" style="width:100%;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;">
-                                </div>
-                            </div>
-                            <div>
-                                <label style="display:block;font-size:0.78rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Notes</label>
-                                <textarea id="memNotes" rows="3" placeholder="Friends &amp; family, regular Wednesday brunch, allergic to shellfish..." style="width:100%;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;font-family:var(--font-sans);resize:vertical;"></textarea>
-                            </div>
-                            <div style="display:flex;gap:18px;font-size:0.88rem;">
-                                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="memMktOptIn" checked> Marketing email opt-in</label>
-                                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="memSmsOptIn"> SMS opt-in</label>
-                            </div>
-                            <div id="addMemberError" style="color:var(--red);font-size:0.88rem;display:none;"></div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn-secondary" onclick="closeAddMemberModal()">Cancel</button>
-                        <button class="btn-primary" id="addMemberSubmit">Add Member</button>
-                    </div>
                 </div>
             </div>
 
@@ -3302,58 +2729,45 @@
             </div>
 
             <!-- ========================================================
-                 RESERVATION INQUIRIES TAB (live from Netlify Forms)
+                 POTENTIAL EVENTS TAB
                  ======================================================== -->
             <div id="potentialTab" class="tab-content">
-                <div class="mkt-header">
-                    <div>
-                        <h2 style="margin:0;">📥 Reservation Inquiries</h2>
-                        <p class="mkt-sub">Every form submission across reservations, private events, and wedding tours — live from the website. Click any row to email the customer or change their status.</p>
+                <div class="crm-header">
+                    <h2>Potential Reservations</h2>
+                    <button onclick="loadPotentialEvents()" style="background:transparent;border:1px solid #d4af37;color:#9a7b2a;padding:0.5rem 1rem;border-radius:4px;cursor:pointer;font-size:0.85rem;font-weight:500;">Refresh</button>
+                </div>
+
+                <div class="crm-stats" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="stat-item">
+                        <div class="stat-label">Potential Reservations</div>
+                        <div class="stat-value" id="potentialLeadsCount">0</div>
                     </div>
-                    <div class="mkt-header-actions">
-                        <select id="resInqFilter" style="padding:0.5rem 0.75rem;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:6px;color:var(--text-primary);font-size:0.85rem;">
-                            <option value="needs_attention">Needs my attention</option>
-                            <option value="all">All inquiries</option>
-                            <option value="not_contacted">Not contacted</option>
-                            <option value="contacted">Contacted</option>
-                            <option value="needs_followup">Needs follow-up</option>
-                            <option value="contacted_2">Followed up</option>
-                            <option value="confirmed">Confirmed</option>
-                            <option value="lost">Lost</option>
-                        </select>
-                        <button class="btn-secondary" id="resInqRefresh" title="Reload from Netlify">↻ Refresh</button>
+                    <div class="stat-item">
+                        <div class="stat-label">This Month</div>
+                        <div class="stat-value" id="potentialThisMonth">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Matched to Confirmed</div>
+                        <div class="stat-value" id="potentialMatched" style="color: #4ade80;">0</div>
                     </div>
                 </div>
 
-                <div class="dash-stats-grid" style="margin-bottom:1rem;">
-                    <div class="dash-stat" id="resInqStatTotal">
-                        <div class="dash-stat-ic">📋</div>
-                        <div class="dash-stat-num" id="resInqTotalCount">0</div>
-                        <div class="dash-stat-lbl">Total Inquiries</div>
+                <div class="crm-filters">
+                    <div class="filter-group" style="flex: 2;">
+                        <input type="text" id="potentialSearch" placeholder="Search potential reservations..." oninput="filterPotentialEvents()">
                     </div>
-                    <div class="dash-stat" id="resInqStatNotContacted">
-                        <div class="dash-stat-ic">⏳</div>
-                        <div class="dash-stat-num" id="resInqNotContactedCount" style="color:#b45309;">0</div>
-                        <div class="dash-stat-lbl">Not Contacted</div>
-                    </div>
-                    <div class="dash-stat" id="resInqStatFollowup">
-                        <div class="dash-stat-ic">⚠️</div>
-                        <div class="dash-stat-num" id="resInqFollowupCount" style="color:#dc2626;">0</div>
-                        <div class="dash-stat-lbl">Need Follow-up</div>
-                    </div>
-                    <div class="dash-stat" id="resInqStatConfirmed">
-                        <div class="dash-stat-ic">✓</div>
-                        <div class="dash-stat-num" id="resInqConfirmedCount" style="color:#16a34a;">0</div>
-                        <div class="dash-stat-lbl">Confirmed</div>
+                    <div class="events-crm-status" style="padding-top: 1.2rem;">
+                        <span class="status-count" id="potentialStatusText">Loading...</span>
                     </div>
                 </div>
 
                 <div class="crm-table-container">
-                    <table class="crm-table" id="resInqTable">
+                    <table class="crm-table" id="potentialTable">
                         <thead>
                             <tr>
                                 <th>Name</th>
-                                <th>Type</th>
+                                <th>Email</th>
+                                <th>Phone</th>
                                 <th>Occasion</th>
                                 <th>Event Date</th>
                                 <th>Guests</th>
@@ -3362,46 +2776,12 @@
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="resInqTableBody">
-                            <tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:2rem;">Loading inquiries…</td></tr>
+                        <tbody id="potentialTableBody">
+                            <tr>
+                                <td colspan="9" style="text-align: center; color: #858d9e;">Loading potential reservations from Gmail...</td>
+                            </tr>
                         </tbody>
                     </table>
-                </div>
-            </div>
-
-            <!-- Inquiry detail modal -->
-            <div class="mkt-modal-backdrop" id="resInqModal" role="dialog" aria-modal="true" aria-hidden="true">
-                <div class="mkt-modal" role="document" style="max-width:720px;">
-                    <div class="mkt-modal-head">
-                        <div>
-                            <h3 id="resInqModalTitle">Inquiry</h3>
-                            <div id="resInqModalSub" style="font-size:0.8rem;color:var(--text-muted);margin-top:0.3rem;display:flex;align-items:center;gap:0.5rem;"></div>
-                        </div>
-                        <button class="mkt-modal-close" id="resInqModalClose" aria-label="Close">&times;</button>
-                    </div>
-                    <div class="mkt-modal-body" style="display:block;">
-                        <div id="resInqDetails" style="padding:0.5rem 0;font-size:0.92rem;line-height:1.6;"></div>
-                        <hr style="border:none;border-top:1px solid var(--border-subtle);margin:1rem 0;">
-                        <div style="font-weight:600;margin-bottom:0.5rem;">Update status:</div>
-                        <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
-                            <button class="btn-secondary" data-status="not_contacted">⏳ Not Contacted</button>
-                            <button class="btn-secondary" data-status="contacted">✉️ Contacted</button>
-                            <button class="btn-secondary" data-status="needs_followup">⚠️ Needs Follow-up</button>
-                            <button class="btn-secondary" data-status="contacted_2">📨 Followed Up Again</button>
-                            <button class="btn-approve" data-status="confirmed">✓ Confirmed (in Calendar)</button>
-                            <button class="btn-reject" data-status="lost">✗ Lost</button>
-                        </div>
-                        <div style="margin-top:1rem;">
-                            <label style="font-size:0.78rem;color:var(--text-muted);">Optional note:</label>
-                            <input type="text" id="resInqStatusNote" placeholder='e.g. "Replied with availability for May 10"' style="width:100%;padding:0.5rem;border:1px solid var(--border-subtle);border-radius:6px;background:var(--bg-card);color:var(--text-primary);margin-top:0.25rem;">
-                        </div>
-                        <div id="resInqHistory" style="margin-top:1rem;font-size:0.8rem;color:var(--text-muted);"></div>
-                    </div>
-                    <div class="mkt-modal-foot">
-                        <a id="resInqMailLink" href="#" target="_blank" class="btn-primary" style="text-decoration:none;">✉️ Email Customer</a>
-                        <div style="flex:1;"></div>
-                        <a id="resInqNetlifyLink" href="#" target="_blank" class="btn-secondary" style="text-decoration:none;font-size:0.78rem;">View in Netlify</a>
-                    </div>
                 </div>
             </div>
 
@@ -3746,8 +3126,8 @@
             <div id="mktCalendarTab" class="tab-content">
                 <div class="mkt-header">
                     <div>
-                        <h2 style="margin:0;">📅 Email Campaign Calendar</h2>
-                        <p class="mkt-sub">Email drafts your AI has queued up. Click any to approve, edit, or rewrite. Approved emails send automatically at their scheduled time.</p>
+                        <h2 style="margin:0;">Campaign Calendar</h2>
+                        <p class="mkt-sub">AI-generated drafts queued by your calendar rules. Approve, edit, or redo each before send.</p>
                     </div>
                     <div class="mkt-header-actions">
                         <button class="btn-secondary" id="mktGenerateNowBtn" title="Generate the next 7 days of drafts now">Generate Drafts Now</button>
@@ -3791,7 +3171,7 @@
 
             <div id="mktInboxTab" class="tab-content">
                 <div class="mkt-header">
-                    <div><h2 style="margin:0;">📥 Email Drafts Inbox</h2><p class="mkt-sub">Email drafts waiting for your sign-off. Approve to schedule, edit to tweak, or rewrite to have the AI try again.</p></div>
+                    <div><h2 style="margin:0;">Drafts Inbox</h2><p class="mkt-sub">Approve, reject, edit, or redo each draft. Approved drafts send at their scheduled time automatically.</p></div>
                     <div class="mkt-header-actions">
                         <select id="mktInboxFilter" style="padding:0.5rem 0.75rem;">
                             <option value="pending">Pending only</option><option value="all">All statuses</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="sent">Sent</option>
@@ -3804,11 +3184,8 @@
 
             <div id="mktPerformanceTab" class="tab-content">
                 <div class="mkt-header">
-                    <div><h2 style="margin:0;">📊 Email Performance</h2><p class="mkt-sub">Open rates, click rates, and which campaigns are actually driving traffic. Auto-pulled once daily at 11 AM CT — click <strong>Refresh now</strong> for the latest numbers.</p></div>
-                    <div class="mkt-header-actions">
-                        <select id="mktPerfRange"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option></select>
-                        <button class="btn-secondary" id="mktPerfRefreshBtn" title="Pull fresh stats from SendGrid right now">↻ Refresh now</button>
-                    </div>
+                    <div><h2 style="margin:0;">Performance</h2><p class="mkt-sub">Open rates, click rates, and which sends are pulling their weight.</p></div>
+                    <div class="mkt-header-actions"><select id="mktPerfRange"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option></select></div>
                 </div>
                 <div class="mkt-stats">
                     <div class="stat-item"><div class="stat-label">Sends</div><div class="stat-value" id="mktPerfSends">—</div></div>
@@ -3818,15 +3195,15 @@
                     <div class="stat-item"><div class="stat-label">Unsubscribes</div><div class="stat-value" id="mktPerfUnsub">—</div></div>
                 </div>
                 <div class="mkt-perf-grid">
-                    <div class="mkt-card"><h4>Top-performing subjects</h4><table class="mkt-table" id="mktPerfTopSubjects"><colgroup><col class="subj"><col class="type"><col class="num"><col class="num"><col class="num"></colgroup><thead><tr><th>Subject</th><th>Type</th><th>Open</th><th>Click</th><th>Sent</th></tr></thead><tbody><tr><td colspan="5" class="mkt-empty-cell">—</td></tr></tbody></table></div>
+                    <div class="mkt-card"><h4>Top-performing subjects</h4><table class="mkt-table" id="mktPerfTopSubjects"><thead><tr><th>Subject</th><th>Type</th><th>Open</th><th>Click</th><th>Sent</th></tr></thead><tbody><tr><td colspan="5" class="mkt-empty-cell">—</td></tr></tbody></table></div>
                     <div class="mkt-card"><h4>Best send hours (CT)</h4><div id="mktPerfHours" class="mkt-bars"></div></div>
-                    <div class="mkt-card"><h4>Performance by content type</h4><table class="mkt-table" id="mktPerfByType"><colgroup><col class="type"><col class="num"><col class="num"><col class="num"></colgroup><thead><tr><th>Type</th><th>Sends</th><th>Open</th><th>Click</th></tr></thead><tbody><tr><td colspan="4" class="mkt-empty-cell">—</td></tr></tbody></table></div>
+                    <div class="mkt-card"><h4>Performance by content type</h4><table class="mkt-table" id="mktPerfByType"><thead><tr><th>Type</th><th>Sends</th><th>Open</th><th>Click</th></tr></thead><tbody><tr><td colspan="4" class="mkt-empty-cell">—</td></tr></tbody></table></div>
                 </div>
             </div>
 
             <div id="mktInsightsTab" class="tab-content">
                 <div class="mkt-header">
-                    <div><h2 style="margin:0;">🧠 AI Insights &amp; Event Ideas</h2><p class="mkt-sub">What the AI has learned from your past email performance, plus fresh event ideas based on what your audience clicks on.</p></div>
+                    <div><h2 style="margin:0;">AI Insights &amp; Event Ideas</h2><p class="mkt-sub">Patterns the AI has learned from past sends, plus event ideas based on what your audience responds to.</p></div>
                     <div class="mkt-header-actions"><button class="btn-secondary" id="mktOptimizeNowBtn" title="Re-run the optimizer against the latest send data">Re-analyze Now</button></div>
                 </div>
                 <div class="mkt-card" style="margin-bottom:1rem;"><h4>Last analysis</h4><div id="mktInsightsSummary" class="mkt-empty">Not run yet.</div></div>
@@ -3837,7 +3214,7 @@
             </div>
 
             <div id="mktSettingsTab" class="tab-content">
-                <div class="mkt-header"><div><h2 style="margin:0;">⚙️ Email Settings</h2><p class="mkt-sub">When emails go out, who gets them, and how often. Adjust your cadence rules and sending defaults here.</p></div></div>
+                <div class="mkt-header"><div><h2 style="margin:0;">Marketing Settings</h2><p class="mkt-sub">Calendar rules, cadence caps, sending defaults. Changes save back to the repo on click.</p></div></div>
                 <div class="mkt-perf-grid">
                     <div class="mkt-card">
                         <h4>Sending defaults</h4>
@@ -3855,202 +3232,6 @@
                         <h4>Calendar rules</h4>
                         <div id="mktRulesList"><div class="mkt-empty">Loading…</div></div>
                         <div style="margin-top:0.75rem;text-align:right;"><button class="btn-primary" id="mktSetSaveRulesBtn">Save Rules</button></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ========================================================
-                 SOCIAL — DRAFTS INBOX TAB
-                 ======================================================== -->
-            <div id="socInboxTab" class="tab-content">
-                <div class="mkt-header">
-                    <div>
-                        <h2 style="margin:0;">📥 Drafts Inbox</h2>
-                        <p class="mkt-sub">AI-drafted Facebook &amp; Instagram posts waiting for your sign-off. Click any post to add an image, tweak the caption, then approve.</p>
-                    </div>
-                    <div class="mkt-header-actions">
-                        <select id="socInboxFilter" style="padding:0.5rem 0.75rem;" title="Filter posts by status">
-                            <option value="pending">Needs my review</option>
-                            <option value="all">All posts</option>
-                            <option value="skeleton">Drafting (scheduled, no caption yet)</option>
-                            <option value="approved">Scheduled to post</option>
-                            <option value="posted">Already posted</option>
-                            <option value="rejected">Rejected</option>
-                        </select>
-                        <button class="btn-secondary" id="socGenerateNowBtn" title="Have the AI write captions for the next 7 days of posts">✨ Draft Captions Now</button>
-                        <button class="btn-secondary" id="socInboxRefresh" title="Reload the latest posts">↻ Refresh</button>
-                    </div>
-                </div>
-                <div id="socInboxList" class="mkt-inbox-list"><div class="mkt-empty">Loading drafts…</div></div>
-            </div>
-
-            <div id="socCalendarTab" class="tab-content">
-                <div class="mkt-header">
-                    <div><h2 style="margin:0;">📅 Posting Calendar</h2><p class="mkt-sub">Everything scheduled and posted, grouped by day. Click any post to review or edit.</p></div>
-                </div>
-                <div id="socCalendarList"><div class="mkt-empty">Loading…</div></div>
-            </div>
-
-            <div id="socPerformanceTab" class="tab-content">
-                <div class="mkt-header">
-                    <div><h2 style="margin:0;">📊 Performance</h2><p class="mkt-sub">How posts are doing — reach, likes, comments, shares. Auto-pulled once daily at noon CT — click <strong>Refresh now</strong> for the latest numbers.</p></div>
-                    <div class="mkt-header-actions">
-                        <button class="btn-secondary" id="socPerfRefreshBtn" title="Pull fresh insights from Facebook & Instagram right now">↻ Refresh now</button>
-                    </div>
-                </div>
-                <div class="mkt-stats">
-                    <div class="stat-item"><div class="stat-label">Posts (30d)</div><div class="stat-value" id="socStatPosts">—</div></div>
-                    <div class="stat-item"><div class="stat-label">Total Reach</div><div class="stat-value" id="socStatReach">—</div></div>
-                    <div class="stat-item"><div class="stat-label">Total Likes</div><div class="stat-value" id="socStatLikes">—</div></div>
-                    <div class="stat-item"><div class="stat-label">Total Comments</div><div class="stat-value" id="socStatComments">—</div></div>
-                </div>
-                <div class="mkt-card"><h4>Top-performing posts (by reach)</h4><table class="mkt-table" id="socPerfTable"><colgroup><col class="cap"><col class="num"><col class="num"><col class="num"><col class="num"></colgroup><thead><tr><th>Caption</th><th>Platform</th><th>Reach</th><th>Likes</th><th>Comments</th></tr></thead><tbody><tr><td colspan="5" class="mkt-empty-cell">No posts yet</td></tr></tbody></table></div>
-            </div>
-
-            <div id="socSettingsTab" class="tab-content">
-                <div class="mkt-header">
-                    <div><h2 style="margin:0;">⚙️ Social Settings</h2><p class="mkt-sub">Designer queue, asset library, AI insights, and connection status. Click "Rebuild Schedule" any time you add new events to refresh the post plan.</p></div>
-                    <div class="mkt-header-actions">
-                        <button class="btn-secondary" id="socRebuildScheduleBtn" style="background:var(--gold);color:#fff;" title="Pick up newly added events and add posts for them">⟳ Rebuild Schedule</button>
-                    </div>
-                </div>
-
-                <div class="mkt-card" style="margin-bottom:1rem;">
-                    <h4>📋 Designer Queue — graphics needed in next 14 days</h4>
-                    <p class="mkt-sub" style="margin:0 0 0.5rem;">All upcoming posts that need a graphic from you. Build them in Canva ahead of time and upload via the draft modal.</p>
-                    <div id="socDesignerQueue"><div class="mkt-empty">Loading…</div></div>
-                </div>
-
-                <div class="mkt-perf-grid">
-                    <div class="mkt-card">
-                        <h4>Meta Connection</h4>
-                        <div id="socMetaStatus"><div class="mkt-empty">Checking…</div></div>
-                    </div>
-                    <div class="mkt-card">
-                        <h4>📚 Asset Library</h4>
-                        <div id="socAssetLibraryStatus" style="font-size:0.85rem;"><div class="mkt-empty">Loading…</div></div>
-                        <div style="margin-top:0.5rem;"><button class="btn-secondary" id="socAddAssetBtn" style="font-size:0.8rem;">+ Add Venue Photo</button></div>
-                    </div>
-                </div>
-
-                <div class="mkt-card" style="margin-top:1rem;">
-                    <h4>🧠 AI Learnings — what's been learned from past posts</h4>
-                    <p class="mkt-sub" style="margin:0 0 0.5rem;">Generated nightly by the optimizer from engagement data. These rules feed into every new caption.</p>
-                    <div id="socLearningsList"><div class="mkt-empty">Loading…</div></div>
-                </div>
-
-                <details style="margin-top:1rem;">
-                    <summary style="cursor:pointer;font-size:0.8rem;color:var(--text-muted);padding:0.4rem;">⚙️ Advanced — legacy cadence rules (rarely needed)</summary>
-                    <div class="mkt-card" style="margin-top:0.5rem;">
-                        <p class="mkt-sub" style="margin:0 0 0.5rem;">These were used by the older draft generator. The new system reads from your events list directly — you usually don't need to touch these.</p>
-                        <div id="socRulesList"><div class="mkt-empty">Loading…</div></div>
-                        <div style="margin-top:0.75rem;text-align:right;"><button class="btn-primary" id="socSaveRulesBtn">Save Rules</button></div>
-                    </div>
-                </details>
-            </div>
-
-            <!-- ========================================================
-                 SOCIAL — DRAFT REVIEW MODAL
-                 ======================================================== -->
-            <div class="mkt-modal-backdrop" id="socDraftModal" role="dialog" aria-modal="true" aria-hidden="true">
-                <div class="mkt-modal" role="document" style="max-width:960px;">
-                    <div class="mkt-modal-head">
-                        <div>
-                            <h3 id="socDraftModalTitle">Social Post</h3>
-                            <div id="socDraftModalSub" style="font-size:0.8rem;color:var(--text-muted);margin-top:0.3rem;display:flex;align-items:center;gap:0.5rem;"></div>
-                        </div>
-                        <button class="mkt-modal-close" id="socDraftModalClose" aria-label="Close">&times;</button>
-                    </div>
-
-                    <!-- Step-by-step "what to do next" banner — shown when this draft needs work -->
-                    <div id="socDraftNextStep" style="margin:0 1.25rem 0.75rem;padding:0.6rem 0.85rem;background:rgba(154,123,42,0.08);border-left:3px solid var(--gold);border-radius:4px;font-size:0.83rem;color:var(--text-primary);display:none;">
-                        <strong>To get this post ready:</strong> <span id="socDraftNextStepText"></span>
-                    </div>
-
-                    <div class="mkt-modal-body">
-                        <!-- LEFT: Image — obvious step 1 -->
-                        <div class="mkt-modal-pane">
-                            <h5 style="margin-top:0;">📸 The Image</h5>
-                            <p style="font-size:0.78rem;color:var(--text-muted);margin:0 0 0.5rem;">Pick where the picture comes from. You can change this later.</p>
-                            <div id="socDraftImagePreview" style="background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:6px;height:300px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:0.85rem;overflow:hidden;text-align:center;padding:1rem;">No image yet</div>
-                            <div id="socImageSourceLabel" style="margin-top:0.4rem;font-size:0.72rem;color:var(--text-muted);min-height:1em;"></div>
-
-                            <div style="margin-top:0.75rem;display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
-                                <button class="btn-secondary" id="socUploadImageBtn" style="background:var(--gold);color:#fff;font-size:0.82rem;padding:0.65rem;font-weight:600;" title="Upload a poster you made in Canva">
-                                    📤 Upload My Poster
-                                </button>
-                                <button class="btn-secondary" id="socPickFromLibraryBtn" style="font-size:0.82rem;padding:0.65rem;" title="Pick from your saved venue photos">
-                                    📚 From Library
-                                </button>
-                            </div>
-                            <details id="socAiImageDetails" style="margin-top:0.5rem;">
-                                <summary style="cursor:pointer;font-size:0.75rem;color:var(--text-muted);padding:0.3rem 0;">🎨 ...or have AI generate one (~$0.04)</summary>
-                                <div style="padding:0.5rem;background:var(--bg-elevated);border-radius:4px;margin-top:0.3rem;">
-                                    <p style="font-size:0.75rem;color:var(--text-muted);margin:0 0 0.4rem;">Describe the photo you want. Specific = better. No people's faces, no text in the image.</p>
-                                    <textarea id="socDraftImagePrompt" style="width:100%;min-height:65px;padding:0.5rem;border:1px solid var(--border-subtle);border-radius:4px;font-size:0.78rem;background:var(--bg-card);color:var(--text-primary);box-sizing:border-box;" placeholder="e.g. Sunset on the patio, string lights overhead, two wine glasses on a wooden table, Quarry lake softly out of focus"></textarea>
-                                    <div style="margin-top:0.4rem;display:flex;gap:0.3rem;flex-wrap:wrap;">
-                                        <button class="ex-prompt-chip" data-ex="Sunset over the Quarry lake from the patio, string lights warming the foreground, no people" style="font-size:0.7rem;padding:0.25rem 0.5rem;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:12px;cursor:pointer;color:var(--text-primary);">🌅 Sunset patio</button>
-                                        <button class="ex-prompt-chip" data-ex="Wood-fired flatbread on dark slate at golden hour, restaurant interior softly out of focus, overhead angle, no people" style="font-size:0.7rem;padding:0.25rem 0.5rem;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:12px;cursor:pointer;color:var(--text-primary);">🍕 Food close-up</button>
-                                        <button class="ex-prompt-chip" data-ex="Two wine glasses with deep red wine on a wooden bar top, bokeh of warm bar lights behind, golden hour, no people" style="font-size:0.7rem;padding:0.25rem 0.5rem;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:12px;cursor:pointer;color:var(--text-primary);">🍷 Wine vibe</button>
-                                        <button class="ex-prompt-chip" data-ex="Acoustic guitar leaning against a wooden chair on a string-lit deck at dusk, warm bokeh, no people, hint of stage equipment in background" style="font-size:0.7rem;padding:0.25rem 0.5rem;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:12px;cursor:pointer;color:var(--text-primary);">🎸 Live music</button>
-                                    </div>
-                                    <button class="btn-secondary" id="socRegenImageBtn" style="margin-top:0.5rem;width:100%;font-size:0.78rem;padding:0.5rem;">Generate Image →</button>
-                                </div>
-                            </details>
-                            <input type="file" id="socImageFileInput" accept="image/png,image/jpeg,image/webp" style="display:none;">
-
-                            <div id="socGraphicBriefPanel" style="margin-top:1rem;background:var(--bg-elevated);border:1px solid var(--gold);border-radius:6px;padding:0.75rem;display:none;">
-                                <details open>
-                                    <summary style="cursor:pointer;font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--gold);font-weight:600;margin-bottom:0.5rem;list-style:none;">
-                                        <span style="display:inline-block;margin-right:0.3rem;">▾</span>📋 Need to make this in Canva? Here's the brief
-                                    </summary>
-                                    <div id="socGraphicBriefContent" style="font-size:0.8rem;line-height:1.5;color:var(--text-primary);margin-top:0.5rem;"></div>
-                                </details>
-                            </div>
-                        </div>
-
-                        <!-- RIGHT: Caption + details -->
-                        <div class="mkt-modal-pane">
-                            <h5 style="margin-top:0;">✍️ The Caption</h5>
-                            <div class="mkt-mode-tabs" style="margin-bottom:0.5rem;">
-                                <div class="mkt-mode-tab active" data-mode="review">View</div>
-                                <div class="mkt-mode-tab" data-mode="edit">✏️ Edit</div>
-                                <div class="mkt-mode-tab" data-mode="redo">🔄 Redo with AI</div>
-                            </div>
-                            <div class="mkt-mode-pane" data-mode-pane="review">
-                                <div id="socDraftCaption" style="background:var(--bg-elevated);padding:0.85rem;border-radius:4px;font-size:0.92rem;line-height:1.55;white-space:pre-wrap;min-height:120px;color:var(--text-primary);"></div>
-                                <div style="margin-top:0.6rem;font-size:0.85rem;color:var(--gold);" id="socDraftHashtags"></div>
-                            </div>
-                            <div class="mkt-mode-pane" data-mode-pane="edit" style="display:none;">
-                                <p style="font-size:0.78rem;color:var(--text-muted);margin:0 0 0.4rem;">Tweak the caption manually. Changes save when you click "Save Edits" below.</p>
-                                <textarea id="socDraftEditCaption" class="body-edit" style="min-height:140px;font-family:inherit;font-size:0.92rem;"></textarea>
-                                <h5 style="margin-top:0.85rem;font-size:0.78rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;">Hashtags <span style="font-weight:normal;text-transform:none;">(one per line)</span></h5>
-                                <textarea id="socDraftEditHashtags" class="body-edit" style="min-height:80px;font-family:inherit;font-size:0.85rem;" placeholder="#NewMelleMO&#10;#StCharlesCounty&#10;#WineBar"></textarea>
-                                <div style="margin-top:0.75rem;text-align:right;"><button class="btn-edit-save" id="socDraftEditSaveBtn">💾 Save Edits</button></div>
-                            </div>
-                            <div class="mkt-mode-pane" data-mode-pane="redo" style="display:none;">
-                                <p style="font-size:0.78rem;color:var(--text-muted);margin:0 0 0.4rem;">Tell the AI what to change about this caption. The more specific you are, the better the rewrite.</p>
-                                <textarea id="socDraftRedoInstructions" class="mkt-redo-input" placeholder="e.g. Make it shorter and punchier. Lead with 'Tonight at The Quarry' and mention the wine list."></textarea>
-                                <div style="margin-top:0.5rem;display:flex;gap:0.3rem;flex-wrap:wrap;">
-                                    <button class="ex-redo-chip" data-ex="Make it shorter — under 100 characters" style="font-size:0.7rem;padding:0.25rem 0.5rem;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:12px;cursor:pointer;color:var(--text-primary);">Shorter</button>
-                                    <button class="ex-redo-chip" data-ex="More casual and conversational, like talking to a friend" style="font-size:0.7rem;padding:0.25rem 0.5rem;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:12px;cursor:pointer;color:var(--text-primary);">More casual</button>
-                                    <button class="ex-redo-chip" data-ex="Lead with the strongest hook — what's the one thing that makes this special?" style="font-size:0.7rem;padding:0.25rem 0.5rem;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:12px;cursor:pointer;color:var(--text-primary);">Stronger hook</button>
-                                    <button class="ex-redo-chip" data-ex="Add a clear call to action like 'Book your spot' or 'Reserve your seat'" style="font-size:0.7rem;padding:0.25rem 0.5rem;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:12px;cursor:pointer;color:var(--text-primary);">Add CTA</button>
-                                </div>
-                                <div style="margin-top:0.85rem;text-align:right;"><button class="btn-redo" id="socDraftRedoBtn">🔄 Rewrite with AI</button></div>
-                            </div>
-
-                            <details style="margin-top:1.25rem;">
-                                <summary style="cursor:pointer;font-size:0.78rem;color:var(--text-muted);padding:0.3rem 0;">📊 Post details</summary>
-                                <div class="mkt-meta-grid" id="socDraftMeta" style="margin-top:0.5rem;"></div>
-                            </details>
-                        </div>
-                    </div>
-                    <div class="mkt-modal-foot">
-                        <button class="btn-reject" id="socDraftRejectBtn">✗ Reject</button>
-                        <div style="flex:1;"></div>
-                        <button class="btn-approve" id="socDraftApproveBtn">✓ Approve &amp; Schedule</button>
-                        <button class="btn-approve" id="socDraftPostNowBtn" style="background:var(--gold);" title="Post immediately to Facebook & Instagram">⚡ Post Now</button>
                     </div>
                 </div>
             </div>
@@ -4649,33 +3830,12 @@
                         <div id="mktDraftRationale" style="font-size:0.82rem;color:var(--text-secondary);line-height:1.5;"></div>
                     </div>
                     <div class="mkt-mode-pane" data-mode-pane="edit" style="display:none;">
-                        <h5>Subject Line</h5>
+                        <h5>Subject</h5>
                         <input type="text" class="subject-edit" id="mktDraftEditSubject" maxlength="120">
                         <div style="font-size:0.7rem;color:var(--text-muted);margin:0.3rem 0 0.85rem;">40-60 characters performs best on mobile previews.</div>
-                        <h5>Email Body</h5>
-                        <p style="font-size:0.78rem;color:var(--text-muted);margin:0 0 0.5rem;">Edit the email visually below — type, delete, format. The brand header &amp; footer are added automatically when sent. For bigger changes, use the "Rewrite with AI" tab instead.</p>
-                        <div class="mkt-rich-toolbar">
-                            <button type="button" data-cmd="bold" title="Bold (Ctrl+B)"><strong>B</strong></button>
-                            <button type="button" data-cmd="italic" title="Italic (Ctrl+I)"><em>I</em></button>
-                            <button type="button" data-cmd="underline" title="Underline"><u>U</u></button>
-                            <span class="mkt-rich-sep"></span>
-                            <button type="button" data-cmd="formatBlock" data-arg="h2" title="Heading">H</button>
-                            <button type="button" data-cmd="formatBlock" data-arg="p" title="Paragraph">¶</button>
-                            <span class="mkt-rich-sep"></span>
-                            <button type="button" data-cmd="insertUnorderedList" title="Bulleted list">•</button>
-                            <button type="button" data-cmd="insertOrderedList" title="Numbered list">1.</button>
-                            <span class="mkt-rich-sep"></span>
-                            <button type="button" data-cmd="createLink" title="Add link">🔗</button>
-                            <button type="button" data-cmd="unlink" title="Remove link">⊘</button>
-                            <span class="mkt-rich-sep"></span>
-                            <button type="button" data-cmd="removeFormat" title="Clear formatting">⌫</button>
-                        </div>
-                        <div id="mktDraftEditBodyVisual" class="mkt-rich-editor" contenteditable="true"></div>
-                        <textarea class="body-edit" id="mktDraftEditBody" style="display:none;"></textarea>
-                        <div style="margin-top:0.5rem;display:flex;justify-content:space-between;align-items:center;">
-                            <span style="font-size:0.72rem;color:var(--text-muted);">Tip: paste images by dragging a file into the editor or copy/paste from elsewhere.</span>
-                            <button class="btn-edit-save" id="mktDraftEditSaveBtn">💾 Save Edits</button>
-                        </div>
+                        <h5>Body HTML (inner — wrapper + footer added automatically)</h5>
+                        <textarea class="body-edit" id="mktDraftEditBody"></textarea>
+                        <div style="margin-top:0.75rem;text-align:right;"><button class="btn-edit-save" id="mktDraftEditSaveBtn">Save Edits</button></div>
                     </div>
                     <div class="mkt-mode-pane" data-mode-pane="redo" style="display:none;">
                         <h5>Tell the AI what to change</h5>
@@ -4788,37 +3948,47 @@
         })();
         document.getElementById('loginForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            const password = document.getElementById('passwordInput').value;
+            // Trim whitespace so trailing spaces / autofill artifacts don't silently break login
+            const password = (document.getElementById('passwordInput').value || '').trim();
             const errorEl = document.getElementById('loginError');
+            if (errorEl) errorEl.textContent = '';
 
             // Server-side verification (with safe fallback to legacy plaintext if the
             // function is unreachable — keeps you locked-in even on transient errors).
             (async () => {
-                const errorEl = document.getElementById('loginError');
+                if (errorEl) errorEl.textContent = 'Verifying…';
                 try {
                     const r = await fetch('/.netlify/functions/verify-admin-password', {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ password })
                     });
                     const body = await r.json().catch(() => ({}));
+                    console.log('[admin login] status=' + r.status + ' ok=' + body.ok + ' legacy=' + !!body.legacy);
                     if (body.ok) {
                         if (body.token) localStorage.setItem('quarryAdminToken', body.token);
                         sessionStorage.setItem('quarryAuth', 'true');
                         app.authenticated = true;
                         const overlay = document.getElementById('loginOverlay');
                         if (overlay) overlay.classList.add('hidden');
-                        if (typeof showApp === 'function') showApp();
+                        if (errorEl) errorEl.textContent = '';
+                        try {
+                            if (typeof showApp === 'function') showApp();
+                        } catch (uiErr) {
+                            console.error('[admin login] login OK but showApp failed:', uiErr);
+                            if (errorEl) errorEl.textContent = 'Logged in — refresh the page if the dashboard does not appear.';
+                        }
                         return;
                     }
                     if (errorEl) errorEl.textContent = 'Invalid password. Try again.';
                 } catch (err) {
+                    console.error('[admin login] verify failed:', err);
                     // Network/function error — fall back to legacy local check so admin remains usable
                     if (password === 'quarry2026') {
                         sessionStorage.setItem('quarryAuth', 'true');
                         app.authenticated = true;
                         const overlay = document.getElementById('loginOverlay');
                         if (overlay) overlay.classList.add('hidden');
-                        if (typeof showApp === 'function') showApp();
+                        try { if (typeof showApp === 'function') showApp(); } catch (_) {}
                         return;
                     }
                     if (errorEl) errorEl.textContent = 'Login error — using offline check; please reload.';
@@ -4856,68 +4026,55 @@
         }
 
         function setupNavigation() {
-            // Sidebar nav items
-            document.querySelectorAll('.sb-nav-item').forEach((item) => {
-                item.addEventListener('click', () => {
-                    const tabName = item.dataset.tab;
+            // Top-level nav tabs (non-dropdown)
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    const tabName = e.target.dataset.tab;
+                    const dropdown = e.target.dataset.dropdown;
+                    if (tabName && !dropdown) {
+                        switchTab(tabName);
+                    } else if (tabName && dropdown) {
+                        // Clicking the dropdown parent opens its first child
+                        switchTab(tabName);
+                    }
+                });
+            });
+            // Dropdown items
+            document.querySelectorAll('.nav-dropdown-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const tabName = e.target.dataset.tab;
                     if (tabName) switchTab(tabName);
-                });
-            });
-            // Sidebar section headers — collapse / expand groups, persist in localStorage
-            const COLLAPSE_KEY = 'quarrySidebarCollapsed_v1';
-            let collapsed = {};
-            try { collapsed = JSON.parse(localStorage.getItem(COLLAPSE_KEY) || '{}'); } catch (_) {}
-            document.querySelectorAll('.sb-nav-section').forEach((section) => {
-                const key = (section.textContent || '').trim();
-                if (collapsed[key]) section.classList.add('collapsed');
-                section.addEventListener('click', () => {
-                    section.classList.toggle('collapsed');
-                    collapsed[key] = section.classList.contains('collapsed');
-                    try { localStorage.setItem(COLLAPSE_KEY, JSON.stringify(collapsed)); } catch (_) {}
-                });
-            });
-            // Auto-expand section containing the currently-active tab so it's never hidden behind a collapse
-            const activeItem = document.querySelector('.sb-nav-item.active');
-            if (activeItem) {
-                const group = activeItem.closest('.sb-nav-group');
-                const sectionHeader = group ? group.previousElementSibling : null;
-                if (sectionHeader && sectionHeader.classList.contains('sb-nav-section') && sectionHeader.classList.contains('collapsed')) {
-                    sectionHeader.classList.remove('collapsed');
-                    const k = (sectionHeader.textContent || '').trim();
-                    delete collapsed[k];
-                    try { localStorage.setItem(COLLAPSE_KEY, JSON.stringify(collapsed)); } catch (_) {}
-                }
-            }
-            // Mobile sidebar toggle
-            const tg = document.getElementById('sbMobileToggle');
-            const sb = document.getElementById('adminSidebar');
-            if (tg && sb) tg.addEventListener('click', () => sb.classList.toggle('open'));
-            // Click outside sidebar (on content) closes mobile menu
-            document.querySelector('.content')?.addEventListener('click', () => {
-                if (window.innerWidth <= 900 && sb?.classList.contains('open')) sb.classList.remove('open');
-            });
-            // Dashboard quick-action + stat-card jumps
-            document.querySelectorAll('[data-jump]').forEach((el) => {
-                el.addEventListener('click', () => {
-                    const t = el.dataset.jump; if (t) switchTab(t);
+                    // Close all dropdowns
+                    document.querySelectorAll('.nav-dropdown').forEach(d => d.classList.remove('open'));
                 });
             });
         }
 
         function switchTab(tabName) {
-            // Close mobile sidebar if open
-            const sidebar = document.getElementById('adminSidebar');
-            if (sidebar) sidebar.classList.remove('open');
+            // Close mobile menu if open
+            const navTabs = document.querySelector('.nav-tabs');
+            const menuBtn = document.getElementById('mobileMenuBtn');
+            if (navTabs) navTabs.classList.remove('mobile-open');
+            if (menuBtn) menuBtn.innerHTML = '&#9776;';
 
-            // Clear active state on sidebar items
-            document.querySelectorAll('.sb-nav-item').forEach(t => t.classList.remove('active'));
-            const sbItem = document.querySelector(`.sb-nav-item[data-tab="${tabName}"]`);
-            if (sbItem) {
-                sbItem.classList.add('active');
-                // Auto-expand the parent section if collapsed (e.g. when reached via dashboard quick-jump)
-                const group = sbItem.closest('.sb-nav-group');
-                const header = group ? group.previousElementSibling : null;
-                if (header && header.classList.contains('sb-nav-section')) header.classList.remove('collapsed');
+            // Clear all active states
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-dropdown-item').forEach(t => t.classList.remove('active'));
+
+            // Set active on the correct nav element
+            const directTab = document.querySelector(`.nav-tab[data-tab="${tabName}"]:not([data-dropdown])`);
+            const dropdownItem = document.querySelector(`.nav-dropdown-item[data-tab="${tabName}"]`);
+
+            if (dropdownItem) {
+                dropdownItem.classList.add('active');
+                // Also highlight the parent dropdown nav-tab
+                const parentDropdown = dropdownItem.closest('.nav-dropdown');
+                if (parentDropdown) {
+                    parentDropdown.querySelector('.nav-tab').classList.add('active');
+                }
+            } else if (directTab) {
+                directTab.classList.add('active');
             }
 
             // Switch tab content
@@ -4959,14 +4116,6 @@
             // Marketing module hook (real backend, /admin/ build)
             if (tabName.startsWith('mkt') && window.MarketingUI && typeof MarketingUI.onTabSwitch === 'function') {
                 MarketingUI.onTabSwitch(tabName);
-            }
-            // Social module hook
-            if (tabName.startsWith('soc') && window.SocialUI && typeof SocialUI.onTabSwitch === 'function') {
-                SocialUI.onTabSwitch(tabName);
-            }
-            // Reservation Inquiries module hook (replaces old Gmail-label loader)
-            if (tabName === 'potential' && window.ResInqUI && typeof ResInqUI.onTabSwitch === 'function') {
-                ResInqUI.onTabSwitch(tabName);
             }
         }
 
@@ -5510,8 +4659,8 @@
         async function loadData() {
             try {
                 const [eventsRes, subscribersRes, formsRes] = await Promise.all([
-                    fetch('/events.json'),
-                    fetch('/subscribers.json'),
+                    fetch('/events.json?t=' + Date.now(), { cache: 'no-store' }),
+                    fetch('/subscribers.json?t=' + Date.now(), { cache: 'no-store' }),
                     fetch('https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/forms.json?t=' + Date.now()).catch(() => null)
                 ]);
 
@@ -5624,118 +4773,12 @@
             document.getElementById('totalRegistrations').textContent = totalRegs;
             document.getElementById('totalRevenue').textContent = '$' + revenue.toLocaleString('en-US', { minimumFractionDigits: 2 });
 
-            // Upcoming bands — use LOCAL date so we don't mark today's bands
-            // as "past" once we tip into UTC tomorrow (anything after 6 PM CT).
-            const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD in local time
+            // Upcoming bands
+            const today = new Date().toISOString().split('T')[0];
             const upcoming = app.bands.filter(b => b.date >= today).length;
             document.getElementById('upcomingBands').textContent = upcoming;
 
             updateActivityFeed();
-            renderDashboardHero();
-            renderDashboardAttention();
-            renderDashboardToday();
-        }
-
-        function renderDashboardHero() {
-            const greet = document.getElementById('dashGreeting');
-            const dateEl = document.getElementById('dashDate');
-            if (!greet || !dateEl) return;
-            const h = new Date().getHours();
-            const part = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
-            greet.textContent = `Good ${part}, Matthew 👋`;
-            dateEl.textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-        }
-
-        async function renderDashboardAttention() {
-            const grid = document.getElementById('dashAttnGrid');
-            if (!grid) return;
-
-            // Pull live counts from social_drafts.json + marketing_drafts.json + events
-            let socialPending = 0, emailPending = 0;
-            try {
-                const r = await fetch('/.netlify/functions/data-store?file=social_drafts.json', { cache: 'no-store' });
-                const b = await r.json();
-                const drafts = (b.decoded && b.decoded.drafts) || [];
-                socialPending = drafts.filter((d) => d.status === 'pending').length;
-            } catch (_) {}
-            try {
-                const r = await fetch('/.netlify/functions/data-store?file=marketing_drafts.json', { cache: 'no-store' });
-                const b = await r.json();
-                const drafts = (b.decoded && b.decoded.drafts) || [];
-                emailPending = drafts.filter((d) => d.status === 'pending').length;
-            } catch (_) {}
-
-            // Reservation inquiries (potential reservations) — count from app
-            const inquiries = (app.events || []).reduce((acc, e) => acc + ((app.registrations?.[e.id] || []).length), 0);
-
-            // Low-fill events: ticketed events <30% sold within 14 days of date
-            const today = new Date(); today.setHours(0,0,0,0);
-            const lowFillEvents = (app.events || []).filter((e) => {
-                if (!e.date) return false;
-                const d = new Date(e.date + 'T12:00:00');
-                const daysOut = Math.round((d - today) / 86400000);
-                if (daysOut < 0 || daysOut > 14) return false;
-                const cap = e.totalCapacity || 0;
-                if (!cap) return false;
-                return ((e.registeredCount || 0) / cap) < 0.3;
-            }).length;
-
-            const cards = [
-                {
-                    n: socialPending, ttl: socialPending === 1 ? 'Social post needs review' : 'Social posts need review',
-                    sub: socialPending > 0 ? 'Approve, edit, or rewrite to keep posting on schedule' : "You're all caught up on social",
-                    jump: 'socInbox'
-                },
-                {
-                    n: emailPending, ttl: emailPending === 1 ? 'Email draft needs review' : 'Email drafts need review',
-                    sub: emailPending > 0 ? 'Sign off so emails go out at their scheduled time' : 'No emails waiting on you',
-                    jump: 'mktInbox'
-                },
-                {
-                    n: lowFillEvents, ttl: lowFillEvents === 1 ? 'Event is filling slowly' : 'Events filling slowly',
-                    sub: lowFillEvents > 0 ? 'Less than 30% sold and within 2 weeks — consider extra promo' : 'All near-term events on pace',
-                    jump: 'events'
-                },
-            ];
-
-            grid.innerHTML = cards.map((c) => `
-                <div class="dash-attn-card ${c.n === 0 ? 'is-zero' : ''}" data-jump="${c.jump}">
-                    <div class="ac-num">${c.n === 0 ? '✓' : c.n}</div>
-                    <div class="ac-ttl">${c.ttl}</div>
-                    <div class="ac-sub">${c.sub}</div>
-                </div>
-            `).join('');
-            grid.querySelectorAll('[data-jump]').forEach((el) => el.addEventListener('click', () => switchTab(el.dataset.jump)));
-        }
-
-        function renderDashboardToday() {
-            // LOCAL date in YYYY-MM-DD form. toISOString() returns the UTC date,
-            // which after 6 PM CT silently rolls forward to tomorrow and makes
-            // tonight's events disappear from "Today's Lineup".
-            const todayKey = new Date().toLocaleDateString('en-CA');
-            const bandsEl = document.getElementById('dashTodayBandsBody');
-            const eventsEl = document.getElementById('dashTodayEventsBody');
-
-            if (bandsEl) {
-                const todayBands = (app.bands || []).filter((b) => b.date === todayKey);
-                if (todayBands.length === 0) bandsEl.innerHTML = '<span class="dash-today-empty">No live music today</span>';
-                else bandsEl.innerHTML = todayBands.map((b) => `<div class="dt-row"><span class="dt-name">${b.name || ''}</span><span class="dt-time">${b.timeSlot || ''}</span></div>`).join('');
-            }
-
-            if (eventsEl) {
-                const todayEvents = (app.events || []).filter((e) => e.date === todayKey);
-                if (todayEvents.length === 0) eventsEl.innerHTML = '<span class="dash-today-empty">No ticketed events today</span>';
-                else eventsEl.innerHTML = todayEvents.map((e) => {
-                    // Pure-string time parse — `new Date('2000-01-01T16:00')` would
-                    // attach local TZ and back through `toLocaleTimeString` is fine
-                    // in most browsers, but we already have a no-TZ helper, so use it.
-                    const m = e.time ? /^(\d{1,2}):(\d{2})/.exec(e.time) : null;
-                    let time = '';
-                    if (m) { let h = parseInt(m[1],10); const min=m[2]; const ap = h>=12?'PM':'AM'; h = h%12 || 12; time = `${h}:${min} ${ap}`; }
-                    const filled = e.totalCapacity ? `${e.registeredCount || 0}/${e.totalCapacity} sold` : '';
-                    return `<div class="dt-row"><span class="dt-name">${e.name}</span><span class="dt-time">${time}${filled ? ' · ' + filled : ''}</span></div>`;
-                }).join('');
-            }
         }
 
         function updateActivityFeed() {
@@ -5797,30 +4840,6 @@
             return app.registrations[eventId] || [];
         }
 
-        // Format a YYYY-MM-DD event date for human display.
-        // Anchors to T12:00:00 LOCAL so the date never rolls back a day from
-        // UTC parsing — `new Date("2026-04-23")` would parse as midnight UTC,
-        // which is 7 PM the day BEFORE in Central Time.
-        function formatEventDate(dateStr) {
-            if (!dateStr) return '';
-            if (/[A-Za-z,]/.test(dateStr)) return dateStr; // already humanized
-            const d = new Date(dateStr + 'T12:00:00');
-            if (isNaN(d.getTime())) return dateStr;
-            return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
-        }
-        // Format an HH:MM time string into "h:mm AM/PM" — pure string parse,
-        // no Date object so timezone never gets applied.
-        function formatEventTime(timeStr) {
-            if (!timeStr) return '';
-            const m = /^(\d{1,2}):(\d{2})/.exec(timeStr);
-            if (!m) return timeStr;
-            let h = parseInt(m[1], 10);
-            const min = m[2];
-            const ampm = h >= 12 ? 'PM' : 'AM';
-            h = h % 12; if (h === 0) h = 12;
-            return `${h}:${min} ${ampm}`;
-        }
-
         function updateEvents() {
             const grid = document.getElementById('eventsGrid');
 
@@ -5840,7 +4859,7 @@
                     </div>
                     <div class="event-card-content">
                         <div class="event-card-title">${event.name}</div>
-                        <div class="event-card-date">${formatEventDate(event.date)}${event.time ? ' at ' + formatEventTime(event.time) : ''}</div>
+                        <div class="event-card-date">${event.date} at ${event.time}</div>
                         <div class="event-card-meta">
                             <span class="event-status status-${(event.status || 'available').toLowerCase().replace(/\s+/g, '-')}">${event.status || 'Active'}</span>
                         </div>
@@ -5871,10 +4890,10 @@
 
         function formatDate(dateStr) {
             if (!dateStr) return '—';
-            // Anchor bare YYYY-MM-DD strings to noon LOCAL time so they don't
-            // roll back a day from UTC parsing in negative-UTC zones.
-            const isBareDate = /^\d{4}-\d{2}-\d{2}$/.test(dateStr);
-            const date = new Date(isBareDate ? (dateStr + 'T12:00:00') : dateStr);
+            // YYYY-MM-DD strings are parsed as UTC by Date(), causing -1 day shift in CT.
+            // Anchor at noon local so it always lands on the intended calendar day.
+            const safe = /^\d{4}-\d{2}-\d{2}$/.test(dateStr) ? dateStr + 'T12:00:00' : dateStr;
+            const date = new Date(safe);
             if (isNaN(date.getTime())) return dateStr;
             return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         }
@@ -7170,9 +6189,7 @@
                     const sentCount = result.sent || recipients.length;
 
                     app.emailHistory.push({
-                        // Use America/Chicago, NOT UTC — toISOString() returns the
-                        // UTC date which silently rolls forward to tomorrow after 6 PM CT.
-                        date: new Date().toLocaleDateString('en-CA', { timeZone: 'America/Chicago' }),
+                        date: new Date().toISOString().split('T')[0],
                         subject, recipients: sentCount, status: 'Sent',
                     });
 
@@ -7541,17 +6558,10 @@
 
         async function saveScheduleData() {
             try {
-                // CRITICAL: must include employees + timeOffRequests in every save.
-                // Otherwise the backend overwrites schedule.json with just `schedules`,
-                // wiping the employees array (this was the April-21 data-loss bug).
                 const response = await fetch('/.netlify/functions/save-schedule', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        employees: app.employees || [],
-                        schedules: app.editingScheduleData,
-                        timeOffRequests: app.timeOffRequests || []
-                    })
+                    body: JSON.stringify({ schedules: app.editingScheduleData })
                 });
                 if (response.ok) {
                     app.schedules = JSON.parse(JSON.stringify(app.editingScheduleData));
@@ -7900,9 +6910,7 @@
                 dayKeys.forEach((dayKey, idx) => {
                     const shiftDate = new Date(app.currentScheduleWeek);
                     shiftDate.setDate(shiftDate.getDate() + idx);
-                    // Build YYYY-MM-DD in CT, NOT UTC. toISOString() shifts the
-                    // calendar date forward in the evenings.
-                    const dateStr = shiftDate.toLocaleDateString('en-CA', { timeZone: 'America/Chicago' });
+                    const dateStr = shiftDate.toISOString().split('T')[0];
 
                     const isClosed = dayKey === 'monday' || dayKey === 'tuesday';
                     const shift = empShifts[dayKey];
@@ -8152,8 +7160,7 @@
             const dayIdx = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].indexOf(dayKey);
             const shiftDate = new Date(app.currentScheduleWeek);
             shiftDate.setDate(shiftDate.getDate() + dayIdx);
-            // CT date string — toISOString() leaks UTC and shifts after 6 PM CT.
-            const dateStr = shiftDate.toLocaleDateString('en-CA', { timeZone: 'America/Chicago' });
+            const dateStr = shiftDate.toISOString().split('T')[0];
 
             const hasTimeOff = app.timeOffRequests.some(t =>
                 t.employeeId === empId && t.dates.includes(dateStr) && t.status === 'approved'
@@ -10554,7 +9561,7 @@ function createCampaign(opts) {
         id: 'camp_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 6),
         name: opts.name || 'Untitled Campaign',
         type: opts.type || 'weekly-newsletter',
-        date: opts.date || new Date().toLocaleDateString('en-CA', { timeZone: 'America/Chicago' }),
+        date: opts.date || new Date().toISOString().split('T')[0],
         sendTime: opts.sendTime || '10:00 AM',
         status: opts.status || 'draft',
         recipients: opts.recipients || 3000,
@@ -10766,16 +9773,12 @@ function hashCode(str) {
                 const topT = $('mktPerfTopSubjects')?.querySelector('tbody');
                 if (topT) {
                     const rows = p.sentDrafts.map((d) => { const a = state.aggregates[d.id] || {}; const r = (d.deliveryStats && d.deliveryStats.recipientCount) || a.delivered || 0; return { subject: d.subject, type: d.type, openRate: r ? (a.uniqueOpen || 0) / r : 0, clickRate: r ? (a.uniqueClick || 0) / r : 0, sent: r }; }).sort((a, b) => b.openRate - a.openRate).slice(0, 8);
-                    topT.innerHTML = rows.length ? rows.map((r) => `<tr><td title="${escHtml(r.subject)}">${escHtml(r.subject)}</td><td style="font-size:0.72rem;color:var(--text-muted);">${escHtml(r.type)}</td><td>${(r.openRate * 100).toFixed(1)}%</td><td>${(r.clickRate * 100).toFixed(1)}%</td><td>${r.sent}</td></tr>`).join('') : '<tr><td colspan="5" class="mkt-empty-cell">No sends in this range yet.</td></tr>';
+                    topT.innerHTML = rows.length ? rows.map((r) => `<tr><td style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(r.subject)}</td><td style="font-size:0.72rem;color:var(--text-muted);">${escHtml(r.type)}</td><td>${(r.openRate * 100).toFixed(1)}%</td><td>${(r.clickRate * 100).toFixed(1)}%</td><td>${r.sent}</td></tr>`).join('') : '<tr><td colspan="5" class="mkt-empty-cell">No sends in this range yet.</td></tr>';
                 }
                 const hoursDiv = $('mktPerfHours');
                 if (hoursDiv) {
                     const buckets = Array(24).fill(null).map(() => ({ recipients: 0, opens: 0 }));
-                    // Bucket sends by hour-of-day in CT. Previously hardcoded as
-                    // `getUTCHours() - 5` which assumed CDT year-round and broke
-                    // every time DST rolled. Intl gives the correct CT hour for any date.
-                    const ctHourFmt = new Intl.DateTimeFormat('en-US', { hour: 'numeric', hour12: false, timeZone: 'America/Chicago' });
-                    p.sentDrafts.forEach((d) => { const a = state.aggregates[d.id] || {}; const r = (d.deliveryStats && d.deliveryStats.recipientCount) || a.delivered || 0; const h = parseInt(ctHourFmt.format(new Date(d.sentAt)), 10) % 24; buckets[h].recipients += r; buckets[h].opens += a.uniqueOpen || 0; });
+                    p.sentDrafts.forEach((d) => { const a = state.aggregates[d.id] || {}; const r = (d.deliveryStats && d.deliveryStats.recipientCount) || a.delivered || 0; const h = ((new Date(d.sentAt).getUTCHours() - 5) + 24) % 24; buckets[h].recipients += r; buckets[h].opens += a.uniqueOpen || 0; });
                     const max = Math.max(...buckets.map((b) => b.recipients ? b.opens / b.recipients : 0), 0.01);
                     const rows = buckets.map((b, h) => ({ h, rate: b.recipients ? b.opens / b.recipients : 0, recipients: b.recipients })).filter((r) => r.recipients > 0).sort((a, b) => b.rate - a.rate).slice(0, 8);
                     hoursDiv.innerHTML = rows.length ? rows.map((r) => `<div class="mkt-bar-row"><span class="mkt-bar-label">${r.h.toString().padStart(2, '0')}:00 CT</span><span class="mkt-bar-fill"><span style="width:${Math.max(4, (r.rate / max) * 100).toFixed(1)}%"></span></span><span class="mkt-bar-val">${(r.rate * 100).toFixed(1)}%</span></div>`).join('') : '<div class="mkt-empty">No data yet — send a few campaigns first.</div>';
@@ -10862,20 +9865,6 @@ function hashCode(str) {
                 $('mktDraftRationale').textContent = d.context && d.context.event ? `Event: ${d.context.event.title || d.context.eventId} · ${d.context.event.date || ''}` : (d.context ? JSON.stringify(d.context).slice(0, 280) : '—');
                 $('mktDraftEditSubject').value = d.subject || '';
                 $('mktDraftEditBody').value = d.innerHtml || '';
-                // Sync to visual editor (rich text) — staff edits this instead of raw HTML
-                const visual = $('mktDraftEditBodyVisual');
-                if (visual) visual.innerHTML = d.innerHtml || '';
-                // Auto-grow preview iframe to fit the full email body so flyers don't get clipped
-                setTimeout(() => {
-                    const iframe = $('mktDraftPreviewFrame');
-                    if (!iframe || !iframe.contentDocument) return;
-                    try {
-                        const body = iframe.contentDocument.body;
-                        if (!body) return;
-                        const h = Math.max(body.scrollHeight, body.offsetHeight, 700);
-                        iframe.style.height = (h + 30) + 'px';
-                    } catch (_) { /* same-origin guard */ }
-                }, 250);
                 $('mktDraftRedoCount').textContent = d.regenerationCount || 0;
                 $('mktDraftRedoInstructions').value = '';
                 const iframe = $('mktDraftPreviewFrame');
@@ -10954,53 +9943,13 @@ function hashCode(str) {
                 $('mktNewCampaignBtn')?.addEventListener('click', () => toast('One-off campaigns: open the existing Email tab to draft and send manually. Auto-scheduled one-offs coming next.'));
                 $('mktOptimizeNowBtn')?.addEventListener('click', optimizeNow);
                 $('mktPerfRange')?.addEventListener('change', renderPerformance);
-                // Manual "Refresh now" button — pulls fresh SendGrid stats on
-                // demand so we don't need to poll every 15 minutes server-side.
-                $('mktPerfRefreshBtn')?.addEventListener('click', async () => {
-                    const btn = $('mktPerfRefreshBtn');
-                    const orig = btn.textContent;
-                    btn.disabled = true; btn.textContent = '↻ Refreshing…';
-                    try {
-                        const r = await fetch('/.netlify/functions/marketing-poll-stats', { method: 'POST' });
-                        const b = await r.json();
-                        if (!r.ok) throw new Error(b.error || 'refresh failed');
-                        toast(`Refreshed: ${b.polledCount || 0} polled, ${b.updatedCount || 0} updated.`);
-                        await loadAll();
-                    } catch (err) {
-                        toast('Refresh failed: ' + err.message);
-                    } finally {
-                        btn.disabled = false; btn.textContent = orig;
-                    }
-                });
                 $('mktSetSaveSettingsBtn')?.addEventListener('click', saveSettings);
                 $('mktSetSaveRulesBtn')?.addEventListener('click', saveRules);
                 $('mktDraftModalClose')?.addEventListener('click', closeModal);
                 document.querySelectorAll('.mkt-mode-tab').forEach((t) => t.addEventListener('click', () => setMode(t.dataset.mode)));
                 $('mktDraftApproveBtn')?.addEventListener('click', () => action('approve', { approvedBy: 'admin' }));
                 $('mktDraftRejectBtn')?.addEventListener('click', () => { const reason = prompt('Optional reason for rejecting (helps the AI learn):') || ''; action('reject', { reason }); });
-                $('mktDraftEditSaveBtn')?.addEventListener('click', () => {
-                    const visual = $('mktDraftEditBodyVisual');
-                    const innerHtml = visual ? visual.innerHTML : $('mktDraftEditBody').value;
-                    action('edit', { subject: $('mktDraftEditSubject').value, innerHtml });
-                });
-                // Wire rich-text toolbar
-                document.querySelectorAll('.mkt-rich-toolbar [data-cmd]').forEach((btn) => {
-                    btn.addEventListener('mousedown', (e) => e.preventDefault());  // keep editor focus
-                    btn.addEventListener('click', () => {
-                        const cmd = btn.dataset.cmd; let arg = btn.dataset.arg || null;
-                        if (cmd === 'createLink') {
-                            arg = prompt('Link URL (start with https://):', 'https://');
-                            if (!arg) return;
-                        }
-                        try { document.execCommand(cmd, false, arg); } catch (_) {}
-                        $('mktDraftEditBodyVisual')?.focus();
-                    });
-                });
-                // Keep hidden textarea in sync (legacy fallback if anything still reads it)
-                $('mktDraftEditBodyVisual')?.addEventListener('input', () => {
-                    const visual = $('mktDraftEditBodyVisual');
-                    if (visual) $('mktDraftEditBody').value = visual.innerHTML;
-                });
+                $('mktDraftEditSaveBtn')?.addEventListener('click', () => action('edit', { subject: $('mktDraftEditSubject').value, innerHtml: $('mktDraftEditBody').value }));
                 $('mktDraftRedoBtn')?.addEventListener('click', () => { const inst = $('mktDraftRedoInstructions').value.trim(); if (!inst) return toast('Tell the AI what to change first.'); action('redo', { instructions: inst }); });
                 $('mktDraftRescheduleBtn')?.addEventListener('click', reschedulePrompt);
                 $('mktDraftSendNowBtn')?.addEventListener('click', sendNow);
@@ -11021,591 +9970,6 @@ function hashCode(str) {
 
         document.addEventListener('DOMContentLoaded', () => { try { MarketingUI.init(); } catch (e) { console.error('MarketingUI init failed', e); } });
 
-        // Social Performance "Refresh now" button — calls social-poll-stats on
-        // demand. Wired here at top-level (rather than inside SocialUI) so a
-        // module-init failure doesn't break the manual refresh fallback.
-        document.addEventListener('DOMContentLoaded', () => {
-            const btn = document.getElementById('socPerfRefreshBtn');
-            if (!btn) return;
-            btn.addEventListener('click', async () => {
-                const orig = btn.textContent;
-                btn.disabled = true; btn.textContent = '↻ Refreshing…';
-                try {
-                    const r = await fetch('/.netlify/functions/social-poll-stats', { method: 'POST' });
-                    const b = await r.json();
-                    if (!r.ok) throw new Error(b.error || 'refresh failed');
-                    const msg = `Refreshed: ${b.polledCount || 0} polled` + ((b.errorsCount || 0) ? `, ${b.errorsCount} error(s)` : '');
-                    if (typeof toast === 'function') toast(msg); else alert(msg);
-                    if (window.SocialUI && typeof SocialUI.loadAll === 'function') await SocialUI.loadAll();
-                    else location.reload();
-                } catch (err) {
-                    const msg = 'Refresh failed: ' + err.message;
-                    if (typeof toast === 'function') toast(msg); else alert(msg);
-                } finally {
-                    btn.disabled = false; btn.textContent = orig;
-                }
-            });
-        });
-
-        // ====================================================================
-        // SocialUI — Facebook + Instagram drafts inbox / calendar / perf / settings
-        // ====================================================================
-        window.SocialUI = (() => {
-            const FN = '/.netlify/functions';
-            const state = {
-                drafts: [], rules: [], aggregates: {}, eventsLog: [],
-                sha: { drafts: null, calendar: null, learnings: null, events: null },
-                currentDraftId: null, modalMode: 'review',
-                loaded: false, loading: false, metaStatus: null,
-            };
-            const $ = (id) => document.getElementById(id);
-            const fmtDate = (iso) => { if (!iso) return '—'; const d = new Date(iso); return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'America/Chicago' }) + ' CT'; };
-            const fmtDay = (iso) => { if (!iso) return '—'; const d = new Date(iso.length === 10 ? iso + 'T12:00:00' : iso); return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }); };
-            const escHtml = (s) => (s == null ? '' : String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])));
-            const platformBadge = (p) => {
-                const map = { facebook: ['#1877f2', 'FB'], instagram: ['#e1306c', 'IG'] };
-                const [bg, label] = map[p] || ['#888', p];
-                return `<span style="display:inline-block;background:${bg};color:#fff;font-size:0.65rem;padding:1px 6px;border-radius:3px;margin-right:0.25rem;font-weight:600;">${label}</span>`;
-            };
-
-            // ── Friendly labels ────────────────────────────────────────────
-            const STATUS_LABELS = {
-                skeleton:   'Drafting',
-                pending:    'Needs Review',
-                approved:   'Scheduled',
-                posted:     'Posted',
-                rejected:   'Rejected',
-                failed:     'Send Failed',
-                superseded: 'Replaced'
-            };
-            const TYPE_LABELS = {
-                event_promo:    'Event Promo',
-                band_announce:  'Live Music',
-                wine_club:      'Wine Club',
-                atmosphere:     'Vibe Post',
-                menu_spotlight: 'Menu Highlight',
-                weather_patio:  'Weather Vibe',
-                brand_post:     'Brand Post',
-                manual:         'Custom Post'
-            };
-            const friendlyStatus = (s) => STATUS_LABELS[s] || (s || 'unknown').replace(/_/g, ' ');
-            const friendlyType = (t) => TYPE_LABELS[t] || (t || 'post').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-
-            // ── Friendly errors — translate technical messages to plain English ─
-            function friendlyError(action, err) {
-                const msg = (err && err.message) ? err.message : String(err || 'Unknown problem');
-                let translated;
-                if (/Failed to fetch|NetworkError|ECONNRESET/i.test(msg)) {
-                    translated = "Couldn't reach the server — check your internet and try again.";
-                } else if (/billing.hard.limit|insufficient_quota/i.test(msg)) {
-                    translated = "OpenAI credits are out — top them up at platform.openai.com.";
-                } else if (/anthropic|claude/i.test(msg) && /quota|rate|limit/i.test(msg)) {
-                    translated = "AI is rate-limited — give it a minute and retry.";
-                } else if (/META_PAGE_ACCESS_TOKEN|not configured/i.test(msg)) {
-                    translated = "Facebook/Instagram isn't connected yet — see Social Settings.";
-                } else if (/^load .+: 4\d{2}/i.test(msg)) {
-                    translated = "Couldn't find that data — try refreshing the page.";
-                } else if (/^load .+: 5\d{2}|^save .+: 5\d{2}|^.+: 5\d{2}/i.test(msg)) {
-                    translated = "Server hiccup — give it a moment and try again.";
-                } else if (/sha|409|conflict/i.test(msg)) {
-                    translated = "Someone else updated this just now — refresh the page and try again.";
-                } else {
-                    translated = msg.length > 120 ? msg.slice(0, 120) + '…' : msg;
-                }
-                return `${action}: ${translated}`;
-            }
-            const emptyState = (icon, title, subtitle) =>
-                `<div class="mkt-empty-friendly"><span class="ic">${icon}</span><div class="ttl">${escHtml(title)}</div><div class="sub">${escHtml(subtitle || '')}</div></div>`;
-
-            async function fetchData(file) {
-                const r = await fetch(`${FN}/data-store?file=${file}`, { cache: 'no-store' });
-                if (!r.ok) throw new Error(`load ${file}: ${r.status}`);
-                const d = await r.json();
-                return { json: d.decoded || {}, sha: d.sha };
-            }
-            async function putData(file, json, sha, message) {
-                const r = await fetch(`${FN}/data-store?file=${file}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ json, sha, message }) });
-                const body = await r.json().catch(() => ({}));
-                if (!r.ok) throw new Error(body.error || ('save ' + file + ': ' + r.status));
-                return body;
-            }
-            function toast(msg) {
-                if (typeof showToast === 'function') return showToast(msg);
-                const el = document.createElement('div');
-                el.textContent = msg;
-                el.style.cssText = 'position:fixed;top:20px;right:20px;background:#1c1f26;color:#fff;padding:0.6rem 1rem;border-radius:6px;z-index:99999;font-size:0.85rem;box-shadow:0 6px 20px rgba(0,0,0,0.3);';
-                document.body.appendChild(el);
-                setTimeout(() => el.remove(), 3500);
-            }
-
-            async function loadAll() {
-                if (state.loading) return;
-                state.loading = true;
-                try {
-                    const [dr, cal, ev] = await Promise.all([
-                        fetchData('social_drafts.json').catch(() => ({ json: { drafts: [] }, sha: null })),
-                        fetchData('social_calendar.json').catch(() => ({ json: { rules: [] }, sha: null })),
-                        fetchData('social_events.json').catch(() => ({ json: { events: [], aggregates: {} }, sha: null })),
-                    ]);
-                    state.drafts = Array.isArray(dr.json.drafts) ? dr.json.drafts : []; state.sha.drafts = dr.sha;
-                    state.rules = Array.isArray(cal.json.rules) ? cal.json.rules : []; state.sha.calendar = cal.sha;
-                    state.aggregates = ev.json.aggregates || {}; state.eventsLog = Array.isArray(ev.json.events) ? ev.json.events : []; state.sha.events = ev.sha;
-                    state.loaded = true;
-                    updateBadge(); renderInbox(); renderCalendar(); renderPerformance(); renderSettings();
-                } catch (err) { console.error('SocialUI load failed', err); toast(friendlyError('Could not load Social', err)); }
-                finally { state.loading = false; }
-            }
-
-            function updateBadge() {
-                const badge = $('socInboxBadge'); if (!badge) return;
-                const pending = state.drafts.filter((d) => d.status === 'pending').length;
-                if (pending > 0) { badge.textContent = pending; badge.style.display = 'inline-block'; }
-                else { badge.style.display = 'none'; }
-            }
-
-            function renderInbox() {
-                const wrap = $('socInboxList'); if (!wrap) return;
-                const filter = $('socInboxFilter')?.value || 'pending';
-                let list = state.drafts.slice();
-                if (filter !== 'all') list = list.filter((d) => d.status === filter);
-                list.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
-                if (!list.length) {
-                    const next = state.drafts.filter((d) => d.scheduledFor && new Date(d.scheduledFor).getTime() > Date.now()).sort((a, b) => (a.scheduledFor || '').localeCompare(b.scheduledFor || ''))[0];
-                    const subtitle = next ? `Next post goes out ${fmtDate(next.scheduledFor)}.` : '';
-                    wrap.innerHTML = emptyState('✓', 'All caught up!', subtitle);
-                    return;
-                }
-                wrap.innerHTML = list.map((d) => {
-                    const platforms = (d.platforms || []).map(platformBadge).join('');
-                    const previewSrc = d.userImageUrl || d.imageUrl;
-                    const img = previewSrc ? `<img src="${escHtml(previewSrc)}" style="width:60px;height:60px;object-fit:cover;border-radius:4px;margin-right:0.6rem;" alt="">` : '';
-                    const captionFull = d.caption || (d.status === 'skeleton' ? '✨ AI will draft this caption when the post date gets within 7 days. Open to draft it now if you want.' : '(no caption)');
-                    const captionPreview = captionFull.slice(0, 140) + (captionFull.length > 140 ? '…' : '');
-                    return `<div class="mkt-inbox-item" data-draft-id="${escHtml(d.id)}" style="display:flex;align-items:flex-start;cursor:pointer;">
-                        ${img}
-                        <div style="flex:1;min-width:0;">
-                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.25rem;">
-                                <div style="font-size:0.75rem;">${platforms}<span style="color:var(--text-muted);">${escHtml(friendlyType(d.type))} · ${fmtDate(d.scheduledFor || d.createdAt)}</span></div>
-                                <div class="mkt-status-pill is-${escHtml(d.status)}">${escHtml(friendlyStatus(d.status))}</div>
-                            </div>
-                            <div style="font-size:0.85rem;line-height:1.4;color:var(--text-primary);">${escHtml(captionPreview)}</div>
-                        </div>
-                    </div>`;
-                }).join('');
-                wrap.querySelectorAll('.mkt-inbox-item').forEach((el) => el.addEventListener('click', () => openModal(el.dataset.draftId)));
-            }
-
-            function renderCalendar() {
-                const wrap = $('socCalendarList'); if (!wrap) return;
-                const upcoming = state.drafts
-                    .filter((d) => d.status !== 'rejected' && d.status !== 'superseded')
-                    .sort((a, b) => (a.scheduledFor || '').localeCompare(b.scheduledFor || ''));
-                if (!upcoming.length) {
-                    wrap.innerHTML = emptyState('📅', 'No posts scheduled yet', 'Click "Rebuild Schedule" in Settings to generate posts from your events.');
-                    return;
-                }
-                const groups = {};
-                upcoming.forEach((d) => {
-                    const key = (d.scheduledFor || d.postedAt || d.createdAt || '').slice(0, 10) || 'unscheduled';
-                    (groups[key] = groups[key] || []).push(d);
-                });
-                wrap.innerHTML = Object.keys(groups).sort().map((key) => {
-                    const label = key === 'unscheduled' ? 'Not yet scheduled' : new Date(key + 'T12:00').toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
-                    const rows = groups[key].map((d) => {
-                        const platforms = (d.platforms || []).map(platformBadge).join('');
-                        const time = d.scheduledFor ? new Date(d.scheduledFor).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Chicago' }) : '—';
-                        const captionPrev = d.caption ? d.caption.slice(0, 120) : `${friendlyType(d.type)} — caption coming soon`;
-                        return `<div class="mkt-inbox-item" data-draft-id="${escHtml(d.id)}" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
-                            <div style="flex:1;min-width:0;">
-                                <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.2rem;">${platforms}${time}</div>
-                                <div style="font-size:0.85rem;">${escHtml(captionPrev)}</div>
-                            </div>
-                            <div class="mkt-status-pill is-${escHtml(d.status)}" style="margin-left:0.6rem;">${escHtml(friendlyStatus(d.status))}</div>
-                        </div>`;
-                    }).join('');
-                    return `<div class="mkt-card" style="margin-bottom:0.75rem;"><h4 style="margin:0 0 0.5rem 0;">${escHtml(label)}</h4>${rows}</div>`;
-                }).join('');
-                wrap.querySelectorAll('.mkt-inbox-item').forEach((el) => el.addEventListener('click', () => openModal(el.dataset.draftId)));
-            }
-
-            function renderPerformance() {
-                const cutoff = Date.now() - 30 * 86400000;
-                const posted = state.drafts.filter((d) => d.status === 'posted' && d.postedAt && new Date(d.postedAt).getTime() >= cutoff);
-                let totalReach = 0, totalLikes = 0, totalComments = 0;
-                const rows = [];
-                posted.forEach((d) => {
-                    const agg = state.aggregates[d.id] || {};
-                    ['facebook', 'instagram'].forEach((p) => {
-                        const a = agg[p]; if (!a) return;
-                        totalReach += a.reach || 0;
-                        totalLikes += a.likes || 0;
-                        totalComments += a.comments || 0;
-                        rows.push({ caption: d.caption, platform: p, reach: a.reach || 0, likes: a.likes || 0, comments: a.comments || 0 });
-                    });
-                });
-                if ($('socStatPosts'))    $('socStatPosts').textContent    = posted.length;
-                if ($('socStatReach'))    $('socStatReach').textContent    = totalReach.toLocaleString();
-                if ($('socStatLikes'))    $('socStatLikes').textContent    = totalLikes.toLocaleString();
-                if ($('socStatComments')) $('socStatComments').textContent = totalComments.toLocaleString();
-                const tbody = $('socPerfTable')?.querySelector('tbody'); if (!tbody) return;
-                if (!rows.length) { tbody.innerHTML = '<tr><td colspan="5" class="mkt-empty-cell">No posts yet</td></tr>'; return; }
-                rows.sort((a, b) => b.reach - a.reach);
-                tbody.innerHTML = rows.slice(0, 20).map((r) =>
-                    `<tr><td>${escHtml((r.caption || '').slice(0, 80))}</td><td>${platformBadge(r.platform)}</td><td>${r.reach.toLocaleString()}</td><td>${r.likes.toLocaleString()}</td><td>${r.comments.toLocaleString()}</td></tr>`
-                ).join('');
-            }
-
-            async function renderSettings() {
-                renderRules();
-                renderDesignerQueue();
-                renderLearnings();
-                renderAssetLibrary();
-                const statusEl = $('socMetaStatus'); if (!statusEl) return;
-                statusEl.innerHTML = '<div class="mkt-empty">Checking…</div>';
-                try {
-                    // Force a dry-run probe on meta-post — response.reason tells us if token is configured
-                    const r = await fetch(`${FN}/meta-post`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dryRun: true, platforms: [], caption: '__probe__' }) });
-                    const body = await r.json().catch(() => ({}));
-                    const tokenMissing = body && body.reason && /not configured/i.test(body.reason);
-                    state.metaStatus = body;
-                    if (!tokenMissing && body.dryRun) {
-                        statusEl.innerHTML = `<div style="color:#2e7d32;font-weight:600;">✓ Connected</div>
-                            <div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem;">META_PAGE_ACCESS_TOKEN is set in Netlify. Posts will go live when approved + scheduled.</div>`;
-                    } else {
-                        statusEl.innerHTML = `<div style="color:#c0392b;font-weight:600;">✗ Not configured</div>
-                            <div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem;">Set <code>META_PAGE_ACCESS_TOKEN</code>, <code>META_PAGE_ID</code>, <code>META_IG_USER_ID</code> in Netlify env. See <code>META_SETUP.md</code>. Until then, posts run in dry-run mode.</div>`;
-                    }
-                } catch (err) {
-                    statusEl.innerHTML = `<div style="color:var(--text-muted);">Could not probe meta-post: ${escHtml(err.message)}</div>`;
-                }
-            }
-
-            function renderDesignerQueue() {
-                const wrap = $('socDesignerQueue'); if (!wrap) return;
-                const cutoff = Date.now() + 14 * 86400000;
-                const queue = state.drafts
-                    .filter((d) => (d.status === 'skeleton' || d.status === 'pending') && d.graphicBrief && !d.userImageUrl)
-                    .filter((d) => d.scheduledFor && new Date(d.scheduledFor).getTime() <= cutoff)
-                    .sort((a, b) => (a.graphicBrief?.neededBy || a.scheduledFor || '').localeCompare(b.graphicBrief?.neededBy || b.scheduledFor || ''));
-                if (!queue.length) { wrap.innerHTML = emptyState('🎉', 'No graphics needed right now', 'All upcoming posts already have an image set or will use an AI-generated one.'); return; }
-                wrap.innerHTML = queue.map((d) => {
-                    const brief = d.graphicBrief || {};
-                    const spec = brief.spec || {};
-                    const neededBy = brief.neededBy ? new Date(brief.neededBy + 'T12:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : 'ASAP';
-                    return `<div class="mkt-inbox-item" data-draft-id="${escHtml(d.id)}" style="cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;padding:0.6rem;border-left:3px solid var(--gold);">
-                        <div style="flex:1;min-width:0;">
-                            <div style="font-weight:600;font-size:0.85rem;">${escHtml(spec.title || brief.type || 'Graphic needed')}</div>
-                            <div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.2rem;">${escHtml(brief.templateRef || '')}</div>
-                            <div style="font-size:0.75rem;margin-top:0.3rem;color:var(--text-primary);">${escHtml(brief.canvasNote || '')}</div>
-                        </div>
-                        <div style="text-align:right;margin-left:0.5rem;font-size:0.7rem;">
-                            <div style="font-weight:600;color:var(--gold);">Build by ${escHtml(neededBy)}</div>
-                            <div style="color:var(--text-muted);margin-top:0.2rem;">Posts ${fmtDate(d.scheduledFor)}</div>
-                        </div>
-                    </div>`;
-                }).join('');
-                wrap.querySelectorAll('.mkt-inbox-item').forEach((el) => el.addEventListener('click', () => openModal(el.dataset.draftId)));
-            }
-
-            async function renderLearnings() {
-                const wrap = $('socLearningsList'); if (!wrap) return;
-                try {
-                    const r = await fetch(`${FN}/data-store?file=social_learnings.json`, { cache: 'no-store' });
-                    const body = await r.json();
-                    const learnings = (body.decoded && Array.isArray(body.decoded.learnings)) ? body.decoded.learnings : [];
-                    const active = learnings.filter((l) => !l.supersededAt);
-                    if (!active.length) { wrap.innerHTML = emptyState('🧠', 'No insights yet', 'After about 5 posts go live and gather engagement, the AI starts spotting patterns and shows them here.'); return; }
-                    wrap.innerHTML = active.map((l) => `<div style="padding:0.5rem;border-bottom:1px solid var(--border-subtle);">
-                        <div style="font-size:0.85rem;font-weight:500;">${escHtml(l.insight)}</div>
-                        <div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.2rem;"><span style="color:var(--gold);">[${escHtml(l.category)}]</span> ${escHtml(l.evidence || '')} · confidence: ${escHtml(l.confidence || 'medium')}</div>
-                    </div>`).join('');
-                } catch (err) { wrap.innerHTML = `<div class="mkt-empty">Could not load learnings: ${escHtml(err.message)}</div>`; }
-            }
-
-            async function renderAssetLibrary() {
-                const wrap = $('socAssetLibraryStatus'); if (!wrap) return;
-                try {
-                    const r = await fetch(`${FN}/data-store?file=social_assets.json`, { cache: 'no-store' });
-                    const body = await r.json();
-                    const assets = (body.decoded && Array.isArray(body.decoded.assets)) ? body.decoded.assets : [];
-                    if (!assets.length) {
-                        wrap.innerHTML = `<div style="color:var(--text-muted);font-size:0.85rem;">Empty. Add real Quarry photos (patio, food, sunset, bands) so vibe posts use your actual venue instead of AI-generated images. Saves about $0.04 per post.</div>`;
-                        return;
-                    }
-                    const tags = [...new Set(assets.flatMap((a) => a.tags || []))];
-                    wrap.innerHTML = `<div><strong>${assets.length}</strong> photo(s) tagged with: ${escHtml(tags.join(', ') || '(none)')}</div>
-                        <div style="display:flex;gap:0.4rem;margin-top:0.5rem;flex-wrap:wrap;">${assets.slice(0, 6).map((a) => `<img src="${escHtml(a.url)}" title="${escHtml(a.title || '')}" style="width:50px;height:50px;object-fit:cover;border-radius:3px;border:1px solid var(--border-subtle);" alt="">`).join('')}${assets.length > 6 ? `<div style="display:flex;align-items:center;justify-content:center;width:50px;height:50px;background:var(--bg-elevated);border-radius:3px;font-size:0.7rem;color:var(--text-muted);">+${assets.length - 6}</div>` : ''}</div>`;
-                } catch (err) { wrap.innerHTML = `<div class="mkt-empty">Could not load assets: ${escHtml(err.message)}</div>`; }
-            }
-
-            async function rebuildSchedule() {
-                if (!confirm("Rebuild the next 60 days of posts?\n\nThis picks up any new events, bands, or wine club dates and adds posts for them. Anything you've already reviewed or approved stays put.")) return;
-                toast('Rebuilding schedule — this takes about 10 seconds…');
-                try {
-                    const r = await fetch(`${FN}/social-cadence-engine`, {
-                        method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ windowDays: 60, dailyCap: 2 })
-                    });
-                    const body = await r.json();
-                    if (!r.ok) throw new Error(body.error || 'rebuild failed');
-                    const parts = [];
-                    if (body.added > 0) parts.push(`Added ${body.added} new post${body.added === 1 ? '' : 's'}`);
-                    if (body.movedExisting > 0) parts.push(`shifted ${body.movedExisting}`);
-                    if (body.supersededExisting > 0) parts.push(`replaced ${body.supersededExisting}`);
-                    toast(parts.length ? parts.join(', ') + '.' : 'Schedule already up to date — nothing new to add.');
-                    await loadAll();
-                } catch (err) { toast(friendlyError('Rebuild schedule', err)); }
-            }
-
-            function renderRules() {
-                const wrap = $('socRulesList'); if (!wrap) return;
-                if (!state.rules.length) {
-                    wrap.innerHTML = `<div class="mkt-empty">No rules yet. Default cadence: daily generator runs 8am CT.</div>`;
-                    return;
-                }
-                wrap.innerHTML = state.rules.map((r, i) =>
-                    `<div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.4rem;">
-                        <input data-rule-idx="${i}" data-field="name" value="${escHtml(r.name || '')}" style="flex:2;padding:0.35rem 0.5rem;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:4px;color:var(--text-primary);">
-                        <input data-rule-idx="${i}" data-field="cadence" value="${escHtml(r.cadence || '')}" placeholder="daily / weekly / event" style="flex:1;padding:0.35rem 0.5rem;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:4px;color:var(--text-primary);">
-                        <input data-rule-idx="${i}" data-field="platforms" value="${escHtml((r.platforms || []).join(','))}" placeholder="facebook,instagram" style="flex:1;padding:0.35rem 0.5rem;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:4px;color:var(--text-primary);">
-                    </div>`
-                ).join('');
-            }
-
-            function openModal(draftId) {
-                state.currentDraftId = draftId;
-                state.modalMode = 'review';
-                const modal = $('socDraftModal'); if (!modal) return;
-                modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false');
-                renderModal(); setMode('review');
-            }
-            function closeModal() {
-                const modal = $('socDraftModal'); if (!modal) return;
-                modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true');
-                state.currentDraftId = null;
-            }
-            function setMode(m) {
-                state.modalMode = m;
-                document.querySelectorAll('#socDraftModal .mkt-mode-tab').forEach((t) => t.classList.toggle('active', t.dataset.mode === m));
-                document.querySelectorAll('#socDraftModal .mkt-mode-pane').forEach((p) => p.style.display = (p.dataset.modePane === m ? '' : 'none'));
-                if (m === 'edit') {
-                    const d = state.drafts.find((x) => x.id === state.currentDraftId);
-                    if (d) {
-                        $('socDraftEditCaption').value = d.caption || '';
-                        $('socDraftEditHashtags').value = (d.hashtags || []).join('\n');
-                    }
-                }
-            }
-            function renderModal() {
-                const d = state.drafts.find((x) => x.id === state.currentDraftId); if (!d) return;
-                const platformList = (d.platforms || []).map((p) => p === 'facebook' ? 'Facebook' : p === 'instagram' ? 'Instagram' : p).join(' + ');
-                $('socDraftModalTitle').textContent = `${friendlyType(d.type)} · ${platformList}`;
-                $('socDraftModalSub').innerHTML = `<span class="mkt-status-pill is-${escHtml(d.status)}">${escHtml(friendlyStatus(d.status))}</span><span style="color:var(--text-muted);">${escHtml(fmtDate(d.scheduledFor || d.createdAt))}</span>`;
-
-                // ── "What to do next" banner ──────────────────────────────
-                const banner = $('socDraftNextStep'); const bannerText = $('socDraftNextStepText');
-                if (banner && bannerText) {
-                    const hasImage = d.userImageUrl || d.imageUrl;
-                    const hasCaption = !!(d.caption && d.caption.trim());
-                    const steps = [];
-                    if (!hasImage) steps.push('① Add an image (upload, library, or AI)');
-                    if (!hasCaption) steps.push((steps.length ? '② ' : '① ') + 'Click "Redo with AI" to draft a caption');
-                    if (d.status === 'pending') steps.push((steps.length ? `${steps.length === 1 ? '②' : '③'} ` : '① ') + 'Click "Approve & Schedule" when ready');
-                    if (steps.length && d.status !== 'posted' && d.status !== 'rejected') {
-                        bannerText.innerHTML = '&nbsp;' + steps.join('  →  ');
-                        banner.style.display = 'block';
-                    } else {
-                        banner.style.display = 'none';
-                    }
-                }
-                const img = $('socDraftImagePreview');
-                const liveImage = d.userImageUrl || d.imageUrl;
-                if (liveImage) img.innerHTML = `<img src="${escHtml(liveImage)}" style="width:100%;height:100%;object-fit:cover;" alt="">`;
-                else img.textContent = 'No image yet — upload your own poster, pick from the library, or generate with DALL-E';
-                const srcLabel = $('socImageSourceLabel');
-                if (srcLabel) {
-                    if (d.userImageUrl) srcLabel.innerHTML = '✓ <span style="color:var(--gold);">Your uploaded poster</span>';
-                    else if (d.imageUrl && d.imageSource === 'library') srcLabel.innerHTML = '✓ <span style="color:var(--gold);">From asset library</span>';
-                    else if (d.imageUrl) srcLabel.innerHTML = '✓ <span style="color:#888;">AI-generated</span>';
-                    else srcLabel.textContent = '';
-                }
-                $('socDraftImagePrompt').value = d.imagePrompt || '';
-                renderGraphicBrief(d.graphicBrief);
-                // Source: prefer event/band/wine-club label over technical IDs
-                let sourceLabel = '—';
-                if (d.context?.eventName) sourceLabel = d.context.eventName;
-                else if (d.context?.bands && d.context.bands.length) sourceLabel = d.context.bands.map((b) => b.name).join(', ');
-                else if (d.context?.weekendOf) sourceLabel = 'Weekend of ' + fmtDay(d.context.weekendOf);
-                else if (d.context?.monthLabel) sourceLabel = 'Rock & Vine — ' + d.context.monthLabel;
-                else if (d.context?.weatherMode) sourceLabel = d.context.weatherMode === 'patio' ? 'Patio-perfect day' : 'Cozy weather';
-                const meta = $('socDraftMeta');
-                meta.innerHTML = [
-                    ['Posts to', platformList || '—'],
-                    ['When', fmtDate(d.scheduledFor)],
-                    ['What about', sourceLabel],
-                    ['Phase', d.context?.arcLabel || '—'],
-                    d.postedAt ? ['Posted', fmtDate(d.postedAt)] : null,
-                    (d.regenerationCount > 0) ? ['Times redrafted', d.regenerationCount] : null,
-                ].filter(Boolean).map(([k, v]) => `<div class="mkt-meta-cell"><div class="mkt-meta-k">${k}</div><div class="mkt-meta-v">${escHtml(String(v))}</div></div>`).join('');
-                if (d.caption) {
-                    $('socDraftCaption').textContent = d.caption;
-                } else if (d.status === 'skeleton') {
-                    $('socDraftCaption').innerHTML = `<em style="color:var(--text-muted);">✨ AI will draft this caption automatically when the post date gets within 7 days. Click "Redo" in the panel above to draft one now.</em>`;
-                } else {
-                    $('socDraftCaption').textContent = '(no caption)';
-                }
-                $('socDraftHashtags').textContent = (d.hashtags || []).join(' ');
-                const showPostNow = d.status === 'pending' || d.status === 'approved';
-                $('socDraftPostNowBtn').style.display = showPostNow ? '' : 'none';
-                $('socDraftApproveBtn').style.display = (d.status === 'pending') ? '' : 'none';
-                $('socDraftRejectBtn').style.display = (d.status === 'pending' || d.status === 'approved') ? '' : 'none';
-            }
-
-            function renderGraphicBrief(brief) {
-                const panel = $('socGraphicBriefPanel'); const content = $('socGraphicBriefContent');
-                if (!panel || !content) return;
-                if (!brief || !brief.spec) { panel.style.display = 'none'; return; }
-                panel.style.display = 'block';
-                const FRIENDLY_BRIEF_KEYS = {
-                    backgroundIdea: 'Background', title: 'Title', subtitle: 'Subtitle',
-                    date: 'Date', time: 'Time', callout: 'Callout',
-                    footerText: 'Footer text', cards: 'Show these acts', qLogo: 'Logo placement'
-                };
-                const FRIENDLY_BRIEF_TYPE = {
-                    event_poster: 'Event Poster', band_lineup_poster: 'Live Music Lineup',
-                    wine_club_poster: 'Wine Club Poster', atmosphere_photo: 'Atmosphere Photo'
-                };
-                const rows = [];
-                rows.push(`<div><strong>Type:</strong> ${escHtml(FRIENDLY_BRIEF_TYPE[brief.type] || brief.type || '')}</div>`);
-                if (brief.templateRef) rows.push(`<div><strong>Template:</strong> ${escHtml(brief.templateRef)}</div>`);
-                if (brief.dimensions) rows.push(`<div><strong>Size:</strong> ${escHtml(brief.dimensions)}</div>`);
-                if (brief.neededBy) rows.push(`<div><strong>Build by:</strong> ${escHtml(fmtDay(brief.neededBy))}</div>`);
-                rows.push(`<hr style="margin:0.5rem 0;border:none;border-top:1px solid var(--border-subtle);">`);
-                rows.push(`<div style="font-weight:600;margin-bottom:0.3rem;">What to put on it:</div>`);
-                for (const [k, v] of Object.entries(brief.spec || {})) {
-                    if (v == null || v === '') continue;
-                    const label = FRIENDLY_BRIEF_KEYS[k] || k.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase());
-                    if (Array.isArray(v)) {
-                        // Pretty-format common arrays (e.g. band cards) instead of dumping JSON
-                        const items = v.map((it) => {
-                            if (typeof it !== 'object') return escHtml(String(it));
-                            // Band card: { day, bandName, time }
-                            if (it.bandName) return `<strong>${escHtml(it.bandName)}</strong> — ${escHtml(it.day || '')}${it.time ? ' · ' + escHtml(it.time) : ''}`;
-                            // Generic: turn into "key: value" pairs
-                            return Object.entries(it).map(([kk, vv]) => `${escHtml(kk)}: ${escHtml(String(vv))}`).join(' · ');
-                        });
-                        rows.push(`<div><em>${escHtml(label)}:</em></div><ul style="margin:0.2rem 0 0.4rem 1.2rem;padding:0;">${items.map((s) => `<li>${s}</li>`).join('')}</ul>`);
-                    } else if (typeof v === 'object') {
-                        rows.push(`<div><em>${escHtml(label)}:</em> ${Object.entries(v).map(([kk, vv]) => `${escHtml(kk)}: ${escHtml(String(vv))}`).join(', ')}</div>`);
-                    } else {
-                        rows.push(`<div><em>${escHtml(label)}:</em> ${escHtml(String(v))}</div>`);
-                    }
-                }
-                if (brief.canvasNote) rows.push(`<div style="margin-top:0.5rem;padding:0.4rem;background:rgba(154,123,42,0.1);border-left:3px solid var(--gold);font-size:0.75rem;font-style:italic;">${escHtml(brief.canvasNote)}</div>`);
-                if (brief.reelBrief) {
-                    rows.push(`<hr style="margin:0.6rem 0;border:none;border-top:1px solid var(--border-subtle);">`);
-                    rows.push(`<div style="font-weight:600;color:#e1306c;">📱 Reel Idea (optional):</div>`);
-                    rows.push(`<div style="font-size:0.78rem;line-height:1.5;">${escHtml(brief.reelBrief)}</div>`);
-                }
-                content.innerHTML = rows.join('');
-            }
-
-            async function uploadImage(file) {
-                if (!file) return;
-                if (file.size > 8 * 1024 * 1024) return toast('That image is over 8 MB — too big for Instagram. Resize it down (or use a JPG instead of PNG) and try again.');
-                if (!/^image\//i.test(file.type)) return toast('That file type isn\'t supported. Use a PNG, JPG, or WebP image.');
-                // Capture the draft ID NOW so it can't be lost if the modal is reopened mid-upload.
-                const draftId = state.currentDraftId;
-                if (!draftId) return toast('Open a post first, then click Upload.');
-
-                // Show progress in the image preview area
-                const preview = $('socDraftImagePreview');
-                const originalPreview = preview ? preview.innerHTML : '';
-                if (preview) preview.innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:0.85rem;"><div style="font-size:1.5rem;">⏳</div>Uploading your poster…</div>';
-                const sourceLabel = $('socImageSourceLabel');
-                if (sourceLabel) sourceLabel.innerHTML = '<span style="color:var(--text-muted);">Uploading…</span>';
-
-                try {
-                    const dataUrl = await new Promise((resolve, reject) => {
-                        const r = new FileReader();
-                        r.onload = () => resolve(r.result);
-                        r.onerror = () => reject(new Error('Could not read the file'));
-                        r.readAsDataURL(file);
-                    });
-                    const r = await fetch(`${FN}/upload-social-image`, {
-                        method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ imageBase64: dataUrl, draftId, filename: file.name })
-                    });
-                    const body = await r.json();
-                    if (!r.ok || !body.success) throw new Error(body.error || 'upload failed');
-
-                    // Save the URL to the draft directly via social-action — pass draftId
-                    // explicitly so we don't depend on state.currentDraftId still being set.
-                    const saveRes = await fetch(`${FN}/social-action`, {
-                        method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            action: 'edit', draftId,
-                            payload: { imageUrl: body.url, userImageUrl: body.url, imageSource: 'upload' }
-                        })
-                    });
-                    const saveBody = await saveRes.json();
-                    if (!saveRes.ok || !saveBody.ok) throw new Error(saveBody.error || 'could not save image to post');
-
-                    // Update local state if this draft is still the current one
-                    const idx = state.drafts.findIndex((x) => x.id === draftId);
-                    if (idx >= 0) state.drafts[idx] = saveBody.draft;
-                    if (state.currentDraftId === draftId) renderModal();
-                    renderInbox(); renderCalendar(); renderSettings();
-
-                    // Refresh sha for future saves
-                    const fresh = await fetchData('social_drafts.json'); state.sha.drafts = fresh.sha;
-
-                    toast('✓ Poster uploaded and saved to this post.');
-                } catch (err) {
-                    if (preview) preview.innerHTML = originalPreview;
-                    if (sourceLabel) sourceLabel.innerHTML = '';
-                    toast(friendlyError('Upload', err));
-                }
-            }
-
-            async function openLibraryPicker() {
-                try {
-                    const r = await fetch(`${FN}/data-store?file=social_assets.json`, { cache: 'no-store' });
-                    const body = await r.json();
-                    const assets = (body.decoded && body.decoded.assets) || [];
-                    if (!assets.length) {
-                        if (confirm('Asset library is empty. Want to add a venue photo now?')) {
-                            $('socImageFileInput').dataset.libraryUpload = 'true';
-                            $('socImageFileInput').click();
-                        }
-                        return;
-                    }
-                    // Simple quick picker — modal lite
-                    const tags = [...new Set(assets.flatMap((a) => a.tags || []))];
-                    const list = assets.map((a) =>
-                        `<div data-asset-url="${escHtml(a.url)}" style="cursor:pointer;border:1px solid var(--border-subtle);border-radius:4px;padding:0.4rem;display:flex;gap:0.5rem;align-items:center;background:var(--bg-elevated);margin-bottom:0.4rem;">
-                            <img src="${escHtml(a.url)}" style="width:60px;height:60px;object-fit:cover;border-radius:3px;" alt="">
-                            <div style="flex:1;font-size:0.8rem;"><div style="font-weight:600;">${escHtml(a.title || a.filename || 'Untitled')}</div><div style="font-size:0.7rem;color:var(--text-muted);">${escHtml((a.tags || []).join(', '))}</div></div>
-                        </div>`
-                    ).join('');
-                    const overlay = document.createElement('div');
-                    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:99999;display:flex;align-items:center;justify-content:center;';
-                    overlay.innerHTML = `<div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:8px;padding:1.5rem;max-width:520px;width:90%;max-height:80vh;overflow-y:auto;">
-                        <h3 style="margin:0 0 0.5rem;color:var(--text-primary);">Pick from Asset Library</h3>
-                        <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.75rem;">${assets.length} photo(s) · tags: ${escHtml(tags.join(', ') || 'none')}</div>
-                        <div>${list}</div>
-                        <div style="display:flex;gap:0.5rem;margin-top:0.75rem;">
-                            <button class="btn-secondary" id="libCloseBtn" style="flex:1;">Cancel</button>
-                            <button class="btn-primary" id="libUploadNewBtn" style="flex:1;">Upload New Asset</button>
-                        </div>
-                    </div>`;
-                    document.body.appendChild(overlay);
-                    const draftIdForPick = state.currentDraftId;
-                    overlay.querySelectorAll('[data-asset-url]').forEach((el) => el.addEventListener('click', async () => {
-                        const url = el.dataset.assetUrl;
-                        document.body.removeChild(overlay);
-                        if (!draftIdForPick) return toast('Open a post first, then pick from the library.');
-                        try {
-                            const saveRes = await fetch(`${FN}/social-action`, {
-                                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ action: 'edit', draftId: draftIdForPick, payload: { imageUrl: url, userImageUrl: null, imageSource: 'library' 
+    </script>
+</body>
+</html>
