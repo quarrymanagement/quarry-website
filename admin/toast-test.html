@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Toast Webhook Test · The Quarry</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f5f7; --card: #fff; --elev: #f0f1f3;
+    --border: #e0e3e8; --border-mid: #cdd1d8;
+    --text: #1c1f26; --text-muted: #4b5263; --text-dim: #858d9e;
+    --gold: #9a7b2a; --gold-light: #b08e30;
+    --green: #16a34a; --green-bg: rgba(22,163,74,0.08);
+    --red: #dc2626; --red-bg: rgba(220,38,38,0.08);
+    --yellow: #b45309; --yellow-bg: rgba(180,83,9,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Montserrat', -apple-system, sans-serif;
+    line-height: 1.5;
+    min-height: 100vh; padding: 32px 16px;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  .header {
+    margin-bottom: 24px; padding-bottom: 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem; font-weight: 700; color: var(--text);
+    margin-bottom: 4px;
+  }
+  .sub { font-size: 0.85rem; color: var(--text-muted); }
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 24px; margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card-header {
+    font-size: 1rem; font-weight: 600; margin-bottom: 6px;
+  }
+  .card-help {
+    font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;
+  }
+  .field { margin-bottom: 14px; }
+  label {
+    display: block;
+    font-size: 0.72rem; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: 5px;
+  }
+  input, textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border); border-radius: 6px;
+    font-size: 0.95rem; font-family: inherit;
+    background: var(--card); color: var(--text);
+  }
+  input:focus, textarea:focus {
+    outline: none; border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(154,123,42,0.1);
+  }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .btn {
+    background: var(--gold); color: white;
+    font-family: inherit; font-size: 0.9rem; font-weight: 600;
+    border: none; border-radius: 6px;
+    padding: 12px 20px; cursor: pointer;
+    width: 100%;
+    transition: background 0.15s;
+  }
+  .btn:hover { background: var(--gold-light); }
+  .btn:disabled { opacity: 0.6; cursor: wait; }
+  .result {
+    margin-top: 16px;
+    padding: 16px;
+    border-radius: 8px;
+    font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-break: break-all;
+    border: 1px solid;
+  }
+  .result.ok { background: var(--green-bg); border-color: var(--green); color: var(--green); }
+  .result.err { background: var(--red-bg); border-color: var(--red); color: var(--red); }
+  .result.info { background: var(--elev); border-color: var(--border); color: var(--text-muted); }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px; border-radius: 999px;
+    font-size: 0.7rem; font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+  .badge.ok { background: var(--green-bg); color: var(--green); }
+  .badge.err { background: var(--red-bg); color: var(--red); }
+  .badge.warn { background: var(--yellow-bg); color: var(--yellow); }
+  details summary { cursor: pointer; user-select: none; padding: 6px 0; font-size: 0.82rem; color: var(--text-muted); }
+  details summary:hover { color: var(--text); }
+  details pre { margin-top: 8px; }
+  .hint {
+    font-size: 0.8rem; color: var(--text-dim);
+    margin-top: 6px;
+  }
+  a { color: var(--gold); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="title">Toast Webhook Test</div>
+    <div class="sub">Send a fake Toast order to your live <code>toast-order-webhook</code> function. Use this from anywhere to verify the integration without ringing up a real transaction at the bar.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">1. Authenticate</div>
+    <div class="card-help">Same password as the admin portal.</div>
+    <div class="field">
+      <label>Admin Password</label>
+      <input type="password" id="password" placeholder="Enter admin password" autocomplete="current-password">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">2. Test Order</div>
+    <div class="card-help">Pretend a member just closed a tab. The webhook will look up the member by email (or phone if no email) and credit points based on the amount × earn rate × tier multiplier from <code>rewards.json</code>.</div>
+
+    <div class="field">
+      <label>Customer Email</label>
+      <input type="email" id="email" placeholder="member@example.com" value="management@thequarrystl.com">
+      <div class="hint">Must match an existing member in members.json. Add yourself first via Admin → Customers → Rewards Members.</div>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>Customer Phone (optional)</label>
+        <input type="tel" id="phone" placeholder="(636) 555-0000">
+      </div>
+      <div class="field">
+        <label>Order Amount ($)</label>
+        <input type="number" id="amount" step="0.01" min="0.01" value="50.00">
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>Customer Name</label>
+        <input type="text" id="name" placeholder="Matthew Meier">
+      </div>
+      <div class="field">
+        <label>Order ID (optional)</label>
+        <input type="text" id="orderId" placeholder="auto-generated if blank">
+      </div>
+    </div>
+  </div>
+
+  <button class="btn" id="sendBtn" onclick="sendTest()">Send Test Webhook</button>
+
+  <div id="results"></div>
+
+  <div style="margin-top: 24px; padding: 16px; background: var(--elev); border-radius: 8px; font-size: 0.82rem; color: var(--text-muted); line-height: 1.6;">
+    <strong style="color: var(--text);">Tips</strong><br>
+    • Reuse the same Order ID twice — second attempt should be skipped (idempotency check working).<br>
+    • Try an email that's NOT a member — should return <code>unmatched</code> (failsafe working).<br>
+    • Try $1, $50, $300 — verify points scale correctly (10 pts per $1 default).<br>
+    • Cross 3,000 lifetime points to verify tier promotion to Gold; 6,000 → Platinum.<br>
+    • Live logs: Netlify → Functions → toast-order-webhook → Logs.
+  </div>
+</div>
+
+<script>
+function $(id) { return document.getElementById(id); }
+function escHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => (
+    {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
+  ));
+}
+
+async function sendTest() {
+  const btn = $('sendBtn');
+  const results = $('results');
+  const password = $('password').value.trim();
+  if (!password) {
+    results.innerHTML = '<div class="result err">Enter the admin password first.</div>';
+    return;
+  }
+  const payload = {
+    password,
+    email: $('email').value.trim(),
+    phone: $('phone').value.trim(),
+    amount: $('amount').value,
+    name: $('name').value.trim(),
+    orderId: $('orderId').value.trim(),
+  };
+  if (!payload.email && !payload.phone) {
+    results.innerHTML = '<div class="result err">Provide either an email or a phone.</div>';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+  results.innerHTML = '<div class="result info">Sending fake order to webhook…</div>';
+
+  try {
+    const r = await fetch('/.netlify/functions/toast-test-webhook', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const body = await r.json().catch(() => ({}));
+
+    if (!r.ok) {
+      results.innerHTML = `
+        <div class="result err">
+          <div><span class="badge err">FAIL</span> HTTP ${r.status}</div>
+          ${body.error ? `<div style="margin-top:8px;">${escHtml(body.error)}</div>` : ''}
+        </div>`;
+      return;
+    }
+
+    const wh = body.webhookResponse || {};
+    const whBody = wh.body || {};
+    const earned = whBody.earned;
+    const newBalance = whBody.newBalance;
+    const tier = whBody.tier;
+    const tierChanged = whBody.tierChanged;
+    const skipped = whBody.skipped || whBody.unmatched || whBody.ignored;
+
+    let summary = '';
+    if (earned != null) {
+      summary = `
+        <div><span class="badge ok">CREDITED</span> +${earned} pts</div>
+        <div style="margin-top:8px;">
+          New balance: <strong>${newBalance.toLocaleString()}</strong> pts<br>
+          Tier: <strong>${tier}</strong>${tierChanged ? ' <span class="badge warn">PROMOTED</span>' : ''}<br>
+          Member: ${escHtml(whBody.memberEmail || whBody.memberId || '—')}
+        </div>
+      `;
+    } else if (skipped) {
+      summary = `
+        <div><span class="badge warn">${skipped === whBody.unmatched ? 'UNMATCHED' : 'SKIPPED'}</span> ${escHtml(skipped)}</div>
+        <div style="margin-top:8px; font-size:0.85rem;">${
+          whBody.unmatched
+            ? 'No member with that email/phone — check spelling or add the member first.'
+            : 'Webhook reached the function but skipped processing (see details).'
+        }</div>
+      `;
+    } else {
+      summary = `<div><span class="badge err">UNKNOWN</span> Webhook responded but no earn/skip status.</div>`;
+    }
+
+    results.innerHTML = `
+      <div class="result ok">
+        ${summary}
+        <details style="margin-top:14px;">
+          <summary>Full webhook response</summary>
+          <pre>${escHtml(JSON.stringify(wh, null, 2))}</pre>
+        </details>
+        <details>
+          <summary>Sent payload</summary>
+          <pre>${escHtml(JSON.stringify(body.sentPayload, null, 2))}</pre>
+        </details>
+        <div style="margin-top:10px; font-size:0.78rem; color:var(--text-muted);">
+          Signature included: ${body.signaturePresent ? 'yes' : 'no (TOAST_WEBHOOK_SECRET not configured)'}
+        </div>
+      </div>
+    `;
+  } catch (err) {
+    results.innerHTML = `<div class="result err">Network error: ${escHtml(err.message)}</div>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Send Test Webhook';
+  }
+}
+
+// Allow Enter key to submit
+document.querySelectorAll('input').forEach(el => {
+  el.addEventListener('keydown', e => { if (e.key === 'Enter') sendTest(); });
+});
+</script>
+</body>
+</html>
