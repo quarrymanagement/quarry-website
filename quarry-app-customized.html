@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>The Quarry — Member App</title>
+<meta name="description" content="Rewards, events, golf, and reservations at The Quarry · New Melle, MO" />
+
+<!-- PWA / Add-to-Home-Screen support -->
+<link rel="manifest" href="quarry-app-manifest.json" />
+<meta name="theme-color" content="#1A1A1A" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="The Quarry" />
+<link rel="apple-touch-icon" href="assets/icons/icon-192.png" />
+<link rel="icon" type="image/png" href="assets/icons/icon-192.png" />
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Quarry brand palette — matches thequarrystl.com */
+  --cream:        #F5F0E8;
+  --cream-soft:   rgba(245,240,232,0.85);
+  --cream-dim:    rgba(245,240,232,0.55);
+  --brown-dark:   #2C1A0E;
+  --brown-mid:    #5C3D2E;
+  --brown-warm:   #8B5E3C;
+  --brown-light:  #C4956A;
+  --gold:         #B8933A;
+  --gold-light:   #D4AF6A;
+  --gold-dim:     rgba(184,147,58,0.14);
+  --charcoal:     #1A1A1A;
+  --charcoal-mid: #232323;
+  --charcoal-soft:#2A2520;
+  --gray:         rgba(245,240,232,0.45);
+  --gray-light:   rgba(245,240,232,0.28);
+  --border-light: rgba(196,149,106,0.22);
+  --border-mid:   rgba(196,149,106,0.45);
+  --border-soft:  rgba(245,240,232,0.05);
+
+  --ff-display: 'Playfair Display', serif;
+  --ff-script:  'Cormorant Garamond', serif;
+  --ff-body:    'Montserrat', sans-serif;
+
+  --nav-h: 64px;
+  --safe-b: 14px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background: #0E0E0E;
+  display: flex; justify-content: center; align-items: flex-start;
+  min-height: 100vh;
+  font-family: var(--ff-body); color: var(--cream);
+  padding: 24px 16px 40px;
+  /* Lock numerals to even columns — points, prices, dates align cleanly */
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+}
+
+/* PHONE FRAME */
+.phone {
+  width: 390px; min-height: 844px;
+  background: var(--charcoal);
+  border-radius: 48px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 40px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(196,149,106,0.18), inset 0 0 0 1px rgba(245,240,232,0.04);
+  display: flex; flex-direction: column;
+}
+.status-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 26px 0;
+  font-size: 13px; font-weight: 600; color: var(--cream); flex-shrink: 0;
+  letter-spacing: 0.02em;
+}
+.status-time { font-feature-settings: 'tnum' 1; }
+.status-icons { display: flex; gap: 7px; align-items: center; color: var(--cream); }
+.status-icons .sb-icon { opacity: 0.85; }
+
+.screen-wrap { flex: 1; overflow: hidden; position: relative; }
+.screen {
+  position: absolute; inset: 0;
+  overflow-y: auto;
+  display: flex; flex-direction: column;
+  scrollbar-width: none;
+  padding-bottom: calc(var(--nav-h) + var(--safe-b) + 12px);
+  /* Cross-fade between screens */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 280ms ease;
+}
+.screen::-webkit-scrollbar { display: none; }
+.screen.active { opacity: 1; pointer-events: auto; }
+
+/* BOTTOM NAV — SVG icons, not emoji */
+.bottom-nav {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: calc(var(--nav-h) + var(--safe-b));
+  background: rgba(20,20,20,0.97);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border-light);
+  display: flex; align-items: flex-start;
+  padding-top: 10px; z-index: 100;
+}
+.nav-item {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  cursor: pointer; padding: 4px 0;
+  color: var(--gray); transition: color 0.2s;
+}
+.nav-item.active { color: var(--gold-light); }
+.nav-item svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+.nav-label {
+  font-family: var(--ff-body);
+  font-size: 9px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase;
+}
+
+/* ─── COMMON ─── */
+.screen-header {
+  padding: 26px 26px 18px;
+  display: flex; align-items: flex-end; justify-content: space-between;
+  flex-shrink: 0;
+}
+.screen-overline {
+  font-family: var(--ff-body);
+  font-size: 9px; font-weight: 500; letter-spacing: 0.36em; text-transform: uppercase;
+  color: var(--gold-light);
+  margin-bottom: 8px;
+}
+
+/* Brand wordmark — appears on Home, mirrors thequarrystl.com header */
+.brand-mark {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 14px;
+  font-family: var(--ff-body);
+  font-size: 9px; letter-spacing: 0.36em; text-transform: uppercase;
+}
+.brand-mark .q-logo {
+  width: 24px; height: 24px;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+  flex-shrink: 0;
+}
+.brand-mark .name { color: var(--cream); font-weight: 600; }
+.brand-mark .bullet { color: var(--gold-light); opacity: 0.5; font-weight: 300; }
+.brand-mark .sub { color: var(--gold-light); font-weight: 500; letter-spacing: 0.32em; }
+
+/* Live / demo connection indicator */
+.sync-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin: 4px 22px 0;
+  padding: 4px 10px;
+  border: 1px solid var(--border-soft);
+  font-family: var(--ff-body);
+  font-size: 8px; letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--gray); width: fit-content;
+  transition: color 0.2s, border-color 0.2s;
+}
+.sync-pill .dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--gray);
+  box-shadow: 0 0 6px transparent;
+  transition: all 0.2s;
+}
+.sync-pill.live { color: var(--gold-light); border-color: var(--border-light); }
+.sync-pill.live .dot { background: #6FBF73; box-shadow: 0 0 6px rgba(111,191,115,0.6); }
+.sync-pill.demo { color: rgba(245,240,232,0.4); }
+.sync-pill.demo .dot { background: var(--gold); }
+
+/* Footer mark — anchors brand at bottom of Account screen */
+.footer-mark {
+  margin: 36px 22px 14px;
+  display: flex; align-items: center; gap: 14px;
+}
+.footer-mark .fm-line { flex: 1; height: 1px; background: var(--border-soft); }
+.footer-mark .fm-text {
+  font-family: var(--ff-body);
+  font-size: 9px; letter-spacing: 0.32em; text-transform: uppercase;
+  color: var(--gold-light); display: flex; gap: 9px; align-items: center;
+}
+.footer-mark .fm-name { color: var(--cream); font-weight: 600; }
+.footer-mark .fm-bullet { opacity: 0.5; }
+.screen-title {
+  font-family: var(--ff-display);
+  font-size: 1.85rem; font-weight: 600; color: var(--cream); line-height: 1.05;
+  letter-spacing: 0.01em;
+}
+.icon-btn {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: transparent; border: 1px solid var(--border-light);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--gold-light);
+}
+.icon-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+
+.section-rule {
+  display: flex; align-items: center; gap: 14px;
+  padding: 28px 26px 14px;
+}
+.section-rule .line { flex: 1; height: 1px; background: var(--border-light); }
+.section-rule .label {
+  font-family: var(--ff-body);
+  font-size: 9px; font-weight: 600; letter-spacing: 0.32em; text-transform: uppercase;
+  color: var(--gold-light); white-space: nowrap;
+}
+
+/* ─── HOME ─── */
+.home-hero {
+  margin: 0 22px;
+  padding: 28px 4px 24px;
+  border-bottom: 1px solid var(--border-light);
+  position: relative;
+}
+.home-hero::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity: 0.6;
+}
+.hero-greeting {
+  font-family: var(--ff-script); font-style: italic;
+  font-size: 1rem; color: var(--cream-dim); margin-bottom: 18px;
+}
+.hero-greeting .name { color: var(--cream-soft); }
+.hero-points-row { display: flex; align-items: baseline; justify-content: space-between; }
+.hero-pts-num {
+  font-family: var(--ff-display); font-weight: 400;
+  font-size: 3.4rem; color: var(--cream); line-height: 1;
+  letter-spacing: -0.01em;
+}
+.hero-pts-label {
+  font-family: var(--ff-body);
+  font-size: 9px; letter-spacing: 0.32em; text-transform: uppercase;
+  color: var(--gray); margin-left: 8px;
+}
+.hero-tier {
+  text-align: right;
+}
+.hero-tier-name {
+  font-family: var(--ff-body); font-size: 10px; font-weight: 600;
+  letter-spacing: 0.28em; text-transform: uppercase; color: var(--gold-light);
+}
+.hero-tier-multi {
+  font-family: var(--ff-script); font-style: italic;
+  font-size: 0.85rem; color: var(--gray); margin-top: 2px;
+}
+.progress-bar { margin-top: 20px; }
+.progress-label {
+  display: flex; justify-content: space-between;
+  font-family: var(--ff-body);
+  font-size: 9px; color: var(--gray); margin-bottom: 7px;
+  letter-spacing: 0.22em; text-transform: uppercase;
+}
+.progress-track { height: 2px; background: rgba(245,240,232,0.08); }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-light)); width: 52%; }
+
+.home-cards {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  margin: 22px 22px 0;
+  background: var(--border-soft);
+  border: 1px solid var(--border-soft);
+}
+.home-card {
+  background: var(--charcoal);
+  padding: 20px 18px;
+  cursor: pointer; transition: background 0.2s;
+}
+.home-card:hover { background: var(--charcoal-mid); }
+.home-card-title {
+  font-family: var(--ff-body);
+  font-size: 9px; font-weight: 600; letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--gold-light); margin-bottom: 10px;
+}
+.home-card-val { font-family: var(--ff-display); font-size: 1.1rem; font-weight: 500; color: var(--cream); line-height: 1.15; }
+.home-card-sub {
+  font-family: var(--ff-script); font-style: italic;
+  font-size: 0.88rem; color: var(--gray); margin-top: 4px;
+}
+
+.feature-card {
+  margin: 16px 22px 0;
+  padding: 22px 24px;
+  border: 1px solid var(--border-light);
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  cursor: pointer; transition: border-color 0.2s;
+}
+.feature-card:hover { border-color: var(--border-mid); }
+.fc-overline {
+  font-family: var(--ff-body);
+  font-size: 9px; font-weight: 500; letter-spacing: 0.32em; text-transform: uppercase;
+  color: var(--gold-light); margin-bottom: 6px;
+}
+.fc-title { font-family: var(--ff-display); font-size: 1.25rem; font-weight: 600; color: var(--cream); }
+.fc-sub {
+  font-family: var(--ff-script); font-style: italic;
+  font-size: 0.92rem; color: var(--gray); margin-top: 4px;
+}
+.fc-action {
+  flex-shrink: 0;
+  font-family: var(--ff-body);
+  font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--gold-light);
+  border: 1px solid var(--border-light);
+  padding: 9px 14px;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.feature-card:hover .fc-action { background: var(--gold); color: var(--brown-dark); border-color: var(--gold); }
+
+.list-item {
+  margin: 0 22px;
+  padding: 20px 4px;
+  border-bottom: 1px solid var(--border-soft);
+  display: flex; align-items: flex-start; gap: 18px;
+  cursor: pointer;
+}
+.list-item:last-of-type { border-bottom: none; }
+.list-overline {
+  font-family: var(--ff-body);
+  font-size: 9px; font-weight: 600; letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--gold-light); margin-bottom: 6px;
+}
+.list-title { font-family: var(--ff-display); font-size: 1.1rem; font-weight: 500; color: var(--cream); margin-bottom: 5px; }
+.list-desc {
+  font-family: var(--ff-script); font-style: italic;
+  font-size: 0.92rem; color: var(--gray); line-height: 1.5;
+}
+.list-rail { flex: 1; }
+.list-arrow { color: var(--gold-light); font-size: 1.3rem; line-height: 1; align-self: center; }
+
+/* ─── EVENTS ─── */
+.segment-control {
+  display: flex; margin: 4px 22px 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+.seg-btn {
+  flex: 1; text-align: center; padding: 14px 4px;
+  font-family: var(--ff-body);
+  font-size: 10px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--gray); cursor: pointer;
+  border-bottom: 1px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.2s, border-color 0.2s;
+}
+.seg-btn.active { color: var(--gold-light); border-bottom-color: var(--gold-light); }
+
+.event-card {
+  margin: 0 22px;
+  padding: 24px 4px 22px;
+  border-bottom: 1px solid var(--border-soft);
+  cursor: pointer;
+}
+.event-card:last-of-type { border-bottom: none; }
+.event-meta-row {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 10px;
+}
+.event-cat {
+  font-family: var(--ff-body);
+  font-size: 9px; font-weight: 700; letter-spacing: 0.32em; text-transform: uppercase;
+  color: var(--gold-light);
+}
+.event-cat-line { width: 24px; height: 1px; background: var(--gold-light); opacity: 0.4; }
+.event-title { font-family: var(--ff-display); font-size: 1.4rem; font-weight: 500; color: var(--cream); margin-bottom: 8px; line-height: 1.15; }
+.event-when {
+  font-family: var(--ff-body);
+  font-size: 11px; font-weight: 500; color: var(--cream-dim);
+  letter-spacing: 0.08em; margin-bottom: 12px;
+}
+.event-desc {
+  font-family: var(--ff-script); font-style: italic;
+  font-size: 1rem; color: var(--gray); line-height: 1.55; margin-bottom: 18px;
+}
+.event-actions { display: flex; gap: 10px; align-items: center; }
+.btn-primary {
+  background: transparent; color: var(--gold-light);
+  border: 1px solid var(--gold);
+  font-family: var(--ff-body);
+  font-size: 10px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase;
+  padding: 13px 22px; cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-primary:hover { background: var(--gold); color: var(--brown-dark); }
+.btn-ghost {
+  background: transparent; color: var(--cream-dim);
+  border: 1px solid var(--border-light);
+  font-family: var(--ff-body);
+  font-size: 10px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase;
+  padding: 13px 16px; cursor: pointer;
+}
+.event-points {
+  margin-left: auto;
+  font-family: var(--ff-script); font-style: italic;
+  font-size: 0.9rem; color: var(--gold-light);
+}
+
+/* ─── MENU ─── */
+.menu-cats {
+  display: flex; gap: 0;
+  padding: 4px 22px 0;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--border-soft);
+}
+.menu-cats::-webkit-scrollbar { display: none; }
+.cat-pill {
+  white-space: nowrap; padding: 14px 18px 14px 0;
+  font-family: var(--ff-body);
+  font-size: 10px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--gray); cursor: pointer;
+  border-bottom: 1px solid transparent; margin-bottom: -1px;
+  transition: color 0.2s, border-color 0.2s;
+}
+.cat-pill.active { color: var(--gold-light); border-bottom-color: var(--gold-light); }
+
+.menu-row {
+  margin: 0 22px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+.menu-row:last-of-type { border-bottom: none; }
+.menu-row-top {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 14px;
+  margin-bottom: 6px;
+}
+.menu-row-name { font-family: var(--ff-display); font-size: 1.05rem; font-weight: 500; color: var(--cream); }
+.menu-row-price { font-family: var(--ff-display); font-size: 1.05rem; font-weight: 600; color: var(--gold-light); flex-shrink: 0; }
+.menu-row-desc {
+  font-family: var(--ff-script); font-style: italic;
+  font-size: 0.95rem; color: var(--gray); line-height: 1.5; margin-bottom: 8px;
+}
+.menu-row-tags { display: flex; gap: 14px; }
+.menu-tag {
+  font-family: var(--ff-body);
+  font-size: 9px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--gold-light);
+}
+
+.featured-strip {
+  margin: 22px 22px 0;
+  padding: 22px 22px 20px;
+  border: 1px solid var(--border-light);
+  position: relative;
+}
+.featured-strip::before {
+  content: 'Staff Pick';
+  position: absolute; top: -8px; left: 18px;
+  background: var(--charcoal); padding: 0 10px;
+  font-family: var(--ff-body);
+  font-size: 9px; font-weight: 600; letter-spacing: 0.32em; text-transform: uppercase;
+  color: var(--gold);
+}
+.featured-name { font-family: var(--ff-display); font-size: 1.3rem; font-weight: 500; color: var(--cream); margin-bottom: 6px; }
+.featured-desc {
+  font-family: var(--ff-script); font-style: italic;
+  font-size: 1rem; color: var(--gray); line-height: 1.5; margin-bottom: 12px;
+}
+.featured-bottom {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding-top: 12px; border-top: 1px solid var(--border-soft);
+}
+.featured-cat {
+  font-family: var(--ff-body);
+  font-size: 9px; font-weight: 600; letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--gold-light);
+}
+.featured-price { font-family: var(--ff-display); font-size: 1.1rem; font-weight: 600; color: var(--gold-light); }
+
+/* ─── REWARDS ─── */
+.rewards-hero {
+  margin: 0 22px;
+  padding: 28px 4px 26px;
+  border-bottom: 1px solid var(--border-light);
+}
+.rh-row { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 22px; }
+.rh-num { font-family: var(--ff-display); font-size: 4rem; font-weight: 400; color: var(--cream); line-height: 1; letter-spacing: -0.02em; }
+.rh-label {
+  font-family: var(--ff-body);
+  font-size: 9px; letter-spacing: 0.32em; text-transform: uppercase;
+  color: var(--gray); margin-left: 8px;
+}
+.rh-tier { text-align: right; }
+.rh-tier-name {
+  font-family: var(--ff-body); font-size: 10px; font-weight: 600;
+  letter-spacing: 0.28em; text-transform: uppercase; color: var(--gold-light);
+}
+.rh-tier-sub { font-family: var(--ff-script); font-style: italic; font-size: 0.85rem; color: var(--gray); margin-top: 2px; }
+.tp-track { height: 2px; background: rgba(245,240,232,0.08); }
+.tp-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-light)); }
+.tp-label {
+  display: flex; justify-content: space-between;
+  font-family: var(--ff-body);
+  font-size: 9px; color: var(--gray); margin-top: 7px;
+  letter-spacing: 0.22em; text-transform: uppercase;
+}
+
+.reward-row {
+  margin: 0 22px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border-soft);
+  display: flex; align-items: center; gap: 16px;
+}
+.reward-row:last-of-type { border-bottom: none; }
+.reward-info { flex: 1; }
+.reward-name { font-family: var(--ff-display); font-size: 1.05rem; font-weight: 500; color: var(--cream); margin-bottom: 4px; }
+.reward-desc {
+  font-family: var(--ff-script); font-style: italic;
+  font-size: 0.92rem; color: var(--gray);
+}
+.reward-cost { text-align: right; flex-shrink: 0; }
+.reward-pts {
+  font-family: var(--ff-display);
+  font-size: 1.2rem; font-weight: 600; color: var(--gold-light); line-height: 1;
+}
+.reward-pts-label {
+  font-family: var(--ff-body);
+  font-size: 9px; color: var(--gray); text-transform: uppercase; letter-spacing: 0.18em;
+  margin-top: 2px;
+}
+.reward-action {
+  margin-top: 10px;
+  font-family: var(--ff-body);
+  font-size: 9px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase;
+  padding: 7px 14px;
+  border: 1px solid var(--gold); color: var(--gold-light);
+  cursor: pointer; white-space: nowrap;
+  transition: all 0.2s;
+}
+.reward-action:hover { background: var(--gold); color: var(--brown-dark); }
+.reward-action.disabled { border-color: var(--border-soft); color: var(--gray-light); cursor: default; pointer-events: none; }
+
+.visit-row {
+  margin: 0 22px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border-soft);
+  display: flex; align-items: center; gap: 18px;
+}
+.visit-row:last-of-type { border-bottom: none; }
+.visit-date {
+  width: 50px; flex-shrink: 0; text-align: center;
+  border-left: 1px solid var(--border-light);
+  padding-left: 12px;
+}
+.vd-month {
+  font-family: var(--ff-body);
+  font-size: 9px; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--gold-light); margin-bottom: 2px;
+}
+.vd-day { font-family: var(--ff-display); font-size: 1.4rem; font-weight: 500; color: var(--cream); line-height: 1; }
+.visit-info { flex: 1; }
+.visit-title { font-family: var(--ff-body); font-size: 12px; font-weight: 500; color: var(--cream); margin-bottom: 3px; letter-spacing: 0.04em; }
+.visit-sub {
+  font-family: var(--ff-script); font-style: italic;
+  font-size: 0.88rem; color: var(--gray);
+}
+.visit-pts { text-align: right; flex-shrink: 0; }
+.vp-num { font-family: var(--ff-display); font-size: 1.05rem; font-weight: 500; color: var(--gold-light); }
+.vp-spend {
+  font-family: var(--ff-body);
+  font-size: 9px; color: var(--gray); letter-spacing: 0.14em; margin-top: 2px;
+}
+
+/* ─── ACCOUNT ─── */
+.profile-block {
+  margin: 0 22px;
+  padding: 22px 4px 24px;
+  border-bottom: 1px solid var(--border-light);
+  text-align: left;
+}
+.profile-monogram {
+  display: inline-block;
+  width: 56px; height: 56px;
+  border: 1px solid var(--gold);
+  border-radius: 50%;
+  font-family: var(--ff-display);
+  font-size: 1.25rem; font-weight: 500;
+  color: var(--gold-light);
+  display: flex; align-items: center; justify-content: center;
+  letter-spacing: 0.06em;
+  margin-bottom: 16px;
+}
+.profile-name { font-family: var(--ff-display); font-size: 1.5rem; font-weight: 500; color: var(--cream); margin-bottom: 4px; }
+.profile-meta {
+  font-family: var(--ff-script); font-style: italic;
+  font-size: 0.95rem; color: var(--gray);
+}
+.profile-tier {
+  margin-top: 12px;
+  font-family: var(--ff-body);
+  font-size: 9px; font-weight: 600; letter-spacing: 0.32em; text-transform: uppercase;
+  color: var(--gold-light);
+}
+
+.stats-row { display: flex; margin: 0 22px; border-bottom: 1px solid var(--border-light); }
+.stat-box {
+  flex: 1; padding: 22px 4px 24px;
+  text-align: center;
+  border-right: 1px solid var(--border-soft);
+}
+.stat-box:last-child { border-right: none; }
+.stat-num { font-family: var(--ff-display); font-size: 1.5rem; font-weight: 500; color: var(--cream); margin-bottom: 6px; line-height: 1; }
+.stat-label {
+  font-family: var(--ff-body);
+  font-size: 9px; color: var(--gold-light); text-transform: uppercase;
+  letter-spacing: 0.28em; font-weight: 600;
+}
+
+.contact-block {
+  margin: 0 22px;
+  padding: 22px 4px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.contact-line {
+  display: flex; gap: 14px;
+  padding: 8px 0;
+  font-family: var(--ff-body);
+  font-size: 12px; color: var(--cream-soft);
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+a.contact-line:hover { color: var(--cream); }
+a.contact-line:hover .label { color: var(--gold); }
+.contact-line .label {
+  font-family: var(--ff-body);
+  font-size: 9px; font-weight: 600; letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--gold-light); width: 70px; flex-shrink: 0; padding-top: 2px;
+  transition: color 0.2s;
+}
+.contact-hours {
+  margin-top: 14px; padding-top: 14px;
+  border-top: 1px solid var(--border-soft);
+  font-family: var(--ff-script); font-style: italic;
+  font-size: 0.95rem; color: var(--cream-dim); line-height: 1.7;
+}
+
+.account-link {
+  margin: 0 22px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--border-soft);
+  display: flex; align-items: center; gap: 14px;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  transition: padding-left 0.2s;
+}
+a.account-link:hover { padding-left: 4px; }
+a.account-link:hover .al-arrow { color: var(--gold); }
+.al-label { flex: 1; font-family: var(--ff-body); font-size: 12px; color: var(--cream); letter-spacing: 0.06em; }
+.al-meta { font-family: var(--ff-script); font-style: italic; font-size: 0.85rem; color: var(--gray); }
+.al-arrow { color: var(--gold-light); font-size: 1.2rem; line-height: 1; }
+
+/* ─── PARTY REQUEST ─── */
+.party-screen { background: var(--charcoal); }
+.party-header {
+  padding: 26px 26px 22px;
+  display: flex; align-items: center; gap: 16px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.back-btn {
+  width: 36px; height: 36px;
+  background: transparent; border: 1px solid var(--border-light);
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  color: var(--gold-light); font-size: 1rem; flex-shrink: 0;
+}
+.party-title { font-family: var(--ff-display); font-size: 1.6rem; font-weight: 500; color: var(--cream); }
+.party-sub { font-family: var(--ff-script); font-style: italic; font-size: 0.9rem; color: var(--gray); margin-top: 2px; }
+
+.party-note {
+  margin: 22px;
+  padding: 18px 20px;
+  border: 1px solid var(--border-light);
+}
+.party-note .pn-label {
+  font-family: var(--ff-body);
+  font-size: 9px; font-weight: 700; letter-spacing: 0.32em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 8px;
+}
+.party-note .pn-text {
+  font-family: var(--ff-script); font-style: italic;
+  font-size: 0.95rem; color: var(--cream-soft); line-height: 1.6;
+}
+
+.form-block { margin: 0 22px 18px; }
+.form-label {
+  font-family: var(--ff-body);
+  font-size: 9px; font-weight: 600; letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--gold-light); margin-bottom: 10px; display: block;
+}
+.form-input, .form-select, textarea.form-input {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--border-light);
+  padding: 10px 0 14px;
+  color: var(--cream);
+  font-family: var(--ff-body); font-size: 13px; outline: none;
+  letter-spacing: 0.04em;
+}
+.form-input::placeholder { color: var(--gray-light); }
+.form-input:focus, .form-select:focus { border-bottom-color: var(--gold); }
+.form-row { display: flex; gap: 22px; margin: 0 22px 18px; }
+.form-row .form-block { margin: 0; flex: 1; }
+.form-select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--gold-light) 50%), linear-gradient(135deg, var(--gold-light) 50%, transparent 50%); background-position: calc(100% - 14px) 18px, calc(100% - 9px) 18px; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; padding-right: 24px; }
+.form-select option { background: var(--charcoal); color: var(--cream); }
+
+.submit-btn {
+  margin: 14px 22px 0;
+  background: transparent; color: var(--gold-light);
+  border: 1px solid var(--gold);
+  font-family: var(--ff-body);
+  font-size: 11px; font-weight: 700; letter-spacing: 0.32em; text-transform: uppercase;
+  padding: 18px; text-align: center; cursor: pointer;
+  width: calc(100% - 44px);
+  transition: all 0.2s;
+}
+.submit-btn:hover { background: var(--gold); color: var(--brown-dark); }
+.submit-success {
+  margin: 20px 22px;
+  padding: 28px 22px;
+  border: 1px solid var(--border-light);
+  text-align: center; display: none;
+}
+.success-mark {
+  display: inline-block;
+  width: 40px; height: 40px;
+  border: 1px solid var(--gold);
+  border-radius: 50%;
+  margin-bottom: 14px;
+  position: relative;
+}
+.success-mark::after {
+  content: ''; position: absolute;
+  top: 13px; left: 12px;
+  width: 14px; height: 7px;
+  border-left: 1.5px solid var(--gold-light);
+  border-bottom: 1.5px solid var(--gold-light);
+  transform: rotate(-45deg);
+}
+.success-title { font-family: var(--ff-display); font-size: 1.3rem; font-weight: 500; color: var(--cream); margin-bottom: 8px; }
+.success-sub {
+  font-family: var(--ff-script); font-style: italic;
+  font-size: 0.95rem; color: var(--gray); line-height: 1.55;
+}
+
+/* ─── ONBOARDING ─── */
+.onboard-hero {
+  padding: 32px 26px 24px;
+  text-align: center;
+  border-bottom: 1px solid var(--border-light);
+}
+.onboard-q {
+  width: 56px; height: 56px;
+  margin: 0 auto 18px;
+  display: block;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+}
+.onboard-overline {
+  font-family: var(--ff-body);
+  font-size: 9px; font-weight: 500; letter-spacing: 0.36em; text-transform: uppercase;
+  color: var(--gold-light); margin-bottom: 8px;
+}
+.onboard-title {
+  font-family: var(--ff-display);
+  font-size: 1.85rem; font-weight: 600; color: var(--cream); line-height: 1.05;
+  margin-bottom: 12px;
+}
+.onboard-tagline {
+  font-family: var(--ff-script); font-style: italic;
+  font-size: 1.05rem; color: var(--cream-soft); line-height: 1.45;
+}
+.onboard-step {
+  margin: 0 22px;
+  padding: 22px 4px;
+  border-bottom: 1px solid var(--border-soft);
+  display: flex; gap: 18px; align-items: flex-start;
+}
+.onboard-step:last-of-type { border-bottom: none; }
+.onboard-step-num {
+  font-family: var(--ff-display);
+  font-size: 1.5rem; font-weight: 400; color: var(--gold-light);
+  width: 30px; flex-shrink: 0; line-height: 1.1;
+}
+.onboard-step-body { flex: 1; }
+.onboard-step-title {
+  font-family: var(--ff-display);
+  font-size: 1.1rem; font-weight: 500; color: var(--cream);
+  margin-bottom: 5px;
+}
+.onboard-step-desc {
+  font-family: var(--ff-script); font-style: italic;
+  font-size: 0.95rem; color: var(--gray); line-height: 1.55;
+}
+.onboard-fineprint {
+  margin: 14px 22px 0;
+  padding: 14px 0 0;
+  border-top: 1px solid var(--border-soft);
+  font-family: var(--ff-body);
+  font-size: 10px; letter-spacing: 0.06em; line-height: 1.6;
+  color: var(--gray-light);
+}
+
+@media (min-width: 500px) {
+  body { align-items: center; min-height: 100vh; }
+}
+</style>
+</head>
+<body>
+
+<div class="phone">
+
+  <!-- STATUS BAR — proper SVG icons -->
+  <div class="status-bar">
+    <span class="status-time">9:41</span>
+    <div class="status-icons">
+      <!-- Cellular signal -->
+      <svg class="sb-icon" viewBox="0 0 18 12" width="14" height="10" aria-hidden="true">
+        <rect x="0"  y="8" width="3" height="4"  rx="0.6" fill="currentColor"/>
+        <rect x="5"  y="6" width="3" height="6"  rx="0.6" fill="currentColor"/>
+        <rect x="10" y="3" width="3" height="9"  rx="0.6" fill="currentColor"/>
+        <rect x="15" y="0" width="3" height="12" rx="0.6" fill="currentColor"/>
+      </svg>
+      <!-- WiFi -->
+      <svg class="sb-icon" viewBox="0 0 16 12" width="14" height="11" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+        <path d="M2 5.5a8.5 8.5 0 0 1 12 0"/>
+        <path d="M4 8a5 5 0 0 1 8 0"/>
+        <circle cx="8" cy="10.6" r="0.9" fill="currentColor" stroke="none"/>
+      </svg>
+      <!-- Battery -->
+      <svg class="sb-icon" viewBox="0 0 24 11" width="22" height="10" aria-hidden="true">
+        <rect x="0.6" y="0.6" width="20" height="9.8" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="0.9"/>
+        <rect x="2" y="2" width="15" height="7" rx="0.8" fill="currentColor"/>
+        <rect x="21.5" y="3.5" width="1.6" height="4" rx="0.6" fill="currentColor"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="screen-wrap">
+
+    <!-- ══════ HOME ══════ -->
+    <div class="screen active" id="screen-home">
+      <div class="screen-header">
+        <div>
+          <div class="brand-mark">
+            <img class="q-logo" src="assets/quarry-q-logo.png" alt="The Quarry" onerror="this.style.display='none'"/>
+            <span class="name">The Quarry</span>
+            <span class="bullet">—</span>
+            <span class="sub">New Melle · MO</span>
+          </div>
+          <div class="screen-title">Welcome back</div>
+        </div>
+        <div class="icon-btn" aria-label="Notifications">
+          <svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+        </div>
+      </div>
+
+      <!-- Connection indicator — flips to "Live" when synced with your calendar -->
+      <div id="sync-pill" class="sync-pill demo">
+        <span class="dot"></span>
+        <span id="sync-label">Demo · sample data</span>
+      </div>
+
+      <!-- Points hero — now editorial, no emoji -->
+      <div class="home-hero">
+        <div class="hero-greeting">Good evening, <span class="name">Matthew</span></div>
+        <div class="hero-points-row">
+          <div>
+            <span class="hero-pts-num">1,240</span>
+            <span class="hero-pts-label">Points</span>
+          </div>
+          <div class="hero-tier">
+            <div class="hero-tier-name">Quarry Gold</div>
+            <div class="hero-tier-multi">1.25× earn rate</div>
+          </div>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-label"><span>Gold · 3,000</span><span>120 to Platinum</span></div>
+          <div class="progress-track"><div class="progress-fill" style="width:98%"></div></div>
+        </div>
+      </div>
+
+      <!-- Quick actions — type only, no icons -->
+      <div class="home-cards">
+        <div class="home-card" onclick="gotoScreen('screen-rewards')">
+          <div class="home-card-title">Redeem</div>
+          <div class="home-card-val">4 available</div>
+          <div class="home-card-sub">Rewards ready to use</div>
+        </div>
+        <div class="home-card" onclick="showParty()">
+          <div class="home-card-title">Reserve</div>
+          <div class="home-card-val">Party of 10+</div>
+          <div class="home-card-sub">Request a date</div>
+        </div>
+        <div class="home-card" onclick="gotoScreen('screen-events')">
+          <div class="home-card-title">This Week</div>
+          <div class="home-card-val">3 Events</div>
+          <div class="home-card-sub">Live music &amp; tastings</div>
+        </div>
+        <div class="home-card" onclick="gotoScreen('screen-menu')">
+          <div class="home-card-title">Menu</div>
+          <div class="home-card-val">Kitchen &amp; Bar</div>
+          <div class="home-card-sub">Food, wine &amp; cocktails</div>
+        </div>
+        <div class="home-card" onclick="gotoScreen('screen-golf')">
+          <div class="home-card-title">Golf</div>
+          <div class="home-card-val">Outdoor Bays</div>
+          <div class="home-card-sub">Aim for the Floating Green</div>
+        </div>
+        <div class="home-card" onclick="gotoScreen('screen-contact')">
+          <div class="home-card-title">Contact</div>
+          <div class="home-card-val">Get in Touch</div>
+          <div class="home-card-sub">Phone · email · visit</div>
+        </div>
+      </div>
+
+      <!-- Happy hour — single editorial strip -->
+      <div class="feature-card">
+        <div>
+          <div class="fc-overline">Happy Hour Today</div>
+          <div class="fc-title">3 – 6 PM</div>
+          <div class="fc-sub">All day Wednesday · Thu &amp; Fri 3 – 6</div>
+        </div>
+        <div class="fc-action">Remind</div>
+      </div>
+
+      <!-- Tonight -->
+      <div class="section-rule"><div class="line"></div><div class="label">Tonight</div><div class="line"></div></div>
+      <div class="list-item" onclick="gotoScreen('screen-events')">
+        <div class="list-rail">
+          <div class="list-overline">Live Music · 8 PM</div>
+          <div class="list-title">Acoustic Sessions</div>
+          <div class="list-desc">Outdoor stage, no cover. Patio open weather permitting.</div>
+        </div>
+        <div class="list-arrow">›</div>
+      </div>
+
+      <!-- Staff pick -->
+      <div class="section-rule"><div class="line"></div><div class="label">Staff Pick</div><div class="line"></div></div>
+      <div class="list-item">
+        <div class="list-rail">
+          <div class="list-overline">Featured Cocktail · $12</div>
+          <div class="list-title">New Melle Well Water</div>
+          <div class="list-desc">Gray Whale Gin, 7up &amp; Squirt — our local signature pour.</div>
+        </div>
+      </div>
+      <div style="height:8px"></div>
+    </div>
+
+    <!-- ══════ EVENTS ══════ -->
+    <div class="screen" id="screen-events">
+      <div class="screen-header">
+        <div>
+          <div class="screen-overline">May at the Quarry</div>
+          <div class="screen-title">Music &amp; Events</div>
+        </div>
+      </div>
+
+      <div class="segment-control">
+        <div class="seg-btn active" onclick="toggleSeg(this)">All</div>
+        <div class="seg-btn" onclick="toggleSeg(this)">Live</div>
+        <div class="seg-btn" onclick="toggleSeg(this)">Tastings</div>
+        <div class="seg-btn" onclick="toggleSeg(this)">Brunch</div>
+      </div>
+
+      <div class="event-card">
+        <div class="event-meta-row">
+          <div class="event-cat-line"></div>
+          <div class="event-cat">Live Music · Tonight</div>
+          <div class="event-points">+ 15 pts RSVP</div>
+        </div>
+        <div class="event-title">Acoustic Sessions</div>
+        <div class="event-when">Friday · 8:00 – 11:00 PM · Outdoor Stage</div>
+        <div class="event-desc">Live acoustic on the outdoor stage. No cover. Full kitchen and bar service until close.</div>
+        <div class="event-actions">
+          <div class="btn-primary">RSVP</div>
+          <div class="btn-ghost">Remind Me</div>
+        </div>
+      </div>
+
+      <div class="event-card">
+        <div class="event-meta-row">
+          <div class="event-cat-line"></div>
+          <div class="event-cat">Wine Tasting · Saturday</div>
+          <div class="event-points">+ 25 pts RSVP</div>
+        </div>
+        <div class="event-title">Wine Tasting Flight</div>
+        <div class="event-when">Saturday · 6:00 – 9:00 PM · Wine Cellar</div>
+        <div class="event-desc">Six hand-selected pours including Norton, Vignoles &amp; a Missouri Cab Franc. Limited to 24 guests, $35 per person.</div>
+        <div class="event-actions">
+          <div class="btn-primary">Reserve</div>
+          <div class="btn-ghost">Share</div>
+        </div>
+      </div>
+
+      <div class="event-card">
+        <div class="event-meta-row">
+          <div class="event-cat-line"></div>
+          <div class="event-cat">Brunch · Sunday</div>
+          <div class="event-points">+ 10 pts visit</div>
+        </div>
+        <div class="event-title">Sunday Brunch</div>
+        <div class="event-when">Sunday · 11:00 AM – 2:00 PM</div>
+        <div class="event-desc">Twisted Waffles, Buffalo Dip Flatbread, Pulled Pork Tacos and bottomless mimosas. Family friendly. No reservation needed.</div>
+        <div class="event-actions">
+          <div class="btn-primary">View Menu</div>
+          <div class="btn-ghost">Remind Me</div>
+        </div>
+      </div>
+
+      <div class="event-card">
+        <div class="event-meta-row">
+          <div class="event-cat-line"></div>
+          <div class="event-cat">Live Music · Next Saturday</div>
+          <div class="event-points">+ 15 pts RSVP</div>
+        </div>
+        <div class="event-title">Live Band on the Patio</div>
+        <div class="event-when">Saturday · 7:00 – 10:00 PM · Outdoor Stage</div>
+        <div class="event-desc">Country and classic rock under the lights. Outdoor stage, full bar, fire pits open. No cover.</div>
+        <div class="event-actions">
+          <div class="btn-primary">RSVP</div>
+          <div class="btn-ghost">Remind Me</div>
+        </div>
+      </div>
+      <div style="height:8px"></div>
+    </div>
+
+    <!-- ══════ MENU ══════ -->
+    <div class="screen" id="screen-menu">
+      <div class="screen-header">
+        <div>
+          <div class="screen-overline">Kitchen &amp; Bar</div>
+          <div class="screen-title">Our Menu</div>
+        </div>
+      </div>
+
+      <div class="menu-cats">
+        <div class="cat-pill active">Cocktails</div>
+        <div class="cat-pill">Wine</div>
+        <div class="cat-pill">Shareables</div>
+        <div class="cat-pill">Sandwiches</div>
+        <div class="cat-pill">Flatbreads</div>
+      </div>
+
+      <!-- Featured strip -->
+      <div class="featured-strip">
+        <div class="featured-name">New Melle Well Water</div>
+        <div class="featured-desc">Gray Whale Gin, 7up Soda &amp; Squirt — our local signature pour.</div>
+        <div class="featured-bottom">
+          <div class="featured-cat">Signature Cocktail</div>
+          <div class="featured-price">$12</div>
+        </div>
+      </div>
+
+      <div class="section-rule"><div class="line"></div><div class="label">Signature Cocktails</div><div class="line"></div></div>
+
+      <div class="menu-row">
+        <div class="menu-row-top">
+          <div class="menu-row-name">Old Fashioned</div>
+          <div class="menu-row-price">$14</div>
+        </div>
+        <div class="menu-row-desc">Buffalo Trace Bourbon, muddled orange, bitters and simple syrup.</div>
+      </div>
+
+      <div class="menu-row">
+        <div class="menu-row-top">
+          <div class="menu-row-name">Espresso Martini</div>
+          <div class="menu-row-price">$12</div>
+        </div>
+        <div class="menu-row-desc">Skyy Vanilla Vodka, Kamora Coffee Liqueur, cold brew and simple syrup.</div>
+      </div>
+
+      <div class="menu-row">
+        <div class="menu-row-top">
+          <div class="menu-row-name">Blackberry Smash</div>
+          <div class="menu-row-price">$12</div>
+        </div>
+        <div class="menu-row-desc">Jack Daniels Blackberry, lime, mint, simple syrup and club soda.</div>
+      </div>
+
+      <div class="menu-row">
+        <div class="menu-row-top">
+          <div class="menu-row-name">Aperol Spritz</div>
+          <div class="menu-row-price">$11</div>
+        </div>
+        <div class="menu-row-desc">Aperol, La Marca Prosecco and a splash of soda water.</div>
+      </div>
+
+      <div class="section-rule"><div class="line"></div><div class="label">Wines by the Glass</div><div class="line"></div></div>
+
+      <div class="menu-row">
+        <div class="menu-row-top">
+          <div class="menu-row-name">Juggernaut Pinot Noir</div>
+          <div class="menu-row-price">$13 / $50</div>
+        </div>
+        <div class="menu-row-desc">Lush ripe cherry, caramel and vanilla. California.</div>
+      </div>
+
+      <div class="menu-row">
+        <div class="menu-row-top">
+          <div class="menu-row-name">Whitehaven Sauvignon Blanc</div>
+          <div class="menu-row-price">$10 / $38</div>
+        </div>
+        <div class="menu-row-desc">Bright tropical fruit and crisp acidity. New Zealand.</div>
+      </div>
+
+      <div class="menu-row">
+        <div class="menu-row-top">
+          <div class="menu-row-name">Studio by Miraval Rosé</div>
+          <div class="menu-row-price">$12 / $46</div>
+        </div>
+        <div class="menu-row-desc">Elegant and refreshing with hints of wild strawberry. Provence.</div>
+      </div>
+
+      <div class="section-rule"><div class="line"></div><div class="label">Shareables</div><div class="line"></div></div>
+
+      <div class="menu-row">
+        <div class="menu-row-top">
+          <div class="menu-row-name">Devils in the Chicken</div>
+          <div class="menu-row-price">$10.59</div>
+        </div>
+        <div class="menu-row-desc">Southern-style deviled eggs with bacon and peach &amp; pepper aioli.</div>
+      </div>
+
+      <div class="menu-row">
+        <div class="menu-row-top">
+          <div class="menu-row-name">Pulled Pork Nachos</div>
+          <div class="menu-row-price">$16.10</div>
+        </div>
+        <div class="menu-row-desc">Tortilla chips, BBQ pulled pork, jalapeños, cheddar, beer cheese, pickled onions and crema.</div>
+      </div>
+
+      <div class="menu-row">
+        <div class="menu-row-top">
+          <div class="menu-row-name">Jumbo Pretzel</div>
+          <div class="menu-row-price">$12.29</div>
+        </div>
+        <div class="menu-row-desc">Over-sized twisted pretzel served with house beer cheese.</div>
+      </div>
+      <div style="height:8px"></div>
+    </div>
+
+    <!-- ══════ REWARDS ══════ -->
+    <div class="screen" id="screen-rewards">
+      <div class="screen-header">
+        <div>
+          <div class="screen-title">Rewards</div>
+        </div>
+      </div>
+
+      <div class="rewards-hero">
+        <div class="rh-row">
+          <div>
+            <span class="rh-num">1,240</span>
+            <span class="rh-label">Points</span>
+          </div>
+          <div class="rh-tier">
+            <div class="rh-tier-name">Quarry Gold</div>
+            <div class="rh-tier-sub">1.25× earn rate</div>
+          </div>
+        </div>
+        <div class="tp-track"><div class="tp-fill" style="width:98%"></div></div>
+        <div class="tp-label"><span>Gold · 3,000</span><span>Platinum · 6,000</span></div>
+      </div>
+
+      <div class="section-rule"><div class="line"></div><div class="label">Redeem</div><div class="line"></div></div>
+
+      <div class="reward-row">
+        <div class="reward-info">
+          <div class="reward-name">$5 Off Your Bill</div>
+          <div class="reward-desc">Applied to any check at the bar</div>
+        </div>
+        <div class="reward-cost">
+          <div class="reward-pts">500</div>
+          <div class="reward-pts-label">Points</div>
+          <div class="reward-action">Redeem</div>
+        </div>
+      </div>
+
+      <div class="reward-row">
+        <div class="reward-info">
+          <div class="reward-name">Free Appetizer</div>
+          <div class="reward-desc">Jumbo Pretzel · Devils · Wings</div>
+        </div>
+        <div class="reward-cost">
+          <div class="reward-pts">750</div>
+          <div class="reward-pts-label">Points</div>
+          <div class="reward-action">Redeem</div>
+        </div>
+      </div>
+
+      <div class="reward-row">
+        <div class="reward-info">
+          <div class="reward-name">$20 Wine Bottle Credit</div>
+          <div class="reward-desc">Toward any bottle on the list</div>
+        </div>
+        <div class="reward-cost">
+          <div class="reward-pts">1,500</div>
+          <div class="reward-pts-label">Points</div>
+          <div class="reward-action disabled">260 More</div>
+        </div>
+      </div>
+
+      <div class="reward-row">
+        <div class="reward-info">
+          <div class="reward-name">Birthday Entrée</div>
+          <div class="reward-desc">On us during your birthday month</div>
+        </div>
+        <div class="reward-cost">
+          <div class="reward-pts">2,000</div>
+          <div class="reward-pts-label">Points</div>
+          <div class="reward-action disabled">760 More</div>
+        </div>
+      </div>
+
+      <div class="reward-row">
+        <div class="reward-info">
+          <div class="reward-name">Private Event Priority</div>
+          <div class="reward-desc">First access to open event dates</div>
+        </div>
+        <div class="reward-cost">
+          <div class="reward-pts">5,000</div>
+          <div class="reward-pts-label">Points</div>
+          <div class="reward-action disabled">3,760 More</div>
+        </div>
+      </div>
+
+      <div class="section-rule"><div class="line"></div><div class="label">Visit History</div><div class="line"></div></div>
+
+      <div class="visit-row">
+        <div class="visit-date">
+          <div class="vd-month">Apr</div>
+          <div class="vd-day">26</div>
+        </div>
+        <div class="visit-info">
+          <div class="visit-title">Saturday Evening</div>
+          <div class="visit-sub">Dinner and drinks</div>
+        </div>
+        <div class="visit-pts">
+          <div class="vp-num">+ 588</div>
+          <div class="vp-spend">10 pts / $1</div>
+        </div>
+      </div>
+
+      <div class="visit-row">
+        <div class="visit-date">
+          <div class="vd-month">Apr</div>
+          <div class="vd-day">19</div>
+        </div>
+        <div class="visit-info">
+          <div class="visit-title">Wine Tasting Flight</div>
+          <div class="visit-sub">+ 250 pt RSVP bonus</div>
+        </div>
+        <div class="visit-pts">
+          <div class="vp-num">+ 1,025</div>
+          <div class="vp-spend">10 pts / $1</div>
+        </div>
+      </div>
+
+      <div class="visit-row">
+        <div class="visit-date">
+          <div class="vd-month">Apr</div>
+          <div class="vd-day">11</div>
+        </div>
+        <div class="visit-info">
+          <div class="visit-title">Friday Night · Live Music</div>
+          <div class="visit-sub">Outdoor stage</div>
+        </div>
+        <div class="visit-pts">
+          <div class="vp-num">+ 475</div>
+          <div class="vp-spend">10 pts / $1</div>
+        </div>
+      </div>
+      <div style="height:8px"></div>
+    </div>
+
+    <!-- ══════ ACCOUNT ══════ -->
+    <div class="screen" id="screen-account">
+      <div class="screen-header">
+        <div>
+          <div class="screen-title">Account</div>
+        </div>
+      </div>
+
+      <div class="profile-block">
+        <div class="profile-monogram">MM</div>
+        <div class="profile-name">Matthew Meier</div>
+        <div class="profile-meta">Member since April 2025</div>
+        <div class="profile-tier">— Quarry Gold</div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-num">14</div>
+          <div class="stat-label">Visits</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">5,880</div>
+          <div class="stat-label">Earned</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">$46</div>
+          <div class="stat-label">Saved</div>
+        </div>
+      </div>
+
+      <div class="section-rule"><div class="line"></div><div class="label">Visit Us</div><div class="line"></div></div>
+
+      <a class="account-link" href="https://maps.apple.com/?q=The+Quarry&address=3960+Highway+Z,+New+Melle,+MO+63365&ll=38.7056,-90.8912" target="_blank" rel="noopener">
+        <div class="al-label">Address</div>
+        <div class="al-arrow">›</div>
+      </a>
+      <a class="account-link" href="tel:+16362248257">
+        <div class="al-label">Phone</div>
+        <div class="al-arrow">›</div>
+      </a>
+      <a class="account-link" href="https://thequarrystl.com" target="_blank" rel="noopener">
+        <div class="al-label">Web</div>
+        <div class="al-arrow">›</div>
+      </a>
+
+      <div class="contact-block" style="border-top:1px solid var(--border-soft);margin-top:8px">
+        <div class="contact-hours" style="margin-top:14px;padding-top:0;border-top:none">
+          Wed – Thu &nbsp;·&nbsp; 11 AM – 9 PM<br>
+          Fri – Sat &nbsp;·&nbsp; 11 AM – 11 PM<br>
+          Sunday &nbsp;·&nbsp; 11 AM – 6 PM<br>
+          Closed Monday &amp; Tuesday
+        </div>
+      </div>
+
+      <div class="section-rule"><div class="line"></div><div class="label">Reservations</div><div class="line"></div></div>
+      <div class="account-link" onclick="showParty()">
+        <div>
+          <div class="al-label">Request a Party Reservation</div>
+          <div class="al-meta">Groups of 10 or more</div>
+        </div>
+        <div class="al-arrow" style="margin-left:auto">›</div>
+      </div>
+
+      <div class="section-rule"><div class="line"></div><div class="label">Rewards Program</div><div class="line"></div></div>
+      <div class="account-link" onclick="gotoScreen('screen-onboarding')"><div class="al-label">How Rewards Work</div><div class="al-arrow">›</div></div>
+      <div class="account-link"><div class="al-label">Refer a Friend <span class="al-meta">— earn 500 pts</span></div><div class="al-arrow">›</div></div>
+      <div class="account-link"><div class="al-label">Birthday <span class="al-meta">— free entrée month of</span></div><div class="al-arrow">›</div></div>
+
+      <div class="section-rule"><div class="line"></div><div class="label">Settings</div><div class="line"></div></div>
+      <div class="account-link"><div class="al-label">Notification Preferences</div><div class="al-arrow">›</div></div>
+      <div class="account-link"><div class="al-label">Gift Cards</div><div class="al-arrow">›</div></div>
+      <div class="account-link" onclick="gotoScreen('screen-contact')"><div class="al-label">Contact The Quarry</div><div class="al-arrow">›</div></div>
+      <div class="account-link"><div class="al-label">Privacy &amp; Terms</div><div class="al-arrow">›</div></div>
+      <div class="account-link"><div class="al-label" style="color:var(--gray)">Sign Out</div><div class="al-arrow">›</div></div>
+
+      <!-- Brand footer mark -->
+      <div class="footer-mark">
+        <div class="fm-line"></div>
+        <div class="fm-text">
+          <span class="fm-name">The Quarry</span>
+          <span class="fm-bullet">—</span>
+          <span>Est. New Melle</span>
+        </div>
+        <div class="fm-line"></div>
+      </div>
+    </div>
+
+    <!-- ══════ PARTY REQUEST ══════ -->
+    <div class="screen party-screen" id="screen-party">
+      <div class="party-header">
+        <div class="back-btn" onclick="goBack()">‹</div>
+        <div>
+          <div class="party-title">Party Reservation</div>
+          <div class="party-sub">Groups of 10 or more · Request only</div>
+        </div>
+      </div>
+
+      <div class="party-note">
+        <div class="pn-label">How it works</div>
+        <div class="pn-text">Submit your request and our team will reach out within 24 hours to confirm availability and secure your date. Reservations are not confirmed until you hear from us directly.</div>
+      </div>
+
+      <div class="form-block">
+        <label class="form-label">Full Name</label>
+        <input class="form-input" type="text" placeholder="Your name" />
+      </div>
+      <div class="form-block">
+        <label class="form-label">Phone</label>
+        <input class="form-input" type="tel" placeholder="(314) 555-0000" />
+      </div>
+      <div class="form-block">
+        <label class="form-label">Emai
