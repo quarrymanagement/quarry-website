@@ -226,7 +226,50 @@ a.account-link:hover .al-arrow { color: var(--gold); }
 .onboard-step-title { font-family: var(--ff-display); font-size: 1.1rem; font-weight: 500; color: var(--cream); margin-bottom: 5px; }
 .onboard-step-desc { font-family: var(--ff-script); font-style: italic; font-size: 0.95rem; color: var(--gray); line-height: 1.55; }
 .onboard-fineprint { margin: 14px 22px 0; padding: 14px 0 0; border-top: 1px solid var(--border-soft); font-family: var(--ff-body); font-size: 10px; letter-spacing: 0.06em; line-height: 1.6; color: var(--gray-light); }
+/* Responsive: full-bleed on real phones, framed only on larger demos */
 @media (min-width: 500px) { body { align-items: center; min-height: 100vh; } }
+@media (max-width: 499px) {
+  body { padding: 0; background: var(--charcoal); }
+  .phone { width: 100%; min-height: 100vh; border-radius: 0; box-shadow: none; }
+  .status-bar { display: none; }
+}
+/* PWA standalone mode — hide the mock status bar (real device shows its own) */
+@media (display-mode: standalone) { .status-bar { display: none; } }
+/* Sync pill is developer chrome — hide unless explicitly enabled */
+.sync-pill { display: none !important; }
+.sync-pill.show-debug { display: inline-flex !important; }
+/* Loading skeleton state */
+.is-loading { position: relative; overflow: hidden; }
+.is-loading::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(245,240,232,0.04), transparent);
+  animation: shimmer 1.4s infinite;
+}
+@keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
+/* Guest welcome banner */
+.guest-welcome {
+  margin: 22px;
+  padding: 28px 24px;
+  text-align: center;
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(184,147,58,0.08), transparent);
+}
+.guest-welcome h3 {
+  font-family: var(--ff-display); font-size: 1.4rem; font-weight: 600;
+  color: var(--cream); margin-bottom: 10px;
+}
+.guest-welcome p {
+  font-family: var(--ff-script); font-style: italic;
+  color: var(--cream-dim); font-size: 0.98rem; line-height: 1.55; margin-bottom: 18px;
+}
+.guest-welcome button {
+  background: var(--gold); color: var(--brown-dark); border: 0;
+  padding: 14px 32px; font-family: var(--ff-body); font-size: 11px; font-weight: 700;
+  letter-spacing: 0.28em; text-transform: uppercase; cursor: pointer; border-radius: 6px;
+  transition: background 0.2s;
+}
+.guest-welcome button:hover { background: var(--gold-light); }
 </style>
 </head>
 <body>
@@ -421,17 +464,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
       <div class="form-block"><label class="form-label">Seating Preference</label><select class="form-select"><option>No preference</option><option>Indoor — Main Room</option><option>Outdoor — Patio</option><option>Private — Wine Cellar</option></select></div>
       <div class="form-block"><label class="form-label">Additional Notes</label><textarea class="form-input" rows="3" placeholder="Special requests, dietary needs, questions..." style="resize:none;line-height:1.5;border-bottom:1px solid var(--border-light);padding-top:10px"></textarea></div>
       <div class="submit-btn" onclick="submitParty()">Submit Request</div>
-      <div class="submit-success" id="party-success"><div class="success-mark"></div><div class="success-title">Request Received</div><div class="success-sub">Thank you. Our team will contact you within 24 hours to confirm your reservation at The Quarry.</div></div>
-      <div style="height:24px"></div>
-    </div>
-
-    <div class="screen party-screen" id="screen-golf">
-      <div class="party-header"><div class="back-btn" onclick="goBack()">‹</div><div><div class="party-title">Hole-In-One Golf</div><div class="party-sub">Outdoor bays · Floating Green challenge</div></div></div>
-      <div class="rewards-hero" style="margin-top:0;border-top:1px solid var(--border-light)"><div class="rh-row"><div><span class="rh-num">4</span><span class="rh-label">Private Bays</span></div><div class="rh-tier"><div class="rh-tier-name">$3,000 Jackpot</div><div class="rh-tier-sub">Hole-in-one wins cash</div></div></div><div class="tp-label" style="margin-top:6px;justify-content:flex-start;gap:24px"><span>50 min per bay</span><span>·</span><span>$30 flat rate</span><span>·</span><span>75 balls included</span></div></div>
-      <div class="section-rule"><div class="line"></div><div class="label">Reserve a Bay</div><div class="line"></div></div>
-      <div class="reward-row"><div class="reward-info"><div class="reward-name">Bay 1</div><div class="reward-desc">Aim for the Floating Green</div></div><div class="reward-cost"><div class="reward-pts">$30</div><div class="reward-pts-label">50 min</div><div class="reward-action">Reserve</div></div></div>
-      <div class="reward-row"><div class="reward-info"><div class="reward-name">Bay 2</div><div class="reward-desc">Aim for the Floating Green</div></div><div class="reward-cost"><div class="reward-pts">$30</div><div class="reward-pts-label">50 min</div><div class="reward-action">Reserve</div></div></div>
-          <div class="reward-name">Bay 3</div>
+             <div class="reward-name">Bay 3</div>
           <div class="reward-desc">Aim for the Floating Green</div>
         </div>
         <div class="reward-cost">
@@ -1125,13 +1158,16 @@ function submitParty() {
     const wrap = document.createElement('div');
     wrap.id = 'redemptionOverlay';
     wrap.style.cssText = 'position:fixed;inset:0;background:rgba(14,14,14,0.94);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px);';
+    const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=10&color=D4AF6A&bgcolor=1A1A1A&data=' + encodeURIComponent(red.code);
     wrap.innerHTML =
-      '<div style="background:#1A1A1A;border:1px solid #B8933A;border-radius:18px;padding:32px;max-width:340px;width:100%;text-align:center;">' +
-        '<div style="font-size:0.65rem;letter-spacing:0.32em;color:#D4AF6A;text-transform:uppercase;margin-bottom:8px;">Show this at the bar</div>' +
-        '<div style="font-family:Playfair Display,serif;font-size:1.3rem;color:#F5F0E8;margin-bottom:24px;">' + (red.rewardName || '') + '</div>' +
-        '<div style="font-family:Playfair Display,serif;font-size:2.8rem;font-weight:700;letter-spacing:0.18em;color:#D4AF6A;padding:24px 0;background:rgba(184,147,58,0.1);border-radius:8px;border:1px solid rgba(196,149,106,0.25);margin-bottom:18px;">' + red.code + '</div>' +
-        '<div id="redCountdown" style="font-family:Cormorant Garamond,serif;font-style:italic;font-size:0.95rem;color:rgba(245,240,232,0.55);margin-bottom:22px;">Loading…</div>' +
-        '<button id="redCloseBtn" style="background:transparent;color:rgba(245,240,232,0.55);border:1px solid rgba(196,149,106,0.25);padding:11px 22px;font-family:Montserrat,sans-serif;font-size:10px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;">Close</button>' +
+      '<div style="background:#1A1A1A;border:1px solid #B8933A;border-radius:18px;padding:28px 24px;max-width:340px;width:100%;text-align:center;">' +
+        '<div style="font-size:0.65rem;letter-spacing:0.32em;color:#D4AF6A;text-transform:uppercase;margin-bottom:6px;">Show this at the bar</div>' +
+        '<div style="font-family:Playfair Display,serif;font-size:1.3rem;color:#F5F0E8;margin-bottom:18px;">' + (red.rewardName || '') + '</div>' +
+        '<img src="' + qrUrl + '" alt="Redemption QR" width="240" height="240" style="display:block;width:240px;height:240px;margin:0 auto 14px;border:1px solid rgba(196,149,106,0.25);border-radius:8px;background:#1A1A1A;" />' +
+        '<div style="font-family:Playfair Display,serif;font-size:1.4rem;font-weight:700;letter-spacing:0.32em;color:#D4AF6A;margin-bottom:6px;">' + red.code + '</div>' +
+        '<div style="font-family:Cormorant Garamond,serif;font-style:italic;font-size:0.85rem;color:rgba(245,240,232,0.4);margin-bottom:12px;">or read the code to your bartender</div>' +
+        '<div id="redCountdown" style="font-family:Cormorant Garamond,serif;font-style:italic;font-size:0.92rem;color:rgba(245,240,232,0.6);margin-bottom:20px;">Loading…</div>' +
+        '<button id="redCloseBtn" style="background:transparent;color:rgba(245,240,232,0.55);border:1px solid rgba(196,149,106,0.25);padding:10px 22px;font-family:Montserrat,sans-serif;font-size:10px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;border-radius:6px;">Close</button>' +
       '</div>';
     document.body.appendChild(wrap);
     document.getElementById('redCloseBtn').addEventListener('click', () => wrap.remove());
@@ -1164,21 +1200,4 @@ function submitParty() {
     try { token = localStorage.getItem(STORAGE_TOKEN); } catch (_) {}
     if (!token) { showOverlay(); return; }
     try {
-      const r = await fetch(API_BASE + '/.netlify/functions/verify-code', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token }),
-      });
-      const body = await r.json();
-      if (!body.ok || !body.member) {
-        try { localStorage.removeItem(STORAGE_TOKEN); } catch (_) {}
-        showOverlay(); return;
-      }
-      currentToken = token; currentMember = body.member;
-      renderMember();
-    } catch (_) {}
-  }
-  setTimeout(init, 200);
-})();
-</script>
-</body>
-</html>
+      const r = await fetch(API_BASE + '/.netlify/funct
