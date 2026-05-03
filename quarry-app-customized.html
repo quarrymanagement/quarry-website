@@ -1200,4 +1200,21 @@ function submitParty() {
     try { token = localStorage.getItem(STORAGE_TOKEN); } catch (_) {}
     if (!token) { showOverlay(); return; }
     try {
-      const r = await fetch(API_BASE + '/.netlify/funct
+      const r = await fetch(API_BASE + '/.netlify/functions/verify-code', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
+      });
+      const body = await r.json();
+      if (!body.ok || !body.member) {
+        try { localStorage.removeItem(STORAGE_TOKEN); } catch (_) {}
+        showOverlay(); return;
+      }
+      currentToken = token; currentMember = body.member;
+      renderMember();
+    } catch (_) {}
+  }
+  setTimeout(init, 200);
+})();
+</script>
+</body>
+</html>
