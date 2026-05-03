@@ -3804,11 +3804,8 @@
 
             <div id="mktPerformanceTab" class="tab-content">
                 <div class="mkt-header">
-                    <div><h2 style="margin:0;">📊 Email Performance</h2><p class="mkt-sub">Open rates, click rates, and which campaigns are actually driving traffic. Auto-pulled once daily at 11 AM CT — click <strong>Refresh now</strong> for the latest numbers.</p></div>
-                    <div class="mkt-header-actions">
-                        <select id="mktPerfRange"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option></select>
-                        <button class="btn-secondary" id="mktPerfRefreshBtn" title="Pull fresh stats from SendGrid right now">↻ Refresh now</button>
-                    </div>
+                    <div><h2 style="margin:0;">📊 Email Performance</h2><p class="mkt-sub">Open rates, click rates, and which campaigns are actually driving traffic. Updates every 15 minutes.</p></div>
+                    <div class="mkt-header-actions"><select id="mktPerfRange"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option></select></div>
                 </div>
                 <div class="mkt-stats">
                     <div class="stat-item"><div class="stat-label">Sends</div><div class="stat-value" id="mktPerfSends">—</div></div>
@@ -3893,10 +3890,7 @@
 
             <div id="socPerformanceTab" class="tab-content">
                 <div class="mkt-header">
-                    <div><h2 style="margin:0;">📊 Performance</h2><p class="mkt-sub">How posts are doing — reach, likes, comments, shares. Auto-pulled once daily at noon CT — click <strong>Refresh now</strong> for the latest numbers.</p></div>
-                    <div class="mkt-header-actions">
-                        <button class="btn-secondary" id="socPerfRefreshBtn" title="Pull fresh insights from Facebook & Instagram right now">↻ Refresh now</button>
-                    </div>
+                    <div><h2 style="margin:0;">📊 Performance</h2><p class="mkt-sub">How posts are doing — reach, likes, comments, shares. Pulled from Facebook & Instagram every 30 minutes.</p></div>
                 </div>
                 <div class="mkt-stats">
                     <div class="stat-item"><div class="stat-label">Posts (30d)</div><div class="stat-value" id="socStatPosts">—</div></div>
@@ -4808,18 +4802,11 @@
                         if (body.token) localStorage.setItem('quarryAdminToken', body.token);
                         sessionStorage.setItem('quarryAuth', 'true');
                         app.authenticated = true;
-                        // Force-reveal app — do this BEFORE calling showApp so that even if
-                        // showApp/initializeApp throws, the user lands on the dashboard.
+                        // Force-reveal app so even if showApp/initializeApp throws, user lands on dashboard
                         const overlay = document.getElementById('loginOverlay');
-                        if (overlay) {
-                            overlay.classList.add('hidden');
-                            overlay.style.display = 'none'; // belt + suspenders if .hidden CSS got overridden
-                        }
+                        if (overlay) { overlay.classList.add('hidden'); overlay.style.display = 'none'; }
                         const mainEl = document.getElementById('mainApp');
-                        if (mainEl) {
-                            mainEl.classList.remove('hidden');
-                            mainEl.style.display = '';
-                        }
+                        if (mainEl) { mainEl.classList.remove('hidden'); mainEl.style.display = ''; }
                         if (errorEl) errorEl.textContent = '';
                         try {
                             if (typeof showApp === 'function') showApp();
@@ -4837,7 +4824,9 @@
                         sessionStorage.setItem('quarryAuth', 'true');
                         app.authenticated = true;
                         const overlay = document.getElementById('loginOverlay');
-                        if (overlay) overlay.classList.add('hidden');
+                        if (overlay) { overlay.classList.add('hidden'); overlay.style.display = 'none'; }
+                        const mainEl = document.getElementById('mainApp');
+                        if (mainEl) { mainEl.classList.remove('hidden'); mainEl.style.display = ''; }
                         try { if (typeof showApp === 'function') showApp(); } catch (_) {}
                         return;
                     }
@@ -10974,24 +10963,6 @@ function hashCode(str) {
                 $('mktNewCampaignBtn')?.addEventListener('click', () => toast('One-off campaigns: open the existing Email tab to draft and send manually. Auto-scheduled one-offs coming next.'));
                 $('mktOptimizeNowBtn')?.addEventListener('click', optimizeNow);
                 $('mktPerfRange')?.addEventListener('change', renderPerformance);
-                // Manual "Refresh now" button — pulls fresh SendGrid stats on
-                // demand so we don't need to poll every 15 minutes server-side.
-                $('mktPerfRefreshBtn')?.addEventListener('click', async () => {
-                    const btn = $('mktPerfRefreshBtn');
-                    const orig = btn.textContent;
-                    btn.disabled = true; btn.textContent = '↻ Refreshing…';
-                    try {
-                        const r = await fetch('/.netlify/functions/marketing-poll-stats', { method: 'POST' });
-                        const b = await r.json();
-                        if (!r.ok) throw new Error(b.error || 'refresh failed');
-                        toast(`Refreshed: ${b.polledCount || 0} polled, ${b.updatedCount || 0} updated.`);
-                        await loadAll();
-                    } catch (err) {
-                        toast('Refresh failed: ' + err.message);
-                    } finally {
-                        btn.disabled = false; btn.textContent = orig;
-                    }
-                });
                 $('mktSetSaveSettingsBtn')?.addEventListener('click', saveSettings);
                 $('mktSetSaveRulesBtn')?.addEventListener('click', saveRules);
                 $('mktDraftModalClose')?.addEventListener('click', closeModal);
@@ -11040,32 +11011,6 @@ function hashCode(str) {
         })();
 
         document.addEventListener('DOMContentLoaded', () => { try { MarketingUI.init(); } catch (e) { console.error('MarketingUI init failed', e); } });
-
-        // Social Performance "Refresh now" button — calls social-poll-stats on
-        // demand. Wired here at top-level (rather than inside SocialUI) so a
-        // module-init failure doesn't break the manual refresh fallback.
-        document.addEventListener('DOMContentLoaded', () => {
-            const btn = document.getElementById('socPerfRefreshBtn');
-            if (!btn) return;
-            btn.addEventListener('click', async () => {
-                const orig = btn.textContent;
-                btn.disabled = true; btn.textContent = '↻ Refreshing…';
-                try {
-                    const r = await fetch('/.netlify/functions/social-poll-stats', { method: 'POST' });
-                    const b = await r.json();
-                    if (!r.ok) throw new Error(b.error || 'refresh failed');
-                    const msg = `Refreshed: ${b.polledCount || 0} polled` + ((b.errorsCount || 0) ? `, ${b.errorsCount} error(s)` : '');
-                    if (typeof toast === 'function') toast(msg); else alert(msg);
-                    if (window.SocialUI && typeof SocialUI.loadAll === 'function') await SocialUI.loadAll();
-                    else location.reload();
-                } catch (err) {
-                    const msg = 'Refresh failed: ' + err.message;
-                    if (typeof toast === 'function') toast(msg); else alert(msg);
-                } finally {
-                    btn.disabled = false; btn.textContent = orig;
-                }
-            });
-        });
 
         // ====================================================================
         // SocialUI — Facebook + Instagram drafts inbox / calendar / perf / settings
@@ -11628,4 +11573,781 @@ function hashCode(str) {
                         try {
                             const saveRes = await fetch(`${FN}/social-action`, {
                                 method: 'POST', headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ action: 'edit', draftId: draftIdForPick, payload: { imageUrl: url, userImageUrl: null, imageSource: 'library' 
+                                body: JSON.stringify({ action: 'edit', draftId: draftIdForPick, payload: { imageUrl: url, userImageUrl: null, imageSource: 'library' } })
+                            });
+                            const saveBody = await saveRes.json();
+                            if (!saveRes.ok || !saveBody.ok) throw new Error(saveBody.error || 'could not save');
+                            const idx = state.drafts.findIndex((x) => x.id === draftIdForPick);
+                            if (idx >= 0) state.drafts[idx] = saveBody.draft;
+                            if (state.currentDraftId === draftIdForPick) renderModal();
+                            renderInbox(); renderCalendar();
+                            const fresh = await fetchData('social_drafts.json'); state.sha.drafts = fresh.sha;
+                            toast('✓ Image picked from library.');
+                        } catch (err) { toast(friendlyError('Pick image', err)); }
+                    }));
+                    overlay.querySelector('#libCloseBtn').addEventListener('click', () => document.body.removeChild(overlay));
+                    overlay.querySelector('#libUploadNewBtn').addEventListener('click', () => {
+                        document.body.removeChild(overlay);
+                        $('socImageFileInput').dataset.libraryUpload = 'true';
+                        $('socImageFileInput').click();
+                    });
+                } catch (err) { toast(friendlyError('Library load', err)); }
+            }
+
+            async function action(act, payload) {
+                if (!state.currentDraftId) return;
+                try {
+                    const r = await fetch(`${FN}/social-action`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: act, draftId: state.currentDraftId, payload: payload || {} }) });
+                    const body = await r.json();
+                    if (!r.ok) throw new Error(body.error || 'action failed');
+                    const idx = state.drafts.findIndex((x) => x.id === state.currentDraftId);
+                    if (idx >= 0) state.drafts[idx] = body.draft;
+                    renderModal(); renderInbox(); renderCalendar(); updateBadge();
+                    toast(act === 'redo' ? 'Regenerated.' : (act === 'regenImage' ? 'Image regenerated.' : (act.charAt(0).toUpperCase() + act.slice(1)) + 'd.'));
+                    const fresh = await fetchData('social_drafts.json'); state.sha.drafts = fresh.sha;
+                    if (act === 'reject') closeModal();
+                } catch (err) { toast(friendlyError('That action', err)); }
+            }
+
+            async function postNow() {
+                if (!state.currentDraftId) return;
+                if (!confirm("Post this to Facebook & Instagram right now?\n\nIt'll go live in a few seconds. Posts can't be deleted from Instagram automatically (you'd have to remove from the IG app yourself), so make sure it's right.")) return;
+                try {
+                    const r = await fetch(`${FN}/social-post`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode: 'sendNow', draftId: state.currentDraftId }) });
+                    const body = await r.json();
+                    if (!r.ok) throw new Error(body.error || 'post failed');
+                    const result = (body.results || [])[0];
+                    if (result && !result.ok) throw new Error(result.error || 'post failed');
+                    toast(body.results?.[0]?.dryRun ? 'Posted (dry-run — Meta token not configured)' : 'Posted to social.');
+                    await loadAll(); closeModal();
+                } catch (err) { toast(friendlyError('Post', err)); }
+            }
+
+            async function generateNow() {
+                if (!confirm("Draft today's social posts now?\n\nThis writes captions and hashtags for any posts coming up in the next 7 days. Takes about a minute. You'll still review each one before it goes live.")) return;
+                toast('Drafting captions — give it 20-60 seconds…');
+                try {
+                    const r = await fetch(`${FN}/social-generate-daily`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) });
+                    const body = await r.json(); if (!r.ok) throw new Error(body.error || 'generation failed');
+                    toast(`Generated ${body.generatedCount || 0} draft(s).`); await loadAll();
+                } catch (err) { toast(friendlyError('Generate', err)); }
+            }
+
+            async function saveRules() {
+                const inputs = document.querySelectorAll('#socRulesList [data-rule-idx]');
+                const rules = state.rules.map((r) => Object.assign({}, r));
+                inputs.forEach((el) => {
+                    const i = parseInt(el.dataset.ruleIdx, 10), f = el.dataset.field;
+                    if (!rules[i]) return;
+                    if (f === 'platforms') rules[i][f] = el.value.split(',').map((s) => s.trim()).filter(Boolean);
+                    else rules[i][f] = el.value;
+                });
+                try {
+                    const cur = await fetchData('social_calendar.json');
+                    const next = Object.assign({}, cur.json, { rules, updatedAt: new Date().toISOString() });
+                    await putData('social_calendar.json', next, cur.sha, 'social: update calendar rules');
+                    state.rules = rules;
+                    toast('Rules saved.');
+                } catch (err) { toast(friendlyError('Save', err)); }
+            }
+
+            function init() {
+                $('socInboxFilter')?.addEventListener('change', renderInbox);
+                $('socInboxRefresh')?.addEventListener('click', loadAll);
+                $('socGenerateNowBtn')?.addEventListener('click', generateNow);
+                $('socSaveRulesBtn')?.addEventListener('click', saveRules);
+                $('socRebuildScheduleBtn')?.addEventListener('click', rebuildSchedule);
+                $('socAddAssetBtn')?.addEventListener('click', () => {
+                    $('socImageFileInput').dataset.libraryUpload = 'true';
+                    $('socImageFileInput').click();
+                });
+                $('socDraftModalClose')?.addEventListener('click', closeModal);
+                document.querySelectorAll('#socDraftModal .mkt-mode-tab').forEach((t) => t.addEventListener('click', () => setMode(t.dataset.mode)));
+                $('socDraftApproveBtn')?.addEventListener('click', () => action('approve', { approvedBy: 'admin' }));
+                $('socDraftRejectBtn')?.addEventListener('click', () => { const reason = prompt("Why are you rejecting this? (Optional — but it helps the AI learn for next time.)\n\nExamples: 'too generic', 'wrong tone for our audience', 'event already passed'") || ''; action('reject', { reason }); });
+                $('socDraftEditSaveBtn')?.addEventListener('click', () => {
+                    const caption = $('socDraftEditCaption').value;
+                    const hashtags = $('socDraftEditHashtags').value.split('\n').map((s) => s.trim()).filter(Boolean);
+                    action('edit', { caption, hashtags });
+                });
+                $('socDraftRedoBtn')?.addEventListener('click', () => {
+                    const inst = $('socDraftRedoInstructions').value.trim();
+                    if (!inst) return toast('Tell the AI what to change first.');
+                    action('redo', { instructions: inst });
+                });
+                $('socRegenImageBtn')?.addEventListener('click', () => {
+                    const newPrompt = $('socDraftImagePrompt').value.trim();
+                    action('regenImage', { imagePrompt: newPrompt });
+                });
+                $('socUploadImageBtn')?.addEventListener('click', () => {
+                    delete $('socImageFileInput').dataset.libraryUpload;
+                    $('socImageFileInput').click();
+                });
+                $('socImageFileInput')?.addEventListener('change', async (e) => {
+                    const file = e.target.files && e.target.files[0]; if (!file) return;
+                    const isLibrary = e.target.dataset.libraryUpload === 'true';
+                    delete e.target.dataset.libraryUpload;
+                    e.target.value = '';
+                    if (isLibrary) await uploadAssetToLibrary(file);
+                    else await uploadImage(file);
+                });
+                $('socPickFromLibraryBtn')?.addEventListener('click', openLibraryPicker);
+                $('socDraftPostNowBtn')?.addEventListener('click', postNow);
+                // Example chips for AI image prompts and caption-redo instructions
+                document.querySelectorAll('#socDraftModal .ex-prompt-chip').forEach((chip) => {
+                    chip.addEventListener('click', () => {
+                        const prompt = $('socDraftImagePrompt');
+                        if (prompt) prompt.value = chip.dataset.ex;
+                    });
+                });
+                document.querySelectorAll('#socDraftModal .ex-redo-chip').forEach((chip) => {
+                    chip.addEventListener('click', () => {
+                        const ti = $('socDraftRedoInstructions');
+                        if (ti) { ti.value = chip.dataset.ex; ti.focus(); }
+                    });
+                });
+                $('socDraftModal')?.addEventListener('click', (e) => { if (e.target.id === 'socDraftModal') closeModal(); });
+                document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('socDraftModal')?.classList.contains('open')) closeModal(); });
+            }
+
+            async function uploadAssetToLibrary(file) {
+                const title = prompt('Give this photo a short name so you can find it later.\n\nExamples: "Patio at sunset", "Wood-fired flatbread", "Friday night band on the deck"', file.name.replace(/\.[^.]+$/, ''));
+                if (!title) return;
+                const tagInput = prompt('Add tags (separated by commas) so the AI knows when to use this photo.\n\nCommon tags: patio, sunset, food, wine, cocktail, band, golf, fireplace, brunch, dinner', '');
+                const tags = (tagInput || '').split(',').map((s) => s.trim().toLowerCase()).filter(Boolean);
+                toast('Uploading to library…');
+                try {
+                    const dataUrl = await new Promise((resolve, reject) => {
+                        const r = new FileReader(); r.onload = () => resolve(r.result); r.onerror = reject; r.readAsDataURL(file);
+                    });
+                    const upRes = await fetch(`${FN}/upload-social-image`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ imageBase64: dataUrl, filename: 'lib-' + file.name })
+                    });
+                    const upBody = await upRes.json();
+                    if (!upRes.ok || !upBody.success) throw new Error(upBody.error || 'upload failed');
+                    // Append to social_assets.json
+                    const cur = await fetch(`${FN}/data-store?file=social_assets.json`, { cache: 'no-store' });
+                    let json = { assets: [] }, sha = null;
+                    try { const d = await cur.json(); json = d.decoded || { assets: [] }; sha = d.sha; } catch (_) {}
+                    json.assets = Array.isArray(json.assets) ? json.assets : [];
+                    json.assets.push({
+                        id: 'asset-' + Date.now().toString(36),
+                        title, tags, url: upBody.url, filename: upBody.filename,
+                        addedAt: new Date().toISOString()
+                    });
+                    json.updatedAt = new Date().toISOString();
+                    const saveRes = await fetch(`${FN}/data-store?file=social_assets.json`, {
+                        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ json, sha, message: `library: add asset "${title}"` })
+                    });
+                    if (!saveRes.ok) throw new Error('save asset list failed: ' + saveRes.status);
+                    toast('Asset added to library: ' + title);
+                } catch (err) { toast(friendlyError('Library upload', err)); }
+            }
+            function onTabSwitch(tabName) {
+                if (!state.loaded) loadAll();
+                if (tabName === 'socInbox') renderInbox();
+                else if (tabName === 'socCalendar') renderCalendar();
+                else if (tabName === 'socPerformance') renderPerformance();
+                else if (tabName === 'socSettings') renderSettings();
+            }
+            return { init, loadAll, onTabSwitch, openModal };
+        })();
+
+        document.addEventListener('DOMContentLoaded', () => { try { SocialUI.init(); } catch (e) { console.error('SocialUI init failed', e); } });
+
+        // ====================================================================
+        // ReservationInquiriesUI — live Netlify Forms reservation tracker
+        // ====================================================================
+        window.ResInqUI = (() => {
+            const FN = '/.netlify/functions';
+            const state = { inquiries: [], current: null, loaded: false, loading: false };
+            const $ = (id) => document.getElementById(id);
+            const escHtml = (s) => (s == null ? '' : String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])));
+            const fmtDate = (iso) => { if (!iso) return '—'; const d = new Date(iso); return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); };
+            const fmtDay = (iso) => { if (!iso) return '—'; try { return new Date(iso.length === 10 ? iso + 'T12:00' : iso).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }); } catch (_) { return iso; } };
+            const STATUS_LABELS = { not_contacted: 'Not Contacted', contacted: 'Contacted', needs_followup: 'Needs Follow-up', contacted_2: 'Followed Up', confirmed: 'Confirmed', lost: 'Lost' };
+            const STATUS_COLORS = { not_contacted: '#b45309', contacted: '#2563eb', needs_followup: '#dc2626', contacted_2: '#7c3aed', confirmed: '#16a34a', lost: '#64748b' };
+            function statusPill(s) { const c = STATUS_COLORS[s] || '#64748b'; return `<span style="display:inline-block;padding:0.18rem 0.55rem;border-radius:999px;font-size:0.68rem;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;background:${c}1f;color:${c};">${escHtml(STATUS_LABELS[s] || s)}</span>`; }
+
+            async function loadAll() {
+                if (state.loading) return;
+                state.loading = true;
+                try {
+                    const r = await fetch(`${FN}/list-reservation-inquiries`, { cache: 'no-store' });
+                    const body = await r.json();
+                    if (!body.ok) throw new Error(body.error || 'load failed');
+                    state.inquiries = body.inquiries || [];
+                    state.loaded = true;
+                    render();
+                } catch (err) {
+                    $('resInqTableBody').innerHTML = `<tr><td colspan="8" style="text-align:center;color:#dc2626;padding:2rem;">Couldn't load inquiries — ${escHtml(err.message)}<br><button class="btn-secondary" onclick="ResInqUI.loadAll()" style="margin-top:0.5rem;">Retry</button></td></tr>`;
+                } finally { state.loading = false; }
+            }
+
+            function render() {
+                // Stats
+                const total = state.inquiries.length;
+                const notContacted = state.inquiries.filter((i) => i.status === 'not_contacted').length;
+                const followup = state.inquiries.filter((i) => i.status === 'needs_followup').length;
+                const confirmed = state.inquiries.filter((i) => i.status === 'confirmed').length;
+                $('resInqTotalCount').textContent = total;
+                $('resInqNotContactedCount').textContent = notContacted;
+                $('resInqFollowupCount').textContent = followup;
+                $('resInqConfirmedCount').textContent = confirmed;
+
+                // Filter
+                const filter = $('resInqFilter')?.value || 'needs_attention';
+                let list = state.inquiries.slice();
+                if (filter === 'needs_attention') {
+                    list = list.filter((i) => ['not_contacted', 'needs_followup'].includes(i.status));
+                } else if (filter !== 'all') {
+                    list = list.filter((i) => i.status === filter);
+                }
+
+                const tbody = $('resInqTableBody');
+                if (list.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:2rem;">No inquiries in this view. ${filter === 'needs_attention' ? "🎉 You're all caught up." : ''}</td></tr>`;
+                    return;
+                }
+                tbody.innerHTML = list.map((i) => `
+                    <tr data-inq-id="${escHtml(i.id)}" class="clickable-row" style="cursor:pointer;">
+                        <td style="font-weight:500;">${escHtml(i.name)}</td>
+                        <td><span style="font-size:0.72rem;background:var(--bg-elevated);padding:0.15rem 0.5rem;border-radius:4px;color:var(--text-muted);">${escHtml(i.formLabel)}</span></td>
+                        <td>${escHtml(i.occasion || '—')}</td>
+                        <td>${escHtml(i.eventDate ? fmtDay(i.eventDate) : '—')}</td>
+                        <td>${escHtml(i.guests || '—')}</td>
+                        <td style="font-size:0.78rem;color:var(--text-muted);">${escHtml(fmtDate(i.submittedAt))}</td>
+                        <td>${statusPill(i.status)}</td>
+                        <td onclick="event.stopPropagation()">
+                            ${i.email ? `<a href="mailto:${encodeURIComponent(i.email)}?subject=${encodeURIComponent('Your inquiry at The Quarry')}" style="color:var(--gold);text-decoration:none;font-size:0.8rem;">✉ Email</a>` : ''}
+                        </td>
+                    </tr>
+                `).join('');
+                tbody.querySelectorAll('[data-inq-id]').forEach((row) => row.addEventListener('click', () => openModal(row.dataset.inqId)));
+            }
+
+            function openModal(id) {
+                const inq = state.inquiries.find((x) => x.id === id);
+                if (!inq) return;
+                state.current = inq;
+                const modal = $('resInqModal');
+                modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false');
+
+                $('resInqModalTitle').textContent = inq.name;
+                $('resInqModalSub').innerHTML = `${statusPill(inq.status)}<span style="color:var(--text-muted);">${escHtml(inq.formLabel)} · received ${escHtml(fmtDate(inq.submittedAt))}</span>`;
+
+                const fields = [
+                    ['Email', inq.email ? `<a href="mailto:${encodeURIComponent(inq.email)}" style="color:var(--gold);">${escHtml(inq.email)}</a>` : '—'],
+                    ['Phone', inq.phone ? `<a href="tel:${encodeURIComponent(inq.phone)}" style="color:var(--gold);">${escHtml(inq.phone)}</a>` : '—'],
+                    inq.company ? ['Company', escHtml(inq.company)] : null,
+                    ['Occasion', escHtml(inq.occasion || '—')],
+                    ['Event Date', escHtml(inq.eventDate ? fmtDay(inq.eventDate) : '—')],
+                    inq.eventTime ? ['Event Time', escHtml(inq.eventTime)] : null,
+                    ['Party Size', escHtml(inq.guests || '—')],
+                    inq.location ? ['Location', escHtml(inq.location)] : null,
+                    ['Marketing Opt-In', inq.marketingOptIn ? '✓ Yes' : '✗ No'],
+                    inq.notes ? ['Notes', `<div style="margin-top:0.25rem;padding:0.5rem;background:var(--bg-elevated);border-radius:4px;white-space:pre-wrap;">${escHtml(inq.notes)}</div>`] : null,
+                ].filter(Boolean);
+                $('resInqDetails').innerHTML = fields.map(([k, v]) =>
+                    `<div style="display:grid;grid-template-columns:140px 1fr;gap:0.5rem;padding:0.35rem 0;border-bottom:1px solid var(--border-subtle);"><div style="color:var(--text-muted);font-weight:500;">${escHtml(k)}</div><div>${v}</div></div>`
+                ).join('');
+
+                // History
+                const hist = $('resInqHistory');
+                if (inq.statusHistory && inq.statusHistory.length) {
+                    hist.innerHTML = '<div style="font-weight:600;color:var(--text-primary);margin-bottom:0.3rem;">Status history:</div>' +
+                        inq.statusHistory.slice().reverse().map((h) =>
+                            `<div>• ${escHtml(fmtDate(h.at))} — ${escHtml(STATUS_LABELS[h.from] || h.from)} → ${escHtml(STATUS_LABELS[h.to] || h.to)}${h.note ? ` <em>(${escHtml(h.note)})</em>` : ''}</div>`
+                        ).join('');
+                } else {
+                    hist.innerHTML = '';
+                }
+
+                $('resInqStatusNote').value = '';
+                if (inq.email) {
+                    const subject = encodeURIComponent(`Your ${inq.formLabel.toLowerCase()} at The Quarry`);
+                    $('resInqMailLink').href = `mailto:${encodeURIComponent(inq.email)}?subject=${subject}`;
+                    $('resInqMailLink').style.display = '';
+                } else {
+                    $('resInqMailLink').style.display = 'none';
+                }
+                $('resInqNetlifyLink').href = inq.netlifyUrl || '#';
+            }
+
+            function closeModal() {
+                const modal = $('resInqModal');
+                modal?.classList.remove('open');
+                modal?.setAttribute('aria-hidden', 'true');
+                state.current = null;
+            }
+
+            async function setStatus(newStatus) {
+                if (!state.current) return;
+                const id = state.current.id;
+                const note = $('resInqStatusNote').value.trim();
+                try {
+                    const r = await fetch(`${FN}/update-reservation-status`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ submissionId: id, status: newStatus, note, by: 'admin' })
+                    });
+                    const body = await r.json();
+                    if (!r.ok || !body.ok) throw new Error(body.error || 'update failed');
+                    // Update local state
+                    const inq = state.inquiries.find((x) => x.id === id);
+                    if (inq) {
+                        inq.status = newStatus;
+                        inq.statusUpdatedAt = body.override.updatedAt;
+                        inq.statusNote = body.override.note;
+                        inq.statusHistory = body.override.history;
+                    }
+                    render();
+                    openModal(id);  // refresh modal with new history
+                    if (typeof showToast === 'function') showToast('Status updated to ' + STATUS_LABELS[newStatus]);
+                } catch (err) {
+                    alert('Could not update status: ' + err.message);
+                }
+            }
+
+            function init() {
+                $('resInqRefresh')?.addEventListener('click', loadAll);
+                $('resInqFilter')?.addEventListener('change', render);
+                $('resInqModalClose')?.addEventListener('click', closeModal);
+                $('resInqModal')?.addEventListener('click', (e) => { if (e.target.id === 'resInqModal') closeModal(); });
+                document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('resInqModal')?.classList.contains('open')) closeModal(); });
+                document.querySelectorAll('#resInqModal [data-status]').forEach((btn) => btn.addEventListener('click', () => setStatus(btn.dataset.status)));
+            }
+
+            function onTabSwitch(tab) {
+                if (tab === 'potential' && !state.loaded) loadAll();
+            }
+
+            return { init, loadAll, openModal, onTabSwitch };
+        })();
+        document.addEventListener('DOMContentLoaded', () => { try { ResInqUI.init(); } catch (e) { console.error('ResInqUI init failed', e); } });
+
+        /* ================================================================
+           REWARDS SETUP TAB
+           Loads + saves rewards.json through save-github-file Netlify fn.
+           ================================================================ */
+        (function(){
+            const FEED = 'https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/rewards.json';
+            const SAVE_FN = '/.netlify/functions/save-github-file';
+            let data = null;
+            let dirty = false;
+
+            const $ = (id) => document.getElementById(id);
+            const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+            function setStatus(msg, color) {
+                const el = $('rewardsStatus');
+                if (el) { el.textContent = msg; el.style.color = color || 'var(--text-muted)'; }
+            }
+            function setDirty(d) {
+                dirty = d;
+                const btn = $('saveRewardsBtn');
+                if (btn) {
+                    btn.style.opacity = d ? '1' : '0.5';
+                    btn.style.pointerEvents = d ? 'auto' : 'none';
+                }
+                if (d) setStatus('Unsaved changes', 'var(--yellow)');
+            }
+
+            async function load() {
+                setStatus('Loading…');
+                try {
+                    const r = await fetch(FEED + '?t=' + Date.now());
+                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                    data = await r.json();
+                    render();
+                    $('rewardsLoading').style.display = 'none';
+                    $('rewardsEditor').style.display = 'block';
+                    setStatus('Synced with GitHub', 'var(--green)');
+                    setDirty(false);
+                } catch (e) {
+                    setStatus('Load failed: ' + e.message, 'var(--red)');
+                    $('rewardsLoading').textContent = 'Could not load rewards.json: ' + e.message;
+                }
+            }
+
+            function render() {
+                if (!data) return;
+                $('earnRateInput').value = data.earnRate || 10;
+
+                // Tiers
+                $('tiersTable').innerHTML = (data.tiers || []).map((t, i) => `
+                    <div style="display:grid;grid-template-columns:160px 1fr 130px 90px;gap:12px;align-items:center;padding:10px;background:var(--bg-elevated);border-radius:6px;">
+                        <input type="text" value="${esc(t.name)}" data-tier-i="${i}" data-tier-k="name"
+                            style="padding:7px 10px;border:1px solid var(--border-subtle);border-radius:4px;font-size:0.9rem;">
+                        <input type="text" value="${esc(t.perks || '')}" placeholder="Perks (free text)" data-tier-i="${i}" data-tier-k="perks"
+                            style="padding:7px 10px;border:1px solid var(--border-subtle);border-radius:4px;font-size:0.9rem;">
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <input type="number" value="${t.minPoints || 0}" min="0" step="100" data-tier-i="${i}" data-tier-k="minPoints"
+                                style="width:90px;padding:7px 10px;border:1px solid var(--border-subtle);border-radius:4px;font-size:0.9rem;">
+                            <span style="font-size:0.78rem;color:var(--text-muted);">pts</span>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <input type="number" value="${t.earnMultiplier || 1}" min="0.5" max="3" step="0.05" data-tier-i="${i}" data-tier-k="earnMultiplier"
+                                style="width:60px;padding:7px 10px;border:1px solid var(--border-subtle);border-radius:4px;font-size:0.9rem;">
+                            <span style="font-size:0.78rem;color:var(--text-muted);">×</span>
+                        </div>
+                    </div>
+                `).join('');
+
+                // Catalog
+                $('catalogTable').innerHTML = (data.catalog || []).map((r, i) => `
+                    <div style="display:grid;grid-template-columns:1fr 2fr 110px 70px 70px;gap:10px;align-items:center;padding:10px;background:var(--bg-elevated);border-radius:6px;">
+                        <input type="text" value="${esc(r.name)}" placeholder="Name" data-cat-i="${i}" data-cat-k="name"
+                            style="padding:7px 10px;border:1px solid var(--border-subtle);border-radius:4px;font-size:0.9rem;">
+                        <input type="text" value="${esc(r.description)}" placeholder="Description" data-cat-i="${i}" data-cat-k="description"
+                            style="padding:7px 10px;border:1px solid var(--border-subtle);border-radius:4px;font-size:0.9rem;">
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <input type="number" value="${r.points || 0}" min="0" step="50" data-cat-i="${i}" data-cat-k="points"
+                                style="width:80px;padding:7px 10px;border:1px solid var(--border-subtle);border-radius:4px;font-size:0.9rem;">
+                            <span style="font-size:0.78rem;color:var(--text-muted);">pts</span>
+                        </div>
+                        <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer;color:var(--text-secondary);">
+                            <input type="checkbox" data-cat-i="${i}" data-cat-k="active" ${r.active !== false ? 'checked' : ''}>
+                            Active
+                        </label>
+                        <button class="btn-small" data-cat-del="${i}" style="padding:6px 10px;background:var(--red-dim);color:var(--red);border:1px solid var(--red);border-radius:4px;font-size:0.78rem;cursor:pointer;">Delete</button>
+                    </div>
+                `).join('');
+
+                // Bonuses
+                $('bonusesTable').innerHTML = (data.bonuses || []).map((b, i) => `
+                    <div style="display:grid;grid-template-columns:1fr 2fr 110px;gap:10px;align-items:center;padding:10px;background:var(--bg-elevated);border-radius:6px;">
+                        <input type="text" value="${esc(b.name)}" data-bon-i="${i}" data-bon-k="name"
+                            style="padding:7px 10px;border:1px solid var(--border-subtle);border-radius:4px;font-size:0.9rem;">
+                        <input type="text" value="${esc(b.description)}" data-bon-i="${i}" data-bon-k="description"
+                            style="padding:7px 10px;border:1px solid var(--border-subtle);border-radius:4px;font-size:0.9rem;">
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <input type="number" value="${b.points || 0}" min="0" step="25" data-bon-i="${i}" data-bon-k="points"
+                                style="width:80px;padding:7px 10px;border:1px solid var(--border-subtle);border-radius:4px;font-size:0.9rem;">
+                            <span style="font-size:0.78rem;color:var(--text-muted);">pts</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Wire up change events on inputs (event delegation)
+            document.addEventListener('input', (e) => {
+                const t = e.target;
+                if (!data) return;
+                if (t.dataset.tierI != null) {
+                    const idx = +t.dataset.tierI, k = t.dataset.tierK;
+                    if (!data.tiers[idx]) return;
+                    data.tiers[idx][k] = (k === 'minPoints' || k === 'earnMultiplier') ? parseFloat(t.value) || 0 : t.value;
+                    setDirty(true);
+                } else if (t.dataset.catI != null) {
+                    const idx = +t.dataset.catI, k = t.dataset.catK;
+                    if (!data.catalog[idx]) return;
+                    if (k === 'active') data.catalog[idx][k] = t.checked;
+                    else data.catalog[idx][k] = (k === 'points') ? parseInt(t.value) || 0 : t.value;
+                    setDirty(true);
+                } else if (t.dataset.bonI != null) {
+                    const idx = +t.dataset.bonI, k = t.dataset.bonK;
+                    if (!data.bonuses[idx]) return;
+                    data.bonuses[idx][k] = (k === 'points') ? parseInt(t.value) || 0 : t.value;
+                    setDirty(true);
+                } else if (t.id === 'earnRateInput') {
+                    data.earnRate = parseFloat(t.value) || 10;
+                    setDirty(true);
+                }
+            });
+            document.addEventListener('change', (e) => {
+                const t = e.target;
+                if (data && t.dataset.catK === 'active') {
+                    const idx = +t.dataset.catI;
+                    if (data.catalog[idx]) { data.catalog[idx].active = t.checked; setDirty(true); }
+                }
+            });
+            document.addEventListener('click', (e) => {
+                if (e.target.dataset.catDel != null && data) {
+                    if (confirm('Delete this reward? You can also just toggle Active off to hide it.')) {
+                        data.catalog.splice(+e.target.dataset.catDel, 1);
+                        render();
+                        setDirty(true);
+                    }
+                }
+            });
+
+            // Add Reward button
+            const addRewardBtn = document.getElementById('addRewardBtn');
+            if (addRewardBtn) {
+                addRewardBtn.addEventListener('click', () => {
+                    if (!data) return;
+                    if (!data.catalog) data.catalog = [];
+                    data.catalog.push({
+                        id: 'r-' + Date.now().toString(36),
+                        name: 'New Reward',
+                        description: '',
+                        points: 500,
+                        active: true
+                    });
+                    render();
+                    setDirty(true);
+                });
+            }
+
+            // Save button
+            const saveBtn = document.getElementById('saveRewardsBtn');
+            if (saveBtn) {
+                saveBtn.addEventListener('click', async () => {
+                    if (!data || !dirty) return;
+                    setStatus('Saving…', 'var(--yellow)');
+                    saveBtn.disabled = true;
+                    try {
+                        data.lastUpdated = new Date().toISOString().split('T')[0];
+                        const r = await fetch(SAVE_FN, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                filePath: 'rewards.json',
+                                content: JSON.stringify(data, null, 2),
+                                message: 'rewards: update via admin'
+                            })
+                        });
+                        const body = await r.json();
+                        if (!r.ok || body.error) throw new Error(body.error || 'HTTP ' + r.status);
+                        setStatus('Saved · live in app within ~60s', 'var(--green)');
+                        setDirty(false);
+                    } catch (e) {
+                        setStatus('Save failed: ' + e.message, 'var(--red)');
+                    } finally {
+                        saveBtn.disabled = false;
+                    }
+                });
+            }
+
+            // Hook into tab switching — load on first open
+            const origSwitch = window.switchTab;
+            if (typeof origSwitch === 'function') {
+                window.switchTab = function(name) {
+                    origSwitch.apply(this, arguments);
+                    if (name === 'appRewards' && !data) load();
+                };
+            }
+        })();
+
+        /* ================================================================
+           REWARDS MEMBERS TAB
+           Loads + saves members.json through save-github-file Netlify fn.
+           ================================================================ */
+        (function(){
+            const FEED = 'https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/members.json';
+            const SAVE_FN = '/.netlify/functions/save-github-file';
+            let data = null;
+
+            const $ = (id) => document.getElementById(id);
+            const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+            function fmtDate(iso) {
+                if (!iso) return '—';
+                try { return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
+                catch { return iso; }
+            }
+
+            function tierBadge(tier) {
+                const colors = {
+                    standard: { bg: 'var(--bg-elevated)', fg: 'var(--text-secondary)', label: 'Standard' },
+                    gold:     { bg: 'rgba(154,123,42,0.12)', fg: 'var(--gold)', label: 'Gold' },
+                    platinum: { bg: 'rgba(124,58,237,0.12)', fg: '#7c3aed', label: 'Platinum' }
+                };
+                const c = colors[tier] || colors.standard;
+                return `<span style="display:inline-block;padding:3px 9px;border-radius:999px;font-size:0.72rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;background:${c.bg};color:${c.fg};">${c.label}</span>`;
+            }
+
+            function tierFromPoints(lifetimePts) {
+                if (lifetimePts >= 6000) return 'platinum';
+                if (lifetimePts >= 3000) return 'gold';
+                return 'standard';
+            }
+
+            async function load() {
+                try {
+                    const r = await fetch(FEED + '?t=' + Date.now());
+                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                    data = await r.json();
+                    render();
+                    $('membersLoading').style.display = 'none';
+                    $('membersContent').style.display = 'block';
+                } catch (e) {
+                    $('membersLoading').textContent = 'Could not load members.json: ' + e.message;
+                }
+            }
+
+            function render() {
+                if (!data) return;
+                const list = data.members || [];
+
+                // Stats
+                const now = new Date();
+                const thisMonth = list.filter(m => {
+                    if (!m.joinedAt) return false;
+                    const d = new Date(m.joinedAt);
+                    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+                }).length;
+                $('memTotal').textContent = list.length;
+                $('memGold').textContent = list.filter(m => m.tier === 'gold').length;
+                $('memPlat').textContent = list.filter(m => m.tier === 'platinum').length;
+                $('memNew').textContent = thisMonth;
+
+                // Empty state
+                const emptyEl = $('membersEmpty');
+                const tableEl = $('membersTableWrap');
+                if (list.length === 0) {
+                    emptyEl.style.display = 'block';
+                    tableEl.style.display = 'none';
+                    return;
+                }
+                emptyEl.style.display = 'none';
+                tableEl.style.display = '';
+
+                // Sort by joinedAt desc
+                const sorted = [...list].sort((a, b) => (b.joinedAt || '').localeCompare(a.joinedAt || ''));
+                $('membersTableBody').innerHTML = sorted.map(m => `
+                    <tr>
+                        <td style="font-weight:500;">${esc(m.name || '—')}</td>
+                        <td style="font-size:0.85rem;color:var(--text-secondary);">
+                            ${m.email ? `<a href="mailto:${esc(m.email)}" style="color:var(--gold);text-decoration:none;">${esc(m.email)}</a>` : ''}
+                            ${m.phone ? `<br><span style="color:var(--text-muted);">${esc(m.phone)}</span>` : ''}
+                        </td>
+                        <td>${tierBadge(m.tier || 'standard')}</td>
+                        <td style="text-align:right;font-weight:500;">
+                            ${(m.currentPoints || 0).toLocaleString()}
+                            <div style="font-size:0.75rem;color:var(--text-muted);font-weight:400;">${(m.lifetimePoints || 0).toLocaleString()} lifetime</div>
+                        </td>
+                        <td style="font-size:0.85rem;color:var(--text-secondary);">${fmtDate(m.joinedAt)}</td>
+                        <td style="font-size:0.85rem;color:var(--text-secondary);">${fmtDate(m.lastVisitAt)}</td>
+                        <td style="text-align:right;">
+                            <button class="btn-small" data-mem-points="${esc(m.id)}" style="padding:4px 8px;font-size:0.75rem;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:4px;cursor:pointer;">+/− Pts</button>
+                            <button class="btn-small" data-mem-del="${esc(m.id)}" style="padding:4px 8px;font-size:0.75rem;background:var(--red-dim);color:var(--red);border:1px solid var(--red);border-radius:4px;cursor:pointer;margin-left:4px;">Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            async function save(message) {
+                try {
+                    data.lastUpdated = new Date().toISOString().split('T')[0];
+                    const r = await fetch(SAVE_FN, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            filePath: 'members.json',
+                            content: JSON.stringify(data, null, 2),
+                            message: message || 'members: update via admin'
+                        })
+                    });
+                    const body = await r.json();
+                    if (!r.ok || body.error) throw new Error(body.error || 'HTTP ' + r.status);
+                    return true;
+                } catch (e) {
+                    alert('Save failed: ' + e.message);
+                    return false;
+                }
+            }
+
+            // Add Member button
+            document.addEventListener('click', (e) => {
+                if (e.target.id === 'addMemberBtn') {
+                    $('addMemberForm').reset();
+                    $('addMemberError').style.display = 'none';
+                    $('addMemberModal').style.display = 'flex';
+                } else if (e.target.id === 'addMemberSubmit') {
+                    handleAdd();
+                } else if (e.target.dataset.memPoints) {
+                    handleAdjustPoints(e.target.dataset.memPoints);
+                } else if (e.target.dataset.memDel) {
+                    handleDelete(e.target.dataset.memDel);
+                }
+            });
+
+            window.closeAddMemberModal = function() {
+                $('addMemberModal').style.display = 'none';
+            };
+
+            async function handleAdd() {
+                const errEl = $('addMemberError');
+                errEl.style.display = 'none';
+                const name = $('memName').value.trim();
+                const email = $('memEmail').value.trim().toLowerCase();
+                if (!name || !email) {
+                    errEl.textContent = 'Name and email are required.';
+                    errEl.style.display = 'block';
+                    return;
+                }
+                if ((data.members || []).some(m => (m.email || '').toLowerCase() === email)) {
+                    errEl.textContent = 'A member with that email already exists.';
+                    errEl.style.display = 'block';
+                    return;
+                }
+                const startPts = parseInt($('memStartPoints').value) || 0;
+                const member = {
+                    id: 'm_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 5),
+                    name,
+                    email,
+                    phone: $('memPhone').value.trim(),
+                    birthday: $('memBirthday').value.trim(),
+                    joinedAt: new Date().toISOString(),
+                    lastVisitAt: null,
+                    tier: tierFromPoints(startPts),
+                    currentPoints: startPts,
+                    lifetimePoints: startPts,
+                    totalRedemptions: 0,
+                    marketingOptIn: $('memMktOptIn').checked,
+                    smsOptIn: $('memSmsOptIn').checked,
+                    notes: $('memNotes').value.trim(),
+                    history: [{ at: new Date().toISOString(), action: 'created', delta: startPts, by: 'admin', note: 'Manual admin add' }]
+                };
+                if (!data.members) data.members = [];
+                data.members.push(member);
+                const ok = await save(`members: add ${name}`);
+                if (ok) {
+                    render();
+                    closeAddMemberModal();
+                }
+            }
+
+            async function handleAdjustPoints(memId) {
+                const m = (data.members || []).find(x => x.id === memId);
+                if (!m) return;
+                const delta = prompt(`Adjust points for ${m.name}\nCurrent: ${m.currentPoints} pts\n\nEnter +N to add, -N to subtract, or a reason note (e.g. "+250 birthday bonus"):`);
+                if (!delta) return;
+                const match = delta.match(/^([+-]?\d+)\s*(.*)$/);
+                if (!match) { alert('Format: +250 reason  or  -100 reason'); return; }
+                const n = parseInt(match[1]);
+                const note = match[2].trim() || 'manual adjustment';
+                m.currentPoints = Math.max(0, (m.currentPoints || 0) + n);
+                if (n > 0) m.lifetimePoints = (m.lifetimePoints || 0) + n;
+                m.tier = tierFromPoints(m.lifetimePoints);
+                if (!m.history) m.history = [];
+                m.history.push({ at: new Date().toISOString(), action: 'adjust', delta: n, by: 'admin', note });
+                const ok = await save(`members: ${n > 0 ? '+' : ''}${n} pts for ${m.name} (${note})`);
+                if (ok) render();
+            }
+
+            async function handleDelete(memId) {
+                const m = (data.members || []).find(x => x.id === memId);
+                if (!m) return;
+                if (!confirm(`Delete member "${m.name}"? This cannot be undone (the audit history will be lost).`)) return;
+                data.members = data.members.filter(x => x.id !== memId);
+                const ok = await save(`members: delete ${m.name}`);
+                if (ok) render();
+            }
+
+            // Hook into tab switching
+            const origSwitch = window.switchTab;
+            if (typeof origSwitch === 'function') {
+                window.switchTab = function(name) {
+                    origSwitch.apply(this, arguments);
+                    if (name === 'members' && !data) load();
+                };
+            }
+        })();
+
+    </script>
+</body>
+</html>
