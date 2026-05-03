@@ -4808,14 +4808,24 @@
                         if (body.token) localStorage.setItem('quarryAdminToken', body.token);
                         sessionStorage.setItem('quarryAuth', 'true');
                         app.authenticated = true;
+                        // Force-reveal app — do this BEFORE calling showApp so that even if
+                        // showApp/initializeApp throws, the user lands on the dashboard.
                         const overlay = document.getElementById('loginOverlay');
-                        if (overlay) overlay.classList.add('hidden');
+                        if (overlay) {
+                            overlay.classList.add('hidden');
+                            overlay.style.display = 'none'; // belt + suspenders if .hidden CSS got overridden
+                        }
+                        const mainEl = document.getElementById('mainApp');
+                        if (mainEl) {
+                            mainEl.classList.remove('hidden');
+                            mainEl.style.display = '';
+                        }
                         if (errorEl) errorEl.textContent = '';
                         try {
                             if (typeof showApp === 'function') showApp();
                         } catch (uiErr) {
                             console.error('[admin login] login OK but showApp failed:', uiErr);
-                            if (errorEl) errorEl.textContent = 'Logged in — refresh the page if the dashboard does not appear.';
+                            if (errorEl) errorEl.textContent = 'Dashboard partially loaded — refresh if anything looks broken.';
                         }
                         return;
                     }
