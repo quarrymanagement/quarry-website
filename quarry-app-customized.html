@@ -815,6 +815,93 @@ a.account-link:hover .al-arrow { color: var(--gold); }
   margin-top: 6px;
 }
 
+
+/* ── Scan Receipt button (Rewards screen) ── */
+.scan-cta {
+  margin: 0 22px 18px;
+  padding: 18px 22px;
+  background: linear-gradient(135deg, rgba(184,147,58,0.18), rgba(184,147,58,0.04));
+  border: 1px solid var(--gold);
+  border-radius: 12px;
+  display: flex; align-items: center; gap: 16px;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s;
+}
+.scan-cta:active { transform: scale(0.98); }
+.scan-cta-icon {
+  width: 42px; height: 42px; flex-shrink: 0;
+  border: 1px solid var(--gold); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gold-light);
+}
+.scan-cta-icon svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.scan-cta-body { flex: 1; }
+.scan-cta-title {
+  font-family: var(--ff-body);
+  font-size: 11px; font-weight: 700; letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--gold-light); margin-bottom: 4px;
+}
+.scan-cta-sub { font-family: var(--ff-script); font-style: italic; font-size: 0.95rem; color: var(--cream-soft); line-height: 1.4; }
+.scan-cta-arrow { color: var(--gold-light); font-size: 1.4rem; flex-shrink: 0; }
+
+/* ── Scan modal (overlay) ── */
+.scan-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 9998;
+  background: rgba(14,14,14,0.94);
+  backdrop-filter: blur(10px);
+  align-items: center; justify-content: center;
+  padding: 20px;
+}
+.scan-overlay.open { display: flex; }
+.scan-modal {
+  background: var(--charcoal);
+  border: 1px solid var(--border-light); border-radius: 18px;
+  padding: 28px 24px;
+  max-width: 380px; width: 100%;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+  text-align: center;
+}
+.scan-modal h3 {
+  font-family: var(--ff-display); font-weight: 600;
+  font-size: 1.4rem; color: var(--cream); margin-bottom: 6px;
+}
+.scan-modal .scan-sub {
+  font-family: var(--ff-script); font-style: italic;
+  font-size: 0.95rem; color: var(--gray); margin-bottom: 22px; line-height: 1.5;
+}
+.scan-preview {
+  width: 100%; max-height: 280px;
+  object-fit: contain; border-radius: 8px;
+  margin-bottom: 18px; display: none;
+  background: rgba(0,0,0,0.3);
+}
+.scan-pill {
+  display: inline-block; margin: 4px; padding: 6px 12px;
+  font-family: var(--ff-body); font-size: 9px; font-weight: 600;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  border-radius: 20px;
+  background: rgba(245,240,232,0.05); color: var(--gray);
+}
+.scan-rules { margin: 14px 0 22px; line-height: 1.8; }
+.scan-btn-row { display: flex; gap: 10px; }
+.scan-btn-primary, .scan-btn-secondary {
+  flex: 1; padding: 14px 8px;
+  font-family: var(--ff-body); font-size: 11px; font-weight: 700;
+  letter-spacing: 0.28em; text-transform: uppercase;
+  border-radius: 8px; cursor: pointer; transition: all 0.15s;
+  border: 1px solid var(--gold);
+}
+.scan-btn-primary { background: var(--gold); color: var(--brown-dark); border-color: var(--gold); }
+.scan-btn-primary:active { transform: scale(0.97); }
+.scan-btn-primary:disabled { opacity: 0.5; cursor: wait; }
+.scan-btn-secondary { background: transparent; color: var(--gold-light); border-color: var(--border-light); }
+.scan-result { margin-top: 16px; padding: 16px; border-radius: 8px; font-size: 0.95rem; line-height: 1.5; }
+.scan-result.success { background: rgba(212,175,106,0.12); border: 1px solid var(--gold); color: var(--cream); }
+.scan-result.error { background: rgba(220,38,38,0.10); border: 1px solid #dc2626; color: #fca5a5; }
+.scan-result.success strong { color: var(--gold-light); font-family: var(--ff-display); font-size: 1.4rem; }
+.scan-result-detail { font-family: var(--ff-script); font-style: italic; color: var(--gray); margin-top: 8px; font-size: 0.9rem; }
+
 /* ──────────────────────────────────────────────────────────────
    V3 MOBILE POLISH — make it pop, fix clunky spacing,
    hide horizontal scroll on menu, tighten golf hero.
@@ -1254,6 +1341,18 @@ a.account-link:hover .al-arrow { color: var(--gold); }
         </div>
         <div class="tp-track"><div class="tp-fill" style="width:98%"></div></div>
         <div class="tp-label"><span>Gold · $600 / 90 days</span><span>Elite · $1,000 / 90 days</span></div>
+      </div>
+
+      <!-- Scan Receipt CTA — manual point credit via Toast cross-validation -->
+      <div class="scan-cta" onclick="openScanModal()">
+        <div class="scan-cta-icon">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 8h10M7 12h6M7 16h8"/></svg>
+        </div>
+        <div class="scan-cta-body">
+          <div class="scan-cta-title">Scan Your Receipt</div>
+          <div class="scan-cta-sub">Snap a photo and we'll credit your points automatically.</div>
+        </div>
+        <div class="scan-cta-arrow">›</div>
       </div>
 
       <div class="section-rule"><div class="line"></div><div class="label">Redeem</div><div class="line"></div></div>
@@ -2413,5 +2512,121 @@ function submitParty() {
   setTimeout(init, 200);
 })();
 </script>
+
+
+<!-- ══════ SCAN RECEIPT MODAL ══════ -->
+<div class="scan-overlay" id="scanOverlay" onclick="if(event.target===this)closeScanModal()">
+  <div class="scan-modal">
+    <h3 id="scanTitle">Scan Your Receipt</h3>
+    <div class="scan-sub" id="scanSub">Take a clear photo of your receipt — we'll verify and credit points instantly.</div>
+    <div class="scan-rules">
+      <span class="scan-pill">Within 24 hours</span>
+      <span class="scan-pill">$20+ tab</span>
+      <span class="scan-pill">2 / day</span>
+    </div>
+    <img class="scan-preview" id="scanPreview" alt="Receipt preview" />
+    <input type="file" id="scanInput" accept="image/*" capture="environment" style="display:none" />
+    <div id="scanResult"></div>
+    <div class="scan-btn-row" id="scanButtons">
+      <button class="scan-btn-secondary" onclick="closeScanModal()">Cancel</button>
+      <button class="scan-btn-primary" id="scanActionBtn" onclick="onScanAction()">Take Photo</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  let pickedFile = null;
+  let pickedDataUrl = null;
+  let busy = false;
+
+  window.openScanModal = function() {
+    pickedFile = null; pickedDataUrl = null; busy = false;
+    document.getElementById('scanPreview').style.display = 'none';
+    document.getElementById('scanResult').innerHTML = '';
+    document.getElementById('scanActionBtn').textContent = 'Take Photo';
+    document.getElementById('scanActionBtn').disabled = false;
+    document.getElementById('scanOverlay').classList.add('open');
+  };
+  window.closeScanModal = function() {
+    if (busy) return;
+    document.getElementById('scanOverlay').classList.remove('open');
+  };
+
+  document.getElementById('scanInput').addEventListener('change', (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    pickedFile = file;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      pickedDataUrl = ev.target.result;
+      const img = document.getElementById('scanPreview');
+      img.src = pickedDataUrl;
+      img.style.display = 'block';
+      document.getElementById('scanActionBtn').textContent = 'Submit Receipt';
+    };
+    reader.readAsDataURL(file);
+  });
+
+  window.onScanAction = async function() {
+    if (!pickedDataUrl) {
+      // First click — open camera
+      document.getElementById('scanInput').click();
+      return;
+    }
+    // Submit
+    const token = (function() { try { return localStorage.getItem('quarry_member_token'); } catch (_) { return null; } })();
+    if (!token) {
+      document.getElementById('scanResult').innerHTML = '<div class="scan-result error">Please sign in first to earn points.</div>';
+      return;
+    }
+    const btn = document.getElementById('scanActionBtn');
+    btn.disabled = true; btn.textContent = 'Verifying…'; busy = true;
+    document.getElementById('scanResult').innerHTML = '<div class="scan-result" style="background:rgba(245,240,232,0.04);color:var(--gray);font-style:italic">Reading receipt and checking with Toast…</div>';
+
+    try {
+      const apiBase = location.hostname.includes('thequarrystl.com') ? '' : 'https://thequarrystl.com';
+      const r = await fetch(apiBase + '/.netlify/functions/scan-receipt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, image: pickedDataUrl }),
+      });
+      const body = await r.json();
+      if (!body.ok) {
+        document.getElementById('scanResult').innerHTML =
+          '<div class="scan-result error">' + (body.error || 'Could not credit this receipt.') + '</div>';
+        btn.textContent = 'Try Another';
+        btn.disabled = false;
+        // Reset for retry
+        pickedDataUrl = null;
+        document.getElementById('scanPreview').style.display = 'none';
+        busy = false;
+        return;
+      }
+      // Success
+      document.getElementById('scanResult').innerHTML =
+        '<div class="scan-result success">' +
+          '<strong>+ ' + body.points.toLocaleString() + ' points</strong><br>' +
+          'New balance: ' + body.newBalance.toLocaleString() + ' pts' +
+          '<div class="scan-result-detail">$' + Number(body.spendUsd).toFixed(2) + ' on check #' + body.checkNumber +
+          (body.multiplier > 1 ? ' · ' + body.multiplier + '× tier bonus' : '') + '</div>' +
+        '</div>';
+      btn.textContent = 'Done';
+      btn.disabled = false;
+      busy = false;
+      // Refresh visible point counters
+      document.querySelectorAll('.hero-pts-num, .rh-num').forEach((el) => {
+        if (el.classList.contains('rh-num') && el.closest('#screen-golf')) return; // don't touch golf bay count
+        el.textContent = body.newBalance.toLocaleString();
+      });
+    } catch (e) {
+      document.getElementById('scanResult').innerHTML =
+        '<div class="scan-result error">Network error — please try again.</div>';
+      btn.textContent = 'Try Again'; btn.disabled = false; busy = false;
+    }
+  };
+})();
+</script>
+
 </body>
 </html>
