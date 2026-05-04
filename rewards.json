@@ -15,24 +15,24 @@
       "name": "Quarry Silver",
       "trailingSpendUsd": 300,
       "earnMultiplier": 1.1,
-      "bottleDiscount": 5,
-      "perks": "1.1\u00d7 earn rate. 5% off any bottle of wine. Avg ~$100/mo to maintain."
+      "bottleDiscount": 0,
+      "perks": "1.1\u00d7 earn rate. Avg ~$100/mo to maintain. Bottle discount unlocks at Gold."
     },
     {
       "id": "gold",
       "name": "Quarry Gold",
-      "trailingSpendUsd": 450,
+      "trailingSpendUsd": 600,
       "earnMultiplier": 1.25,
-      "bottleDiscount": 10,
-      "perks": "1.25\u00d7 earn rate. 10% off bottles. Free birthday entr\u00e9e. Early event RSVPs. Avg ~$150/mo to maintain."
+      "bottleDiscount": 5,
+      "perks": "1.25\u00d7 earn rate. 5% off any bottle of wine. Free birthday entr\u00e9e. Early event RSVPs. Avg ~$200/mo to maintain."
     },
     {
       "id": "elite",
       "name": "Quarry Elite",
       "trailingSpendUsd": 1000,
       "earnMultiplier": 1.5,
-      "bottleDiscount": 15,
-      "perks": "1.5\u00d7 earn rate. 15% off bottles. One complimentary glass of wine per visit. Priority on private event dates. Named on the wall. Avg ~$333/mo to maintain."
+      "bottleDiscount": 10,
+      "perks": "1.5\u00d7 earn rate. 10% off bottles. One complimentary glass of wine per visit (requires $20+ closed tab). Priority on private event dates. Named on the wall. Avg ~$333/mo to maintain."
     }
   ],
   "tierDecay": {
@@ -176,7 +176,7 @@
   "stipulations": [
     "Members redeem one reward per check (no stacking five rewards on one visit).",
     "Tier bottle discounts don't combine with happy hour or wine-of-the-week pricing.",
-    "Elite 'free glass per visit' is one standard pour per check, logged by the bartender.",
+    "Elite 'free glass per visit' is one standard pour per check, requires a closed tab of $20 or more, logged by the bartender.",
     "Birthday rewards must be redeemed in person, ID required, valid only in birthday month.",
     "Free Entr\u00e9e + Wine reward applies to entr\u00e9es up to $25 menu price; wine pour is 6 oz house standard.",
     "Tier downgrades one level on 60 days of no spend; warning shown at 30 days.",
