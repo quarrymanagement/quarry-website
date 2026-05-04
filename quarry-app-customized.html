@@ -428,6 +428,65 @@ a.account-link:hover .al-arrow { color: var(--gold); }
   font-size: 1.4rem;
   box-shadow: 0 4px 16px rgba(184,147,58,0.25);
 }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   v3 POLISH — kill the clunk, make it pop on mobile
+   ═══════════════════════════════════════════════════════════════ */
+.menu-cats { display: none !important; }
+
+@media (max-width: 499px) {
+  .home-cards { grid-template-columns: 1fr 1fr; gap: 10px; background: transparent; border: 0; padding: 0 22px; margin: 22px 0 0; }
+  .home-card { background: var(--charcoal-mid); border: 1px solid var(--border-soft); border-radius: 12px; padding: 18px 16px; transition: transform 0.15s, border-color 0.15s; }
+  .home-card:active { transform: scale(0.98); border-color: var(--gold); }
+  #screen-golf .rewards-hero { padding: 16px 4px 14px; }
+  #screen-golf .rh-num { font-size: 2.4rem; }
+  #screen-golf .rh-tier-name { font-size: 9px; }
+  #screen-golf .rh-tier-sub { font-size: 0.78rem; }
+  #screen-golf .tp-label { font-size: 0.7rem; flex-wrap: wrap; gap: 8px 18px; }
+  #screen-golf .reward-row { padding: 16px 0; }
+  .screen-header { padding: 22px 22px 14px; }
+  .screen-title { font-size: 1.6rem; }
+  .brand-mark { font-size: 8px; gap: 8px; margin-bottom: 10px; }
+  .brand-mark .q-logo { width: 20px; height: 20px; }
+}
+
+.section-rule .label { color: var(--gold); font-weight: 700; letter-spacing: 0.36em; }
+.section-rule .line { background: var(--border-mid); opacity: 0.4; }
+
+.reward-action { padding: 9px 18px; font-size: 9.5px; font-weight: 700; letter-spacing: 0.2em; border-radius: 5px; margin-top: 12px; }
+.reward-action:active { transform: scale(0.96); }
+
+.hero-pts-num { font-size: 3.6rem; letter-spacing: -0.02em; color: var(--gold-light); text-shadow: 0 2px 12px rgba(212,175,106,0.15); }
+.rh-num { color: var(--gold-light); text-shadow: 0 2px 16px rgba(212,175,106,0.18); }
+
+.hero-greeting { font-family: var(--ff-body); font-style: normal; font-size: 0.78rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold-light); font-weight: 500; }
+.hero-greeting .name { color: var(--cream); font-weight: 600; }
+
+.home-card:active, .feature-card:active, .list-item:active { background: var(--charcoal-mid); }
+.account-link:active { background: rgba(184,147,58,0.06); }
+
+.feature-card { background: linear-gradient(135deg, rgba(184,147,58,0.08), rgba(184,147,58,0.02)); border-radius: 12px; }
+.fc-action { background: var(--gold); color: var(--brown-dark); border-color: var(--gold); border-radius: 5px; padding: 11px 18px; font-size: 10px; font-weight: 700; letter-spacing: 0.2em; }
+
+.menu-row { padding: 16px 0; }
+.menu-row-name { font-weight: 600; }
+.menu-row-price { color: var(--gold); }
+
+.featured-strip { background: linear-gradient(135deg, rgba(184,147,58,0.06), transparent); border-color: var(--gold); border-radius: 12px; }
+.featured-strip::before { background: var(--charcoal); color: var(--gold); font-weight: 700; }
+.featured-price { font-size: 1.4rem; color: var(--gold); }
+
+.event-card { border-bottom: 1px solid var(--border-light); }
+.event-card:last-child { border-bottom: none; }
+.event-cat { color: var(--gold); }
+.btn-primary { background: var(--gold); color: var(--brown-dark); border-radius: 5px; padding: 12px 22px; font-weight: 700; }
+
+.bottom-nav { background: rgba(20,20,20,0.92); border-top: 1px solid rgba(196,149,106,0.15); }
+.nav-item.active svg { stroke-width: 1.8; }
+
+.profile-monogram { background: linear-gradient(135deg, var(--gold), var(--brown-warm)); color: var(--brown-dark); border: 0; font-weight: 700; font-size: 1.4rem; box-shadow: 0 4px 16px rgba(184,147,58,0.25); }
+
 </style>
 </head>
 <body>
