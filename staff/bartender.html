@@ -193,6 +193,8 @@ function fmtMoney(n) { return '$' + (Number(n) || 0).toFixed(2); }
 // Reward IDs that need bartender to enter a $ amount
 // (Toast OPEN_ITEM / OPEN_CHECK types — they don't carry their own amount).
 const OPEN_AMOUNT_REWARDS = new Set(['r-glass','r-app','r-tasting','r-bottle','r-entree-glass']);
+// Reward IDs that DON'T apply to a Toast check (off-property comps, etc.)
+const OFFLINE_REWARDS = new Set(['r-balls']); // Surfside Hole-In-One bucket
 
 function saveAuth() {
   const p = $('password').value.trim();
@@ -237,12 +239,15 @@ async function search() {
 }
 
 function renderMember(m) {
-  const pending = m.pendingRedemption ? `
-    <div class="mem-pending">
-      <div class="mem-pending-label">Active Code</div>
-      <div class="mem-pending-code">${escHtml(m.pendingRedemption.code)}</div>
-      <div class="mem-pending-name">${escHtml(m.pendingRedemption.rewardName)}</div>
-      <div class="mem-pending-meta">Expires ${fmtDate(m.pendingRedemption.expiresAt)} · ${fmtTime(m.pendingRedemption.expiresAt)}</div>
+  const pr = m.pendingRedemption;
+  const prExpired = pr && new Date(pr.expiresAt).getTime() < Date.now();
+  const prOffline = pr && OFFLINE_REWARDS.has(pr.rewardId || '');
+  const pending = pr ? `
+    <div class="mem-pending" style="${prExpired ? 'border-color:#DC2626;background:rgba(220,38,38,0.08)' : ''}">
+      <div class="mem-pending-label" style="${prExpired ? 'color:#fca5a5' : ''}">${prExpired ? 'Expired Code' : (prOffline ? 'Off-Property Reward' : 'Active Code')}</div>
+      <div class="mem-pending-code" style="${prExpired ? 'color:#fca5a5' : ''}">${escHtml(pr.code)}</div>
+      <div class="mem-pending-name">${escHtml(pr.rewardName)}</div>
+      <div class="mem-pending-meta">${prExpired ? 'Expired ' : 'Expires '}${fmtDate(pr.expiresAt)} · ${fmtTime(pr.expiresAt)}${prExpired ? ' — ask member to regenerate' : ''}${prOffline && !prExpired ? ' — hand Surfside voucher, then clear' : ''}</div>
     </div>` : '';
 
   const histRows = (m.recentHistory || []).map(h => {
@@ -269,7 +274,9 @@ function renderMember(m) {
         <div class="mem-stat"><div class="mem-stat-num discount">${m.bottleDiscountPct}%</div><div class="mem-stat-label">Bottle off</div></div>
       </div>
       <div class="mem-actions">
-        ${pending ? `<button class="btn" data-action="claim" data-code="${escHtml(m.pendingRedemption.code)}" data-reward-id="${escHtml(m.pendingRedemption.rewardId || '')}" data-reward-name="${escHtml(m.pendingRedemption.rewardName || '')}">Claim Code at Bar</button>` : ''}
+        ${pr && !prExpired && !prOffline ? `<button class="btn" data-action="claim" data-code="${escHtml(pr.code)}" data-reward-id="${escHtml(pr.rewardId || '')}" data-reward-name="${escHtml(pr.rewardName || '')}">Claim Code at Bar</button>` : ''}
+        ${pr && !prExpired && prOffline ? `<button class="btn" data-action="claim-offline" data-code="${escHtml(pr.code)}" data-reward-name="${escHtml(pr.rewardName || '')}">Mark Voucher Handed</button>` : ''}
+        ${pr && prExpired ? `<button class="btn btn-danger" data-action="clear-expired" data-code="${escHtml(pr.code)}">Clear Expired Code</button>` : ''}
         ${(m.bottleDiscountPct > 0) ? `<button class="btn btn-secondary" data-action="bottle-discount" data-perk="${m.bottleDiscountPct >= 10 ? 'elite-bottle' : 'gold-bottle'}" data-pct="${m.bottleDiscountPct}">Apply ${m.bottleDiscountPct}% Bottle</button>` : ''}
         <button class="btn btn-secondary" data-action="add-pts">+ Pts</button>
         <button class="btn btn-secondary" data-action="copy-email">Copy Email</button>
@@ -321,6 +328,30 @@ function wireMemberCards() {
             rewardName: rewardName,
             openType: OPEN_AMOUNT_REWARDS.has(rewardId),
           });
+        } else if (action === 'claim-offline') {
+          const code = btn.getAttribute('data-code');
+          const rewardName = btn.getAttribute('data-reward-name') || 'Reward';
+          if (!confirm('Mark "' + rewardName + '" voucher handed to ' + email + '?')) return;
+          try {
+            const r = await fetch('/.netlify/functions/redeem-claim', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ adminPassword: adminPass, code: code })
+            });
+            const body = await r.json();
+            if (!body.ok) throw new Error(body.error);
+            showToast('Voucher logged: ' + rewardName, 'ok');
+            search();
+          } catch (e) { showToast(e.message, 'err'); }
+        } else if (action === 'clear-expired') {
+          const code = btn.getAttribute('data-code');
+          try {
+            await fetch('/.netlify/functions/redeem-claim', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ adminPassword: adminPass, code: code })
+            });
+            showToast('Expired code cleared', 'ok');
+            search();
+          } catch (e) { showToast(e.message, 'err'); }
         } else if (action === 'bottle-discount') {
           // Apply tier-based bottle discount (Gold 5% / Elite 10%) to a live check.
           const perk = btn.getAttribute('data-perk');
