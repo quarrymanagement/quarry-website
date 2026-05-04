@@ -30,7 +30,7 @@ set -e
 # Whitelist of data files that DON'T need a Netlify rebuild when they change.
 # Keep in sync with data-store.js ALLOWED_FILES + a few other auto-written
 # files (schedule.json, form submissions, etc.).
-DATA_FILES_REGEX='^(events|bands|members|rewards|credited-orders|scanned-flagged|pending-scans|marketing_drafts|marketing_calendar|marketing_events|marketing_learnings|marketing_crm|marketing_optimization|subscribers|social_drafts|social_calendar|social_events|social_learnings|social_assets|social_optimization|social_event_ideas|reservations|reservations_status|form_submissions|backup_form_submissions|crm_contacts|send_events|email_history|aggregates|inbox|schedule|ai_learnings)\.json$'
+DATA_FILES_REGEX='^(events|bands|members|rewards|menu|credited-orders|scanned-flagged|pending-scans|marketing_drafts|marketing_calendar|marketing_events|marketing_learnings|marketing_crm|marketing_optimization|subscribers|social_drafts|social_calendar|social_events|social_learnings|social_assets|social_optimization|social_event_ideas|reservations|reservations_status|form_submissions|backup_form_submissions|crm_contacts|send_events|email_history|aggregates|inbox|schedule|ai_learnings)\.json$'
 
 # What changed in this commit?
 CHANGED=$(git diff --name-only HEAD^ HEAD 2>/dev/null || echo '')
