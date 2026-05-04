@@ -2220,6 +2220,8 @@ function renderEventList(filter) {
         rightBadge = 'Free · No cover';
       } else if (isFreeAdm) {
         rightBadge = 'Free admission';
+      } else if (evt.registrationType === 'email') {
+        rightBadge = 'Email RSVP';
       } else if (points > 0) {
         rightBadge = '+ ' + points + ' pts RSVP';
       } else {
@@ -2233,6 +2235,14 @@ function renderEventList(filter) {
       } else if (isThisTasting) {
         actionsHtml =
           '<a href="https://thequarrystl.com/quarry-wineclub" target="_blank" rel="noopener" class="btn-primary" style="text-decoration:none">RSVP a Spot</a>' +
+          `<a href="#" data-action="ics" data-event-id="${evtIdAttr}" class="btn-ghost" style="text-decoration:none;display:inline-block">Remind Me</a>`;
+      } else if (evt.registrationType === 'email') {
+        // Email-registration event (e.g. Yoga with Charity). RSVP by emailing the host.
+        const regEmail = String(evt.registrationEmail || '').replace(/'/g, "&#39;").replace(/"/g, '&quot;');
+        const regSubject = String(evt.registrationSubject || ('RSVP — ' + (evt.name || 'Event'))).replace(/'/g, "&#39;").replace(/"/g, '&quot;');
+        const regBody = String(evt.registrationBody || '').replace(/'/g, "&#39;").replace(/"/g, '&quot;');
+        actionsHtml =
+          `<a href="#" class="btn-primary" data-action="email-rsvp" data-to="${regEmail}" data-subject="${regSubject}" data-body="${regBody}" style="text-decoration:none">${remaining === 0 ? 'Sold Out' : 'RSVP via Email'}</a>` +
           `<a href="#" data-action="ics" data-event-id="${evtIdAttr}" class="btn-ghost" style="text-decoration:none;display:inline-block">Remind Me</a>`;
       } else {
         // Per-event URL on the website: /quarry-events?event={slug}
@@ -3459,6 +3469,66 @@ async function submitParty() {
       btn.textContent = 'Try Again'; btn.disabled = false; busy = false;
     }
   };
+})();
+</script>
+
+
+<!-- Email-registration picker (yoga events etc.) -->
+<div id="emailPickerModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:5000;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#232323;border:1px solid #B8933A;border-radius:14px;padding:22px 20px;max-width:380px;width:100%;color:#F5F0E8;font-family:Montserrat,sans-serif">
+    <div style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:600;color:#D4AF6A;margin-bottom:6px" id="emailPickerTitle">Send RSVP</div>
+    <div style="font-size:0.8rem;color:rgba(245,240,232,0.6);margin-bottom:16px" id="emailPickerSub">Choose how to open the email.</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <a id="emailPickerGmail" target="_blank" rel="noopener" style="text-align:center;padding:12px;background:#B8933A;color:#1A1A1A;border-radius:8px;text-decoration:none;font-weight:700;font-size:0.85rem;letter-spacing:0.08em;text-transform:uppercase">Open in Gmail</a>
+      <a id="emailPickerOutlook" target="_blank" rel="noopener" style="text-align:center;padding:12px;background:transparent;color:#D4AF6A;border:1px solid #B8933A;border-radius:8px;text-decoration:none;font-weight:700;font-size:0.85rem;letter-spacing:0.08em;text-transform:uppercase">Open in Outlook</a>
+      <a id="emailPickerDefault" style="text-align:center;padding:12px;background:transparent;color:#D4AF6A;border:1px solid #B8933A;border-radius:8px;text-decoration:none;font-weight:700;font-size:0.85rem;letter-spacing:0.08em;text-transform:uppercase">Default Mail App</a>
+    </div>
+    <button id="emailPickerClose" type="button" style="margin-top:14px;width:100%;padding:10px;background:transparent;color:rgba(245,240,232,0.55);border:0;font-family:inherit;font-size:0.78rem;cursor:pointer;letter-spacing:0.1em;text-transform:uppercase">Cancel</button>
+  </div>
+</div>
+<script>
+(function(){
+  function $$(id){ return document.getElementById(id); }
+  window.openEmailPicker = function(to, subject, body){
+    var enc = encodeURIComponent;
+    var gmailUrl = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + enc(to) + '&su=' + enc(subject) + '&body=' + enc(body || '');
+    var outlookUrl = 'https://outlook.live.com/owa/?path=/mail/action/compose&to=' + enc(to) + '&subject=' + enc(subject) + '&body=' + enc(body || '');
+    var mailtoUrl = 'mailto:' + to + '?subject=' + enc(subject) + (body ? '&body=' + enc(body) : '');
+    $$('emailPickerGmail').href = gmailUrl;
+    $$('emailPickerOutlook').href = outlookUrl;
+    $$('emailPickerDefault').href = mailtoUrl;
+    $$('emailPickerTitle').textContent = subject;
+    $$('emailPickerSub').textContent = 'Send to ' + to;
+    var modal = $$('emailPickerModal');
+    modal.style.display = 'flex';
+  };
+  function closePicker(){ $$('emailPickerModal').style.display = 'none'; }
+  document.addEventListener('DOMContentLoaded', function(){
+    var modal = $$('emailPickerModal');
+    if (!modal) return;
+    $$('emailPickerClose').addEventListener('click', closePicker);
+    modal.addEventListener('click', function(e){ if (e.target === modal) closePicker(); });
+    // After any picker link is clicked, close the modal so the user returns to a clean state.
+    ['emailPickerGmail','emailPickerOutlook','emailPickerDefault'].forEach(function(id){
+      var el = $$(id);
+      if (el) el.addEventListener('click', function(){ setTimeout(closePicker, 250); });
+    });
+  });
+})();
+</script>
+
+
+<script>
+(function(){
+  document.addEventListener('click', function(e){
+    var el = e.target.closest && e.target.closest('[data-action="email-rsvp"]');
+    if (!el) return;
+    e.preventDefault();
+    var to = el.getAttribute('data-to') || '';
+    var subject = el.getAttribute('data-subject') || '';
+    var body = (el.getAttribute('data-body') || '').replace(/&#39;/g, "'").replace(/&quot;/g, '"');
+    if (window.openEmailPicker) window.openEmailPicker(to, subject, body);
+  });
 })();
 </script>
 
