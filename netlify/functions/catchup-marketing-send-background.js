@@ -2,10 +2,8 @@
 // catchup-marketing-send-background.js
 //
 // Netlify BACKGROUND function (filename ends with `-background.js`):
-//   - Returns 202 immediately to the caller
-//   - Runs up to 15 minutes (vs 10s for sync functions)
-//   - No usable HTTP response body — we write progress to
-//     catchup_status.json via data-store so callers can poll
+//   - Auto-returns 202 to caller; runs up to 15 minutes
+//   - Writes progress to catchup_status.json via data-store
 //
 // One-shot catch-up sender. Used to send a previously-sent draft to a
 // specific set of recipients who SHOULD have gotten it but didn't (because
@@ -83,22 +81,16 @@ async function loadDraft(draftId) {
 }
 
 async function writeStatus(status) {
-    // Best-effort write to catchup_status.json so callers can poll progress.
     try {
-        // Get current sha
         const get = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=catchup_status.json`);
         let sha = '';
-        if (get.ok) {
-            const cur = await get.json();
-            sha = cur.sha || '';
-        }
-        const payload = { json: status, sha, message: `catchup-status: ${status.stage || 'update'}` };
+        if (get.ok) { const cur = await get.json(); sha = cur.sha || ''; }
         await fetch(`${SITE_URL}/.netlify/functions/data-store?file=catchup_status.json`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+            body: JSON.stringify({ json: status, sha, message: `catchup-status: ${status.stage || 'update'}` })
         });
-    } catch (_) { /* swallow — status writing is best-effort */ }
+    } catch (_) {}
 }
 
 async function sgBulkLookup(emails) {
@@ -152,8 +144,7 @@ async function sgCreateList(name) {
 
 async function sgWaitForListCount(listId, expectedAtLeast, maxWaitMs = 480000) {
     // Contact upserts are async. Poll the list until it has at least
-    // expectedAtLeast contacts, or until we time out (default 8 minutes —
-    // generous because background functions get up to 15 min runtime).
+    // expectedAtLeast contacts, or until we time out.
     const start = Date.now();
     let last = -1;
     while (Date.now() - start < maxWaitMs) {
@@ -227,27 +218,18 @@ exports.handler = async (event) => {
     if (!draftId) return respond(400, { error: 'draftId required' });
     if (!Array.isArray(emails) || !emails.length) return respond(400, { error: 'emails[] required' });
 
-    // Background function: AWAIT all work directly. Netlify auto-returns 202
-    // to the HTTP caller; the runtime keeps the function alive for up to 15
-    // min while this handler resolves.
     const runId = `${draftId.slice(0,8)}-${Date.now()}`;
     await writeStatus({ runId, draftId, stage: 'started', startedAt: new Date().toISOString() });
-
     try {
         const draft = await loadDraft(draftId);
         if (!draft) { await writeStatus({ runId, draftId, stage: 'error', error: 'draft not found' }); return { statusCode: 200, body: '' }; }
-        if (!draft.sentAt || !draft.sgSingleSendId) {
-            await writeStatus({ runId, draftId, stage: 'error', error: 'draft not sent yet' }); return { statusCode: 200, body: '' };
-        }
+        if (!draft.sentAt || !draft.sgSingleSendId) { await writeStatus({ runId, draftId, stage: 'error', error: 'draft not sent yet' }); return { statusCode: 200, body: '' }; }
 
-        const seen = new Set();
-        const cleaned = [];
+        const seen = new Set(); const cleaned = [];
         for (const raw of emails) {
             const e = String(raw || '').trim().toLowerCase();
-            if (!e || !e.includes('@')) continue;
-            if (seen.has(e)) continue;
-            seen.add(e);
-            cleaned.push(e);
+            if (!e || !e.includes('@') || seen.has(e)) continue;
+            seen.add(e); cleaned.push(e);
         }
         await writeStatus({ runId, draftId, stage: 'cleaned', cleanedCount: cleaned.length });
 
@@ -258,15 +240,11 @@ exports.handler = async (event) => {
         }
         await writeStatus({ runId, draftId, stage: 'lookup-done', lookedUp: Object.keys(lookup).length });
 
-        const willSendTo = [];
-        const skipped = [];
+        const willSendTo = []; const skipped = [];
         for (const email of cleaned) {
             const r = lookup[email];
-            if (r && r.contact && (r.contact.list_ids || []).includes(LIST_SUB)) {
-                skipped.push({ email, reason: 'already in LIST_SUB' });
-            } else {
-                willSendTo.push(email);
-            }
+            if (r && r.contact && (r.contact.list_ids || []).includes(LIST_SUB)) skipped.push({ email, reason: 'already in LIST_SUB' });
+            else willSendTo.push(email);
         }
         await writeStatus({ runId, draftId, stage: 'classified', willSendCount: willSendTo.length, skippedCount: skipped.length });
 
@@ -275,5 +253,33 @@ exports.handler = async (event) => {
             return { statusCode: 200, body: '' };
         }
 
-        // 1) Permanent fix: add survivors to LIST_SUBSCRIBED for future campaigns
-        await sgUpsertWit
+        await sgUpsertWithLists(willSendTo, [LIST_SUB]);
+        await writeStatus({ runId, draftId, stage: 'upserted-to-list-sub', count: willSendTo.length });
+
+        const catchupName = `catchup-${draftId.slice(0, 8)}-${Date.now()}`;
+        const catchupListId = await sgCreateList(catchupName);
+        await writeStatus({ runId, draftId, stage: 'catchup-list-created', catchupListId, catchupName });
+
+        await sgUpsertWithLists(willSendTo, [catchupListId]);
+        await writeStatus({ runId, draftId, stage: 'upserted-to-catchup-list', count: willSendTo.length });
+
+        const reflectedCount = await sgWaitForListCount(catchupListId, willSendTo.length);
+        await writeStatus({ runId, draftId, stage: 'list-propagated', reflectedCount, expected: willSendTo.length });
+
+        const send = await sgCreateAndScheduleSingleSend(draft, [catchupListId], 'catchup');
+        await writeStatus({
+            runId, draftId, stage: 'completed',
+            draftSubject: draft.subject, originalSendId: draft.sgSingleSendId,
+            catchupListId, catchupListName: catchupName,
+            attemptedRecipients: cleaned.length,
+            sentToCount: willSendTo.length, skippedCount: skipped.length,
+            listMembersConfirmed: reflectedCount,
+            newSingleSendId: send.sendId, newSingleSendStatus: send.status,
+            completedAt: new Date().toISOString()
+        });
+        return { statusCode: 200, body: '' };
+    } catch (err) {
+        await writeStatus({ runId, draftId, stage: 'error', error: err.message, errorAt: new Date().toISOString() });
+        return { statusCode: 200, body: '' };
+    }
+};
