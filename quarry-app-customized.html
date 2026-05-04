@@ -1052,6 +1052,42 @@ a.account-link:hover .al-arrow { color: var(--gold); }
 /* Scan CTA on home screen — slightly tighter than the rewards-screen version */
 .scan-cta.scan-cta-home { margin-top: 22px; margin-bottom: 4px; }
 
+
+/* Upcoming Bands list on Home (Fri/Sat/Sun) */
+.upcoming-bands-list { margin: 0 22px 8px; }
+.upcoming-bands-list .ub-empty {
+  padding: 22px 4px; text-align: center;
+  font-family: var(--ff-script); font-style: italic;
+  font-size: 0.95rem; color: var(--gray);
+}
+.upcoming-bands-list .ub-day {
+  font-family: var(--ff-body);
+  font-size: 9px; font-weight: 700; letter-spacing: 0.32em; text-transform: uppercase;
+  color: var(--gold); margin: 18px 0 6px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.upcoming-bands-list .ub-day:first-child { margin-top: 4px; }
+.upcoming-bands-list .ub-row {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 14px;
+  padding: 10px 4px; cursor: pointer;
+  border-bottom: 1px solid var(--border-soft);
+  transition: padding 0.15s;
+}
+.upcoming-bands-list .ub-row:active { padding-left: 8px; }
+.upcoming-bands-list .ub-name {
+  font-family: var(--ff-display); font-weight: 500;
+  font-size: 1rem; color: var(--cream); flex: 1; min-width: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.upcoming-bands-list .ub-time {
+  font-family: var(--ff-body); font-size: 0.78rem;
+  color: var(--gold-light); letter-spacing: 0.08em; flex-shrink: 0;
+}
+.upcoming-bands-list .ub-stage {
+  font-family: var(--ff-script); font-style: italic;
+  font-size: 0.82rem; color: var(--gray); flex-shrink: 0; margin-left: 6px;
+}
+
 </style>
 </head>
 <body>
@@ -1178,16 +1214,9 @@ a.account-link:hover .al-arrow { color: var(--gold); }
       <div class="section-rule"><div class="line"></div><div class="label">Upcoming This Month</div><div class="line"></div></div>
       <div id="upcomingMonthList" class="upcoming-month-list"></div>
 
-      <!-- Tonight -->
-      <div class="section-rule"><div class="line"></div><div class="label">Tonight</div><div class="line"></div></div>
-      <div class="list-item" onclick="gotoScreen('screen-events')">
-        <div class="list-rail">
-          <div class="list-overline">Live Music · 8 PM</div>
-          <div class="list-title">Acoustic Sessions</div>
-          <div class="list-desc">Outdoor stage, no cover. Patio open weather permitting.</div>
-        </div>
-        <div class="list-arrow">›</div>
-      </div>
+      <!-- Upcoming bands — Fri/Sat/Sun for the coming weekend, populated by renderUpcomingBands() -->
+      <div class="section-rule"><div class="line"></div><div class="label">Upcoming Bands</div><div class="line"></div></div>
+      <div id="upcomingBandsList" class="upcoming-bands-list"></div>
 
       <!-- Staff pick -->
       <div class="section-rule"><div class="line"></div><div class="label">Staff Pick</div><div class="line"></div></div>
@@ -2224,6 +2253,119 @@ function downloadIcs(evt) {
   setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 
+
+
+function renderUpcomingMonth(allEvents) {
+  const wrap = document.getElementById('upcomingMonthList');
+  if (!wrap) return;
+  if (!allEvents || !allEvents.length) {
+    wrap.innerHTML = '<div class="um-empty">Nothing on the calendar yet — check back soon.</div>';
+    return;
+  }
+  const now = new Date();
+  const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+  const _isWine = (evt) => {
+    const blob = ((evt.name || '') + ' | ' + (evt.category || '') + ' | ' + (evt.location || '')).toLowerCase();
+    return /\bwine tast|\bwine club|\bvintner|\bsommelier|\bwinery|\bchateau|\bvineyard|\brock & vine\b|\btasting\b/.test(blob);
+  };
+  const _isFree = (evt) => {
+    if (typeof evt.price === 'number') return evt.price === 0;
+    if (typeof evt.admissionPrice === 'number') return evt.admissionPrice === 0;
+    if (typeof evt.cost === 'string' && /^\s*(free|no cover|0)/i.test(evt.cost)) return true;
+    return false;
+  };
+  const filtered = allEvents.filter((evt) => {
+    if (!evt._start || isNaN(evt._start)) return false;
+    if (evt._start < now || evt._start > monthEnd) return false;
+    const cat = (evt.category || '').toLowerCase();
+    const isBand = evt._kind === 'band' || /live music|band/i.test(cat);
+    if (isBand) return false;
+    if (_isWine(evt)) return false;
+    return true;
+  }).slice(0, 5);
+
+  if (!filtered.length) {
+    wrap.innerHTML = '<div class="um-empty">No ticketed or community events scheduled this month.</div>';
+    return;
+  }
+
+  wrap.innerHTML = filtered.map((evt) => {
+    const isFree = _isFree(evt);
+    const cat = isFree ? 'Social · Free' : 'Ticketed';
+    const month = evt._start.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+    const day = evt._start.getDate();
+    const timeStr = evt.time && /^\d/.test(evt.time)
+      ? evt.time
+      : evt._start.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }).replace(':00', '');
+    const meta = evt._start.toLocaleDateString('en-US', { weekday: 'long' }) + ' · ' + timeStr;
+    return '<div class="um-card" onclick="gotoScreen(\'screen-events\')">' +
+      '<div class="um-date">' +
+        '<div class="um-month">' + month + '</div>' +
+        '<div class="um-day">' + day + '</div>' +
+      '</div>' +
+      '<div class="um-body">' +
+        '<div class="um-cat">' + cat + '</div>' +
+        '<div class="um-title">' + escapeHtml(evt.name || 'Event') + '</div>' +
+        '<div class="um-meta">' + escapeHtml(meta) + '</div>' +
+      '</div>' +
+      '<div class="um-arrow">›</div>' +
+    '</div>';
+  }).join('');
+}
+
+function renderUpcomingBands(allEvents) {
+  const wrap = document.getElementById('upcomingBandsList');
+  if (!wrap) return;
+  if (!allEvents || !allEvents.length) {
+    wrap.innerHTML = '<div class="ub-empty">No bands booked yet — check back soon.</div>';
+    return;
+  }
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const labelByDow = { 5: 'Friday', 6: 'Saturday', 0: 'Sunday' };
+  // Find the next Fri, Sat, Sun within the next 14 days (covers cases where today is mid-week)
+  const targetDays = [];
+  for (let offset = 0; offset < 14; offset++) {
+    const d = new Date(today.getTime() + offset * 86400000);
+    const lbl = labelByDow[d.getDay()];
+    if (lbl) {
+      const ymd = d.toISOString().split('T')[0];
+      if (!targetDays.find((x) => x.ymd === ymd)) {
+        targetDays.push({ date: d, ymd, label: lbl });
+        if (targetDays.length >= 3) break;
+      }
+    }
+  }
+
+  const bands = allEvents.filter((e) => e._kind === 'band' && e._start && !isNaN(e._start));
+
+  let html = '';
+  let totalShown = 0;
+  targetDays.forEach((td) => {
+    const bandsForDay = bands.filter((b) => b._start.toISOString().split('T')[0] === td.ymd);
+    if (!bandsForDay.length) return;
+    const dayHeader = td.label + ' · ' + td.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    html += '<div class="ub-day">' + dayHeader + '</div>';
+    bandsForDay.forEach((b) => {
+      const tStr = b.time && /^\d/.test(b.time)
+        ? b.time
+        : (b.timeSlot || (b.type === 'afternoon' ? '2 PM' : '7 PM'));
+      const bandIdAttr = escapeHtml(b.id || ('band-' + Math.random().toString(36).slice(2, 8)));
+      html +=
+        '<div class="ub-row" data-action="ics" data-event-id="' + bandIdAttr + '" onclick="gotoScreen(\'screen-events\')">' +
+          '<div class="ub-name">' + escapeHtml(b.name || 'TBD') + '</div>' +
+          '<div class="ub-time">' + escapeHtml(tStr) + '</div>' +
+        '</div>';
+      totalShown++;
+    });
+  });
+
+  if (!totalShown) {
+    wrap.innerHTML = '<div class="ub-empty">No bands booked for the upcoming weekend yet.</div>';
+    return;
+  }
+  wrap.innerHTML = html;
+}
+
 function renderHomeContext(upcoming) {
   const todayEvt = upcoming.find(e => isToday(e._start));
   const tonightCard = document.querySelector('#screen-home .list-item');
@@ -2259,6 +2401,10 @@ function renderHomeContext(upcoming) {
       if (v) v.textContent = weekCount + ' Event' + (weekCount === 1 ? '' : 's');
     }
   });
+
+  // Populate the Upcoming This Month list and Upcoming Bands list
+  renderUpcomingMonth(upcoming);
+  renderUpcomingBands(upcoming);
 }
 
 async function fetchBookings(dateISO) {
