@@ -2560,6 +2560,59 @@ function updateEventsMonthLabel() {
   } catch (_) {}
 }
 
+
+// ─── Native menu rendering (from menu.json) ────────────────────────────
+let _menuData = null;
+let _menuActiveSection = 'all';
+const MENU_FEED = 'https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/menu.json';
+
+async function fetchMenu() {
+  try {
+    const r = await fetch(MENU_FEED + '?t=' + Date.now(), { mode: 'cors' });
+    if (!r.ok) throw new Error('menu HTTP ' + r.status);
+    return await r.json();
+  } catch (e) {
+    console.log('[Quarry App] menu fetch failed:', e.message);
+    return null;
+  }
+}
+
+function renderMenu(data) {
+  if (!data || !Array.isArray(data.sections)) return;
+  _menuData = data;
+  const segWrap = document.getElementById('menuSegments');
+  const listWrap = document.getElementById('menuList');
+  if (!segWrap || !listWrap) return;
+
+  let segHtml = '<button class="menu-seg-btn ' + (_menuActiveSection === 'all' ? 'active' : '') + '" data-mid="all">All</button>';
+  data.sections.forEach((s) => {
+    segHtml += '<button class="menu-seg-btn ' + (_menuActiveSection === s.id ? 'active' : '') + '" data-mid="' + s.id + '">' + escapeHtml(s.title) + '</button>';
+  });
+  segWrap.innerHTML = segHtml;
+
+  const sections = (_menuActiveSection === 'all') ? data.sections : data.sections.filter((s) => s.id === _menuActiveSection);
+  let html = '';
+  sections.forEach((s) => {
+    html += '<div class="menu-section-block">';
+    html += '<div class="menu-section-title">' + escapeHtml(s.title) + '</div>';
+    (s.items || []).forEach((it) => {
+      html += '<div class="menu-item-row">';
+      html += '<div class="menu-item-head"><div class="menu-item-name">' + escapeHtml(it.name) + '</div><div class="menu-item-price">' + escapeHtml(it.price) + '</div></div>';
+      if (it.desc) html += '<div class="menu-item-desc">' + escapeHtml(it.desc) + '</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  });
+  listWrap.innerHTML = html;
+
+  segWrap.querySelectorAll('.menu-seg-btn').forEach((b) => {
+    b.addEventListener('click', () => {
+      _menuActiveSection = b.getAttribute('data-mid');
+      renderMenu(_menuData);
+    });
+  });
+}
+
 window.addEventListener('DOMContentLoaded', () => {
   updateEventsMonthLabel();
   fetchMenu().then(m => { if (m) renderMenu(m); });
