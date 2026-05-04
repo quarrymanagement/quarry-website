@@ -2362,15 +2362,17 @@ function submitParty() {
       pill.classList.remove('demo'); pill.classList.add('live');
       pillLabel.textContent = 'Signed in as ' + m.email;
     }
-    document.querySelectorAll('.reward-row').forEach((row) => {
+    document.querySelectorAll('#screen-rewards .reward-row').forEach((row) => {
       const btn = row.querySelector('.reward-action');
       if (!btn || btn.dataset.wired) return;
       btn.dataset.wired = '1';
       const name = row.querySelector('.reward-name') ? row.querySelector('.reward-name').textContent.trim() : '';
+      const ptsText = row.querySelector('.reward-pts') ? row.querySelector('.reward-pts').textContent.trim() : '';
+      const cost = parseInt(ptsText.replace(/[^\d]/g,''), 10) || 0;
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         if (btn.classList.contains('disabled')) return;
-        startRedemption(name);
+        confirmRedemption(name, cost);
       });
     });
   }
@@ -2386,6 +2388,51 @@ function submitParty() {
     'Free Bottle of Wine': 'r-bottle',
   };
 
+  // Confirm overlay — show before charging points
+  function confirmRedemption(rewardName, cost) {
+    if (!currentToken) { showOverlay(); return; }
+    const balance = (currentMember && typeof currentMember.currentPoints === 'number') ? currentMember.currentPoints : 0;
+    if (cost > balance) { alert("You don't have enough points for this reward yet."); return; }
+    const remaining = balance - cost;
+
+    const existing = document.getElementById('confirmRedeemOverlay');
+    if (existing) existing.remove();
+    const wrap = document.createElement('div');
+    wrap.id = 'confirmRedeemOverlay';
+    wrap.style.cssText = 'position:fixed;inset:0;background:rgba(14,14,14,0.94);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px);';
+    wrap.innerHTML =
+      '<div style="background:#1A1A1A;border:1px solid rgba(196,149,106,0.45);border-radius:18px;padding:28px 24px;max-width:360px;width:100%;text-align:center">' +
+        '<div style="font-size:0.65rem;letter-spacing:0.32em;color:#D4AF6A;text-transform:uppercase;margin-bottom:8px">Confirm Redemption</div>' +
+        '<div style="font-family:Playfair Display,serif;font-size:1.4rem;color:#F5F0E8;margin-bottom:16px">' + rewardName + '</div>' +
+        '<div style="font-family:Cormorant Garamond,serif;font-style:italic;color:rgba(245,240,232,0.7);font-size:1rem;line-height:1.55;margin-bottom:18px">Are you sure you want to redeem this reward?</div>' +
+        '<div style="display:flex;justify-content:space-between;padding:14px 18px;background:rgba(184,147,58,0.08);border:1px solid rgba(196,149,106,0.18);border-radius:8px;margin-bottom:22px;align-items:center">' +
+          '<div style="text-align:left">' +
+            '<div style="font-size:0.6rem;letter-spacing:0.32em;color:rgba(245,240,232,0.45);text-transform:uppercase">Cost</div>' +
+            '<div style="font-family:Playfair Display,serif;font-size:1.1rem;color:#D4AF6A;font-weight:600">−' + cost.toLocaleString() + ' pts</div>' +
+          '</div>' +
+          '<div style="text-align:right">' +
+            '<div style="font-size:0.6rem;letter-spacing:0.32em;color:rgba(245,240,232,0.45);text-transform:uppercase">After</div>' +
+            '<div style="font-family:Playfair Display,serif;font-size:1.1rem;color:#F5F0E8;font-weight:500">' + remaining.toLocaleString() + ' pts</div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="display:flex;gap:10px">' +
+          '<button id="cancelRedeemBtn" style="flex:1;background:transparent;color:rgba(245,240,232,0.7);border:1px solid rgba(196,149,106,0.25);padding:14px;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.28em;text-transform:uppercase;border-radius:8px;cursor:pointer">Cancel</button>' +
+          '<button id="okRedeemBtn" style="flex:1;background:#B8933A;color:#1A1A1A;border:1px solid #B8933A;padding:14px;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.28em;text-transform:uppercase;border-radius:8px;cursor:pointer">Redeem</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(wrap);
+    document.getElementById('cancelRedeemBtn').addEventListener('click', () => wrap.remove());
+    document.getElementById('okRedeemBtn').addEventListener('click', async () => {
+      const okBtn = document.getElementById('okRedeemBtn');
+      okBtn.disabled = true; okBtn.textContent = 'Redeeming…';
+      try {
+        await startRedemption(rewardName);
+      } finally {
+        wrap.remove();
+      }
+    });
+  }
+
   async function startRedemption(rewardName) {
     if (!currentToken) { showOverlay(); return; }
     const rewardId = REWARD_ID_MAP[rewardName];
@@ -2397,6 +2444,11 @@ function submitParty() {
       });
       const body = await r.json();
       if (!body.ok) throw new Error(body.error || 'Could not start redemption');
+      // Server has already deducted — mirror locally so points display updates immediately
+      if (currentMember && typeof body.newBalance === 'number') {
+        currentMember.currentPoints = body.newBalance;
+        renderMember();
+      }
       showRedemptionModal(body);
     } catch (e) { alert(e.message); }
   }
