@@ -710,5 +710,23 @@
         };
     })();
     </script>
+<!-- Pre-fill ?email= from URL (used when launched from the Quarry member app) -->
+<script>
+(function() {
+  try {
+    var p = new URLSearchParams(location.search);
+    var e = p.get("email");
+    if (!e || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)) return;
+    var fill = function() {
+      document.querySelectorAll("input[type="email"], input[name="email"]").forEach(function(el) {
+        if (!el.value) el.value = e;
+      });
+    };
+    if (document.readyState !== "loading") fill();
+    else document.addEventListener("DOMContentLoaded", fill);
+    new MutationObserver(function() { fill(); }).observe(document.documentElement, { childList: true, subtree: true });
+  } catch (_) {}
+})();
+</script>
 </body>
 </html>
