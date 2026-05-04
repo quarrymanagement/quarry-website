@@ -129,6 +129,20 @@ exports.handler = async (event) => {
   }
 
   const expiresAt = new Date(Date.now() + CLAIM_TTL_MS).toISOString();
+  // DEDUCT points immediately on confirm — customer commits at this step.
+  // Code generation IS the point-spending action; bartender claim is just audit.
+  member.currentPoints = (member.currentPoints || 0) - reward.points;
+  member.history = member.history || [];
+  member.history.push({
+    at: new Date().toISOString(),
+    action: 'redeem',
+    rewardId: reward.id,
+    rewardName: reward.name,
+    delta: -reward.points,
+    code: code,
+    note: 'Redeemed via app — code generated for bartender',
+  });
+  member.totalRedemptions = (member.totalRedemptions || 0) + 1;
   member.pendingRedemption = {
     code: code,
     rewardId: reward.id,
@@ -151,6 +165,7 @@ exports.handler = async (event) => {
     rewardName: reward.name,
     rewardDescription: reward.description,
     points: reward.points,
+    newBalance: member.currentPoints,
     expiresAt: expiresAt,
     expiresInSeconds: Math.round(CLAIM_TTL_MS / 1000),
   });
