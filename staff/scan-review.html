@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>Quarry · Flagged Scans</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1A1A1A; --card: #232323; --elev: #2A2520;
+    --border: rgba(196,149,106,0.22); --gold: #B8933A; --gold-light: #D4AF6A;
+    --cream: #F5F0E8; --text-muted: rgba(245,240,232,0.55); --text-dim: rgba(245,240,232,0.35);
+    --green: #6FBF73; --green-bg: rgba(111,191,115,0.12);
+    --red: #DC2626; --red-bg: rgba(220,38,38,0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--cream); font-family: 'Montserrat', sans-serif; min-height: 100vh; padding: 24px 16px; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  .header { text-align: center; margin-bottom: 24px; }
+  .brand { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--cream); margin-bottom: 4px; }
+  .sub { font-size: 0.7rem; letter-spacing: 0.32em; text-transform: uppercase; color: var(--gold-light); }
+  .login-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; max-width: 380px; margin: 0 auto; }
+  .field { margin-bottom: 14px; }
+  label { display: block; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-light); margin-bottom: 6px; }
+  input { width: 100%; padding: 14px 16px; background: var(--elev); border: 1px solid var(--border); border-radius: 6px; color: var(--cream); font-size: 1rem; font-family: inherit; }
+  input:focus { outline: none; border-color: var(--gold); }
+  .btn { width: 100%; background: var(--gold); color: var(--bg); font-family: inherit; font-size: 0.9rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; border: none; border-radius: 8px; padding: 14px; cursor: pointer; }
+  .btn:hover { background: var(--gold-light); }
+  .btn:disabled { opacity: 0.5; cursor: wait; }
+  .btn-sm { padding: 8px 14px; font-size: 0.7rem; border-radius: 4px; width: auto; }
+  .btn-approve { background: var(--green); color: var(--bg); }
+  .btn-reject { background: var(--red); color: var(--cream); }
+
+  .scan-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 14px; }
+  .scan-row { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 10px; align-items: baseline; }
+  .scan-name { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 600; color: var(--cream); }
+  .scan-meta { font-size: 0.85rem; color: var(--text-muted); }
+  .scan-detail { font-size: 0.85rem; color: var(--text-muted); padding: 8px 0; line-height: 1.5; border-top: 1px solid var(--border); margin-top: 8px; }
+  .scan-detail strong { color: var(--gold-light); font-weight: 600; }
+  .scan-actions { display: flex; gap: 10px; margin-top: 14px; }
+  .empty { text-align: center; padding: 60px 20px; color: var(--text-muted); font-style: italic; }
+  .reason { font-style: italic; color: var(--red); font-size: 0.85rem; }
+  .footer { text-align: center; margin-top: 32px; font-size: 0.75rem; color: var(--text-dim); letter-spacing: 0.06em; }
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); padding: 14px 22px; border-radius: 8px; font-size: 0.9rem; opacity: 0; transition: opacity 0.2s; }
+  .toast.show { opacity: 1; }
+  .toast.ok { background: var(--green-bg); border: 1px solid var(--green); color: var(--green); }
+  .toast.err { background: var(--red-bg); border: 1px solid var(--red); color: #fca5a5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="brand">The Quarry</div>
+    <div class="sub">Flagged Receipt Scans</div>
+  </div>
+
+  <div id="loginPanel" class="login-card">
+    <div class="field">
+      <label>Admin Password</label>
+      <input type="password" id="password" placeholder="Enter password" autocomplete="current-password">
+    </div>
+    <button class="btn" onclick="login()">Continue</button>
+  </div>
+
+  <div id="queuePanel" style="display:none">
+    <div id="queueList"></div>
+  </div>
+
+  <div class="footer">
+    Each card was rejected for a cardholder name mismatch. Approve only if you can verify the receipt belongs to this member.
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+let adminPass = null;
+let items = [];
+
+function $(id) { return document.getElementById(id); }
+function showToast(msg, kind='ok') {
+  const t = $('toast'); t.textContent = msg; t.className = 'toast show ' + kind;
+  setTimeout(() => { t.className = 'toast ' + kind; }, 2400);
+}
+function escHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+async function login() {
+  const p = $('password').value.trim();
+  if (!p) return;
+  adminPass = p;
+  await loadQueue();
+}
+
+async function loadQueue() {
+  // Load scanned-flagged.json directly from raw GitHub
+  try {
+    const r = await fetch('https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/scanned-flagged.json?t=' + Date.now());
+    const data = await r.json();
+    items = (data.items || []).filter(i => i.status === 'pending');
+    renderQueue();
+    $('loginPanel').style.display = 'none';
+    $('queuePanel').style.display = 'block';
+  } catch (e) {
+    showToast('Could not load flagged queue', 'err');
+  }
+}
+
+function renderQueue() {
+  const list = $('queueList');
+  if (!items.length) {
+    list.innerHTML = '<div class="empty">No flagged scans pending review.</div>';
+    return;
+  }
+  list.innerHTML = items.map(it =>
+    '<div class="scan-card" data-id="' + escHtml(it.id) + '">' +
+      '<div class="scan-row">' +
+        '<div>' +
+          '<div class="scan-name">' + escHtml(it.memberName || it.memberEmail) + '</div>' +
+          '<div class="scan-meta">' + escHtml(it.memberEmail) + '</div>' +
+        '</div>' +
+        '<div style="text-align:right">' +
+          '<div class="scan-name">$' + Number(it.total || 0).toFixed(2) + '</div>' +
+          '<div class="scan-meta">Check #' + escHtml(it.checkNumber) + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="scan-detail">' +
+        '<strong>Card name on receipt:</strong> ' + escHtml(it.cardholder || '—') + '<br>' +
+        '<strong>Member name on account:</strong> ' + escHtml(it.memberName || '—') + '<br>' +
+        '<span class="reason">Reason: ' + escHtml(it.reason) + '</span><br>' +
+        '<span class="scan-meta">Flagged ' + new Date(it.createdAt).toLocaleString() + '</span>' +
+      '</div>' +
+      '<div class="scan-actions">' +
+        '<button class="btn btn-sm btn-approve" onclick="decide(\'' + it.id + '\', \'approve\')">Approve & Credit</button>' +
+        '<button class="btn btn-sm btn-reject" onclick="decide(\'' + it.id + '\', \'reject\')">Reject</button>' +
+      '</div>' +
+    '</div>'
+  ).join('');
+}
+
+async function decide(itemId, action) {
+  const card = document.querySelector('.scan-card[data-id="' + itemId + '"]');
+  if (card) card.style.opacity = '0.5';
+  try {
+    const r = await fetch('/.netlify/functions/scan-review', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminPassword: adminPass, itemId: itemId, action: action }),
+    });
+    const body = await r.json();
+    if (!body.ok) throw new Error(body.error || 'Failed');
+    showToast(action === 'approve' ? 'Approved · ' + body.points + ' pts credited' : 'Rejected', 'ok');
+    items = items.filter(i => i.id !== itemId);
+    renderQueue();
+  } catch (e) {
+    showToast(e.message, 'err');
+    if (card) card.style.opacity = '1';
+  }
+}
+
+$('password').addEventListener('keydown', (e) => { if (e.key === 'Enter') login(); });
+</script>
+</body>
+</html>
