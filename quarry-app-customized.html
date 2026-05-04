@@ -2577,127 +2577,266 @@ async function submitParty() {
   let currentMember = null;
   let currentToken = null;
 
+  // ─── Sign-in overlay with tabs (Sign In / Sign Up / Forgot Password) ──
   const overlay = document.createElement('div');
   overlay.id = 'signinOverlay';
-  overlay.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(14,14,14,0.96);z-index:9999;backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:20px;';
+  overlay.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(14,14,14,0.96);z-index:9999;backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:20px;overflow-y:auto;';
+  // Common styles
+  const ovrInputCss = 'width:100%;padding:12px 0;background:transparent;border:0;border-bottom:1px solid rgba(196,149,106,0.25);color:#F5F0E8;font-size:14px;font-family:Montserrat,sans-serif;outline:none;letter-spacing:0.04em;';
+  const ovrInputCssMargin = ovrInputCss + 'margin-bottom:16px;';
+  const ovrPrimaryBtn = 'width:100%;background:#B8933A;color:#1A1A1A;border:1px solid #B8933A;padding:14px;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.32em;text-transform:uppercase;cursor:pointer;border-radius:6px;';
+  const ovrSecondaryBtn = 'width:100%;background:transparent;color:#D4AF6A;border:1px solid #B8933A;padding:14px;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.32em;text-transform:uppercase;cursor:pointer;border-radius:6px;';
+  const ovrTabBtn = 'flex:1;padding:12px 8px;font-family:Montserrat,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.28em;text-transform:uppercase;background:transparent;color:rgba(245,240,232,0.5);border:0;border-bottom:2px solid transparent;cursor:pointer;';
+  const ovrTabBtnActive = ovrTabBtn + 'color:#D4AF6A;border-bottom-color:#D4AF6A;';
+
   overlay.innerHTML =
-    '<div style="background:#1A1A1A;border:1px solid rgba(196,149,106,0.25);border-radius:18px;padding:32px;max-width:360px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,0.6);">' +
-      '<div style="text-align:center;margin-bottom:24px;">' +
-        '<div style="font-family:Playfair Display,serif;font-size:1.1rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#F5F0E8;">The Quarry</div>' +
-        '<div style="font-size:0.7rem;letter-spacing:0.32em;color:#D4AF6A;text-transform:uppercase;margin-top:6px;">Member Sign In</div>' +
+    '<div style="background:#1A1A1A;border:1px solid rgba(196,149,106,0.25);border-radius:18px;padding:32px 28px 28px;max-width:380px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,0.6);max-height:90vh;overflow-y:auto">' +
+      '<div style="text-align:center;margin-bottom:18px">' +
+        '<div style="font-family:Playfair Display,serif;font-size:1.1rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#F5F0E8">The Quarry</div>' +
+        '<div style="font-size:0.7rem;letter-spacing:0.32em;color:#D4AF6A;text-transform:uppercase;margin-top:6px">Members Club</div>' +
       '</div>' +
-      '<div id="signinStep1">' +
-        '<div style="font-family:Cormorant Garamond,serif;font-style:italic;color:rgba(245,240,232,0.7);font-size:1rem;text-align:center;margin-bottom:18px;line-height:1.5;">Enter your email and we\'ll send a 6-digit sign-in code.</div>' +
-        '<input id="signinEmail" type="email" placeholder="you@email.com" style="width:100%;padding:12px 0;background:transparent;border:0;border-bottom:1px solid rgba(196,149,106,0.25);color:#F5F0E8;font-size:14px;font-family:Montserrat,sans-serif;outline:none;margin-bottom:22px;letter-spacing:0.04em;">' +
-        '<button id="signinReqBtn" style="width:100%;background:transparent;color:#D4AF6A;border:1px solid #B8933A;padding:14px;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.32em;text-transform:uppercase;cursor:pointer;">Send Code</button>' +
-        '<div id="signinErr1" style="color:#DC2626;font-size:11px;margin-top:12px;text-align:center;display:none;"></div>' +
-        '<div style="text-align:center;margin-top:18px;"><a href="#" id="signinSkip" style="font-family:Cormorant Garamond,serif;font-style:italic;color:rgba(245,240,232,0.45);text-decoration:none;font-size:0.9rem;">Continue as guest (demo)</a></div>' +
+      // Tabs
+      '<div style="display:flex;border-bottom:1px solid rgba(196,149,106,0.18);margin-bottom:22px">' +
+        '<button id="tabSignIn" style="' + ovrTabBtnActive + '">Sign In</button>' +
+        '<button id="tabSignUp" style="' + ovrTabBtn + '">Sign Up</button>' +
       '</div>' +
-      '<div id="signinStep2" style="display:none;">' +
-        '<div style="font-family:Cormorant Garamond,serif;font-style:italic;color:rgba(245,240,232,0.7);font-size:0.95rem;text-align:center;margin-bottom:16px;line-height:1.5;">We sent a code to<br><span id="signinEmailEcho" style="color:#F5F0E8;font-style:normal;letter-spacing:0.04em;"></span></div>' +
-        '<input id="signinCode" type="text" inputmode="numeric" maxlength="6" placeholder="000000" style="width:100%;padding:14px 16px;background:transparent;border:0;border-bottom:1px solid rgba(196,149,106,0.25);color:#F5F0E8;font-size:1.6rem;font-family:Playfair Display,serif;outline:none;margin-bottom:20px;letter-spacing:0.32em;text-align:center;">' +
-        '<button id="signinVerBtn" style="width:100%;background:transparent;color:#D4AF6A;border:1px solid #B8933A;padding:14px;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.32em;text-transform:uppercase;cursor:pointer;">Verify &amp; Sign In</button>' +
-        '<div style="text-align:center;margin-top:14px;"><a href="#" id="signinBack" style="font-family:Cormorant Garamond,serif;font-style:italic;color:rgba(245,240,232,0.45);text-decoration:none;font-size:0.85rem;">Use a different email</a></div>' +
-        '<div id="signinErr2" style="color:#DC2626;font-size:11px;margin-top:12px;text-align:center;display:none;"></div>' +
+
+      // SIGN IN PANEL
+      '<div id="panelSignIn">' +
+        '<div style="font-family:Cormorant Garamond,serif;font-style:italic;color:rgba(245,240,232,0.7);font-size:0.95rem;text-align:center;margin-bottom:18px;line-height:1.5">Welcome back. Sign in to see your points.</div>' +
+        '<input id="siEmail" type="email" placeholder="Email" autocomplete="email" style="' + ovrInputCssMargin + '">' +
+        '<input id="siPassword" type="password" placeholder="Password" autocomplete="current-password" style="' + ovrInputCssMargin + '">' +
+        '<button id="siBtn" style="' + ovrPrimaryBtn + '">Sign In</button>' +
+        '<div id="siErr" style="color:#DC2626;font-size:11px;margin-top:12px;text-align:center;display:none"></div>' +
+        '<div style="display:flex;justify-content:space-between;margin-top:18px;font-size:0.85rem">' +
+          '<a href="#" id="siForgot" style="font-family:Cormorant Garamond,serif;font-style:italic;color:rgba(245,240,232,0.55);text-decoration:none">Forgot password?</a>' +
+          '<a href="#" id="siGuest" style="font-family:Cormorant Garamond,serif;font-style:italic;color:rgba(245,240,232,0.4);text-decoration:none">Continue as guest</a>' +
+        '</div>' +
       '</div>' +
+
+      // SIGN UP PANEL
+      '<div id="panelSignUp" style="display:none">' +
+        '<div style="font-family:Cormorant Garamond,serif;font-style:italic;color:rgba(245,240,232,0.7);font-size:0.95rem;text-align:center;margin-bottom:14px;line-height:1.5">Create your account and earn <strong style="color:#D4AF6A;font-style:normal">270 welcome points</strong> instantly.</div>' +
+        '<input id="suName" type="text" placeholder="Full name" autocomplete="name" style="' + ovrInputCssMargin + '">' +
+        '<input id="suEmail" type="email" placeholder="Email" autocomplete="email" style="' + ovrInputCssMargin + '">' +
+        '<input id="suPhone" type="tel" placeholder="Phone (xxx) xxx-xxxx" autocomplete="tel" style="' + ovrInputCssMargin + '">' +
+        '<div style="display:flex;gap:10px;margin-bottom:16px;align-items:baseline">' +
+          '<label style="flex:0 0 auto;font-family:Montserrat,sans-serif;font-size:9px;font-weight:600;letter-spacing:0.22em;text-transform:uppercase;color:#D4AF6A;white-space:nowrap">Date of birth</label>' +
+          '<input id="suDob" type="date" style="' + ovrInputCss + 'flex:1;color-scheme:dark;color:#F5F0E8;font-size:13px">' +
+        '</div>' +
+        '<input id="suPassword" type="password" placeholder="Password (8+ chars)" autocomplete="new-password" style="' + ovrInputCssMargin + '">' +
+        '<label style="display:flex;gap:10px;align-items:flex-start;font-family:Cormorant Garamond,serif;font-style:italic;font-size:0.92rem;color:rgba(245,240,232,0.75);cursor:pointer;margin-bottom:10px">' +
+          '<input id="suEmailOpt" type="checkbox" checked style="margin-top:3px;accent-color:#B8933A">' +
+          '<span>Email me about events &amp; rewards <strong style="color:#D4AF6A;font-style:normal">(+10 pts)</strong></span>' +
+        '</label>' +
+        '<label style="display:flex;gap:10px;align-items:flex-start;font-family:Cormorant Garamond,serif;font-style:italic;font-size:0.92rem;color:rgba(245,240,232,0.75);cursor:pointer;margin-bottom:18px">' +
+          '<input id="suSmsOpt" type="checkbox" style="margin-top:3px;accent-color:#B8933A">' +
+          '<span>Text me push notifications &amp; reminders <strong style="color:#D4AF6A;font-style:normal">(+10 pts)</strong></span>' +
+        '</label>' +
+        '<button id="suBtn" style="' + ovrPrimaryBtn + '">Create Account</button>' +
+        '<div id="suErr" style="color:#DC2626;font-size:11px;margin-top:12px;text-align:center;display:none"></div>' +
+      '</div>' +
+
+      // FORGOT PASSWORD PANEL
+      '<div id="panelForgot" style="display:none">' +
+        '<div style="font-family:Playfair Display,serif;font-size:1.2rem;color:#F5F0E8;text-align:center;margin-bottom:6px">Reset Password</div>' +
+        '<div id="fpStep1">' +
+          '<div style="font-family:Cormorant Garamond,serif;font-style:italic;color:rgba(245,240,232,0.7);font-size:0.95rem;text-align:center;margin-bottom:18px;line-height:1.5">Enter your email — we\'ll send a 6-digit code.</div>' +
+          '<input id="fpEmail" type="email" placeholder="Email" style="' + ovrInputCssMargin + '">' +
+          '<button id="fpSendBtn" style="' + ovrPrimaryBtn + '">Send Code</button>' +
+        '</div>' +
+        '<div id="fpStep2" style="display:none">' +
+          '<div style="font-family:Cormorant Garamond,serif;font-style:italic;color:rgba(245,240,232,0.7);font-size:0.95rem;text-align:center;margin-bottom:14px;line-height:1.5">We sent a code to<br><span id="fpEmailEcho" style="color:#F5F0E8;font-style:normal;letter-spacing:0.04em"></span></div>' +
+          '<input id="fpCode" type="text" inputmode="numeric" maxlength="6" placeholder="000000" style="' + ovrInputCssMargin + 'font-size:1.6rem;font-family:Playfair Display,serif;letter-spacing:0.32em;text-align:center;padding:14px 0">' +
+          '<input id="fpNewPass" type="password" placeholder="New password (8+ chars)" autocomplete="new-password" style="' + ovrInputCssMargin + '">' +
+          '<button id="fpResetBtn" style="' + ovrPrimaryBtn + '">Reset Password</button>' +
+        '</div>' +
+        '<div id="fpErr" style="color:#DC2626;font-size:11px;margin-top:12px;text-align:center;display:none"></div>' +
+        '<div style="text-align:center;margin-top:18px"><a href="#" id="fpBack" style="font-family:Cormorant Garamond,serif;font-style:italic;color:rgba(245,240,232,0.55);text-decoration:none;font-size:0.9rem">Back to sign in</a></div>' +
+      '</div>' +
+
     '</div>';
   document.body.appendChild(overlay);
 
-  function showOverlay() {
+  function showOverlay(panel) {
     overlay.style.display = 'flex';
-    document.getElementById('signinStep1').style.display = '';
-    document.getElementById('signinStep2').style.display = 'none';
-    setTimeout(() => document.getElementById('signinEmail').focus(), 100);
+    showPanel(panel || 'signin');
+    setTimeout(() => {
+      const target = panel === 'signup' ? 'suName' : panel === 'forgot' ? 'fpEmail' : 'siEmail';
+      const el = document.getElementById(target); if (el) el.focus();
+    }, 100);
   }
   function hideOverlay() { overlay.style.display = 'none'; }
-
-  async function requestCode() {
-    const email = document.getElementById('signinEmail').value.trim().toLowerCase();
-    const errEl = document.getElementById('signinErr1');
-    errEl.style.display = 'none';
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-      errEl.textContent = 'Enter a valid email';
-      errEl.style.display = 'block';
-      return;
+  function showPanel(name) {
+    document.getElementById('panelSignIn').style.display = name === 'signin' ? '' : 'none';
+    document.getElementById('panelSignUp').style.display = name === 'signup' ? '' : 'none';
+    document.getElementById('panelForgot').style.display = name === 'forgot' ? '' : 'none';
+    document.getElementById('tabSignIn').style.cssText = name === 'signin' ? ovrTabBtnActive : ovrTabBtn;
+    document.getElementById('tabSignUp').style.cssText = name === 'signup' ? ovrTabBtnActive : ovrTabBtn;
+    // Reset forgot to step 1
+    if (name === 'forgot') {
+      document.getElementById('fpStep1').style.display = '';
+      document.getElementById('fpStep2').style.display = 'none';
     }
-    document.getElementById('signinReqBtn').textContent = 'Sending…';
+  }
+  function setErr(id, msg) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (msg) { el.textContent = msg; el.style.display = 'block'; }
+    else { el.style.display = 'none'; }
+  }
+
+  // Wire tabs
+  document.getElementById('tabSignIn').addEventListener('click', () => showPanel('signin'));
+  document.getElementById('tabSignUp').addEventListener('click', () => showPanel('signup'));
+
+  // Sign In handler
+  async function doSignIn() {
+    setErr('siErr', null);
+    const email = document.getElementById('siEmail').value.trim().toLowerCase();
+    const password = document.getElementById('siPassword').value;
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return setErr('siErr', 'Enter a valid email');
+    if (!password) return setErr('siErr', 'Enter your password');
+    const btn = document.getElementById('siBtn'); btn.disabled = true; const orig = btn.textContent; btn.textContent = 'Signing in…';
+    try {
+      const r = await fetch(API_BASE + '/.netlify/functions/login', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const body = await r.json();
+      if (!body.ok) {
+        if (body.needsSignup) return setErr('siErr', body.error);
+        return setErr('siErr', body.error || 'Sign in failed');
+      }
+      currentToken = body.token;
+      currentMember = body.member;
+      try { localStorage.setItem(STORAGE_TOKEN, body.token); } catch (_) {}
+      hideOverlay();
+      renderMember();
+      retryPendingScans(body.token);
+    } catch (e) {
+      setErr('siErr', 'Network error — try again');
+    } finally {
+      btn.disabled = false; btn.textContent = orig;
+    }
+  }
+
+  // Sign Up handler
+  async function doSignUp() {
+    setErr('suErr', null);
+    const name = document.getElementById('suName').value.trim();
+    const email = document.getElementById('suEmail').value.trim().toLowerCase();
+    const phone = document.getElementById('suPhone').value.trim();
+    const dob = document.getElementById('suDob').value;
+    const password = document.getElementById('suPassword').value;
+    const marketingOptIn = document.getElementById('suEmailOpt').checked;
+    const smsOptIn = document.getElementById('suSmsOpt').checked;
+    if (!name) return setErr('suErr', 'Name is required');
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return setErr('suErr', 'Enter a valid email');
+    if ((phone.match(/\d/g) || []).length < 10) return setErr('suErr', 'Enter a valid phone (10+ digits)');
+    if (password.length < 8) return setErr('suErr', 'Password must be 8+ characters');
+    const btn = document.getElementById('suBtn'); btn.disabled = true; const orig = btn.textContent; btn.textContent = 'Creating…';
+    try {
+      const r = await fetch(API_BASE + '/.netlify/functions/signup', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, phone, dob, password, marketingOptIn, smsOptIn }),
+      });
+      const body = await r.json();
+      if (!body.ok) return setErr('suErr', body.error || 'Sign up failed');
+      currentToken = body.token;
+      currentMember = body.member;
+      try { localStorage.setItem(STORAGE_TOKEN, body.token); } catch (_) {}
+      hideOverlay();
+      renderMember();
+      // Friendly toast
+      try {
+        alert('Welcome! ' + body.bonusAwarded + ' points landed in your account.');
+      } catch (_) {}
+    } catch (e) {
+      setErr('suErr', 'Network error — try again');
+    } finally {
+      btn.disabled = false; btn.textContent = orig;
+    }
+  }
+
+  // Forgot Password handlers
+  async function doForgotSend() {
+    setErr('fpErr', null);
+    const email = document.getElementById('fpEmail').value.trim().toLowerCase();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return setErr('fpErr', 'Enter a valid email');
+    const btn = document.getElementById('fpSendBtn'); btn.disabled = true; btn.textContent = 'Sending…';
     try {
       const r = await fetch(API_BASE + '/.netlify/functions/request-code', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       });
       const body = await r.json();
-      if (!body.ok) throw new Error(body.error || 'Send failed');
-      document.getElementById('signinEmailEcho').textContent = email;
-      document.getElementById('signinStep1').style.display = 'none';
-      document.getElementById('signinStep2').style.display = '';
-      setTimeout(() => document.getElementById('signinCode').focus(), 100);
+      if (!body.ok) return setErr('fpErr', body.error || 'Could not send code');
+      document.getElementById('fpEmailEcho').textContent = email;
+      document.getElementById('fpStep1').style.display = 'none';
+      document.getElementById('fpStep2').style.display = '';
+      setTimeout(() => { const el = document.getElementById('fpCode'); if (el) el.focus(); }, 100);
     } catch (e) {
-      errEl.textContent = e.message;
-      errEl.style.display = 'block';
+      setErr('fpErr', 'Network error');
     } finally {
-      document.getElementById('signinReqBtn').textContent = 'Send Code';
+      btn.disabled = false; btn.textContent = 'Send Code';
     }
   }
-
-  async function verifyCode() {
-    const email = document.getElementById('signinEmail').value.trim().toLowerCase();
-    const code = document.getElementById('signinCode').value.replace(/\D/g, '');
-    const errEl = document.getElementById('signinErr2');
-    errEl.style.display = 'none';
-    if (code.length !== 6) {
-      errEl.textContent = 'Enter the 6-digit code';
-      errEl.style.display = 'block';
-      return;
-    }
-    document.getElementById('signinVerBtn').textContent = 'Verifying…';
+  async function doForgotReset() {
+    setErr('fpErr', null);
+    const email = document.getElementById('fpEmail').value.trim().toLowerCase();
+    const code = document.getElementById('fpCode').value.replace(/\D/g, '');
+    const newPassword = document.getElementById('fpNewPass').value;
+    if (code.length !== 6) return setErr('fpErr', 'Enter the 6-digit code');
+    if (newPassword.length < 8) return setErr('fpErr', 'New password must be 8+ characters');
+    const btn = document.getElementById('fpResetBtn'); btn.disabled = true; btn.textContent = 'Resetting…';
     try {
-      const r = await fetch(API_BASE + '/.netlify/functions/verify-code', {
+      const r = await fetch(API_BASE + '/.netlify/functions/reset-password', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, code }),
+        body: JSON.stringify({ email, code, newPassword }),
       });
       const body = await r.json();
-      if (!body.ok) throw new Error(body.error || 'Verification failed');
+      if (!body.ok) return setErr('fpErr', body.error || 'Reset failed');
       currentToken = body.token;
       currentMember = body.member;
       try { localStorage.setItem(STORAGE_TOKEN, body.token); } catch (_) {}
       hideOverlay();
       renderMember();
-      // Silently retry any pending receipt scans for this user
-      try {
-        fetch(API_BASE + '/.netlify/functions/scan-receipt', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token: body.token }),
-        }).then((r) => r.json()).then((res) => {
-          if (res && res.credited > 0) {
-            // Refresh member data after queue credit
-            return fetch(API_BASE + '/.netlify/functions/verify-code', {
-              method: 'POST', headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ token: body.token }),
-            }).then((r2) => r2.json()).then((m2) => {
-              if (m2 && m2.member) { currentMember = m2.member; renderMember(); }
-            });
-          }
-        }).catch(() => {});
-      } catch (_) {}
     } catch (e) {
-      errEl.textContent = e.message;
-      errEl.style.display = 'block';
+      setErr('fpErr', 'Network error');
     } finally {
-      document.getElementById('signinVerBtn').textContent = 'Verify & Sign In';
+      btn.disabled = false; btn.textContent = 'Reset Password';
     }
   }
 
-  document.getElementById('signinReqBtn').addEventListener('click', requestCode);
-  document.getElementById('signinVerBtn').addEventListener('click', verifyCode);
-  document.getElementById('signinBack').addEventListener('click', (e) => {
-    e.preventDefault();
-    document.getElementById('signinStep1').style.display = '';
-    document.getElementById('signinStep2').style.display = 'none';
-  });
-  document.getElementById('signinSkip').addEventListener('click', (e) => { e.preventDefault(); hideOverlay(); });
-  document.getElementById('signinEmail').addEventListener('keydown', (e) => { if (e.key === 'Enter') requestCode(); });
-  document.getElementById('signinCode').addEventListener('keydown', (e) => { if (e.key === 'Enter') verifyCode(); });
+  function retryPendingScans(token) {
+    try {
+      fetch(API_BASE + '/.netlify/functions/scan-receipt', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
+      }).then((r) => r.json()).then((res) => {
+        if (res && res.credited > 0) {
+          fetch(API_BASE + '/.netlify/functions/verify-code', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token }),
+          }).then((r2) => r2.json()).then((m2) => {
+            if (m2 && m2.member) { currentMember = m2.member; renderMember(); }
+          }).catch(() => {});
+        }
+      }).catch(() => {});
+    } catch (_) {}
+  }
+
+  // Wire buttons
+  document.getElementById('siBtn').addEventListener('click', doSignIn);
+  document.getElementById('siEmail').addEventListener('keydown', (e) => { if (e.key === 'Enter') doSignIn(); });
+  document.getElementById('siPassword').addEventListener('keydown', (e) => { if (e.key === 'Enter') doSignIn(); });
+  document.getElementById('siForgot').addEventListener('click', (e) => { e.preventDefault(); showPanel('forgot'); });
+  document.getElementById('siGuest').addEventListener('click', (e) => { e.preventDefault(); hideOverlay(); });
+  document.getElementById('suBtn').addEventListener('click', doSignUp);
+  document.getElementById('fpSendBtn').addEventListener('click', doForgotSend);
+  document.getElementById('fpResetBtn').addEventListener('click', doForgotReset);
+  document.getElementById('fpBack').addEventListener('click', (e) => { e.preventDefault(); showPanel('signin'); });
 
 
   // Update reward affordability + Redeem home card count based on currentMember.currentPoints
