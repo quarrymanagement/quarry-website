@@ -883,6 +883,20 @@ a.account-link:hover .al-arrow { color: var(--gold); }
   border-radius: 12px;
   border: 1px solid var(--border-soft);
 }
+
+/* Tier-decay warning banner — shown when 30+ days inactive */
+.tier-decay-banner {
+  margin: 14px 22px 0;
+  padding: 12px 18px;
+  background: linear-gradient(135deg, rgba(220,150,50,0.16), rgba(220,150,50,0.04));
+  border: 1px solid var(--gold);
+  border-radius: 8px;
+  font-family: var(--ff-script); font-style: italic;
+  font-size: 0.92rem; color: var(--cream);
+  display: none;
+}
+.tier-decay-banner strong { color: var(--gold-light); font-style: normal; font-family: var(--ff-body); font-size: 0.78rem; letter-spacing: 0.18em; text-transform: uppercase; }
+
 </style>
 </head>
 <body>
@@ -1239,15 +1253,15 @@ a.account-link:hover .al-arrow { color: var(--gold); }
           </div>
         </div>
         <div class="tp-track"><div class="tp-fill" style="width:98%"></div></div>
-        <div class="tp-label"><span>Gold · 3,000</span><span>Platinum · 6,000</span></div>
+        <div class="tp-label"><span>Gold · $600 / 90 days</span><span>Elite · $1,500 / 90 days</span></div>
       </div>
 
       <div class="section-rule"><div class="line"></div><div class="label">Redeem</div><div class="line"></div></div>
 
       <div class="reward-row">
         <div class="reward-info">
-          <div class="reward-name">$5 Off Your Bill</div>
-          <div class="reward-desc">Applied to any check at the bar</div>
+          <div class="reward-name">Free Bucket of Balls</div>
+          <div class="reward-desc">Surfside Hole-In-One · 75 practice balls</div>
           <div class="reward-spend">≈ $50 spent to earn</div>
         </div>
         <div class="reward-cost">
@@ -1259,12 +1273,12 @@ a.account-link:hover .al-arrow { color: var(--gold); }
 
       <div class="reward-row">
         <div class="reward-info">
-          <div class="reward-name">Free Appetizer</div>
-          <div class="reward-desc">Jumbo Pretzel · Devils · Wings</div>
-          <div class="reward-spend">≈ $75 spent to earn</div>
+          <div class="reward-name">$10 Off Your Bill</div>
+          <div class="reward-desc">Applied to any check at the bar or kitchen</div>
+          <div class="reward-spend">≈ $100 spent to earn</div>
         </div>
         <div class="reward-cost">
-          <div class="reward-pts">750</div>
+          <div class="reward-pts">1,000</div>
           <div class="reward-pts-label">Points</div>
           <div class="reward-action">Redeem</div>
         </div>
@@ -1272,8 +1286,21 @@ a.account-link:hover .al-arrow { color: var(--gold); }
 
       <div class="reward-row">
         <div class="reward-info">
-          <div class="reward-name">$20 Wine Bottle Credit</div>
-          <div class="reward-desc">Toward any bottle on the list</div>
+          <div class="reward-name">Free Glass of Wine or Beer</div>
+          <div class="reward-desc">House pour or any draft beer · standard pour</div>
+          <div class="reward-spend">≈ $125 spent to earn</div>
+        </div>
+        <div class="reward-cost">
+          <div class="reward-pts">1,250</div>
+          <div class="reward-pts-label">Points</div>
+          <div class="reward-action disabled">10 More</div>
+        </div>
+      </div>
+
+      <div class="reward-row">
+        <div class="reward-info">
+          <div class="reward-name">Free Appetizer</div>
+          <div class="reward-desc">Jumbo Pretzel · Devils · Wings · Flatbread</div>
           <div class="reward-spend">≈ $150 spent to earn</div>
         </div>
         <div class="reward-cost">
@@ -1285,8 +1312,8 @@ a.account-link:hover .al-arrow { color: var(--gold); }
 
       <div class="reward-row">
         <div class="reward-info">
-          <div class="reward-name">Birthday Entrée</div>
-          <div class="reward-desc">On us during your birthday month</div>
+          <div class="reward-name">$20 Wine Bottle Credit</div>
+          <div class="reward-desc">Toward any bottle on the wine list</div>
           <div class="reward-spend">≈ $200 spent to earn</div>
         </div>
         <div class="reward-cost">
@@ -1298,14 +1325,40 @@ a.account-link:hover .al-arrow { color: var(--gold); }
 
       <div class="reward-row">
         <div class="reward-info">
-          <div class="reward-name">Private Event Priority</div>
-          <div class="reward-desc">First access to open event dates</div>
-          <div class="reward-spend">≈ $500 spent to earn</div>
+          <div class="reward-name">Free Entrée + Glass of Wine</div>
+          <div class="reward-desc">Entrée up to $25 · 6 oz house pour</div>
+          <div class="reward-spend">≈ $250 spent to earn</div>
         </div>
         <div class="reward-cost">
-          <div class="reward-pts">5,000</div>
+          <div class="reward-pts">2,500</div>
           <div class="reward-pts-label">Points</div>
-          <div class="reward-action disabled">3,760 More</div>
+          <div class="reward-action disabled">1,260 More</div>
+        </div>
+      </div>
+
+      <div class="reward-row">
+        <div class="reward-info">
+          <div class="reward-name">Free Wine Tasting Admission</div>
+          <div class="reward-desc">Food and wine for two at any monthly tasting</div>
+          <div class="reward-spend">≈ $300 spent to earn</div>
+        </div>
+        <div class="reward-cost">
+          <div class="reward-pts">3,000</div>
+          <div class="reward-pts-label">Points</div>
+          <div class="reward-action disabled">1,760 More</div>
+        </div>
+      </div>
+
+      <div class="reward-row">
+        <div class="reward-info">
+          <div class="reward-name">Free Bottle of Wine</div>
+          <div class="reward-desc">Any bottle from the standard list (excl. reserve & vintage)</div>
+          <div class="reward-spend">≈ $350 spent to earn</div>
+        </div>
+        <div class="reward-cost">
+          <div class="reward-pts">3,500</div>
+          <div class="reward-pts-label">Points</div>
+          <div class="reward-action disabled">2,260 More</div>
         </div>
       </div>
 
@@ -1713,49 +1766,65 @@ a.account-link:hover .al-arrow { color: var(--gold); }
         <div class="onboard-step-num">1</div>
         <div class="onboard-step-body">
           <div class="onboard-step-title">Earn 10 points per $1</div>
-          <div class="onboard-step-desc">Every dollar at the bar, kitchen, or golf bay earns 10 points automatically when your tab closes. No card to swipe, no code to remember.</div>
+          <div class="onboard-step-desc">Every dollar at the bar, kitchen, or golf bay earns 10 points automatically when your tab closes. No card to swipe, no code to remember. Higher tiers earn at 1.1× to 1.5× the base rate.</div>
         </div>
       </div>
 
       <div class="onboard-step">
         <div class="onboard-step-num">2</div>
         <div class="onboard-step-body">
-          <div class="onboard-step-title">Hit milestones, get rewards</div>
-          <div class="onboard-step-desc">500 pts (≈ $50 spent) → $5 off your bill. 750 pts (≈ $75) → free appetizer. 1,500 pts (≈ $150) → $20 wine credit. 2,000 pts (≈ $200) → birthday entrée. 5,000 pts (≈ $500) → private event priority. Points never expire.</div>
+          <div class="onboard-step-title">Redeem from the ladder</div>
+          <div class="onboard-step-desc">500 pts (≈ $50) → free bucket of balls at Surfside · 1,000 (≈ $100) → $10 off your bill · 1,250 (≈ $125) → free glass of wine or beer · 1,500 (≈ $150) → free appetizer · 2,000 (≈ $200) → $20 wine bottle credit · 2,500 (≈ $250) → free entrée + glass · 3,000 (≈ $300) → wine tasting for two · 3,500 (≈ $350) → free bottle. Points never expire.</div>
         </div>
       </div>
 
       <div class="onboard-step">
         <div class="onboard-step-num">3</div>
         <div class="onboard-step-body">
-          <div class="onboard-step-title">Bonus points add up</div>
-          <div class="onboard-step-desc">RSVP a ticketed event (wine tastings, brunches) for +25 to +50. Refer a friend who joins for +500. Reach 3,000 lifetime points to unlock Quarry Gold (1.25× earn rate). Live bands are free — listed for what's playing this month, but no RSVP needed.</div>
+          <div class="onboard-step-title">Earn bonus points beyond your tab</div>
+          <div class="onboard-step-desc">Welcome bonus +100 · Birthday-month visit +250 · Reservation honored +50 · Wine tasting RSVP +25 · Refer a friend +500 (cap 5/yr) · Public review +100 · Book a private party +1,000. Live bands are free — listed for what's playing this month, no RSVP needed and no points.</div>
         </div>
       </div>
 
-      <div class="section-rule"><div class="line"></div><div class="label">The Tiers</div><div class="line"></div></div>
+      <div class="section-rule"><div class="line"></div><div class="label">Status Tiers · Trailing 90-Day Spend</div><div class="line"></div></div>
 
       <div class="onboard-step">
         <div class="onboard-step-num">★</div>
         <div class="onboard-step-body">
           <div class="onboard-step-title">Quarry Standard</div>
-          <div class="onboard-step-desc">All members start here. 1 point per $1. Full access to rewards.</div>
+          <div class="onboard-step-desc">Welcome to the family. 1.0× earn rate. Full access to the redemption ladder.</div>
         </div>
       </div>
 
       <div class="onboard-step">
         <div class="onboard-step-num">★★</div>
         <div class="onboard-step-body">
-          <div class="onboard-step-title">Quarry Gold · 3,000 lifetime pts</div>
-          <div class="onboard-step-desc">1.25× earn rate. Early access to event RSVPs. Priority on busy nights.</div>
+          <div class="onboard-step-title">Quarry Silver · $300 / 90 days (~$100/mo)</div>
+          <div class="onboard-step-desc">1.1× earn rate. 5% off any bottle of wine.</div>
         </div>
       </div>
 
       <div class="onboard-step">
         <div class="onboard-step-num">★★★</div>
         <div class="onboard-step-body">
-          <div class="onboard-step-title">Quarry Platinum · 6,000 lifetime pts</div>
-          <div class="onboard-step-desc">1.5× earn rate. Hosted tastings invitation. Concierge holiday booking.</div>
+          <div class="onboard-step-title">Quarry Gold · $600 / 90 days (~$200/mo)</div>
+          <div class="onboard-step-desc">1.25× earn rate. 10% off bottles. Free birthday entrée. Early access to event RSVPs.</div>
+        </div>
+      </div>
+
+      <div class="onboard-step">
+        <div class="onboard-step-num">★★★★</div>
+        <div class="onboard-step-body">
+          <div class="onboard-step-title">Quarry Elite · $1,500 / 90 days (~$500/mo)</div>
+          <div class="onboard-step-desc">1.5× earn rate. 15% off bottles. One complimentary glass of wine per visit. Priority on private event dates. Named on the wall.</div>
+        </div>
+      </div>
+
+      <div class="onboard-step">
+        <div class="onboard-step-num">↻</div>
+        <div class="onboard-step-body">
+          <div class="onboard-step-title">Tier decay — fair, not punitive</div>
+          <div class="onboard-step-desc">If you go 30 days without a visit, we'll send a reminder. After 60 days of zero spend, your tier drops one level. Your points are always safe — only the tier perks decay. A few visits brings the tier right back.</div>
         </div>
       </div>
 
@@ -2188,8 +2257,8 @@ function submitParty() {
     const balance = (m.currentPoints || 0).toLocaleString();
     const lifetime = m.lifetimePoints || 0;
     const tier = m.tier || 'standard';
-    const tierLabel = { standard: 'Quarry Standard', gold: 'Quarry Gold', platinum: 'Quarry Platinum' }[tier];
-    const tierMult = { standard: '1.0×', gold: '1.25×', platinum: '1.5×' }[tier];
+    const tierLabel = { standard: 'Quarry Standard', silver: 'Quarry Silver', gold: 'Quarry Gold', elite: 'Quarry Elite', platinum: 'Quarry Elite' }[tier] || 'Quarry Standard';
+    const tierMult = { standard: '1.0×', silver: '1.1×', gold: '1.25×', elite: '1.5×', platinum: '1.5×' }[tier] || '1.0×';
     const firstName = (m.name || m.email || '').split(/[\s@]/)[0] || 'Friend';
     const set = (sel, txt) => { const el = document.querySelector(sel); if (el) el.textContent = txt; };
     set('.hero-pts-num', balance);
@@ -2206,18 +2275,27 @@ function submitParty() {
       set('.profile-meta', 'Member since ' + d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }));
     }
     if (m.email) set('.profile-monogram', (firstName[0] || '?').toUpperCase() + ((m.name || '').split(' ')[1] || '?').charAt(0).toUpperCase());
-    const next = tier === 'standard' ? 3000 : 6000;
-    const pct = tier === 'platinum' ? 100 : Math.min(100, (lifetime / next) * 100);
-    const ptsToNext = Math.max(0, next - lifetime);
+    // Tier progress — TRAILING 90-day spend (preferred) with lifetime fallback
+    const trailing = (m.trailingSpend90 != null) ? m.trailingSpend90 : (lifetime / 10);
+    let nextThreshold, nextLabel;
+    if (tier === 'standard')      { nextThreshold = 300;  nextLabel = 'Silver'; }
+    else if (tier === 'silver')   { nextThreshold = 600;  nextLabel = 'Gold'; }
+    else if (tier === 'gold')     { nextThreshold = 1500; nextLabel = 'Elite'; }
+    else                          { nextThreshold = 1500; nextLabel = 'Top tier'; }
+    const pct = (tier === 'elite' || tier === 'platinum') ? 100 : Math.min(100, (trailing / nextThreshold) * 100);
+    const ptsToNext = Math.max(0, nextThreshold - trailing);
+    const next = nextThreshold; // legacy alias
     const fills = document.querySelectorAll('.progress-fill, .tp-fill');
     fills.forEach((f) => { f.style.width = pct + '%'; });
     const progLabel = document.querySelector('.progress-label');
     if (progLabel) {
-      progLabel.innerHTML = '<span>' + tierLabel.replace('Quarry ', '') + ' · ' + (next === 3000 ? '3,000' : '6,000') + '</span><span>' + (tier === 'platinum' ? 'Top tier' : (ptsToNext.toLocaleString() + ' to ' + (tier === 'standard' ? 'Gold' : 'Platinum'))) + '</span>';
+      progLabel.innerHTML = '<span>' + tierLabel.replace('Quarry ', '') + ' · $' + Math.round(trailing) + ' / 90d</span><span>' + (pct >= 100 ? 'Top tier' : ('$' + Math.round(ptsToNext) + ' to ' + nextLabel)) + '</span>';
     }
     const tpLabel = document.querySelector('.tp-label');
-    if (tpLabel && tier !== 'platinum') {
-      tpLabel.innerHTML = '<span>' + (tier === 'standard' ? 'Standard · 0' : 'Gold · 3,000') + '</span><span>' + (tier === 'standard' ? 'Gold · 3,000' : 'Platinum · 6,000') + '</span>';
+    if (tpLabel && tier !== 'elite' && tier !== 'platinum') {
+      const here = tier === 'standard' ? 'Standard' : tier === 'silver' ? 'Silver' : 'Gold';
+      const target = tier === 'standard' ? 'Silver · $300' : tier === 'silver' ? 'Gold · $600' : 'Elite · $1,500';
+      tpLabel.innerHTML = '<span>' + here + ' · $' + Math.round(trailing) + '</span><span>' + target + '</span>';
     }
     const earnVisits = (m.history || []).filter((h) => h.action === 'earn').length;
     const savedDollars = Math.round(((m.history || []).filter((h) => h.action === 'redeem').reduce((s, h) => s - (h.delta || 0), 0)) / 100);
@@ -2247,11 +2325,14 @@ function submitParty() {
   }
 
   const REWARD_ID_MAP = {
-    '$5 Off Your Bill': 'r-bill5',
+    'Free Bucket of Balls': 'r-balls',
+    '$10 Off Your Bill': 'r-bill10',
+    'Free Glass of Wine or Beer': 'r-glass',
     'Free Appetizer': 'r-app',
     '$20 Wine Bottle Credit': 'r-wine20',
-    'Birthday Entrée': 'r-bday',
-    'Private Event Priority': 'r-private',
+    'Free Entrée + Glass of Wine': 'r-entree-glass',
+    'Free Wine Tasting Admission': 'r-tasting',
+    'Free Bottle of Wine': 'r-bottle',
   };
 
   async function startRedemption(rewardName) {
