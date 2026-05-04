@@ -176,11 +176,29 @@ exports.handler = async (event) => {
 
     var eventNote = form.eventId ? '<p style="color:#888;font-size:0.85em">Linked to event: ' + (form.eventName || form.eventId) + '</p>' : '';
 
+    // Build a unique subject line so Gmail doesn't thread submissions together.
+    // Find submitter name/email from responses to identify each submission.
+    var submitterNameForSubject = null;
+    var submitterEmailForSubject = null;
+    form.fields.forEach(function(field) {
+      var label = (field.label || '').toLowerCase();
+      if (!submitterNameForSubject && (field.type === 'name' || label.indexOf('name') !== -1)) {
+        if (responses[field.id]) submitterNameForSubject = String(responses[field.id]).trim();
+      }
+      if (!submitterEmailForSubject && field.type === 'email' && responses[field.id]) {
+        submitterEmailForSubject = String(responses[field.id]).trim();
+      }
+    });
+    var identifier = submitterNameForSubject || submitterEmailForSubject ||
+      (responses[Object.keys(responses)[0]] ? String(responses[Object.keys(responses)[0]]).slice(0, 40) : 'Anonymous');
+    var shortId = submission.id.slice(-6);
+    var ownerSubject = 'New ' + form.name + ' Submission — ' + identifier + ' [' + shortId + ']';
+
     // Send owner notification to management AND Jacqueline
     try {
       await sendEmail(
         ['management@thequarrystl.com', 'jacqueline@thequarrystl.com'],
-        'New Form Submission — ' + form.name,
+        ownerSubject,
         '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">' +
         '<div style="background:#1A0E08;padding:24px;text-align:center"><h1 style="color:#B8933A;margin:0;font-size:28px">The Quarry</h1>' +
         '<p style="color:#F5F0E8;font-size:0.8rem;letter-spacing:0.15em;margin:4px 0 0">NEW MELLE, MISSOURI</p></div>' +
