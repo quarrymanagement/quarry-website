@@ -2125,7 +2125,7 @@ function renderEvents(events) {
 function renderEventList(filter) {
   const screen = document.getElementById('screen-events');
   if (!screen) return;
-  screen.querySelectorAll('.event-card, .wineclub-hero').forEach(c => c.remove());
+  screen.querySelectorAll('.event-card, .wineclub-hero, .events-empty-state').forEach(c => c.remove());
   const segCtrl = screen.querySelector('.segment-control');
 
   // Tastings tab: insert wine club hero card at the top
@@ -2180,17 +2180,17 @@ function renderEventList(filter) {
   if (!filtered.length) {
     let body;
     if (filter === 'tastings') {
-      body = '<div style="padding:30px 22px;text-align:center;line-height:1.6">' +
+      body = '<div class="events-empty-state" style="padding:30px 22px;text-align:center;line-height:1.6">' +
         '<div style="font-family:var(--ff-script);font-style:italic;color:var(--gray);margin-bottom:14px">No wine tastings on the calendar right now.</div>' +
         '<a href="https://thequarrystl.com/quarry-wineclub" target="_blank" rel="noopener" style="display:inline-block;padding:12px 22px;border:1px solid var(--gold);color:var(--gold-light);font-family:var(--ff-body);font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;text-decoration:none">Visit the Wine Club ›</a>' +
       '</div>';
     } else if (filter === 'social') {
-      body = '<div style="padding:30px 22px;text-align:center;line-height:1.6">' +
+      body = '<div class="events-empty-state" style="padding:30px 22px;text-align:center;line-height:1.6">' +
         '<div style="font-family:var(--ff-script);font-style:italic;color:var(--gray);margin-bottom:14px">No social events scheduled right now.</div>' +
         '<a href="https://thequarrystl.com/quarry-events" target="_blank" rel="noopener" style="display:inline-block;padding:12px 22px;border:1px solid var(--gold);color:var(--gold-light);font-family:var(--ff-body);font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;text-decoration:none">See Full Calendar ›</a>' +
       '</div>';
     } else {
-      body = `<div style="padding:40px 22px;text-align:center;font-family:var(--ff-script);font-style:italic;color:var(--gray);">No ${filter === 'all' ? '' : filter + ' '}events scheduled right now.</div>`;
+      body = `<div class="events-empty-state" style="padding:40px 22px;text-align:center;font-family:var(--ff-script);font-style:italic;color:var(--gray);">No ${filter === 'all' ? '' : filter + ' '}events scheduled right now.</div>`;
     }
     segCtrl.insertAdjacentHTML('afterend', body);
     return;
