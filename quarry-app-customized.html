@@ -1048,6 +1048,10 @@ a.account-link:hover .al-arrow { color: var(--gold); }
   color: var(--gold-light); font-size: 1.2rem; flex-shrink: 0;
 }
 
+
+/* Scan CTA on home screen — slightly tighter than the rewards-screen version */
+.scan-cta.scan-cta-home { margin-top: 22px; margin-bottom: 4px; }
+
 </style>
 </head>
 <body>
@@ -1122,6 +1126,18 @@ a.account-link:hover .al-arrow { color: var(--gold); }
           <div class="progress-label"><span>Gold · 3,000</span><span>120 to Platinum</span></div>
           <div class="progress-track"><div class="progress-fill" style="width:98%"></div></div>
         </div>
+      </div>
+
+      <!-- Scan Receipt CTA — quick access from the home dashboard -->
+      <div class="scan-cta scan-cta-home" onclick="openScanModal()">
+        <div class="scan-cta-icon">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 8h10M7 12h6M7 16h8"/></svg>
+        </div>
+        <div class="scan-cta-body">
+          <div class="scan-cta-title">Scan Receipt</div>
+          <div class="scan-cta-sub">Earn points from your latest visit.</div>
+        </div>
+        <div class="scan-cta-arrow">›</div>
       </div>
 
       <!-- Quick actions — type only, no icons -->
