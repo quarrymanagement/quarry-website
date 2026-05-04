@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-04T22:33:51.626Z",
+  "updatedAt": "2026-05-04T22:34:12.993Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -16840,6 +16840,17 @@
       "sgEventId": "-QHpKv6MQ5eWvzIqxxRBkA",
       "userAgent": "Mozilla/5.0 (Windows NT 5.1; rv:11.0) Gecko Firefox/11.0 (via ggpht.com GoogleImageProxy)",
       "category": "quarry-marketing:test"
+    },
+    {
+      "ts": "2026-05-04T22:34:02.000Z",
+      "type": "click",
+      "draftId": "f1c820f9-f469-430e-b1a1-2fed9d01f64a",
+      "ruleId": null,
+      "email": "management@thequarrystl.com",
+      "url": "https://thequarrystl.com/quarry-wineclub?utm_source=email&utm_medium=marketing&utm_campaign=menu_spotlight",
+      "sgEventId": "VKsV2vY_QHGIE4DjI4-_ZQ",
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Mobile/15E148 Safari/604.1",
+      "category": "quarry-marketing:test"
     }
   ],
   "aggregates": {
@@ -16893,18 +16904,22 @@
       "delivered": 1,
       "open": 3,
       "uniqueOpen": 1,
-      "click": 0,
-      "uniqueClick": 0,
+      "click": 1,
+      "uniqueClick": 1,
       "bounce": 0,
       "unsubscribe": 0,
       "spamreport": 0,
       "dropped": 0,
-      "lastEventAt": "2026-05-04T22:33:39.000Z",
+      "lastEventAt": "2026-05-04T22:34:02.000Z",
       "openersByEmail": {
         "management@thequarrystl.com": "2026-05-04T22:33:33.000Z"
       },
-      "clickersByEmail": {},
-      "urlsClicked": {}
+      "clickersByEmail": {
+        "management@thequarrystl.com": "2026-05-04T22:34:02.000Z"
+      },
+      "urlsClicked": {
+        "https://thequarrystl.com/quarry-wineclub?utm_source=email&utm_medium=marketing&utm_campaign=menu_spotlight": 1
+      }
     }
   }
 }
