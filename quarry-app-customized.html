@@ -1969,14 +1969,51 @@ function renderEvents(events) {
 function renderEventList(filter) {
   const screen = document.getElementById('screen-events');
   if (!screen) return;
-  screen.querySelectorAll('.event-card').forEach(c => c.remove());
+  screen.querySelectorAll('.event-card, .wineclub-hero').forEach(c => c.remove());
   const segCtrl = screen.querySelector('.segment-control');
+
+  // Tastings tab: insert wine club hero card at the top
+  if (filter === 'tastings' && segCtrl) {
+    const hero =
+      '<div class="wineclub-hero" style="margin:18px 22px;padding:22px;background:linear-gradient(135deg, rgba(184,147,58,0.16), rgba(184,147,58,0.04));border:1px solid var(--gold);border-radius:14px">' +
+        '<div style="font-family:var(--ff-body);font-size:9px;font-weight:700;letter-spacing:0.32em;text-transform:uppercase;color:var(--gold);margin-bottom:8px">Rock &amp; Vine Wine Club</div>' +
+        '<div style="font-family:var(--ff-display);font-size:1.45rem;color:var(--cream);font-weight:500;margin-bottom:10px;line-height:1.2">Monthly Tastings · Members Only</div>' +
+        '<div style="font-family:var(--ff-script);font-style:italic;font-size:1rem;color:var(--cream-soft);line-height:1.55;margin-bottom:18px">Members receive a monthly wine tasting (food + wine for two), early access to exclusive bottles, and priority on private event dates. New members welcome.</div>' +
+        '<div style="display:flex;gap:10px;flex-wrap:wrap">' +
+          '<a href="https://thequarrystl.com/quarry-wineclub" target="_blank" rel="noopener" style="flex:1;min-width:140px;padding:13px 18px;background:var(--gold);color:var(--brown-dark);font-family:var(--ff-body);font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;border-radius:8px;text-align:center;text-decoration:none">Sign Up for Club ›</a>' +
+          '<a href="https://thequarrystl.com/quarry-wineclub" target="_blank" rel="noopener" style="flex:1;min-width:140px;padding:13px 18px;background:transparent;color:var(--gold-light);border:1px solid var(--border-light);font-family:var(--ff-body);font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;border-radius:8px;text-align:center;text-decoration:none">RSVP a Tasting ›</a>' +
+        '</div>' +
+      '</div>';
+    segCtrl.insertAdjacentHTML('afterend', hero);
+  }
+  // Categorization rules (priority order):
+  //   1. Bands → live music walk-ups
+  //   2. Tastings → wine tastings, wine club events
+  //   3. Social → free events that aren't bands (price = 0)
+  //   4. Ticketed → paid events with admission price > 0
+  const isWineEvent = (evt) => {
+    const blob = ((evt.name || '') + ' ' + (evt.category || '') + ' ' + (evt.location || '') + ' ' + (evt.description || '')).toLowerCase();
+    return /wine|tast|vintner|sommelier|winery|chateau|wine club|vintage/.test(blob);
+  };
+  const isFreeEvent = (evt) => {
+    if (evt.price === 0) return true;
+    if (typeof evt.admissionPrice === 'number' && evt.admissionPrice === 0) return true;
+    if (evt.pricePerPerson === 0 || evt.pricePerSeat === 0) return true;
+    if (typeof evt.cost === 'string' && /^\s*(free|no cover|0)/i.test(evt.cost)) return true;
+    return false;
+  };
+
   const filtered = _allUpcoming.filter(evt => {
     if (filter === 'all') return true;
     const cat = (evt.category || categorizeEvent(evt.name) || '').toLowerCase();
-    if (filter === 'live') return /live music|band/i.test(cat) || evt._kind === 'band';
-    if (filter === 'tastings') return /wine|tast/i.test(cat);
-    if (filter === 'brunch') return /brunch/i.test(cat);
+    const isBand = evt._kind === 'band' || /live music|band/i.test(cat);
+    const isTasting = !isBand && isWineEvent(evt);
+    const isFree = !isBand && !isTasting && isFreeEvent(evt);
+    const isPaid = !isBand && !isTasting && !isFree;
+    if (filter === 'bands') return isBand;
+    if (filter === 'tastings') return isTasting;
+    if (filter === 'social') return isFree;
+    if (filter === 'ticketed') return isPaid;
     return true;
   });
   if (!filtered.length) {
@@ -2012,12 +2049,13 @@ function renderEventList(filter) {
         if (remaining <= 0) availability = 'Sold Out';
         else if (remaining <= 5) availability = `Only ${remaining} left`;
       }
-      // RSVP points: ONLY for paid/ticketed events (have totalCapacity).
-      // Bands and free events show "No cover" or sold-out availability instead — no points.
+      // RSVP points: ONLY for ticketed events (paid). Bands → "Free · No cover".
+      // Social events (price=0) → "Free admission" no points. Tastings → points if paid.
       const isBand = evt._kind === 'band' || /live music|band/i.test(cat);
-      const isPaid = cap > 0; // ticketed events have capacity set
+      const isFreeAdm = isFreeEvent(evt);
+      const isTickPaid = !isBand && !isFreeAdm;
       let points = 0;
-      if (isPaid && !isBand) {
+      if (isTickPaid) {
         points = /wine|tast/i.test(cat) ? 25 : /brunch/i.test(cat) ? 10 : 15;
       }
       let rightBadge;
@@ -2025,10 +2063,25 @@ function renderEventList(filter) {
         rightBadge = escapeHtml(availability);
       } else if (isBand) {
         rightBadge = 'Free · No cover';
+      } else if (isFreeAdm) {
+        rightBadge = 'Free admission';
       } else if (points > 0) {
         rightBadge = '+ ' + points + ' pts RSVP';
       } else {
         rightBadge = '';
+      }
+      const isThisTasting = !isBand && isWineEvent(evt);
+      let actionsHtml;
+      if (isBand) {
+        actionsHtml = '<div class="btn-ghost">Add to Calendar</div>';
+      } else if (isThisTasting) {
+        actionsHtml =
+          '<a href="https://thequarrystl.com/quarry-wineclub" target="_blank" rel="noopener" class="btn-primary" style="text-decoration:none">RSVP a Spot</a>' +
+          '<div class="btn-ghost">Remind Me</div>';
+      } else {
+        actionsHtml =
+          `<div class="btn-primary">${remaining === 0 ? 'View' : 'Reserve'}</div>` +
+          '<div class="btn-ghost">Remind Me</div>';
       }
       html += `
         <div class="event-card">
@@ -2040,10 +2093,7 @@ function renderEventList(filter) {
           <div class="event-title">${escapeHtml(evt.name || 'Event')}</div>
           <div class="event-when">${escapeHtml(timeStr)}${evt.location ? ' · ' + escapeHtml(evt.location) : ''}</div>
           <div class="event-desc">${escapeHtml(desc) || 'Details &amp; tickets at thequarrystl.com.'}</div>
-          <div class="event-actions">
-            ${isBand ? '' : `<div class="btn-primary">${remaining === 0 ? 'View' : 'Reserve'}</div>`}
-            <div class="btn-ghost">${isBand ? 'Add to Calendar' : 'Remind Me'}</div>
-          </div>
+          <div class="event-actions">${actionsHtml}</div>
         </div>`;
   });
   if (segCtrl) segCtrl.insertAdjacentHTML('afterend', html);
@@ -2157,7 +2207,7 @@ function toggleSeg(el) {
   el.closest('.segment-control').querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
   const label = (el.textContent || '').trim().toLowerCase();
-  const filterMap = { 'all': 'all', 'live': 'live', 'tastings': 'tastings', 'brunch': 'brunch' };
+  const filterMap = { 'all': 'all', 'bands': 'bands', 'ticketed': 'ticketed', 'social': 'social', 'tastings': 'tastings' };
   const filter = filterMap[label] || 'all';
   if (typeof renderEventList === 'function' && _allUpcoming.length) renderEventList(filter);
 }
