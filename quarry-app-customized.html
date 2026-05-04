@@ -1865,7 +1865,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
         <div class="onboard-step-num">1</div>
         <div class="onboard-step-body">
           <div class="onboard-step-title">Earn 10 points per $1</div>
-          <div class="onboard-step-desc">Every dollar at the bar, kitchen, or golf bay earns 10 points automatically when your tab closes. No card to swipe, no code to remember. Higher tiers earn at 1.1× to 1.5× the base rate.</div>
+          <div class="onboard-step-desc">Every dollar at the bar, kitchen, or golf bay earns 10 points based on your pre-tip total (subtotal + tax). Tips go to your server, not Quarry — so they don't earn points. Higher tiers earn at 1.1× to 1.5× the base rate.</div>
         </div>
       </div>
 
@@ -2518,9 +2518,9 @@ function submitParty() {
 <div class="scan-overlay" id="scanOverlay" onclick="if(event.target===this)closeScanModal()">
   <div class="scan-modal">
     <h3 id="scanTitle">Scan Your Receipt</h3>
-    <div class="scan-sub" id="scanSub">Take a clear photo of your receipt — we'll verify and credit points instantly.</div>
+    <div class="scan-sub" id="scanSub">Snap a clear photo within 12 hours of your visit. Points are awarded on the pre-tip total — tips go to your server.</div>
     <div class="scan-rules">
-      <span class="scan-pill">Within 24 hours</span>
+      <span class="scan-pill">Within 12 hours</span>
       <span class="scan-pill">$20+ tab</span>
       <span class="scan-pill">2 / day</span>
     </div>
@@ -2608,7 +2608,7 @@ function submitParty() {
         '<div class="scan-result success">' +
           '<strong>+ ' + body.points.toLocaleString() + ' points</strong><br>' +
           'New balance: ' + body.newBalance.toLocaleString() + ' pts' +
-          '<div class="scan-result-detail">$' + Number(body.spendUsd).toFixed(2) + ' on check #' + body.checkNumber +
+          '<div class="scan-result-detail">Pre-tip $' + Number(body.spendUsd).toFixed(2) + ' on check #' + body.checkNumber +
           (body.multiplier > 1 ? ' · ' + body.multiplier + '× tier bonus' : '') + '</div>' +
         '</div>';
       btn.textContent = 'Done';
