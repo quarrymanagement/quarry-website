@@ -29,7 +29,16 @@ const SCAN_WINDOW_HOURS = 12;
 const PENDING_TTL_HOURS = 6;
 const MIN_TAB_USD       = 20;
 const TOTAL_TOLERANCE   = 1.0;
-const RESTAURANT_KEYWORDS = ['quarry'];
+const RESTAURANT_KEYWORDS = [
+  'quarry',
+  'the quarry',
+  'new melle',
+  '63365',
+  'highway z',
+  'hwy z',
+  '3960',          // street number
+  '17a quarry',    // common Toast restaurant code prefix variants
+];
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -129,11 +138,12 @@ Schema:
   "tip_amount": number|null,
   "total_amount": number|null,
   "restaurant_name": string|null,
+  "restaurant_address": string|null,
   "cardholder_name": string|null,
   "payment_type": string|null
 }
 
-If a field is unclear, set it to null. Do not invent data. The subtotal_amount is critical — pre-tax line, NOT including tax or tip.` }
+If a field is unclear, set it to null. Do not invent data. The subtotal_amount is critical — pre-tax line, NOT including tax or tip. The restaurant_name and restaurant_address should capture WHATEVER is printed at the top of the receipt as the establishment header.` }
       ]
     }]
   });
@@ -411,10 +421,17 @@ exports.handler = async (event) => {
     return reply(400, { ok: false, error: 'Gift card receipts don\'t earn points — points are credited when the gift card is used.' });
   }
 
-  // ── 2. Restaurant must include "Quarry" ──
-  const restName = (ocr.restaurant_name || '').toLowerCase();
-  if (!RESTAURANT_KEYWORDS.some((k) => restName.includes(k))) {
-    return reply(400, { ok: false, error: 'This receipt does not appear to be from The Quarry.' });
+  // ── 2. Soft restaurant check (Toast cross-check below is the authoritative filter) ──
+  // Build a search blob from anything OCR found at the top of the receipt.
+  const restBlob = (
+    (ocr.restaurant_name || '') + ' ' +
+    (ocr.restaurant_address || '')
+  ).toLowerCase();
+  const sawQuarryToken = restBlob && RESTAURANT_KEYWORDS.some((k) => restBlob.includes(k));
+  // Only hard-reject if OCR DID see a restaurant name AND it doesn't match.
+  // If OCR couldn't read the header (blurry top of receipt), let Toast validate.
+  if (ocr.restaurant_name && !sawQuarryToken) {
+    return reply(400, { ok: false, error: 'This receipt does not appear to be from The Quarry. (If this is a Quarry receipt, try a clearer photo of the top header.)' });
   }
 
   // ── 3. Receipt freshness (12-hour submission window) ──
