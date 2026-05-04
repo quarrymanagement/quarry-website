@@ -133,7 +133,7 @@ function expiryEmail(name, expiredPts, lifetimePts, tier) {
 
 async function runWarning() {
   const mFile = await loadJson('members.json');
-  const year = String(new Date().getFullYear());
+  const year = String(parseInt((new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago', year: 'numeric' }).formatToParts(new Date()).find((p) => p.type === 'year') || {}).value, 10));
   const members = mFile.json.members || [];
   let sent = 0;
   for (const m of members) {
@@ -166,7 +166,7 @@ async function runWarning() {
 
 async function runExpiry() {
   const mFile = await loadJson('members.json');
-  const year = String(new Date().getFullYear());
+  const year = String(parseInt((new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago', year: 'numeric' }).formatToParts(new Date()).find((p) => p.type === 'year') || {}).value, 10));
   const members = mFile.json.members || [];
   let zeroed = 0;
   let totalExpired = 0;
@@ -203,14 +203,18 @@ exports.handler = async (event) => {
   let mode = null;
 
   if (isScheduled) {
-    // Determine job by today's date in Central Time
+    // Determine the job by today's date in Central Time (Quarry's local calendar)
     const now = new Date();
-    // Approximation: server is UTC, convert to CT (UTC-6 for CST or UTC-5 CDT). Use UTC and add tolerance — runs daily so "around midnight" is fine.
-    const m = now.getUTCMonth() + 1;
-    const d = now.getUTCDate();
+    const ctParts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Chicago',
+      year: 'numeric', month: '2-digit', day: '2-digit',
+    }).formatToParts(now);
+    const get = (t) => parseInt((ctParts.find((x) => x.type === t) || {}).value, 10);
+    const m = get('month');
+    const d = get('day');
     if (m === 12 && d >= 24 && d <= 30) mode = 'warning';
     else if (m === 1 && d === 1) mode = 'expiry';
-    else return reply(200, { ok: true, message: 'Not a warning/expiry day; nothing to do.', date: now.toISOString() });
+    else return reply(200, { ok: true, message: 'Not a warning/expiry day in Central Time; nothing to do.', ctDate: get('year') + '-' + String(m).padStart(2,'0') + '-' + String(d).padStart(2,'0') });
   } else {
     if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: CORS, body: '' };
     if (event.httpMethod !== 'POST') return reply(405, { ok: false, error: 'Method not allowed' });
@@ -233,5 +237,7 @@ exports.handler = async (event) => {
 };
 
 exports.config = {
-  schedule: '0 6 * * *', // daily at 06:00 UTC = midnight CT (CST) or 1 AM (CDT) — close enough for the warning/expiry windows
+  // Daily at 07:00 UTC. That's 02:00 CDT (summer) or 01:00 CST (winter) — safely inside the right
+  // CT calendar day for the warning/expiry windows.
+  schedule: '0 7 * * *',
 };
