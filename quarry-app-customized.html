@@ -1253,7 +1253,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
           </div>
         </div>
         <div class="tp-track"><div class="tp-fill" style="width:98%"></div></div>
-        <div class="tp-label"><span>Gold · $600 / 90 days</span><span>Elite · $1,500 / 90 days</span></div>
+        <div class="tp-label"><span>Gold · $400 / 90 days</span><span>Elite · $1,000 / 90 days</span></div>
       </div>
 
       <div class="section-rule"><div class="line"></div><div class="label">Redeem</div><div class="line"></div></div>
@@ -1782,7 +1782,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
         <div class="onboard-step-num">3</div>
         <div class="onboard-step-body">
           <div class="onboard-step-title">Earn bonus points beyond your tab</div>
-          <div class="onboard-step-desc">Welcome bonus +100 · Birthday-month visit +250 · Reservation honored +50 · Wine tasting RSVP +25 · Refer a friend +500 (cap 5/yr) · Public review +100 · Book a private party +1,000. Live bands are free — listed for what's playing this month, no RSVP needed and no points.</div>
+          <div class="onboard-step-desc">Just for stopping in: <strong style="color:var(--gold-light);font-style:normal">+10 pts every visit</strong> (when your closed tab is $20+). Welcome bonus +100 · Birthday-month visit +250 · Reservation honored +50 · Wine tasting RSVP +25 · Refer a friend +500 (cap 5/yr) · Public review +100 · Book a private party +1,000. Live bands are free — listed for what's playing this month, no RSVP needed and no points.</div>
         </div>
       </div>
 
@@ -1799,7 +1799,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
       <div class="onboard-step">
         <div class="onboard-step-num">★★</div>
         <div class="onboard-step-body">
-          <div class="onboard-step-title">Quarry Silver · $300 / 90 days (~$100/mo)</div>
+          <div class="onboard-step-title">Quarry Silver · $200 / 90 days (~$66/mo)</div>
           <div class="onboard-step-desc">1.1× earn rate. 5% off any bottle of wine.</div>
         </div>
       </div>
@@ -1807,7 +1807,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
       <div class="onboard-step">
         <div class="onboard-step-num">★★★</div>
         <div class="onboard-step-body">
-          <div class="onboard-step-title">Quarry Gold · $600 / 90 days (~$200/mo)</div>
+          <div class="onboard-step-title">Quarry Gold · $400 / 90 days (~$133/mo)</div>
           <div class="onboard-step-desc">1.25× earn rate. 10% off bottles. Free birthday entrée. Early access to event RSVPs.</div>
         </div>
       </div>
@@ -1815,7 +1815,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
       <div class="onboard-step">
         <div class="onboard-step-num">★★★★</div>
         <div class="onboard-step-body">
-          <div class="onboard-step-title">Quarry Elite · $1,500 / 90 days (~$500/mo)</div>
+          <div class="onboard-step-title">Quarry Elite · $1,000 / 90 days (~$333/mo)</div>
           <div class="onboard-step-desc">1.5× earn rate. 15% off bottles. One complimentary glass of wine per visit. Priority on private event dates. Named on the wall.</div>
         </div>
       </div>
@@ -2278,10 +2278,10 @@ function submitParty() {
     // Tier progress — TRAILING 90-day spend (preferred) with lifetime fallback
     const trailing = (m.trailingSpend90 != null) ? m.trailingSpend90 : (lifetime / 10);
     let nextThreshold, nextLabel;
-    if (tier === 'standard')      { nextThreshold = 300;  nextLabel = 'Silver'; }
-    else if (tier === 'silver')   { nextThreshold = 600;  nextLabel = 'Gold'; }
-    else if (tier === 'gold')     { nextThreshold = 1500; nextLabel = 'Elite'; }
-    else                          { nextThreshold = 1500; nextLabel = 'Top tier'; }
+    if (tier === 'standard')      { nextThreshold = 200;  nextLabel = 'Silver'; }
+    else if (tier === 'silver')   { nextThreshold = 400;  nextLabel = 'Gold'; }
+    else if (tier === 'gold')     { nextThreshold = 1000; nextLabel = 'Elite'; }
+    else                          { nextThreshold = 1000; nextLabel = 'Top tier'; }
     const pct = (tier === 'elite' || tier === 'platinum') ? 100 : Math.min(100, (trailing / nextThreshold) * 100);
     const ptsToNext = Math.max(0, nextThreshold - trailing);
     const next = nextThreshold; // legacy alias
@@ -2294,7 +2294,7 @@ function submitParty() {
     const tpLabel = document.querySelector('.tp-label');
     if (tpLabel && tier !== 'elite' && tier !== 'platinum') {
       const here = tier === 'standard' ? 'Standard' : tier === 'silver' ? 'Silver' : 'Gold';
-      const target = tier === 'standard' ? 'Silver · $300' : tier === 'silver' ? 'Gold · $600' : 'Elite · $1,500';
+      const target = tier === 'standard' ? 'Silver · $200' : tier === 'silver' ? 'Gold · $400' : 'Elite · $1,000';
       tpLabel.innerHTML = '<span>' + here + ' · $' + Math.round(trailing) + '</span><span>' + target + '</span>';
     }
     const earnVisits = (m.history || []).filter((h) => h.action === 'earn').length;
