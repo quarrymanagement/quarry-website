@@ -805,6 +805,16 @@ a.account-link:hover .al-arrow { color: var(--gold); }
   body { align-items: center; min-height: 100vh; }
 }
 
+
+/* Spend-to-earn hint under each reward */
+.reward-spend {
+  font-family: var(--ff-body);
+  font-size: 9px; font-weight: 500;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--gold-light); opacity: 0.7;
+  margin-top: 6px;
+}
+
 /* ──────────────────────────────────────────────────────────────
    V3 MOBILE POLISH — make it pop, fix clunky spacing,
    hide horizontal scroll on menu, tighten golf hero.
@@ -1238,6 +1248,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
         <div class="reward-info">
           <div class="reward-name">$5 Off Your Bill</div>
           <div class="reward-desc">Applied to any check at the bar</div>
+          <div class="reward-spend">≈ $50 spent to earn</div>
         </div>
         <div class="reward-cost">
           <div class="reward-pts">500</div>
@@ -1250,6 +1261,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
         <div class="reward-info">
           <div class="reward-name">Free Appetizer</div>
           <div class="reward-desc">Jumbo Pretzel · Devils · Wings</div>
+          <div class="reward-spend">≈ $75 spent to earn</div>
         </div>
         <div class="reward-cost">
           <div class="reward-pts">750</div>
@@ -1262,6 +1274,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
         <div class="reward-info">
           <div class="reward-name">$20 Wine Bottle Credit</div>
           <div class="reward-desc">Toward any bottle on the list</div>
+          <div class="reward-spend">≈ $150 spent to earn</div>
         </div>
         <div class="reward-cost">
           <div class="reward-pts">1,500</div>
@@ -1274,6 +1287,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
         <div class="reward-info">
           <div class="reward-name">Birthday Entrée</div>
           <div class="reward-desc">On us during your birthday month</div>
+          <div class="reward-spend">≈ $200 spent to earn</div>
         </div>
         <div class="reward-cost">
           <div class="reward-pts">2,000</div>
@@ -1286,6 +1300,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
         <div class="reward-info">
           <div class="reward-name">Private Event Priority</div>
           <div class="reward-desc">First access to open event dates</div>
+          <div class="reward-spend">≈ $500 spent to earn</div>
         </div>
         <div class="reward-cost">
           <div class="reward-pts">5,000</div>
@@ -1706,7 +1721,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
         <div class="onboard-step-num">2</div>
         <div class="onboard-step-body">
           <div class="onboard-step-title">Hit milestones, get rewards</div>
-          <div class="onboard-step-desc">500 points → $5 off. 750 → free appetizer. 1,500 → $20 toward a wine bottle. Birthday entrée at 2,000. The points don't expire.</div>
+          <div class="onboard-step-desc">500 pts (≈ $50 spent) → $5 off your bill. 750 pts (≈ $75) → free appetizer. 1,500 pts (≈ $150) → $20 wine credit. 2,000 pts (≈ $200) → birthday entrée. 5,000 pts (≈ $500) → private event priority. Points never expire.</div>
         </div>
       </div>
 
@@ -1714,7 +1729,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
         <div class="onboard-step-num">3</div>
         <div class="onboard-step-body">
           <div class="onboard-step-title">Bonus points add up</div>
-          <div class="onboard-step-desc">RSVP a public event for +50. Refer a friend who joins for +500. Reach 3,000 lifetime points to unlock Quarry Gold (1.25× earn rate).</div>
+          <div class="onboard-step-desc">RSVP a ticketed event (wine tastings, brunches) for +25 to +50. Refer a friend who joins for +500. Reach 3,000 lifetime points to unlock Quarry Gold (1.25× earn rate). Live bands are free — listed for what's playing this month, but no RSVP needed.</div>
         </div>
       </div>
 
@@ -1901,13 +1916,30 @@ function renderEventList(filter) {
         if (remaining <= 0) availability = 'Sold Out';
         else if (remaining <= 5) availability = `Only ${remaining} left`;
       }
-      const points = /wine|tast/i.test(cat) ? 25 : /brunch/i.test(cat) ? 10 : 15;
+      // RSVP points: ONLY for paid/ticketed events (have totalCapacity).
+      // Bands and free events show "No cover" or sold-out availability instead — no points.
+      const isBand = evt._kind === 'band' || /live music|band/i.test(cat);
+      const isPaid = cap > 0; // ticketed events have capacity set
+      let points = 0;
+      if (isPaid && !isBand) {
+        points = /wine|tast/i.test(cat) ? 25 : /brunch/i.test(cat) ? 10 : 15;
+      }
+      let rightBadge;
+      if (availability) {
+        rightBadge = escapeHtml(availability);
+      } else if (isBand) {
+        rightBadge = 'Free · No cover';
+      } else if (points > 0) {
+        rightBadge = '+ ' + points + ' pts RSVP';
+      } else {
+        rightBadge = '';
+      }
       html += `
         <div class="event-card">
           <div class="event-meta-row">
             <div class="event-cat-line"></div>
             <div class="event-cat">${escapeHtml(cat)} · ${escapeHtml(dayLabel)}</div>
-            <div class="event-points">${availability ? escapeHtml(availability) : '+ ' + points + ' pts RSVP'}</div>
+            <div class="event-points">${rightBadge}</div>
           </div>
           <div class="event-title">${escapeHtml(evt.name || 'Event')}</div>
           <div class="event-when">${escapeHtml(timeStr)}${evt.location ? ' · ' + escapeHtml(evt.location) : ''}</div>
