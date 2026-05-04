@@ -2206,8 +2206,9 @@ function renderEventList(filter) {
           ? 'https://thequarrystl.com/quarry-events?event=' + encodeURIComponent(slug)
           : 'https://thequarrystl.com/quarry-events';
         // Append the member's email so checkout pre-fills it (key to point crediting)
-        const emailParam = (currentMember && currentMember.email)
-          ? (slugUrl.indexOf('?') >= 0 ? '&' : '?') + 'email=' + encodeURIComponent(currentMember.email)
+        const _m = (typeof window.getQuarryMember === 'function') ? window.getQuarryMember() : null;
+        const emailParam = (_m && _m.email)
+          ? (slugUrl.indexOf('?') >= 0 ? '&' : '?') + 'email=' + encodeURIComponent(_m.email)
           : '';
         const buyHref = slugUrl + emailParam;
         actionsHtml =
@@ -2515,9 +2516,10 @@ let prevScreen = 'screen-home';
 function openWithMember(baseUrl) {
   let url = baseUrl;
   try {
-    if (currentMember && currentMember.email) {
+    const m = (typeof window.getQuarryMember === 'function') ? window.getQuarryMember() : null;
+    if (m && m.email) {
       const sep = url.indexOf('?') >= 0 ? '&' : '?';
-      url = url + sep + 'email=' + encodeURIComponent(currentMember.email);
+      url = url + sep + 'email=' + encodeURIComponent(m.email);
     }
   } catch (_) {}
   window.open(url, '_blank', 'noopener');
@@ -2604,6 +2606,8 @@ async function submitParty() {
   const API_BASE = (typeof location !== 'undefined' && location.hostname.includes('thequarrystl.com')) ? '' : 'https://thequarrystl.com';
   let currentMember = null;
   let currentToken = null;
+  // Expose to global functions (renderEventList, openWithMember etc.) which live outside this IIFE
+  window.getQuarryMember = () => currentMember;
 
   // ─── Sign-in overlay with tabs (Sign In / Sign Up / Forgot Password) ──
   const overlay = document.createElement('div');
