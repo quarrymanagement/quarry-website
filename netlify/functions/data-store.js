@@ -31,8 +31,8 @@ const ALLOWED_FILES = new Set([
     'social_learnings.json',
     'social_assets.json',
     'reservations_status.json',
-    'events.json',  // mirror github-proxy.js so we have one read/write surface long-term
-    'catchup_status.json'  // status output of catchup-marketing-send-background.js
+    'events.json',
+    'catchup_status.json'  // mirror github-proxy.js so we have one read/write surface long-term
 ]);
 
 const CORS = {
@@ -135,3 +135,6 @@ exports.handler = async (event) => {
 
         return respond(405, { error: 'Method not allowed' });
     } catch (err) {
+        return respond(500, { error: 'data-store error: ' + err.message });
+    }
+};
