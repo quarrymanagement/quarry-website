@@ -8,43 +8,43 @@
       "trailingSpendUsd": 0,
       "earnMultiplier": 1.0,
       "bottleDiscount": 0,
-      "perks": "Welcome to the family. Full access to the redemption ladder. 1.0× earn rate."
+      "perks": "Welcome to the family. Full access to the redemption ladder. 1.0\u00d7 earn rate."
     },
     {
       "id": "silver",
       "name": "Quarry Silver",
-      "trailingSpendUsd": 300,
+      "trailingSpendUsd": 200,
       "earnMultiplier": 1.1,
       "bottleDiscount": 5,
-      "perks": "1.1× earn rate. 5% off any bottle of wine. Avg ~$100/mo to maintain."
+      "perks": "1.1\u00d7 earn rate. 5% off any bottle of wine. Avg ~$66/mo to maintain."
     },
     {
       "id": "gold",
       "name": "Quarry Gold",
-      "trailingSpendUsd": 600,
+      "trailingSpendUsd": 400,
       "earnMultiplier": 1.25,
       "bottleDiscount": 10,
-      "perks": "1.25× earn rate. 10% off bottles. Free birthday entrée. Early event RSVPs. Avg ~$200/mo to maintain."
+      "perks": "1.25\u00d7 earn rate. 10% off bottles. Free birthday entr\u00e9e. Early event RSVPs. Avg ~$133/mo to maintain."
     },
     {
       "id": "elite",
       "name": "Quarry Elite",
-      "trailingSpendUsd": 1500,
+      "trailingSpendUsd": 1000,
       "earnMultiplier": 1.5,
       "bottleDiscount": 15,
-      "perks": "1.5× earn rate. 15% off bottles. One complimentary glass of wine per visit. Priority on private event dates. Named on the wall. Avg ~$500/mo to maintain."
+      "perks": "1.5\u00d7 earn rate. 15% off bottles. One complimentary glass of wine per visit. Priority on private event dates. Named on the wall. Avg ~$333/mo to maintain."
     }
   ],
   "tierDecay": {
     "warningDays": 30,
     "downgradeDays": 60,
-    "rule": "If a member has zero spend for 60 days, tier drops one level. A banner appears at day 30 saying 'Visit by [date] to keep your tier.' Points themselves never expire — only the tier perks decay."
+    "rule": "If a member has zero spend for 60 days, tier drops one level. A banner appears at day 30 saying 'Visit by [date] to keep your tier.' Points themselves never expire \u2014 only the tier perks decay."
   },
   "catalog": [
     {
       "id": "r-balls",
       "name": "Free Bucket of Balls",
-      "description": "Surfside Hole-In-One Golf · 75 practice balls.",
+      "description": "Surfside Hole-In-One Golf \u00b7 75 practice balls.",
       "spendEquivalent": 50,
       "points": 500,
       "active": true
@@ -60,7 +60,7 @@
     {
       "id": "r-glass",
       "name": "Free Glass of Wine or Beer",
-      "description": "House pour or any draft beer · standard pour.",
+      "description": "House pour or any draft beer \u00b7 standard pour.",
       "spendEquivalent": 125,
       "points": 1250,
       "active": true
@@ -68,7 +68,7 @@
     {
       "id": "r-app",
       "name": "Free Appetizer",
-      "description": "Jumbo Pretzel · Devils · Wings · Flatbread.",
+      "description": "Jumbo Pretzel \u00b7 Devils \u00b7 Wings \u00b7 Flatbread.",
       "spendEquivalent": 150,
       "points": 1500,
       "active": true
@@ -83,8 +83,8 @@
     },
     {
       "id": "r-entree-glass",
-      "name": "Free Entrée + Glass of Wine",
-      "description": "Any entrée up to $25 menu price + standard 6 oz house pour.",
+      "name": "Free Entr\u00e9e + Glass of Wine",
+      "description": "Any entr\u00e9e up to $25 menu price + standard 6 oz house pour.",
       "spendEquivalent": 250,
       "points": 2500,
       "active": true
@@ -113,6 +113,13 @@
       "description": "First sign-in to the Quarry app.",
       "points": 100,
       "oneTime": true
+    },
+    {
+      "id": "b-visit",
+      "name": "Per-Visit Bonus",
+      "description": "Just for stopping in \u2014 earn 10 pts every visit when your closed tab is $20 or more.",
+      "points": 10,
+      "minTabUsd": 20
     },
     {
       "id": "b-rsvp-wine",
@@ -171,9 +178,9 @@
     "Tier bottle discounts don't combine with happy hour or wine-of-the-week pricing.",
     "Elite 'free glass per visit' is one standard pour per check, logged by the bartender.",
     "Birthday rewards must be redeemed in person, ID required, valid only in birthday month.",
-    "Free Entrée + Wine reward applies to entrées up to $25 menu price; wine pour is 6 oz house standard.",
+    "Free Entr\u00e9e + Wine reward applies to entr\u00e9es up to $25 menu price; wine pour is 6 oz house standard.",
     "Tier downgrades one level on 60 days of no spend; warning shown at 30 days.",
-    "Points never expire — only tier perks decay with inactivity.",
+    "Points never expire \u2014 only tier perks decay with inactivity.",
     "Redemption codes expire 5 minutes after generation; show to staff at the bar.",
     "Anthropic/Quarry reserves the right to update the program. Members notified of any change."
   ],
