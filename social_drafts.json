@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-04T22:51:57.392Z",
+  "updatedAt": "2026-05-04T22:52:57.969Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -965,7 +965,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "approved",
+      "status": "rejected",
       "scheduledFor": "2026-05-06T17:00:00-05:00",
       "createdAt": "2026-04-28T03:38:22.279Z",
       "createdBy": "cadence-engine",
@@ -1060,10 +1060,12 @@
       "aiReasoning": "T-3 'Weekend Lineup' arc calls for logistical specificity — day, time, names — framed as a low-friction invitation that reinforces the free live music value without any urgency or hype.",
       "model": "claude-sonnet-4-6",
       "hydratedAt": "2026-04-30T13:02:59.046Z",
-      "updatedAt": "2026-05-04T22:51:57.392Z",
+      "updatedAt": "2026-05-04T22:52:57.969Z",
       "imageSource": "upload",
       "approvedAt": "2026-05-04T22:51:57.392Z",
-      "approvedBy": "admin"
+      "approvedBy": "admin",
+      "rejectedAt": "2026-05-04T22:52:57.969Z",
+      "rejectionReason": "image got cut off from personal upload"
     },
     {
       "id": "drf-moi2t9s8-u-miv9l",
