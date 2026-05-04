@@ -1340,7 +1340,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
           </div>
         </div>
         <div class="tp-track"><div class="tp-fill" style="width:98%"></div></div>
-        <div class="tp-label"><span>Gold · $600 / 90 days</span><span>Elite · $1,000 / 90 days</span></div>
+        <div class="tp-label"><span>Gold · 6,000 pts / 90d</span><span>Elite · 10,000 pts / 90d</span></div>
       </div>
 
       <!-- Scan Receipt CTA — manual point credit via Toast cross-validation -->
@@ -2331,6 +2331,23 @@ function submitParty() {
       try { localStorage.setItem(STORAGE_TOKEN, body.token); } catch (_) {}
       hideOverlay();
       renderMember();
+      // Silently retry any pending receipt scans for this user
+      try {
+        fetch(API_BASE + '/.netlify/functions/scan-receipt', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: body.token }),
+        }).then((r) => r.json()).then((res) => {
+          if (res && res.credited > 0) {
+            // Refresh member data after queue credit
+            return fetch(API_BASE + '/.netlify/functions/verify-code', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ token: body.token }),
+            }).then((r2) => r2.json()).then((m2) => {
+              if (m2 && m2.member) { currentMember = m2.member; renderMember(); }
+            });
+          }
+        }).catch(() => {});
+      } catch (_) {}
     } catch (e) {
       errEl.textContent = e.message;
       errEl.style.display = 'block';
@@ -2388,13 +2405,16 @@ function submitParty() {
     fills.forEach((f) => { f.style.width = pct + '%'; });
     const progLabel = document.querySelector('.progress-label');
     if (progLabel) {
-      progLabel.innerHTML = '<span>' + tierLabel.replace('Quarry ', '') + ' · $' + Math.round(trailing) + ' / 90d</span><span>' + (pct >= 100 ? 'Top tier' : ('$' + Math.round(ptsToNext) + ' to ' + nextLabel)) + '</span>';
+      const trailingPts = Math.round(trailing * 10);
+      const ptsToNextPts = Math.round(ptsToNext * 10);
+      progLabel.innerHTML = '<span>' + tierLabel.replace('Quarry ', '') + ' · ' + trailingPts.toLocaleString() + ' pts / 90d</span><span>' + (pct >= 100 ? 'Top tier' : (ptsToNextPts.toLocaleString() + ' pts to ' + nextLabel)) + '</span>';
     }
     const tpLabel = document.querySelector('.tp-label');
     if (tpLabel && tier !== 'elite' && tier !== 'platinum') {
       const here = tier === 'standard' ? 'Standard' : tier === 'silver' ? 'Silver' : 'Gold';
-      const target = tier === 'standard' ? 'Silver · $300' : tier === 'silver' ? 'Gold · $600' : 'Elite · $1,000';
-      tpLabel.innerHTML = '<span>' + here + ' · $' + Math.round(trailing) + '</span><span>' + target + '</span>';
+      const target = tier === 'standard' ? 'Silver · 3,000 pts' : tier === 'silver' ? 'Gold · 6,000 pts' : 'Elite · 10,000 pts';
+      const trailingPts2 = Math.round(trailing * 10).toLocaleString();
+      tpLabel.innerHTML = '<span>' + here + ' · ' + trailingPts2 + ' pts</span><span>' + target + '</span>';
     }
     const earnVisits = (m.history || []).filter((h) => h.action === 'earn').length;
     const savedDollars = Math.round(((m.history || []).filter((h) => h.action === 'redeem').reduce((s, h) => s - (h.delta || 0), 0)) / 100);
@@ -2507,6 +2527,22 @@ function submitParty() {
       currentToken = token;
       currentMember = body.member;
       renderMember();
+      // Silently retry pending scans on app load
+      try {
+        fetch(API_BASE + '/.netlify/functions/scan-receipt', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: token }),
+        }).then((rr) => rr.json()).then((rs) => {
+          if (rs && rs.credited > 0) {
+            return fetch(API_BASE + '/.netlify/functions/verify-code', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ token: token }),
+            }).then((r2) => r2.json()).then((m2) => {
+              if (m2 && m2.member) { currentMember = m2.member; renderMember(); }
+            });
+          }
+        }).catch(() => {});
+      } catch (_) {}
     } catch (_) { /* offline — keep static demo data */ }
   }
   setTimeout(init, 200);
@@ -2592,6 +2628,18 @@ function submitParty() {
         body: JSON.stringify({ token, image: pickedDataUrl }),
       });
       const body = await r.json();
+      if (body.queued) {
+        document.getElementById('scanResult').innerHTML =
+          '<div class="scan-result" style="background:rgba(212,175,106,0.10);border:1px solid var(--gold-light);color:var(--cream)">' +
+            '<strong style="color:var(--gold-light);font-family:var(--ff-display);font-size:1.2rem">Queued for verification</strong><br>' +
+            (body.message || "We're checking with Toast — your points will land within a few hours.") +
+            '<div class="scan-result-detail">Check #' + (body.checkNumber || '—') + '</div>' +
+          '</div>';
+        btn.textContent = 'Done';
+        btn.disabled = false;
+        busy = false;
+        return;
+      }
       if (!body.ok) {
         document.getElementById('scanResult').innerHTML =
           '<div class="scan-result error">' + (body.error || 'Could not credit this receipt.') + '</div>';
