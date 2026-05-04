@@ -1149,9 +1149,10 @@ a.account-link:hover .al-arrow { color: var(--gold); }
 
       <div class="segment-control">
         <div class="seg-btn active" onclick="toggleSeg(this)">All</div>
-        <div class="seg-btn" onclick="toggleSeg(this)">Live</div>
+        <div class="seg-btn" onclick="toggleSeg(this)">Bands</div>
+        <div class="seg-btn" onclick="toggleSeg(this)">Ticketed</div>
+        <div class="seg-btn" onclick="toggleSeg(this)">Social</div>
         <div class="seg-btn" onclick="toggleSeg(this)">Tastings</div>
-        <div class="seg-btn" onclick="toggleSeg(this)">Brunch</div>
       </div>
 
       <div class="event-card">
@@ -1225,110 +1226,13 @@ a.account-link:hover .al-arrow { color: var(--gold); }
         </div>
       </div>
 
-      <div class="menu-cats">
-        <div class="cat-pill active">Cocktails</div>
-        <div class="cat-pill">Wine</div>
-        <div class="cat-pill">Shareables</div>
-        <div class="cat-pill">Sandwiches</div>
-        <div class="cat-pill">Flatbreads</div>
-      </div>
-
-      <!-- Featured strip -->
-      <div class="featured-strip">
-        <div class="featured-name">New Melle Well Water</div>
-        <div class="featured-desc">Gray Whale Gin, 7up Soda &amp; Squirt — our local signature pour.</div>
-        <div class="featured-bottom">
-          <div class="featured-cat">Signature Cocktail</div>
-          <div class="featured-price">$12</div>
-        </div>
-      </div>
-
-      <div class="section-rule"><div class="line"></div><div class="label">Signature Cocktails</div><div class="line"></div></div>
-
-      <div class="menu-row">
-        <div class="menu-row-top">
-          <div class="menu-row-name">Old Fashioned</div>
-          <div class="menu-row-price">$14</div>
-        </div>
-        <div class="menu-row-desc">Buffalo Trace Bourbon, muddled orange, bitters and simple syrup.</div>
-      </div>
-
-      <div class="menu-row">
-        <div class="menu-row-top">
-          <div class="menu-row-name">Espresso Martini</div>
-          <div class="menu-row-price">$12</div>
-        </div>
-        <div class="menu-row-desc">Skyy Vanilla Vodka, Kamora Coffee Liqueur, cold brew and simple syrup.</div>
-      </div>
-
-      <div class="menu-row">
-        <div class="menu-row-top">
-          <div class="menu-row-name">Blackberry Smash</div>
-          <div class="menu-row-price">$12</div>
-        </div>
-        <div class="menu-row-desc">Jack Daniels Blackberry, lime, mint, simple syrup and club soda.</div>
-      </div>
-
-      <div class="menu-row">
-        <div class="menu-row-top">
-          <div class="menu-row-name">Aperol Spritz</div>
-          <div class="menu-row-price">$11</div>
-        </div>
-        <div class="menu-row-desc">Aperol, La Marca Prosecco and a splash of soda water.</div>
-      </div>
-
-      <div class="section-rule"><div class="line"></div><div class="label">Wines by the Glass</div><div class="line"></div></div>
-
-      <div class="menu-row">
-        <div class="menu-row-top">
-          <div class="menu-row-name">Juggernaut Pinot Noir</div>
-          <div class="menu-row-price">$13 / $50</div>
-        </div>
-        <div class="menu-row-desc">Lush ripe cherry, caramel and vanilla. California.</div>
-      </div>
-
-      <div class="menu-row">
-        <div class="menu-row-top">
-          <div class="menu-row-name">Whitehaven Sauvignon Blanc</div>
-          <div class="menu-row-price">$10 / $38</div>
-        </div>
-        <div class="menu-row-desc">Bright tropical fruit and crisp acidity. New Zealand.</div>
-      </div>
-
-      <div class="menu-row">
-        <div class="menu-row-top">
-          <div class="menu-row-name">Studio by Miraval Rosé</div>
-          <div class="menu-row-price">$12 / $46</div>
-        </div>
-        <div class="menu-row-desc">Elegant and refreshing with hints of wild strawberry. Provence.</div>
-      </div>
-
-      <div class="section-rule"><div class="line"></div><div class="label">Shareables</div><div class="line"></div></div>
-
-      <div class="menu-row">
-        <div class="menu-row-top">
-          <div class="menu-row-name">Devils in the Chicken</div>
-          <div class="menu-row-price">$10.59</div>
-        </div>
-        <div class="menu-row-desc">Southern-style deviled eggs with bacon and peach &amp; pepper aioli.</div>
-      </div>
-
-      <div class="menu-row">
-        <div class="menu-row-top">
-          <div class="menu-row-name">Pulled Pork Nachos</div>
-          <div class="menu-row-price">$16.10</div>
-        </div>
-        <div class="menu-row-desc">Tortilla chips, BBQ pulled pork, jalapeños, cheddar, beer cheese, pickled onions and crema.</div>
-      </div>
-
-      <div class="menu-row">
-        <div class="menu-row-top">
-          <div class="menu-row-name">Jumbo Pretzel</div>
-          <div class="menu-row-price">$12.29</div>
-        </div>
-        <div class="menu-row-desc">Over-sized twisted pretzel served with house beer cheese.</div>
-      </div>
-      <div style="height:8px"></div>
+      <!-- Live menu pulled directly from the website so the app and site never drift. -->
+      <iframe
+        src="https://www.thequarrystl.com/menu"
+        title="The Quarry Menu"
+        style="border:0;width:100%;flex:1;background:var(--charcoal);min-height:600px"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"></iframe>
     </div>
 
     <!-- ══════ REWARDS ══════ -->
@@ -1591,7 +1495,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
 
       <div class="section-rule"><div class="line"></div><div class="label">Settings</div><div class="line"></div></div>
       <div class="account-link"><div class="al-label">Notification Preferences</div><div class="al-arrow">›</div></div>
-      <div class="account-link"><div class="al-label">Gift Cards</div><div class="al-arrow">›</div></div>
+      <a class="account-link" href="https://thequarrystl.com/quarry-giftcards" target="_blank" rel="noopener"><div class="al-label">Gift Cards</div><div class="al-arrow">›</div></a>
       <div class="account-link" onclick="gotoScreen('screen-contact')"><div class="al-label">Contact The Quarry</div><div class="al-arrow">›</div></div>
       <div class="account-link"><div class="al-label">Privacy &amp; Terms</div><div class="al-arrow">›</div></div>
       <div class="account-link"><div class="al-label" style="color:var(--gray)">Sign Out</div><div class="al-arrow">›</div></div>
@@ -2076,8 +1980,21 @@ function renderEventList(filter) {
     return true;
   });
   if (!filtered.length) {
-    segCtrl.insertAdjacentHTML('afterend',
-      `<div style="padding:40px 22px;text-align:center;font-family:var(--ff-script);font-style:italic;color:var(--gray);">No ${filter === 'all' ? '' : filter + ' '}events scheduled right now.</div>`);
+    let body;
+    if (filter === 'tastings') {
+      body = '<div style="padding:30px 22px;text-align:center;line-height:1.6">' +
+        '<div style="font-family:var(--ff-script);font-style:italic;color:var(--gray);margin-bottom:14px">No wine tastings on the calendar right now.</div>' +
+        '<a href="https://thequarrystl.com/quarry-wineclub" target="_blank" rel="noopener" style="display:inline-block;padding:12px 22px;border:1px solid var(--gold);color:var(--gold-light);font-family:var(--ff-body);font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;text-decoration:none">Visit the Wine Club ›</a>' +
+      '</div>';
+    } else if (filter === 'social') {
+      body = '<div style="padding:30px 22px;text-align:center;line-height:1.6">' +
+        '<div style="font-family:var(--ff-script);font-style:italic;color:var(--gray);margin-bottom:14px">No social events scheduled right now.</div>' +
+        '<a href="https://thequarrystl.com/quarry-events" target="_blank" rel="noopener" style="display:inline-block;padding:12px 22px;border:1px solid var(--gold);color:var(--gold-light);font-family:var(--ff-body);font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;text-decoration:none">See Full Calendar ›</a>' +
+      '</div>';
+    } else {
+      body = `<div style="padding:40px 22px;text-align:center;font-family:var(--ff-script);font-style:italic;color:var(--gray);">No ${filter === 'all' ? '' : filter + ' '}events scheduled right now.</div>`;
+    }
+    segCtrl.insertAdjacentHTML('afterend', body);
     return;
   }
   let html = '';
