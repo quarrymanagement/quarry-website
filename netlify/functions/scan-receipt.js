@@ -484,9 +484,14 @@ exports.handler = async (event) => {
   // headers differ from the printed POS slip.
 
   // ── 3. Receipt freshness (12-hour submission window) ──
-  const receiptIso = ocr.transaction_date + 'T' + (ocr.transaction_time || '23:59') + ':00';
+  const dateIso = parseFlexibleDate(ocr.transaction_date);
+  if (!dateIso) return reply(400, { ok: false, error: 'We could not read the date on your receipt. Make sure the date line is visible and try another photo.' });
+  const timeIso = parseFlexibleTime(ocr.transaction_time) || '23:59';
+  const receiptIso = dateIso + 'T' + timeIso + ':00';
   const receiptTs = new Date(receiptIso).getTime();
-  if (isNaN(receiptTs)) return reply(400, { ok: false, error: 'Could not parse receipt date.' });
+  if (isNaN(receiptTs)) return reply(400, { ok: false, error: 'Could not parse receipt date/time.' });
+  // Normalize the date on the OCR object so downstream code uses the parsed value
+  ocr.transaction_date = dateIso;
   const ageHours = (Date.now() - receiptTs) / 3600000;
   if (ageHours > SCAN_WINDOW_HOURS) {
     return reply(400, { ok: false, error: `This receipt is more than ${SCAN_WINDOW_HOURS} hours old — the scan window has expired.` });
