@@ -2,21 +2,180 @@
   "earnRate": 10,
   "earnRateNote": "Points earned per $1 spent at The Quarry (closed tab).",
   "tiers": [
-    { "id": "standard",  "name": "Quarry Standard",  "minPoints": 0,    "earnMultiplier": 1.00, "perks": "Full access to all rewards." },
-    { "id": "gold",      "name": "Quarry Gold",      "minPoints": 3000, "earnMultiplier": 1.25, "perks": "1.25× earn rate. Early access to event RSVPs. Priority on busy nights." },
-    { "id": "platinum",  "name": "Quarry Platinum",  "minPoints": 6000, "earnMultiplier": 1.50, "perks": "1.5× earn rate. Hosted tastings invitation. Concierge holiday booking." }
+    {
+      "id": "standard",
+      "name": "Quarry Standard",
+      "trailingSpendUsd": 0,
+      "earnMultiplier": 1.0,
+      "bottleDiscount": 0,
+      "perks": "Welcome to the family. Full access to the redemption ladder. 1.0× earn rate."
+    },
+    {
+      "id": "silver",
+      "name": "Quarry Silver",
+      "trailingSpendUsd": 300,
+      "earnMultiplier": 1.1,
+      "bottleDiscount": 5,
+      "perks": "1.1× earn rate. 5% off any bottle of wine. Avg ~$100/mo to maintain."
+    },
+    {
+      "id": "gold",
+      "name": "Quarry Gold",
+      "trailingSpendUsd": 600,
+      "earnMultiplier": 1.25,
+      "bottleDiscount": 10,
+      "perks": "1.25× earn rate. 10% off bottles. Free birthday entrée. Early event RSVPs. Avg ~$200/mo to maintain."
+    },
+    {
+      "id": "elite",
+      "name": "Quarry Elite",
+      "trailingSpendUsd": 1500,
+      "earnMultiplier": 1.5,
+      "bottleDiscount": 15,
+      "perks": "1.5× earn rate. 15% off bottles. One complimentary glass of wine per visit. Priority on private event dates. Named on the wall. Avg ~$500/mo to maintain."
+    }
   ],
+  "tierDecay": {
+    "warningDays": 30,
+    "downgradeDays": 60,
+    "rule": "If a member has zero spend for 60 days, tier drops one level. A banner appears at day 30 saying 'Visit by [date] to keep your tier.' Points themselves never expire — only the tier perks decay."
+  },
   "catalog": [
-    { "id": "r-bill5",   "name": "$5 Off Your Bill",         "description": "Applied to any check at the bar.",       "points": 500,  "active": true },
-    { "id": "r-app",     "name": "Free Appetizer",           "description": "Jumbo Pretzel · Devils · Wings.",        "points": 750,  "active": true },
-    { "id": "r-wine20",  "name": "$20 Wine Bottle Credit",   "description": "Toward any bottle on the list.",         "points": 1500, "active": true },
-    { "id": "r-bday",    "name": "Birthday Entrée",          "description": "On us during your birthday month.",      "points": 2000, "active": true },
-    { "id": "r-private", "name": "Private Event Priority",   "description": "First access to open event dates.",      "points": 5000, "active": true }
+    {
+      "id": "r-balls",
+      "name": "Free Bucket of Balls",
+      "description": "Surfside Hole-In-One Golf · 75 practice balls.",
+      "spendEquivalent": 50,
+      "points": 500,
+      "active": true
+    },
+    {
+      "id": "r-bill10",
+      "name": "$10 Off Your Bill",
+      "description": "Applied to any check at the bar or kitchen.",
+      "spendEquivalent": 100,
+      "points": 1000,
+      "active": true
+    },
+    {
+      "id": "r-glass",
+      "name": "Free Glass of Wine or Beer",
+      "description": "House pour or any draft beer · standard pour.",
+      "spendEquivalent": 125,
+      "points": 1250,
+      "active": true
+    },
+    {
+      "id": "r-app",
+      "name": "Free Appetizer",
+      "description": "Jumbo Pretzel · Devils · Wings · Flatbread.",
+      "spendEquivalent": 150,
+      "points": 1500,
+      "active": true
+    },
+    {
+      "id": "r-wine20",
+      "name": "$20 Wine Bottle Credit",
+      "description": "Toward any bottle on the wine list.",
+      "spendEquivalent": 200,
+      "points": 2000,
+      "active": true
+    },
+    {
+      "id": "r-entree-glass",
+      "name": "Free Entrée + Glass of Wine",
+      "description": "Any entrée up to $25 menu price + standard 6 oz house pour.",
+      "spendEquivalent": 250,
+      "points": 2500,
+      "active": true
+    },
+    {
+      "id": "r-tasting",
+      "name": "Free Wine Tasting Admission",
+      "description": "Includes food and wine for two. Reserve any monthly tasting.",
+      "spendEquivalent": 300,
+      "points": 3000,
+      "active": true
+    },
+    {
+      "id": "r-bottle",
+      "name": "Free Bottle of Wine",
+      "description": "Any bottle on the standard wine list (excludes reserve & vintage).",
+      "spendEquivalent": 350,
+      "points": 3500,
+      "active": true
+    }
   ],
   "bonuses": [
-    { "id": "b-rsvp",    "name": "Public Event RSVP",        "description": "Earn bonus points for RSVPing public events on the app.", "points": 50 },
-    { "id": "b-refer",   "name": "Refer a Friend",           "description": "When a referred friend's first visit closes a tab.",     "points": 500 },
-    { "id": "b-bday",    "name": "Birthday Month Bonus",     "description": "Free dessert during your birthday month.",                "points": 0  }
+    {
+      "id": "b-welcome",
+      "name": "Welcome Bonus",
+      "description": "First sign-in to the Quarry app.",
+      "points": 100,
+      "oneTime": true
+    },
+    {
+      "id": "b-rsvp-wine",
+      "name": "Wine Tasting RSVP",
+      "description": "RSVP and attend a paid wine tasting event.",
+      "points": 25
+    },
+    {
+      "id": "b-rsvp-event",
+      "name": "Ticketed Event RSVP",
+      "description": "RSVP and attend any other ticketed event.",
+      "points": 15
+    },
+    {
+      "id": "b-rsvp-brunch",
+      "name": "Brunch RSVP",
+      "description": "RSVP a featured brunch.",
+      "points": 10
+    },
+    {
+      "id": "b-reservation",
+      "name": "Reservation Honored",
+      "description": "Show up for a confirmed dinner reservation.",
+      "points": 50
+    },
+    {
+      "id": "b-bday",
+      "name": "Birthday Month Visit",
+      "description": "First visit during your birthday month each year.",
+      "points": 250,
+      "oneTimePerYear": true
+    },
+    {
+      "id": "b-refer",
+      "name": "Refer a Friend",
+      "description": "Both you and your friend earn when their first tab closes. Capped at 5 referrals per year.",
+      "points": 500,
+      "yearlyCap": 5
+    },
+    {
+      "id": "b-review",
+      "name": "Public Review",
+      "description": "Leave a Google or Facebook review (admin verifies).",
+      "points": 100,
+      "oneTime": true
+    },
+    {
+      "id": "b-private",
+      "name": "Private Party Booked",
+      "description": "Book a private party of 10+ people via the app.",
+      "points": 1000
+    }
   ],
-  "lastUpdated": "2026-05-01"
+  "stipulations": [
+    "Members redeem one reward per check (no stacking five rewards on one visit).",
+    "Tier bottle discounts don't combine with happy hour or wine-of-the-week pricing.",
+    "Elite 'free glass per visit' is one standard pour per check, logged by the bartender.",
+    "Birthday rewards must be redeemed in person, ID required, valid only in birthday month.",
+    "Free Entrée + Wine reward applies to entrées up to $25 menu price; wine pour is 6 oz house standard.",
+    "Tier downgrades one level on 60 days of no spend; warning shown at 30 days.",
+    "Points never expire — only tier perks decay with inactivity.",
+    "Redemption codes expire 5 minutes after generation; show to staff at the bar.",
+    "Anthropic/Quarry reserves the right to update the program. Members notified of any change."
+  ],
+  "lastUpdated": "2026-05-03"
 }
