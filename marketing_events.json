@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-04T22:40:49.886Z",
+  "updatedAt": "2026-05-04T22:40:57.877Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -17687,6 +17687,30 @@
       "sgEventId": "Ym91bmNlLTQtMTA2MDM3NzY1LVdsQ2k1UHJ5UkpldC1BZ0VFaW42UUEtMjI",
       "userAgent": null,
       "category": "quarry-marketing"
+    },
+    {
+      "ts": "2026-05-04T22:40:57.767Z",
+      "type": "poll",
+      "draftId": "f1c820f9-f469-430e-b1a1-2fed9d01f64a",
+      "sendId": "7a62ca53-4809-11f1-8238-e6db3a268033",
+      "summary": {
+        "opens": 17,
+        "clicks": 2,
+        "bounces": 1,
+        "unsubs": 0
+      }
+    },
+    {
+      "ts": "2026-05-04T22:40:57.877Z",
+      "type": "poll",
+      "draftId": "d4d01b90-a7a2-4061-b5d7-dd442f9acf7b",
+      "sendId": "92c78bd3-44af-11f1-81cc-0a22d60890ee",
+      "summary": {
+        "opens": 222,
+        "clicks": 4,
+        "bounces": 9,
+        "unsubs": 0
+      }
     }
   ],
   "aggregates": {
@@ -17716,8 +17740,8 @@
     },
     "d4d01b90-a7a2-4061-b5d7-dd442f9acf7b": {
       "delivered": 469,
-      "open": 315,
-      "uniqueOpen": 220,
+      "open": 319,
+      "uniqueOpen": 222,
       "click": 7,
       "uniqueClick": 4,
       "bounce": 9,
@@ -17734,15 +17758,15 @@
       "urlsClicked": {},
       "requests": 483,
       "block": 0,
-      "lastPolledAt": "2026-05-04T16:00:22.243Z"
+      "lastPolledAt": "2026-05-04T22:40:57.877Z"
     },
     "f1c820f9-f469-430e-b1a1-2fed9d01f64a": {
-      "delivered": 1,
-      "open": 3,
-      "uniqueOpen": 1,
-      "click": 5,
-      "uniqueClick": 1,
-      "bounce": 0,
+      "delivered": 486,
+      "open": 21,
+      "uniqueOpen": 17,
+      "click": 11,
+      "uniqueClick": 2,
+      "bounce": 1,
       "unsubscribe": 0,
       "spamreport": 0,
       "dropped": 0,
@@ -17759,7 +17783,10 @@
         "https://thequarrystl.com/quarry-golf?utm_source=email&utm_medium=marketing&utm_campaign=menu_spotlight": 1,
         "https://www.thequarrystl.com/quarry-private-events.html?utm_source=email&utm_medium=marketing&utm_campaign=footer-cta": 1,
         "https://thequarrystl.com/quarry-bands?utm_source=email&utm_medium=marketing&utm_campaign=menu_spotlight": 1
-      }
+      },
+      "requests": 498,
+      "block": 0,
+      "lastPolledAt": "2026-05-04T22:40:57.767Z"
     }
   }
 }
