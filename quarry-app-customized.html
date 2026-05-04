@@ -1226,7 +1226,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
     <div class="screen" id="screen-events">
       <div class="screen-header">
         <div>
-          <div class="screen-overline">May at the Quarry</div>
+          <div class="screen-overline" id="eventsMonthLabel">May at the Quarry</div>
           <div class="screen-title">Music &amp; Events</div>
         </div>
       </div>
@@ -2551,7 +2551,19 @@ async function renderGolfAvailability() {
   }
 }
 
+
+// Auto-update the events screen "{Month} at the Quarry" label to current month in CT
+function updateEventsMonthLabel() {
+  try {
+    const el = document.getElementById('eventsMonthLabel');
+    if (!el) return;
+    const month = new Intl.DateTimeFormat('en-US', { timeZone: QUARRY_TZ, month: 'long' }).format(new Date());
+    el.textContent = month + ' at the Quarry';
+  } catch (_) {}
+}
+
 window.addEventListener('DOMContentLoaded', () => {
+  updateEventsMonthLabel();
   fetchEvents().then(events => {
     if (events) renderEvents(events);
     else setSyncStatus('demo', 'Demo · open thequarrystl.com to sync');
