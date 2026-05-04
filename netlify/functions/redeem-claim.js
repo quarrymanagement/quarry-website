@@ -97,20 +97,15 @@ exports.handler = async (event) => {
     return reply(410, { ok: false, error: 'Code expired. Member needs to generate a new one.' });
   }
 
-  if ((member.currentPoints || 0) < pr.points) {
-    return reply(400, { ok: false, error: 'Member no longer has enough points (current: ' + (member.currentPoints || 0) + ')' });
-  }
-
-  // Apply
-  member.currentPoints = (member.currentPoints || 0) - pr.points;
-  member.totalRedemptions = (member.totalRedemptions || 0) + 1;
+  // Points were deducted at redeem-init (when the customer confirmed via the app).
+  // This endpoint just records the bartender's claim and clears the pending hold.
   member.history = member.history || [];
   member.history.push({
     at: new Date().toISOString(),
-    action: 'redeem',
-    delta: -pr.points,
+    action: 'redeem-claimed',
+    delta: 0,
     by: 'staff-redeem',
-    note: pr.rewardName + ' (code ' + code + ')',
+    note: pr.rewardName + ' (code ' + code + ' · honored at bar)',
     rewardId: pr.rewardId,
   });
   delete member.pendingRedemption;
