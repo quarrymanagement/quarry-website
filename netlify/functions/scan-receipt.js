@@ -1,5 +1,5 @@
 // ============================================================================
-// scan-receipt.js — credit a member by scanning a Toast receipt (v1.1)
+// scan-receipt.js — credit a member by scanning a Toast receipt (v1.2)
 //
 // POST { token, image }
 //   token: session token from verify-code.js
@@ -7,13 +7,17 @@
 //
 // Flow:
 //   1. Verify session token → resolve member
-//   2. Run Claude Vision OCR on image → extract check#, date, total, etc.
-//   3. Cross-validate against Toast Open API (real check, total matches)
+//   2. Run Claude Vision OCR on image → extract check#, date, subtotal, tax, tip
+//   3. Cross-validate against Toast Open API (real check, subtotal matches)
 //   4. Dedupe via credited-orders.json (first-claim-wins)
 //   5. Daily scan cap (2/day per member)
 //   6. Soft-flag cardholder name mismatch → push to scanned-flagged.json
-//   7. Award points (10 × total + 10 visit bonus, × tier multiplier)
+//   7. Award points (10 × pre-tip total + 10 visit bonus, × tier multiplier)
+//      Tips do NOT earn points — they go to the server, not Quarry.
 //   8. Append to member history + credited-orders.json
+//
+// v1.2: 12-hour scan window, point math now on pre-tip total (subtotal+tax),
+// OCR extracts itemized subtotal/tax/tip and cross-checks subtotal with Toast.
 //
 // ENV:
 //   MEMBER_AUTH_SECRET, GITHUB_TOKEN          — auth + storage
@@ -35,7 +39,7 @@ const TOAST_REST_GUID   = process.env.TOAST_RESTAURANT_GUID || '';
 
 const SESSION_TTL_DAYS  = 30;
 const MAX_SCANS_PER_DAY = 2;
-const SCAN_WINDOW_HOURS = 24;
+const SCAN_WINDOW_HOURS = 12;
 const MIN_TAB_USD       = 20;
 const TOTAL_TOLERANCE   = 1.0;
 const RESTAURANT_KEYWORDS = ['quarry'];
@@ -128,13 +132,16 @@ Schema:
   "check_number": string|null,        // the check/order number (e.g., "1247")
   "transaction_date": string|null,    // ISO date "YYYY-MM-DD"
   "transaction_time": string|null,    // 24-hour "HH:MM"
-  "total_amount": number|null,        // final paid amount, including tax+tip
+  "subtotal_amount": number|null,     // PRE-TAX subtotal (food/drinks only, before tax)
+  "tax_amount": number|null,          // tax line on receipt
+  "tip_amount": number|null,          // tip if shown (often handwritten)
+  "total_amount": number|null,        // final paid amount including tax + tip
   "restaurant_name": string|null,     // name as printed on receipt
   "cardholder_name": string|null,     // ONLY if credit card receipt; null otherwise
   "payment_type": string|null         // "credit" | "cash" | "gift" | "other"
 }
 
-If a field is unclear, set it to null. Do not invent data.`
+If a field is unclear, set it to null. Do not invent data. The subtotal_amount is critical — it's the pre-tax line, NOT including tax or tip.`
         }
       ]
     }]
@@ -210,10 +217,31 @@ function extractCardholder(check) {
   return null;
 }
 
-function checkTotal(check) {
+function checkSubtotal(check) {
+  // PRE-TAX subtotal (food/drinks only — strict subtotal)
   if (!check) return 0;
-  return check.totalAmount || check.amount ||
-    ((check.subtotal || 0) + (check.tax || 0) + (check.tipAmount || 0)) || 0;
+  if (typeof check.amount === 'number') return check.amount;
+  if (typeof check.subtotal === 'number') return check.subtotal;
+  return 0;
+}
+
+function checkPreTipTotal(check) {
+  // Subtotal + tax (everything except tip). This is what we award points on.
+  if (!check) return 0;
+  const sub = checkSubtotal(check);
+  const tax = (typeof check.taxAmount === 'number') ? check.taxAmount : (check.tax || 0);
+  if (sub) return sub + tax;
+  // Last-resort fallback: total minus tip
+  if (typeof check.totalAmount === 'number') {
+    return check.totalAmount - (check.tipAmount || 0);
+  }
+  return 0;
+}
+
+function checkTotal(check) {
+  // Final paid amount including tax + tip (used only for receipt-vs-Toast cross-check display)
+  if (!check) return 0;
+  return check.totalAmount || ((checkSubtotal(check) + (check.taxAmount || 0) + (check.tipAmount || 0))) || 0;
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
@@ -278,10 +306,7 @@ exports.handler = async (event) => {
   }
   if (ageHours < -2) return reply(400, { ok: false, error: 'Receipt date is in the future.' });
 
-  // ── 4. Min tab ──
-  if (ocr.total_amount < MIN_TAB_USD) {
-    return reply(400, { ok: false, error: `Receipts under $${MIN_TAB_USD} are not eligible for points.` });
-  }
+  // ── 4. (Min-tab check moved below Toast lookup to use authoritative pre-tip total) ──
 
   // ── 5. Cross-validate with Toast ──
   const businessDate = ocr.transaction_date.replace(/-/g, '');
@@ -291,12 +316,27 @@ exports.handler = async (event) => {
   if (!toastMatch) {
     return reply(400, { ok: false, error: 'We could not find this check in our records. Double-check the photo and try again.' });
   }
+  const toastSubtotal = checkSubtotal(toastMatch.check);
+  const toastPreTip = checkPreTipTotal(toastMatch.check);
   const toastTotal = checkTotal(toastMatch.check);
-  if (Math.abs(toastTotal - ocr.total_amount) > TOTAL_TOLERANCE) {
+
+  // Cross-check: OCR'd subtotal must match Toast's subtotal (the pre-tax basis).
+  // Tip varies (often handwritten), so we trust subtotal as the integrity check.
+  const ocrSubtotal = (typeof ocr.subtotal_amount === 'number') ? ocr.subtotal_amount : null;
+  if (ocrSubtotal != null && Math.abs(toastSubtotal - ocrSubtotal) > TOTAL_TOLERANCE) {
+    return reply(400, { ok: false, error: 'Receipt subtotal does not match our records.' });
+  }
+  // Fallback: if OCR didn't see a subtotal line, fall back to total cross-check
+  if (ocrSubtotal == null && Math.abs(toastTotal - ocr.total_amount) > TOTAL_TOLERANCE) {
     return reply(400, { ok: false, error: 'Receipt total does not match our records.' });
   }
   const toastOrderId = toastMatch.order.guid;
   const cardholder = extractCardholder(toastMatch.check);
+
+  // Min-tab uses Toast's authoritative pre-tip total
+  if (toastPreTip < MIN_TAB_USD) {
+    return reply(400, { ok: false, error: `Pre-tip total under $${MIN_TAB_USD} — not eligible for points.` });
+  }
 
   // ── 6. Dedupe ──
   let creditedFile = await loadJson('credited-orders.json');
@@ -344,11 +384,12 @@ exports.handler = async (event) => {
     });
   }
 
-  // ── 9. Compute points ──
+  // ── 9. Compute points ── (on PRE-TIP TOTAL — tips don't earn points)
   const tier = member.tier || 'standard';
   const mult = tierMult(tier);
-  const basePts = Math.round(toastTotal * 10);
-  const visitBonus = toastTotal >= MIN_TAB_USD ? 10 : 0;
+  const earnBasis = toastPreTip; // subtotal + tax (NOT tip)
+  const basePts = Math.round(earnBasis * 10);
+  const visitBonus = earnBasis >= MIN_TAB_USD ? 10 : 0;
   const totalPts = Math.round((basePts + visitBonus) * mult);
 
   // ── 10. Update member ──
@@ -363,7 +404,9 @@ exports.handler = async (event) => {
     delta: totalPts,
     orderId: toastOrderId,
     checkNumber: ocr.check_number,
-    spendUsd: toastTotal,
+    spendUsd: earnBasis,           // pre-tip total (basis for points)
+    finalTotalUsd: toastTotal,     // for reference (incl. tip)
+    subtotalUsd: toastSubtotal,
     tier,
     multiplier: mult,
     note: 'Receipt scan',
@@ -377,7 +420,9 @@ exports.handler = async (event) => {
     orderId: toastOrderId,
     checkNumber: ocr.check_number,
     memberEmail: member.email,
-    total: toastTotal,
+    subtotal: toastSubtotal,
+    preTipTotal: earnBasis,
+    finalTotal: toastTotal,
     points: totalPts,
     creditedAt: new Date().toISOString(),
   });
@@ -391,7 +436,9 @@ exports.handler = async (event) => {
     visitBonus,
     multiplier: mult,
     newBalance: member.currentPoints,
-    spendUsd: toastTotal,
+    spendUsd: earnBasis,           // pre-tip total used for points
+    finalTotal: toastTotal,        // including tip, for display only
+    subtotal: toastSubtotal,
     checkNumber: ocr.check_number,
   });
 };
