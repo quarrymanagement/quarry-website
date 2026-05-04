@@ -1253,7 +1253,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
           </div>
         </div>
         <div class="tp-track"><div class="tp-fill" style="width:98%"></div></div>
-        <div class="tp-label"><span>Gold · $450 / 90 days</span><span>Elite · $1,000 / 90 days</span></div>
+        <div class="tp-label"><span>Gold · $600 / 90 days</span><span>Elite · $1,000 / 90 days</span></div>
       </div>
 
       <div class="section-rule"><div class="line"></div><div class="label">Redeem</div><div class="line"></div></div>
@@ -1800,15 +1800,15 @@ a.account-link:hover .al-arrow { color: var(--gold); }
         <div class="onboard-step-num">★★</div>
         <div class="onboard-step-body">
           <div class="onboard-step-title">Quarry Silver · $300 / 90 days (~$100/mo)</div>
-          <div class="onboard-step-desc">1.1× earn rate. 5% off any bottle of wine.</div>
+          <div class="onboard-step-desc">1.1× earn rate. The first taste of perks — bottle discounts unlock at Gold.</div>
         </div>
       </div>
 
       <div class="onboard-step">
         <div class="onboard-step-num">★★★</div>
         <div class="onboard-step-body">
-          <div class="onboard-step-title">Quarry Gold · $450 / 90 days (~$150/mo)</div>
-          <div class="onboard-step-desc">1.25× earn rate. 10% off bottles. Free birthday entrée. Early access to event RSVPs.</div>
+          <div class="onboard-step-title">Quarry Gold · $600 / 90 days (~$200/mo)</div>
+          <div class="onboard-step-desc">1.25× earn rate. 5% off any bottle of wine. Free birthday entrée. Early access to event RSVPs.</div>
         </div>
       </div>
 
@@ -1816,7 +1816,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
         <div class="onboard-step-num">★★★★</div>
         <div class="onboard-step-body">
           <div class="onboard-step-title">Quarry Elite · $1,000 / 90 days (~$333/mo)</div>
-          <div class="onboard-step-desc">1.5× earn rate. 15% off bottles. One complimentary glass of wine per visit. Priority on private event dates. Named on the wall.</div>
+          <div class="onboard-step-desc">1.5× earn rate. 10% off bottles. One complimentary glass of wine per visit (requires a $20+ closed tab). Priority on private event dates. Named on the wall.</div>
         </div>
       </div>
 
@@ -2279,7 +2279,7 @@ function submitParty() {
     const trailing = (m.trailingSpend90 != null) ? m.trailingSpend90 : (lifetime / 10);
     let nextThreshold, nextLabel;
     if (tier === 'standard')      { nextThreshold = 300;  nextLabel = 'Silver'; }
-    else if (tier === 'silver')   { nextThreshold = 450;  nextLabel = 'Gold'; }
+    else if (tier === 'silver')   { nextThreshold = 600;  nextLabel = 'Gold'; }
     else if (tier === 'gold')     { nextThreshold = 1000; nextLabel = 'Elite'; }
     else                          { nextThreshold = 1000; nextLabel = 'Top tier'; }
     const pct = (tier === 'elite' || tier === 'platinum') ? 100 : Math.min(100, (trailing / nextThreshold) * 100);
@@ -2294,7 +2294,7 @@ function submitParty() {
     const tpLabel = document.querySelector('.tp-label');
     if (tpLabel && tier !== 'elite' && tier !== 'platinum') {
       const here = tier === 'standard' ? 'Standard' : tier === 'silver' ? 'Silver' : 'Gold';
-      const target = tier === 'standard' ? 'Silver · $300' : tier === 'silver' ? 'Gold · $450' : 'Elite · $1,000';
+      const target = tier === 'standard' ? 'Silver · $300' : tier === 'silver' ? 'Gold · $600' : 'Elite · $1,000';
       tpLabel.innerHTML = '<span>' + here + ' · $' + Math.round(trailing) + '</span><span>' + target + '</span>';
     }
     const earnVisits = (m.history || []).filter((h) => h.action === 'earn').length;
