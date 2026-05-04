@@ -841,6 +841,12 @@
             display: flex;
             gap: 12px;
             justify-content: flex-end;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .modal-footer .marketing-optin-label {
+            flex: 1 1 100%;
+            margin: 0 0 4px 0 !important;
         }
 
         .modal-footer button {
@@ -1551,8 +1557,8 @@
             <div class="modal-footer" id="modalFooter">
                 <button type="button" class="btn-primary" id="selectTableBtn" style="display:none;" onclick="confirmTableSelection()">Continue with Selected Table →</button>
                 <button type="button" class="btn-secondary" id="backToMapBtn" style="display:none;" onclick="goBackToMap()">← Back to Map</button>
-                <label style="display:flex;align-items:flex-start;gap:0.6rem;font-size:0.9rem;line-height:1.4;margin:1rem 0;padding:0.85rem;background:#f5efde;border:1px solid #d4c79b;border-radius:6px;cursor:pointer;">
-                    <input type="checkbox" name="marketing_opt_in" value="yes" style="margin-top:0.2rem;flex-shrink:0;width:18px;height:18px;cursor:pointer;accent-color:#9a7b2a;">
+                <label class="marketing-optin-label" style="display:flex;align-items:flex-start;gap:0.6rem;font-size:0.9rem;line-height:1.4;padding:0.85rem;background:#f5efde;border:1px solid #d4c79b;border-radius:6px;cursor:pointer;">
+                    <input type="checkbox" form="registrationForm" name="marketing_opt_in" value="yes" style="margin-top:0.2rem;flex-shrink:0;width:18px;height:18px;cursor:pointer;accent-color:#9a7b2a;">
                     <span style="color:#1a2942;">
                         <strong>Yes, keep me in the loop.</strong> Send me occasional emails about upcoming events, live music, wine club tastings, and specials at The Quarry. (Unsubscribe any time.)
                     </span>
@@ -2282,6 +2288,7 @@
                     seatType: seatType,
                     tableId: selectedMapTable ? selectedMapTable.id : (formData.get("selectedTableId") || ''),
                     ticketTier: formData.get("ticketTier"),
+                    marketing_opt_in: formData.get("marketing_opt_in") === "yes",
                     successUrl: window.location.origin + '/quarry-events',
                     cancelUrl: window.location.origin + '/quarry-events'
                 };
@@ -2486,28 +2493,5 @@
             renderEvents();
         });
     </script>
-
-
-<!-- Pre-fill ?email= from URL (used when launched from the Quarry member app) -->
-<script>
-(function(){
-  try {
-    var p = new URLSearchParams(location.search);
-    var e = p.get('email');
-    if (!e || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)) return;
-    var fill = function(){
-      var inputs = document.querySelectorAll('input[type="email"], input[name="email"]');
-      for (var i = 0; i < inputs.length; i++) {
-        if (!inputs[i].value) inputs[i].value = e;
-      }
-    };
-    if (document.readyState !== 'loading') fill();
-    else document.addEventListener('DOMContentLoaded', fill);
-    var mo = new MutationObserver(function(){ fill(); });
-    mo.observe(document.documentElement, { childList: true, subtree: true });
-    setTimeout(function(){ try { mo.disconnect(); } catch(_){} }, 30000);
-  } catch (_) {}
-})();
-</script>
 </body>
 </html>
