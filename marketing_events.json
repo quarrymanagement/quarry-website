@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-04T22:34:19.821Z",
+  "updatedAt": "2026-05-04T22:34:27.702Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -16884,6 +16884,17 @@
       "sgEventId": "U9t08itYRPmgH1z3lnldVA",
       "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Mobile/15E148 Safari/604.1",
       "category": "quarry-marketing:test"
+    },
+    {
+      "ts": "2026-05-04T22:34:22.000Z",
+      "type": "click",
+      "draftId": "f1c820f9-f469-430e-b1a1-2fed9d01f64a",
+      "ruleId": null,
+      "email": "management@thequarrystl.com",
+      "url": "https://thequarrystl.com/quarry-bands?utm_source=email&utm_medium=marketing&utm_campaign=menu_spotlight",
+      "sgEventId": "_dXxDrIWQGKtPfg-M20p5Q",
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Mobile/15E148 Safari/604.1",
+      "category": "quarry-marketing:test"
     }
   ],
   "aggregates": {
@@ -16937,13 +16948,13 @@
       "delivered": 1,
       "open": 3,
       "uniqueOpen": 1,
-      "click": 4,
+      "click": 5,
       "uniqueClick": 1,
       "bounce": 0,
       "unsubscribe": 0,
       "spamreport": 0,
       "dropped": 0,
-      "lastEventAt": "2026-05-04T22:34:13.000Z",
+      "lastEventAt": "2026-05-04T22:34:22.000Z",
       "openersByEmail": {
         "management@thequarrystl.com": "2026-05-04T22:33:33.000Z"
       },
@@ -16954,7 +16965,8 @@
         "https://thequarrystl.com/quarry-wineclub?utm_source=email&utm_medium=marketing&utm_campaign=menu_spotlight": 1,
         "https://thequarrystl.com/quarry-events?utm_source=email&utm_medium=marketing&utm_campaign=menu_spotlight": 1,
         "https://thequarrystl.com/quarry-golf?utm_source=email&utm_medium=marketing&utm_campaign=menu_spotlight": 1,
-        "https://www.thequarrystl.com/quarry-private-events.html?utm_source=email&utm_medium=marketing&utm_campaign=footer-cta": 1
+        "https://www.thequarrystl.com/quarry-private-events.html?utm_source=email&utm_medium=marketing&utm_campaign=footer-cta": 1,
+        "https://thequarrystl.com/quarry-bands?utm_source=email&utm_medium=marketing&utm_campaign=menu_spotlight": 1
       }
     }
   }
