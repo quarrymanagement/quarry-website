@@ -1310,13 +1310,17 @@ a.account-link:hover .al-arrow { color: var(--gold); }
         </div>
       </div>
 
-      <!-- Live menu pulled directly from the website so the app and site never drift. -->
+      <!-- Live menu pulled directly from the website (embedded mode = no nav/footer) -->
       <iframe
-        src="https://www.thequarrystl.com/quarry-menu"
+        src="https://www.thequarrystl.com/quarry-menu?embedded=1"
         title="The Quarry Menu"
-        style="border:0;width:100%;flex:1;background:var(--charcoal);min-height:600px"
+        style="border:0;width:100%;flex:1;background:var(--charcoal);min-height:calc(100vh - 200px)"
         loading="lazy"
         referrerpolicy="no-referrer-when-downgrade"></iframe>
+      <!-- Footer fallback link in case iframe fails -->
+      <div style="text-align:center;padding:14px 22px 28px;font-family:var(--ff-script);font-style:italic;font-size:0.92rem;color:var(--gray)">
+        Menu not loading? <a href="https://www.thequarrystl.com/quarry-menu" target="_blank" rel="noopener" style="color:var(--gold-light);text-decoration:underline">Open in browser ›</a>
+      </div>
     </div>
 
     <!-- ══════ REWARDS ══════ -->
