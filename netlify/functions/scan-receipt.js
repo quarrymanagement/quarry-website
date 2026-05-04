@@ -170,23 +170,28 @@ async function getToastToken() {
 
 async function findToastOrder(checkNumber, businessDateYYYYMMDD, token) {
   if (!token) token = await getToastToken();
-  const r = await httpsRequest({
-    hostname: 'ws-api.toasttab.com',
-    path: '/orders/v2/ordersBulk?businessDate=' + businessDateYYYYMMDD + '&pageSize=100',
-    method: 'GET',
-    headers: {
-      'Authorization': 'Bearer ' + token,
-      'Toast-Restaurant-External-ID': TOAST_REST_GUID,
-      'Accept': 'application/json',
-    },
-  });
-  if (r.status !== 200 || !Array.isArray(r.data)) throw new Error('Toast lookup: HTTP ' + r.status);
   const target = String(checkNumber).replace(/^#?/, '');
-  for (const order of r.data) {
-    for (const check of (order.checks || [])) {
-      const dn = String(check.displayNumber || check.tabName || '').replace(/^#?/, '');
-      if (dn === target) return { order, check };
+  // Toast ordersBulk paginates at max 100 orders/page. Walk up to 10 pages.
+  for (let page = 1; page <= 10; page++) {
+    const r = await httpsRequest({
+      hostname: 'ws-api.toasttab.com',
+      path: '/orders/v2/ordersBulk?businessDate=' + businessDateYYYYMMDD + '&pageSize=100&page=' + page,
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Toast-Restaurant-External-ID': TOAST_REST_GUID,
+        'Accept': 'application/json',
+      },
+    });
+    if (r.status !== 200 || !Array.isArray(r.data)) throw new Error('Toast lookup: HTTP ' + r.status);
+    if (r.data.length === 0) return null;
+    for (const order of r.data) {
+      for (const check of (order.checks || [])) {
+        const dn = String(check.displayNumber || check.tabName || '').replace(/^#?/, '');
+        if (dn === target) return { order, check };
+      }
     }
+    if (r.data.length < 100) return null;
   }
   return null;
 }
