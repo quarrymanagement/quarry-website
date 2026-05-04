@@ -66,6 +66,77 @@ function githubRequest(method, path, token, data) {
   });
 }
 
+
+
+// ─── Credit Quarry rewards points for an in-app purchase (event ticket or golf bay) ──
+// Idempotent via sourceId (Stripe session id). Best-effort — failures are logged
+// but never break the registration webhook.
+async function creditMemberPointsForPurchase({ email, amountCents, source, sourceId, label }) {
+  if (!email || !amountCents || amountCents <= 0) return null;
+  const ghToken = process.env.GITHUB_TOKEN;
+  if (!ghToken) return null;
+
+  const repo = 'quarrymanagement/quarry-website';
+  const TIER_MULT = { standard: 1.0, silver: 1.1, gold: 1.25, elite: 1.5, platinum: 1.5 };
+
+  try {
+    // Load members.json
+    const meta = await githubRequest('GET', '/repos/' + repo + '/contents/members.json', ghToken);
+    if (meta.statusCode !== 200) return null;
+    const json = JSON.parse(Buffer.from(meta.data.content, 'base64').toString('utf8'));
+    const sha = meta.data.sha;
+
+    const member = (json.members || []).find((m) => (m.email || '').toLowerCase() === email.toLowerCase());
+    if (!member) {
+      console.log('[purchase-credit] no member matching ' + email + ' — skipping');
+      return null;
+    }
+    // Idempotency: don't double-credit the same Stripe session
+    if ((member.history || []).some((h) => h.sourceId === sourceId)) {
+      console.log('[purchase-credit] session ' + sourceId + ' already credited for ' + email);
+      return null;
+    }
+
+    const amountUsd = amountCents / 100;
+    const mult = TIER_MULT[member.tier || 'standard'] || 1.0;
+    const basePts = Math.round(amountUsd * 10);
+    const totalPts = Math.round(basePts * mult);
+
+    member.currentPoints = (member.currentPoints || 0) + totalPts;
+    member.lifetimePoints = (member.lifetimePoints || 0) + totalPts;
+    member.lastVisitAt = new Date().toISOString();
+    member.history = member.history || [];
+    member.history.push({
+      at: new Date().toISOString(),
+      action: 'earn',
+      source: source,
+      sourceId: sourceId,
+      delta: totalPts,
+      spendUsd: amountUsd,
+      tier: member.tier || 'standard',
+      multiplier: mult,
+      note: label || 'In-app purchase',
+    });
+    json.lastUpdated = new Date().toISOString().split('T')[0];
+
+    const content = Buffer.from(JSON.stringify(json, null, 2), 'utf8').toString('base64');
+    const put = await githubRequest('PUT', '/repos/' + repo + '/contents/members.json', ghToken, {
+      message: '+' + totalPts + ' pts (' + source + ') — ' + email,
+      content: content,
+      sha: sha,
+    });
+    if (put.statusCode !== 200 && put.statusCode !== 201) {
+      console.error('[purchase-credit] save failed: HTTP ' + put.statusCode);
+      return null;
+    }
+    console.log('[purchase-credit] +' + totalPts + ' pts to ' + email + ' for ' + source);
+    return { points: totalPts, newBalance: member.currentPoints };
+  } catch (e) {
+    console.error('[purchase-credit] error:', e.message);
+    return null;
+  }
+}
+
 exports.handler = async (event) => {
   const sig = event.headers['stripe-signature'];
   const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
@@ -90,7 +161,26 @@ exports.handler = async (event) => {
       ticketTier
     } = session.metadata || {};
 
-    if (!eventId) return { statusCode: 200, body: 'No eventId' };
+    // Credit Quarry rewards points for the buyer (works for events AND golf bookings)
+    // Runs BEFORE the eventId early-return so golf checkouts (which lack eventId) still credit.
+    const buyerEmail = customerEmail || session.customer_email || '';
+    const isGolf = !eventId && !!(session.metadata && session.metadata.bay);
+    const purchaseLabel = eventId
+      ? ('Event: ' + (eventName || 'ticketed event'))
+      : (isGolf ? ('Golf bay: ' + (session.metadata.bay || '') + ' on ' + (session.metadata.date || '')) : 'In-app purchase');
+    try {
+      await creditMemberPointsForPurchase({
+        email: buyerEmail,
+        amountCents: session.amount_total || 0,
+        source: eventId ? 'event-purchase' : (isGolf ? 'golf-purchase' : 'app-purchase'),
+        sourceId: session.id,
+        label: purchaseLabel,
+      });
+    } catch (e) {
+      console.error('Purchase credit error:', e.message);
+    }
+
+    if (!eventId) return { statusCode: 200, body: isGolf ? 'Golf booking credited' : 'No eventId' };
 
     const token = process.env.NETLIFY_AUTH_TOKEN;
     const siteId = 'roaring-pegasus-444826';
