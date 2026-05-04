@@ -1,0 +1,88 @@
+{
+  "_doc": "Maps Quarry Rewards reward IDs (and tier perks) to Toast Discount GUIDs created in Toast Admin → Settings → Front of house → Discounts and promo codes. The redeem-claim Netlify function reads this to call Toast's appliedDiscounts endpoint when the bartender selects an open check. NULL guid = discount not yet created in Toast (do this manually then paste the GUID in here).",
+  "_lastUpdated": "2026-05-04",
+  "rewards": {
+    "r-balls": {
+      "label": "Free Bucket of Balls (Surfside)",
+      "applyToToast": false,
+      "_note": "Off-property — Surfside Hole-In-One. NOT a Toast discount. Bartender hands over a Surfside voucher coupon manually.",
+      "guid": null
+    },
+    "r-bill10": {
+      "label": "$10 Off Your Bill",
+      "applyToToast": true,
+      "appliesTo": "CHECK",
+      "guid": "876e6b8d-af4d-46f3-a3fc-7a193166ff65",
+      "type": "FIXED",
+      "fixedAmount": 10
+    },
+    "r-glass": {
+      "label": "Free Glass of Wine or Beer",
+      "applyToToast": true,
+      "appliesTo": "ITEM",
+      "guid": "41c921c7-293a-4d80-bdad-d56897e91470",
+      "type": "OPEN_ITEM",
+      "_note": "Bartender enters the price of the chosen drink as the discount amount; Toast prompts at apply time."
+    },
+    "r-app": {
+      "label": "Free Appetizer",
+      "applyToToast": true,
+      "appliesTo": "ITEM",
+      "guid": "c1b53f1e-6f84-4915-86ee-80ade57d8595",
+      "type": "OPEN_ITEM",
+      "_note": "Bartender enters appetizer price as discount."
+    },
+    "r-wine20": {
+      "label": "$20 Wine Bottle Credit",
+      "applyToToast": true,
+      "appliesTo": "ITEM",
+      "guid": "a53c3101-06fb-4e2e-a3e1-4d12048648df",
+      "type": "FIXED_ITEM",
+      "fixedAmount": 20
+    },
+    "r-entree-glass": {
+      "label": "Free Entrée + Glass of Wine",
+      "applyToToast": true,
+      "appliesTo": "CHECK",
+      "guid": "1ac089fb-6d95-4b1b-996b-1f3c0a26d4c5",
+      "type": "OPEN_CHECK",
+      "_note": "Bartender enters combined entrée + glass price (entrée capped at $25 menu price, 6 oz house pour)."
+    },
+    "r-tasting": {
+      "label": "Free Wine Tasting Admission",
+      "applyToToast": true,
+      "appliesTo": "ITEM",
+      "guid": null,
+      "type": "OPEN_ITEM",
+      "_todo": "Create in Toast Admin: Open $ Off, Any item. Then paste the GUID here."
+    },
+    "r-bottle": {
+      "label": "Free Bottle of Wine (excl. reserve)",
+      "applyToToast": true,
+      "appliesTo": "ITEM",
+      "guid": null,
+      "type": "OPEN_ITEM",
+      "_todo": "Create in Toast Admin: Open $ Off, Any item. Then paste the GUID here."
+    }
+  },
+  "tierPerks": {
+    "gold-bottle": {
+      "label": "Quarry Gold · 5% Off Bottle",
+      "applyToToast": true,
+      "appliesTo": "ITEM",
+      "guid": null,
+      "type": "FIXED_PCT",
+      "percent": 5,
+      "_todo": "Create in Toast Admin: Fixed % Off, 5%, Any item (or restrict to wine bottle category once we have its GUID)."
+    },
+    "elite-bottle": {
+      "label": "Quarry Elite · 10% Off Bottle",
+      "applyToToast": true,
+      "appliesTo": "ITEM",
+      "guid": null,
+      "type": "FIXED_PCT",
+      "percent": 10,
+      "_todo": "Create in Toast Admin: Fixed % Off, 10%, Any item (or wine bottle category)."
+    }
+  }
+}
