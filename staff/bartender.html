@@ -83,13 +83,37 @@
   .hist-pos { color: var(--gold-light); }
   .hist-neg { color: #fca5a5; }
 
-  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); padding: 12px 20px; border-radius: 8px; font-size: 0.85rem; opacity: 0; transition: opacity 0.2s; }
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); padding: 12px 20px; border-radius: 8px; font-size: 0.85rem; opacity: 0; transition: opacity 0.2s; z-index: 200; }
   .toast.show { opacity: 1; }
   .toast.ok { background: rgba(111,191,115,0.12); border: 1px solid var(--green); color: var(--green); }
   .toast.err { background: rgba(220,38,38,0.12); border: 1px solid #DC2626; color: #fca5a5; }
 
   .footer { text-align: center; margin-top: 24px; font-size: 0.7rem; color: var(--dim); letter-spacing: 0.06em; }
   .footer a { color: var(--gold-light); text-decoration: none; }
+
+  /* ---- Pick-a-check modal -------------------------------------------------- */
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.78); z-index: 100; display: none; align-items: flex-start; justify-content: center; padding: 16px; overflow-y: auto; }
+  .modal-bg.open { display: flex; }
+  .modal { background: var(--card); border: 1px solid var(--gold); border-radius: 12px; padding: 18px; width: 100%; max-width: 520px; margin-top: 30px; }
+  .modal-head { display: flex; justify-content: space-between; align-items: center; gap: 14px; margin-bottom: 16px; }
+  .modal-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 600; color: var(--gold-light); }
+  .modal-close { background: transparent; border: 0; color: var(--gray); font-size: 1.4rem; cursor: pointer; }
+  .modal-sub { font-size: 0.78rem; color: var(--gray); margin-bottom: 14px; }
+  .check-list { display: flex; flex-direction: column; gap: 8px; max-height: 50vh; overflow-y: auto; padding-bottom: 4px; }
+  .check-item { background: var(--elev); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; cursor: pointer; transition: border-color 0.15s; }
+  .check-item:hover, .check-item.selected { border-color: var(--gold); }
+  .check-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .check-num { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 600; color: var(--cream); }
+  .check-amt { font-family: 'Playfair Display', serif; font-size: 1.0rem; color: var(--gold-light); }
+  .check-meta { font-size: 0.7rem; color: var(--gray); margin-top: 4px; }
+  .check-cust { font-size: 0.78rem; color: var(--cream); margin-top: 2px; font-style: italic; }
+  .modal-actions { display: flex; gap: 8px; margin-top: 14px; }
+  .modal-actions .btn { flex: 1; padding: 12px; font-size: 0.7rem; }
+  .modal-empty { text-align: center; padding: 24px; color: var(--gray); font-style: italic; }
+  .open-amt { margin-top: 12px; }
+  .open-amt label { margin-bottom: 4px; }
+  .open-amt input { font-size: 0.95rem; padding: 10px 12px; }
+  .open-amt-help { font-size: 0.7rem; color: var(--gray); margin-top: 4px; font-style: italic; }
 </style>
 </head>
 <body>
@@ -124,10 +148,36 @@
     <a href="scan-review.html">Flagged scans</a>
   </div>
 </div>
+
+<!-- Pick-a-check modal: appears when bartender taps "Claim Code at Bar"
+     so they can attach the redemption to a specific live Toast check. -->
+<div class="modal-bg" id="checkModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="checkModalTitle">Pick the open check</div>
+      <button class="modal-close" data-action="close-modal">&times;</button>
+    </div>
+    <div class="modal-sub" id="checkModalSub">Tap the customer's open Toast check to apply the discount.</div>
+    <div class="check-list" id="checkList"><div class="modal-empty">Loading open checks…</div></div>
+
+    <div class="open-amt" id="openAmtBlock" style="display:none">
+      <label>Discount Amount</label>
+      <input type="number" id="openAmtInput" inputmode="decimal" step="0.01" placeholder="e.g. 12.00">
+      <div class="open-amt-help" id="openAmtHelp">Enter the price of the item being comped (Toast won't compute it for an open-amount discount).</div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary" data-action="skip-modal">Skip · honor manually</button>
+      <button class="btn" id="confirmApplyBtn" data-action="confirm-apply" disabled>Apply to selected check</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
 let adminPass = sessionStorage.getItem('quarry_admin_pass') || '';
+let modalState = { code: null, rewardName: null, openType: false, selected: null, checks: [] };
 
 function $(id) { return document.getElementById(id); }
 function escHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -136,7 +186,13 @@ function showToast(msg, kind='ok') {
   setTimeout(() => { t.className = 'toast ' + kind; }, 2500);
 }
 function fmtDate(iso) { try { return new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(iso)); } catch(_) { return ''; } }
+function fmtTime(iso) { try { return new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', hour: 'numeric', minute: '2-digit' }).format(new Date(iso)); } catch(_) { return ''; } }
 function fmtPhone(p) { const d = (p || '').replace(/\D/g, ''); if (d.length === 10) return '(' + d.slice(0,3) + ') ' + d.slice(3,6) + '-' + d.slice(6); return p || ''; }
+function fmtMoney(n) { return '$' + (Number(n) || 0).toFixed(2); }
+
+// Reward IDs that need bartender to enter a $ amount
+// (Toast OPEN_ITEM / OPEN_CHECK types — they don't carry their own amount).
+const OPEN_AMOUNT_REWARDS = new Set(['r-glass','r-app','r-tasting','r-bottle','r-entree-glass']);
 
 function saveAuth() {
   const p = $('password').value.trim();
@@ -186,7 +242,7 @@ function renderMember(m) {
       <div class="mem-pending-label">Active Code</div>
       <div class="mem-pending-code">${escHtml(m.pendingRedemption.code)}</div>
       <div class="mem-pending-name">${escHtml(m.pendingRedemption.rewardName)}</div>
-      <div class="mem-pending-meta">Expires ${fmtDate(m.pendingRedemption.expiresAt)}</div>
+      <div class="mem-pending-meta">Expires ${fmtDate(m.pendingRedemption.expiresAt)} · ${fmtTime(m.pendingRedemption.expiresAt)}</div>
     </div>` : '';
 
   const histRows = (m.recentHistory || []).map(h => {
@@ -213,7 +269,8 @@ function renderMember(m) {
         <div class="mem-stat"><div class="mem-stat-num discount">${m.bottleDiscountPct}%</div><div class="mem-stat-label">Bottle off</div></div>
       </div>
       <div class="mem-actions">
-        ${pending ? `<button class="btn" data-action="claim" data-code="${escHtml(m.pendingRedemption.code)}">Claim Code at Bar</button>` : ''}
+        ${pending ? `<button class="btn" data-action="claim" data-code="${escHtml(m.pendingRedemption.code)}" data-reward-id="${escHtml(m.pendingRedemption.rewardId || '')}" data-reward-name="${escHtml(m.pendingRedemption.rewardName || '')}">Claim Code at Bar</button>` : ''}
+        ${(m.bottleDiscountPct > 0) ? `<button class="btn btn-secondary" data-action="bottle-discount">Apply ${m.bottleDiscountPct}% Bottle</button>` : ''}
         <button class="btn btn-secondary" data-action="add-pts">+ Pts</button>
         <button class="btn btn-secondary" data-action="copy-email">Copy Email</button>
       </div>
@@ -236,7 +293,8 @@ function wireMemberCards() {
           try { await navigator.clipboard.writeText(email); showToast('Copied ' + email, 'ok'); }
           catch(_) { showToast('Copy failed', 'err'); }
         } else if (action === 'add-pts') {
-          const amt = prompt('How many points to ' + (confirm('Add (OK) or remove (Cancel) points?') ? 'add' : 'remove') + '?\n\nMember: ' + email);
+          const dir = confirm('Add (OK) or remove (Cancel) points?') ? 'add' : 'remove';
+          const amt = prompt('How many points to ' + dir + '?\n\nMember: ' + email);
           if (!amt) return;
           const n = parseInt(amt, 10);
           if (!n || isNaN(n)) return showToast('Invalid amount', 'err');
@@ -245,7 +303,7 @@ function wireMemberCards() {
           try {
             const r = await fetch('/.netlify/functions/admin-adjust-points', {
               method: 'POST', headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ adminPassword: adminPass, memberEmail: email, delta: n, note: note })
+              body: JSON.stringify({ adminPassword: adminPass, memberEmail: email, delta: dir==='add' ? n : -n, note: note })
             });
             const body = await r.json();
             if (!body.ok) throw new Error(body.error);
@@ -254,21 +312,154 @@ function wireMemberCards() {
           } catch(e) { showToast(e.message, 'err'); }
         } else if (action === 'claim') {
           const code = btn.getAttribute('data-code');
-          try {
-            const r = await fetch('/.netlify/functions/redeem-claim', {
-              method: 'POST', headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ adminPassword: adminPass, code: code })
-            });
-            const body = await r.json();
-            if (!body.ok) throw new Error(body.error);
-            showToast('Reward honored: ' + (body.reward && body.reward.name || ''), 'ok');
-            search(); // re-load
-          } catch(e) { showToast(e.message, 'err'); }
+          const rewardId = btn.getAttribute('data-reward-id') || '';
+          const rewardName = btn.getAttribute('data-reward-name') || 'Reward';
+          openCheckModal({
+            mode: 'redeem',
+            code: code,
+            rewardId: rewardId,
+            rewardName: rewardName,
+            openType: OPEN_AMOUNT_REWARDS.has(rewardId),
+          });
+        } else if (action === 'bottle-discount') {
+          // Apply tier-based bottle discount (Gold 5% / Elite 10%) to a live check.
+          // Bottle discounts use redeem-claim's same shape but with a synthetic code-less flow:
+          // we hit a separate endpoint apply-tier-discount (TODO) — for now show coming soon.
+          showToast('Bottle discount: pick a check (coming next deploy)', 'ok');
         }
       });
     });
   });
 }
+
+async function openCheckModal(opts) {
+  modalState = {
+    mode: opts.mode || 'redeem',
+    code: opts.code || null,
+    rewardId: opts.rewardId || null,
+    rewardName: opts.rewardName || null,
+    openType: !!opts.openType,
+    selected: null,
+    checks: [],
+  };
+  $('checkModalTitle').textContent = opts.rewardName || 'Pick the open check';
+  $('checkModalSub').textContent = 'Tap the customer’s open Toast check to apply the discount.';
+  $('checkList').innerHTML = '<div class="modal-empty">Loading open checks…</div>';
+  $('openAmtBlock').style.display = opts.openType ? 'block' : 'none';
+  $('openAmtInput').value = '';
+  $('confirmApplyBtn').disabled = true;
+  $('checkModal').classList.add('open');
+
+  try {
+    const r = await fetch('/.netlify/functions/list-open-checks', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminPassword: adminPass })
+    });
+    const body = await r.json();
+    if (!body.ok) throw new Error(body.error || 'Could not load checks');
+    modalState.checks = body.checks || [];
+    renderCheckList();
+  } catch (e) {
+    $('checkList').innerHTML = '<div class="modal-empty">' + escHtml(e.message) + '</div>';
+  }
+}
+
+function renderCheckList() {
+  if (!modalState.checks.length) {
+    $('checkList').innerHTML = '<div class="modal-empty">No open checks right now. Tap &ldquo;Skip&rdquo; to honor this manually.</div>';
+    return;
+  }
+  $('checkList').innerHTML = modalState.checks.map((c, i) => {
+    const opened = c.openedAt ? fmtTime(c.openedAt) : '';
+    const cust = (c.customerFirst || c.customerLast)
+      ? [c.customerFirst, c.customerLast].filter(Boolean).join(' ')
+      : (c.tabName || '');
+    return `
+      <div class="check-item" data-idx="${i}">
+        <div class="check-row">
+          <div class="check-num">#${escHtml(c.checkNumber || c.orderNumber || '?')}</div>
+          <div class="check-amt">${fmtMoney(c.totalAmount)}</div>
+        </div>
+        ${cust ? `<div class="check-cust">${escHtml(cust)}</div>` : ''}
+        <div class="check-meta">${c.itemCount || 0} item${c.itemCount === 1 ? '' : 's'}${opened ? ' · opened ' + opened : ''}</div>
+      </div>`;
+  }).join('');
+  document.querySelectorAll('.check-item').forEach(el => {
+    el.addEventListener('click', () => {
+      document.querySelectorAll('.check-item').forEach(e => e.classList.remove('selected'));
+      el.classList.add('selected');
+      modalState.selected = parseInt(el.getAttribute('data-idx'), 10);
+      $('confirmApplyBtn').disabled = false;
+    });
+  });
+}
+
+document.querySelectorAll('[data-action="close-modal"], [data-action="skip-modal"]').forEach(el => {
+  el.addEventListener('click', async () => {
+    if (el.getAttribute('data-action') === 'skip-modal') {
+      // Skip Toast attach — call redeem-claim with no orderGuid/checkGuid
+      // so the bartender can honor manually.
+      if (modalState.mode === 'redeem' && modalState.code) {
+        try {
+          const r = await fetch('/.netlify/functions/redeem-claim', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ adminPassword: adminPass, code: modalState.code })
+          });
+          const body = await r.json();
+          if (!body.ok) throw new Error(body.error);
+          showToast('Reward honored: ' + (body.reward && body.reward.name || ''), 'ok');
+          search();
+        } catch (e) { showToast(e.message, 'err'); }
+      }
+    }
+    $('checkModal').classList.remove('open');
+  });
+});
+
+$('confirmApplyBtn').addEventListener('click', async () => {
+  if (modalState.selected == null) return;
+  const c = modalState.checks[modalState.selected];
+  const btn = $('confirmApplyBtn');
+  btn.disabled = true; btn.textContent = 'Applying…';
+  try {
+    if (modalState.mode === 'redeem') {
+      const payload = {
+        adminPassword: adminPass,
+        code: modalState.code,
+        orderGuid: c.orderGuid,
+        checkGuid: c.checkGuid,
+      };
+      if (modalState.openType) {
+        const amt = parseFloat($('openAmtInput').value);
+        if (!amt || isNaN(amt) || amt <= 0) {
+          showToast('Enter the discount $ amount', 'err');
+          btn.disabled = false; btn.textContent = 'Apply to selected check';
+          return;
+        }
+        payload.openAmount = amt;
+      }
+      const r = await fetch('/.netlify/functions/redeem-claim', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const body = await r.json();
+      if (!body.ok) throw new Error(body.error);
+      const toastApplied = body.toast && body.toast.applied;
+      showToast(
+        toastApplied
+          ? 'Applied to check #' + (c.checkNumber || c.orderNumber)
+          : 'Honored (Toast: ' + ((body.toast && body.toast.reason) || 'failed') + ')',
+        toastApplied ? 'ok' : 'err'
+      );
+      $('checkModal').classList.remove('open');
+      search();
+    }
+  } catch (e) {
+    showToast(e.message, 'err');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Apply to selected check';
+  }
+});
 
 $('password').addEventListener('keydown', (e) => { if (e.key === 'Enter') saveAuth(); });
 $('searchInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') search(); });
