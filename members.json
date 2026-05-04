@@ -7,10 +7,10 @@
       "phone": "636-373-1751",
       "birthday": "05-06",
       "joinedAt": "2026-05-03T22:42:54.383Z",
-      "lastVisitAt": "2026-04-30T04:28:06.456079Z",
+      "lastVisitAt": "2026-05-04T05:28:26.182Z",
       "tier": "gold",
-      "currentPoints": 3500,
-      "lifetimePoints": 4000,
+      "currentPoints": 4138,
+      "lifetimePoints": 4638,
       "totalRedemptions": 1,
       "marketingOptIn": true,
       "smsOptIn": true,
@@ -75,6 +75,20 @@
           "delta": -500,
           "code": "55J98F",
           "note": "Redeemed via app — code generated for bartender"
+        },
+        {
+          "at": "2026-05-04T05:28:26.183Z",
+          "action": "earn",
+          "source": "receipt-scan-cron",
+          "delta": 638,
+          "orderId": "9f0c2bc0-4b94-4e31-9c51-d1ee0e4a6c8f",
+          "checkNumber": "172",
+          "spendUsd": 50,
+          "finalTotalUsd": 50,
+          "subtotalUsd": 50,
+          "tier": "gold",
+          "multiplier": 1.25,
+          "note": "Receipt scan (cron retry, 3 attempts)"
         }
       ],
       "pendingRedemption": {
