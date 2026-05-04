@@ -156,8 +156,22 @@ exports.handler = async (event) => {
             catch (e) { console.warn('welcome email failed:', e.message); welcomeStatus = 'failed: ' + e.message; }
         }
 
+        // 4) Staff notification with a UNIQUE subject so Gmail doesn't thread
+        //    submissions together. We skip pure list opt-ins (mailing-list) since
+        //    those aren't actionable for staff — just contacts being added.
+        let staffNotifyStatus = 'skipped';
+        if (formName && formName !== 'mailing-list') {
+            try {
+                await sendStaffNotification({ formName, email, firstName, lastName, phone, data });
+                staffNotifyStatus = 'sent';
+            } catch (e) {
+                console.warn('staff notification failed:', e.message);
+                staffNotifyStatus = 'failed: ' + e.message;
+            }
+        }
+
         if (!r.ok) return respond(200, { ok: false, sg_status: r.status, sg_body: body, crm: crmResult });
-        return respond(200, { ok: true, segmentTag, formName, jobId: body.job_id, email, addedToLists: listIds, crm: crmResult, welcome: welcomeStatus });
+        return respond(200, { ok: true, segmentTag, formName, jobId: body.job_id, email, addedToLists: listIds, crm: crmResult, welcome: welcomeStatus, staffNotify: staffNotifyStatus });
     } catch (err) {
         return respond(200, { ok: false, error: err.message });
     }
@@ -338,4 +352,107 @@ ${htmlBody}
   <div>You're receiving this because you signed up at thequarrystl.com. <a href="${UNSUB}" style="color:#858d9e;text-decoration:underline;">Unsubscribe</a> &middot; <a href="https://www.thequarrystl.com/privacy.html" style="color:#858d9e;text-decoration:underline;">Privacy Policy</a></div>
 </div>
 </div></body></html>`;
+}
+
+// ---------------------------------------------------------------------------
+// Staff notification — sent to management + Jacqueline for every actionable
+// form submission. Uses a UNIQUE subject per submission so Gmail does not
+// thread separate submissions together.
+//
+// IMPORTANT: To avoid duplicate emails, the Netlify built-in "Email
+// notification" for each form should be DISABLED (Site settings → Forms →
+// Form notifications). Netlify's notifications use a constant subject which
+// causes Gmail to collapse all submissions into one thread — that is the bug
+// this function replaces.
+// ---------------------------------------------------------------------------
+async function sendStaffNotification({ formName, email, firstName, lastName, phone, data }) {
+    const FORM_LABELS = {
+        'mailing-list': 'Mailing List Signup',
+        'wine-club-registration': 'Wine Club Registration',
+        'wine-club-signup': 'Wine Club Signup',
+        'wedding-tour': 'Wedding Tour Request',
+        'private-events': 'Private Event Inquiry',
+        'reservations': 'Reservation Request',
+        'beer-garden': 'Beer Garden Inquiry',
+        'contact': 'Contact Form',
+        'careers': 'Career Application',
+        'event-registration': 'Event Registration',
+        'event-registration-notification': 'Event Registration',
+        'golf-booking': 'Golf Booking'
+    };
+    const niceName = FORM_LABELS[formName] || humanizeKey(formName || 'Website Form');
+    const fullName = [firstName, lastName].filter(Boolean).join(' ').trim();
+    const identifier = fullName || email || (data && data.name) || 'Anonymous';
+    // 6-char unique tag — Gmail threads on normalized subject, this guarantees uniqueness
+    const shortId = (Date.now().toString(36) + Math.random().toString(36).slice(2, 5)).slice(-6);
+    const subject = `New ${niceName} — ${identifier} [${shortId}]`;
+
+    const SKIP_FIELDS = new Set([
+        'form-name', 'bot-field', 'g-recaptcha-response',
+        'subject' // Some forms have a "Subject" field that would collide visually with the email subject
+    ]);
+    const PRIORITY_KEYS = ['name', 'first_name', 'firstName', 'last_name', 'lastName', 'email', 'phone'];
+    const entries = Object.entries(data || {})
+        .filter(([k, v]) => !SKIP_FIELDS.has(k) && v != null && v !== '');
+    // Render priority fields first, then everything else
+    entries.sort((a, b) => {
+        const ai = PRIORITY_KEYS.indexOf(a[0]);
+        const bi = PRIORITY_KEYS.indexOf(b[0]);
+        if (ai === -1 && bi === -1) return 0;
+        if (ai === -1) return 1;
+        if (bi === -1) return -1;
+        return ai - bi;
+    });
+    const rows = entries
+        .map(([k, v]) => `<p style="margin:6px 0"><strong>${escapeHtml(humanizeKey(k))}:</strong> ${escapeHtml(String(v))}</p>`)
+        .join('');
+
+    const html = `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#fff">
+<div style="background:#1A0E08;padding:24px;text-align:center">
+  <h1 style="color:#B8933A;margin:0;font-size:28px">The Quarry</h1>
+  <p style="color:#F5F0E8;font-size:0.78rem;letter-spacing:0.15em;margin:4px 0 0">NEW MELLE, MISSOURI</p>
+</div>
+<div style="padding:28px 24px">
+  <h2 style="color:#2C1A0E;margin:0 0 6px;font-size:20px">${escapeHtml(niceName)}</h2>
+  <p style="color:#888;font-size:0.85rem;margin:0 0 18px">From <strong style="color:#444">${escapeHtml(identifier)}</strong></p>
+  <div style="background:#FAF7F2;border-left:4px solid #B8933A;padding:14px 18px;border-radius:4px">${rows || '<p style="color:#888">(No fields)</p>'}</div>
+  <p style="color:#aaa;font-size:0.75rem;margin:18px 0 0">Submission ID: ${shortId} &middot; Form: ${escapeHtml(formName || '')}</p>
+</div>
+</div>`;
+
+    const payload = {
+        from: { email: FROM_EMAIL, name: FROM_NAME },
+        personalizations: [{ to: [
+            { email: 'management@thequarrystl.com' },
+            { email: 'jacqueline@thequarrystl.com' }
+        ]}],
+        subject,
+        content: [{ type: 'text/html', value: html }],
+        categories: ['quarry-form-notification'],
+        custom_args: { form_name: formName || 'unknown', notify_id: shortId }
+    };
+    // If the submitter gave a real email, set Reply-To so staff can respond directly
+    if (email && email.includes('@')) {
+        payload.reply_to = { email, name: identifier };
+    }
+
+    const r = await fetch('https://api.sendgrid.com/v3/mail/send', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${SG_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+    if (!r.ok) {
+        const t = await r.text();
+        throw new Error(`SG staff notify: ${r.status} ${t.slice(0, 150)}`);
+    }
+}
+
+function humanizeKey(key) {
+    return String(key || '').replace(/[_-]+/g, ' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); }).trim();
+}
+
+function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function(c){
+        return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+    });
 }
