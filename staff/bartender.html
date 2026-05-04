@@ -270,7 +270,7 @@ function renderMember(m) {
       </div>
       <div class="mem-actions">
         ${pending ? `<button class="btn" data-action="claim" data-code="${escHtml(m.pendingRedemption.code)}" data-reward-id="${escHtml(m.pendingRedemption.rewardId || '')}" data-reward-name="${escHtml(m.pendingRedemption.rewardName || '')}">Claim Code at Bar</button>` : ''}
-        ${(m.bottleDiscountPct > 0) ? `<button class="btn btn-secondary" data-action="bottle-discount">Apply ${m.bottleDiscountPct}% Bottle</button>` : ''}
+        ${(m.bottleDiscountPct > 0) ? `<button class="btn btn-secondary" data-action="bottle-discount" data-perk="${m.bottleDiscountPct >= 10 ? 'elite-bottle' : 'gold-bottle'}" data-pct="${m.bottleDiscountPct}">Apply ${m.bottleDiscountPct}% Bottle</button>` : ''}
         <button class="btn btn-secondary" data-action="add-pts">+ Pts</button>
         <button class="btn btn-secondary" data-action="copy-email">Copy Email</button>
       </div>
@@ -323,9 +323,15 @@ function wireMemberCards() {
           });
         } else if (action === 'bottle-discount') {
           // Apply tier-based bottle discount (Gold 5% / Elite 10%) to a live check.
-          // Bottle discounts use redeem-claim's same shape but with a synthetic code-less flow:
-          // we hit a separate endpoint apply-tier-discount (TODO) — for now show coming soon.
-          showToast('Bottle discount: pick a check (coming next deploy)', 'ok');
+          const perk = btn.getAttribute('data-perk');
+          const pct = btn.getAttribute('data-pct');
+          openCheckModal({
+            mode: 'tier-perk',
+            perk: perk,
+            memberEmail: email,
+            rewardName: pct + '% Off Bottle (' + (perk === 'elite-bottle' ? 'Elite' : 'Gold') + ')',
+            openType: false,
+          });
         }
       });
     });
@@ -339,6 +345,8 @@ async function openCheckModal(opts) {
     rewardId: opts.rewardId || null,
     rewardName: opts.rewardName || null,
     openType: !!opts.openType,
+    perk: opts.perk || null,
+    memberEmail: opts.memberEmail || null,
     selected: null,
     checks: [],
   };
@@ -397,8 +405,9 @@ function renderCheckList() {
 document.querySelectorAll('[data-action="close-modal"], [data-action="skip-modal"]').forEach(el => {
   el.addEventListener('click', async () => {
     if (el.getAttribute('data-action') === 'skip-modal') {
-      // Skip Toast attach — call redeem-claim with no orderGuid/checkGuid
-      // so the bartender can honor manually.
+      // Skip Toast attach.
+      // For redeem: still honor (mark code as claimed without Toast attach).
+      // For tier-perk: just close — no code to consume, nothing to log.
       if (modalState.mode === 'redeem' && modalState.code) {
         try {
           const r = await fetch('/.netlify/functions/redeem-claim', {
@@ -410,6 +419,8 @@ document.querySelectorAll('[data-action="close-modal"], [data-action="skip-modal
           showToast('Reward honored: ' + (body.reward && body.reward.name || ''), 'ok');
           search();
         } catch (e) { showToast(e.message, 'err'); }
+      } else if (modalState.mode === 'tier-perk') {
+        showToast('Cancelled — no discount applied', 'ok');
       }
     }
     $('checkModal').classList.remove('open');
@@ -449,20 +460,4 @@ $('confirmApplyBtn').addEventListener('click', async () => {
         toastApplied
           ? 'Applied to check #' + (c.checkNumber || c.orderNumber)
           : 'Honored (Toast: ' + ((body.toast && body.toast.reason) || 'failed') + ')',
-        toastApplied ? 'ok' : 'err'
-      );
-      $('checkModal').classList.remove('open');
-      search();
-    }
-  } catch (e) {
-    showToast(e.message, 'err');
-  } finally {
-    btn.disabled = false; btn.textContent = 'Apply to selected check';
-  }
-});
-
-$('password').addEventListener('keydown', (e) => { if (e.key === 'Enter') saveAuth(); });
-$('searchInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') search(); });
-</script>
-</body>
-</html>
+        toastApplied ? '
