@@ -1218,15 +1218,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
       <div class="section-rule"><div class="line"></div><div class="label">Upcoming Bands</div><div class="line"></div></div>
       <div id="upcomingBandsList" class="upcoming-bands-list"></div>
 
-      <!-- Staff pick -->
-      <div class="section-rule"><div class="line"></div><div class="label">Staff Pick</div><div class="line"></div></div>
-      <div class="list-item">
-        <div class="list-rail">
-          <div class="list-overline">Featured Cocktail · $12</div>
-          <div class="list-title">New Melle Well Water</div>
-          <div class="list-desc">Gray Whale Gin, 7up &amp; Squirt — our local signature pour.</div>
-        </div>
-      </div>
+
       <div style="height:8px"></div>
     </div>
 
@@ -1989,6 +1981,34 @@ function categorizeEvent(summary) {
   return 'Event';
 }
 
+
+
+// Convert "17:30", "5:30 PM", "5:30PM", "5 PM", "17:30:00" to "5:30 PM"
+function formatHumanTime(s) {
+  if (!s) return '';
+  const str = String(s).trim();
+  // Already has am/pm — return as-is (cleaned)
+  if (/[ap]\.?m\.?/i.test(str)) return str.toUpperCase().replace(/([AP])\.?M\.?/i, '$1M');
+  // 24-hour HH:MM(:SS)?
+  const m24 = str.match(/^(\d{1,2}):(\d{2})/);
+  if (m24) {
+    let h = parseInt(m24[1], 10);
+    const min = parseInt(m24[2], 10);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12; if (h === 0) h = 12;
+    return min === 0 ? h + ' ' + ampm : h + ':' + String(min).padStart(2, '0') + ' ' + ampm;
+  }
+  // Just "17" or "5"
+  const mH = str.match(/^(\d{1,2})$/);
+  if (mH) {
+    let h = parseInt(mH[1], 10);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12; if (h === 0) h = 12;
+    return h + ' ' + ampm;
+  }
+  return str;
+}
+
 function fmtTime(d) { return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }).replace(':00', ''); }
 function fmtDay(d) { return d.toLocaleDateString('en-US', { weekday: 'long' }); }
 function fmtDate(d) { return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
@@ -2177,13 +2197,17 @@ function renderEventList(filter) {
           '<a href="https://thequarrystl.com/quarry-wineclub" target="_blank" rel="noopener" class="btn-primary" style="text-decoration:none">RSVP a Spot</a>' +
           `<a href="#" data-action="ics" data-event-id="${evtIdAttr}" class="btn-ghost" style="text-decoration:none;display:inline-block">Remind Me</a>`;
       } else {
-        const buyHref = 'https://thequarrystl.com/quarry-events';
+        // Per-event URL on the website: /quarry-events?event={slug}
+        const slug = evt.slug || evt.id || '';
+        const buyHref = slug
+          ? 'https://thequarrystl.com/quarry-events?event=' + encodeURIComponent(slug)
+          : 'https://thequarrystl.com/quarry-events';
         actionsHtml =
           `<a href="${buyHref}" target="_blank" rel="noopener" class="btn-primary" style="text-decoration:none">${remaining === 0 ? 'View Event' : 'Get Tickets'}</a>` +
           `<a href="#" data-action="ics" data-event-id="${evtIdAttr}" class="btn-ghost" style="text-decoration:none;display:inline-block">Remind Me</a>`;
       }
       html += `
-        <div class="event-card">
+        <div class="event-card" data-event-slug="${escapeHtml(evt.slug || evt.id || '')}" data-is-band="${isBand ? '1' : '0'}" data-is-tasting="${isThisTasting ? '1' : '0'}">
           <div class="event-meta-row">
             <div class="event-cat-line"></div>
             <div class="event-cat">${escapeHtml(cat)} · ${escapeHtml(dayLabel)}</div>
@@ -2196,6 +2220,22 @@ function renderEventList(filter) {
         </div>`;
   });
   if (segCtrl) segCtrl.insertAdjacentHTML('afterend', html);
+
+  // Wire whole-card clicks to open the per-event page (ticketed only)
+  screen.querySelectorAll('.event-card[data-event-slug]').forEach((card) => {
+    if (card.dataset.cardWired) return;
+    card.dataset.cardWired = '1';
+    const slug = card.getAttribute('data-event-slug');
+    const isBandCard = card.getAttribute('data-is-band') === '1';
+    const isTastingCard = card.getAttribute('data-is-tasting') === '1';
+    if (!slug || isBandCard || isTastingCard) return; // bands & tastings have their own primary buttons
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', (e) => {
+      // Don't hijack clicks on inner buttons/links
+      if (e.target.closest('a, [data-action]')) return;
+      window.open('https://thequarrystl.com/quarry-events?event=' + encodeURIComponent(slug), '_blank', 'noopener');
+    });
+  });
 
   // Wire "Remind Me" / "Add to Calendar" buttons — generate .ics and download
   screen.querySelectorAll('[data-action="ics"]').forEach((el) => {
@@ -2295,7 +2335,7 @@ function renderUpcomingMonth(allEvents) {
     const month = evt._start.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
     const day = evt._start.getDate();
     const timeStr = evt.time && /^\d/.test(evt.time)
-      ? evt.time
+      ? formatHumanTime(evt.time)
       : evt._start.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }).replace(':00', '');
     const meta = evt._start.toLocaleDateString('en-US', { weekday: 'long' }) + ' · ' + timeStr;
     return '<div class="um-card" onclick="gotoScreen(\'screen-events\')">' +
@@ -2347,7 +2387,7 @@ function renderUpcomingBands(allEvents) {
     html += '<div class="ub-day">' + dayHeader + '</div>';
     bandsForDay.forEach((b) => {
       const tStr = b.time && /^\d/.test(b.time)
-        ? b.time
+        ? formatHumanTime(b.time)
         : (b.timeSlot || (b.type === 'afternoon' ? '2 PM' : '7 PM'));
       const bandIdAttr = escapeHtml(b.id || ('band-' + Math.random().toString(36).slice(2, 8)));
       html +=
