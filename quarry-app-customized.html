@@ -1143,6 +1143,59 @@ a.account-link:hover .al-arrow { color: var(--gold); }
   font-size: 0.95rem; color: var(--gray); line-height: 1.5;
 }
 
+
+/* Activity history list — dynamic rendering of member.history */
+.member-history { margin: 0; }
+.member-history .ah-empty {
+  padding: 30px 22px; text-align: center;
+  font-family: var(--ff-script); font-style: italic;
+  color: var(--gray); line-height: 1.5;
+}
+.member-history .ah-row {
+  margin: 0 22px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border-soft);
+  display: flex; align-items: center; gap: 16px;
+}
+.member-history .ah-row:last-child { border-bottom: none; }
+.member-history .ah-date {
+  flex-shrink: 0; width: 50px; text-align: center;
+  border-left: 1px solid var(--border-light);
+  padding-left: 12px;
+}
+.member-history .ah-month {
+  font-family: var(--ff-body);
+  font-size: 9px; font-weight: 600;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--gold-light); margin-bottom: 2px;
+}
+.member-history .ah-day {
+  font-family: var(--ff-display); font-size: 1.4rem; font-weight: 500;
+  color: var(--cream); line-height: 1;
+}
+.member-history .ah-info { flex: 1; min-width: 0; }
+.member-history .ah-title {
+  font-family: var(--ff-body); font-size: 12px; font-weight: 500;
+  color: var(--cream); margin-bottom: 3px; letter-spacing: 0.04em;
+}
+.member-history .ah-sub {
+  font-family: var(--ff-script); font-style: italic;
+  font-size: 0.88rem; color: var(--gray);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.member-history .ah-pts { text-align: right; flex-shrink: 0; }
+.member-history .ah-pts-num {
+  font-family: var(--ff-display); font-size: 1.05rem; font-weight: 500;
+}
+.member-history .ah-pts-num.pos { color: var(--gold-light); }
+.member-history .ah-pts-num.neg { color: #fca5a5; }
+.member-history .ah-pts-num.zero { color: var(--gray); }
+.member-history .ah-pts-tag {
+  font-family: var(--ff-body);
+  font-size: 9px; color: var(--gray);
+  letter-spacing: 0.14em; margin-top: 2px;
+}
+
 </style>
 </head>
 <body>
@@ -1462,51 +1515,10 @@ a.account-link:hover .al-arrow { color: var(--gold); }
         </div>
       </div>
 
-      <div class="section-rule"><div class="line"></div><div class="label">Visit History</div><div class="line"></div></div>
+      <div class="section-rule"><div class="line"></div><div class="label">Activity History</div><div class="line"></div></div>
 
-      <div class="visit-row">
-        <div class="visit-date">
-          <div class="vd-month">Apr</div>
-          <div class="vd-day">26</div>
-        </div>
-        <div class="visit-info">
-          <div class="visit-title">Saturday Evening</div>
-          <div class="visit-sub">Dinner and drinks</div>
-        </div>
-        <div class="visit-pts">
-          <div class="vp-num">+ 588</div>
-          <div class="vp-spend">10 pts / $1</div>
-        </div>
-      </div>
-
-      <div class="visit-row">
-        <div class="visit-date">
-          <div class="vd-month">Apr</div>
-          <div class="vd-day">19</div>
-        </div>
-        <div class="visit-info">
-          <div class="visit-title">Wine Tasting Flight</div>
-          <div class="visit-sub">+ 250 pt RSVP bonus</div>
-        </div>
-        <div class="visit-pts">
-          <div class="vp-num">+ 1,025</div>
-          <div class="vp-spend">10 pts / $1</div>
-        </div>
-      </div>
-
-      <div class="visit-row">
-        <div class="visit-date">
-          <div class="vd-month">Apr</div>
-          <div class="vd-day">11</div>
-        </div>
-        <div class="visit-info">
-          <div class="visit-title">Friday Night · Live Music</div>
-          <div class="visit-sub">Outdoor stage</div>
-        </div>
-        <div class="visit-pts">
-          <div class="vp-num">+ 475</div>
-          <div class="vp-spend">10 pts / $1</div>
-        </div>
+      <div id="memberHistory" class="member-history">
+        <div style="padding:30px 22px;text-align:center;font-family:var(--ff-script);font-style:italic;color:var(--gray)">Sign in to see your activity history.</div>
       </div>
       <div style="height:8px"></div>
     </div>
@@ -3020,6 +3032,88 @@ async function submitParty() {
     });
   }
 
+
+
+  // Render member.history as a friendly Activity log on the Rewards screen
+  function renderMemberHistory() {
+    const wrap = document.getElementById('memberHistory');
+    if (!wrap) return;
+    if (!currentMember || !Array.isArray(currentMember.history)) {
+      wrap.innerHTML = '<div class="ah-empty">Sign in to see your activity history.</div>';
+      return;
+    }
+    const entries = (currentMember.history || []).slice().reverse();
+    if (!entries.length) {
+      wrap.innerHTML = '<div class="ah-empty">No activity yet — your first visit will appear here.</div>';
+      return;
+    }
+    // Friendly source labels
+    const sourceLabel = {
+      'signup': 'Welcome bonus',
+      'signup-claim': 'Account claim',
+      'receipt-scan': 'Visit · Receipt scanned',
+      'receipt-scan-retry': 'Visit · Receipt verified',
+      'receipt-scan-cron': 'Visit · Receipt verified',
+      'receipt-scan-approved': 'Visit · Approved by staff',
+      'event-purchase': 'Event ticket',
+      'golf-purchase': 'Golf bay',
+      'app-purchase': 'In-app purchase',
+      'admin-adjust': 'Adjustment by admin',
+    };
+    const dateMonth = (iso) => {
+      try {
+        return new Intl.DateTimeFormat('en-US', { timeZone: QUARRY_TZ, month: 'short' }).format(new Date(iso)).toUpperCase();
+      } catch (_) { return ''; }
+    };
+    const dateDay = (iso) => {
+      try {
+        return new Intl.DateTimeFormat('en-US', { timeZone: QUARRY_TZ, day: 'numeric' }).format(new Date(iso));
+      } catch (_) { return ''; }
+    };
+    let html = '';
+    entries.forEach((h) => {
+      const at = h.at || h.ts;
+      const action = h.action || 'event';
+      const delta = (typeof h.delta === 'number') ? h.delta : 0;
+      const source = h.source || '';
+      let title;
+      if (action === 'redeem') {
+        title = 'Redeemed: ' + (h.rewardName || h.note || 'Reward');
+      } else if (action === 'redeem-claimed') {
+        title = 'Reward honored at bar';
+      } else if (action === 'points-expired') {
+        title = 'Annual points reset';
+      } else if (action === 'expiry-warning') {
+        title = 'Year-end reminder sent';
+      } else if (action === 'password-reset') {
+        title = 'Password reset';
+      } else if (action === 'created') {
+        title = 'Account created';
+      } else if (action === 'earn') {
+        title = sourceLabel[source] || (source === 'toast-webhook' ? 'Visit · Closed tab' : 'Earn');
+      } else {
+        title = sourceLabel[source] || action;
+      }
+      const sub = h.note || (h.spendUsd ? ('$' + Number(h.spendUsd).toFixed(2) + ' spent · ' + (h.tier || '').toUpperCase()) : '');
+      const cls = delta > 0 ? 'pos' : delta < 0 ? 'neg' : 'zero';
+      const sign = delta > 0 ? '+ ' : delta < 0 ? '− ' : '';
+      const ptsTxt = sign + Math.abs(delta).toLocaleString();
+      const tag = (h.multiplier && h.multiplier > 1) ? (h.multiplier + '× tier bonus') : (delta === 0 ? '' : '10 pts / $1');
+      html += '<div class="ah-row">';
+      html += '<div class="ah-date"><div class="ah-month">' + dateMonth(at) + '</div><div class="ah-day">' + dateDay(at) + '</div></div>';
+      html += '<div class="ah-info"><div class="ah-title">' + escapeHtml(title) + '</div>';
+      if (sub) html += '<div class="ah-sub">' + escapeHtml(sub) + '</div>';
+      html += '</div>';
+      if (delta !== 0 || tag) {
+        html += '<div class="ah-pts"><div class="ah-pts-num ' + cls + '">' + ptsTxt + '</div>';
+        if (tag) html += '<div class="ah-pts-tag">' + escapeHtml(tag) + '</div>';
+        html += '</div>';
+      }
+      html += '</div>';
+    });
+    wrap.innerHTML = html;
+  }
+
   function renderMember() {
     if (!currentMember) return;
     const m = currentMember;
@@ -3100,6 +3194,7 @@ async function submitParty() {
       });
     });
     updateRewardAvailability();
+    renderMemberHistory();
   }
 
   const REWARD_ID_MAP = {
