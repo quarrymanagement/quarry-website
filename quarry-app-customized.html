@@ -1228,7 +1228,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
 
       <!-- Live menu pulled directly from the website so the app and site never drift. -->
       <iframe
-        src="https://www.thequarrystl.com/menu"
+        src="https://www.thequarrystl.com/quarry-menu"
         title="The Quarry Menu"
         style="border:0;width:100%;flex:1;background:var(--charcoal);min-height:600px"
         loading="lazy"
@@ -1992,8 +1992,11 @@ function renderEventList(filter) {
   //   3. Social → free events that aren't bands (price = 0)
   //   4. Ticketed → paid events with admission price > 0
   const isWineEvent = (evt) => {
-    const blob = ((evt.name || '') + ' ' + (evt.category || '') + ' ' + (evt.location || '') + ' ' + (evt.description || '')).toLowerCase();
-    return /wine|tast|vintner|sommelier|winery|chateau|wine club|vintage/.test(blob);
+    // Look at name + category + location ONLY (NOT description — too many false positives like
+    // "beer bucket OR bottle of wine" in a music bingo event triggering wine match).
+    const blob = ((evt.name || '') + ' | ' + (evt.category || '') + ' | ' + (evt.location || '')).toLowerCase();
+    // Require strong wine-event indicators (no standalone "wine")
+    return /\bwine tast|\bwine club|\bvintner|\bsommelier|\bwinery|\bchateau|\bvineyard|\brock & vine\b|\btasting\b/.test(blob);
   };
   const isFreeEvent = (evt) => {
     if (evt.price === 0) return true;
@@ -2071,17 +2074,19 @@ function renderEventList(filter) {
         rightBadge = '';
       }
       const isThisTasting = !isBand && isWineEvent(evt);
+      const evtIdAttr = escapeHtml(evt.id || ('idx-' + Math.random().toString(36).slice(2,8)));
       let actionsHtml;
       if (isBand) {
-        actionsHtml = '<div class="btn-ghost">Add to Calendar</div>';
+        actionsHtml = `<a href="#" data-action="ics" data-event-id="${evtIdAttr}" class="btn-ghost" style="text-decoration:none;display:inline-block">Add to Calendar</a>`;
       } else if (isThisTasting) {
         actionsHtml =
           '<a href="https://thequarrystl.com/quarry-wineclub" target="_blank" rel="noopener" class="btn-primary" style="text-decoration:none">RSVP a Spot</a>' +
-          '<div class="btn-ghost">Remind Me</div>';
+          `<a href="#" data-action="ics" data-event-id="${evtIdAttr}" class="btn-ghost" style="text-decoration:none;display:inline-block">Remind Me</a>`;
       } else {
+        const buyHref = 'https://thequarrystl.com/quarry-events';
         actionsHtml =
-          `<div class="btn-primary">${remaining === 0 ? 'View' : 'Reserve'}</div>` +
-          '<div class="btn-ghost">Remind Me</div>';
+          `<a href="${buyHref}" target="_blank" rel="noopener" class="btn-primary" style="text-decoration:none">${remaining === 0 ? 'View Event' : 'Get Tickets'}</a>` +
+          `<a href="#" data-action="ics" data-event-id="${evtIdAttr}" class="btn-ghost" style="text-decoration:none;display:inline-block">Remind Me</a>`;
       }
       html += `
         <div class="event-card">
@@ -2097,6 +2102,61 @@ function renderEventList(filter) {
         </div>`;
   });
   if (segCtrl) segCtrl.insertAdjacentHTML('afterend', html);
+
+  // Wire "Remind Me" / "Add to Calendar" buttons — generate .ics and download
+  screen.querySelectorAll('[data-action="ics"]').forEach((el) => {
+    if (el.dataset.icsWired) return;
+    el.dataset.icsWired = '1';
+    el.addEventListener('click', (e) => {
+      e.preventDefault();
+      const id = el.getAttribute('data-event-id');
+      const evt = _allUpcoming.find((x) => x.id === id);
+      if (!evt) return;
+      downloadIcs(evt);
+    });
+  });
+}
+
+function downloadIcs(evt) {
+  const start = evt._start;
+  if (!start || isNaN(start)) return;
+  // Default 3 hr duration — most band sets and event blocks fit
+  const end = new Date(start.getTime() + 3 * 60 * 60 * 1000);
+  const fmtIcs = (d) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  const cleanDesc = (evt.description || '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .replace(/[\r\n]/g, ' ')
+    .replace(/[\\;,]/g, ' ')
+    .trim()
+    .substring(0, 400);
+  const ics = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//The Quarry//Member App//EN',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'BEGIN:VEVENT',
+    'UID:' + (evt.id || 'evt-' + Date.now()) + '@thequarrystl.com',
+    'DTSTAMP:' + fmtIcs(new Date()),
+    'DTSTART:' + fmtIcs(start),
+    'DTEND:' + fmtIcs(end),
+    'SUMMARY:' + ((evt.name || 'Event at The Quarry').replace(/[\\;,]/g,' ')),
+    'LOCATION:The Quarry · 3960 Highway Z\\, New Melle\\, MO 63365',
+    'DESCRIPTION:' + cleanDesc,
+    'URL:https://thequarrystl.com/quarry-events',
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].join('\r\n');
+  const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = (evt.name || 'event').replace(/[^a-z0-9]/gi, '-').toLowerCase() + '.ics';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 
 function renderHomeContext(upcoming) {
