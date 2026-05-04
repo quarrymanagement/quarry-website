@@ -421,6 +421,21 @@
                 return;
             }
 
+            // Email-registration events (e.g. Yoga with Charity) — RSVP via host's email.
+            if (evt.registrationType === 'email') {
+                var to = String(evt.registrationEmail || '');
+                var subj = String(evt.registrationSubject || ('RSVP — ' + (evt.name || 'Event')));
+                var body = String(evt.registrationBody || '');
+                var pricePerPerson = (evt.tiers && evt.tiers[0] && evt.tiers[0].pricePerPerson) || evt.price || 0;
+                var priceLabel = (evt.tiers && evt.tiers[0] && evt.tiers[0].priceLabel) || ('$' + (pricePerPerson/100).toFixed(2));
+                card.innerHTML = '<h3>RSVP via Email</h3>' +
+                  '<div class="price-display"><div class="price-option selected"><div class="price-label"><strong>' + (evt.tiers && evt.tiers[0] ? evt.tiers[0].name : 'Reservation') + '</strong><span>Payment processed by the host at RSVP</span></div><div class="price-amount">' + priceLabel + '</div></div></div>' +
+                  '<p style="color:#ccc;line-height:1.6;margin:14px 0;font-size:.9rem;">Tap the button below to email the host with your RSVP. Pick whichever email client you use — Gmail, Outlook, or your default mail app.</p>' +
+                  '<button type="button" class="reg-button" onclick="window.openEmailPicker(' + JSON.stringify(to).replace(/"/g, '&quot;') + ', ' + JSON.stringify(subj).replace(/"/g, '&quot;') + ', ' + JSON.stringify(body).replace(/"/g, '&quot;') + ')" style="width:100%;background:#d4af37;color:#1A1A1A;border:0;border-radius:6px;padding:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;font-family:inherit;font-size:.85rem;margin-top:8px">RSVP via Email</button>' +
+                  '<a href="/quarry-events" style="display:block;text-align:center;color:#d4af37;margin-top:16px;text-decoration:none;font-size:.85rem;">View All Events &rarr;</a>';
+                return;
+            }
+
             var html = '<h3>Register Now</h3>';
 
             // Form — matches the main events page modal exactly
@@ -733,5 +748,45 @@
   } catch (_) {}
 })();
 </script>
+
+<!-- Email-registration picker -->
+<div id="emailPickerModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:9999;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#1A1A1A;border:1px solid #d4af37;border-radius:14px;padding:24px;max-width:400px;width:100%;color:#F5F0E8;font-family:'Inter',sans-serif">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;color:#d4af37;margin-bottom:6px" id="emailPickerTitle">Send RSVP</div>
+    <div style="font-size:0.85rem;color:rgba(245,240,232,0.6);margin-bottom:18px" id="emailPickerSub">Choose how to open the email.</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <a id="emailPickerGmail" target="_blank" rel="noopener" style="text-align:center;padding:13px;background:#d4af37;color:#1A1A1A;border-radius:8px;text-decoration:none;font-weight:700;font-size:0.85rem;letter-spacing:0.08em;text-transform:uppercase">Open in Gmail</a>
+      <a id="emailPickerOutlook" target="_blank" rel="noopener" style="text-align:center;padding:13px;background:transparent;color:#d4af37;border:1px solid #d4af37;border-radius:8px;text-decoration:none;font-weight:700;font-size:0.85rem;letter-spacing:0.08em;text-transform:uppercase">Open in Outlook</a>
+      <a id="emailPickerDefault" style="text-align:center;padding:13px;background:transparent;color:#d4af37;border:1px solid #d4af37;border-radius:8px;text-decoration:none;font-weight:700;font-size:0.85rem;letter-spacing:0.08em;text-transform:uppercase">Default Mail App</a>
+    </div>
+    <button id="emailPickerClose" type="button" style="margin-top:14px;width:100%;padding:10px;background:transparent;color:rgba(245,240,232,0.55);border:0;font-family:inherit;font-size:0.78rem;cursor:pointer;letter-spacing:0.1em;text-transform:uppercase">Cancel</button>
+  </div>
+</div>
+<script>
+(function(){
+  function $$(id){ return document.getElementById(id); }
+  window.openEmailPicker = function(to, subject, body){
+    var enc = encodeURIComponent;
+    $$('emailPickerGmail').href = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + enc(to) + '&su=' + enc(subject) + '&body=' + enc(body || '');
+    $$('emailPickerOutlook').href = 'https://outlook.live.com/owa/?path=/mail/action/compose&to=' + enc(to) + '&subject=' + enc(subject) + '&body=' + enc(body || '');
+    $$('emailPickerDefault').href = 'mailto:' + to + '?subject=' + enc(subject) + (body ? '&body=' + enc(body) : '');
+    $$('emailPickerTitle').textContent = subject;
+    $$('emailPickerSub').textContent = 'Send to ' + to;
+    $$('emailPickerModal').style.display = 'flex';
+  };
+  function close(){ $$('emailPickerModal').style.display = 'none'; }
+  document.addEventListener('DOMContentLoaded', function(){
+    var modal = $$('emailPickerModal');
+    if (!modal) return;
+    $$('emailPickerClose').addEventListener('click', close);
+    modal.addEventListener('click', function(e){ if (e.target === modal) close(); });
+    ['emailPickerGmail','emailPickerOutlook','emailPickerDefault'].forEach(function(id){
+      var el = $$(id);
+      if (el) el.addEventListener('click', function(){ setTimeout(close, 250); });
+    });
+  });
+})();
+</script>
+
 </body>
 </html>
