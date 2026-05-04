@@ -984,6 +984,17 @@ a.account-link:hover .al-arrow { color: var(--gold); }
 }
 .tier-decay-banner strong { color: var(--gold-light); font-style: normal; font-family: var(--ff-body); font-size: 0.78rem; letter-spacing: 0.18em; text-transform: uppercase; }
 
+
+/* Fix onboarding star icons bleeding into tier titles */
+.onboard-step .onboard-step-num {
+  flex-shrink: 0;
+  min-width: 56px;
+  text-align: center;
+  letter-spacing: -1px;
+  white-space: nowrap;
+}
+.onboard-step .onboard-step-body { flex: 1; min-width: 0; }
+
 </style>
 </head>
 <body>
@@ -1050,7 +1061,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
             <span class="hero-pts-label">Points</span>
           </div>
           <div class="hero-tier">
-            <div class="hero-tier-name">Quarry Gold</div>
+            <div class="hero-tier-name">Gold</div>
             <div class="hero-tier-multi">1.25× earn rate</div>
           </div>
         </div>
@@ -1087,10 +1098,10 @@ a.account-link:hover .al-arrow { color: var(--gold); }
           <div class="home-card-val">Outdoor Bays</div>
           <div class="home-card-sub">Aim for the Floating Green</div>
         </div>
-        <div class="home-card" onclick="gotoScreen('screen-contact')">
-          <div class="home-card-title">Contact</div>
-          <div class="home-card-val">Get in Touch</div>
-          <div class="home-card-sub">Phone · email · visit</div>
+        <div class="home-card" onclick="window.open('https://www.thequarrystl.com/weddings', '_blank')">
+          <div class="home-card-title">Weddings</div>
+          <div class="home-card-val">Your Day, Our Place</div>
+          <div class="home-card-sub">Plan your celebration</div>
         </div>
       </div>
 
@@ -1335,7 +1346,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
             <span class="rh-label">Points</span>
           </div>
           <div class="rh-tier">
-            <div class="rh-tier-name">Quarry Gold</div>
+            <div class="rh-tier-name">Gold</div>
             <div class="rh-tier-sub">1.25× earn rate</div>
           </div>
         </div>
@@ -1522,7 +1533,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
         <div class="profile-monogram">MM</div>
         <div class="profile-name">Matthew Meier</div>
         <div class="profile-meta">Member since April 2025</div>
-        <div class="profile-tier">— Quarry Gold</div>
+        <div class="profile-tier">Account Status · <strong style="color:var(--cream); font-weight:700; letter-spacing:0.18em">Gold</strong></div>
       </div>
 
       <div class="stats-row">
@@ -1881,7 +1892,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
         <div class="onboard-step-num">3</div>
         <div class="onboard-step-body">
           <div class="onboard-step-title">Earn bonus points beyond your tab</div>
-          <div class="onboard-step-desc">Just for stopping in: <strong style="color:var(--gold-light);font-style:normal">+10 pts every visit</strong> (when your closed tab is $20+). Welcome bonus +100 · Birthday-month visit +250 · Reservation honored +50 · Wine tasting RSVP +25 · Refer a friend +500 (cap 5/yr) · Public review +100 · Book a private party +1,000. Live bands are free — listed for what's playing this month, no RSVP needed and no points.</div>
+          <div class="onboard-step-desc">Just for stopping in: <strong style="color:var(--gold-light);font-style:normal">+10 pts every visit</strong> (when your closed tab is $20+). Welcome bonus +250 · Email opt-in +10 · Phone/SMS opt-in +10 · Birthday-month visit +250 · Reservation honored +50 (groups of 10+ included) · Wine tasting RSVP +25 · Refer a friend +50 (cap 5/yr) · Public review +100 · Book a private party +1,000. Live bands are free — listed for what's playing this month, no RSVP needed and no points. Gift cards do not earn points.</div>
         </div>
       </div>
 
@@ -1890,7 +1901,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
       <div class="onboard-step">
         <div class="onboard-step-num">★</div>
         <div class="onboard-step-body">
-          <div class="onboard-step-title">Quarry Standard</div>
+          <div class="onboard-step-title">Standard</div>
           <div class="onboard-step-desc">Welcome to the family. 1.0× earn rate. Full access to the redemption ladder.</div>
         </div>
       </div>
@@ -1898,7 +1909,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
       <div class="onboard-step">
         <div class="onboard-step-num">★★</div>
         <div class="onboard-step-body">
-          <div class="onboard-step-title">Quarry Silver · $300 / 90 days (~$100/mo)</div>
+          <div class="onboard-step-title">Silver · $300 / 90 days (~$100/mo)</div>
           <div class="onboard-step-desc">1.1× earn rate. The first taste of perks — bottle discounts unlock at Gold.</div>
         </div>
       </div>
@@ -1906,7 +1917,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
       <div class="onboard-step">
         <div class="onboard-step-num">★★★</div>
         <div class="onboard-step-body">
-          <div class="onboard-step-title">Quarry Gold · $600 / 90 days (~$200/mo)</div>
+          <div class="onboard-step-title">Gold · $600 / 90 days (~$200/mo)</div>
           <div class="onboard-step-desc">1.25× earn rate. 5% off any bottle of wine. Free birthday entrée. Early access to event RSVPs.</div>
         </div>
       </div>
@@ -1914,7 +1925,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
       <div class="onboard-step">
         <div class="onboard-step-num">★★★★</div>
         <div class="onboard-step-body">
-          <div class="onboard-step-title">Quarry Elite · $1,000 / 90 days (~$333/mo)</div>
+          <div class="onboard-step-title">Elite · $1,000 / 90 days (~$333/mo)</div>
           <div class="onboard-step-desc">1.5× earn rate. 10% off bottles. One complimentary glass of wine per visit (requires a $20+ closed tab). Priority on private event dates. Named on the wall.</div>
         </div>
       </div>
@@ -2373,7 +2384,7 @@ function submitParty() {
     const balance = (m.currentPoints || 0).toLocaleString();
     const lifetime = m.lifetimePoints || 0;
     const tier = m.tier || 'standard';
-    const tierLabel = { standard: 'Quarry Standard', silver: 'Quarry Silver', gold: 'Quarry Gold', elite: 'Quarry Elite', platinum: 'Quarry Elite' }[tier] || 'Quarry Standard';
+    const tierLabel = { standard: 'Standard', silver: 'Silver', gold: 'Gold', elite: 'Elite', platinum: 'Elite' }[tier] || 'Standard';
     const tierMult = { standard: '1.0×', silver: '1.1×', gold: '1.25×', elite: '1.5×', platinum: '1.5×' }[tier] || '1.0×';
     const firstName = (m.name || m.email || '').split(/[\s@]/)[0] || 'Friend';
     const set = (sel, txt) => { const el = document.querySelector(sel); if (el) el.textContent = txt; };
@@ -2385,7 +2396,11 @@ function submitParty() {
     set('.rh-tier-name', tierLabel);
     set('.rh-tier-sub', tierMult + ' earn rate');
     set('.profile-name', m.name || m.email);
-    set('.profile-tier', '— ' + tierLabel);
+    set('.profile-tier', '');
+    const ptEl = document.querySelector('.profile-tier');
+    if (ptEl) {
+      ptEl.innerHTML = 'Account Status · <strong style="color:var(--cream); font-weight:700; letter-spacing:0.18em">' + tierLabel + '</strong>';
+    }
     if (m.joinedAt) {
       const d = new Date(m.joinedAt);
       set('.profile-meta', 'Member since ' + d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }));
