@@ -369,6 +369,60 @@ async function processMemberPending(memberEmail, toastToken) {
   return { credited, expired };
 }
 
+
+
+// Parse a wide range of date formats from OCR. Returns ISO YYYY-MM-DD or null.
+function parseFlexibleDate(s) {
+  if (!s) return null;
+  const str = String(s).trim();
+  // ISO already
+  if (/^\d{4}-\d{1,2}-\d{1,2}/.test(str)) return str.substring(0, 10);
+  // US M/D/Y or M-D-Y
+  let m = str.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})/);
+  if (m) {
+    let y = parseInt(m[3], 10);
+    if (y < 100) y += 2000;
+    return y.toString().padStart(4, '0') + '-' + m[1].padStart(2, '0') + '-' + m[2].padStart(2, '0');
+  }
+  // "May 4, 2026" or "May 4 2026" or "Mar. 22, 2025"
+  const months = { jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,sept:9,oct:10,nov:11,dec:12 };
+  m = str.match(/^([a-z]+)\.?\s+(\d{1,2})[,\s]+(\d{4})/i);
+  if (m) {
+    const mn = months[m[1].toLowerCase().slice(0, 4)] || months[m[1].toLowerCase().slice(0, 3)];
+    if (mn) return m[3] + '-' + String(mn).padStart(2, '0') + '-' + m[2].padStart(2, '0');
+  }
+  // Last-resort native parse
+  const d = new Date(str);
+  if (!isNaN(d)) {
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  return null;
+}
+
+function parseFlexibleTime(s) {
+  if (!s) return null;
+  const str = String(s).trim();
+  // "17:30" or "5:30 PM" or "5:30PM" or "5 PM" or "1730"
+  let m = str.match(/^(\d{1,2}):?(\d{2})\s*(am|pm)?/i);
+  if (m) {
+    let h = parseInt(m[1], 10);
+    const min = parseInt(m[2], 10);
+    const ampm = (m[3] || '').toLowerCase();
+    if (ampm === 'pm' && h < 12) h += 12;
+    if (ampm === 'am' && h === 12) h = 0;
+    return String(h).padStart(2, '0') + ':' + String(min).padStart(2, '0');
+  }
+  m = str.match(/^(\d{1,2})\s*(am|pm)/i);
+  if (m) {
+    let h = parseInt(m[1], 10);
+    const ampm = m[2].toLowerCase();
+    if (ampm === 'pm' && h < 12) h += 12;
+    if (ampm === 'am' && h === 12) h = 0;
+    return String(h).padStart(2, '0') + ':00';
+  }
+  return null;
+}
+
 // ─── Main handler ──────────────────────────────────────────────────────────
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: CORS, body: '' };
