@@ -107,16 +107,20 @@ async function sgBulkLookup(emails) {
     return d.result || {};
 }
 
-async function sgUpsertWithLists(emails, listIds) {
+async function sgUpsertWithLists(records, listIds) {
+    // records: array of either email strings OR contact objects {email, phone_number_id?, id?}
     // PUT /v3/marketing/contacts upserts contacts and adds them to list_ids.
-    // Max 30k contacts per call, but we'll batch at 1000 to be safe.
-    const batches = chunk(emails, 1000);
+    // CRITICAL: SendGrid requires ALL primary identifiers (email + phone_number_id)
+    // to be supplied when updating a contact that has both. Pass enriched records
+    // with phone_number_id when known to avoid the "primary_identifiers" error.
+    const batches = chunk(records, 1000);
     let jobIds = [];
     for (const b of batches) {
+        const contacts = b.map((rec) => typeof rec === 'string' ? { email: rec } : rec);
         const r = await fetch('https://api.sendgrid.com/v3/marketing/contacts', {
             method: 'PUT',
             headers: { 'Authorization': `Bearer ${SG_KEY}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ list_ids: listIds, contacts: b.map((email) => ({ email })) })
+            body: JSON.stringify({ list_ids: listIds, contacts })
         });
         if (!r.ok) {
             const t = await r.text();
@@ -253,14 +257,28 @@ exports.handler = async (event) => {
             return { statusCode: 200, body: '' };
         }
 
-        await sgUpsertWithLists(willSendTo, [LIST_SUB]);
-        await writeStatus({ runId, draftId, stage: 'upserted-to-list-sub', count: willSendTo.length });
+        // Build enriched records: include phone_number_id when the existing contact has one
+        // (otherwise SendGrid rejects the upsert with the 'primary_identifiers' error).
+        const enriched = willSendTo.map((email) => {
+            const c = (lookup[email] || {}).contact;
+            const rec = { email };
+            if (c) {
+                if (c.id) rec.id = c.id;
+                if (c.phone_number_id) rec.phone_number_id = c.phone_number_id;
+                if (c.external_id) rec.external_id = c.external_id;
+                if (c.anonymous_id) rec.anonymous_id = c.anonymous_id;
+            }
+            return rec;
+        });
+
+        await sgUpsertWithLists(enriched, [LIST_SUB]);
+        await writeStatus({ runId, draftId, stage: 'upserted-to-list-sub', count: enriched.length });
 
         const catchupName = `catchup-${draftId.slice(0, 8)}-${Date.now()}`;
         const catchupListId = await sgCreateList(catchupName);
         await writeStatus({ runId, draftId, stage: 'catchup-list-created', catchupListId, catchupName });
 
-        await sgUpsertWithLists(willSendTo, [catchupListId]);
+        await sgUpsertWithLists(enriched, [catchupListId]);
         await writeStatus({ runId, draftId, stage: 'upserted-to-catchup-list', count: willSendTo.length });
 
         const reflectedCount = await sgWaitForListCount(catchupListId, willSendTo.length);
