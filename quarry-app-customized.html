@@ -2338,7 +2338,11 @@ function renderUpcomingMonth(allEvents) {
       ? formatHumanTime(evt.time)
       : evt._start.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }).replace(':00', '');
     const meta = evt._start.toLocaleDateString('en-US', { weekday: 'long' }) + ' · ' + timeStr;
-    return '<div class="um-card" onclick="gotoScreen(\'screen-events\')">' +
+    const evtSlug = evt.slug || evt.id || '';
+    const onClickAttr = evtSlug
+      ? 'window.open(\'https://thequarrystl.com/quarry-events?event=' + encodeURIComponent(evtSlug) + '\', \'_blank\', \'noopener\')'
+      : 'gotoScreen(\'screen-events\')';
+    return '<div class="um-card" onclick="' + onClickAttr + '">' +
       '<div class="um-date">' +
         '<div class="um-month">' + month + '</div>' +
         '<div class="um-day">' + day + '</div>' +
