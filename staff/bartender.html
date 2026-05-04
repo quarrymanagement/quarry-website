@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>Quarry · Bartender</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1A1A1A; --card: #232323; --elev: #2A2520;
+    --border: rgba(196,149,106,0.22); --gold: #B8933A; --gold-light: #D4AF6A;
+    --cream: #F5F0E8; --gray: rgba(245,240,232,0.55); --dim: rgba(245,240,232,0.35);
+    --green: #6FBF73; --red: #DC2626;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { background: var(--bg); color: var(--cream); font-family: 'Montserrat', sans-serif; min-height: 100vh; padding: 20px 14px; }
+  .wrap { max-width: 540px; margin: 0 auto; }
+  .header { text-align: center; margin-bottom: 22px; }
+  .brand { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; }
+  .sub { font-size: 0.7rem; letter-spacing: 0.32em; text-transform: uppercase; color: var(--gold-light); margin-top: 4px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 14px; }
+  label { display: block; font-size: 0.65rem; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold-light); margin-bottom: 6px; }
+  input { width: 100%; padding: 14px 16px; background: var(--elev); border: 1px solid var(--border); border-radius: 6px; color: var(--cream); font-size: 1rem; font-family: inherit; }
+  input:focus { outline: none; border-color: var(--gold); }
+  .row { display: flex; gap: 10px; }
+  .row > * { flex: 1; }
+  .btn {
+    padding: 14px 18px;
+    background: var(--gold); color: var(--bg);
+    font-family: inherit; font-size: 0.85rem; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    border: none; border-radius: 6px; cursor: pointer;
+  }
+  .btn:hover { background: var(--gold-light); }
+  .btn:disabled { opacity: 0.5; cursor: wait; }
+  .btn-secondary { background: transparent; color: var(--gold-light); border: 1px solid var(--gold); }
+  .btn-secondary:hover { background: rgba(184,147,58,0.1); }
+  .btn-danger { background: transparent; color: #fca5a5; border: 1px solid #DC2626; }
+  .empty { text-align: center; padding: 30px; color: var(--gray); font-style: italic; }
+
+  .mem-card { padding: 18px; margin-bottom: 12px; }
+  .mem-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 12px; }
+  .mem-name { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 600; color: var(--cream); margin-bottom: 2px; }
+  .mem-meta { font-size: 0.78rem; color: var(--gray); letter-spacing: 0.04em; }
+  .mem-tier {
+    flex-shrink: 0;
+    padding: 6px 12px;
+    background: rgba(184,147,58,0.14);
+    border: 1px solid var(--gold);
+    border-radius: 20px;
+    font-size: 0.62rem; font-weight: 700;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--gold-light);
+  }
+  .mem-stats { display: flex; gap: 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 14px; }
+  .mem-stat { flex: 1; padding: 12px 8px; text-align: center; border-right: 1px solid var(--border); background: var(--elev); }
+  .mem-stat:last-child { border-right: 0; }
+  .mem-stat-num { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 600; color: var(--cream); }
+  .mem-stat-label { font-size: 0.55rem; color: var(--gray); letter-spacing: 0.18em; text-transform: uppercase; margin-top: 2px; }
+  .mem-stat-num.gold { color: var(--gold-light); }
+  .mem-stat-num.discount { color: var(--green); }
+
+  .mem-pending {
+    background: rgba(212,175,106,0.10);
+    border: 1px solid var(--gold);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+  }
+  .mem-pending-label { font-size: 0.6rem; letter-spacing: 0.28em; text-transform: uppercase; color: var(--gold-light); margin-bottom: 6px; }
+  .mem-pending-code { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; letter-spacing: 0.32em; color: var(--gold-light); margin-bottom: 4px; }
+  .mem-pending-name { font-size: 0.85rem; color: var(--cream); }
+  .mem-pending-meta { font-size: 0.7rem; color: var(--gray); margin-top: 4px; font-style: italic; }
+
+  .mem-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .mem-actions .btn { flex: 1; min-width: 140px; padding: 10px 12px; font-size: 0.7rem; }
+  .hist-toggle { width: 100%; padding: 8px; margin-top: 10px; background: transparent; border: 0; color: var(--gray); font-family: inherit; font-size: 0.75rem; cursor: pointer; letter-spacing: 0.12em; text-transform: uppercase; }
+  .hist-list { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); display: none; }
+  .hist-list.open { display: block; }
+  .hist-row { padding: 6px 0; font-size: 0.8rem; color: var(--gray); display: flex; justify-content: space-between; }
+  .hist-row strong { color: var(--cream); font-weight: 500; }
+  .hist-pos { color: var(--gold-light); }
+  .hist-neg { color: #fca5a5; }
+
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); padding: 12px 20px; border-radius: 8px; font-size: 0.85rem; opacity: 0; transition: opacity 0.2s; }
+  .toast.show { opacity: 1; }
+  .toast.ok { background: rgba(111,191,115,0.12); border: 1px solid var(--green); color: var(--green); }
+  .toast.err { background: rgba(220,38,38,0.12); border: 1px solid #DC2626; color: #fca5a5; }
+
+  .footer { text-align: center; margin-top: 24px; font-size: 0.7rem; color: var(--dim); letter-spacing: 0.06em; }
+  .footer a { color: var(--gold-light); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="brand">The Quarry</div>
+    <div class="sub">Bartender Console</div>
+  </div>
+
+  <div class="card" id="loginCard">
+    <label>Admin Password</label>
+    <input type="password" id="password" placeholder="Enter admin password" autocomplete="current-password">
+    <button class="btn" style="width:100%;margin-top:14px" onclick="saveAuth()">Continue</button>
+  </div>
+
+  <div id="searchCard" class="card" style="display:none">
+    <label>Search Member</label>
+    <div class="row">
+      <input type="text" id="searchInput" placeholder="Email, phone (last 4), or name" autocomplete="off">
+      <button class="btn" onclick="search()" style="flex:0 0 auto;min-width:90px">Find</button>
+    </div>
+    <div style="font-size:0.7rem;color:var(--gray);margin-top:6px;font-style:italic">Tip: phone last-4 digits often unique enough</div>
+  </div>
+
+  <div id="results"></div>
+
+  <div class="footer">
+    <a href="redeem.html">Redemption claim</a>
+    &nbsp;·&nbsp;
+    <a href="admin-points.html">Adjust points</a>
+    &nbsp;·&nbsp;
+    <a href="scan-review.html">Flagged scans</a>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+let adminPass = sessionStorage.getItem('quarry_admin_pass') || '';
+
+function $(id) { return document.getElementById(id); }
+function escHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function showToast(msg, kind='ok') {
+  const t = $('toast'); t.textContent = msg; t.className = 'toast show ' + kind;
+  setTimeout(() => { t.className = 'toast ' + kind; }, 2500);
+}
+function fmtDate(iso) { try { return new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(iso)); } catch(_) { return ''; } }
+function fmtPhone(p) { const d = (p || '').replace(/\D/g, ''); if (d.length === 10) return '(' + d.slice(0,3) + ') ' + d.slice(3,6) + '-' + d.slice(6); return p || ''; }
+
+function saveAuth() {
+  const p = $('password').value.trim();
+  if (!p) return;
+  adminPass = p;
+  sessionStorage.setItem('quarry_admin_pass', p);
+  $('loginCard').style.display = 'none';
+  $('searchCard').style.display = 'block';
+  setTimeout(() => $('searchInput').focus(), 100);
+}
+
+if (adminPass) {
+  $('loginCard').style.display = 'none';
+  $('searchCard').style.display = 'block';
+}
+
+async function search() {
+  const q = $('searchInput').value.trim();
+  if (!q) return;
+  const btn = document.querySelector('#searchCard .btn');
+  btn.disabled = true; btn.textContent = '…';
+  $('results').innerHTML = '<div class="card empty">Searching…</div>';
+  try {
+    const r = await fetch('/.netlify/functions/member-lookup', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminPassword: adminPass, query: q })
+    });
+    const body = await r.json();
+    if (!body.ok) throw new Error(body.error || 'Search failed');
+    if (!body.members.length) {
+      $('results').innerHTML = '<div class="card empty">No matches for &ldquo;' + escHtml(q) + '&rdquo;.</div>';
+    } else {
+      $('results').innerHTML = body.members.map(renderMember).join('');
+      wireMemberCards();
+    }
+  } catch (e) {
+    showToast(e.message, 'err');
+    $('results').innerHTML = '';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Find';
+  }
+}
+
+function renderMember(m) {
+  const pending = m.pendingRedemption ? `
+    <div class="mem-pending">
+      <div class="mem-pending-label">Active Code</div>
+      <div class="mem-pending-code">${escHtml(m.pendingRedemption.code)}</div>
+      <div class="mem-pending-name">${escHtml(m.pendingRedemption.rewardName)}</div>
+      <div class="mem-pending-meta">Expires ${fmtDate(m.pendingRedemption.expiresAt)}</div>
+    </div>` : '';
+
+  const histRows = (m.recentHistory || []).map(h => {
+    const delta = (typeof h.delta === 'number') ? h.delta : 0;
+    const cls = delta > 0 ? 'hist-pos' : delta < 0 ? 'hist-neg' : '';
+    const sign = delta > 0 ? '+ ' : delta < 0 ? '− ' : '';
+    const note = h.note || h.action || '';
+    return `<div class="hist-row"><span><strong>${fmtDate(h.at)}</strong> · ${escHtml(note)}</span><span class="${cls}">${sign}${Math.abs(delta).toLocaleString()}</span></div>`;
+  }).join('');
+
+  return `
+    <div class="card mem-card" data-email="${escHtml(m.email)}">
+      <div class="mem-head">
+        <div>
+          <div class="mem-name">${escHtml(m.name || '(no name)')}</div>
+          <div class="mem-meta">${escHtml(m.email)}${m.phone ? ' · ' + escHtml(fmtPhone(m.phone)) : ''}</div>
+        </div>
+        <div class="mem-tier">${escHtml(m.tierLabel)}</div>
+      </div>
+      ${pending}
+      <div class="mem-stats">
+        <div class="mem-stat"><div class="mem-stat-num gold">${m.currentPoints.toLocaleString()}</div><div class="mem-stat-label">Available pts</div></div>
+        <div class="mem-stat"><div class="mem-stat-num">${m.lifetimePoints.toLocaleString()}</div><div class="mem-stat-label">Lifetime</div></div>
+        <div class="mem-stat"><div class="mem-stat-num discount">${m.bottleDiscountPct}%</div><div class="mem-stat-label">Bottle off</div></div>
+      </div>
+      <div class="mem-actions">
+        ${pending ? `<button class="btn" data-action="claim" data-code="${escHtml(m.pendingRedemption.code)}">Claim Code at Bar</button>` : ''}
+        <button class="btn btn-secondary" data-action="add-pts">+ Pts</button>
+        <button class="btn btn-secondary" data-action="copy-email">Copy Email</button>
+      </div>
+      <button class="hist-toggle" data-action="toggle-hist">Show recent activity ${histRows ? '' : '(empty)'}</button>
+      <div class="hist-list">${histRows || '<div class="hist-row"><span style="color:var(--dim);font-style:italic">No activity yet</span></div>'}</div>
+    </div>`;
+}
+
+function wireMemberCards() {
+  document.querySelectorAll('.mem-card').forEach(card => {
+    const email = card.getAttribute('data-email');
+    card.querySelectorAll('[data-action]').forEach(btn => {
+      const action = btn.getAttribute('data-action');
+      btn.addEventListener('click', async () => {
+        if (action === 'toggle-hist') {
+          const list = card.querySelector('.hist-list');
+          list.classList.toggle('open');
+          btn.textContent = list.classList.contains('open') ? 'Hide activity' : 'Show recent activity';
+        } else if (action === 'copy-email') {
+          try { await navigator.clipboard.writeText(email); showToast('Copied ' + email, 'ok'); }
+          catch(_) { showToast('Copy failed', 'err'); }
+        } else if (action === 'add-pts') {
+          const amt = prompt('How many points to ' + (confirm('Add (OK) or remove (Cancel) points?') ? 'add' : 'remove') + '?\n\nMember: ' + email);
+          if (!amt) return;
+          const n = parseInt(amt, 10);
+          if (!n || isNaN(n)) return showToast('Invalid amount', 'err');
+          const note = prompt('Reason (logged in audit trail):');
+          if (!note) return showToast('A reason is required', 'err');
+          try {
+            const r = await fetch('/.netlify/functions/admin-adjust-points', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ adminPassword: adminPass, memberEmail: email, delta: n, note: note })
+            });
+            const body = await r.json();
+            if (!body.ok) throw new Error(body.error);
+            showToast('Adjusted to ' + body.newBalance.toLocaleString() + ' pts', 'ok');
+            search(); // re-load
+          } catch(e) { showToast(e.message, 'err'); }
+        } else if (action === 'claim') {
+          const code = btn.getAttribute('data-code');
+          try {
+            const r = await fetch('/.netlify/functions/redeem-claim', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ adminPassword: adminPass, code: code })
+            });
+            const body = await r.json();
+            if (!body.ok) throw new Error(body.error);
+            showToast('Reward honored: ' + (body.reward && body.reward.name || ''), 'ok');
+            search(); // re-load
+          } catch(e) { showToast(e.message, 'err'); }
+        }
+      });
+    });
+  });
+}
+
+$('password').addEventListener('keydown', (e) => { if (e.key === 'Enter') saveAuth(); });
+$('searchInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') search(); });
+</script>
+</body>
+</html>
