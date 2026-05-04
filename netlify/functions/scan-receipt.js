@@ -406,6 +406,11 @@ exports.handler = async (event) => {
     return reply(400, { ok: false, error: 'Could not extract receipt details. Please use a clearer, well-lit photo.' });
   }
 
+  // ── 1b. Gift card receipts don't earn points (recipient earns when they spend it) ──
+  if (ocr.payment_type && /gift/i.test(ocr.payment_type)) {
+    return reply(400, { ok: false, error: 'Gift card receipts don\'t earn points — points are credited when the gift card is used.' });
+  }
+
   // ── 2. Restaurant must include "Quarry" ──
   const restName = (ocr.restaurant_name || '').toLowerCase();
   if (!RESTAURANT_KEYWORDS.some((k) => restName.includes(k))) {
