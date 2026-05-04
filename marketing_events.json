@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-04T20:43:13.520Z",
+  "updatedAt": "2026-05-04T22:06:17.871Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -16719,6 +16719,17 @@
       "sgEventId": "pcqdLUozQmmSiJANNt4JVg",
       "userAgent": "Mozilla/5.0 (Windows NT 5.1; rv:11.0) Gecko Firefox/11.0 (via ggpht.com GoogleImageProxy)",
       "category": "quarry-marketing"
+    },
+    {
+      "ts": "2026-05-04T22:05:58.000Z",
+      "type": "dropped",
+      "draftId": null,
+      "ruleId": null,
+      "email": "test+netlifycheck@example.com",
+      "url": null,
+      "sgEventId": "ZHJvcC0xMDYwMzc3NjUtendaVUlhcENSVEdfTW4za19wbnRpQS0w",
+      "userAgent": null,
+      "category": "quarry-marketing:welcome"
     }
   ],
   "aggregates": {
