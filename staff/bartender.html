@@ -460,4 +460,43 @@ $('confirmApplyBtn').addEventListener('click', async () => {
         toastApplied
           ? 'Applied to check #' + (c.checkNumber || c.orderNumber)
           : 'Honored (Toast: ' + ((body.toast && body.toast.reason) || 'failed') + ')',
-        toastApplied ? '
+        toastApplied ? 'ok' : 'err'
+      );
+      $('checkModal').classList.remove('open');
+      search();
+    } else if (modalState.mode === 'tier-perk') {
+      const r = await fetch('/.netlify/functions/apply-tier-discount', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          adminPassword: adminPass,
+          memberEmail: modalState.memberEmail,
+          perk: modalState.perk,
+          orderGuid: c.orderGuid,
+          checkGuid: c.checkGuid,
+        }),
+      });
+      const body = await r.json();
+      if (!body.ok) throw new Error(body.error);
+      const toastApplied = body.toast && body.toast.applied;
+      showToast(
+        toastApplied
+          ? body.perk.label + ' applied to #' + (c.checkNumber || c.orderNumber)
+          : 'Toast apply failed (HTTP ' + (body.toast && body.toast.status) + ')',
+        toastApplied ? 'ok' : 'err'
+      );
+      $('checkModal').classList.remove('open');
+      search();
+    }
+  } catch (e) {
+    showToast(e.message, 'err');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Apply to selected check';
+  }
+});
+
+$('password').addEventListener('keydown', (e) => { if (e.key === 'Enter') saveAuth(); });
+$('searchInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') search(); });
+</script>
+</body>
+</html>
+'
