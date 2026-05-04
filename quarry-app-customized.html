@@ -2161,10 +2161,53 @@ function toggleSeg(el) {
   const filter = filterMap[label] || 'all';
   if (typeof renderEventList === 'function' && _allUpcoming.length) renderEventList(filter);
 }
-function submitParty() {
-  document.querySelector('.submit-btn').style.display = 'none';
-  document.getElementById('party-success').style.display = 'block';
-  document.getElementById('party-success').scrollIntoView({ behavior: 'smooth' });
+async function submitParty() {
+  const screen = document.getElementById('screen-party');
+  if (!screen) return;
+  // Collect fields by their declared order
+  const inputs = screen.querySelectorAll('.form-input, .form-select, textarea.form-input');
+  const labels = screen.querySelectorAll('.form-label');
+  const data = {};
+  // Map well-known labels
+  inputs.forEach((el, i) => {
+    const labelEl = labels[i];
+    const lab = labelEl ? labelEl.textContent.trim().toLowerCase() : '';
+    const v = el.value;
+    if (/full name|^name/.test(lab)) data.name = v;
+    else if (/^phone/.test(lab)) data.phone = v;
+    else if (/^email/.test(lab)) data.email = v;
+    else if (/^date/.test(lab)) data.date = v;
+    else if (/start time/.test(lab)) data.time = v;
+    else if (/party size/.test(lab)) data.partySize = v;
+    else if (/occasion/.test(lab)) data.occasion = v;
+    else if (/seating/.test(lab)) data.seating = v;
+    else if (/note/.test(lab)) data.notes = v;
+  });
+  data.source = 'app';
+
+  if (!data.name || !data.email || !data.phone) {
+    alert('Please fill in your name, email, and phone before submitting.');
+    return;
+  }
+
+  const btn = document.querySelector('#screen-party .submit-btn');
+  btn.style.pointerEvents = 'none'; btn.textContent = 'Submitting…';
+  try {
+    const apiBase = location.hostname.includes('thequarrystl.com') ? '' : 'https://thequarrystl.com';
+    const r = await fetch(apiBase + '/.netlify/functions/party-request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    const body = await r.json();
+    if (!body.ok) throw new Error(body.error || 'Could not send request');
+    btn.style.display = 'none';
+    document.getElementById('party-success').style.display = 'block';
+    document.getElementById('party-success').scrollIntoView({ behavior: 'smooth' });
+  } catch (e) {
+    btn.style.pointerEvents = ''; btn.textContent = 'Submit Request';
+    alert('Could not send your request: ' + e.message + '. Please try again or call us directly.');
+  }
 }
 
 (function() {
@@ -2295,6 +2338,38 @@ function submitParty() {
   document.getElementById('signinEmail').addEventListener('keydown', (e) => { if (e.key === 'Enter') requestCode(); });
   document.getElementById('signinCode').addEventListener('keydown', (e) => { if (e.key === 'Enter') verifyCode(); });
 
+
+  // Update reward affordability + Redeem home card count based on currentMember.currentPoints
+  function updateRewardAvailability() {
+    const balance = (currentMember && typeof currentMember.currentPoints === 'number') ? currentMember.currentPoints : 0;
+    let available = 0;
+    document.querySelectorAll('#screen-rewards .reward-row').forEach((row) => {
+      const ptsEl = row.querySelector('.reward-pts');
+      const btn = row.querySelector('.reward-action');
+      if (!ptsEl || !btn) return;
+      const cost = parseInt(ptsEl.textContent.replace(/[^\d]/g, ''), 10);
+      if (!cost) return;
+      if (cost <= balance) {
+        available++;
+        btn.classList.remove('disabled');
+        btn.textContent = 'Redeem';
+      } else {
+        btn.classList.add('disabled');
+        const remaining = cost - balance;
+        btn.textContent = remaining.toLocaleString() + ' More';
+      }
+    });
+    // Update Redeem home card
+    document.querySelectorAll('#screen-home .home-card').forEach((card) => {
+      const t = card.querySelector('.home-card-title');
+      if (!t || t.textContent.trim() !== 'Redeem') return;
+      const v = card.querySelector('.home-card-val');
+      const s = card.querySelector('.home-card-sub');
+      if (v) v.textContent = available + (available === 1 ? ' available' : ' available');
+      if (s) s.textContent = available === 0 ? 'Earn more to redeem' : 'Rewards ready to use';
+    });
+  }
+
   function renderMember() {
     if (!currentMember) return;
     const m = currentMember;
@@ -2375,6 +2450,7 @@ function submitParty() {
         confirmRedemption(name, cost);
       });
     });
+    updateRewardAvailability();
   }
 
   const REWARD_ID_MAP = {
