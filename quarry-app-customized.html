@@ -1704,6 +1704,9 @@ a.account-link:hover .al-arrow { color: var(--gold); }
         </div>
       </div>
 
+      <div style="margin:8px 22px 14px;padding:14px 18px;background:rgba(184,147,58,0.08);border:1px solid var(--border-soft);border-radius:8px;font-family:var(--ff-script);font-style:italic;font-size:0.9rem;color:var(--cream-soft);line-height:1.5">
+        Tap a bay to reserve on our site. <strong style="color:var(--gold-light);font-style:normal;font-family:var(--ff-body);font-size:0.78rem;letter-spacing:0.12em">YOUR POINTS</strong> credit automatically once payment clears — as long as you use the same email at checkout.
+      </div>
       <div class="section-rule"><div class="line"></div><div class="label">Reserve a Bay</div><div class="line"></div></div>
 
       <div class="reward-row">
@@ -1714,7 +1717,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
         <div class="reward-cost">
           <div class="reward-pts">$30</div>
           <div class="reward-pts-label">50 min</div>
-          <div class="reward-action">Reserve</div>
+          <div class="reward-action" onclick="openWithMember('https://thequarrystl.com/quarry-golf')">Reserve</div>
         </div>
       </div>
 
@@ -1726,7 +1729,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
         <div class="reward-cost">
           <div class="reward-pts">$30</div>
           <div class="reward-pts-label">50 min</div>
-          <div class="reward-action">Reserve</div>
+          <div class="reward-action" onclick="openWithMember('https://thequarrystl.com/quarry-golf')">Reserve</div>
         </div>
       </div>
 
@@ -1738,7 +1741,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
         <div class="reward-cost">
           <div class="reward-pts">$30</div>
           <div class="reward-pts-label">50 min</div>
-          <div class="reward-action">Reserve</div>
+          <div class="reward-action" onclick="openWithMember('https://thequarrystl.com/quarry-golf')">Reserve</div>
         </div>
       </div>
 
@@ -1750,7 +1753,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
         <div class="reward-cost">
           <div class="reward-pts">$30</div>
           <div class="reward-pts-label">50 min</div>
-          <div class="reward-action">Reserve</div>
+          <div class="reward-action" onclick="openWithMember('https://thequarrystl.com/quarry-golf')">Reserve</div>
         </div>
       </div>
 
@@ -2199,9 +2202,14 @@ function renderEventList(filter) {
       } else {
         // Per-event URL on the website: /quarry-events?event={slug}
         const slug = evt.slug || evt.id || '';
-        const buyHref = slug
+        const slugUrl = slug
           ? 'https://thequarrystl.com/quarry-events?event=' + encodeURIComponent(slug)
           : 'https://thequarrystl.com/quarry-events';
+        // Append the member's email so checkout pre-fills it (key to point crediting)
+        const emailParam = (currentMember && currentMember.email)
+          ? (slugUrl.indexOf('?') >= 0 ? '&' : '?') + 'email=' + encodeURIComponent(currentMember.email)
+          : '';
+        const buyHref = slugUrl + emailParam;
         actionsHtml =
           `<a href="${buyHref}" target="_blank" rel="noopener" class="btn-primary" style="text-decoration:none">${remaining === 0 ? 'View Event' : 'Get Tickets'}</a>` +
           `<a href="#" data-action="ics" data-event-id="${evtIdAttr}" class="btn-ghost" style="text-decoration:none;display:inline-block">Remind Me</a>`;
@@ -2231,9 +2239,8 @@ function renderEventList(filter) {
     if (!slug || isBandCard || isTastingCard) return; // bands & tastings have their own primary buttons
     card.style.cursor = 'pointer';
     card.addEventListener('click', (e) => {
-      // Don't hijack clicks on inner buttons/links
       if (e.target.closest('a, [data-action]')) return;
-      window.open('https://thequarrystl.com/quarry-events?event=' + encodeURIComponent(slug), '_blank', 'noopener');
+      openWithMember('https://thequarrystl.com/quarry-events?event=' + encodeURIComponent(slug));
     });
   });
 
@@ -2340,7 +2347,7 @@ function renderUpcomingMonth(allEvents) {
     const meta = evt._start.toLocaleDateString('en-US', { weekday: 'long' }) + ' · ' + timeStr;
     const evtSlug = evt.slug || evt.id || '';
     const onClickAttr = evtSlug
-      ? 'window.open(\'https://thequarrystl.com/quarry-events?event=' + encodeURIComponent(evtSlug) + '\', \'_blank\', \'noopener\')'
+      ? 'openWithMember(\'https://thequarrystl.com/quarry-events?event=' + encodeURIComponent(evtSlug) + '\')'
       : 'gotoScreen(\'screen-events\')';
     return '<div class="um-card" onclick="' + onClickAttr + '">' +
       '<div class="um-date">' +
@@ -2498,6 +2505,23 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 let prevScreen = 'screen-home';
+
+
+
+// Open an external Quarry-website URL with the signed-in member's email
+// pre-filled as ?email=. The website's Stripe checkout flows pass that to
+// `customer_email`, which is what our webhook matches against to auto-credit
+// points after a successful purchase.
+function openWithMember(baseUrl) {
+  let url = baseUrl;
+  try {
+    if (currentMember && currentMember.email) {
+      const sep = url.indexOf('?') >= 0 ? '&' : '?';
+      url = url + sep + 'email=' + encodeURIComponent(currentMember.email);
+    }
+  } catch (_) {}
+  window.open(url, '_blank', 'noopener');
+}
 
 function gotoScreen(id) {
   const current = document.querySelector('.screen.active');
