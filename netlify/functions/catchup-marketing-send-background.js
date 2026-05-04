@@ -227,53 +227,53 @@ exports.handler = async (event) => {
     if (!draftId) return respond(400, { error: 'draftId required' });
     if (!Array.isArray(emails) || !emails.length) return respond(400, { error: 'emails[] required' });
 
-    // Background functions return 202 immediately. We do all real work
-    // afterwards and report progress via writeStatus().
+    // Background function: AWAIT all work directly. Netlify auto-returns 202
+    // to the HTTP caller; the runtime keeps the function alive for up to 15
+    // min while this handler resolves.
     const runId = `${draftId.slice(0,8)}-${Date.now()}`;
     await writeStatus({ runId, draftId, stage: 'started', startedAt: new Date().toISOString() });
 
-    (async () => {
-        try {
-            const draft = await loadDraft(draftId);
-            if (!draft) { await writeStatus({ runId, draftId, stage: 'error', error: 'draft not found' }); return; }
-            if (!draft.sentAt || !draft.sgSingleSendId) {
-                await writeStatus({ runId, draftId, stage: 'error', error: 'draft not sent yet' }); return;
-            }
+    try {
+        const draft = await loadDraft(draftId);
+        if (!draft) { await writeStatus({ runId, draftId, stage: 'error', error: 'draft not found' }); return { statusCode: 200, body: '' }; }
+        if (!draft.sentAt || !draft.sgSingleSendId) {
+            await writeStatus({ runId, draftId, stage: 'error', error: 'draft not sent yet' }); return { statusCode: 200, body: '' };
+        }
 
-            const seen = new Set();
-            const cleaned = [];
-            for (const raw of emails) {
-                const e = String(raw || '').trim().toLowerCase();
-                if (!e || !e.includes('@')) continue;
-                if (seen.has(e)) continue;
-                seen.add(e);
-                cleaned.push(e);
-            }
-            await writeStatus({ runId, draftId, stage: 'cleaned', cleanedCount: cleaned.length });
+        const seen = new Set();
+        const cleaned = [];
+        for (const raw of emails) {
+            const e = String(raw || '').trim().toLowerCase();
+            if (!e || !e.includes('@')) continue;
+            if (seen.has(e)) continue;
+            seen.add(e);
+            cleaned.push(e);
+        }
+        await writeStatus({ runId, draftId, stage: 'cleaned', cleanedCount: cleaned.length });
 
-            const lookup = {};
-            for (const b of chunk(cleaned, 100)) {
-                const r = await sgBulkLookup(b);
-                for (const k of Object.keys(r)) lookup[k.toLowerCase()] = r[k];
-            }
-            await writeStatus({ runId, draftId, stage: 'lookup-done', lookedUp: Object.keys(lookup).length });
+        const lookup = {};
+        for (const b of chunk(cleaned, 100)) {
+            const r = await sgBulkLookup(b);
+            for (const k of Object.keys(r)) lookup[k.toLowerCase()] = r[k];
+        }
+        await writeStatus({ runId, draftId, stage: 'lookup-done', lookedUp: Object.keys(lookup).length });
 
-            const willSendTo = [];
-            const skipped = [];
-            for (const email of cleaned) {
-                const r = lookup[email];
-                if (r && r.contact && (r.contact.list_ids || []).includes(LIST_SUB)) {
-                    skipped.push({ email, reason: 'already in LIST_SUB' });
-                } else {
-                    willSendTo.push(email);
-                }
+        const willSendTo = [];
+        const skipped = [];
+        for (const email of cleaned) {
+            const r = lookup[email];
+            if (r && r.contact && (r.contact.list_ids || []).includes(LIST_SUB)) {
+                skipped.push({ email, reason: 'already in LIST_SUB' });
+            } else {
+                willSendTo.push(email);
             }
-            await writeStatus({ runId, draftId, stage: 'classified', willSendCount: willSendTo.length, skippedCount: skipped.length });
+        }
+        await writeStatus({ runId, draftId, stage: 'classified', willSendCount: willSendTo.length, skippedCount: skipped.length });
 
-            if (dryRun || !willSendTo.length) {
-                await writeStatus({ runId, draftId, stage: 'done-dryrun', willSendTo: willSendTo.length, skipped: skipped.length });
-                return;
-            }
+        if (dryRun || !willSendTo.length) {
+            await writeStatus({ runId, draftId, stage: 'done-dryrun', willSendTo: willSendTo.length, skipped: skipped.length });
+            return { statusCode: 200, body: '' };
+        }
 
-            // 1) Permanent fix: add survivors to LIST_SUBSCRIBED for future campaigns
-          
+        // 1) Permanent fix: add survivors to LIST_SUBSCRIBED for future campaigns
+        await sgUpsertWit
