@@ -2046,9 +2046,11 @@ function renderEventList(filter) {
     return /\bwine tast|\bwine club|\bvintner|\bsommelier|\bwinery|\bchateau|\bvineyard|\brock & vine\b|\btasting\b/.test(blob);
   };
   const isFreeEvent = (evt) => {
-    if (evt.price === 0) return true;
-    if (typeof evt.admissionPrice === 'number' && evt.admissionPrice === 0) return true;
-    if (evt.pricePerPerson === 0 || evt.pricePerSeat === 0) return true;
+    // price is in cents (0 = free, > 0 = paid). It's the authoritative indicator.
+    // Note: pricePerPerson can be 0 on per-table-priced events like Music Bingo,
+    // so we DON'T use it for the free check.
+    if (typeof evt.price === 'number') return evt.price === 0;
+    if (typeof evt.admissionPrice === 'number') return evt.admissionPrice === 0;
     if (typeof evt.cost === 'string' && /^\s*(free|no cover|0)/i.test(evt.cost)) return true;
     return false;
   };
