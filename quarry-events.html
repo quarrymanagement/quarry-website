@@ -2487,24 +2487,25 @@
         });
     </script>
 
+
 <!-- Pre-fill ?email= from URL (used when launched from the Quarry member app) -->
 <script>
 (function(){
   try {
     var p = new URLSearchParams(location.search);
-    var e = p.get("email");
+    var e = p.get('email');
     if (!e || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)) return;
     var fill = function(){
-      var inputs = document.querySelectorAll("input[type="email"], input[name="email"]");
+      var inputs = document.querySelectorAll('input[type="email"], input[name="email"]');
       for (var i = 0; i < inputs.length; i++) {
         if (!inputs[i].value) inputs[i].value = e;
       }
     };
-    if (document.readyState !== "loading") fill();
-    else document.addEventListener("DOMContentLoaded", fill);
+    if (document.readyState !== 'loading') fill();
+    else document.addEventListener('DOMContentLoaded', fill);
     var mo = new MutationObserver(function(){ fill(); });
     mo.observe(document.documentElement, { childList: true, subtree: true });
-    setTimeout(function(){ try { mo.disconnect(); } catch(_) {} }, 30000);
+    setTimeout(function(){ try { mo.disconnect(); } catch(_){} }, 30000);
   } catch (_) {}
 })();
 </script>
