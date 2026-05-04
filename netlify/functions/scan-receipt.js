@@ -1,29 +1,15 @@
 // ============================================================================
-// scan-receipt.js — credit a member by scanning a Toast receipt (v1.2)
+// scan-receipt.js — credit a member by scanning a Toast receipt (v1.3)
 //
 // POST { token, image }
-//   token: session token from verify-code.js
-//   image: data URL ("data:image/jpeg;base64,...")
 //
-// Flow:
-//   1. Verify session token → resolve member
-//   2. Run Claude Vision OCR on image → extract check#, date, subtotal, tax, tip
-//   3. Cross-validate against Toast Open API (real check, subtotal matches)
-//   4. Dedupe via credited-orders.json (first-claim-wins)
-//   5. Daily scan cap (2/day per member)
-//   6. Soft-flag cardholder name mismatch → push to scanned-flagged.json
-//   7. Award points (10 × pre-tip total + 10 visit bonus, × tier multiplier)
-//      Tips do NOT earn points — they go to the server, not Quarry.
-//   8. Append to member history + credited-orders.json
-//
-// v1.2: 12-hour scan window, point math now on pre-tip total (subtotal+tax),
-// OCR extracts itemized subtotal/tax/tip and cross-checks subtotal with Toast.
-//
-// ENV:
-//   MEMBER_AUTH_SECRET, GITHUB_TOKEN          — auth + storage
-//   ANTHROPIC_API_KEY                         — Claude Vision OCR
-//   TOAST_CLIENT_ID, TOAST_CLIENT_SECRET      — Toast OAuth
-//   TOAST_RESTAURANT_GUID                     — restaurant ID (Toast-Restaurant-External-ID header)
+// v1.3: pending-queue when Toast hasn't synced yet.
+//   - Self-heal: every scan first retries this user's pending queue
+//     (in case Toast caught up since last attempt)
+//   - On Toast-miss: queue to pending-scans.json instead of rejecting
+//   - Customer sees friendly "Queued — credited within a few hours"
+//   - Cron (process-pending-scans.js) walks the queue hourly
+//   - 6-hour TTL: queued scans expire and notify member
 // ============================================================================
 
 const crypto = require('crypto');
@@ -40,6 +26,7 @@ const TOAST_REST_GUID   = process.env.TOAST_RESTAURANT_GUID || '';
 const SESSION_TTL_DAYS  = 30;
 const MAX_SCANS_PER_DAY = 2;
 const SCAN_WINDOW_HOURS = 12;
+const PENDING_TTL_HOURS = 6;
 const MIN_TAB_USD       = 20;
 const TOTAL_TOLERANCE   = 1.0;
 const RESTAURANT_KEYWORDS = ['quarry'];
@@ -52,7 +39,7 @@ const CORS = {
 };
 const reply = (s, b) => ({ statusCode: s, headers: CORS, body: JSON.stringify(b) });
 
-// ─── Session token (matches verify-code.js exactly) ────────────────────────
+// ─── Session token ─────────────────────────────────────────────────────────
 function verifySessionToken(token) {
   if (!token) return null;
   try {
@@ -68,7 +55,7 @@ function verifySessionToken(token) {
   } catch (_) { return null; }
 }
 
-// ─── Generic HTTPS helper ──────────────────────────────────────────────────
+// ─── HTTPS helper ──────────────────────────────────────────────────────────
 function httpsRequest(opts, body) {
   return new Promise((resolve, reject) => {
     const req = https.request(opts, (res) => {
@@ -85,7 +72,7 @@ function httpsRequest(opts, body) {
   });
 }
 
-// ─── GitHub helpers (match toast-order-webhook.js pattern) ─────────────────
+// ─── GitHub helpers ────────────────────────────────────────────────────────
 function gh(method, path, body) {
   return httpsRequest({
     hostname: 'api.github.com', path, method,
@@ -115,56 +102,47 @@ async function saveJson(filePath, json, sha, message) {
 
 // ─── Claude Vision OCR ─────────────────────────────────────────────────────
 async function ocrReceipt(imageBase64, mediaType) {
-  const payload = {
+  const r = await httpsRequest({
+    hostname: 'api.anthropic.com', path: '/v1/messages', method: 'POST',
+    headers: {
+      'x-api-key': ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01',
+      'Content-Type': 'application/json',
+    },
+  }, {
     model: 'claude-sonnet-4-5',
     max_tokens: 600,
     messages: [{
       role: 'user',
       content: [
         { type: 'image', source: { type: 'base64', media_type: mediaType, data: imageBase64 } },
-        {
-          type: 'text',
-          text: `Extract structured data from this restaurant receipt photo.
+        { type: 'text', text: `Extract structured data from this restaurant receipt photo.
 Reply with ONLY valid JSON, no prose, no markdown fences.
 
 Schema:
 {
-  "check_number": string|null,        // the check/order number (e.g., "1247")
-  "transaction_date": string|null,    // ISO date "YYYY-MM-DD"
-  "transaction_time": string|null,    // 24-hour "HH:MM"
-  "subtotal_amount": number|null,     // PRE-TAX subtotal (food/drinks only, before tax)
-  "tax_amount": number|null,          // tax line on receipt
-  "tip_amount": number|null,          // tip if shown (often handwritten)
-  "total_amount": number|null,        // final paid amount including tax + tip
-  "restaurant_name": string|null,     // name as printed on receipt
-  "cardholder_name": string|null,     // ONLY if credit card receipt; null otherwise
-  "payment_type": string|null         // "credit" | "cash" | "gift" | "other"
+  "check_number": string|null,
+  "transaction_date": string|null,
+  "transaction_time": string|null,
+  "subtotal_amount": number|null,
+  "tax_amount": number|null,
+  "tip_amount": number|null,
+  "total_amount": number|null,
+  "restaurant_name": string|null,
+  "cardholder_name": string|null,
+  "payment_type": string|null
 }
 
-If a field is unclear, set it to null. Do not invent data. The subtotal_amount is critical — it's the pre-tax line, NOT including tax or tip.`
-        }
+If a field is unclear, set it to null. Do not invent data. The subtotal_amount is critical — pre-tax line, NOT including tax or tip.` }
       ]
     }]
-  };
-
-  const r = await httpsRequest({
-    hostname: 'api.anthropic.com',
-    path: '/v1/messages',
-    method: 'POST',
-    headers: {
-      'x-api-key': ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01',
-      'Content-Type': 'application/json',
-    },
-  }, payload);
-
+  });
   if (r.status !== 200) throw new Error('OCR API: HTTP ' + r.status);
   const txt = (r.data.content && r.data.content[0] && r.data.content[0].text || '').trim();
-  const cleaned = txt.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
-  return JSON.parse(cleaned);
+  return JSON.parse(txt.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim());
 }
 
-// ─── Toast OAuth + order lookup ────────────────────────────────────────────
+// ─── Toast OAuth + lookup ──────────────────────────────────────────────────
 async function getToastToken() {
   const r = await httpsRequest({
     hostname: 'ws-api.toasttab.com',
@@ -180,9 +158,8 @@ async function getToastToken() {
   return r.data.token.accessToken;
 }
 
-async function findToastOrder(checkNumber, businessDateYYYYMMDD) {
-  const token = await getToastToken();
-  // Toast uses ordersBulk for date-range fetch; businessDate=yyyyMMdd
+async function findToastOrder(checkNumber, businessDateYYYYMMDD, token) {
+  if (!token) token = await getToastToken();
   const r = await httpsRequest({
     hostname: 'ws-api.toasttab.com',
     path: '/orders/v2/ordersBulk?businessDate=' + businessDateYYYYMMDD + '&pageSize=100',
@@ -194,13 +171,11 @@ async function findToastOrder(checkNumber, businessDateYYYYMMDD) {
     },
   });
   if (r.status !== 200 || !Array.isArray(r.data)) throw new Error('Toast lookup: HTTP ' + r.status);
-
+  const target = String(checkNumber).replace(/^#?/, '');
   for (const order of r.data) {
     for (const check of (order.checks || [])) {
       const dn = String(check.displayNumber || check.tabName || '').replace(/^#?/, '');
-      if (dn === String(checkNumber).replace(/^#?/, '')) {
-        return { order, check };
-      }
+      if (dn === target) return { order, check };
     }
   }
   return null;
@@ -218,7 +193,6 @@ function extractCardholder(check) {
 }
 
 function checkSubtotal(check) {
-  // PRE-TAX subtotal (food/drinks only — strict subtotal)
   if (!check) return 0;
   if (typeof check.amount === 'number') return check.amount;
   if (typeof check.subtotal === 'number') return check.subtotal;
@@ -226,12 +200,10 @@ function checkSubtotal(check) {
 }
 
 function checkPreTipTotal(check) {
-  // Subtotal + tax (everything except tip). This is what we award points on.
   if (!check) return 0;
   const sub = checkSubtotal(check);
   const tax = (typeof check.taxAmount === 'number') ? check.taxAmount : (check.tax || 0);
   if (sub) return sub + tax;
-  // Last-resort fallback: total minus tip
   if (typeof check.totalAmount === 'number') {
     return check.totalAmount - (check.tipAmount || 0);
   }
@@ -239,12 +211,10 @@ function checkPreTipTotal(check) {
 }
 
 function checkTotal(check) {
-  // Final paid amount including tax + tip (used only for receipt-vs-Toast cross-check display)
   if (!check) return 0;
   return check.totalAmount || ((checkSubtotal(check) + (check.taxAmount || 0) + (check.tipAmount || 0))) || 0;
 }
 
-// ─── Helpers ───────────────────────────────────────────────────────────────
 function namesOverlap(a, b) {
   if (!a || !b) return true;
   const tok = (s) => s.toLowerCase().replace(/[^a-z\s]/g, ' ').split(/\s+/).filter((t) => t.length >= 2);
@@ -255,6 +225,138 @@ function namesOverlap(a, b) {
 
 function tierMult(tier) {
   return ({ standard: 1.0, silver: 1.1, gold: 1.25, elite: 1.5, platinum: 1.5 }[tier]) || 1.0;
+}
+
+// ─── Self-heal: process this member's pending queue first ──────────────────
+async function processMemberPending(memberEmail, toastToken) {
+  const pendingFile = await loadJson('pending-scans.json');
+  if (!pendingFile.json) return { credited: 0, expired: 0 };
+  const items = pendingFile.json.items || [];
+  const myItems = items.filter((it) =>
+    it.status === 'pending' && (it.memberEmail || '').toLowerCase() === memberEmail.toLowerCase()
+  );
+  if (!myItems.length) return { credited: 0, expired: 0 };
+
+  let credited = 0, expired = 0;
+  let pendingDirty = false;
+  let creditedFile = null, creditedJson = null;
+  let membersFile = null, membersJson = null;
+
+  for (const it of myItems) {
+    const ageHours = (Date.now() - new Date(it.transactionAt).getTime()) / 3600000;
+
+    // Check if expired
+    if (ageHours > PENDING_TTL_HOURS + SCAN_WINDOW_HOURS) {
+      it.status = 'expired';
+      it.decidedAt = new Date().toISOString();
+      pendingDirty = true;
+      expired++;
+      continue;
+    }
+
+    // Try Toast lookup
+    let match;
+    try { match = await findToastOrder(it.checkNumber, it.businessDate, toastToken); }
+    catch (_) { continue; } // Toast failure → leave for next retry
+
+    if (!match) {
+      it.tryCount = (it.tryCount || 1) + 1;
+      it.lastTriedAt = new Date().toISOString();
+      pendingDirty = true;
+      continue;
+    }
+
+    // Found! Validate + credit
+    const toastSubtotal = checkSubtotal(match.check);
+    const toastPreTip = checkPreTipTotal(match.check);
+    const toastTotal = checkTotal(match.check);
+    if (it.ocrSubtotal != null && Math.abs(toastSubtotal - it.ocrSubtotal) > TOTAL_TOLERANCE) {
+      it.status = 'mismatch';
+      it.decidedAt = new Date().toISOString();
+      pendingDirty = true;
+      continue;
+    }
+    if (toastPreTip < MIN_TAB_USD) {
+      it.status = 'below-minimum';
+      it.decidedAt = new Date().toISOString();
+      pendingDirty = true;
+      continue;
+    }
+
+    // Dedupe + credit (load on first hit)
+    if (!creditedFile) {
+      creditedFile = await loadJson('credited-orders.json');
+      creditedJson = creditedFile.json || { orders: [] };
+    }
+    if (creditedJson.orders.some((o) => o.orderId === match.order.guid)) {
+      it.status = 'duplicate';
+      it.decidedAt = new Date().toISOString();
+      pendingDirty = true;
+      continue;
+    }
+    if (!membersFile) {
+      membersFile = await loadJson('members.json');
+      membersJson = membersFile.json;
+    }
+    const member = (membersJson.members || []).find((x) => (x.email || '').toLowerCase() === memberEmail.toLowerCase());
+    if (!member) continue;
+
+    const tier = member.tier || 'standard';
+    const mult = tierMult(tier);
+    const earnBasis = toastPreTip;
+    const basePts = Math.round(earnBasis * 10);
+    const visitBonus = earnBasis >= MIN_TAB_USD ? 10 : 0;
+    const totalPts = Math.round((basePts + visitBonus) * mult);
+
+    member.currentPoints = (member.currentPoints || 0) + totalPts;
+    member.lifetimePoints = (member.lifetimePoints || 0) + totalPts;
+    member.lastVisitAt = new Date().toISOString();
+    member.history = member.history || [];
+    member.history.push({
+      at: new Date().toISOString(),
+      action: 'earn',
+      source: 'receipt-scan-retry',
+      delta: totalPts,
+      orderId: match.order.guid,
+      checkNumber: it.checkNumber,
+      spendUsd: earnBasis,
+      finalTotalUsd: toastTotal,
+      subtotalUsd: toastSubtotal,
+      tier, multiplier: mult,
+      note: 'Receipt scan (queued ' + (it.tryCount || 1) + ' retries)',
+    });
+
+    creditedJson.orders.push({
+      orderId: match.order.guid,
+      checkNumber: it.checkNumber,
+      memberEmail: memberEmail,
+      subtotal: toastSubtotal,
+      preTipTotal: earnBasis,
+      finalTotal: toastTotal,
+      points: totalPts,
+      creditedAt: new Date().toISOString(),
+      fromQueue: true,
+    });
+
+    it.status = 'credited';
+    it.decidedAt = new Date().toISOString();
+    it.creditedPoints = totalPts;
+    pendingDirty = true;
+    credited++;
+  }
+
+  // Save all dirty files (do members + credited first, then pending)
+  if (credited > 0) {
+    await saveJson('members.json', membersJson, membersFile.sha,
+      `+pts via queue retry — ${memberEmail}`);
+    await saveJson('credited-orders.json', creditedJson, creditedFile.sha,
+      `credit (queue retry) → ${memberEmail}`);
+  }
+  if (pendingDirty) {
+    await saveJson('pending-scans.json', pendingFile.json, pendingFile.sha,
+      `process pending: ${credited} credited, ${expired} expired (${memberEmail})`);
+  }
+  return { credited, expired };
 }
 
 // ─── Main handler ──────────────────────────────────────────────────────────
@@ -271,10 +373,24 @@ exports.handler = async (event) => {
   catch (_) { return reply(400, { ok: false, error: 'Invalid JSON' }); }
 
   const { token, image } = body;
-  if (!token || !image) return reply(400, { ok: false, error: 'Missing token or image' });
+  if (!token) return reply(400, { ok: false, error: 'Missing token' });
 
   const email = verifySessionToken(token);
   if (!email) return reply(401, { ok: false, error: 'Session expired — please sign in again' });
+
+  // ── Always self-heal this member's pending queue first (cheap, often credits something)
+  let pendingResult = { credited: 0, expired: 0 };
+  try { pendingResult = await processMemberPending(email); } catch (_) { /* ignore */ }
+
+  // If no image was sent, this was a "retry-only" call. Return the result.
+  if (!image) {
+    return reply(200, {
+      ok: true,
+      retryOnly: true,
+      credited: pendingResult.credited,
+      expired: pendingResult.expired,
+    });
+  }
 
   const m = String(image).match(/^data:(image\/[a-z+]+);base64,(.+)$/i);
   if (!m) return reply(400, { ok: false, error: 'Invalid image format' });
@@ -296,7 +412,7 @@ exports.handler = async (event) => {
     return reply(400, { ok: false, error: 'This receipt does not appear to be from The Quarry.' });
   }
 
-  // ── 3. Receipt freshness (24-hour window) ──
+  // ── 3. Receipt freshness (12-hour submission window) ──
   const receiptIso = ocr.transaction_date + 'T' + (ocr.transaction_time || '23:59') + ':00';
   const receiptTs = new Date(receiptIso).getTime();
   if (isNaN(receiptTs)) return reply(400, { ok: false, error: 'Could not parse receipt date.' });
@@ -306,34 +422,79 @@ exports.handler = async (event) => {
   }
   if (ageHours < -2) return reply(400, { ok: false, error: 'Receipt date is in the future.' });
 
-  // ── 4. (Min-tab check moved below Toast lookup to use authoritative pre-tip total) ──
-
-  // ── 5. Cross-validate with Toast ──
+  // ── 4. Cross-validate with Toast ──
   const businessDate = ocr.transaction_date.replace(/-/g, '');
   let toastMatch;
+  let toastDown = false;
   try { toastMatch = await findToastOrder(ocr.check_number, businessDate); }
-  catch (e) { return reply(502, { ok: false, error: 'Could not verify with Toast right now. Please try again in a few minutes.' }); }
+  catch (e) { toastDown = true; toastMatch = null; }
+
+  // ── 4a. If Toast doesn't have it yet, queue for retry ──
   if (!toastMatch) {
-    return reply(400, { ok: false, error: 'We could not find this check in our records. Double-check the photo and try again.' });
+    // Check daily scan cap before queuing (so abusers can't fill the queue)
+    const membersCheck = await loadJson('members.json');
+    const member = (membersCheck.json.members || []).find((x) => (x.email || '').toLowerCase() === email);
+    if (member) {
+      const todayIso = new Date().toISOString().split('T')[0];
+      const todayScans = (member.history || []).filter(
+        (h) => h.action === 'earn' && /receipt-scan/.test(h.source) && h.at && h.at.startsWith(todayIso)
+      ).length;
+      // Also count pending items submitted today
+      const pendingFile = await loadJson('pending-scans.json');
+      const todayPending = ((pendingFile.json && pendingFile.json.items) || []).filter(
+        (it) => it.memberEmail.toLowerCase() === email && it.status === 'pending' &&
+                it.submittedAt && it.submittedAt.startsWith(todayIso)
+      ).length;
+      if (todayScans + todayPending >= MAX_SCANS_PER_DAY) {
+        return reply(429, { ok: false, error: `You've reached today's limit of ${MAX_SCANS_PER_DAY} receipt scans. Try again tomorrow.` });
+      }
+
+      // Append to queue
+      const pending = pendingFile.json || { items: [] };
+      pending.items.push({
+        id: 'p-' + Date.now() + '-' + crypto.randomBytes(2).toString('hex'),
+        memberEmail: member.email,
+        memberName: member.name || '',
+        checkNumber: ocr.check_number,
+        businessDate,
+        transactionAt: receiptIso,
+        ocrSubtotal: ocr.subtotal_amount,
+        ocrTax: ocr.tax_amount,
+        ocrTip: ocr.tip_amount,
+        ocrTotal: ocr.total_amount,
+        ocrCardholder: ocr.cardholder_name,
+        submittedAt: new Date().toISOString(),
+        lastTriedAt: new Date().toISOString(),
+        tryCount: 1,
+        status: 'pending',
+      });
+      await saveJson('pending-scans.json', pending, pendingFile.sha,
+        `queue scan: ${ocr.check_number} for ${member.email}`);
+    }
+    return reply(202, {
+      ok: true,
+      queued: true,
+      message: toastDown
+        ? "Toast is taking a moment to sync — we'll keep checking and credit your points shortly."
+        : "We can't see your check in Toast yet — sometimes it takes a few minutes to sync. We'll keep checking and credit your points within a few hours.",
+      checkNumber: ocr.check_number,
+    });
   }
+
   const toastSubtotal = checkSubtotal(toastMatch.check);
   const toastPreTip = checkPreTipTotal(toastMatch.check);
   const toastTotal = checkTotal(toastMatch.check);
 
-  // Cross-check: OCR'd subtotal must match Toast's subtotal (the pre-tax basis).
-  // Tip varies (often handwritten), so we trust subtotal as the integrity check.
   const ocrSubtotal = (typeof ocr.subtotal_amount === 'number') ? ocr.subtotal_amount : null;
   if (ocrSubtotal != null && Math.abs(toastSubtotal - ocrSubtotal) > TOTAL_TOLERANCE) {
     return reply(400, { ok: false, error: 'Receipt subtotal does not match our records.' });
   }
-  // Fallback: if OCR didn't see a subtotal line, fall back to total cross-check
   if (ocrSubtotal == null && Math.abs(toastTotal - ocr.total_amount) > TOTAL_TOLERANCE) {
     return reply(400, { ok: false, error: 'Receipt total does not match our records.' });
   }
   const toastOrderId = toastMatch.order.guid;
   const cardholder = extractCardholder(toastMatch.check);
 
-  // Min-tab uses Toast's authoritative pre-tip total
   if (toastPreTip < MIN_TAB_USD) {
     return reply(400, { ok: false, error: `Pre-tip total under $${MIN_TAB_USD} — not eligible for points.` });
   }
@@ -353,7 +514,7 @@ exports.handler = async (event) => {
 
   const todayIso = new Date().toISOString().split('T')[0];
   const todayScans = (member.history || []).filter(
-    (h) => h.action === 'earn' && h.source === 'receipt-scan' && h.at && h.at.startsWith(todayIso)
+    (h) => h.action === 'earn' && /receipt-scan/.test(h.source) && h.at && h.at.startsWith(todayIso)
   ).length;
   if (todayScans >= MAX_SCANS_PER_DAY) {
     return reply(429, { ok: false, error: `You've reached today's limit of ${MAX_SCANS_PER_DAY} receipt scans. Try again tomorrow.` });
@@ -369,7 +530,7 @@ exports.handler = async (event) => {
       memberName: member.name,
       orderId: toastOrderId,
       checkNumber: ocr.check_number,
-      total: toastTotal,
+      total: toastPreTip,
       cardholder,
       reason: 'Cardholder name mismatch',
       createdAt: new Date().toISOString(),
@@ -384,10 +545,10 @@ exports.handler = async (event) => {
     });
   }
 
-  // ── 9. Compute points ── (on PRE-TIP TOTAL — tips don't earn points)
+  // ── 9. Compute points (on PRE-TIP TOTAL) ──
   const tier = member.tier || 'standard';
   const mult = tierMult(tier);
-  const earnBasis = toastPreTip; // subtotal + tax (NOT tip)
+  const earnBasis = toastPreTip;
   const basePts = Math.round(earnBasis * 10);
   const visitBonus = earnBasis >= MIN_TAB_USD ? 10 : 0;
   const totalPts = Math.round((basePts + visitBonus) * mult);
@@ -404,8 +565,8 @@ exports.handler = async (event) => {
     delta: totalPts,
     orderId: toastOrderId,
     checkNumber: ocr.check_number,
-    spendUsd: earnBasis,           // pre-tip total (basis for points)
-    finalTotalUsd: toastTotal,     // for reference (incl. tip)
+    spendUsd: earnBasis,
+    finalTotalUsd: toastTotal,
     subtotalUsd: toastSubtotal,
     tier,
     multiplier: mult,
@@ -436,9 +597,10 @@ exports.handler = async (event) => {
     visitBonus,
     multiplier: mult,
     newBalance: member.currentPoints,
-    spendUsd: earnBasis,           // pre-tip total used for points
-    finalTotal: toastTotal,        // including tip, for display only
+    spendUsd: earnBasis,
+    finalTotal: toastTotal,
     subtotal: toastSubtotal,
     checkNumber: ocr.check_number,
+    queueProcessed: pendingResult.credited > 0 ? pendingResult : undefined,
   });
 };
