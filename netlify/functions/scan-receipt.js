@@ -143,7 +143,11 @@ Schema:
   "payment_type": string|null
 }
 
-If a field is unclear, set it to null. Do not invent data. The subtotal_amount is critical — pre-tax line, NOT including tax or tip. The restaurant_name and restaurant_address should capture WHATEVER is printed at the top of the receipt as the establishment header.` }
+Rules:
+- transaction_date should be in ISO format YYYY-MM-DD (e.g. "2026-05-04").
+- transaction_time should be the printed time as 24-hour HH:MM (e.g. "17:30") OR with AM/PM if that\'s how it\'s printed (e.g. "5:30 PM"). Capture WHATEVER is printed — we treat all times as Central Time (the restaurant\'s timezone).
+- The subtotal_amount is critical — pre-tax line, NOT including tax or tip.
+- If a field is unclear, set it to null. Do not invent data.` }
       ]
     }]
   });
