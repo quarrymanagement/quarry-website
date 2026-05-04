@@ -110,8 +110,8 @@
     {
       "id": "b-welcome",
       "name": "Welcome Bonus",
-      "description": "First sign-in to the Quarry app.",
-      "points": 100,
+      "description": "First sign-up to the Quarry app.",
+      "points": 250,
       "oneTime": true
     },
     {
@@ -120,6 +120,20 @@
       "description": "Just for stopping in \u2014 earn 10 pts every visit when your closed tab is $20 or more.",
       "points": 10,
       "minTabUsd": 20
+    },
+    {
+      "id": "b-email-opt",
+      "name": "Email Opt-In",
+      "description": "Opt in to email updates from The Quarry.",
+      "points": 10,
+      "oneTime": true
+    },
+    {
+      "id": "b-phone-opt",
+      "name": "Phone/SMS Opt-In",
+      "description": "Opt in to text updates and push notifications.",
+      "points": 10,
+      "oneTime": true
     },
     {
       "id": "b-rsvp-wine",
@@ -142,7 +156,7 @@
     {
       "id": "b-reservation",
       "name": "Reservation Honored",
-      "description": "Show up for a confirmed dinner reservation.",
+      "description": "Show up for a confirmed dinner reservation. Group reservations of 10+ also earn this bonus.",
       "points": 50
     },
     {
@@ -155,8 +169,8 @@
     {
       "id": "b-refer",
       "name": "Refer a Friend",
-      "description": "Both you and your friend earn when their first tab closes. Capped at 5 referrals per year.",
-      "points": 500,
+      "description": "Both you and your friend earn 50 pts when their first tab closes. Capped at 5 referrals per year.",
+      "points": 50,
       "yearlyCap": 5
     },
     {
@@ -174,6 +188,8 @@
     }
   ],
   "stipulations": [
+    "Gift cards purchased through The Quarry do NOT earn rewards points (gift card recipient earns when they spend it).",
+    "Points expire annually on December 31 at midnight CT. Tier status persists based on rolling 90-day spend regardless of point balance reset.",
     "Members redeem one reward per check (no stacking five rewards on one visit).",
     "Tier bottle discounts don't combine with happy hour or wine-of-the-week pricing.",
     "Elite 'free glass per visit' is one standard pour per check, requires a closed tab of $20 or more, logged by the bartender.",
@@ -184,5 +200,5 @@
     "Redemption codes expire 5 minutes after generation; show to staff at the bar.",
     "Anthropic/Quarry reserves the right to update the program. Members notified of any change."
   ],
-  "lastUpdated": "2026-05-03"
+  "lastUpdated": "2026-05-04"
 }
