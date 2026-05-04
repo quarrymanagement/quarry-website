@@ -72,6 +72,35 @@ function gh(method, path, body) {
   }, body);
 }
 
+
+
+function ctOffsetSuffix(yyyymmdd) {
+  if (!yyyymmdd || typeof yyyymmdd !== 'string') return '-05:00';
+  const [y, m, d] = yyyymmdd.split('-').map(Number);
+  if (!y || !m || !d) return '-05:00';
+  const probe = new Date(Date.UTC(y, m - 1, d, 18, 0, 0));
+  try {
+    const fmt = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', timeZoneName: 'short' });
+    const tzAbbr = (fmt.formatToParts(probe).find((p) => p.type === 'timeZoneName') || {}).value || 'CDT';
+    return tzAbbr === 'CST' ? '-06:00' : '-05:00';
+  } catch (_) {
+    return (m >= 3 && m <= 10) ? '-05:00' : '-06:00';
+  }
+}
+
+// Parse transactionAt safely. Legacy entries may lack timezone — treat those as CT.
+function parseTransactionTs(s) {
+  if (!s) return NaN;
+  // If it has Z or explicit offset, use as-is
+  if (/Z$|[+-]\d{2}:\d{2}$/.test(s)) return new Date(s).getTime();
+  // Otherwise treat as CT — extract date and append CT offset
+  const m = String(s).match(/^(\d{4}-\d{2}-\d{2})T?(\d{2}:\d{2})?/);
+  if (!m) return NaN;
+  const dateIso = m[1];
+  const timeIso = m[2] || '23:59';
+  return new Date(dateIso + 'T' + timeIso + ':00' + ctOffsetSuffix(dateIso)).getTime();
+}
+
 async function loadJson(filePath) {
   const r = await gh('GET', '/repos/' + GITHUB_REPO + '/contents/' + filePath);
   if (r.status === 404) return { sha: null, json: null };
@@ -191,7 +220,7 @@ async function processAllPending() {
   let dirty = false, credited = 0, expired = 0, mismatched = 0;
 
   for (const it of pendingOnly) {
-    const ageHours = (Date.now() - new Date(it.transactionAt).getTime()) / 3600000;
+    const ageHours = (Date.now() - parseTransactionTs(it.transactionAt)) / 3600000;
 
     // Expire if past total window (PENDING_TTL + scan window grace)
     if (ageHours > PENDING_TTL_HOURS + SCAN_WINDOW_HOURS) {
