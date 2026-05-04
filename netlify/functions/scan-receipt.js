@@ -428,6 +428,26 @@ function parseFlexibleTime(s) {
   return null;
 }
 
+
+// Returns "-05:00" (CDT) or "-06:00" (CST) for a given YYYY-MM-DD date.
+// Receipts print times in restaurant-local (Central Time) but Netlify runs UTC,
+// so we have to attach the right offset before constructing a Date.
+function ctOffsetSuffix(yyyymmdd) {
+  if (!yyyymmdd || typeof yyyymmdd !== 'string') return '-05:00';
+  const [y, m, d] = yyyymmdd.split('-').map(Number);
+  if (!y || !m || !d) return '-05:00';
+  // Use noon UTC of that date to ask "what's the CT offset right now?"
+  const probe = new Date(Date.UTC(y, m - 1, d, 18, 0, 0));
+  try {
+    const fmt = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', timeZoneName: 'short' });
+    const tzAbbr = (fmt.formatToParts(probe).find((p) => p.type === 'timeZoneName') || {}).value || 'CDT';
+    return tzAbbr === 'CST' ? '-06:00' : '-05:00';
+  } catch (_) {
+    // Fallback: simple month-based guess (DST roughly mid-March → early November)
+    return (m >= 3 && m <= 10) ? '-05:00' : '-06:00';
+  }
+}
+
 // ─── Main handler ──────────────────────────────────────────────────────────
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: CORS, body: '' };
@@ -489,13 +509,14 @@ exports.handler = async (event) => {
   // headers differ from the printed POS slip.
 
   // ── 3. Receipt freshness (12-hour submission window) ──
+  // Receipts print in Central Time; attach CT offset so Date() builds correct UTC ms.
   const dateIso = parseFlexibleDate(ocr.transaction_date);
   if (!dateIso) return reply(400, { ok: false, error: 'We could not read the date on your receipt. Make sure the date line is visible and try another photo.' });
   const timeIso = parseFlexibleTime(ocr.transaction_time) || '23:59';
-  const receiptIso = dateIso + 'T' + timeIso + ':00';
+  const tzSuffix = ctOffsetSuffix(dateIso);
+  const receiptIso = dateIso + 'T' + timeIso + ':00' + tzSuffix;
   const receiptTs = new Date(receiptIso).getTime();
   if (isNaN(receiptTs)) return reply(400, { ok: false, error: 'Could not parse receipt date/time.' });
-  // Normalize the date on the OCR object so downstream code uses the parsed value
   ocr.transaction_date = dateIso;
   const ageHours = (Date.now() - receiptTs) / 3600000;
   if (ageHours > SCAN_WINDOW_HOURS) {
@@ -538,7 +559,7 @@ exports.handler = async (event) => {
         memberName: member.name || '',
         checkNumber: ocr.check_number,
         businessDate,
-        transactionAt: receiptIso,
+        transactionAt: new Date(receiptTs).toISOString(),
         ocrSubtotal: ocr.subtotal_amount,
         ocrTax: ocr.tax_amount,
         ocrTip: ocr.tip_amount,
