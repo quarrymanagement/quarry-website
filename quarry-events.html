@@ -2039,9 +2039,11 @@
                             <span class="availability-text ${availabilityInfo.class}">${availabilityInfo.text}</span>
                             ${event.status === "sold-out" ? `
                                 <button class="event-button" disabled>Sold Out</button>
+                            ` : (event.registrationType === 'email' ? `
+                                <button class="event-button" onclick="openEmailPicker(${JSON.stringify(event.registrationEmail || '').replace(/"/g, '&quot;')}, ${JSON.stringify(event.registrationSubject || ('RSVP — ' + event.name)).replace(/"/g, '&quot;')}, ${JSON.stringify(event.registrationBody || '').replace(/"/g, '&quot;')})">RSVP via Email</button>
                             ` : `
                                 <button class="event-button" onclick="openModal(${allEvents.indexOf(event)})">Get Tickets</button>
-                            `}
+                            `)}
                         </div>
                     </div>
                 </div>
@@ -2493,5 +2495,45 @@
             renderEvents();
         });
     </script>
+
+<!-- Email-registration picker -->
+<div id="emailPickerModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:9999;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#1A1A1A;border:1px solid #d4af37;border-radius:14px;padding:24px;max-width:400px;width:100%;color:#F5F0E8;font-family:'Inter',sans-serif">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;color:#d4af37;margin-bottom:6px" id="emailPickerTitle">Send RSVP</div>
+    <div style="font-size:0.85rem;color:rgba(245,240,232,0.6);margin-bottom:18px" id="emailPickerSub">Choose how to open the email.</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <a id="emailPickerGmail" target="_blank" rel="noopener" style="text-align:center;padding:13px;background:#d4af37;color:#1A1A1A;border-radius:8px;text-decoration:none;font-weight:700;font-size:0.85rem;letter-spacing:0.08em;text-transform:uppercase">Open in Gmail</a>
+      <a id="emailPickerOutlook" target="_blank" rel="noopener" style="text-align:center;padding:13px;background:transparent;color:#d4af37;border:1px solid #d4af37;border-radius:8px;text-decoration:none;font-weight:700;font-size:0.85rem;letter-spacing:0.08em;text-transform:uppercase">Open in Outlook</a>
+      <a id="emailPickerDefault" style="text-align:center;padding:13px;background:transparent;color:#d4af37;border:1px solid #d4af37;border-radius:8px;text-decoration:none;font-weight:700;font-size:0.85rem;letter-spacing:0.08em;text-transform:uppercase">Default Mail App</a>
+    </div>
+    <button id="emailPickerClose" type="button" style="margin-top:14px;width:100%;padding:10px;background:transparent;color:rgba(245,240,232,0.55);border:0;font-family:inherit;font-size:0.78rem;cursor:pointer;letter-spacing:0.1em;text-transform:uppercase">Cancel</button>
+  </div>
+</div>
+<script>
+(function(){
+  function $$(id){ return document.getElementById(id); }
+  window.openEmailPicker = function(to, subject, body){
+    var enc = encodeURIComponent;
+    $$('emailPickerGmail').href = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + enc(to) + '&su=' + enc(subject) + '&body=' + enc(body || '');
+    $$('emailPickerOutlook').href = 'https://outlook.live.com/owa/?path=/mail/action/compose&to=' + enc(to) + '&subject=' + enc(subject) + '&body=' + enc(body || '');
+    $$('emailPickerDefault').href = 'mailto:' + to + '?subject=' + enc(subject) + (body ? '&body=' + enc(body) : '');
+    $$('emailPickerTitle').textContent = subject;
+    $$('emailPickerSub').textContent = 'Send to ' + to;
+    $$('emailPickerModal').style.display = 'flex';
+  };
+  function close(){ $$('emailPickerModal').style.display = 'none'; }
+  document.addEventListener('DOMContentLoaded', function(){
+    var modal = $$('emailPickerModal');
+    if (!modal) return;
+    $$('emailPickerClose').addEventListener('click', close);
+    modal.addEventListener('click', function(e){ if (e.target === modal) close(); });
+    ['emailPickerGmail','emailPickerOutlook','emailPickerDefault'].forEach(function(id){
+      var el = $$(id);
+      if (el) el.addEventListener('click', function(){ setTimeout(close, 250); });
+    });
+  });
+})();
+</script>
+
 </body>
 </html>
