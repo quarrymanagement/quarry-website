@@ -412,27 +412,22 @@ exports.handler = async (event) => {
   try { ocr = await ocrReceipt(imageBase64, mediaType); }
   catch (e) { return reply(500, { ok: false, error: 'Could not read receipt — please try a clearer photo' }); }
 
-  if (!ocr.check_number || !ocr.transaction_date || !ocr.total_amount) {
-    return reply(400, { ok: false, error: 'Could not extract receipt details. Please use a clearer, well-lit photo.' });
+  if (!ocr.check_number || !ocr.transaction_date) {
+    return reply(400, { ok: false, error: 'Could not extract the check number or date from this receipt. Please use a clearer photo with the check #/order # and date visible.' });
   }
+  // total_amount is helpful for fallback validation but not strictly required —
+  // we'll cross-check subtotal against Toast in the lookup step.
 
   // ── 1b. Gift card receipts don't earn points (recipient earns when they spend it) ──
   if (ocr.payment_type && /gift/i.test(ocr.payment_type)) {
     return reply(400, { ok: false, error: 'Gift card receipts don\'t earn points — points are credited when the gift card is used.' });
   }
 
-  // ── 2. Soft restaurant check (Toast cross-check below is the authoritative filter) ──
-  // Build a search blob from anything OCR found at the top of the receipt.
-  const restBlob = (
-    (ocr.restaurant_name || '') + ' ' +
-    (ocr.restaurant_address || '')
-  ).toLowerCase();
-  const sawQuarryToken = restBlob && RESTAURANT_KEYWORDS.some((k) => restBlob.includes(k));
-  // Only hard-reject if OCR DID see a restaurant name AND it doesn't match.
-  // If OCR couldn't read the header (blurry top of receipt), let Toast validate.
-  if (ocr.restaurant_name && !sawQuarryToken) {
-    return reply(400, { ok: false, error: 'This receipt does not appear to be from The Quarry. (If this is a Quarry receipt, try a clearer photo of the top header.)' });
-  }
+  // ── 2. (Restaurant name check removed) ──
+  // Toast cross-check below uses our TOAST_RESTAURANT_GUID, so Toast will ONLY
+  // return checks from THIS restaurant. That's the authoritative filter; OCR
+  // header parsing was creating false negatives on email/online receipts whose
+  // headers differ from the printed POS slip.
 
   // ── 3. Receipt freshness (12-hour submission window) ──
   const receiptIso = ocr.transaction_date + 'T' + (ocr.transaction_time || '23:59') + ':00';
