@@ -270,6 +270,164 @@ a.account-link:hover .al-arrow { color: var(--gold); }
   transition: background 0.2s;
 }
 .guest-welcome button:hover { background: var(--gold-light); }
+
+/* ═══════════════════════════════════════════════════════════════
+   v3 POLISH — kill the clunk, make it pop on mobile
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Kill the horizontal-scrolling menu category bar — menu is static */
+.menu-cats { display: none !important; }
+
+/* Mobile = card-style home grid (real borders, no hairline tricks) */
+@media (max-width: 499px) {
+  .home-cards {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    background: transparent;
+    border: 0;
+    padding: 0 22px;
+    margin: 22px 0 0;
+  }
+  .home-card {
+    background: var(--charcoal-mid);
+    border: 1px solid var(--border-soft);
+    border-radius: 12px;
+    padding: 18px 16px;
+    transition: transform 0.15s, border-color 0.15s;
+  }
+  .home-card:active {
+    transform: scale(0.98);
+    border-color: var(--gold);
+  }
+  /* Compact golf hero so all 4 bays + add-ons fit above the fold */
+  #screen-golf .rewards-hero { padding: 16px 4px 14px; }
+  #screen-golf .rh-num { font-size: 2.4rem; }
+  #screen-golf .rh-tier-name { font-size: 9px; }
+  #screen-golf .rh-tier-sub { font-size: 0.78rem; }
+  #screen-golf .tp-label { font-size: 0.7rem; flex-wrap: wrap; gap: 8px 18px; }
+  #screen-golf .reward-row { padding: 16px 0; }
+  /* Tighter screen padding on phones */
+  .screen-header { padding: 22px 22px 14px; }
+  .screen-title { font-size: 1.6rem; }
+  /* Brand mark cleaner on mobile */
+  .brand-mark { font-size: 8px; gap: 8px; margin-bottom: 10px; }
+  .brand-mark .q-logo { width: 20px; height: 20px; }
+}
+
+/* Stronger gold accents — section labels actually feel like sections */
+.section-rule .label {
+  color: var(--gold);
+  font-weight: 700;
+  letter-spacing: 0.36em;
+}
+.section-rule .line { background: var(--border-mid); opacity: 0.4; }
+
+/* Reward action buttons get bigger + more tappable */
+.reward-action {
+  padding: 9px 18px;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  border-radius: 5px;
+  margin-top: 12px;
+}
+.reward-action:active { transform: scale(0.96); }
+
+/* Pop the points number — this is the hero of the app */
+.hero-pts-num {
+  font-size: 3.6rem;
+  letter-spacing: -0.02em;
+  color: var(--gold-light);
+  text-shadow: 0 2px 12px rgba(212,175,106,0.15);
+}
+.rh-num {
+  color: var(--gold-light);
+  text-shadow: 0 2px 16px rgba(212,175,106,0.18);
+}
+
+/* Cleaner home hero — less italic noise */
+.hero-greeting {
+  font-family: var(--ff-body);
+  font-style: normal;
+  font-size: 0.78rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold-light);
+  font-weight: 500;
+}
+.hero-greeting .name {
+  color: var(--cream);
+  font-weight: 600;
+}
+
+/* Better tap states */
+.home-card:active, .feature-card:active, .list-item:active {
+  background: var(--charcoal-mid);
+}
+.account-link:active { background: rgba(184,147,58,0.06); }
+
+/* Stronger feature card (Happy Hour) */
+.feature-card {
+  background: linear-gradient(135deg, rgba(184,147,58,0.08), rgba(184,147,58,0.02));
+  border-radius: 12px;
+}
+.fc-action {
+  background: var(--gold);
+  color: var(--brown-dark);
+  border-color: var(--gold);
+  border-radius: 5px;
+  padding: 11px 18px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+/* Menu items breathe better */
+.menu-row { padding: 16px 0; }
+.menu-row-name { font-weight: 600; }
+.menu-row-price { color: var(--gold); }
+
+/* Featured strip pops */
+.featured-strip {
+  background: linear-gradient(135deg, rgba(184,147,58,0.06), transparent);
+  border-color: var(--gold);
+  border-radius: 12px;
+}
+.featured-strip::before {
+  background: var(--charcoal);
+  color: var(--gold);
+  font-weight: 700;
+}
+.featured-price { font-size: 1.4rem; color: var(--gold); }
+
+/* Event cards: cleaner */
+.event-card { border-bottom: 1px solid var(--border-light); }
+.event-card:last-child { border-bottom: none; }
+.event-cat { color: var(--gold); }
+.btn-primary {
+  background: var(--gold);
+  color: var(--brown-dark);
+  border-radius: 5px;
+  padding: 12px 22px;
+  font-weight: 700;
+}
+
+/* Bottom nav: subtle backdrop */
+.bottom-nav {
+  background: rgba(20,20,20,0.92);
+  border-top: 1px solid rgba(196,149,106,0.15);
+}
+.nav-item.active svg { stroke-width: 1.8; }
+
+/* Profile monogram pops */
+.profile-monogram {
+  background: linear-gradient(135deg, var(--gold), var(--brown-warm));
+  color: var(--brown-dark);
+  border: 0;
+  font-weight: 700;
+  font-size: 1.4rem;
+  box-shadow: 0 4px 16px rgba(184,147,58,0.25);
+}
 </style>
 </head>
 <body>
@@ -341,7 +499,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
 
       <div class="home-cards">
         <div class="home-card" onclick="gotoScreen('screen-rewards')"><div class="home-card-title">Redeem</div><div class="home-card-val">4 available</div><div class="home-card-sub">Rewards ready to use</div></div>
-        <div class="home-card" onclick="showParty()"><div class="home-card-title">Reserve</div><div class="home-card-val">Party of 10+</div><div class="home-card-sub">Request a date</div></div>
+        <div class="home-card" onclick="showParty()"><div class="home-card-title">Private Party</div><div class="home-card-val">Groups of 10+</div><div class="home-card-sub">Request a date</div></div>
         <div class="home-card" onclick="gotoScreen('screen-events')"><div class="home-card-title">This Week</div><div class="home-card-val">3 Events</div><div class="home-card-sub">Live music &amp; tastings</div></div>
         <div class="home-card" onclick="gotoScreen('screen-menu')"><div class="home-card-title">Menu</div><div class="home-card-val">Kitchen &amp; Bar</div><div class="home-card-sub">Food, wine &amp; cocktails</div></div>
         <div class="home-card" onclick="gotoScreen('screen-golf')"><div class="home-card-title">Golf</div><div class="home-card-val">Outdoor Bays</div><div class="home-card-sub">Aim for the Floating Green</div></div>
@@ -437,34 +595,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
       <a class="account-link" href="https://maps.apple.com/?q=The+Quarry&address=3960+Highway+Z,+New+Melle,+MO+63365&ll=38.7056,-90.8912" target="_blank" rel="noopener"><div class="al-label">Address</div><div class="al-arrow">›</div></a>
       <a class="account-link" href="tel:+16362248257"><div class="al-label">Phone</div><div class="al-arrow">›</div></a>
       <a class="account-link" href="https://thequarrystl.com" target="_blank" rel="noopener"><div class="al-label">Web</div><div class="al-arrow">›</div></a>
-      <div class="contact-block" style="border-top:1px solid var(--border-soft);margin-top:8px"><div class="contact-hours" style="margin-top:14px;padding-top:0;border-top:none">Wed – Thu &nbsp;·&nbsp; 11 AM – 9 PM<br>Fri – Sat &nbsp;·&nbsp; 11 AM – 11 PM<br>Sunday &nbsp;·&nbsp; 11 AM – 6 PM<br>Closed Monday &amp; Tuesday</div></div>
-      <div class="section-rule"><div class="line"></div><div class="label">Reservations</div><div class="line"></div></div>
-      <div class="account-link" onclick="showParty()"><div><div class="al-label">Request a Party Reservation</div><div class="al-meta">Groups of 10 or more</div></div><div class="al-arrow" style="margin-left:auto">›</div></div>
-      <div class="section-rule"><div class="line"></div><div class="label">Rewards Program</div><div class="line"></div></div>
-      <div class="account-link" onclick="gotoScreen('screen-onboarding')"><div class="al-label">How Rewards Work</div><div class="al-arrow">›</div></div>
-      <div class="account-link"><div class="al-label">Refer a Friend <span class="al-meta">— earn 500 pts</span></div><div class="al-arrow">›</div></div>
-      <div class="account-link"><div class="al-label">Birthday <span class="al-meta">— free entrée month of</span></div><div class="al-arrow">›</div></div>
-      <div class="section-rule"><div class="line"></div><div class="label">Settings</div><div class="line"></div></div>
-      <div class="account-link"><div class="al-label">Notification Preferences</div><div class="al-arrow">›</div></div>
-      <div class="account-link"><div class="al-label">Gift Cards</div><div class="al-arrow">›</div></div>
-      <div class="account-link" onclick="gotoScreen('screen-contact')"><div class="al-label">Contact The Quarry</div><div class="al-arrow">›</div></div>
-      <div class="account-link"><div class="al-label">Privacy &amp; Terms</div><div class="al-arrow">›</div></div>
-      <div class="account-link"><div class="al-label" style="color:var(--gray)">Sign Out</div><div class="al-arrow">›</div></div>
-      <div class="footer-mark"><div class="fm-line"></div><div class="fm-text"><span class="fm-name">The Quarry</span><span class="fm-bullet">—</span><span>Est. New Melle</span></div><div class="fm-line"></div></div>
-    </div>
-
-    <div class="screen party-screen" id="screen-party">
-      <div class="party-header"><div class="back-btn" onclick="goBack()">‹</div><div><div class="party-title">Party Reservation</div><div class="party-sub">Groups of 10 or more · Request only</div></div></div>
-      <div class="party-note"><div class="pn-label">How it works</div><div class="pn-text">Submit your request and our team will reach out within 24 hours to confirm availability and secure your date. Reservations are not confirmed until you hear from us directly.</div></div>
-      <div class="form-block"><label class="form-label">Full Name</label><input class="form-input" type="text" placeholder="Your name" /></div>
-      <div class="form-block"><label class="form-label">Phone</label><input class="form-input" type="tel" placeholder="(314) 555-0000" /></div>
-      <div class="form-block"><label class="form-label">Email</label><input class="form-input" type="email" placeholder="you@email.com" /></div>
-      <div class="form-row"><div class="form-block"><label class="form-label">Date</label><input class="form-input" type="date" style="color-scheme:dark" /></div><div class="form-block"><label class="form-label">Start Time</label><select class="form-select"><option>5:00 PM</option><option>6:00 PM</option><option>7:00 PM</option><option>8:00 PM</option></select></div></div>
-      <div class="form-row"><div class="form-block"><label class="form-label">Party Size</label><select class="form-select"><option>10 guests</option><option>11 – 15</option><option>16 – 20</option><option>21 – 30</option><option>30+</option></select></div><div class="form-block"><label class="form-label">Occasion</label><select class="form-select"><option>Birthday</option><option>Anniversary</option><option>Corporate</option><option>Rehearsal Dinner</option><option>Wedding Party</option><option>Other</option></select></div></div>
-      <div class="form-block"><label class="form-label">Seating Preference</label><select class="form-select"><option>No preference</option><option>Indoor — Main Room</option><option>Outdoor — Patio</option><option>Private — Wine Cellar</option></select></div>
-      <div class="form-block"><label class="form-label">Additional Notes</label><textarea class="form-input" rows="3" placeholder="Special requests, dietary needs, questions..." style="resize:none;line-height:1.5;border-bottom:1px solid var(--border-light);padding-top:10px"></textarea></div>
-      <div class="submit-btn" onclick="submitParty()">Submit Request</div>
-             <div class="reward-name">Bay 3</div>
+      <div class="contact-block" style="border-top:1px solid var(--border-soft);margin-top:8px"><div class="contact-hours" style="margin-top:14px;padding-top:0;b          <div class="reward-name">Bay 3</div>
           <div class="reward-desc">Aim for the Floating Green</div>
         </div>
         <div class="reward-cost">
