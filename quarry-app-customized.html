@@ -1945,8 +1945,8 @@ function renderEventList(filter) {
           <div class="event-when">${escapeHtml(timeStr)}${evt.location ? ' · ' + escapeHtml(evt.location) : ''}</div>
           <div class="event-desc">${escapeHtml(desc) || 'Details &amp; tickets at thequarrystl.com.'}</div>
           <div class="event-actions">
-            <div class="btn-primary">${remaining === 0 ? 'View' : 'Reserve'}</div>
-            <div class="btn-ghost">Remind Me</div>
+            ${isBand ? '' : `<div class="btn-primary">${remaining === 0 ? 'View' : 'Reserve'}</div>`}
+            <div class="btn-ghost">${isBand ? 'Add to Calendar' : 'Remind Me'}</div>
           </div>
         </div>`;
   });
