@@ -995,6 +995,59 @@ a.account-link:hover .al-arrow { color: var(--gold); }
 }
 .onboard-step .onboard-step-body { flex: 1; min-width: 0; }
 
+
+/* Upcoming This Month list on Home */
+.upcoming-month-list { margin: 0 22px 8px; }
+.upcoming-month-list .um-empty {
+  padding: 22px 4px;
+  font-family: var(--ff-script); font-style: italic;
+  font-size: 0.95rem; color: var(--gray); text-align: center;
+}
+.upcoming-month-list .um-card {
+  display: flex; align-items: center; gap: 16px;
+  padding: 14px 4px;
+  border-bottom: 1px solid var(--border-soft);
+  cursor: pointer;
+  transition: padding 0.15s;
+}
+.upcoming-month-list .um-card:last-child { border-bottom: none; }
+.upcoming-month-list .um-card:active { padding-left: 8px; }
+.upcoming-month-list .um-date {
+  flex-shrink: 0; width: 50px; text-align: center;
+  border-left: 1px solid var(--border-light);
+  padding-left: 12px;
+}
+.upcoming-month-list .um-month {
+  font-family: var(--ff-body);
+  font-size: 9px; font-weight: 600;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--gold-light); margin-bottom: 2px;
+}
+.upcoming-month-list .um-day {
+  font-family: var(--ff-display); font-size: 1.4rem;
+  font-weight: 500; color: var(--cream); line-height: 1;
+}
+.upcoming-month-list .um-body { flex: 1; min-width: 0; }
+.upcoming-month-list .um-cat {
+  font-family: var(--ff-body);
+  font-size: 8px; font-weight: 700;
+  letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 4px;
+}
+.upcoming-month-list .um-title {
+  font-family: var(--ff-display); font-size: 1.05rem;
+  font-weight: 500; color: var(--cream);
+  line-height: 1.2; margin-bottom: 3px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.upcoming-month-list .um-meta {
+  font-family: var(--ff-script); font-style: italic;
+  font-size: 0.85rem; color: var(--gray);
+}
+.upcoming-month-list .um-arrow {
+  color: var(--gold-light); font-size: 1.2rem; flex-shrink: 0;
+}
+
 </style>
 </head>
 <body>
@@ -1105,15 +1158,9 @@ a.account-link:hover .al-arrow { color: var(--gold); }
         </div>
       </div>
 
-      <!-- Happy hour — single editorial strip -->
-      <div class="feature-card">
-        <div>
-          <div class="fc-overline">Happy Hour Today</div>
-          <div class="fc-title">3 – 6 PM</div>
-          <div class="fc-sub">All day Wednesday · Thu &amp; Fri 3 – 6</div>
-        </div>
-        <div class="fc-action">Remind</div>
-      </div>
+      <!-- Upcoming events this month — populated by renderUpcomingMonth() -->
+      <div class="section-rule"><div class="line"></div><div class="label">Upcoming This Month</div><div class="line"></div></div>
+      <div id="upcomingMonthList" class="upcoming-month-list"></div>
 
       <!-- Tonight -->
       <div class="section-rule"><div class="line"></div><div class="label">Tonight</div><div class="line"></div></div>
