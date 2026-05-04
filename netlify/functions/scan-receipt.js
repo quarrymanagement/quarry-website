@@ -1,5 +1,5 @@
 // ============================================================================
-// scan-receipt.js — credit a member by scanning a Toast receipt
+// scan-receipt.js — credit a member by scanning a Toast receipt (v1.1)
 //
 // POST { token, image }
 //   token: session token from verify-code.js
