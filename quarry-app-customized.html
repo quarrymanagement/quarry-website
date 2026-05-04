@@ -1088,6 +1088,61 @@ a.account-link:hover .al-arrow { color: var(--gold); }
   font-size: 0.82rem; color: var(--gray); flex-shrink: 0; margin-left: 6px;
 }
 
+
+/* Native menu screen */
+.menu-segments {
+  display: flex; gap: 0;
+  padding: 4px 22px 0;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--border-soft);
+  scrollbar-width: none;
+}
+.menu-segments::-webkit-scrollbar { display: none; }
+.menu-seg-btn {
+  white-space: nowrap;
+  padding: 14px 16px 14px 0;
+  font-family: var(--ff-body);
+  font-size: 10px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--gray); cursor: pointer;
+  border-bottom: 1px solid transparent; margin-bottom: -1px;
+  transition: color 0.15s, border-color 0.15s;
+  background: transparent; border-left: 0; border-right: 0; border-top: 0;
+}
+.menu-seg-btn.active { color: var(--gold-light); border-bottom-color: var(--gold-light); }
+.menu-seg-btn:not(:last-child) { margin-right: 18px; }
+
+.menu-list { margin: 0; }
+.menu-section-block { padding: 14px 22px 4px; }
+.menu-section-title {
+  font-family: var(--ff-display);
+  font-size: 1.4rem; font-weight: 500; color: var(--cream);
+  margin: 18px 0 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-light);
+  letter-spacing: 0.02em;
+}
+.menu-item-row {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+.menu-item-row:last-child { border-bottom: none; }
+.menu-item-head {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 14px;
+  margin-bottom: 6px;
+}
+.menu-item-name {
+  font-family: var(--ff-display); font-size: 1.05rem; font-weight: 500;
+  color: var(--cream); flex: 1; min-width: 0;
+}
+.menu-item-price {
+  font-family: var(--ff-display); font-size: 1.05rem; font-weight: 600;
+  color: var(--gold-light); flex-shrink: 0;
+}
+.menu-item-desc {
+  font-family: var(--ff-script); font-style: italic;
+  font-size: 0.95rem; color: var(--gray); line-height: 1.5;
+}
+
 </style>
 </head>
 <body>
@@ -1310,17 +1365,12 @@ a.account-link:hover .al-arrow { color: var(--gold); }
         </div>
       </div>
 
-      <!-- Live menu pulled directly from the website (embedded mode = no nav/footer) -->
-      <iframe
-        src="https://www.thequarrystl.com/quarry-menu?embedded=1"
-        title="The Quarry Menu"
-        style="border:0;width:100%;flex:1;background:var(--charcoal);min-height:calc(100vh - 200px)"
-        loading="lazy"
-        referrerpolicy="no-referrer-when-downgrade"></iframe>
-      <!-- Footer fallback link in case iframe fails -->
-      <div style="text-align:center;padding:14px 22px 28px;font-family:var(--ff-script);font-style:italic;font-size:0.92rem;color:var(--gray)">
-        Menu not loading? <a href="https://www.thequarrystl.com/quarry-menu" target="_blank" rel="noopener" style="color:var(--gold-light);text-decoration:underline">Open in browser ›</a>
+      <!-- Native menu — segment tabs + items rendered from menu.json -->
+      <div class="menu-segments" id="menuSegments"></div>
+      <div class="menu-list" id="menuList">
+        <div style="padding:60px 22px;text-align:center;font-family:var(--ff-script);font-style:italic;color:var(--gray)">Loading menu…</div>
       </div>
+      <div style="height:24px"></div>
     </div>
 
     <!-- ══════ REWARDS ══════ -->
@@ -2564,6 +2614,7 @@ function updateEventsMonthLabel() {
 
 window.addEventListener('DOMContentLoaded', () => {
   updateEventsMonthLabel();
+  fetchMenu().then(m => { if (m) renderMenu(m); });
   fetchEvents().then(events => {
     if (events) renderEvents(events);
     else setSyncStatus('demo', 'Demo · open thequarrystl.com to sync');
