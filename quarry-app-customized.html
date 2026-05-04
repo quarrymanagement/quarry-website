@@ -2323,8 +2323,13 @@ function renderUpcomingMonth(allEvents) {
     return false;
   };
   const filtered = allEvents.filter((evt) => {
-    if (!evt._start || isNaN(evt._start)) return false;
-    if (evt._start < now || evt._start > monthEnd) return false;
+    if (!evt.date) return false;
+    // Use event.date for month-boundary check (avoid UTC-shifting evenings to next day)
+    const evtY = parseInt(evt.date.slice(0, 4), 10);
+    const evtM = parseInt(evt.date.slice(5, 7), 10);
+    const evtD = parseInt(evt.date.slice(8, 10), 10);
+    if (evtY !== now.getFullYear() || evtM !== (now.getMonth() + 1)) return false;
+    if (evtD < now.getDate()) return false;
     const cat = (evt.category || '').toLowerCase();
     const isBand = evt._kind === 'band' || /live music|band/i.test(cat);
     if (isBand) return false;
@@ -2340,12 +2345,14 @@ function renderUpcomingMonth(allEvents) {
   wrap.innerHTML = filtered.map((evt) => {
     const isFree = _isFree(evt);
     const cat = isFree ? 'Social · Free' : 'Ticketed';
-    const month = evt._start.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
-    const day = evt._start.getDate();
+    // Display month/day from local-correct event.date
+    const evtDate = new Date(evt.date + 'T12:00:00'); // noon to avoid TZ issues
+    const month = evtDate.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+    const day = evtDate.getDate();
     const timeStr = evt.time && /^\d/.test(evt.time)
       ? formatHumanTime(evt.time)
       : evt._start.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }).replace(':00', '');
-    const meta = evt._start.toLocaleDateString('en-US', { weekday: 'long' }) + ' · ' + timeStr;
+    const meta = evtDate.toLocaleDateString('en-US', { weekday: 'long' }) + ' · ' + timeStr;
     const evtSlug = evt.slug || evt.id || '';
     const onClickAttr = evtSlug
       ? 'openWithMember(\'https://thequarrystl.com/quarry-events?event=' + encodeURIComponent(evtSlug) + '\')'
@@ -2374,13 +2381,14 @@ function renderUpcomingBands(allEvents) {
   }
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const labelByDow = { 5: 'Friday', 6: 'Saturday', 0: 'Sunday' };
-  // Find the next Fri, Sat, Sun within the next 14 days (covers cases where today is mid-week)
+  // Find the next Fri, Sat, Sun within the next 14 days
   const targetDays = [];
+  const ymdLocal = (d) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   for (let offset = 0; offset < 14; offset++) {
     const d = new Date(today.getTime() + offset * 86400000);
     const lbl = labelByDow[d.getDay()];
     if (lbl) {
-      const ymd = d.toISOString().split('T')[0];
+      const ymd = ymdLocal(d);
       if (!targetDays.find((x) => x.ymd === ymd)) {
         targetDays.push({ date: d, ymd, label: lbl });
         if (targetDays.length >= 3) break;
@@ -2388,12 +2396,14 @@ function renderUpcomingBands(allEvents) {
     }
   }
 
-  const bands = allEvents.filter((e) => e._kind === 'band' && e._start && !isNaN(e._start));
+  // Match by raw event.date (already YYYY-MM-DD in restaurant-local time)
+  // NOT _start.toISOString() — that converts to UTC and shifts evening events to next day
+  const bands = allEvents.filter((e) => e._kind === 'band' && e.date);
 
   let html = '';
   let totalShown = 0;
   targetDays.forEach((td) => {
-    const bandsForDay = bands.filter((b) => b._start.toISOString().split('T')[0] === td.ymd);
+    const bandsForDay = bands.filter((b) => (b.date || '') === td.ymd);
     if (!bandsForDay.length) return;
     const dayHeader = td.label + ' · ' + td.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     html += '<div class="ub-day">' + dayHeader + '</div>';
