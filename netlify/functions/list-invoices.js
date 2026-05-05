@@ -37,8 +37,10 @@ exports.handler = async (event) => {
         const invoiceList = invoices.data.map(inv => ({
             id: inv.id,
             number: inv.number,
-            customerName: inv.customer_name || (inv.customer && inv.customer.name) || 'Unknown',
-            customerEmail: inv.customer_email || (inv.customer && inv.customer.email) || '',
+            customerName: (inv.customer && inv.customer.name) || inv.customer_name || 'Unknown',
+            // Prefer the live customer record's email (it reflects edits) over the
+            // frozen snapshot Stripe puts on finalized invoices.
+            customerEmail: (inv.customer && inv.customer.email) || inv.customer_email || '',
             amount: inv.amount_due,
             amountPaid: inv.amount_paid,
             currency: inv.currency,
