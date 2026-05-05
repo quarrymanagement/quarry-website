@@ -194,10 +194,13 @@ exports.handler = async (event) => {
     var shortId = submission.id.slice(-6);
     var ownerSubject = 'New ' + form.name + ' Submission — ' + identifier + ' [' + shortId + ']';
 
-    // Send owner notification to management AND Jacqueline
+    // Send owner notification to management. Loop in Jacqueline only for wedding forms.
+    var formIsWedding = /wedding/i.test(form.name || '') || /wedding/i.test(form.slug || '') || /wedding/i.test(form.id || '');
+    var notifyRecipients = ['management@thequarrystl.com'];
+    if (formIsWedding) notifyRecipients.push('jacqueline@thequarrystl.com');
     try {
       await sendEmail(
-        ['management@thequarrystl.com', 'jacqueline@thequarrystl.com'],
+        notifyRecipients,
         ownerSubject,
         '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">' +
         '<div style="background:#1A0E08;padding:24px;text-align:center"><h1 style="color:#B8933A;margin:0;font-size:28px">The Quarry</h1>' +
