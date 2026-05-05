@@ -406,7 +406,7 @@ nav { display:flex; align-items:center; }
       <div class="form-group">
         <label class="form-label">Preferred Date <span>*</span></label>
         <input type="date" name="date" id="reservationDate" required>
-        <div id="dateBlockedMsg" style="display:none;color:#a02020;font-size:0.78rem;margin-top:0.4rem;font-weight:500;">This date is fully booked. Please select another.</div>
+        <div id="dateBlockedMsg" style="display:none;color:#a02020;font-size:0.78rem;margin-top:0.4rem;font-weight:500;">This date is fully booked for reservations — walk-ins welcome that day. Please select another date for a reserved table.</div>
       </div>
 
       <!-- PREFERRED TIME -->
@@ -604,7 +604,7 @@ nav { display:flex; align-items:center; }
     var blocked = v && BLOCKED_DATES.indexOf(v) !== -1;
     if (blocked) {
       if (blockedMsg) blockedMsg.style.display = 'block';
-      dateInput.setCustomValidity('This date is fully booked. Please select another.');
+      dateInput.setCustomValidity('This date is fully booked for reservations — walk-ins welcome. Please select another date.');
     } else {
       if (blockedMsg) blockedMsg.style.display = 'none';
       dateInput.setCustomValidity('');
