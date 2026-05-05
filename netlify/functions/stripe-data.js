@@ -281,6 +281,67 @@ const createPaymentLink = async (event) => {
   }
 };
 
+// Update an invoice's customer email (also updates the underlying customer record).
+// Optionally re-sends the invoice so the new email gets a payment notification.
+const updateInvoiceEmail = async (event) => {
+  try {
+    const body = JSON.parse(event.body);
+    const { invoice_id, email, resend } = body;
+
+    if (!invoice_id) {
+      return response(400, { success: false, error: 'Missing required field: invoice_id' });
+    }
+    if (!email || typeof email !== 'string' || !email.includes('@')) {
+      return response(400, { success: false, error: 'Provide a valid email address' });
+    }
+
+    // Pull the current invoice to find the customer + check status
+    const inv = await stripe.invoices.retrieve(invoice_id);
+    if (inv.status === 'void' || inv.status === 'paid' || inv.status === 'uncollectible') {
+      return response(400, {
+        success: false,
+        error: 'Cannot edit ' + inv.status + ' invoice. Email changes only apply to draft/open invoices.',
+      });
+    }
+
+    // 1) Update the invoice's own customer_email override (works for finalized invoices)
+    const updatedInvoice = await stripe.invoices.update(invoice_id, { customer_email: email });
+
+    // 2) Update the underlying customer record so future invoices use the right email
+    if (inv.customer) {
+      try {
+        await stripe.customers.update(inv.customer, { email: email });
+      } catch (custErr) {
+        console.warn('Customer email update warning:', custErr.message);
+      }
+    }
+
+    // 3) Optionally re-send the invoice email to the new address
+    let resent = false;
+    if (resend && (updatedInvoice.status === 'open' || updatedInvoice.status === 'draft')) {
+      try {
+        if (updatedInvoice.status === 'draft') {
+          await stripe.invoices.finalizeInvoice(invoice_id);
+        }
+        await stripe.invoices.sendInvoice(invoice_id);
+        resent = true;
+      } catch (sendErr) {
+        console.warn('Resend warning:', sendErr.message);
+      }
+    }
+
+    return response(200, {
+      success: true,
+      invoice: updatedInvoice,
+      resent,
+      message: 'Invoice email updated' + (resent ? ' and re-sent' : ''),
+    });
+  } catch (error) {
+    console.error('Error updating invoice email:', error);
+    return response(500, { success: false, error: error.message });
+  }
+};
+
 // Void an invoice
 const voidInvoice = async (event) => {
   try {
@@ -399,10 +460,15 @@ exports.handler = async (event) => {
           return response(405, { success: false, error: 'Method not allowed' });
         }
         return await sendReminder(event);
+      case 'update-invoice-email':
+        if (event.httpMethod !== 'POST') {
+          return response(405, { success: false, error: 'Method not allowed' });
+        }
+        return await updateInvoiceEmail(event);
       default:
         return response(400, {
           success: false,
-          error: 'Invalid action. Valid actions: customers, invoices, subscriptions, create-invoice, create-customer, create-payment-link, balance, void-invoice, send-reminder',
+          error: 'Invalid action. Valid actions: customers, invoices, subscriptions, create-invoice, create-customer, create-payment-link, balance, void-invoice, send-reminder, update-invoice-email',
         });
     }
   } catch (error) {
