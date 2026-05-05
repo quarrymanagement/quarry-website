@@ -420,12 +420,13 @@ async function sendStaffNotification({ formName, email, firstName, lastName, pho
 </div>
 </div>`;
 
+    // Loop in Jacqueline only for wedding forms.
+    const isWedding = /wedding/i.test(formName || '');
+    const recipients = [{ email: 'management@thequarrystl.com' }];
+    if (isWedding) recipients.push({ email: 'jacqueline@thequarrystl.com' });
     const payload = {
         from: { email: FROM_EMAIL, name: FROM_NAME },
-        personalizations: [{ to: [
-            { email: 'management@thequarrystl.com' },
-            { email: 'jacqueline@thequarrystl.com' }
-        ]}],
+        personalizations: [{ to: recipients }],
         subject,
         content: [{ type: 'text/html', value: html }],
         categories: ['quarry-form-notification'],
