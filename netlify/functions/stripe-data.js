@@ -281,8 +281,11 @@ const createPaymentLink = async (event) => {
   }
 };
 
-// Update an invoice's customer email (also updates the underlying customer record).
-// Optionally re-sends the invoice so the new email gets a payment notification.
+// Update an invoice's customer email.
+// Stripe doesn't allow customer_email on invoices.update for finalized invoices,
+// so we update the underlying customer record (which is what Stripe uses to send
+// the invoice email). For draft invoices we also try to update customer_email
+// directly. Optionally re-sends so the new address gets a payment notification.
 const updateInvoiceEmail = async (event) => {
   try {
     const body = JSON.parse(event.body);
@@ -304,23 +307,33 @@ const updateInvoiceEmail = async (event) => {
       });
     }
 
-    // 1) Update the invoice's own customer_email override (works for finalized invoices)
-    const updatedInvoice = await stripe.invoices.update(invoice_id, { customer_email: email });
-
-    // 2) Update the underlying customer record so future invoices use the right email
+    // 1) Update the underlying customer's email — this is the field Stripe uses
+    //    when sending the hosted invoice email. Works for any non-terminal status.
+    let customerUpdated = false;
     if (inv.customer) {
       try {
         await stripe.customers.update(inv.customer, { email: email });
+        customerUpdated = true;
       } catch (custErr) {
         console.warn('Customer email update warning:', custErr.message);
       }
     }
 
+    // 2) For DRAFT invoices, we can also override customer_email on the invoice itself.
+    //    Open/finalized invoices reject this update — skip silently in that case.
+    if (inv.status === 'draft') {
+      try {
+        await stripe.invoices.update(invoice_id, { customer_email: email });
+      } catch (invErr) {
+        console.warn('Invoice customer_email override warning:', invErr.message);
+      }
+    }
+
     // 3) Optionally re-send the invoice email to the new address
     let resent = false;
-    if (resend && (updatedInvoice.status === 'open' || updatedInvoice.status === 'draft')) {
+    if (resend && (inv.status === 'open' || inv.status === 'draft')) {
       try {
-        if (updatedInvoice.status === 'draft') {
+        if (inv.status === 'draft') {
           await stripe.invoices.finalizeInvoice(invoice_id);
         }
         await stripe.invoices.sendInvoice(invoice_id);
@@ -330,11 +343,15 @@ const updateInvoiceEmail = async (event) => {
       }
     }
 
+    // 4) Pull the latest invoice state to return
+    const refreshed = await stripe.invoices.retrieve(invoice_id, { expand: ['customer'] });
+
     return response(200, {
       success: true,
-      invoice: updatedInvoice,
+      invoice: refreshed,
+      customerUpdated,
       resent,
-      message: 'Invoice email updated' + (resent ? ' and re-sent' : ''),
+      message: 'Email updated to ' + email + (resent ? ' and invoice re-sent' : '') + (!customerUpdated ? ' (warning: customer record could not be updated)' : ''),
     });
   } catch (error) {
     console.error('Error updating invoice email:', error);
