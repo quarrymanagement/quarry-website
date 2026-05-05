@@ -7240,8 +7240,12 @@
 
             tbody.innerHTML = app.invoices.map(inv => {
                 const date = inv.created ? new Date(inv.created * 1000).toLocaleDateString() : '—';
-                const custName = inv.customer_name || inv.customer_email || '—';
-                const email = inv.customer_email || '—';
+                // Prefer the live customer record (reflects email edits) over the
+                // frozen snapshot Stripe stamps on the invoice when finalized.
+                const liveEmail = (inv.customer && typeof inv.customer === 'object' && inv.customer.email) || '';
+                const liveName  = (inv.customer && typeof inv.customer === 'object' && inv.customer.name)  || '';
+                const custName = liveName || inv.customer_name || liveEmail || inv.customer_email || '—';
+                const email = liveEmail || inv.customer_email || '—';
                 const amount = inv.amount_due != null ? '$' + (inv.amount_due / 100).toFixed(2) : '—';
                 const status = inv.status || 'unknown';
                 const invoiceUrl = inv.hosted_invoice_url || '#';
@@ -7251,7 +7255,8 @@
                     actions += `<a href="${invoiceUrl}" target="_blank" style="color:#2563eb;text-decoration:none;margin-right:0.5rem;">View</a>`;
                 }
                 if (status === 'open' || status === 'draft') {
-                    actions += `<button class="btn-small" onclick="editInvoiceEmail('${inv.id}', ${JSON.stringify(email).replace(/"/g, '&quot;')})" style="font-size:0.7rem;padding:2px 8px;margin-right:4px;border-color:#3b82f6;color:#3b82f6;">Edit Email</button>`;
+                    const safeEmail = (email || '').replace(/'/g, "\\'");
+                    actions += `<button class="btn-small" onclick="editInvoiceEmail('${inv.id}', '${safeEmail}')" style="font-size:0.7rem;padding:2px 8px;margin-right:4px;border-color:#3b82f6;color:#3b82f6;">Edit Email</button>`;
                 }
                 if (status === 'open') {
                     actions += `<button class="btn-small" onclick="sendInvoiceReminder('${inv.id}')" style="font-size:0.7rem;padding:2px 8px;margin-right:4px;border-color:#fbbf24;color:#fbbf24;">Remind</button>`;
