@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-05T00:04:04.638Z",
+  "updatedAt": "2026-05-05T13:03:13.853Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -1809,7 +1809,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-05-07T10:00:00-05:00",
       "createdAt": "2026-05-05T00:04:04.630Z",
       "createdBy": "cadence-engine",
@@ -1843,12 +1843,32 @@
           "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "Save the Date — Post 30 days before event. "
+        "canvasNote": "Save the Date — Post 30 days before event. ",
+        "reelBrief": "Open with a slow pan across the quarry lake at early morning, mist on the water, 3s hold. Cut to a close-up of a yoga mat unrolled on the patio deck, morning light catching the texture. End on a wide shot of a mimosa and bloody mary side by side on a stone table, cliffs softly out of focus behind. Suggested audio: calm acoustic or light ambient morning track. Text overlay: 'Un-Wine-D & Align — June 6 · 9 AM · The Quarry'."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Yoga at The Quarry. June 6, 9–10 AM — then stay for wine, a mimosa, or a bloody mary and 10% off brunch. Outdoor session with Yoga with Charity, all levels welcome. Spots are limited to 25. Tickets are $20.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#STLEvents",
+        "#OutdoorYoga",
+        "#YogaSTL",
+        "#WineBar"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Wide shot of a serene outdoor patio at golden morning light, yoga mat rolled out on a wooden deck overlooking a calm quarry lake with limestone cliffs in the soft background, dewy grass, string lights still faintly glowing overhead, warm peachy sunrise tones, no people, no text",
+      "variants": {
+        "facebook": "Yoga at The Quarry — Saturday, June 6, 9–10 AM.\n\nYoga with Charity leads an outdoor session on the patio, then you unwind with your choice of wine, mimosa, or bloody mary and 10% off brunch. All levels welcome. Bring your mat.\n\nSpots are capped at 25 and tickets are $20. Link to register in the comments.",
+        "instagram": "Yoga at The Quarry. June 6, 9 AM — then stay for a mimosa and 10% off brunch. 25 spots, $20. All levels welcome."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "At T-30 with 0% fill, this is a clean save-the-date announcement — no urgency, just a clear picture of what the experience is and why it's worth a Saturday morning, letting the venue setting and the post-yoga brunch perk do the selling.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-05-05T13:03:13.853Z",
+      "updatedAt": "2026-05-05T13:03:13.853Z"
     },
     {
       "id": "drf-morv8nfc-5-ee7wg",
