@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-05T14:19:48.602Z",
+  "updatedAt": "2026-05-05T14:22:05.822Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -20120,6 +20120,17 @@
       "sgEventId": "5OyGUBCvSHi4jlLUzrr9Sw",
       "userAgent": "Mozilla/5.0",
       "category": "quarry-form-notification"
+    },
+    {
+      "ts": "2026-05-05T14:21:53.000Z",
+      "type": "click",
+      "draftId": null,
+      "ruleId": null,
+      "email": "michelle.terbrock@gmail.com",
+      "url": "https://thequarrystl.com/quarry-golf?utm_source=email&utm_medium=marketing&utm_campaign=menu_spotlight",
+      "sgEventId": "HkkW5ms8TaOGcUMCjrszqg",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+      "category": "quarry-marketing"
     }
   ],
   "aggregates": {
