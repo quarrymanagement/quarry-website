@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-05T15:59:11.106Z",
+  "updatedAt": "2026-05-05T16:00:29.423Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -20285,6 +20285,30 @@
       "sgEventId": "Cng_9MODS8eSqn91aQmBdw",
       "userAgent": "Mozilla/5.0 (Windows NT 5.1; rv:11.0) Gecko Firefox/11.0 (via ggpht.com GoogleImageProxy)",
       "category": "quarry-form-notification"
+    },
+    {
+      "ts": "2026-05-05T16:00:29.306Z",
+      "type": "poll",
+      "draftId": "f1c820f9-f469-430e-b1a1-2fed9d01f64a",
+      "sendId": "7a62ca53-4809-11f1-8238-e6db3a268033",
+      "summary": {
+        "opens": 150,
+        "clicks": 10,
+        "bounces": 6,
+        "unsubs": 0
+      }
+    },
+    {
+      "ts": "2026-05-05T16:00:29.423Z",
+      "type": "poll",
+      "draftId": "d4d01b90-a7a2-4061-b5d7-dd442f9acf7b",
+      "sendId": "92c78bd3-44af-11f1-81cc-0a22d60890ee",
+      "summary": {
+        "opens": 225,
+        "clicks": 4,
+        "bounces": 9,
+        "unsubs": 0
+      }
     }
   ],
   "aggregates": {
@@ -20314,8 +20338,8 @@
     },
     "d4d01b90-a7a2-4061-b5d7-dd442f9acf7b": {
       "delivered": 469,
-      "open": 319,
-      "uniqueOpen": 222,
+      "open": 327,
+      "uniqueOpen": 225,
       "click": 7,
       "uniqueClick": 4,
       "bounce": 9,
@@ -20332,15 +20356,15 @@
       "urlsClicked": {},
       "requests": 483,
       "block": 0,
-      "lastPolledAt": "2026-05-04T22:40:57.877Z"
+      "lastPolledAt": "2026-05-05T16:00:29.423Z"
     },
     "f1c820f9-f469-430e-b1a1-2fed9d01f64a": {
       "delivered": 486,
-      "open": 21,
-      "uniqueOpen": 17,
-      "click": 11,
-      "uniqueClick": 2,
-      "bounce": 1,
+      "open": 207,
+      "uniqueOpen": 150,
+      "click": 21,
+      "uniqueClick": 10,
+      "bounce": 6,
       "unsubscribe": 0,
       "spamreport": 0,
       "dropped": 0,
@@ -20360,7 +20384,7 @@
       },
       "requests": 498,
       "block": 0,
-      "lastPolledAt": "2026-05-04T22:40:57.767Z"
+      "lastPolledAt": "2026-05-05T16:00:29.306Z"
     }
   }
 }
