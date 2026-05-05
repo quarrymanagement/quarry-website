@@ -45,6 +45,7 @@ const listInvoices = async (event) => {
     const invoices = await stripe.invoices.list({
       limit: Math.min(parseInt(limit), 100),
       starting_after,
+      expand: ['data.customer'], // so admin sees the live customer.email after edits
     });
     return response(200, {
       success: true,
