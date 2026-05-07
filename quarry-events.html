@@ -2013,8 +2013,8 @@
 
             return `
                 <div class="event-card" data-category="${event.category}">
-                    <div class="event-image ${event.imageGradient}">
-                        <div class="event-image-text">${event.imageText}</div>
+                    <div class="event-image ${event.imageGradient}"${event.image ? ` style="background-image:url('${event.image}');background-size:cover;background-position:center;background-repeat:no-repeat;"` : ''}>
+                        ${event.image ? '' : `<div class="event-image-text">${event.imageText}</div>`}
                         <div class="date-badge">${formatDateBadge(event.date)}</div>
                         <div class="status-badge ${statusInfo.class}">${statusInfo.text}</div>
                         ${event.status === "sold-out" ? `
@@ -2126,6 +2126,7 @@
                 modalBody.style.display = "block";
                 modalBody.innerHTML = `
                     <div style="padding:24px 28px">
+                        ${ev.image ? `<img src="${ev.image}" alt="${(ev.imageAlt || ev.name).replace(/"/g,'&quot;')}" style="width:100%;max-width:520px;display:block;margin:0 auto 22px;border-radius:6px;box-shadow:0 4px 14px rgba(0,0,0,0.15);">` : ''}
                         <p style="font-size:14px;line-height:1.7;color:#333;margin:0 0 18px;white-space:pre-wrap">${detail}</p>
                         ${highlights ? `<ul style="margin:0 0 18px 18px;padding:0;font-size:14px;color:#333">${highlights}</ul>` : ''}
                         ${ev.location ? `<p style="font-size:13px;color:#666;margin:0 0 6px"><strong>Location:</strong> ${ev.location}</p>` : ''}
