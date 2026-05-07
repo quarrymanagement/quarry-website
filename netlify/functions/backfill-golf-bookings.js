@@ -66,13 +66,14 @@ function buildIsoForCentral(dateStr, hour, minute) {
 
 // ----- Google Calendar -----
 async function createCalendarEvent({ summary, description, location, startIso, endIso, attendeeEmail, sessionId }) {
-  if (!process.env.GMAIL_CLIENT_ID || !process.env.GMAIL_CLIENT_SECRET || !process.env.GMAIL_REFRESH_TOKEN) {
+  const refreshToken = process.env.GOOGLE_CALENDAR_REFRESH_TOKEN || process.env.GMAIL_REFRESH_TOKEN;
+  if (!process.env.GMAIL_CLIENT_ID || !process.env.GMAIL_CLIENT_SECRET || !refreshToken) {
     return { ok: false, error: 'Google OAuth env vars missing' };
   }
   const oauth2Client = new google.auth.OAuth2(
     process.env.GMAIL_CLIENT_ID, process.env.GMAIL_CLIENT_SECRET, 'https://developers.google.com/oauthplayground'
   );
-  oauth2Client.setCredentials({ refresh_token: process.env.GMAIL_REFRESH_TOKEN });
+  oauth2Client.setCredentials({ refresh_token: refreshToken });
   const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
   const eventBody = {
     summary, description, location,
