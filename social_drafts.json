@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-06T00:06:15.888Z",
+  "updatedAt": "2026-05-07T11:04:44.165Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -2109,6 +2109,43 @@
           "qLogo": "top-center, gold"
         },
         "canvasNote": "Weekly Hype — Post 21 days before event. "
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
+    },
+    {
+      "id": "drf-movdpyth-1-cosrw",
+      "cadenceTag": "weather:2026-05-08:cozy",
+      "type": "atmosphere",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-05-08T16:00:00.000Z",
+      "createdAt": "2026-05-07T11:04:44.165Z",
+      "createdBy": "weather-trigger",
+      "context": {
+        "sourceType": "weather",
+        "sourceId": "2026-05-08",
+        "weatherMode": "cozy",
+        "temperatureRange": "60-69°F",
+        "maxPrecipChance": 76,
+        "arcLabel": "Cozy weather"
+      },
+      "graphicBrief": {
+        "type": "atmosphere_photo",
+        "templateRef": "No graphic needed — interior fireplace / cozy bar / warm food shot",
+        "dimensions": "1080x1080 or 1080x1350 (4:5)",
+        "toneMode": "cozy-indoors",
+        "spec": {
+          "backgroundIdea": "Warm interior — fireplace, candles on the bar, glass of red wine in foreground, soft ambient light",
+          "title": "",
+          "footerText": "optional small Q logo bottom-right"
+        },
+        "canvasNote": "Stormy / cold day. Lean into \"perfect day to come in and warm up\" vibes."
       },
       "caption": "",
       "hashtags": [],
