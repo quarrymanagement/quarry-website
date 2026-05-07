@@ -90,7 +90,10 @@ function buildIsoForCentral(dateStr, hour, minute) {
 
 // ----- Google Calendar event creation -----
 async function createGoogleCalendarEvent(summary, description, location, startIso, endIso, attendeeEmail) {
-  if (!process.env.GMAIL_CLIENT_ID || !process.env.GMAIL_CLIENT_SECRET || !process.env.GMAIL_REFRESH_TOKEN) {
+  // Prefer GOOGLE_CALENDAR_REFRESH_TOKEN (calendar write scope) if set,
+  // fall back to GMAIL_REFRESH_TOKEN (legacy, may not have write scope).
+  const refreshToken = process.env.GOOGLE_CALENDAR_REFRESH_TOKEN || process.env.GMAIL_REFRESH_TOKEN;
+  if (!process.env.GMAIL_CLIENT_ID || !process.env.GMAIL_CLIENT_SECRET || !refreshToken) {
     console.warn('Google OAuth env vars not configured — skipping calendar event');
     return null;
   }
@@ -100,7 +103,7 @@ async function createGoogleCalendarEvent(summary, description, location, startIs
       process.env.GMAIL_CLIENT_SECRET,
       'https://developers.google.com/oauthplayground'
     );
-    oauth2Client.setCredentials({ refresh_token: process.env.GMAIL_REFRESH_TOKEN });
+    oauth2Client.setCredentials({ refresh_token: refreshToken });
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 
     const eventBody = {
