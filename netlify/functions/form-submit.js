@@ -194,13 +194,22 @@ exports.handler = async (event) => {
     var shortId = submission.id.slice(-6);
     var ownerSubject = 'New ' + form.name + ' Submission — ' + identifier + ' [' + shortId + ']';
 
-    // Send owner notification to management. Loop in Jacqueline only for wedding forms.
-    var formIsWedding = /wedding/i.test(form.name || '') || /wedding/i.test(form.slug || '') || /wedding/i.test(form.id || '');
-    var notifyRecipients = ['management@thequarrystl.com'];
-    if (formIsWedding) notifyRecipients.push('jacqueline@thequarrystl.com');
+    // Jacqueline ONLY handles wedding-related submissions; everything else
+    // goes to management@ only. Detect wedding-related by form name/category.
+    var formNameLower = (form.name || '').toLowerCase();
+    var formCategoryLower = (form.category || '').toLowerCase();
+    var isWeddingForm = formNameLower.indexOf('wedding') !== -1 ||
+                        formNameLower.indexOf('bride') !== -1 ||
+                        formCategoryLower.indexOf('wedding') !== -1 ||
+                        (form.id && String(form.id).toLowerCase().indexOf('wedding') !== -1);
+    var ownerRecipients = isWeddingForm
+      ? ['management@thequarrystl.com', 'jacqueline@thequarrystl.com']
+      : ['management@thequarrystl.com'];
+
+    // Send owner notification
     try {
       await sendEmail(
-        notifyRecipients,
+        ownerRecipients,
         ownerSubject,
         '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">' +
         '<div style="background:#1A0E08;padding:24px;text-align:center"><h1 style="color:#B8933A;margin:0;font-size:28px">The Quarry</h1>' +
