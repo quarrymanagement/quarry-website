@@ -1974,6 +1974,10 @@
          * Get status badge info
          */
         function getStatusInfo(event) {
+            // Free walk-up events: no capacity / registration UI
+            if (event.noRegistration || event.registrationType === "none" || event.eventType === "free") {
+                return { class: "available", text: "Free Event" };
+            }
             const remaining = event.totalCapacity - event.registeredCount;
             if (event.status === "sold-out" || remaining <= 0) {
                 return { class: "sold-out", text: "Sold Out" };
@@ -1987,6 +1991,9 @@
          * Get availability text with color class
          */
         function getAvailabilityText(event) {
+            if (event.noRegistration || event.registrationType === "none" || event.eventType === "free") {
+                return { text: "Just cruise in - no registration needed", class: "available" };
+            }
             const remaining = event.totalCapacity - event.registeredCount;
             if (event.status === "sold-out" || remaining <= 0) {
                 return { text: "Sold Out", class: "sold-out" };
@@ -2002,6 +2009,7 @@
         function createEventCard(event) {
             const statusInfo = getStatusInfo(event);
             const availabilityInfo = getAvailabilityText(event);
+            const isFreeWalkup = event.noRegistration || event.registrationType === "none" || event.eventType === "free";
 
             return `
                 <div class="event-card" data-category="${event.category}">
@@ -2023,7 +2031,12 @@
                         </div>
                         <p class="event-description">${event.description}</p>
                         <div class="event-tiers">
-                            ${event.tiers.map(tier => `
+                            ${isFreeWalkup ? `
+                                <div class="tier" style="background:#faf7f2;border-color:#d4c79b">
+                                    <div class="tier-name" style="color:#9a7b2a">FREE EVENT</div>
+                                    <div class="tier-price">No registration required</div>
+                                </div>
+                            ` : (event.tiers || []).map(tier => `
                                 <div class="tier">
                                     <div class="tier-name">${tier.name}</div>
                                     <div class="tier-price">${tier.priceLabel}/person</div>
@@ -2039,11 +2052,11 @@
                             <span class="availability-text ${availabilityInfo.class}">${availabilityInfo.text}</span>
                             ${event.status === "sold-out" ? `
                                 <button class="event-button" disabled>Sold Out</button>
-                            ` : (event.registrationType === 'email' ? `
-                                <button class="event-button" onclick="openEmailPicker(${JSON.stringify(event.registrationEmail || '').replace(/"/g, '&quot;')}, ${JSON.stringify(event.registrationSubject || ('RSVP — ' + event.name)).replace(/"/g, '&quot;')}, ${JSON.stringify(event.registrationBody || '').replace(/"/g, '&quot;')})">RSVP via Email</button>
+                            ` : isFreeWalkup ? `
+                                <button class="event-button" onclick="openModal(${allEvents.indexOf(event)})">Event Details</button>
                             ` : `
                                 <button class="event-button" onclick="openModal(${allEvents.indexOf(event)})">Get Tickets</button>
-                            `)}
+                            `}
                         </div>
                     </div>
                 </div>
@@ -2099,6 +2112,35 @@
 
             // Set modal header
             document.getElementById("modalEventName").textContent = currentEventForModal.name;
+
+            // === FREE WALK-UP EVENT: skip registration form, show details only ===
+            if (currentEventForModal.noRegistration || currentEventForModal.registrationType === "none" || currentEventForModal.eventType === "free") {
+                const ev = currentEventForModal;
+                document.getElementById("modalEventDate").textContent = formatDate(ev.date) + (ev.time ? ' - ' + formatTime(ev.time) : '');
+                const tableMapStep = document.getElementById("tableMapStep");
+                if (tableMapStep) tableMapStep.style.display = "none";
+                const modalBody = document.getElementById("modalFormContent");
+                const modalFooter = document.getElementById("modalFooter");
+                const highlights = (ev.highlights || []).map(h => `<li style="margin:6px 0">${h}</li>`).join('');
+                const detail = (ev.detailDescription || ev.description || '').replace(/\n/g, '<br>');
+                modalBody.style.display = "block";
+                modalBody.innerHTML = `
+                    <div style="padding:24px 28px">
+                        <p style="font-size:14px;line-height:1.7;color:#333;margin:0 0 18px;white-space:pre-wrap">${detail}</p>
+                        ${highlights ? `<ul style="margin:0 0 18px 18px;padding:0;font-size:14px;color:#333">${highlights}</ul>` : ''}
+                        ${ev.location ? `<p style="font-size:13px;color:#666;margin:0 0 6px"><strong>Location:</strong> ${ev.location}</p>` : ''}
+                        <div style="background:#faf7f2;border:1px solid #d4c79b;padding:16px;text-align:center;border-radius:6px;margin-top:18px;">
+                            <div style="font-size:13px;font-weight:700;color:#9a7b2a;letter-spacing:0.08em;text-transform:uppercase;">Free Event - No Registration</div>
+                            <p style="margin:8px 0 0;font-size:13px;color:#333;">Just cruise in and enjoy. No tickets, no signups, no capacity limits.</p>
+                        </div>
+                    </div>
+                `;
+                if (modalFooter) modalFooter.style.display = "none";
+                modal.classList.add("active");
+                return;
+            }
+            // === end walk-up branch ===
+
             document.getElementById("modalEventDate").textContent = formatDate(currentEventForModal.date) + (currentEventForModal.time ? ' · ' + formatTime(currentEventForModal.time) : '');
 
             // Populate ticket tier dropdown
@@ -2495,45 +2537,5 @@
             renderEvents();
         });
     </script>
-
-<!-- Email-registration picker -->
-<div id="emailPickerModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:9999;align-items:center;justify-content:center;padding:20px">
-  <div style="background:#1A1A1A;border:1px solid #d4af37;border-radius:14px;padding:24px;max-width:400px;width:100%;color:#F5F0E8;font-family:'Inter',sans-serif">
-    <div style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;color:#d4af37;margin-bottom:6px" id="emailPickerTitle">Send RSVP</div>
-    <div style="font-size:0.85rem;color:rgba(245,240,232,0.6);margin-bottom:18px" id="emailPickerSub">Choose how to open the email.</div>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <a id="emailPickerGmail" target="_blank" rel="noopener" style="text-align:center;padding:13px;background:#d4af37;color:#1A1A1A;border-radius:8px;text-decoration:none;font-weight:700;font-size:0.85rem;letter-spacing:0.08em;text-transform:uppercase">Open in Gmail</a>
-      <a id="emailPickerOutlook" target="_blank" rel="noopener" style="text-align:center;padding:13px;background:transparent;color:#d4af37;border:1px solid #d4af37;border-radius:8px;text-decoration:none;font-weight:700;font-size:0.85rem;letter-spacing:0.08em;text-transform:uppercase">Open in Outlook</a>
-      <a id="emailPickerDefault" style="text-align:center;padding:13px;background:transparent;color:#d4af37;border:1px solid #d4af37;border-radius:8px;text-decoration:none;font-weight:700;font-size:0.85rem;letter-spacing:0.08em;text-transform:uppercase">Default Mail App</a>
-    </div>
-    <button id="emailPickerClose" type="button" style="margin-top:14px;width:100%;padding:10px;background:transparent;color:rgba(245,240,232,0.55);border:0;font-family:inherit;font-size:0.78rem;cursor:pointer;letter-spacing:0.1em;text-transform:uppercase">Cancel</button>
-  </div>
-</div>
-<script>
-(function(){
-  function $$(id){ return document.getElementById(id); }
-  window.openEmailPicker = function(to, subject, body){
-    var enc = encodeURIComponent;
-    $$('emailPickerGmail').href = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + enc(to) + '&su=' + enc(subject) + '&body=' + enc(body || '');
-    $$('emailPickerOutlook').href = 'https://outlook.live.com/owa/?path=/mail/action/compose&to=' + enc(to) + '&subject=' + enc(subject) + '&body=' + enc(body || '');
-    $$('emailPickerDefault').href = 'mailto:' + to + '?subject=' + enc(subject) + (body ? '&body=' + enc(body) : '');
-    $$('emailPickerTitle').textContent = subject;
-    $$('emailPickerSub').textContent = 'Send to ' + to;
-    $$('emailPickerModal').style.display = 'flex';
-  };
-  function close(){ $$('emailPickerModal').style.display = 'none'; }
-  document.addEventListener('DOMContentLoaded', function(){
-    var modal = $$('emailPickerModal');
-    if (!modal) return;
-    $$('emailPickerClose').addEventListener('click', close);
-    modal.addEventListener('click', function(e){ if (e.target === modal) close(); });
-    ['emailPickerGmail','emailPickerOutlook','emailPickerDefault'].forEach(function(id){
-      var el = $$(id);
-      if (el) el.addEventListener('click', function(){ setTimeout(close, 250); });
-    });
-  });
-})();
-</script>
-
 </body>
 </html>
