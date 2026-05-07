@@ -242,7 +242,7 @@ async function handleGolfBooking(session) {
   // 2) Send owner email to management@thequarrystl.com
   try {
     await sendGridEmail(
-      ['management@thequarrystl.com', 'jacqueline@thequarrystl.com'],
+      'management@thequarrystl.com',  // Jacqueline only handles weddings - golf emails go to management only
       'New Golf Booking - ' + (m.bay || 'Bay') + ' on ' + (m.date || '?') + ' at ' + (m.time || '?'),
       buildOwnerHtml(m, amountStr, extrasLine, session.id)
     );
