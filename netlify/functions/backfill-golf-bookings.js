@@ -145,8 +145,9 @@ exports.handler = async (event) => {
 
   try {
     let body = {}; try { body = JSON.parse(event.body || '{}'); } catch (_) {}
-    const dryRun  = !!body.dryRun;
-    const force   = !!body.force;
+    const dryRun    = !!body.dryRun;
+    const force     = !!body.force;
+    const skipEmail = !!body.skipEmail;
     const sinceDays = parseInt(body.sinceDays || '180', 10);
 
     const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
@@ -199,9 +200,11 @@ exports.handler = async (event) => {
 
       if (dryRun) { results.push({ ...b, action: 'dryrun' }); continue; }
 
-      // 1) Customer email (skip if no email on file)
+      // 1) Customer email (skip if no email on file or if caller asked to skip)
       let emailRes = 'skipped';
-      if (b.customerEmail) {
+      if (skipEmail) {
+        emailRes = 'skipped (skipEmail=true)';
+      } else if (b.customerEmail) {
         try { await sendGridEmail(b.customerEmail, 'Your Golf Booking is Confirmed - The Quarry', buildCustomerHtml(b)); emailRes = 'sent'; }
         catch (e) { emailRes = 'fail: ' + e.message.substring(0, 100); }
       }
