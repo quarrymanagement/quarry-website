@@ -2672,6 +2672,7 @@
                 <div class="sb-nav-group">
                     <div class="sb-nav-item" data-tab="events"><span class="sb-ic">🎫</span><span class="sb-lbl">Events</span></div>
                     <div class="sb-nav-item" data-tab="bands"><span class="sb-ic">🎵</span><span class="sb-lbl">Live Bands</span></div>
+                    <div class="sb-nav-item" data-tab="golf"><span class="sb-ic">⛳</span><span class="sb-lbl">Golf Bookings</span></div>
                     <div class="sb-nav-item" data-tab="scheduling"><span class="sb-ic">📋</span><span class="sb-lbl">Staff Schedule</span></div>
                     <div class="sb-nav-item" data-tab="employees"><span class="sb-ic">👤</span><span class="sb-lbl">Employees</span></div>
                     <div class="sb-nav-item" data-tab="timeoff"><span class="sb-ic">🌴</span><span class="sb-lbl">Time Off</span></div>
@@ -4127,6 +4128,59 @@
                 </div>
             </div>
 
+            <div id="golfTab" class="tab-content">
+                <style>
+                    .golf-grid-table { width:100%;border-collapse:collapse;font-size:0.85rem; }
+                    .golf-grid-table th, .golf-grid-table td { border:1px solid var(--border-subtle);padding:0;vertical-align:top; }
+                    .golf-grid-table thead th { background:var(--bg-elevated);padding:10px;font-size:0.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--text-secondary);text-align:center;font-weight:600; }
+                    .golf-grid-table thead th.golf-bay-h { background:#1A0E08;color:#B8933A; }
+                    .golf-grid-table .golf-time-cell { width:90px;background:var(--bg-elevated);padding:14px 10px;font-weight:600;color:var(--text-primary);text-align:center;white-space:nowrap; }
+                    .golf-grid-table .golf-slot { padding:10px 12px;height:88px;line-height:1.35;cursor:pointer;transition:background .15s; }
+                    .golf-grid-table .golf-slot.empty { background:transparent;color:var(--text-secondary);font-style:italic;text-align:center;cursor:default;font-size:0.78rem; }
+                    .golf-grid-table .golf-slot.booked { background:rgba(184,147,58,0.10); }
+                    .golf-grid-table .golf-slot.booked:hover { background:rgba(184,147,58,0.18); }
+                    .golf-slot .gbk-name { font-weight:700;color:var(--gold);margin-bottom:2px;font-size:0.85rem; }
+                    .golf-slot .gbk-meta { font-size:0.72rem;color:var(--text-secondary);line-height:1.4; }
+                    .golf-slot .gbk-extras { display:inline-block;margin-top:4px;padding:1px 6px;font-size:0.7rem;background:rgba(184,147,58,0.2);color:var(--gold);border-radius:3px; }
+                    .golf-summary { display:flex;gap:14px;flex-wrap:wrap;font-size:0.85rem;color:var(--text-secondary); }
+                    .golf-summary b { color:var(--text-primary); }
+                    @media(max-width:760px) { .golf-grid-table .golf-time-cell { width:60px;padding:8px 4px;font-size:0.72rem; } .golf-grid-table .golf-slot { padding:6px 6px;height:74px; } }
+                </style>
+                <div class="section">
+                    <div class="section-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+                        <div>
+                            <div class="section-title">Golf Bay Schedule</div>
+                            <div style="font-size:0.85rem;color:var(--text-secondary);">Live bookings across all 4 bays. Click a booking to see full details.</div>
+                        </div>
+                        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                            <button class="btn-secondary" onclick="golfShiftDay(-1)" title="Previous day">&lsaquo; Prev</button>
+                            <input type="date" id="golfScheduleDate" onchange="loadGolfSchedule()" style="padding:8px 10px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-elevated);color:var(--text-primary);font-size:0.9rem;">
+                            <button class="btn-secondary" onclick="golfShiftDay(1)" title="Next day">Next &rsaquo;</button>
+                            <button class="btn-secondary" onclick="golfJumpToday()">Today</button>
+                            <button class="btn-primary" onclick="loadGolfSchedule()">Refresh</button>
+                        </div>
+                    </div>
+                    <div id="golfScheduleStats" class="golf-summary" style="margin:8px 0 16px;"></div>
+                    <div id="golfScheduleGrid" style="overflow-x:auto;border:1px solid var(--border-subtle);border-radius:8px;background:var(--bg-elevated);">
+                        <div style="padding:32px;text-align:center;color:var(--text-secondary);">Loading bookings...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Golf booking detail modal -->
+            <div id="golfBookingModal" class="modal-overlay" onclick="if(event.target===this)closeGolfBookingModal()">
+                <div class="modal-card" style="max-width:520px;width:90%;background:var(--bg-secondary);border-radius:10px;padding:24px;border:1px solid var(--border-subtle);">
+                    <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:16px;">
+                        <div>
+                            <h3 style="margin:0 0 4px;color:var(--gold);font-size:1.1rem;">Golf Booking Details</h3>
+                            <div id="gbmHeader" style="font-size:0.82rem;color:var(--text-secondary);"></div>
+                        </div>
+                        <button class="btn-close" style="background:none;border:none;font-size:1.5rem;color:var(--text-secondary);cursor:pointer;" onclick="closeGolfBookingModal()">&times;</button>
+                    </div>
+                    <div id="gbmBody" style="font-size:0.9rem;line-height:1.7;"></div>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -4954,6 +5008,14 @@
             // Load forms
             if (tabName === 'forms') {
                 updateFormsGrid();
+            }
+            // Load golf schedule
+            if (tabName === 'golf') {
+                if (!document.getElementById('golfScheduleDate').value) {
+                    golfJumpToday();
+                } else {
+                    loadGolfSchedule();
+                }
             }
             // Initialize campaign calendar
             if (tabName === 'campaignCalendar') {
@@ -12355,6 +12417,134 @@ function hashCode(str) {
             }
         })();
 
+    </script>
+
+    <!-- ================================================================
+         GOLF BOOKINGS SCHEDULE
+         Pulls paid bookings from /.netlify/functions/list-golf-bookings
+         and renders a 4-bay × hourly-slot grid for the selected date.
+         ================================================================ -->
+    <script>
+    (function(){
+        const HOURS = ['11:00 AM','12:00 PM','1:00 PM','2:00 PM','3:00 PM','4:00 PM','5:00 PM','6:00 PM','7:00 PM','8:00 PM','9:00 PM'];
+        const BAYS  = ['Bay 1','Bay 2','Bay 3','Bay 4'];
+        let cache = { date: null, bookings: [] };
+
+        function todayCT() {
+            const ct = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' }));
+            return ct.getFullYear() + '-' + String(ct.getMonth()+1).padStart(2,'0') + '-' + String(ct.getDate()).padStart(2,'0');
+        }
+        function shiftDate(yyyymmdd, days) {
+            const [y,m,d] = yyyymmdd.split('-').map(Number);
+            const dt = new Date(Date.UTC(y, m-1, d));
+            dt.setUTCDate(dt.getUTCDate() + days);
+            return dt.toISOString().slice(0,10);
+        }
+        function fmtPretty(yyyymmdd) {
+            const [y,m,d] = yyyymmdd.split('-').map(Number);
+            const dt = new Date(Date.UTC(y, m-1, d));
+            return dt.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric', timeZone:'UTC' });
+        }
+        function escapeHtml(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+        }
+
+        window.golfJumpToday = function() {
+            document.getElementById('golfScheduleDate').value = todayCT();
+            loadGolfSchedule();
+        };
+        window.golfShiftDay = function(days) {
+            const inp = document.getElementById('golfScheduleDate');
+            const cur = inp.value || todayCT();
+            inp.value = shiftDate(cur, days);
+            loadGolfSchedule();
+        };
+
+        window.loadGolfSchedule = async function() {
+            const date = document.getElementById('golfScheduleDate').value || todayCT();
+            const grid = document.getElementById('golfScheduleGrid');
+            const stats = document.getElementById('golfScheduleStats');
+            grid.innerHTML = '<div style="padding:32px;text-align:center;color:var(--text-secondary);">Loading bookings for ' + escapeHtml(fmtPretty(date)) + '...</div>';
+            try {
+                const r = await fetch('/.netlify/functions/list-golf-bookings?startDate=' + date + '&endDate=' + date);
+                const data = await r.json();
+                if (!data.ok) throw new Error(data.error || 'API error');
+                cache = { date, bookings: data.bookings || [] };
+                renderGolfGrid(date, cache.bookings);
+                const totalRevenue = (cache.bookings || []).reduce((s, b) => s + (b.amountTotal || 0), 0);
+                const players = (cache.bookings || []).reduce((s, b) => s + (parseInt(b.players,10) || 0), 0);
+                stats.innerHTML = '<span><b>' + cache.bookings.length + '</b> booking' + (cache.bookings.length === 1 ? '' : 's') + '</span>' +
+                                  '<span><b>' + players + '</b> total player' + (players === 1 ? '' : 's') + '</span>' +
+                                  '<span><b>$' + (totalRevenue/100).toFixed(2) + '</b> revenue</span>' +
+                                  '<span style="opacity:.6">' + escapeHtml(fmtPretty(date)) + '</span>';
+            } catch (e) {
+                grid.innerHTML = '<div style="padding:32px;text-align:center;color:#c33;">Failed to load: ' + escapeHtml(e.message) + '</div>';
+                stats.innerHTML = '';
+            }
+        };
+
+        function renderGolfGrid(date, bookings) {
+            // Build a lookup: { 'Bay X|TIME' -> booking }
+            const lookup = {};
+            (bookings || []).forEach(b => {
+                if (b.bay && b.time) lookup[b.bay + '|' + b.time] = b;
+            });
+
+            let html = '<table class="golf-grid-table"><thead><tr>';
+            html += '<th>Time</th>';
+            BAYS.forEach(bay => { html += '<th class="golf-bay-h">' + escapeHtml(bay) + '</th>'; });
+            html += '</tr></thead><tbody>';
+            HOURS.forEach(t => {
+                html += '<tr><td class="golf-time-cell">' + escapeHtml(t) + '</td>';
+                BAYS.forEach(bay => {
+                    const b = lookup[bay + '|' + t];
+                    if (b) {
+                        const extras = b.extraBalls > 0 ? '<span class="gbk-extras">+' + b.extraBalls + ' balls</span>' : '';
+                        html += '<td class="golf-slot booked" data-session="' + escapeHtml(b.sessionId) + '" onclick="openGolfBookingDetails(\'' + b.sessionId + '\')">' +
+                                '<div class="gbk-name">' + escapeHtml(b.customerName || '(no name)') + '</div>' +
+                                '<div class="gbk-meta">' +
+                                  (b.players ? escapeHtml(b.players) + ' player' + (b.players == 1 ? '' : 's') + ' · ' : '') +
+                                  '$' + ((b.amountTotal || 0)/100).toFixed(0) +
+                                '</div>' + extras +
+                                '</td>';
+                    } else {
+                        html += '<td class="golf-slot empty">Available</td>';
+                    }
+                });
+                html += '</tr>';
+            });
+            html += '</tbody></table>';
+            document.getElementById('golfScheduleGrid').innerHTML = html;
+        }
+
+        window.openGolfBookingDetails = function(sessionId) {
+            const b = (cache.bookings || []).find(x => x.sessionId === sessionId);
+            if (!b) return;
+            document.getElementById('gbmHeader').textContent = (b.bay || '') + ' · ' + (b.date || '') + ' · ' + (b.time || '');
+            const rows = [
+                ['Customer', escapeHtml(b.customerName || '-')],
+                ['Email',    b.customerEmail ? '<a href="mailto:' + escapeHtml(b.customerEmail) + '">' + escapeHtml(b.customerEmail) + '</a>' : '-'],
+                ['Phone',    b.customerPhone ? '<a href="tel:' + escapeHtml(b.customerPhone) + '">' + escapeHtml(b.customerPhone) + '</a>' : '-'],
+                ['Bay',      escapeHtml(b.bay || '-')],
+                ['Date',     escapeHtml(b.date || '-')],
+                ['Time',     escapeHtml(b.time || '-')],
+                ['Duration', escapeHtml(b.duration || '50 Minutes')],
+                ['Players',  escapeHtml(b.players || '-')],
+            ];
+            if (b.extraBalls > 0) rows.push(['Extras', escapeHtml(b.extraBalls + ' extra balls (+$' + b.extraBallsPrice + ')')]);
+            rows.push(['Coupon',     b.coupon ? escapeHtml(b.coupon) : '<span style="color:var(--text-secondary)">none</span>']);
+            rows.push(['Amount Paid', '<b style="color:var(--gold)">' + escapeHtml(b.amountPaid) + '</b>']);
+            rows.push(['Booked At',   new Date(b.createdAt).toLocaleString('en-US', { timeZone: 'America/Chicago' })]);
+            rows.push(['Stripe ID',   '<code style="font-size:0.7rem;color:var(--text-secondary)">' + escapeHtml(b.sessionId) + '</code>']);
+            document.getElementById('gbmBody').innerHTML = rows.map(r =>
+                '<div style="display:flex;border-bottom:1px solid var(--border-subtle);padding:6px 0"><div style="width:130px;color:var(--text-secondary);font-size:0.78rem;text-transform:uppercase;letter-spacing:.05em">' + r[0] + '</div><div style="flex:1">' + r[1] + '</div></div>'
+            ).join('');
+            document.getElementById('golfBookingModal').classList.add('active');
+        };
+        window.closeGolfBookingModal = function() {
+            document.getElementById('golfBookingModal').classList.remove('active');
+        };
+    })();
     </script>
 </body>
 </html>
