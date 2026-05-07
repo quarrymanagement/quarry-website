@@ -420,10 +420,15 @@ async function sendStaffNotification({ formName, email, firstName, lastName, pho
 </div>
 </div>`;
 
-    // Loop in Jacqueline only for wedding forms.
-    const isWedding = /wedding/i.test(formName || '');
-    const recipients = [{ email: 'management@thequarrystl.com' }];
-    if (isWedding) recipients.push({ email: 'jacqueline@thequarrystl.com' });
+    // Jacqueline ONLY gets wedding-related notifications. Everything else
+    // (reservations, contact, private events, careers, mailing-list, etc.)
+    // goes to management@ only.
+    const WEDDING_FORMS = new Set(['wedding-tour']);
+    const isWeddingForm = WEDDING_FORMS.has(formName) || /wedding/i.test(formName || '');
+    const recipients = isWeddingForm
+        ? [{ email: 'management@thequarrystl.com' }, { email: 'jacqueline@thequarrystl.com' }]
+        : [{ email: 'management@thequarrystl.com' }];
+
     const payload = {
         from: { email: FROM_EMAIL, name: FROM_NAME },
         personalizations: [{ to: recipients }],
