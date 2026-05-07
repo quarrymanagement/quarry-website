@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-07T11:04:44.165Z",
+  "updatedAt": "2026-05-07T13:01:30.639Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -1179,7 +1179,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-05-13T17:00:00-05:00",
       "createdAt": "2026-04-28T03:38:22.280Z",
       "createdBy": "cadence-engine",
@@ -1249,12 +1249,32 @@
           ],
           "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
         },
-        "canvasNote": "Weekend Lineup — covers 4 band(s). Post 3 days before first show."
+        "canvasNote": "Weekend Lineup — covers 4 band(s). Post 3 days before first show.",
+        "reelBrief": "Open with a slow pan across the patio — empty tables, string lights just coming on at dusk. Cut to a close-up of a wine glass being set down on a stone bar top. Hold 3s on a wide shot of the cliff and lake at golden hour. End on the patio filling with soft evening light. Suggested audio: warm acoustic or low-key country instrumental. Text overlay: 'Live music this weekend. No cover. Just show up.' — fade in at the end."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "This weekend at The Quarry — four live acts, no cover.\n\nSaturday: Mixology 1–4 PM · James Jones 7–10 PM\nSunday: Double D 1–4 PM\n\nPlus DJ Earl is on deck Friday the 22nd, 7–10 PM.\n\nWalk in, find a seat, stay a while. That's the whole plan.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#LiveMusicSTL",
+        "#WineBar",
+        "#STLEats",
+        "#OutdoorDining"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Acoustic guitar leaning against a wooden stool on a stone-and-wood patio stage, warm late-afternoon golden light, string lights overhead beginning to glow, soft bokeh of a lake and limestone cliff in the background, no people, no text",
+      "variants": {
+        "facebook": "Four live acts this weekend at The Quarry — and every single one is free with your visit.\n\nSaturday: Mixology 1–4 PM, then James Jones takes the evening 7–10 PM.\nSunday: Double D 1–4 PM.\n\nAnd mark next Friday the 22nd — DJ Earl is spinning 7–10 PM.\n\nNo reservations needed. Walk in, grab a glass, and let the weekend do its thing. We're at 3960 Highway Z in New Melle.",
+        "instagram": "Four live acts this weekend. No cover, no ticket — just show up.\n\nSat: Mixology 1–4 · James Jones 7–10\nSun: Double D 1–4\n\nSee you out here."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "At T-3 the post shifts to 'this Saturday' specificity with logistics (times, no cover) presented as an easy invitation rather than a push, keeping the vibe-forward tone appropriate for a band announcement.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-05-07T13:01:30.639Z",
+      "updatedAt": "2026-05-07T13:01:30.639Z"
     },
     {
       "id": "drf-moi2t9s8-w-bpjh8",
@@ -2123,7 +2143,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-05-08T16:00:00.000Z",
       "createdAt": "2026-05-07T11:04:44.165Z",
       "createdBy": "weather-trigger",
@@ -2147,10 +2167,29 @@
         },
         "canvasNote": "Stormy / cold day. Lean into \"perfect day to come in and warm up\" vibes."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Some nights, the rain stays outside. Inside, it's warm wine and nowhere to be.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#WineBar",
+        "#STLEats",
+        "#CozyVibes",
+        "#MissouriWineCountry"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Interior of a warm upscale-casual wine bar, rain streaking the window glass softly out of focus, two glasses of red wine on a dark wood table, candlelight and string lights casting amber glow, stone wall visible in background, no people, no text",
+      "variants": {
+        "facebook": "Some nights, the rain stays outside. Inside, it's warm wine, good music, and nowhere to be. We're open Wednesday through Sunday — come find your table.",
+        "instagram": "Some nights, the rain stays outside. Inside, it's warm wine and nowhere to be."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "Cozy weather at 60-69°F with 76% precip chance calls for a sensory, in-the-moment caption that frames the rain as a reason to come in — no CTA, no event details, pure atmosphere — matching the vibe post guidance and the audience's 'escape the week' mindset.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-05-07T13:01:15.233Z",
+      "updatedAt": "2026-05-07T13:01:17.006Z"
     }
   ],
   "history": [],
