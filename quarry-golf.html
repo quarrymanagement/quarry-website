@@ -691,6 +691,7 @@ function selectBalls(count,price){
   document.querySelectorAll('.bcard').forEach(function(c){c.classList.remove('sel');});
   document.getElementById('balls-'+count).classList.add('sel');
   S.extraPrice=price;
+  S.extraBalls=count;
   document.getElementById('extraBallsPrice').value=price*100;
   document.getElementById('sumExtra').textContent=count>0?count+' balls (+$'+price+')':'None';
   updateTotal();
@@ -730,7 +731,7 @@ async function submitBooking(){
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         amount:3000+(S.extraPrice*100),
-        metadata:{customerName:first+' '+last,customerEmail:email,customerPhone:phone,bay:bay,date:date,time:time,duration:'50 Minutes',players:players}
+        metadata:{customerName:first+' '+last,customerEmail:email,customerPhone:phone,bay:bay,date:date,time:time,duration:'50 Minutes',players:players,extraBalls:String(S.extraBalls||0),extraBallsPrice:String(S.extraPrice||0)}
       })
     });
     var data=await res.json();
@@ -795,29 +796,6 @@ async function submitBooking(){
       nav.classList.remove('open');
     }
   });
-})();
-</script>
-
-
-<!-- Pre-fill ?email= from URL (used when launched from the Quarry member app) -->
-<script>
-(function(){
-  try {
-    var p = new URLSearchParams(location.search);
-    var e = p.get('email');
-    if (!e || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)) return;
-    var fill = function(){
-      var inputs = document.querySelectorAll('input[type="email"], input[name="email"]');
-      for (var i = 0; i < inputs.length; i++) {
-        if (!inputs[i].value) inputs[i].value = e;
-      }
-    };
-    if (document.readyState !== 'loading') fill();
-    else document.addEventListener('DOMContentLoaded', fill);
-    var mo = new MutationObserver(function(){ fill(); });
-    mo.observe(document.documentElement, { childList: true, subtree: true });
-    setTimeout(function(){ try { mo.disconnect(); } catch(_){} }, 30000);
-  } catch (_) {}
 })();
 </script>
 </body>
