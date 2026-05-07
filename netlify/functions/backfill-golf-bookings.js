@@ -67,6 +67,7 @@ function buildIsoForCentral(dateStr, hour, minute) {
 // ----- Google Calendar -----
 async function createCalendarEvent({ summary, description, location, startIso, endIso, attendeeEmail, sessionId }) {
   const refreshToken = process.env.GOOGLE_CALENDAR_REFRESH_TOKEN || process.env.GMAIL_REFRESH_TOKEN;
+  const usingNew = !!process.env.GOOGLE_CALENDAR_REFRESH_TOKEN;
   if (!process.env.GMAIL_CLIENT_ID || !process.env.GMAIL_CLIENT_SECRET || !refreshToken) {
     return { ok: false, error: 'Google OAuth env vars missing' };
   }
@@ -74,6 +75,8 @@ async function createCalendarEvent({ summary, description, location, startIso, e
     process.env.GMAIL_CLIENT_ID, process.env.GMAIL_CLIENT_SECRET, 'https://developers.google.com/oauthplayground'
   );
   oauth2Client.setCredentials({ refresh_token: refreshToken });
+  // Tag in error path so we know which token was tried
+  global.__calendarTokenSource = usingNew ? 'GOOGLE_CALENDAR_REFRESH_TOKEN' : 'GMAIL_REFRESH_TOKEN';
   const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
   const eventBody = {
     summary, description, location,
@@ -239,7 +242,17 @@ exports.handler = async (event) => {
             sessionId: b.sessionId
           });
           calRes = r.ok ? 'created (' + r.id + ')' : 'fail: ' + r.error;
-        } catch (e) { calRes = 'fail: ' + e.message.substring(0, 120); }
+        } catch (e) {
+          // Extract Google API's full error for better debugging
+          let detail = e.message || String(e);
+          if (e.response && e.response.data) {
+            try { detail += ' :: ' + JSON.stringify(e.response.data).substring(0, 300); } catch(_) {}
+          } else if (e.errors) {
+            try { detail += ' :: ' + JSON.stringify(e.errors).substring(0, 300); } catch(_) {}
+          }
+          if (global.__calendarTokenSource) detail += ' [token=' + global.__calendarTokenSource + ']';
+          calRes = 'fail: ' + detail.substring(0, 400);
+        }
       }
 
       processed.add(s.id);
