@@ -72,33 +72,80 @@ exports.handler = async (event) => {
     dates.push(ctYmd(d));
   }
 
-  // Fetch each date in parallel-ish (sequential to avoid rate limits)
+  // The Stripe webhook stores bookings at flat key `golf-{dateKey}` where
+  // dateKey is m.date with slashes replaced by dashes. The customer-facing
+  // checkout sends m.date in whatever format the front-end form passed —
+  // could be YYYY-MM-DD or M/D/YYYY etc. We try every likely variant.
+  function variants(d) {
+    // d is a Date object
+    const yyyy = d.getFullYear();
+    const m = d.getMonth() + 1;
+    const dd = d.getDate();
+    const mm = String(m).padStart(2, '0');
+    const dd0 = String(dd).padStart(2, '0');
+    return [
+      // YYYY-MM-DD (zero-padded ISO)
+      `${yyyy}-${mm}-${dd0}`,
+      // M-D-YYYY (no leading zeros, US style after slash→dash)
+      `${m}-${dd}-${yyyy}`,
+      // MM-DD-YYYY (zero-padded US)
+      `${mm}-${dd0}-${yyyy}`,
+      // YYYY-M-D
+      `${yyyy}-${m}-${dd}`,
+    ];
+  }
+
+  function ymdToDate(s) {
+    const [y, m, dd] = s.split('-').map(n => parseInt(n, 10));
+    return new Date(y, m - 1, dd);
+  }
+
   const all = [];
-  for (const dateKey of dates) {
-    try {
-      const url = `https://api.netlify.com/api/v1/blobs/${SITE_ID}/golf-bookings/${dateKey}`;
-      const res = await fetch(url, { headers: { Authorization: 'Bearer ' + NETLIFY_TOKEN } });
-      if (!res.ok) continue;
-      const data = await res.json();
-      const bookings = data.bookings || [];
-      for (const b of bookings) {
-        all.push({
-          dateKey: dateKey,
-          bay: b.bay || '',
-          time: b.time || '',
-          customerName: b.customerName || '',
-          customerEmail: b.customerEmail || '',
-          customerPhone: b.customerPhone || '',
-          partySize: b.partySize || null,
-          sessionId: b.sessionId || '',
-          paymentIntent: b.paymentIntent || '',
-          amount: b.amount || null,
-          createdAt: b.createdAt || null,
-          notes: b.notes || '',
-        });
+  const seen = new Set(); // dedupe by sessionId
+
+  for (const isoDate of dates) {
+    const d = ymdToDate(isoDate);
+    const tried = new Set();
+    for (const v of variants(d)) {
+      if (tried.has(v)) continue;
+      tried.add(v);
+      // Try both flat-key (webhook's storage) and store-namespaced (legacy)
+      const urls = [
+        `https://api.netlify.com/api/v1/blobs/${SITE_ID}/golf-${v}`,
+        `https://api.netlify.com/api/v1/blobs/${SITE_ID}/golf-bookings/${v}`,
+      ];
+      for (const url of urls) {
+        try {
+          const res = await fetch(url, { headers: { Authorization: 'Bearer ' + NETLIFY_TOKEN } });
+          if (!res.ok) continue;
+          let data;
+          try { data = await res.json(); } catch (_) { continue; }
+          const bookings = (data && data.bookings) || [];
+          for (const b of bookings) {
+            const key = (b.sessionId || '') + '|' + (b.bay || '') + '|' + (b.time || '');
+            if (seen.has(key)) continue;
+            seen.add(key);
+            all.push({
+              dateKey: isoDate,            // normalized ISO for UI
+              storedDateKey: v,            // raw key in blob storage
+              storedAt: url,
+              bay: b.bay || '',
+              time: b.time || '',
+              customerName: b.customerName || b.name || '',
+              customerEmail: b.customerEmail || b.email || '',
+              customerPhone: b.customerPhone || b.phone || '',
+              partySize: b.partySize || b.players || null,
+              sessionId: b.sessionId || '',
+              paymentIntent: b.paymentIntent || '',
+              amount: b.amount || null,
+              createdAt: b.createdAt || b.bookedAt || null,
+              notes: b.notes || '',
+            });
+          }
+        } catch (e) {
+          // skip per-URL errors
+        }
       }
-    } catch (e) {
-      // skip date-fetch errors silently
     }
   }
 
