@@ -447,6 +447,39 @@ const searchCustomers = async (event) => {
   }
 };
 
+// Search Stripe charges (works for guest customers too — they don't appear in
+// customers.search but their charges do).
+const searchCharges = async (event) => {
+  try {
+    const q = event.queryStringParameters || {};
+    const email = (q.email || '').trim();
+    if (!email) return response(400, { success: false, error: 'Provide ?email=' });
+    const query = `billing_details.email~"${email.replace(/"/g, '')}"`;
+    const result = await stripe.charges.search({ query, limit: 100 });
+    return response(200, {
+      success: true,
+      query,
+      data: result.data.map(c => ({
+        id: c.id,
+        created: c.created,
+        amount: c.amount,
+        status: c.status,
+        paid: c.paid,
+        receipt_email: c.receipt_email,
+        billingName: c.billing_details && c.billing_details.name,
+        billingEmail: c.billing_details && c.billing_details.email,
+        description: c.description,
+        payment_intent: c.payment_intent,
+        metadata: c.metadata,
+      })),
+      has_more: result.has_more,
+    });
+  } catch (error) {
+    console.error('Error searching charges:', error);
+    return response(500, { success: false, error: error.message });
+  }
+};
+
 // Get account balance
 const getBalance = async (event) => {
   try {
@@ -476,6 +509,8 @@ exports.handler = async (event) => {
         return await listCustomers(event);
       case 'search-customers':
         return await searchCustomers(event);
+      case 'search-charges':
+        return await searchCharges(event);
       case 'invoices':
         return await listInvoices(event);
       case 'subscriptions':
