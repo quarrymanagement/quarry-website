@@ -21,21 +21,26 @@ exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: CORS, body: '' };
   const q = event.queryStringParameters || {};
   if (!checkAdmin(q.adminPassword)) return reply(401, { ok: false, error: 'auth' });
-  const store = q.store || ''; // empty = default store
-  const path = store ? `${store}` : '';
+  // Probe a specific key across multiple path variants
+  const key = q.key || 'golf-2026-05-10';
   const urls = [
-    `https://api.netlify.com/api/v1/blobs/${SITE_ID}` + (path ? `/${path}` : ''),
-    `https://api.netlify.com/api/v1/blobs/${SITE_ID}/${path || 'site'}`,
+    // Flat-key variants
+    `https://api.netlify.com/api/v1/blobs/${SITE_ID}/${encodeURIComponent(key)}`,
+    `https://api.netlify.com/api/v1/blobs/${SITE_ID}/${key}`,
+    // Store-namespaced variants
+    `https://api.netlify.com/api/v1/blobs/${SITE_ID}/site/${encodeURIComponent(key)}`,
+    `https://api.netlify.com/api/v1/blobs/${SITE_ID}/golf-bookings/${encodeURIComponent(key.replace(/^golf-/, ''))}`,
+    `https://api.netlify.com/api/v1/blobs/${SITE_ID}/golf/${encodeURIComponent(key.replace(/^golf-/, ''))}`,
   ];
   const results = [];
   for (const url of urls) {
     try {
       const r = await fetch(url, { headers: { Authorization: 'Bearer ' + NETLIFY_TOKEN } });
       const text = await r.text();
-      results.push({ url, status: r.status, body: text.slice(0, 2000) });
+      results.push({ url, status: r.status, bodyHead: text.slice(0, 600) });
     } catch (e) {
       results.push({ url, error: e.message });
     }
   }
-  return reply(200, { ok: true, results });
+  return reply(200, { ok: true, key, results });
 };
