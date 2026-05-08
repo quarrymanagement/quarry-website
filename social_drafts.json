@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-08T11:05:44.353Z",
+  "updatedAt": "2026-05-08T13:03:42.010Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -2395,7 +2395,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-05-09T16:00:00.000Z",
       "createdAt": "2026-05-08T11:05:44.353Z",
       "createdBy": "weather-trigger",
@@ -2419,10 +2419,29 @@
         },
         "canvasNote": "Patio-perfect day (79°F). Caption hooks on the weather."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "67 degrees. No clouds worth mentioning. The patio is open and the wine is cold. Some days just line up right.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#WineBar",
+        "#PatioSeason",
+        "#STLEats",
+        "#OutdoorDining"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Wide shot of a sun-drenched stone patio with wooden tables and chairs, string lights overhead catching the afternoon light, a half-full glass of white wine on the table edge, soft green hills and a glimpse of a quarry lake in the background, warm golden-hour tone, no people, no text",
+      "variants": {
+        "facebook": "67 degrees. No clouds worth mentioning. The patio is open and the wine is cold. Some days just line up right — come find us at 3960 Highway Z in New Melle.",
+        "instagram": "67 degrees. No clouds worth mentioning. The patio is open and the wine is cold. Some days just line up right."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "Atmosphere posts perform best as sensory snapshots with no CTA pressure — this leans into the specific weather window and lets the scene sell itself, timed at 4pm when dinner plans are forming.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-05-08T13:03:38.878Z",
+      "updatedAt": "2026-05-08T13:03:42.010Z"
     }
   ],
   "history": [],
