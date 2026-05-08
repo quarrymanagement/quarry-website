@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-08T00:31:12.080Z",
+  "updatedAt": "2026-05-08T00:31:28.896Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -23644,6 +23644,17 @@
       "sgEventId": "N4mOC5vdTniSOGpbg3lmcg",
       "userAgent": "Mozilla/5.0",
       "category": "quarry-marketing"
+    },
+    {
+      "ts": "2026-05-08T00:31:22.000Z",
+      "type": "delivered",
+      "draftId": null,
+      "ruleId": null,
+      "email": "jacks212121@icloud.com",
+      "url": null,
+      "sgEventId": "ZGVsaXZlcmVkLTAtMTA2MDM3NzY1LWladUwwVTd3UVdxUFFBTlVEUmg0bUEtMA",
+      "userAgent": null,
+      "category": "quarry-golf-reschedule"
     }
   ],
   "aggregates": {
