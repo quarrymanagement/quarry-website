@@ -29,7 +29,8 @@ const crypto = require('crypto');
 const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH || '';
 const NETLIFY_TOKEN = process.env.NETLIFY_AUTH_TOKEN || '';
 const SENDGRID_KEY = process.env.SENDGRID_API_KEY || '';
-const SITE_ID = 'roaring-pegasus-444826';
+// Site UUID, not slug. Slug returns 400 from the Blobs API.
+const SITE_ID = process.env.NETLIFY_SITE_ID || 'd9496ae2-2b01-4229-b6d2-9203c3be7acb';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -135,6 +136,49 @@ exports.handler = async (event) => {
 
   if (!checkAdmin(body.adminPassword)) return reply(401, { ok: false, error: 'Invalid admin password' });
   if (!NETLIFY_TOKEN) return reply(500, { ok: false, error: 'NETLIFY_AUTH_TOKEN not set' });
+
+  // ── Backfill mode ─────────────────────────────────────────────────────────
+  // POST { adminPassword, action:'backfill', dateKey, bay, time, customerName,
+  //         customerEmail, ... } — creates a new booking record on the given
+  //         date without expecting a prior record to mutate. Used to recover
+  //         bookings that were paid via Stripe but never persisted.
+  if (body.action === 'backfill') {
+    if (!body.dateKey || !/^\d{4}-\d{2}-\d{2}$/.test(body.dateKey)) {
+      return reply(400, { ok: false, error: 'dateKey YYYY-MM-DD required' });
+    }
+    const fresh = {
+      bay: body.bay || '',
+      time: body.time || '',
+      date: body.dateKey,
+      customerName: body.customerName || '',
+      customerEmail: body.customerEmail || '',
+      customerPhone: body.customerPhone || '',
+      players: body.players || body.partySize || null,
+      partySize: body.partySize || body.players || null,
+      duration: body.duration || '',
+      amountPaid: body.amountPaid || null,
+      sessionId: body.sessionId || ('backfill-' + Date.now()),
+      paymentIntent: body.paymentIntent || '',
+      notes: (body.notes || '') + (body.notes ? ' | ' : '') + 'backfilled by admin',
+      bookedAt: body.bookedAt || new Date().toISOString(),
+    };
+    const targetBlob = await readBlob(body.dateKey);
+    // Optional collision guard
+    const collision = (targetBlob.bookings || []).some((b) =>
+      String(b.bay || '').toLowerCase() === String(fresh.bay).toLowerCase() &&
+      String(b.time || '').replace(/\s+/g, '') === String(fresh.time).replace(/\s+/g, '')
+    );
+    if (collision && !body.force) {
+      return reply(409, { ok: false, error: 'Bay+time already booked. Add force:true to overwrite.' });
+    }
+    const newBookings = collision
+      ? (targetBlob.bookings || []).filter(b =>
+          !(String(b.bay || '').toLowerCase() === String(fresh.bay).toLowerCase() &&
+            String(b.time || '').replace(/\s+/g, '') === String(fresh.time).replace(/\s+/g, ''))).concat([fresh])
+      : (targetBlob.bookings || []).concat([fresh]);
+    await writeBlob(body.dateKey, { bookings: newBookings });
+    return reply(200, { ok: true, mode: 'backfill', booking: fresh, totalOnDate: newBookings.length });
+  }
 
   const oldDateKey = body.oldDateKey;
   const sessionId = body.sessionId;
