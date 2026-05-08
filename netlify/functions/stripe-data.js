@@ -420,6 +420,33 @@ const sendReminder = async (event) => {
   }
 };
 
+// Search customers across the full Stripe history (not limited to recent like list).
+// Uses Stripe's Search API which supports email/name fuzzy matches.
+const searchCustomers = async (event) => {
+  try {
+    const q = event.queryStringParameters || {};
+    const email = (q.email || '').trim();
+    const name  = (q.name  || '').trim();
+    if (!email && !name) return response(400, { success: false, error: 'Provide ?email= or ?name=' });
+
+    const parts = [];
+    if (email) parts.push(`email~"${email.replace(/"/g, '')}"`);
+    if (name)  parts.push(`name~"${name.replace(/"/g, '')}"`);
+    const query = parts.join(' OR ');
+
+    const result = await stripe.customers.search({ query, limit: 100 });
+    return response(200, {
+      success: true,
+      query,
+      data: result.data,
+      has_more: result.has_more,
+    });
+  } catch (error) {
+    console.error('Error searching customers:', error);
+    return response(500, { success: false, error: error.message });
+  }
+};
+
 // Get account balance
 const getBalance = async (event) => {
   try {
@@ -447,6 +474,8 @@ exports.handler = async (event) => {
     switch (action) {
       case 'customers':
         return await listCustomers(event);
+      case 'search-customers':
+        return await searchCustomers(event);
       case 'invoices':
         return await listInvoices(event);
       case 'subscriptions':
