@@ -1667,11 +1667,17 @@
                 if (!resp.ok) throw new Error('Failed to fetch events data');
                 const data = await resp.json();
                 allEvents = (data.events || []).map(evt => {
-                    // Auto-calculate status from capacity
-                    const remaining = evt.totalCapacity - evt.registeredCount;
-                    if (remaining <= 0) evt.status = 'sold-out';
-                    else if (remaining <= 5) evt.status = 'low';
-                    else evt.status = 'available';
+                    // Free walk-up events have no capacity tracking — never auto-mark "sold-out"
+                    const isFreeWalkup = evt.noRegistration || evt.registrationType === 'none' || evt.eventType === 'free';
+                    if (isFreeWalkup) {
+                        evt.status = evt.status === 'inactive' ? 'inactive' : 'available';
+                    } else {
+                        // Auto-calculate status from capacity
+                        const remaining = evt.totalCapacity - evt.registeredCount;
+                        if (remaining <= 0) evt.status = 'sold-out';
+                        else if (remaining <= 5) evt.status = 'low';
+                        else evt.status = 'available';
+                    }
                     // Ensure defaults
                     evt.tiers = evt.tiers || [{ name: 'General Admission', description: 'Event entry', pricePerPerson: evt.pricePerSeat || 0, priceLabel: '$' + ((evt.pricePerSeat || 0) / 100).toFixed(0) }];
                     evt.imageGradient = evt.imageGradient || 'general';
