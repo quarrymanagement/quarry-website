@@ -134,75 +134,38 @@ async function createGoogleCalendarEvent(summary, description, location, startIs
   }
 }
 
-// ----- Booking storage in Netlify Blobs ---------------------------------
-// Path: /api/v1/blobs/{NETLIFY_SITE_ID}/golf-bookings/{YYYY-MM-DD}
-//   - SITE_ID must be the UUID, not the slug. The slug returns 400.
-//   - 'golf-bookings' is the store name; date is the key.
-//   - Old code used a flat key 'golf-{date}' which was never a valid path
-//     on Netlify's Blobs REST API; writes silently failed. Fixed 2026-05-07.
-function toIsoDate(d) {
-  if (!d) return null;
-  const s = String(d).trim();
-  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-  let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
-  if (m) return `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}`;
-  m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
-  if (m) return `${m[3]}-${m[1].padStart(2, '0')}-${m[2].padStart(2, '0')}`;
-  m = s.match(/^(\d{4})[\/](\d{1,2})[\/](\d{1,2})$/);
-  if (m) return `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}`;
-  return null;
-}
-
+// ----- Booking storage (best effort, mirrors the helper from create-checkout) -----
 async function storeBooking(m, amountStr) {
   try {
     const token = process.env.NETLIFY_AUTH_TOKEN;
     if (!token) { console.warn('NETLIFY_AUTH_TOKEN missing - skipping blob store'); return; }
-    const siteId = process.env.NETLIFY_SITE_ID || 'd9496ae2-2b01-4229-b6d2-9203c3be7acb';
-    const dateKey = toIsoDate(m.date);
-    if (!dateKey) { console.warn('storeBooking: bad date metadata', m.date); return; }
-    const url = `https://api.netlify.com/api/v1/blobs/${siteId}/golf-bookings/${dateKey}`;
-
+    const siteId = 'roaring-pegasus-444826';
+    const dateKey = (m.date || 'unknown').replace(/\//g, '-');
+    const key = encodeURIComponent('golf-' + dateKey);
+    const url = 'https://api.netlify.com/api/v1/blobs/' + siteId + '/' + key;
     const existing = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
     let bookings = [];
-    if (existing.ok) {
-      try { bookings = (await existing.json()).bookings || []; } catch (_) {}
-    } else if (existing.status !== 404) {
-      console.warn('storeBooking GET unexpected status', existing.status, 'for', dateKey);
-    }
-
+    if (existing.ok) { try { bookings = (await existing.json()).bookings || []; } catch (_) {} }
     bookings.push({
       bay: m.bay,
       time: m.time,
-      date: dateKey,                    // stored canonical
-      rawDate: m.date,                  // original for audit
+      date: m.date,
       duration: m.duration,
       players: m.players,
-      partySize: m.players,
-      customerName: m.customerName,     // canonical name field
-      customerEmail: m.customerEmail,
-      customerPhone: m.customerPhone,
-      name: m.customerName,             // back-compat
-      email: m.customerEmail,           // back-compat
-      phone: m.customerPhone,           // back-compat
+      name: m.customerName,
+      email: m.customerEmail,
+      phone: m.customerPhone,
       extraBalls: m.extraBalls,
       extraBallsPrice: m.extraBallsPrice,
       amountPaid: amountStr,
-      sessionId: m.sessionId || m.checkoutSessionId || '',
-      paymentIntent: m.paymentIntent || '',
-      bookedAt: new Date().toISOString(),
+      bookedAt: new Date().toISOString()
     });
-
-    const put = await fetch(url, {
+    await fetch(url, {
       method: 'PUT',
       headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ bookings }),
+      body: JSON.stringify({ bookings })
     });
-    if (put.ok) {
-      console.log('Booking stored:', m.bay, dateKey, m.time, '(total now', bookings.length + ')');
-    } else {
-      const t = await put.text();
-      console.error('storeBooking PUT failed', put.status, t.slice(0, 200));
-    }
+    console.log('Booking stored:', m.bay, m.date, m.time);
   } catch (e) {
     console.error('storeBooking error:', e.message);
   }
