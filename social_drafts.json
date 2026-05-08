@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-08T13:03:42.010Z",
+  "updatedAt": "2026-05-08T20:01:56.389Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -2095,7 +2095,7 @@
         "instagram"
       ],
       "status": "skeleton",
-      "scheduledFor": "2026-07-04T11:00:00-05:00",
+      "scheduledFor": "2026-07-05T11:00:00-05:00",
       "createdAt": "2026-05-06T00:06:15.876Z",
       "createdBy": "cadence-engine",
       "context": {
@@ -2133,7 +2133,9 @@
       "caption": "",
       "hashtags": [],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "bumpedFromDay": "2026-07-04",
+      "updatedAt": "2026-05-08T20:01:56.389Z"
     },
     {
       "id": "drf-movdpyth-1-cosrw",
@@ -2442,6 +2444,153 @@
       "model": "claude-sonnet-4-6",
       "hydratedAt": "2026-05-08T13:03:38.878Z",
       "updatedAt": "2026-05-08T13:03:42.010Z"
+    },
+    {
+      "id": "drf-moxcco0v-3-5pgrq",
+      "cadenceTag": "event:evt-car-cruise-2026-07-18:T-14",
+      "type": "event_promo",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-07-04T17:00:00-05:00",
+      "createdAt": "2026-05-08T20:01:56.383Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "event",
+        "sourceId": "evt-car-cruise-2026-07-18",
+        "eventName": "Quarry Classics Car Cruise",
+        "eventDate": "2026-07-18",
+        "eventTime": "17:00",
+        "eventDescription": "Classics, muscle, trucks, bikes - all makes and models welcome. Cruise in, park, hang out. Live band starts at 7 PM. Family and pet friendly. Free event, no registration required.",
+        "pricePerSeat": 0,
+        "totalCapacity": 0,
+        "registeredCount": 0,
+        "fillPct": 0,
+        "arcStep": "T-14",
+        "arcLabel": "What to Expect"
+      },
+      "graphicBrief": {
+        "type": "event_poster",
+        "templateRef": "Event poster — match Boots & Bourbon / Live Bands template style",
+        "neededBy": "2026-07-02",
+        "dimensions": "1080x1080 square (Instagram + Facebook safe)",
+        "toneMode": "standard",
+        "spec": {
+          "backgroundIdea": "Use a Quarry-relevant photographic background that matches the event theme (e.g. country/boots for Boot Scootin, bingo balls/80s for Music Bingo, vineyard for Chateau trip, etc.)",
+          "title": "QUARRY CLASSICS CAR CRUISE",
+          "subtitle": "Classics, muscle, trucks, bikes - all makes and models welcome. Cruise in, park, hang out. Live band",
+          "date": "SATURDAY, JULY 18",
+          "time": "5:00 PM",
+          "callout": "TICKETS AVAILABLE",
+          "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
+          "qLogo": "top-center, gold"
+        },
+        "canvasNote": "What to Expect — Post 14 days before event. "
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
+    },
+    {
+      "id": "drf-moxcco0v-2-u1fr6",
+      "cadenceTag": "event:evt-car-cruise-2026-07-18:T-21",
+      "type": "event_promo",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-06-27T11:00:00-05:00",
+      "createdAt": "2026-05-08T20:01:56.383Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "event",
+        "sourceId": "evt-car-cruise-2026-07-18",
+        "eventName": "Quarry Classics Car Cruise",
+        "eventDate": "2026-07-18",
+        "eventTime": "17:00",
+        "eventDescription": "Classics, muscle, trucks, bikes - all makes and models welcome. Cruise in, park, hang out. Live band starts at 7 PM. Family and pet friendly. Free event, no registration required.",
+        "pricePerSeat": 0,
+        "totalCapacity": 0,
+        "registeredCount": 0,
+        "fillPct": 0,
+        "arcStep": "T-21",
+        "arcLabel": "Weekly Hype"
+      },
+      "graphicBrief": {
+        "type": "event_poster",
+        "templateRef": "Event poster — match Boots & Bourbon / Live Bands template style",
+        "neededBy": "2026-06-25",
+        "dimensions": "1080x1080 square (Instagram + Facebook safe)",
+        "toneMode": "standard",
+        "spec": {
+          "backgroundIdea": "Use a Quarry-relevant photographic background that matches the event theme (e.g. country/boots for Boot Scootin, bingo balls/80s for Music Bingo, vineyard for Chateau trip, etc.)",
+          "title": "QUARRY CLASSICS CAR CRUISE",
+          "subtitle": "Classics, muscle, trucks, bikes - all makes and models welcome. Cruise in, park, hang out. Live band",
+          "date": "SATURDAY, JULY 18",
+          "time": "5:00 PM",
+          "callout": "TICKETS AVAILABLE",
+          "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
+          "qLogo": "top-center, gold"
+        },
+        "canvasNote": "Weekly Hype — Post 21 days before event. "
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
+    },
+    {
+      "id": "drf-moxcco0u-1-yuvdh",
+      "cadenceTag": "event:evt-car-cruise-2026-07-18:T-30",
+      "type": "event_promo",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-06-18T10:00:00-05:00",
+      "createdAt": "2026-05-08T20:01:56.382Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "event",
+        "sourceId": "evt-car-cruise-2026-07-18",
+        "eventName": "Quarry Classics Car Cruise",
+        "eventDate": "2026-07-18",
+        "eventTime": "17:00",
+        "eventDescription": "Classics, muscle, trucks, bikes - all makes and models welcome. Cruise in, park, hang out. Live band starts at 7 PM. Family and pet friendly. Free event, no registration required.",
+        "pricePerSeat": 0,
+        "totalCapacity": 0,
+        "registeredCount": 0,
+        "fillPct": 0,
+        "arcStep": "T-30",
+        "arcLabel": "Save the Date"
+      },
+      "graphicBrief": {
+        "type": "event_poster",
+        "templateRef": "Event poster — match Boots & Bourbon / Live Bands template style",
+        "neededBy": "2026-06-16",
+        "dimensions": "1080x1080 square (Instagram + Facebook safe)",
+        "toneMode": "standard",
+        "spec": {
+          "backgroundIdea": "Use a Quarry-relevant photographic background that matches the event theme (e.g. country/boots for Boot Scootin, bingo balls/80s for Music Bingo, vineyard for Chateau trip, etc.)",
+          "title": "QUARRY CLASSICS CAR CRUISE",
+          "subtitle": "Classics, muscle, trucks, bikes - all makes and models welcome. Cruise in, park, hang out. Live band",
+          "date": "SATURDAY, JULY 18",
+          "time": "5:00 PM",
+          "callout": "TICKETS AVAILABLE",
+          "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
+          "qLogo": "top-center, gold"
+        },
+        "canvasNote": "Save the Date — Post 30 days before event. "
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
     }
   ],
   "history": [],
