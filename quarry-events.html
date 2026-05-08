@@ -1667,9 +1667,11 @@
                 if (!resp.ok) throw new Error('Failed to fetch events data');
                 const data = await resp.json();
                 allEvents = (data.events || []).map(evt => {
-                    // Free walk-up events have no capacity tracking — never auto-mark "sold-out"
+                    // Skip auto-capacity for any event NOT using on-site Stripe registration
+                    // (free walk-ups + external email registration like Yoga with Charity)
                     const isFreeWalkup = evt.noRegistration || evt.registrationType === 'none' || evt.eventType === 'free';
-                    if (isFreeWalkup) {
+                    const isEmailReg   = evt.registrationType === 'email';
+                    if (isFreeWalkup || isEmailReg) {
                         evt.status = evt.status === 'inactive' ? 'inactive' : 'available';
                     } else {
                         // Auto-calculate status from capacity
@@ -1984,6 +1986,10 @@
             if (event.noRegistration || event.registrationType === "none" || event.eventType === "free") {
                 return { class: "available", text: "Free Event" };
             }
+            // External email-only registration (e.g. Yoga with Charity) - no capacity displayed
+            if (event.registrationType === "email") {
+                return { class: "available", text: "RSVP via Email" };
+            }
             const remaining = event.totalCapacity - event.registeredCount;
             if (event.status === "sold-out" || remaining <= 0) {
                 return { class: "sold-out", text: "Sold Out" };
@@ -1999,6 +2005,9 @@
         function getAvailabilityText(event) {
             if (event.noRegistration || event.registrationType === "none" || event.eventType === "free") {
                 return { text: "Just cruise in - no registration needed", class: "available" };
+            }
+            if (event.registrationType === "email") {
+                return { text: "Email " + (event.registrationEmail || "to register") + " to reserve your spot", class: "available" };
             }
             const remaining = event.totalCapacity - event.registeredCount;
             if (event.status === "sold-out" || remaining <= 0) {
@@ -2016,6 +2025,16 @@
             const statusInfo = getStatusInfo(event);
             const availabilityInfo = getAvailabilityText(event);
             const isFreeWalkup = event.noRegistration || event.registrationType === "none" || event.eventType === "free";
+            const isEmailReg   = event.registrationType === "email";
+            // Build mailto: link if this event uses external email registration
+            let mailtoHref = '';
+            if (isEmailReg && event.registrationEmail) {
+                const subj = event.registrationSubject || ('Reservation for The Quarry Event - ' + (event.date || ''));
+                const body = event.registrationBody || '';
+                mailtoHref = 'mailto:' + event.registrationEmail
+                    + '?subject=' + encodeURIComponent(subj)
+                    + '&body=' + encodeURIComponent(body);
+            }
 
             return `
                 <div class="event-card" data-category="${event.category}">
@@ -2058,6 +2077,8 @@
                             <span class="availability-text ${availabilityInfo.class}">${availabilityInfo.text}</span>
                             ${event.status === "sold-out" ? `
                                 <button class="event-button" disabled>Sold Out</button>
+                            ` : isEmailReg ? `
+                                <a class="event-button" href="${mailtoHref}" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;">Email to RSVP</a>
                             ` : isFreeWalkup ? `
                                 <button class="event-button" onclick="openModal(${allEvents.indexOf(event)})">Event Details</button>
                             ` : `
