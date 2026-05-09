@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-08T20:01:56.389Z",
+  "updatedAt": "2026-05-09T13:05:58.029Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -167,7 +167,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-05-15T17:00:00-05:00",
       "createdAt": "2026-04-28T03:33:43.330Z",
       "createdBy": "cadence-engine",
@@ -193,10 +193,29 @@
         },
         "canvasNote": "Member Benefit Spotlight — recurring monthly post for the Rock & Vine Wine Club."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Rock & Vine Wine Club members get more than a bottle. Monthly curated selections, exclusive tastings, and early access to member events — all out here in Defiance Wine Country. May selections are in. Join before the month's out.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#DefianceWineCountry",
+        "#StCharlesCounty",
+        "#STLWine",
+        "#WineBar",
+        "#WineClub",
+        "#STLEats",
+        "#WentzvilleMO"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Two glasses of white and rosé wine side by side on a weathered stone ledge, late afternoon golden light, soft-focus view of a calm lake and limestone cliffs behind, warm neutral tones, string lights beginning to glow in the background, no faces, no text",
+      "variants": {
+        "facebook": "Rock & Vine Wine Club members get more than a bottle each month. Curated selections, exclusive tastings, and member-only events — all at The Quarry in New Melle. May selections are in. If you've been thinking about joining, now's a good time.",
+        "instagram": "Rock & Vine Wine Club — monthly curated wines, tastings, and member events out in Defiance Wine Country. May selections are in."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "Mid-month member benefit spotlight calls for lifestyle and belonging tone — this copy leads with what members get, not a hard sell, and closes with a soft nudge to join before May closes out.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-05-09T13:05:44.679Z",
+      "updatedAt": "2026-05-09T13:05:44.679Z"
     },
     {
       "id": "drf-moi2najm-x3yu4",
@@ -471,7 +490,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-05-15T18:00:00-05:00",
       "createdAt": "2026-04-28T03:38:22.277Z",
       "createdBy": "cadence-engine",
@@ -505,12 +524,32 @@
           "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "One Week Away — Post 7 days before event. "
+        "canvasNote": "One Week Away — Post 7 days before event. ",
+        "reelBrief": "Open with a slow pan across a bingo card on a table set for four, beer bucket in frame. Cut to a quick montage of wine being poured, a prize being held up, people reacting (no faces needed — hands, glasses, cards). End on the table setup with string lights overhead. Suggested audio: upbeat 80s synth instrumental or a recognizable 80s hit snippet. Text overlay: '70s • 80s • 90s Music Bingo / May 22 / The Quarry / Link in bio'."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Music Bingo is back — and this one hits different. 70s, 80s, and 90s hits, tables of 4, a beer bucket or bottle of wine included, and prizes all night. Friday, May 22 at 5:30pm. Seats are $80/table and past nights have sold out. Link in bio to grab yours.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#STLEvents",
+        "#MusicBingo",
+        "#WentzvilleMO",
+        "#OFallonMO"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Overhead shot of a bingo card on a dark wood table next to a sweating beer bottle and two wine glasses, warm string-light bokeh in background, vintage 80s cassette tape resting beside the card as a prop, golden evening light, no faces, no text on card",
+      "variants": {
+        "facebook": "Music Bingo is back — and this one covers three decades of hits. 70s, 80s, and 90s all night long, tables of 4, a beer bucket or bottle of wine included per table, and prizes throughout the night. Friday, May 22 at 5:30pm. Seats are $80/table. Past nights have sold out — grab your table now: [LINK]",
+        "instagram": "70s, 80s, and 90s Music Bingo — May 22 at 5:30pm. Tables of 4, wine or beer included, prizes all night. $80/table. Link in bio."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "At T-7 with 38% fill, this is a value-push moment — the caption leads with what you get (three decades, drinks included, prizes) and names the sell-out history as soft social proof without manufactured urgency.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-05-09T13:05:58.029Z",
+      "updatedAt": "2026-05-09T13:05:58.029Z"
     },
     {
       "id": "drf-moi2t9s5-k-otn3p",
