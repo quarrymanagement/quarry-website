@@ -36628,8 +36628,8 @@
     "emailStatus": "Subscribed",
     "smsStatus": "",
     "source": "Event RSVP",
-    "lastActivity": "Promoted to Subscribed (catchup batch)",
-    "lastActivityDate": "2026-05-04T23:30:00Z",
+    "lastActivity": "Form: event-registration",
+    "lastActivityDate": "2026-05-10T12:02:17.659Z",
     "address": {
       "street": "",
       "city": "",
@@ -36644,9 +36644,25 @@
         "details": {
           "reason": "Added to LIST_SUBSCRIBED on owner's instruction (use-unsubs-as-complaints policy 2026-05-04)"
         }
+      },
+      {
+        "type": "event-registration",
+        "timestamp": "2026-05-10T12:02:17.659Z",
+        "marketingOptIn": false,
+        "details": {
+          "eventId": "event_1776285550837",
+          "eventName": "70s • 80s • 90s MUSIC BINGO",
+          "partySize": "1",
+          "seatType": "general",
+          "amountPaid": "80.00",
+          "ip": "3.145.106.248",
+          "user_agent": "node"
+        }
       }
     ],
-    "tags": []
+    "tags": [
+      "Event Attendees"
+    ]
   },
   {
     "firstName": "Sara",
