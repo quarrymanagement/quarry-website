@@ -115,6 +115,47 @@ async function writeProcessed(set) {
   });
 }
 
+// Persist booking record to the canonical golf-bookings/{date} blob path so
+// the customer-facing get-bookings.js (double-book guard) and the admin
+// update-booking.js (reschedule) can both find it.
+async function persistToBlob(b) {
+  const token = process.env.NETLIFY_AUTH_TOKEN;
+  if (!token || !b.date) return { ok: false, reason: 'missing token or date' };
+  const siteId = process.env.NETLIFY_SITE_ID || 'd9496ae2-2b01-4229-b6d2-9203c3be7acb';
+  const url = 'https://api.netlify.com/api/v1/blobs/' + siteId + '/golf-bookings/' + b.date;
+  let bookings = [];
+  try {
+    const r = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
+    if (r.ok) { const d = await r.json(); bookings = d.bookings || []; }
+  } catch (_) {}
+  // Replace any existing record with the same sessionId
+  bookings = bookings.filter(x => (x.sessionId || '') !== b.sessionId);
+  bookings.push({
+    sessionId: b.sessionId,
+    bay: b.bay,
+    time: b.time,
+    date: b.date,
+    dateKey: b.date,
+    duration: b.duration,
+    players: b.players,
+    partySize: b.players,
+    customerName:  b.customerName,
+    customerEmail: b.customerEmail,
+    customerPhone: b.customerPhone,
+    extraBalls: b.extraBalls,
+    extraBallsPrice: b.extraBallsPrice,
+    amountPaid: b.amountPaid,
+    bookedAt: new Date().toISOString(),
+    backfilled: true
+  });
+  const r2 = await fetch(url, {
+    method: 'PUT',
+    headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ bookings })
+  });
+  return { ok: r2.ok, status: r2.status };
+}
+
 // ----- Customer email body -----
 function buildCustomerHtml(b) {
   const extrasLine = b.extraBalls > 0
@@ -255,8 +296,15 @@ exports.handler = async (event) => {
         }
       }
 
+      // 3) Persist booking to canonical blob path so admin reschedule + double-book guard work
+      let blobRes = 'skipped';
+      try {
+        const pr = await persistToBlob(b);
+        blobRes = pr.ok ? 'stored' : ('fail ' + pr.status);
+      } catch (e) { blobRes = 'fail: ' + e.message.substring(0, 100); }
+
       processed.add(s.id);
-      results.push({ ...b, email: emailRes, calendar: calRes });
+      results.push({ ...b, email: emailRes, calendar: calRes, blob: blobRes });
     }
 
     if (!dryRun && results.length) await writeProcessed(processed);
