@@ -189,10 +189,11 @@ exports.handler = async (event) => {
 
   try {
     let body = {}; try { body = JSON.parse(event.body || '{}'); } catch (_) {}
-    const dryRun    = !!body.dryRun;
-    const force     = !!body.force;
-    const skipEmail = !!body.skipEmail;
-    const sinceDays = parseInt(body.sinceDays || '180', 10);
+    const dryRun       = !!body.dryRun;
+    const force        = !!body.force;
+    const skipEmail    = !!body.skipEmail;
+    const skipCalendar = !!body.skipCalendar;
+    const sinceDays    = parseInt(body.sinceDays || '180', 10);
 
     const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
     const sinceTs = Math.floor((Date.now() - sinceDays * 24 * 3600 * 1000) / 1000);
@@ -255,6 +256,8 @@ exports.handler = async (event) => {
 
       // 2) Calendar event
       let calRes = 'skipped';
+      if (skipCalendar) { calRes = 'skipped (skipCalendar=true)'; }
+      else {
       const start = parseHourFromAmPm(b.time);
       if (start && b.date) {
         let endHour = start.hour, endMin = start.minute + 50;
@@ -294,7 +297,10 @@ exports.handler = async (event) => {
           if (global.__calendarTokenSource) detail += ' [token=' + global.__calendarTokenSource + ']';
           calRes = 'fail: ' + detail.substring(0, 400);
         }
+      } else {
+        console.warn('Could not parse time/date for calendar event:', b.date, b.time);
       }
+      } // end else (calendar enabled)
 
       // 3) Persist booking to canonical blob path so admin reschedule + double-book guard work
       let blobRes = 'skipped';
