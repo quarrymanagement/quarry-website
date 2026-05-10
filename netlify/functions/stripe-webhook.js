@@ -134,27 +134,34 @@ async function createGoogleCalendarEvent(summary, description, location, startIs
   }
 }
 
-// ----- Booking storage (best effort, mirrors the helper from create-checkout) -----
-async function storeBooking(m, amountStr) {
+// ----- Booking storage (best effort) -----
+// Writes to golf-bookings/{date} which is the canonical path read by both
+// get-bookings.js (customer-side double-book prevention) and update-booking.js
+// (admin reschedule). Field names match the schema those readers expect.
+async function storeBooking(m, amountStr, sessionId) {
   try {
     const token = process.env.NETLIFY_AUTH_TOKEN;
     if (!token) { console.warn('NETLIFY_AUTH_TOKEN missing - skipping blob store'); return; }
-    const siteId = 'roaring-pegasus-444826';
+    const siteId = process.env.NETLIFY_SITE_ID || 'd9496ae2-2b01-4229-b6d2-9203c3be7acb';
     const dateKey = (m.date || 'unknown').replace(/\//g, '-');
-    const key = encodeURIComponent('golf-' + dateKey);
-    const url = 'https://api.netlify.com/api/v1/blobs/' + siteId + '/' + key;
+    const url = 'https://api.netlify.com/api/v1/blobs/' + siteId + '/golf-bookings/' + dateKey;
     const existing = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
     let bookings = [];
     if (existing.ok) { try { bookings = (await existing.json()).bookings || []; } catch (_) {} }
+    // Idempotency: if a record with this sessionId already exists, replace it
+    if (sessionId) bookings = bookings.filter(b => (b.sessionId || '') !== sessionId);
     bookings.push({
+      sessionId: sessionId || '',
       bay: m.bay,
       time: m.time,
       date: m.date,
+      dateKey,
       duration: m.duration,
       players: m.players,
-      name: m.customerName,
-      email: m.customerEmail,
-      phone: m.customerPhone,
+      partySize: m.players,
+      customerName:  m.customerName,
+      customerEmail: m.customerEmail,
+      customerPhone: m.customerPhone,
       extraBalls: m.extraBalls,
       extraBallsPrice: m.extraBallsPrice,
       amountPaid: amountStr,
@@ -165,7 +172,7 @@ async function storeBooking(m, amountStr) {
       headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
       body: JSON.stringify({ bookings })
     });
-    console.log('Booking stored:', m.bay, m.date, m.time);
+    console.log('Booking stored at golf-bookings/' + dateKey + ':', m.bay, m.time);
   } catch (e) {
     console.error('storeBooking error:', e.message);
   }
@@ -282,7 +289,7 @@ async function handleGolfBooking(session) {
   } catch (e) { console.error('calendar event error:', e.message); }
 
   // 4) Persist booking
-  try { await storeBooking(m, amountStr); } catch (e) { console.error('store booking error:', e.message); }
+  try { await storeBooking(m, amountStr, session.id); } catch (e) { console.error('store booking error:', e.message); }
 }
 
 // ----- Webhook entry point -----
