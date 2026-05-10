@@ -4,7 +4,7 @@ exports.handler = async (event) => {
     const date = event.queryStringParameters && event.queryStringParameters.date;
     if (!date) return { statusCode: 400, headers, body: JSON.stringify({ error: 'date required' }) };
     const token = process.env.NETLIFY_AUTH_TOKEN;
-    const siteId = 'roaring-pegasus-444826';
+    const siteId = process.env.NETLIFY_SITE_ID || 'd9496ae2-2b01-4229-b6d2-9203c3be7acb';
     const dateKey = date.replace(/\//g, '-');
     const url = `https://api.netlify.com/api/v1/blobs/${siteId}/golf-bookings/${dateKey}`;
     const res = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
