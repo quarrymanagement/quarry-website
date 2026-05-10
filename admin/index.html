@@ -4169,7 +4169,7 @@
 
             <!-- Golf booking detail modal -->
             <div id="golfBookingModal" class="modal-overlay" onclick="if(event.target===this)closeGolfBookingModal()">
-                <div class="modal-card" style="max-width:520px;width:90%;background:var(--bg-secondary);border-radius:10px;padding:24px;border:1px solid var(--border-subtle);">
+                <div class="modal-card" style="max-width:560px;width:90%;background:var(--bg-secondary);border-radius:10px;padding:24px;border:1px solid var(--border-subtle);max-height:90vh;overflow-y:auto;">
                     <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:16px;">
                         <div>
                             <h3 style="margin:0 0 4px;color:var(--gold);font-size:1.1rem;">Golf Booking Details</h3>
@@ -4178,6 +4178,45 @@
                         <button class="btn-close" style="background:none;border:none;font-size:1.5rem;color:var(--text-secondary);cursor:pointer;" onclick="closeGolfBookingModal()">&times;</button>
                     </div>
                     <div id="gbmBody" style="font-size:0.9rem;line-height:1.7;"></div>
+                    <div id="gbmActions" style="display:flex;gap:8px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap;">
+                        <button class="btn-secondary" onclick="closeGolfBookingModal()">Close</button>
+                        <button class="btn-primary" onclick="openGolfReschedule()">Reschedule</button>
+                    </div>
+                    <!-- Reschedule form (hidden by default) -->
+                    <div id="gbmReschedule" style="display:none;margin-top:18px;padding:18px;background:var(--bg-elevated);border-radius:8px;border:1px solid var(--border-subtle);">
+                        <h4 style="margin:0 0 14px;color:var(--gold);font-size:1rem;">Reschedule This Booking</h4>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                            <div>
+                                <label style="display:block;font-size:0.75rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">New Date</label>
+                                <input type="date" id="rsNewDate" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-secondary);color:var(--text-primary);font-size:0.9rem;">
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:0.75rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">New Time</label>
+                                <select id="rsNewTime" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-secondary);color:var(--text-primary);font-size:0.9rem;"></select>
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:0.75rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">New Bay</label>
+                                <select id="rsNewBay" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-secondary);color:var(--text-primary);font-size:0.9rem;">
+                                    <option value="Bay 1">Bay 1</option><option value="Bay 2">Bay 2</option>
+                                    <option value="Bay 3">Bay 3</option><option value="Bay 4">Bay 4</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:0.75rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Admin Password</label>
+                                <input type="password" id="rsAdminPw" placeholder="Required" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-secondary);color:var(--text-primary);font-size:0.9rem;">
+                            </div>
+                        </div>
+                        <div style="margin-bottom:12px;">
+                            <label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;color:var(--text-primary);cursor:pointer;">
+                                <input type="checkbox" id="rsSendEmail" checked> Send rescheduled-confirmation email to customer
+                            </label>
+                        </div>
+                        <div id="rsResult" style="font-size:0.85rem;margin-bottom:12px;"></div>
+                        <div style="display:flex;gap:8px;justify-content:flex-end;">
+                            <button class="btn-secondary" onclick="cancelGolfReschedule()">Cancel</button>
+                            <button class="btn-primary" id="rsSubmitBtn" onclick="submitGolfReschedule()">Save Changes</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -12543,6 +12582,98 @@ function hashCode(str) {
         };
         window.closeGolfBookingModal = function() {
             document.getElementById('golfBookingModal').classList.remove('active');
+            // Reset reschedule form so next open starts clean
+            document.getElementById('gbmReschedule').style.display = 'none';
+            document.getElementById('gbmActions').style.display = 'flex';
+            const rsr = document.getElementById('rsResult'); if (rsr) rsr.innerHTML = '';
+        };
+
+        // === Reschedule form ===
+        let _rsCurrentBooking = null;
+        window.openGolfReschedule = function() {
+            // Find currently displayed booking from header text — fallback to last cache item
+            const last = (cache.bookings || []).find(b => {
+                const hdr = document.getElementById('gbmHeader').textContent;
+                return hdr && hdr.indexOf(b.bay) !== -1 && hdr.indexOf(b.date) !== -1 && hdr.indexOf(b.time) !== -1;
+            });
+            if (!last) { alert('Could not identify booking to edit. Refresh and try again.'); return; }
+            _rsCurrentBooking = last;
+            // Pre-fill form with current values
+            document.getElementById('rsNewDate').value = last.date;
+            document.getElementById('rsNewBay').value  = last.bay;
+            // Build time dropdown
+            const timeSel = document.getElementById('rsNewTime');
+            timeSel.innerHTML = '';
+            HOURS.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t; opt.textContent = t;
+                if (t === last.time) opt.selected = true;
+                timeSel.appendChild(opt);
+            });
+            document.getElementById('rsAdminPw').value = '';
+            document.getElementById('rsSendEmail').checked = true;
+            document.getElementById('rsResult').innerHTML = '';
+            // Show form, hide initial actions row
+            document.getElementById('gbmReschedule').style.display = 'block';
+            document.getElementById('gbmActions').style.display = 'none';
+        };
+
+        window.cancelGolfReschedule = function() {
+            document.getElementById('gbmReschedule').style.display = 'none';
+            document.getElementById('gbmActions').style.display = 'flex';
+            document.getElementById('rsResult').innerHTML = '';
+        };
+
+        window.submitGolfReschedule = async function() {
+            const b = _rsCurrentBooking;
+            if (!b) return;
+            const newDate = document.getElementById('rsNewDate').value;
+            const newTime = document.getElementById('rsNewTime').value;
+            const newBay  = document.getElementById('rsNewBay').value;
+            const pw      = document.getElementById('rsAdminPw').value;
+            const sendEmail = document.getElementById('rsSendEmail').checked;
+            const resDiv = document.getElementById('rsResult');
+            const btn    = document.getElementById('rsSubmitBtn');
+
+            if (!pw) { resDiv.innerHTML = '<span style="color:#c33">Admin password required.</span>'; return; }
+            if (!newDate || !newTime || !newBay) { resDiv.innerHTML = '<span style="color:#c33">Date, time, and bay all required.</span>'; return; }
+            if (newDate === b.date && newTime === b.time && newBay === b.bay) {
+                resDiv.innerHTML = '<span style="color:#c33">Nothing changed.</span>';
+                return;
+            }
+
+            btn.disabled = true; btn.textContent = 'Saving...';
+            resDiv.innerHTML = '<span style="color:var(--text-secondary)">Updating booking...</span>';
+            try {
+                const r = await fetch('/.netlify/functions/update-booking', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        adminPassword: pw,
+                        sessionId:   b.sessionId,
+                        oldDateKey:  b.date,
+                        newDate:     newDate,
+                        newTime:     newTime,
+                        newBay:      newBay,
+                        sendReconfirm: sendEmail
+                    })
+                });
+                const data = await r.json();
+                if (!r.ok || !data.ok) {
+                    resDiv.innerHTML = '<span style="color:#c33">Error: ' + (data.error || ('HTTP ' + r.status)) + '</span>';
+                } else {
+                    let msg = 'Booking updated successfully';
+                    if (data.moved) msg += ' (moved from ' + b.date + ')';
+                    if (data.email && data.email.sent) msg += '. Reschedule email sent to ' + b.customerEmail;
+                    else if (sendEmail && data.email) msg += '. Email: ' + (data.email.reason || data.email.error || 'not sent');
+                    resDiv.innerHTML = '<span style="color:#2C5F2D">' + msg + '.</span>';
+                    // Refresh schedule + close modal after a moment
+                    setTimeout(() => { closeGolfBookingModal(); loadGolfSchedule(); }, 1500);
+                }
+            } catch (e) {
+                resDiv.innerHTML = '<span style="color:#c33">Network error: ' + e.message + '</span>';
+            }
+            btn.disabled = false; btn.textContent = 'Save Changes';
         };
     })();
     </script>
