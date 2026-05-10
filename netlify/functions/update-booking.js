@@ -29,7 +29,7 @@ const crypto = require('crypto');
 const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH || '';
 const NETLIFY_TOKEN = process.env.NETLIFY_AUTH_TOKEN || '';
 const SENDGRID_KEY = process.env.SENDGRID_API_KEY || '';
-const SITE_ID = 'roaring-pegasus-444826';
+const SITE_ID = process.env.NETLIFY_SITE_ID || 'd9496ae2-2b01-4229-b6d2-9203c3be7acb';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
