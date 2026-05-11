@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-11T16:04:52.715Z",
+  "updatedAt": "2026-05-11T16:06:33.399Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -26047,6 +26047,30 @@
       "sgEventId": "krpXjZQ9SLqnubs_baZz8w",
       "userAgent": "Mozilla/5.0 (Windows NT 5.1; rv:11.0) Gecko Firefox/11.0 (via ggpht.com GoogleImageProxy)",
       "category": "quarry-form-notification"
+    },
+    {
+      "ts": "2026-05-11T16:06:33.309Z",
+      "type": "poll",
+      "draftId": "f1c820f9-f469-430e-b1a1-2fed9d01f64a",
+      "sendId": "7a62ca53-4809-11f1-8238-e6db3a268033",
+      "summary": {
+        "opens": 175,
+        "clicks": 17,
+        "bounces": 6,
+        "unsubs": 0
+      }
+    },
+    {
+      "ts": "2026-05-11T16:06:33.399Z",
+      "type": "poll",
+      "draftId": "d4d01b90-a7a2-4061-b5d7-dd442f9acf7b",
+      "sendId": "92c78bd3-44af-11f1-81cc-0a22d60890ee",
+      "summary": {
+        "opens": 237,
+        "clicks": 4,
+        "bounces": 9,
+        "unsubs": 0
+      }
     }
   ],
   "aggregates": {
@@ -26076,8 +26100,8 @@
     },
     "d4d01b90-a7a2-4061-b5d7-dd442f9acf7b": {
       "delivered": 469,
-      "open": 355,
-      "uniqueOpen": 236,
+      "open": 356,
+      "uniqueOpen": 237,
       "click": 7,
       "uniqueClick": 4,
       "bounce": 9,
@@ -26094,12 +26118,12 @@
       "urlsClicked": {},
       "requests": 483,
       "block": 0,
-      "lastPolledAt": "2026-05-10T16:04:30.579Z"
+      "lastPolledAt": "2026-05-11T16:06:33.399Z"
     },
     "f1c820f9-f469-430e-b1a1-2fed9d01f64a": {
       "delivered": 486,
-      "open": 302,
-      "uniqueOpen": 174,
+      "open": 308,
+      "uniqueOpen": 175,
       "click": 34,
       "uniqueClick": 17,
       "bounce": 6,
@@ -26122,7 +26146,7 @@
       },
       "requests": 498,
       "block": 0,
-      "lastPolledAt": "2026-05-10T16:04:30.243Z"
+      "lastPolledAt": "2026-05-11T16:06:33.309Z"
     }
   }
 }
