@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-14T12:07:19.833Z",
+  "updatedAt": "2026-05-14T13:04:54.132Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -1447,7 +1447,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-05-20T17:00:00-05:00",
       "createdAt": "2026-04-28T03:38:22.281Z",
       "createdBy": "cadence-engine",
@@ -1506,12 +1506,32 @@
           ],
           "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
         },
-        "canvasNote": "Weekend Lineup — covers 3 band(s). Post 3 days before first show."
+        "canvasNote": "Weekend Lineup — covers 3 band(s). Post 3 days before first show.",
+        "reelBrief": "Open with a slow pan across the string-lit patio at dusk (2s). Cut to a close-up of a wine glass on a stone bar top, warm bokeh behind (3s). End on a wide shot of the outdoor stage or performance area, empty and inviting, golden light (3s). Suggested audio: upbeat classic rock instrumental or lo-fi 80s synth. Text overlay: 'This weekend. Live music. Free.' — fade in at the end."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "This weekend's live music lineup — free with your visit.\n\nSaturday: Music Bingo (70s/80s/90s DJ) from 6–10 PM\nSunday: Ed Callison from 1–4 PM\n\nNo cover. No ticket. Just come out.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#LiveMusicSTL",
+        "#WineBar",
+        "#STLEats",
+        "#MusicBingo"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Acoustic guitar leaning against a wooden stool on a warm string-lit patio at golden hour, stone cliff wall softly out of focus in the background, warm amber light, no people, no text",
+      "variants": {
+        "facebook": "This weekend's live music is free with your visit — no cover, no ticket needed.\n\nSaturday evening: 70s/80s/90s Music Bingo with a DJ, 6–10 PM\nSunday afternoon: Ed Callison, 1–4 PM\n\nGrab a table, pour a glass, and let the weekend do the rest. We're at 3960 Highway Z in New Melle.",
+        "instagram": "This weekend's live music — free with your visit.\n\nSat: Music Bingo (70s/80s/90s) 6–10 PM\nSun: Ed Callison 1–4 PM\n\nNo cover. Just come out."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "At T-3, the post focuses on 'this weekend' specificity with day, act, and time — framed as a casual invitation rather than a push, consistent with band post guidance and the no-urgency tone live music calls for.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-05-14T13:04:54.132Z",
+      "updatedAt": "2026-05-14T13:04:54.132Z"
     },
     {
       "id": "drf-moi2t9s9-y-d895r",
@@ -2853,7 +2873,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-05-17T16:00:00-05:00",
       "createdAt": "2026-05-14T11:06:10.620Z",
       "createdBy": "weather-trigger",
@@ -2877,12 +2897,30 @@
         },
         "canvasNote": "Patio-perfect day (85°F). Caption hooks on the weather."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "70s, no clouds, and a patio that earns it. Come find your table.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#WineBar",
+        "#PatioSeason",
+        "#STLEats",
+        "#OutdoorDining"
+      ],
       "imageUrl": null,
       "userImageUrl": null,
       "bumpedFromDay": "2026-05-15",
-      "updatedAt": "2026-05-14T12:07:19.833Z"
+      "updatedAt": "2026-05-14T13:04:41.796Z",
+      "imagePrompt": "Sun-drenched patio table set for two with a glass of white wine catching the afternoon light, stone cliff face and still lake softly out of focus in the background, string lights overhead not yet lit, warm golden hour glow, no people, no text",
+      "variants": {
+        "facebook": "70s, barely a cloud, and a patio that was made for a day like this. We're open Wednesday through Sunday — no reservations needed for dining. Just show up.",
+        "instagram": "70s, no clouds, and a patio that earns it. Come find your table."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "Pure atmosphere post with no event hook — sensory and invitational, not promotional — timed for the lunch-decision window when people are already thinking about the weekend.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-05-14T13:04:40.141Z"
     }
   ],
   "history": [],
