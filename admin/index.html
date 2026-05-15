@@ -4157,12 +4157,89 @@
                             <input type="date" id="golfScheduleDate" onchange="loadGolfSchedule()" style="padding:8px 10px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-elevated);color:var(--text-primary);font-size:0.9rem;">
                             <button class="btn-secondary" onclick="golfShiftDay(1)" title="Next day">Next &rsaquo;</button>
                             <button class="btn-secondary" onclick="golfJumpToday()">Today</button>
-                            <button class="btn-primary" onclick="loadGolfSchedule()">Refresh</button>
+                            <button class="btn-secondary" onclick="loadGolfSchedule()">Refresh</button>
+                            <button class="btn-primary" onclick="openGolfAddBooking()" style="background:#2C5F2D;border-color:#2C5F2D;">+ Add Booking</button>
                         </div>
                     </div>
                     <div id="golfScheduleStats" class="golf-summary" style="margin:8px 0 16px;"></div>
                     <div id="golfScheduleGrid" style="overflow-x:auto;border:1px solid var(--border-subtle);border-radius:8px;background:var(--bg-elevated);">
                         <div style="padding:32px;text-align:center;color:var(--text-secondary);">Loading bookings...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add booking modal (pay-at-venue) -->
+            <div id="golfAddBookingModal" class="modal-overlay" onclick="if(event.target===this)closeGolfAddBooking()">
+                <div class="modal-card" style="max-width:600px;width:90%;background:var(--bg-secondary);border-radius:10px;padding:24px;border:1px solid var(--border-subtle);max-height:92vh;overflow-y:auto;">
+                    <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px;">
+                        <div>
+                            <h3 style="margin:0 0 4px;color:var(--gold);font-size:1.15rem;">Add Golf Booking</h3>
+                            <div style="font-size:0.8rem;color:var(--text-secondary);">Pay-at-venue reservation — sends customer confirmation + calendar invite, no charge</div>
+                        </div>
+                        <button class="btn-close" style="background:none;border:none;font-size:1.5rem;color:var(--text-secondary);cursor:pointer;" onclick="closeGolfAddBooking()">&times;</button>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px;">
+                        <div style="grid-column:1/-1;">
+                            <label style="display:block;font-size:0.72rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Customer Name <span style="color:#c33">*</span></label>
+                            <input type="text" id="abCustName" placeholder="Full name" style="width:100%;padding:9px 10px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-elevated);color:var(--text-primary);font-size:0.9rem;">
+                        </div>
+                        <div>
+                            <label style="display:block;font-size:0.72rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Email</label>
+                            <input type="email" id="abCustEmail" placeholder="customer@example.com" style="width:100%;padding:9px 10px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-elevated);color:var(--text-primary);font-size:0.9rem;">
+                        </div>
+                        <div>
+                            <label style="display:block;font-size:0.72rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Phone</label>
+                            <input type="tel" id="abCustPhone" placeholder="(636) 555-1234" style="width:100%;padding:9px 10px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-elevated);color:var(--text-primary);font-size:0.9rem;">
+                        </div>
+                        <div>
+                            <label style="display:block;font-size:0.72rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Date <span style="color:#c33">*</span></label>
+                            <input type="date" id="abDate" style="width:100%;padding:9px 10px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-elevated);color:var(--text-primary);font-size:0.9rem;">
+                        </div>
+                        <div>
+                            <label style="display:block;font-size:0.72rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Time <span style="color:#c33">*</span></label>
+                            <select id="abTime" style="width:100%;padding:9px 10px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-elevated);color:var(--text-primary);font-size:0.9rem;"></select>
+                        </div>
+                        <div>
+                            <label style="display:block;font-size:0.72rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Bay <span style="color:#c33">*</span></label>
+                            <select id="abBay" style="width:100%;padding:9px 10px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-elevated);color:var(--text-primary);font-size:0.9rem;">
+                                <option value="Bay 1">Bay 1</option><option value="Bay 2">Bay 2</option>
+                                <option value="Bay 3">Bay 3</option><option value="Bay 4">Bay 4</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display:block;font-size:0.72rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Players <span style="color:#c33">*</span></label>
+                            <select id="abPlayers" style="width:100%;padding:9px 10px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-elevated);color:var(--text-primary);font-size:0.9rem;">
+                                <option value="1 Player">1 Player</option><option value="2 Players">2 Players</option>
+                                <option value="3 Players">3 Players</option><option value="4 Players" selected>4 Players</option>
+                                <option value="5 Players">5 Players</option><option value="6 Players">6 Players</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display:block;font-size:0.72rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Extra Balls</label>
+                            <select id="abExtras" style="width:100%;padding:9px 10px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-elevated);color:var(--text-primary);font-size:0.9rem;">
+                                <option value="0|0" selected>None</option>
+                                <option value="25|10">25 balls (+$10)</option>
+                                <option value="50|18">50 balls (+$18)</option>
+                            </select>
+                        </div>
+                        <div style="grid-column:1/-1;">
+                            <label style="display:block;font-size:0.72rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Notes (optional)</label>
+                            <textarea id="abNotes" placeholder="e.g. Group from Smith party, birthday celebration..." style="width:100%;padding:9px 10px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-elevated);color:var(--text-primary);font-size:0.88rem;min-height:50px;resize:vertical;"></textarea>
+                        </div>
+                        <div>
+                            <label style="display:block;font-size:0.72rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Admin Password <span style="color:#c33">*</span></label>
+                            <input type="password" id="abAdminPw" placeholder="Required" style="width:100%;padding:9px 10px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-elevated);color:var(--text-primary);font-size:0.9rem;">
+                        </div>
+                        <div style="display:flex;align-items:flex-end;padding-bottom:4px;">
+                            <label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;color:var(--text-primary);cursor:pointer;user-select:none;">
+                                <input type="checkbox" id="abSendEmail" checked> Email confirmation to customer
+                            </label>
+                        </div>
+                    </div>
+                    <div id="abResult" style="font-size:0.88rem;margin-top:14px;"></div>
+                    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:18px;">
+                        <button class="btn-secondary" onclick="closeGolfAddBooking()">Cancel</button>
+                        <button class="btn-primary" id="abSubmitBtn" onclick="submitGolfAddBooking()" style="background:#2C5F2D;border-color:#2C5F2D;">Save Booking</button>
                     </div>
                 </div>
             </div>
@@ -12539,11 +12616,13 @@ function hashCode(str) {
                     const b = lookup[bay + '|' + t];
                     if (b) {
                         const extras = b.extraBalls > 0 ? '<span class="gbk-extras">+' + b.extraBalls + ' balls</span>' : '';
-                        html += '<td class="golf-slot booked" data-session="' + escapeHtml(b.sessionId) + '" onclick="openGolfBookingDetails(\'' + b.sessionId + '\')">' +
+                        const isPayAtVenue = b.paymentMethod === 'pay-at-venue' || (b.sessionId && b.sessionId.indexOf('admin-') === 0);
+                        const priceText = isPayAtVenue ? '<span style="color:#9a7b2a;font-weight:600">Pay at venue</span>' : ('$' + ((b.amountTotal || 0)/100).toFixed(0));
+                        html += '<td class="golf-slot booked" data-session="' + escapeHtml(b.sessionId) + '" onclick="openGolfBookingDetails(\'' + b.sessionId + '\')"' + (isPayAtVenue ? ' style="background:rgba(154,123,42,0.10);border-left:3px solid #9a7b2a;"' : '') + '>' +
                                 '<div class="gbk-name">' + escapeHtml(b.customerName || '(no name)') + '</div>' +
                                 '<div class="gbk-meta">' +
                                   (b.players ? escapeHtml(b.players) + ' player' + (b.players == 1 ? '' : 's') + ' · ' : '') +
-                                  '$' + ((b.amountTotal || 0)/100).toFixed(0) +
+                                  priceText +
                                 '</div>' + extras +
                                 '</td>';
                     } else {
@@ -12586,6 +12665,96 @@ function hashCode(str) {
             document.getElementById('gbmReschedule').style.display = 'none';
             document.getElementById('gbmActions').style.display = 'flex';
             const rsr = document.getElementById('rsResult'); if (rsr) rsr.innerHTML = '';
+        };
+
+        // === Add booking (pay-at-venue) ===
+        window.openGolfAddBooking = function() {
+            // Pre-fill time dropdown
+            const timeSel = document.getElementById('abTime');
+            timeSel.innerHTML = '';
+            HOURS.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t; opt.textContent = t;
+                timeSel.appendChild(opt);
+            });
+            // Default date to whatever is shown in the schedule, or today
+            const cur = document.getElementById('golfScheduleDate').value || todayCT();
+            document.getElementById('abDate').value = cur;
+            // Reset form fields
+            document.getElementById('abCustName').value = '';
+            document.getElementById('abCustEmail').value = '';
+            document.getElementById('abCustPhone').value = '';
+            document.getElementById('abBay').value = 'Bay 1';
+            document.getElementById('abPlayers').value = '4 Players';
+            document.getElementById('abExtras').value = '0|0';
+            document.getElementById('abNotes').value = '';
+            document.getElementById('abAdminPw').value = '';
+            document.getElementById('abSendEmail').checked = true;
+            document.getElementById('abResult').innerHTML = '';
+            document.getElementById('golfAddBookingModal').classList.add('active');
+            setTimeout(() => document.getElementById('abCustName').focus(), 100);
+        };
+        window.closeGolfAddBooking = function() {
+            document.getElementById('golfAddBookingModal').classList.remove('active');
+        };
+        window.submitGolfAddBooking = async function() {
+            const name  = document.getElementById('abCustName').value.trim();
+            const email = document.getElementById('abCustEmail').value.trim();
+            const phone = document.getElementById('abCustPhone').value.trim();
+            const date  = document.getElementById('abDate').value;
+            const time  = document.getElementById('abTime').value;
+            const bay   = document.getElementById('abBay').value;
+            const players = document.getElementById('abPlayers').value;
+            const extrasVal = document.getElementById('abExtras').value.split('|');
+            const notes = document.getElementById('abNotes').value.trim();
+            const pw    = document.getElementById('abAdminPw').value;
+            const sendEmail = document.getElementById('abSendEmail').checked;
+            const resDiv = document.getElementById('abResult');
+            const btn    = document.getElementById('abSubmitBtn');
+
+            if (!name)  { resDiv.innerHTML = '<span style="color:#c33">Customer name required.</span>'; return; }
+            if (!date || !time || !bay || !players) { resDiv.innerHTML = '<span style="color:#c33">Date, time, bay, and players required.</span>'; return; }
+            if (!pw)    { resDiv.innerHTML = '<span style="color:#c33">Admin password required.</span>'; return; }
+            if (sendEmail && !email) { resDiv.innerHTML = '<span style="color:#c33">Customer email required if sending confirmation. Uncheck the box if not sending.</span>'; return; }
+
+            btn.disabled = true; btn.textContent = 'Saving...';
+            resDiv.innerHTML = '<span style="color:var(--text-secondary)">Creating booking...</span>';
+            try {
+                const r = await fetch('/.netlify/functions/admin-add-booking', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        adminPassword: pw,
+                        customerName: name, customerEmail: email, customerPhone: phone,
+                        bay, date, time, players,
+                        duration: '50 Minutes',
+                        extraBalls: extrasVal[0], extraBallsPrice: extrasVal[1],
+                        notes,
+                        sendConfirmEmail: sendEmail
+                    })
+                });
+                const data = await r.json();
+                if (!r.ok || !data.ok) {
+                    resDiv.innerHTML = '<span style="color:#c33">Error: ' + (data.error || ('HTTP ' + r.status)) + '</span>';
+                } else {
+                    let msg = 'Booking saved.';
+                    if (data.email === 'sent') msg += ' Customer email sent.';
+                    else if (data.email && data.email.indexOf('skipped') === 0) msg += ' Customer email skipped.';
+                    else if (data.email) msg += ' Customer email: ' + data.email + '.';
+                    if (data.calendar && data.calendar.indexOf('created') === 0) msg += ' Calendar event added.';
+                    resDiv.innerHTML = '<span style="color:#2C5F2D">' + msg + '</span>';
+                    // Refresh schedule + close after a moment
+                    setTimeout(() => {
+                        closeGolfAddBooking();
+                        // Jump the schedule to the new booking's date so admin can see it
+                        document.getElementById('golfScheduleDate').value = date;
+                        loadGolfSchedule();
+                    }, 1500);
+                }
+            } catch (e) {
+                resDiv.innerHTML = '<span style="color:#c33">Network error: ' + e.message + '</span>';
+            }
+            btn.disabled = false; btn.textContent = 'Save Booking';
         };
 
         // === Reschedule form ===
