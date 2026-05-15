@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-14T13:04:54.132Z",
+  "updatedAt": "2026-05-15T13:05:23.382Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -698,7 +698,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-05-21T11:00:00-05:00",
       "createdAt": "2026-04-28T03:38:22.278Z",
       "createdBy": "cadence-engine",
@@ -732,12 +732,32 @@
           "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "Tomorrow — Post 1 days before event. "
+        "canvasNote": "Tomorrow — Post 1 days before event. ",
+        "reelBrief": "Open with a slow pan across a table set with bingo cards and a wine bottle, string lights overhead. Cut to a close-up of a beer bucket with condensation catching the warm light. Hold 3s. End on the wide patio shot at dusk. Suggested audio: upbeat 80s synth instrumental or lo-fi remix of a recognizable era hit. Text overlay: '70s • 80s • 90s Music Bingo / Tomorrow 5:30pm / The Quarry'."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Music Bingo is tomorrow night — 70s, 80s, and 90s hits, a beer bucket or bottle of wine at your table, and prizes all night. Tables of 4, $80/table. A few spots still open.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#MusicBingo",
+        "#STLEvents",
+        "#WentzvilleMO",
+        "#OFallonMO"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Overhead shot of a rustic wooden table set for four at a warm evening venue — bingo cards, a wine bottle, and a bucket of beers arranged casually, string lights glowing softly overhead, stone wall backdrop, golden ambient light, no faces, no text",
+      "variants": {
+        "facebook": "Music Bingo is tomorrow night. 70s, 80s, and 90s hits — your table gets a beer bucket or a bottle of wine, and there are prizes all night long. Tables of 4, $80/table. A few spots are still open if you want in. Doors at 5:30pm, 3960 Highway Z, New Melle.",
+        "instagram": "Music Bingo is tomorrow — 70s, 80s, 90s hits with wine or beers at your table. A few spots left. Link in bio to grab yours."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "T-1 arc calls for short and punchy with one specific reason to act; fillPct of 38 triggers a value push (wine/beer included, prizes) while the remaining capacity note creates soft urgency without manufactured pressure.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-05-15T13:05:23.382Z",
+      "updatedAt": "2026-05-15T13:05:23.382Z"
     },
     {
       "id": "drf-moi2t9s6-o-yfveb",
