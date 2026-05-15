@@ -119,7 +119,13 @@ exports.handler = async (event) => {
 
   } catch (err) {
     console.error('create-checkout error:', err);
-    return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
+    // Friendly message for account-level holds (Stripe Risk Operations, etc.)
+    const raw = String(err.message || '');
+    let friendly = raw;
+    if (/cannot currently make live charges|capabilities are inactive|charges_disabled|account.*disabled/i.test(raw)) {
+      friendly = 'Online booking is temporarily paused while we update our payment system. Please call (636) 224-8257 or email management@thequarrystl.com to reserve a bay - we will get you on the calendar right away.';
+    }
+    return { statusCode: 500, headers, body: JSON.stringify({ error: friendly, _raw: raw }) };
   }
 };
 
