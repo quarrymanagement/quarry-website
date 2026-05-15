@@ -151,7 +151,7 @@ function buildCustomerHtml(b) {
   const extrasLine = (parseInt(b.extraBalls,10) || 0) > 0
     ? '<p style="margin:4px 0"><b>Extras:</b> ' + b.extraBalls + ' extra balls (+$' + (b.extraBallsPrice || 0) + ')</p>'
     : '';
-  const baseDollars = 30 + (parseInt(b.extraBallsPrice,10) || 0);
+  const baseDollars = 40 + (parseInt(b.extraBallsPrice,10) || 0);
   return (
     '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">' +
     '<div style="background:#1A0E08;padding:24px;text-align:center"><h1 style="color:#B8933A;margin:0">The Quarry</h1>' +
