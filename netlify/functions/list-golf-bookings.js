@@ -71,6 +71,56 @@ exports.handler = async (event) => {
         pages++;
     }
 
+    // Merge in pay-at-venue / manual bookings from blob storage (which never
+    // hit Stripe). Walk each day in the range and read the blob.
+    const netlifyToken = process.env.NETLIFY_AUTH_TOKEN;
+    const siteId = process.env.NETLIFY_SITE_ID || 'd9496ae2-2b01-4229-b6d2-9203c3be7acb';
+    if (netlifyToken) {
+        const seenSessions = new Set(all.map(b => b.sessionId));
+        // Walk each day in the requested range
+        let cursor = startDate;
+        let dayCount = 0;
+        while (cursor <= endDate && dayCount < 365) {
+            try {
+                const blobUrl = `https://api.netlify.com/api/v1/blobs/${siteId}/golf-bookings/${cursor}`;
+                const r = await fetch(blobUrl, { headers: { Authorization: 'Bearer ' + netlifyToken } });
+                if (r.ok) {
+                    const data = await r.json();
+                    for (const b of (data.bookings || [])) {
+                        if (!b.sessionId || seenSessions.has(b.sessionId)) continue;
+                        // Only include blob-only records (e.g. pay-at-venue / admin-added)
+                        // Stripe-paid records were already added above.
+                        if (!(String(b.sessionId).startsWith('admin-') || String(b.paymentMethod) === 'pay-at-venue')) continue;
+                        seenSessions.add(b.sessionId);
+                        all.push({
+                            sessionId:       b.sessionId,
+                            amountTotal:     0,
+                            amountPaid:      b.amountPaid || 'Pay at venue',
+                            currency:        'usd',
+                            createdAt:       b.bookedAt || new Date().toISOString(),
+                            customerName:    b.customerName    || '',
+                            customerEmail:   b.customerEmail   || '',
+                            customerPhone:   b.customerPhone   || '',
+                            bay:             b.bay || '',
+                            date:            b.date || cursor,
+                            time:            b.time || '',
+                            duration:        b.duration || '50 Minutes',
+                            players:         b.players  || '',
+                            extraBalls:      parseInt(b.extraBalls || '0', 10),
+                            extraBallsPrice: parseInt(b.extraBallsPrice || '0', 10),
+                            coupon:          '',
+                            paymentMethod:   b.paymentMethod || 'pay-at-venue',
+                            addedBy:         b.addedBy || 'admin',
+                            notes:           b.notes || ''
+                        });
+                    }
+                }
+            } catch (_) { /* skip days that error */ }
+            cursor = addDays(cursor, 1);
+            dayCount++;
+        }
+    }
+
     // Sort by date then time so the admin grid can render directly
     all.sort((a, b) => {
         const k1 = a.date + ' ' + (a.time || '');
