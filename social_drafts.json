@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-16T11:00:27.567Z",
+  "updatedAt": "2026-05-16T13:01:01.655Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -767,7 +767,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-05-22T09:00:00-05:00",
       "createdAt": "2026-04-28T03:38:22.278Z",
       "createdBy": "cadence-engine",
@@ -801,12 +801,32 @@
           "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "Today / Tonight — Post 0 days before event. "
+        "canvasNote": "Today / Tonight — Post 0 days before event. ",
+        "reelBrief": "Open with a slow pan across a bingo card on a wood table, wine glass in frame. Cut to a quick montage of 3 prize items or drink buckets. End on the patio string lights at dusk. Suggested audio: upbeat 80s synth instrumental or lo-fi remix of a recognizable era hit. Text overlay: '70s • 80s • 90s Music Bingo — Tonight at 5:30'."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Music Bingo is tonight — 70s, 80s, and 90s hits, a beer bucket or bottle of wine at your table, and prizes all night. Doors at 5:30. Seats are still available.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#MusicBingo",
+        "#STLEvents",
+        "#WentzvilleMO",
+        "#OFallonMO"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Overhead shot of a bingo card on a dark wood table at a warmly lit venue, a glass of red wine and a bottle of beer beside it, soft string light bokeh in the background, golden evening atmosphere, no faces, no text on the card",
+      "variants": {
+        "facebook": "Music Bingo is tonight at The Quarry — 70s, 80s, and 90s hits, a beer bucket or bottle of wine included at your table, and prizes all night long. Tables of 4, $80 per table. Doors open at 5:30. A few spots are still open — grab yours at the link.",
+        "instagram": "Music Bingo is tonight. 70s, 80s, 90s hits — wine or beer included, prizes all night. Doors at 5:30. Link in bio."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "T-0 calls for short, logistical, tonight-specific copy — this version leads with the event happening now, names the key inclusions, and closes with a soft availability nudge without manufactured urgency, matching the 38% fill context with a value-forward tone.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-05-16T13:01:01.655Z",
+      "updatedAt": "2026-05-16T13:01:01.655Z"
     },
     {
       "id": "drf-moi2t9s7-p-33n4f",
@@ -2989,7 +3009,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-05-17T16:00:00.000Z",
       "createdAt": "2026-05-16T11:00:27.567Z",
       "createdBy": "weather-trigger",
@@ -3013,10 +3033,29 @@
         },
         "canvasNote": "Patio-perfect day (87°F). Caption hooks on the weather."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "77 degrees, zero clouds, a cold glass of wine, and nowhere to be. The patio is ready when you are.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#WineBar",
+        "#PatioSeason",
+        "#STLEats",
+        "#OutdoorDining"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Sun-drenched patio table at a stone-and-wood venue, two glasses of chilled white wine catching afternoon light, soft bokeh of lush green trees and a calm quarry lake in the background, warm golden tones, no people, no text, natural and inviting",
+      "variants": {
+        "facebook": "77 degrees and a 2% chance of rain. The patio is open, the wine is cold, and the view doesn't disappoint. Come find your spot out here this weekend — we're open Wednesday through Sunday.",
+        "instagram": "77 degrees, zero clouds, a cold glass of wine, and nowhere to be. The patio is ready when you are."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "Pure atmosphere post with no CTA or event hook — sensory and invitational, leading with the weather specifics that make this a scroll-stopper on a warm spring day, timed for the 11am lunch-decision window.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-05-16T13:00:47.466Z",
+      "updatedAt": "2026-05-16T13:00:49.362Z"
     }
   ],
   "history": [],
