@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-15T13:05:23.382Z",
+  "updatedAt": "2026-05-16T00:06:21.424Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -2941,6 +2941,45 @@
       "aiReasoning": "Pure atmosphere post with no event hook — sensory and invitational, not promotional — timed for the lunch-decision window when people are already thinking about the weekend.",
       "model": "claude-sonnet-4-6",
       "hydratedAt": "2026-05-14T13:04:40.141Z"
+    },
+    {
+      "id": "drf-mp7l5yb3-1-kofhg",
+      "cadenceTag": "wineclub:2026-07-15:wc-month-mid",
+      "type": "wine_club",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-07-15T17:00:00-05:00",
+      "createdAt": "2026-05-16T00:06:21.423Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "wine_club",
+        "sourceId": "rock-and-vine",
+        "monthLabel": "July 2026",
+        "arcStep": "wc-month-mid",
+        "arcLabel": "Member Benefit Spotlight"
+      },
+      "graphicBrief": {
+        "type": "wine_club_poster",
+        "templateRef": "Lifestyle poster — wine glass + Quarry view, \"Rock & Vine\" branding",
+        "neededBy": null,
+        "dimensions": "1080x1080 square",
+        "toneMode": "lifestyle",
+        "spec": {
+          "backgroundIdea": "Wine glass, sunset over Quarry lake, member tasting moment",
+          "title": "LIFE AS A ROCK & VINE MEMBER",
+          "subtitle": "Curated wines • Member tastings • Exclusive events",
+          "callout": "Monthly subscription — start anytime",
+          "footerText": "THE QUARRY  •  ROCK & VINE WINE CLUB"
+        },
+        "canvasNote": "Member Benefit Spotlight — recurring monthly post for the Rock & Vine Wine Club."
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
     }
   ],
   "history": [],
