@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-17T00:06:24.046Z",
+  "updatedAt": "2026-05-17T13:07:02.240Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -1581,7 +1581,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-05-23T14:00:00-05:00",
       "createdAt": "2026-04-28T03:38:22.281Z",
       "createdBy": "cadence-engine",
@@ -1640,12 +1640,32 @@
           ],
           "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
         },
-        "canvasNote": "Tonight — covers 3 band(s). Post 0 days before first show."
+        "canvasNote": "Tonight — covers 3 band(s). Post 0 days before first show.",
+        "reelBrief": "Open with a slow pan across the lit patio at dusk (3s), cut to a close-up of a wine glass being set on a bar top (2s), end on a wide shot of the string-lit space filling up. Suggested audio: upbeat 80s synth instrumental or lo-fi remix of a classic hit. Text overlay: 'Music Bingo Tonight · 6 PM · Free with your visit · The Quarry'."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Music Bingo is tonight — 70s, 80s, and 90s hits from 6 to 10 PM. Free with your visit. Come for dinner, stay for the nostalgia.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#LiveMusicSTL",
+        "#MusicBingo",
+        "#STLEats",
+        "#WineBar"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Warm evening view of a string-lit patio at a stone-and-wood venue, empty barstools at a rustic bar top, golden light pooling on wood grain, soft bokeh of cliff and lake in the background, no faces, no text",
+      "variants": {
+        "facebook": "Music Bingo is tonight — 70s, 80s, and 90s hits from 6 to 10 PM out at The Quarry. No cover, no ticket needed. Just come hungry, grab a drink, and see how many songs you actually remember. 3960 Highway Z, New Melle.",
+        "instagram": "Music Bingo tonight — 70s, 80s, and 90s hits from 6–10 PM. Free with your visit."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "T-0 calls for a short, specific 'tonight' frame — no urgency needed for live music, so this stays vibe-forward and logistical, leading with the most distinctive offering (Music Bingo) and the strongest guest benefit (free, no ticket).",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-05-17T13:06:49.184Z",
+      "updatedAt": "2026-05-17T13:06:49.184Z"
     },
     {
       "id": "drf-moi2t9s9-z-0vs54",
@@ -1890,7 +1910,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-05-23T17:00:00-05:00",
       "createdAt": "2026-05-05T00:04:04.631Z",
       "createdBy": "cadence-engine",
@@ -1924,12 +1944,33 @@
           "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "What to Expect — Post 14 days before event. "
+        "canvasNote": "What to Expect — Post 14 days before event. ",
+        "reelBrief": "Open with a slow pan across the stone patio at early morning light — dew on the wood, quiet. Cut to a close-up of a mimosa being poured, bubbles rising. Hold 3s on a wide shot of the patio with the lake and cliffs behind. End on the yoga mat and glass side by side on the railing. Suggested audio: soft acoustic or lo-fi morning instrumental. Text overlay: 'Yoga. Then wine. June 6 — The Quarry, New Melle.'"
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Yoga on the patio. Wine after. That's the whole plan.\n\nUn-Wine-D & Align is June 6 — a 9–10 AM outdoor yoga session with Yoga with Charity, followed by your choice of wine, mimosa, or bloody mary and 10% off brunch. All levels welcome. Bring your mat.\n\nTickets are $20. Link to register in bio.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#STLEvents",
+        "#YogaSTL",
+        "#WineBar",
+        "#BrunchSTL",
+        "#OutdoorYoga"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "A rolled yoga mat resting on a wooden deck railing at golden morning light, a glass of pale rosé or mimosa set beside it on the railing, soft quarry lake and limestone cliffs blurred in the background, warm hazy sunrise atmosphere, no faces, no text",
+      "variants": {
+        "facebook": "Yoga on the patio. Wine after. That's the whole plan.\n\nUn-Wine-D & Align is Saturday, June 6 — a 9–10 AM outdoor session with Yoga with Charity, right here at The Quarry. Afterward, unwind with a glass of wine, mimosa, or bloody mary and 10% off brunch.\n\nAll levels welcome. Bring your mat, come as you are. Tickets are $20 — grab yours at the link below.",
+        "instagram": "Yoga on the patio. Wine after. That's the whole plan.\n\nJune 6, 9 AM — outdoor yoga with Yoga with Charity, then brunch + your drink of choice. $20. Link in bio."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "At T-14 the post focuses on what to expect — the full experience arc from mat to mimosa — with a light CTA pointing to registration, matching the 'detail/why it's worth your Saturday' tone without urgency at 0% fill.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-05-17T13:07:02.240Z",
+      "updatedAt": "2026-05-17T13:07:02.240Z"
     },
     {
       "id": "drf-morv8nfb-4-ktqsw",
