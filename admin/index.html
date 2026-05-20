@@ -2693,6 +2693,7 @@
                     <div class="sb-nav-item" data-tab="potential"><span class="sb-ic">📥</span><span class="sb-lbl">Reservation Inquiries</span></div>
                     <div class="sb-nav-item" data-tab="confirmed"><span class="sb-ic">✓</span><span class="sb-lbl">Confirmed Bookings</span></div>
                     <div class="sb-nav-item" data-tab="payments"><span class="sb-ic">💳</span><span class="sb-lbl">Payments</span></div>
+                    <div class="sb-nav-item" data-tab="invoices"><span class="sb-ic">🧾</span><span class="sb-lbl">Send Invoice</span></div>
                 </div>
 
                 <div class="sb-nav-section">Marketing</div>
@@ -3556,6 +3557,184 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- ========================================================
+                 INVOICES TAB (Square)
+                 ======================================================== -->
+            <div id="invoicesTab" class="tab-content">
+                <div class="section">
+                    <div class="section-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                        <div class="section-title" style="font-family:var(--font-serif);font-size:1.3rem;font-weight:600;">Send a Square Invoice</div>
+                    </div>
+                    <p style="color:#777;font-size:0.9rem;margin-bottom:24px;">Create and email an invoice to a customer through Square. They will receive a pay-online link valid until paid. Best for wedding deposits, private events, and ad-hoc charges.</p>
+
+                    <div style="max-width:720px;background:#fff;border:1px solid #eadfc8;border-radius:10px;padding:24px;">
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+                            <div>
+                                <label style="display:block;font-size:0.78rem;font-weight:600;color:#555;margin-bottom:4px;">Customer Name *</label>
+                                <input id="invCustName" type="text" placeholder="Full name" style="width:100%;padding:9px 12px;border:1px solid #d8c9a8;border-radius:6px;font-size:0.92rem;">
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:0.78rem;font-weight:600;color:#555;margin-bottom:4px;">Customer Email *</label>
+                                <input id="invCustEmail" type="email" placeholder="name@example.com" style="width:100%;padding:9px 12px;border:1px solid #d8c9a8;border-radius:6px;font-size:0.92rem;">
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:0.78rem;font-weight:600;color:#555;margin-bottom:4px;">Phone (optional)</label>
+                                <input id="invCustPhone" type="tel" placeholder="(636) 555-1234" style="width:100%;padding:9px 12px;border:1px solid #d8c9a8;border-radius:6px;font-size:0.92rem;">
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:0.78rem;font-weight:600;color:#555;margin-bottom:4px;">Due Date (optional)</label>
+                                <input id="invDueDate" type="date" style="width:100%;padding:9px 12px;border:1px solid #d8c9a8;border-radius:6px;font-size:0.92rem;">
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom:14px;">
+                            <label style="display:block;font-size:0.78rem;font-weight:600;color:#555;margin-bottom:4px;">Invoice Title *</label>
+                            <input id="invTitle" type="text" placeholder="Wedding deposit - Smith / Jones" style="width:100%;padding:9px 12px;border:1px solid #d8c9a8;border-radius:6px;font-size:0.92rem;">
+                        </div>
+
+                        <div style="margin-bottom:14px;">
+                            <label style="display:block;font-size:0.78rem;font-weight:600;color:#555;margin-bottom:4px;">Description / Notes (optional)</label>
+                            <textarea id="invDesc" rows="2" placeholder="Anything the customer should see on the invoice." style="width:100%;padding:9px 12px;border:1px solid #d8c9a8;border-radius:6px;font-size:0.92rem;resize:vertical;"></textarea>
+                        </div>
+
+                        <div style="margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+                            <label style="font-size:0.78rem;font-weight:600;color:#555;">Line Items</label>
+                            <button onclick="addInvoiceLineItem()" type="button" style="background:transparent;color:var(--gold);border:1px solid var(--gold);padding:5px 12px;font-size:0.78rem;cursor:pointer;border-radius:6px;">+ Add Item</button>
+                        </div>
+                        <div id="invLineItems"></div>
+
+                        <div style="display:flex;justify-content:flex-end;align-items:center;margin-top:14px;padding-top:14px;border-top:1px solid #eee;">
+                            <div style="font-weight:700;font-size:1.1rem;color:var(--brown-dark);margin-right:auto;">Total: <span id="invTotal">$0.00</span></div>
+                            <button id="invSendBtn" onclick="sendSquareInvoice()" style="background:var(--gold);color:#fff;border:none;padding:12px 24px;font-size:0.92rem;font-weight:600;cursor:pointer;border-radius:6px;">Create & Send Invoice</button>
+                        </div>
+
+                        <div id="invResult" style="margin-top:16px;display:none;"></div>
+                    </div>
+                </div>
+
+                <script>
+                (function(){
+                    if (window._invoiceTabInited) return;
+                    window._invoiceTabInited = true;
+
+                    function lineRowHtml(idx) {
+                        return '<div class="inv-line" data-idx="'+idx+'" style="display:grid;grid-template-columns:2fr 70px 110px 30px;gap:8px;margin-bottom:6px;align-items:center;">' +
+                            '<input class="inv-name" type="text" placeholder="Item description" style="padding:8px 10px;border:1px solid #d8c9a8;border-radius:6px;font-size:0.88rem;" oninput="updateInvoiceTotal()">' +
+                            '<input class="inv-qty" type="number" min="1" value="1" style="padding:8px 10px;border:1px solid #d8c9a8;border-radius:6px;font-size:0.88rem;text-align:center;" oninput="updateInvoiceTotal()">' +
+                            '<input class="inv-price" type="number" min="0" step="0.01" placeholder="0.00" style="padding:8px 10px;border:1px solid #d8c9a8;border-radius:6px;font-size:0.88rem;text-align:right;" oninput="updateInvoiceTotal()">' +
+                            '<button onclick="removeInvoiceLineItem('+idx+')" type="button" title="Remove" style="background:transparent;border:none;color:#c0392b;font-size:1.15rem;cursor:pointer;padding:0;">×</button>' +
+                            '</div>';
+                    }
+
+                    let _invLineCounter = 0;
+                    window.addInvoiceLineItem = function() {
+                        const wrap = document.getElementById('invLineItems');
+                        if (!wrap) return;
+                        wrap.insertAdjacentHTML('beforeend', lineRowHtml(_invLineCounter++));
+                        updateInvoiceTotal();
+                    };
+                    window.removeInvoiceLineItem = function(idx) {
+                        const row = document.querySelector('.inv-line[data-idx="'+idx+'"]');
+                        if (row) row.parentNode.removeChild(row);
+                        updateInvoiceTotal();
+                    };
+                    window.updateInvoiceTotal = function() {
+                        let total = 0;
+                        document.querySelectorAll('.inv-line').forEach(function(row){
+                            const qty = parseFloat(row.querySelector('.inv-qty').value || '0');
+                            const price = parseFloat(row.querySelector('.inv-price').value || '0');
+                            if (!isNaN(qty) && !isNaN(price)) total += qty * price;
+                        });
+                        const el = document.getElementById('invTotal');
+                        if (el) el.textContent = '$' + total.toFixed(2);
+                    };
+                    window.sendSquareInvoice = async function() {
+                        const btn = document.getElementById('invSendBtn');
+                        const result = document.getElementById('invResult');
+                        const name = (document.getElementById('invCustName').value || '').trim();
+                        const email = (document.getElementById('invCustEmail').value || '').trim();
+                        const phone = (document.getElementById('invCustPhone').value || '').trim();
+                        const dueDate = document.getElementById('invDueDate').value || '';
+                        const title = (document.getElementById('invTitle').value || '').trim();
+                        const desc = (document.getElementById('invDesc').value || '').trim();
+
+                        if (!name || !email) { alert('Customer name and email are required.'); return; }
+                        if (!title) { alert('Invoice title is required.'); return; }
+
+                        const lineItems = [];
+                        document.querySelectorAll('.inv-line').forEach(function(row){
+                            const itemName = (row.querySelector('.inv-name').value || '').trim();
+                            const qty = parseInt(row.querySelector('.inv-qty').value || '0', 10);
+                            const price = parseFloat(row.querySelector('.inv-price').value || '0');
+                            if (itemName && qty > 0 && price > 0) {
+                                lineItems.push({ name: itemName, qty: qty, priceCents: Math.round(price * 100) });
+                            }
+                        });
+                        if (!lineItems.length) { alert('At least one valid line item is required.'); return; }
+
+                        // Prompt for admin password (kept out of UI to avoid leaking it)
+                        const password = prompt('Admin password to confirm:');
+                        if (!password) return;
+
+                        btn.disabled = true; btn.textContent = 'Sending...';
+                        result.style.display = 'none';
+                        try {
+                            const r = await fetch('/.netlify/functions/square-create-invoice', {
+                                method: 'POST',
+                                headers: {'Content-Type':'application/json'},
+                                body: JSON.stringify({
+                                    password: password,
+                                    customer: { name: name, email: email, phone: phone },
+                                    lineItems: lineItems,
+                                    title: title,
+                                    description: desc,
+                                    dueDate: dueDate || undefined
+                                })
+                            });
+                            const data = await r.json();
+                            if (!r.ok || data.error) throw new Error(data.error || ('HTTP '+r.status));
+
+                            result.style.display = 'block';
+                            result.innerHTML =
+                                '<div style="background:#e8f5e9;border:1px solid #4caf50;border-radius:8px;padding:14px;">' +
+                                '<div style="font-weight:700;color:#2e7d32;margin-bottom:8px;">✓ Invoice sent to ' + email + '</div>' +
+                                '<div style="font-size:0.88rem;color:#444;">Status: ' + (data.status || '?') + '</div>' +
+                                (data.publicUrl ? '<div style="margin-top:8px;font-size:0.88rem;"><a href="' + data.publicUrl + '" target="_blank" style="color:var(--gold);font-weight:600;">View / Share Invoice Link</a></div>' : '') +
+                                '<div style="margin-top:6px;font-size:0.78rem;color:#666;">Square ID: <code>' + (data.invoiceId || '-') + '</code></div>' +
+                                '</div>';
+                            // Reset form
+                            document.getElementById('invCustName').value = '';
+                            document.getElementById('invCustEmail').value = '';
+                            document.getElementById('invCustPhone').value = '';
+                            document.getElementById('invDueDate').value = '';
+                            document.getElementById('invTitle').value = '';
+                            document.getElementById('invDesc').value = '';
+                            document.getElementById('invLineItems').innerHTML = '';
+                            addInvoiceLineItem();
+                        } catch (e) {
+                            result.style.display = 'block';
+                            result.innerHTML =
+                                '<div style="background:#ffebee;border:1px solid #c62828;border-radius:8px;padding:14px;">' +
+                                '<div style="font-weight:700;color:#c62828;">Error: ' + (e.message || 'Could not send invoice') + '</div></div>';
+                        } finally {
+                            btn.disabled = false;
+                            btn.textContent = 'Create & Send Invoice';
+                        }
+                    };
+
+                    // Lazy init: when the tab becomes visible, seed one line item
+                    document.addEventListener('click', function(e){
+                        const t = e.target.closest('[data-tab="invoices"]');
+                        if (!t) return;
+                        setTimeout(function(){
+                            const wrap = document.getElementById('invLineItems');
+                            if (wrap && !wrap.children.length) addInvoiceLineItem();
+                        }, 50);
+                    });
+                })();
+                </script>
             </div>
 
             <!-- ========================================================
