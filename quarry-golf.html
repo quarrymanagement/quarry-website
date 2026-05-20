@@ -572,9 +572,9 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.65re
 
     <div class="sec">
       <div class="step"><div class="sn">6</div><h2>Payment</h2></div>
-      <p style="font-size:0.75rem;color:#888;font-style:italic;margin-bottom:1rem;">Secure payment processed by Stripe. Your card information is never stored on our servers. Have a promo code? You can enter it on the Stripe payment page.</p>
+      <p style="font-size:0.75rem;color:#888;font-style:italic;margin-bottom:1rem;">Secure payment processed by Square. Your card information is never stored on our servers.</p>
       <button type="button" id="submitBtn" onclick="submitBooking()">Complete Reservation &rarr;</button>
-      <p style="font-size:0.62rem;color:#aaa;text-align:center;margin-top:0.5rem;">256-bit SSL encrypted &middot; Powered by Stripe</p>
+      <p style="font-size:0.62rem;color:#aaa;text-align:center;margin-top:0.5rem;">256-bit SSL encrypted &middot; Powered by Square</p>
     </div>
 
   </div>
@@ -727,7 +727,7 @@ async function submitBooking(){
   var btn=document.getElementById('submitBtn');
   btn.disabled=true;btn.textContent='Redirecting to payment...';
   try{
-    var res=await fetch('/.netlify/functions/create-checkout',{
+    var res=await fetch('/.netlify/functions/square-checkout',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         amount:4000+(S.extraPrice*100),
