@@ -1,0 +1,8 @@
+# Short, shareable URLs for The Quarry events.
+# Format:  /short-path   /actual-page?query   200
+# 200 = rewrite (browser bar keeps the short URL).
+# 301 = permanent redirect (browser bar shows the long URL).
+
+# Chateau Sainte Genevieve wine tasting - May 21, 2026
+/chateau                       /quarry-event-detail.html?event=chateau-sainte-genevieve-may-2026   200
+/chateau-sainte-genevieve      /quarry-event-detail.html?event=chateau-sainte-genevieve-may-2026   200
