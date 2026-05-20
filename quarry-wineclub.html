@@ -738,8 +738,8 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
   <h2 class="stitle">How It Works</h2>
   <p class="ssub">Two simple steps to start enjoying all the benefits of Rock &amp; Vine membership.</p>
   <div class="steps" style="grid-template-columns:repeat(2,1fr);max-width:600px;">
-    <div class="step"><div class="step-n">1</div><h4>Complete Your Profile</h4><p>Fill out the member registration form below with your contact information.</p></div>
-    <div class="step"><div class="step-n">2</div><h4>Complete Payment</h4><p>After submitting, you'll be redirected to our secure Stripe checkout to start your $29.99/month subscription.</p></div>
+    <div class="step"><div class="step-n">1</div><h4>Submit Your Profile</h4><p>Fill out the member registration form below with your contact information.</p></div>
+    <div class="step"><div class="step-n">2</div><h4>Finish In Person</h4><p>We&rsquo;ll see you at The Quarry to complete your enrollment and set up your monthly $29.99 membership on your next visit.</p></div>
   </div>
 </div>
 
@@ -748,12 +748,12 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
   <div class="step-indicators">
     <div class="si si-active"><span class="si-num">1</span>Your Profile</div>
     <div class="si-arrow">&rarr;</div>
-    <div class="si si-inactive"><span class="si-num">2</span>Payment</div>
+    <div class="si si-inactive"><span class="si-num">2</span>Finish In Person</div>
   </div>
   <div style="text-align:center;margin-bottom:2rem;">
     <div class="slabel">Step 1 of 2</div>
     <h2 class="stitle" style="font-size:2rem;">Complete Your Profile</h2>
-    <p style="font-size:0.78rem;color:#888;line-height:1.7;max-width:460px;margin:0 auto;">Tell us a bit about yourself so we can get your membership set up. After submitting, you'll be taken to complete payment.</p>
+    <p style="font-size:0.78rem;color:#888;line-height:1.7;max-width:460px;margin:0 auto;">Tell us a bit about yourself so we can get your membership started. We&rsquo;ll finish enrollment in person on your next visit to The Quarry.</p>
   </div>
   <form name="wine-club-registration" netlify netlify-honeypot="bot-field" onsubmit="handleMemberForm(event)">
     <input type="hidden" name="form-name" value="wine-club-registration"/>
@@ -779,9 +779,9 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
                         <strong>Yes, keep me in the loop.</strong> Send me occasional emails about upcoming events, live music, wine club tastings, and specials at The Quarry. (Unsubscribe any time.)
                     </span>
                 </label>
-                <button type="submit" class="submit-btn" id="memberSubmitBtn">Next: Proceed to Payment &rarr;</button>
+                <button type="submit" class="submit-btn" id="memberSubmitBtn">Submit Membership Request &rarr;</button>
     <div id="member-success" style="display:none;text-align:center;padding:1rem;background:#f0faf0;border:1px solid #27ae60;margin-top:1rem;">
-      <p style="color:#27ae60;font-weight:700;font-size:0.85rem;">&#10003; Profile received! Redirecting you to payment...</p>
+      <p style="color:#27ae60;font-weight:700;font-size:0.85rem;">&#10003; Got it! We&rsquo;ll be in touch to finish enrollment in person on your next visit. Thanks for joining Rock &amp; Vine!</p>
     </div>
   </form>
 </div>
@@ -798,26 +798,26 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
   </div>
   <div class="faq-item">
     <div class="faq-q" onclick="faq(this)">How do I RSVP for wine tasting events?</div>
-    <div class="faq-a">Once your profile is submitted and payment is complete, your membership is active. You'll receive a member confirmation email with instructions on how to RSVP for upcoming wine tasting events — members always get access before the general public.</div>
+    <div class="faq-a">Once your profile is submitted and we finish enrolling you in person at The Quarry, your membership is active. You&rsquo;ll receive a member confirmation email with instructions on how to RSVP for upcoming wine tasting events &mdash; members always get access before the general public.</div>
   </div>
   <div class="faq-item">
     <div class="faq-q" onclick="faq(this)">How do I cancel my membership?</div>
-    <div class="faq-a">You can cancel anytime — two easy options:<br><br><strong>Option 1 — Self-service:</strong> Go to <a href="https://billing.stripe.com" style="color:var(--gold)">billing.stripe.com</a>, enter the email you used to sign up, and Stripe will send you a secure link to manage or cancel your subscription instantly.<br><br><strong>Option 2 — Email us:</strong> Send an email to <a href="mailto:management@thequarrystl.com" style="color:var(--gold)">management@thequarrystl.com</a> and we'll cancel it for you within 24 hours.<br><br>Your member access continues until the end of the current billing period.</div>
+    <div class="faq-a">You can cancel anytime. Email us at <a href="mailto:management@thequarrystl.com" style="color:var(--gold)">management@thequarrystl.com</a> or let us know on your next visit, and we&rsquo;ll cancel it for you. Your member access continues until the end of the current billing period.</div>
   </div>
   <div class="faq-item">
     <div class="faq-q" onclick="faq(this)">What happens after I submit the form?</div>
-    <div class="faq-a">After submitting your profile, you'll be automatically redirected to our secure Stripe checkout page to complete your $29.99/month subscription payment. Once payment is confirmed, your membership is active immediately.</div>
+    <div class="faq-a">After submitting your profile, our team will reach out to set up your membership in person on your next visit to The Quarry. We&rsquo;ll get your card on file and your $29.99/month membership rolling. Once enrolled, you&rsquo;ll receive a member confirmation email.</div>
   </div>
   <div class="faq-item">
     <div class="faq-q" onclick="faq(this)">What if my payment fails?</div>
-    <div class="faq-a">Stripe will automatically retry failed payments. If payment cannot be collected, your membership access will be paused. You'll receive email notifications and can update your payment method at <a href="https://billing.stripe.com" style="color:var(--gold)">billing.stripe.com</a>.</div>
+    <div class="faq-a">If your card on file declines on a monthly renewal, we&rsquo;ll reach out to you directly to update it on your next visit. Your membership access will be paused until the payment is current.</div>
   </div>
 </div>
 
 <!-- CTA -->
 <div class="cta-s">
   <h2>Ready to Join?</h2>
-  <p>Fill out your member profile above and complete payment to start enjoying exclusive access to wine tastings and member events at The Quarry.</p>
+  <p>Fill out your member profile above and we&rsquo;ll finish enrollment in person on your next visit &mdash; then enjoy exclusive access to wine tastings and member events at The Quarry.</p>
   <a href="#member-form" class="btn-g" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">Get Started — $29.99/mo</a>
 </div>
 
@@ -848,12 +848,13 @@ function handleMemberForm(e){
   fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(data).toString()})
     .then(function(){
       document.getElementById('member-success').style.display='block';
-      btn.textContent='Redirecting to payment...';
-      setTimeout(function(){window.location.href='https://buy.stripe.com/14A00kfiDaCHfXc47jds404';},2000);
+      btn.textContent='Thanks - we will be in touch!';
+      // Wine club enrollment is in-person at The Quarry. The form submission
+      // notifies the team; final card-on-file setup happens during your visit.
     })
     .catch(function(){
       alert('Something went wrong. Please email management@thequarrystl.com to complete registration.');
-      btn.disabled=false;btn.textContent='Next: Proceed to Payment →';
+      btn.disabled=false;btn.textContent='Submit Membership Request &rarr;';
     });
 }
 
