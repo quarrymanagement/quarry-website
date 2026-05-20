@@ -492,6 +492,7 @@ function buildEventCustomerHtml(m, amount) {
     '<div style="background:#FAF7F2;border-left:4px solid #B8933A;padding:16px 20px;margin:20px 0">' +
     '<p style="margin:4px 0"><b>Event:</b> ' + (m.eventName || '-') + '</p>' +
     '<p style="margin:4px 0"><b>Party size:</b> ' + (m.partySize || '1') + '</p>' +
+    (m.guestName ? '<p style="margin:4px 0"><b>Bringing:</b> ' + m.guestName + '</p>' : '') +
     (m.ticketTier ? '<p style="margin:4px 0"><b>Tier:</b> ' + m.ticketTier + '</p>' : '') +
     '<p style="margin:8px 0 4px;color:#B8933A"><b>Total: ' + amount + '</b></p></div>' +
     '<p>We will see you soon. Questions? <a href="tel:6362248257" style="color:#B8933A">636-224-8257</a></p></div>' +
@@ -503,6 +504,7 @@ function buildEventOwnerHtml(m, amount, paymentId) {
     '<p><b>Event:</b> ' + (m.eventName || '-') + '</p>' +
     '<p><b>Customer:</b> ' + (m.customerName || '-') + ' (' + (m.customerEmail || '-') + ')</p>' +
     '<p><b>Phone:</b> ' + (m.customerPhone || '-') + '</p>' +
+    (m.guestName ? '<p><b>Guest / +1:</b> ' + m.guestName + '</p>' : '') +
     '<p><b>Party size:</b> ' + (m.partySize || '1') + '</p>' +
     (m.ticketTier ? '<p><b>Tier:</b> ' + m.ticketTier + '</p>' : '') +
     '<p><b>Total Paid:</b> ' + amount + '</p>' +
