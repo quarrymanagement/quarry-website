@@ -119,7 +119,13 @@ exports.handler = async function(event) {
     const items = body.lineItems || [];
     const title = body.title || 'Invoice from The Quarry';
     const description = body.description || '';
-    const dueDate = body.dueDate || null;
+    // Square requires due_date. If admin didn't pick one, default to 30 days from now.
+    let dueDate = body.dueDate || null;
+    if (!dueDate) {
+      const d = new Date();
+      d.setDate(d.getDate() + 30);
+      dueDate = d.toISOString().slice(0, 10); // YYYY-MM-DD
+    }
 
     if (!cust.email || !cust.name) {
       return { statusCode: 400, headers, body: JSON.stringify({ error: 'customer.name and customer.email required' }) };
@@ -164,11 +170,11 @@ exports.handler = async function(event) {
         primary_recipient: { customer_id: customer.id },
         payment_requests: [{
           request_type: 'BALANCE',
-          due_date: dueDate || undefined,
+          due_date: dueDate,
           automatic_payment_source: 'NONE',
-          reminders: dueDate ? [
+          reminders: [
             { relative_scheduled_days: -3, message: 'Reminder: your invoice is due in 3 days.' }
-          ] : undefined
+          ]
         }],
         delivery_method: 'EMAIL',
         title: title,
