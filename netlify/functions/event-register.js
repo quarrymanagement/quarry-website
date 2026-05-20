@@ -79,6 +79,7 @@ exports.handler = async function(event) {
     const name = body.name;
     const email = body.email;
     const phone = body.phone || '';
+    const additionalGuestName = body.additionalGuestName || '';
     const partySize = body.partySize || 1;
     const seatType = body.seatType;
     const tableId = body.tableId || '';
@@ -145,6 +146,7 @@ exports.handler = async function(event) {
       customerName: String(name).slice(0, 255),
       customerEmail: String(email).slice(0, 255),
       customerPhone: String(phone).slice(0, 255),
+      guestName: String(additionalGuestName).slice(0, 255),
       partySize: String(qty),
       seatType: String(seatType).slice(0, 60),
       tableId: String(tableId).slice(0, 60),
