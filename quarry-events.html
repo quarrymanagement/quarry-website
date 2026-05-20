@@ -1519,6 +1519,12 @@
                         <input type="tel" id="phone" name="phone">
                     </div>
 
+                    <div class="form-group" id="guestNameGroup" style="display:none;">
+                        <label for="additionalGuestName">Partner / +1 Name</label>
+                        <input type="text" id="additionalGuestName" name="additionalGuestName" placeholder="Your guest's name">
+                        <div style="font-size:11px;color:#888;margin-top:4px;">Your admission includes a partner — let us know who is coming with you.</div>
+                    </div>
+
                     <div class="form-group">
                         <label for="ticketTier">Ticket Tier *</label>
                         <select id="ticketTier" name="ticketTier" required onchange="updateOrderSummary()"></select>
@@ -2202,6 +2208,12 @@
                 partySizeInput.value = 1;
             }
 
+            // Toggle "Partner / +1 Name" field for events flagged as 2-person admission
+            const guestNameGroup = document.getElementById("guestNameGroup");
+            if (guestNameGroup) {
+                guestNameGroup.style.display = currentEventForModal.collectGuestName ? "block" : "none";
+            }
+
             // Reset form and show order summary
             form.reset();
             // Re-set the tier select after reset
@@ -2356,6 +2368,7 @@
                     name: formData.get("fullName"),
                     email: formData.get("email"),
                     phone: formData.get("phone"),
+                    additionalGuestName: formData.get("additionalGuestName") || '',
                     partySize: partySize,
                     seatType: seatType,
                     tableId: selectedMapTable ? selectedMapTable.id : (formData.get("selectedTableId") || ''),
