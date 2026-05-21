@@ -387,19 +387,50 @@ async function handleSubscriptionEvent(eventType, subscription) {
       'bookings@thequarrystl.com', 'The Quarry STL', 'quarry-wine-club'
     );
 
-    // Persist a lightweight wine-club roster
+    // Fetch the customer so we capture name/email for the admin roster
+    let customerName = '';
+    let customerEmail = '';
+    let customerPhone = '';
+    if (sub.customer_id) {
+      try {
+        const cust = await squareApi('GET', '/v2/customers/' + sub.customer_id);
+        const c = (cust && cust.customer) || {};
+        customerName  = [c.given_name, c.family_name].filter(Boolean).join(' ') || c.company_name || '';
+        customerEmail = (c.email_address || '').toLowerCase();
+        customerPhone = c.phone_number || '';
+      } catch (e) { console.warn('Customer lookup failed:', e.message); }
+    }
+
+    // Persist a richer wine-club roster (used by /admin/ Wine Club tab)
     const roster = await readBlob('wine-club-members') || { members: [] };
     let members = roster.members || [];
-    members = members.filter(function(m) { return m.subscriptionId !== sub.id; });
-    members.push({
-      subscriptionId: sub.id,
-      customerId: sub.customer_id,
-      status: sub.status,
-      startDate: sub.start_date,
-      planVariationId: sub.plan_variation_id,
-      lastEventAt: new Date().toISOString(),
-      lastEventType: eventType
+    let existingIdx = members.findIndex(function(m) {
+      if (sub.id && m.subscriptionId === sub.id) return true;
+      if (customerEmail && (m.email || '').toLowerCase() === customerEmail) return true;
+      return false;
     });
+    const mapped = {
+      id:             (existingIdx >= 0 && members[existingIdx].id) || ('wc_sq_' + sub.id),
+      name:           customerName || (existingIdx >= 0 ? members[existingIdx].name : '') || '',
+      email:          customerEmail || (existingIdx >= 0 ? members[existingIdx].email : '') || '',
+      phone:          customerPhone || (existingIdx >= 0 ? members[existingIdx].phone : '') || '',
+      plan:           (existingIdx >= 0 && members[existingIdx].plan) || 'Rock & Vine Wine Club',
+      price:          (existingIdx >= 0 && members[existingIdx].price) || '',
+      joinedAt:       sub.start_date || (existingIdx >= 0 ? members[existingIdx].joinedAt : '') || '',
+      status:         /^ACTIVE$/i.test(sub.status||'')   ? 'Active' :
+                      /^PAUSED$/i.test(sub.status||'')   ? 'Paused' :
+                      /^CANCELED$/i.test(sub.status||'') ? 'Canceled' :
+                      (sub.status || 'Active'),
+      source:         'Square',
+      notes:          (existingIdx >= 0 && members[existingIdx].notes) || '',
+      subscriptionId: sub.id || '',
+      customerId:     sub.customer_id || '',
+      planVariationId: sub.plan_variation_id || '',
+      lastEventAt:    new Date().toISOString(),
+      lastEventType:  eventType
+    };
+    if (existingIdx >= 0) members[existingIdx] = mapped;
+    else                   members.push(mapped);
     await writeBlob('wine-club-members', { members: members });
   } catch (e) { console.error('handleSubscriptionEvent:', e.message); }
 }
