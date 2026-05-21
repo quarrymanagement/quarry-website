@@ -7,10 +7,10 @@
       "phone": "636-373-1751",
       "birthday": "05-06",
       "joinedAt": "2026-05-03T22:42:54.383Z",
-      "lastVisitAt": "2026-05-04T05:28:26.182Z",
-      "tier": "gold",
-      "currentPoints": 4238,
-      "lifetimePoints": 4738,
+      "lastVisitAt": "2026-05-21T20:55:30.893Z",
+      "tier": "standard",
+      "currentPoints": 4769,
+      "lifetimePoints": 5269,
       "totalRedemptions": 1,
       "marketingOptIn": true,
       "smsOptIn": true,
@@ -105,12 +105,31 @@
           "delta": 50,
           "referredEmail": "demo-guest-walkthrough@example.com",
           "note": "Referred Demo Guest to The Quarry"
+        },
+        {
+          "at": "2026-05-21T20:55:30.893Z",
+          "action": "earn",
+          "source": "simulate-visit",
+          "orderId": "sim-1779396930894-77daee",
+          "delta": 531,
+          "spendUsd": 42.5,
+          "tier": "gold",
+          "note": "[TEST] Simulated visit: $42.50"
+        },
+        {
+          "at": "2026-05-21T20:55:30.893Z",
+          "action": "tier-promotion",
+          "from": "gold",
+          "to": "standard",
+          "by": "auto",
+          "note": "[TEST] Simulated promotion via simulate-visit"
         }
       ],
       "referralCode": "QRY-ZJ7WBK",
       "welcomeSeriesSent": {
         "day7": "2026-05-21T18:32:49.744Z"
-      }
+      },
+      "tierWarnedAt": null
     },
     {
       "id": "m_moqrvmuj_233a",
