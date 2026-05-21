@@ -32,6 +32,9 @@ const ADMIN_PASSWORD_HASH   = process.env.ADMIN_PASSWORD_HASH || '';
 const ADMIN_SESSION_SECRET  = process.env.ADMIN_SESSION_SECRET
   || ('qrr-session-' + (process.env.GITHUB_TOKEN || '').slice(-24));
 const SESSION_TTL_HOURS     = 168;
+const TOAST_CLIENT_ID       = process.env.TOAST_CLIENT_ID || '';
+const TOAST_SECRET          = process.env.TOAST_CLIENT_SECRET || '';
+const TOAST_REST_GUID       = process.env.TOAST_RESTAURANT_GUID || '';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -85,6 +88,66 @@ function gh(method, path, body) {
     if (body) req.write(JSON.stringify(body));
     req.end();
   });
+}
+
+function httpsRequest(opts, payload) {
+  return new Promise((resolve, reject) => {
+    const req = https.request(opts, (res) => {
+      let d = '';
+      res.on('data', (c) => d += c);
+      res.on('end', () => {
+        try { resolve({ status: res.statusCode, data: JSON.parse(d || '{}') }); }
+        catch (_) { resolve({ status: res.statusCode, data: d }); }
+      });
+    });
+    req.on('error', reject);
+    if (payload) req.write(typeof payload === 'string' ? payload : JSON.stringify(payload));
+    req.end();
+  });
+}
+
+async function getToastToken() {
+  const r = await httpsRequest({
+    hostname: 'ws-api.toasttab.com',
+    path: '/authentication/v1/authentication/login',
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+  }, { clientId: TOAST_CLIENT_ID, clientSecret: TOAST_SECRET, userAccessType: 'TOAST_MACHINE_CLIENT' });
+  if (r.status !== 200 || !r.data.token) throw new Error('Toast auth: HTTP ' + r.status);
+  return r.data.token.accessToken;
+}
+
+async function applyDiscountToCheck(token, orderGuid, checkGuid, rewardEntry, openAmount) {
+  if (!rewardEntry || !rewardEntry.guid) return { applied: false, reason: 'no-discount-guid' };
+  const payload = {
+    name: rewardEntry.label || 'Quarry Reward',
+    discount: { guid: rewardEntry.guid },
+    processingState: 'PENDING_APPROVAL',
+  };
+  if (rewardEntry.type === 'OPEN_ITEM' || rewardEntry.type === 'OPEN_CHECK') {
+    if (openAmount && openAmount > 0) payload.discountAmount = Number(openAmount);
+  } else if (rewardEntry.type === 'FIXED' || rewardEntry.type === 'FIXED_ITEM') {
+    if (rewardEntry.fixedAmount) payload.discountAmount = Number(rewardEntry.fixedAmount);
+  }
+  const r = await httpsRequest({
+    hostname: 'ws-api.toasttab.com',
+    path: '/orders/v2/orders/' + orderGuid + '/checks/' + checkGuid + '/appliedDiscounts',
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + token,
+      'Toast-Restaurant-External-ID': TOAST_REST_GUID,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+  }, payload);
+  return { applied: r.status >= 200 && r.status < 300, status: r.status, response: r.data };
+}
+
+async function loadDiscountMap() {
+  const r = await gh('GET', '/repos/' + GITHUB_REPO + '/contents/toast-discount-map.json');
+  if (r.status !== 200) return null;
+  try { return JSON.parse(Buffer.from(r.data.content, 'base64').toString('utf8')); }
+  catch (_) { return null; }
 }
 
 exports.handler = wrap('redeem-confirm', async (event) => {
@@ -163,12 +226,35 @@ exports.handler = wrap('redeem-confirm', async (event) => {
     return reply(500, { ok: false, error: 'Save failed: ' + e.message });
   }
 
+  // ── Optional: auto-apply the matching discount to a Toast check ────────
+  // If staff supplied orderGuid + checkGuid (from /list-open-checks), call
+  // Toast's appliedDiscounts endpoint so the discount lands on the live tab.
+  let toastResult = { applied: false, reason: 'no-check-selected' };
+  if (body.orderGuid && body.checkGuid && TOAST_CLIENT_ID && TOAST_SECRET && TOAST_REST_GUID) {
+    try {
+      const map = await loadDiscountMap();
+      const entry = map && map.rewards && map.rewards[pending.rewardId];
+      if (!entry || !entry.applyToToast) {
+        toastResult = { applied: false, reason: 'reward-not-mapped-or-offline', rewardId: pending.rewardId };
+      } else if (!entry.guid) {
+        toastResult = { applied: false, reason: 'discount-guid-missing', rewardId: pending.rewardId };
+      } else {
+        const tk = await getToastToken();
+        toastResult = await applyDiscountToCheck(tk, body.orderGuid, body.checkGuid, entry, body.openAmount);
+      }
+    } catch (e) {
+      toastResult = { applied: false, reason: 'exception', error: e.message };
+    }
+  }
+
   // Flip the blob to confirmed so the customer's poll sees it
   const updatedBlob = Object.assign({}, pending, {
     status: 'confirmed',
     confirmedAt: now,
     confirmedBy: staffName || 'staff',
     newBalance: member.currentPoints,
+    toastApplied: toastResult.applied,
+    toastReason: toastResult.applied ? null : (toastResult.reason || toastResult.status || 'unknown'),
   });
   await writeBlob('redemptions/' + code, updatedBlob);
 
@@ -185,5 +271,7 @@ exports.handler = wrap('redeem-confirm', async (event) => {
     points: pointsCost,
     newBalance: member.currentPoints,
     confirmedAt: now,
+    toastApplied: toastResult.applied,
+    toastReason: toastResult.applied ? null : (toastResult.reason || 'unknown'),
   });
 });

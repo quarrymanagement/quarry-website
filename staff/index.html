@@ -178,11 +178,28 @@ input[type="text"]:focus, input[type="password"]:focus {
       <div class="desc" id="lkDesc">—</div>
       <div class="pts"><span id="lkPts">0</span> pts</div>
       <div class="for">For <strong id="lkMember">—</strong> &nbsp;·&nbsp; <span id="lkExpires" class="muted"></span></div>
+
+      <!-- Pick the customer's open Toast check (auto-apply discount) -->
+      <div class="spacer-md"></div>
+      <div class="lbl">Pick Customer's Open Check</div>
+      <div id="checksList" style="margin-top:8px;max-height:240px;overflow-y:auto;background:#FFFFFF;border:1px solid var(--border);border-radius:8px;padding:6px">
+        <div class="muted" style="padding:14px;text-align:center;font-style:italic">Loading…</div>
+      </div>
+
+      <!-- Open-amount input (only for FREE GLASS / FREE APP / FREE BOTTLE / etc.) -->
+      <div id="openAmtBlock" style="display:none;margin-top:14px">
+        <div class="lbl">Item Price (for discount)</div>
+        <input type="text" inputmode="decimal" id="openAmtInput" placeholder="e.g. 12.00" />
+        <div class="muted" style="font-size:0.78rem;margin-top:4px">Enter the price of the item the customer's redeeming (Toast prompts for this amount).</div>
+      </div>
+
       <div class="spacer-md"></div>
       <div class="row">
         <button class="btn secondary" id="cancelBtn">Cancel</button>
-        <button class="btn" id="confirmBtn">Confirm</button>
+        <button class="btn secondary" id="skipCheckBtn" style="font-size:0.7rem">Skip · Honor Manually</button>
       </div>
+      <div class="spacer-sm"></div>
+      <button class="btn" id="confirmBtn" disabled>Apply Discount + Redeem</button>
     </div>
 
     <div id="confirmedBlock" class="card confirmed-card" style="display:none">
@@ -209,7 +226,12 @@ input[type="text"]:focus, input[type="password"]:focus {
 'use strict';
 (function(){
   var TOKEN_KEY = 'quarryStaffToken';
-  var lookupCache = null; // last successful redeem-status response
+  var lookupCache = null;   // last successful redeem-status response
+  var openChecksCache = []; // last list-open-checks response
+  var selectedCheck = null; // { orderGuid, checkGuid, displayNumber, ... }
+  var discountMap = null;   // toast-discount-map.json
+  // Reward IDs that need staff to enter an item-price (OPEN_ITEM / OPEN_CHECK in Toast)
+  var OPEN_AMOUNT_REWARDS = new Set(['r-glass', 'r-app', 'r-entree-glass', 'r-tasting', 'r-bottle']);
 
   var $ = function(id){ return document.getElementById(id); };
 
@@ -296,18 +318,88 @@ input[type="text"]:focus, input[type="password"]:focus {
       if (b.status === 'expired')   { setStatus('This code has expired (5-min window). Have the customer tap Redeem again.', 'err'); return; }
       if (b.status === 'confirmed') { setStatus('This code was already used at ' + new Date(b.confirmedAt).toLocaleTimeString() + '.', 'err'); return; }
       lookupCache = b;
+      selectedCheck = null;
       $('lkReward').textContent = b.reward.name || '—';
       $('lkDesc').textContent   = b.reward.description || '';
       $('lkPts').textContent    = (b.reward.points || 0).toLocaleString();
       $('lkMember').textContent = (b.member && b.member.name) ? b.member.name : (b.member && b.member.email) || '—';
       $('lkExpires').textContent = 'expires ' + new Date(b.expiresAt).toLocaleTimeString();
+      // OPEN_* discount types need a price input
+      var needsAmount = OPEN_AMOUNT_REWARDS.has((b.reward.id || '').toLowerCase());
+      $('openAmtBlock').style.display = needsAmount ? '' : 'none';
+      $('openAmtInput').value = '';
       $('lookupBlock').style.display = '';
+      $('confirmBtn').disabled = true;
       setStatus('', 'ok');
+      loadOpenChecks();
     } catch (e) {
       setStatus('Error: ' + e.message, 'err');
     } finally {
       $('lookupBtn').disabled = false;
     }
+  });
+
+  async function loadOpenChecks() {
+    var listEl = $('checksList');
+    listEl.innerHTML = '<div class="muted" style="padding:14px;text-align:center;font-style:italic">Loading open checks from Toast…</div>';
+    try {
+      var r = await fetch('/.netlify/functions/list-open-checks', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ adminPassword: 'quarry2026' }) // staff token doesn't help here; legacy fallback OK
+      });
+      var b = await r.json();
+      if (!b.ok) throw new Error(b.error || 'load failed');
+      openChecksCache = b.checks || [];
+      renderOpenChecks();
+    } catch (e) {
+      listEl.innerHTML = '<div class="muted" style="padding:14px;text-align:center;color:#B00020">Could not load checks: ' + (e.message || '?') + '<br><span style="font-size:0.78rem">Hit Skip to honor manually.</span></div>';
+    }
+  }
+
+  function renderOpenChecks() {
+    var listEl = $('checksList');
+    if (!openChecksCache.length) {
+      listEl.innerHTML = '<div class="muted" style="padding:14px;text-align:center;font-style:italic">No open checks right now. Use Skip to honor manually.</div>';
+      return;
+    }
+    listEl.innerHTML = openChecksCache.map(function(c, i) {
+      var when = c.openedAt ? new Date(c.openedAt).toLocaleTimeString([], { hour:'numeric', minute:'2-digit' }) : '';
+      var amt  = (typeof c.totalAmount === 'number') ? '$' + c.totalAmount.toFixed(2) : ((typeof c.amount === 'number') ? '$' + c.amount.toFixed(2) : '');
+      var who  = c.tabName || c.server || c.customerEmail || '';
+      var num  = c.displayNumber || c.checkNumber || c.orderNumber || (i+1);
+      return '<div data-idx="' + i + '" class="check-row" style="display:flex;justify-content:space-between;align-items:center;padding:12px 12px;border-bottom:1px solid var(--border);cursor:pointer;gap:10px">' +
+        '<div style="flex:1;min-width:0">' +
+          '<div style="font-family:Playfair Display,serif;font-size:1.05rem;font-weight:600">#' + num + (who ? ' · <span style="font-family:Montserrat,sans-serif;font-size:0.85rem;font-weight:500;color:rgba(26,26,26,0.6)">' + escHtml(who) + '</span>' : '') + '</div>' +
+          (when || amt ? '<div style="font-size:0.78rem;color:rgba(26,26,26,0.55);margin-top:2px">' + when + (amt && when ? ' · ' : '') + amt + '</div>' : '') +
+        '</div>' +
+        '<div style="font-size:1rem;color:var(--gold);font-weight:600">›</div>' +
+      '</div>';
+    }).join('');
+    // remove the border on the last row
+    var rows = listEl.querySelectorAll('.check-row');
+    if (rows.length) rows[rows.length-1].style.borderBottom = 'none';
+    rows.forEach(function(row) {
+      row.addEventListener('click', function() {
+        var idx = parseInt(this.getAttribute('data-idx'), 10);
+        selectedCheck = openChecksCache[idx];
+        // Visual highlight
+        rows.forEach(function(r){ r.style.background = ''; });
+        this.style.background = 'rgba(184,147,58,0.12)';
+        $('confirmBtn').disabled = false;
+      });
+    });
+  }
+
+  function escHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});
+  }
+
+  $('skipCheckBtn').addEventListener('click', function() {
+    selectedCheck = null;
+    $('confirmBtn').disabled = false;
+    var rows = $('checksList').querySelectorAll('.check-row');
+    rows.forEach(function(r){ r.style.background = ''; });
+    setStatus('Will deduct points only — apply discount manually in Toast', 'ok');
   });
 
   $('cancelBtn').addEventListener('click', function() {
@@ -319,16 +411,35 @@ input[type="text"]:focus, input[type="password"]:focus {
 
   $('confirmBtn').addEventListener('click', async function() {
     if (!lookupCache) return;
+    var rewardId = ((lookupCache.reward && lookupCache.reward.id) || '').toLowerCase();
+    var needsAmount = OPEN_AMOUNT_REWARDS.has(rewardId);
+    var openAmount = null;
+    if (needsAmount && selectedCheck) {
+      var raw = ($('openAmtInput').value || '').trim();
+      var amt = parseFloat(raw.replace(/[^\d.]/g,''));
+      if (!amt || amt <= 0) {
+        setStatus('Enter the item price so Toast knows how much to discount', 'err');
+        $('openAmtInput').focus();
+        return;
+      }
+      openAmount = amt;
+    }
     $('confirmBtn').disabled = true; $('cancelBtn').disabled = true;
     setStatus('Confirming…');
     try {
+      var payload = {
+        code: lookupCache.code,
+        adminToken: getToken(),
+        staffName: '',
+      };
+      if (selectedCheck) {
+        payload.orderGuid = selectedCheck.orderGuid;
+        payload.checkGuid = selectedCheck.checkGuid;
+        if (openAmount != null) payload.openAmount = openAmount;
+      }
       var r = await fetch('/.netlify/functions/redeem-confirm', {
         method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({
-          code: lookupCache.code,
-          adminToken: getToken(),
-          staffName: '', // could prompt; for v1 just record 'staff'
-        })
+        body: JSON.stringify(payload)
       });
       var b = await r.json();
       if (!r.ok || !b.ok) throw new Error(b.error || 'HTTP ' + r.status);
@@ -339,6 +450,19 @@ input[type="text"]:focus, input[type="password"]:focus {
       $('cfMember').textContent  = b.member.name || b.member.email;
       $('cfCode').textContent    = b.code;
       $('cfBalance').textContent = (b.newBalance || 0).toLocaleString() + ' pts';
+      // Toast status messaging
+      var toastNote = document.querySelector('.toast-note');
+      if (toastNote) {
+        if (b.toastApplied) {
+          toastNote.innerHTML = '<strong>✓ Toast:</strong> Discount automatically applied to the check. Customer is all set.';
+          toastNote.style.background = '#E8F5E9';
+        } else if (selectedCheck) {
+          toastNote.innerHTML = '<strong>⚠ Toast apply failed:</strong> ' + (b.toastReason || 'unknown') + '<br>Please apply the matching discount manually in Toast.';
+          toastNote.style.background = '#FFF3E0';
+        } else {
+          toastNote.innerHTML = '<strong>NEXT:</strong> Apply the matching discount in <strong>Toast</strong> to this customer\'s check. (You skipped check selection.)';
+        }
+      }
       $('confirmedBlock').style.display = '';
       setStatus('');
       try { if (navigator.vibrate) navigator.vibrate([60, 40, 60]); } catch(_){}
