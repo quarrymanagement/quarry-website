@@ -11,10 +11,9 @@
 //                          customerPhone, partySize, sessionId, ... }, ...] }
 // ============================================================================
 const crypto = require('crypto');
+const { readBlob } = require('./_blobs');
 
 const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH || '';
-const NETLIFY_TOKEN = process.env.NETLIFY_AUTH_TOKEN || '';
-const SITE_ID = 'roaring-pegasus-444826';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -61,7 +60,6 @@ exports.handler = async (event) => {
   }
 
   if (!checkAdmin(adminPassword)) return reply(401, { ok: false, error: 'Invalid admin password' });
-  if (!NETLIFY_TOKEN) return reply(500, { ok: false, error: 'NETLIFY_AUTH_TOKEN not set' });
 
   // Build the list of date keys to check
   const today = new Date();
@@ -109,17 +107,16 @@ exports.handler = async (event) => {
     for (const v of variants(d)) {
       if (tried.has(v)) continue;
       tried.add(v);
-      // Try both flat-key (webhook's storage) and store-namespaced (legacy)
-      const urls = [
-        `https://api.netlify.com/api/v1/blobs/${SITE_ID}/golf-${v}`,
-        `https://api.netlify.com/api/v1/blobs/${SITE_ID}/golf-bookings/${v}`,
+      // Canonical store path is golf-bookings/{dateKey}. We still try the
+      // legacy flat-key fallback (golf-{v}) in case any legacy records exist.
+      const paths = [
+        'golf-bookings/' + v,
+        'kv/golf-' + v,
       ];
-      for (const url of urls) {
+      for (const p of paths) {
         try {
-          const res = await fetch(url, { headers: { Authorization: 'Bearer ' + NETLIFY_TOKEN } });
-          if (!res.ok) continue;
-          let data;
-          try { data = await res.json(); } catch (_) { continue; }
+          const data = await readBlob(p);
+          if (!data) continue;
           const bookings = (data && data.bookings) || [];
           for (const b of bookings) {
             const key = (b.sessionId || '') + '|' + (b.bay || '') + '|' + (b.time || '');
@@ -128,7 +125,7 @@ exports.handler = async (event) => {
             all.push({
               dateKey: isoDate,            // normalized ISO for UI
               storedDateKey: v,            // raw key in blob storage
-              storedAt: url,
+              storedAt: p,
               bay: b.bay || '',
               time: b.time || '',
               customerName: b.customerName || b.name || '',
@@ -143,7 +140,7 @@ exports.handler = async (event) => {
             });
           }
         } catch (e) {
-          // skip per-URL errors
+          // skip per-path errors
         }
       }
     }

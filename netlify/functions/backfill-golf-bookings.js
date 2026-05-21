@@ -17,6 +17,7 @@
 const Stripe = require('stripe');
 const https  = require('https');
 const { google } = require('googleapis');
+const _blobs = require('./_blobs');
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -94,24 +95,13 @@ async function createCalendarEvent({ summary, description, location, startIso, e
 
 // ----- Idempotency tracking via Netlify Blobs -----
 async function readProcessed() {
-  const token = process.env.NETLIFY_AUTH_TOKEN;
-  if (!token) return new Set();
-  const url = 'https://api.netlify.com/api/v1/blobs/roaring-pegasus-444826/' + encodeURIComponent('golf-backfill-processed');
-  try {
-    const r = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
-    if (!r.ok) return new Set();
-    const d = await r.json();
-    return new Set(Array.isArray(d.processed) ? d.processed : []);
-  } catch (_) { return new Set(); }
+  const d = await _blobs.readBlob('kv/golf-backfill-processed');
+  return new Set(d && Array.isArray(d.processed) ? d.processed : []);
 }
 async function writeProcessed(set) {
-  const token = process.env.NETLIFY_AUTH_TOKEN;
-  if (!token) return;
-  const url = 'https://api.netlify.com/api/v1/blobs/roaring-pegasus-444826/' + encodeURIComponent('golf-backfill-processed');
-  await fetch(url, {
-    method: 'PUT',
-    headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ processed: Array.from(set), updatedAt: new Date().toISOString() })
+  await _blobs.writeBlob('kv/golf-backfill-processed', {
+    processed: Array.from(set),
+    updatedAt: new Date().toISOString(),
   });
 }
 
@@ -119,15 +109,10 @@ async function writeProcessed(set) {
 // the customer-facing get-bookings.js (double-book guard) and the admin
 // update-booking.js (reschedule) can both find it.
 async function persistToBlob(b) {
-  const token = process.env.NETLIFY_AUTH_TOKEN;
-  if (!token || !b.date) return { ok: false, reason: 'missing token or date' };
-  const siteId = process.env.NETLIFY_SITE_ID || 'd9496ae2-2b01-4229-b6d2-9203c3be7acb';
-  const url = 'https://api.netlify.com/api/v1/blobs/' + siteId + '/golf-bookings/' + b.date;
-  let bookings = [];
-  try {
-    const r = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
-    if (r.ok) { const d = await r.json(); bookings = d.bookings || []; }
-  } catch (_) {}
+  if (!b.date) return { ok: false, reason: 'missing date' };
+  const path = 'golf-bookings/' + b.date;
+  const existing = await _blobs.readBlob(path);
+  let bookings = (existing && existing.bookings) || [];
   // Replace any existing record with the same sessionId
   bookings = bookings.filter(x => (x.sessionId || '') !== b.sessionId);
   bookings.push({
@@ -148,12 +133,8 @@ async function persistToBlob(b) {
     bookedAt: new Date().toISOString(),
     backfilled: true
   });
-  const r2 = await fetch(url, {
-    method: 'PUT',
-    headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ bookings })
-  });
-  return { ok: r2.ok, status: r2.status };
+  const ok = await _blobs.writeBlob(path, { bookings });
+  return { ok };
 }
 
 // ----- Customer email body -----

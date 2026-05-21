@@ -20,6 +20,7 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const https = require('https');
 const { google } = require('googleapis');
+const _blobs = require('./_blobs');
 
 // ----- Email helper (SendGrid via raw HTTPS so we don't need a new dep) -----
 function sendGridEmail(to, subject, htmlBody, fromEmail, fromName) {
@@ -140,14 +141,10 @@ async function createGoogleCalendarEvent(summary, description, location, startIs
 // (admin reschedule). Field names match the schema those readers expect.
 async function storeBooking(m, amountStr, sessionId) {
   try {
-    const token = process.env.NETLIFY_AUTH_TOKEN;
-    if (!token) { console.warn('NETLIFY_AUTH_TOKEN missing - skipping blob store'); return; }
-    const siteId = process.env.NETLIFY_SITE_ID || 'd9496ae2-2b01-4229-b6d2-9203c3be7acb';
     const dateKey = (m.date || 'unknown').replace(/\//g, '-');
-    const url = 'https://api.netlify.com/api/v1/blobs/' + siteId + '/golf-bookings/' + dateKey;
-    const existing = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
-    let bookings = [];
-    if (existing.ok) { try { bookings = (await existing.json()).bookings || []; } catch (_) {} }
+    const path = 'golf-bookings/' + dateKey;
+    const existing = await _blobs.readBlob(path);
+    let bookings = (existing && existing.bookings) || [];
     // Idempotency: if a record with this sessionId already exists, replace it
     if (sessionId) bookings = bookings.filter(b => (b.sessionId || '') !== sessionId);
     bookings.push({
@@ -167,11 +164,7 @@ async function storeBooking(m, amountStr, sessionId) {
       amountPaid: amountStr,
       bookedAt: new Date().toISOString()
     });
-    await fetch(url, {
-      method: 'PUT',
-      headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ bookings })
-    });
+    await _blobs.writeBlob(path, { bookings });
     console.log('Booking stored at golf-bookings/' + dateKey + ':', m.bay, m.time);
   } catch (e) {
     console.error('storeBooking error:', e.message);

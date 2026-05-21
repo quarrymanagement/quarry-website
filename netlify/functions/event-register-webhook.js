@@ -1,5 +1,6 @@
 const Stripe = require('stripe');
 const https = require('https');
+const { readBlob, writeBlob } = require('./_blobs');
 
 function sendGridEmail(to, subject, htmlBody, fromEmail, fromName) {
   fromEmail = fromEmail || 'management@thequarrystl.com';
@@ -182,7 +183,6 @@ exports.handler = async (event) => {
 
     if (!eventId) return { statusCode: 200, body: isGolf ? 'Golf booking credited' : 'No eventId' };
 
-    const token = process.env.NETLIFY_AUTH_TOKEN;
     const siteId = 'roaring-pegasus-444826';
     const name = customerName || '';
     const email = customerEmail || session.customer_email || '';
@@ -209,17 +209,9 @@ exports.handler = async (event) => {
     };
 
     // 1. Store in Netlify Blobs (backup)
-    let blobRegistrations = [];
-    try {
-      const r = await fetch(`https://api.netlify.com/api/v1/blobs/${siteId}/quarry-registrations/event-${eventId}`, {
-        headers: { Authorization: 'Bearer ' + token }
-      });
-      if (r.ok) {
-        const d = await r.json();
-        blobRegistrations = d.registrations || [];
-      }
-    } catch (e) {}
-
+    const regPath = 'quarry-registrations/event-' + eventId;
+    const existingRegs = await readBlob(regPath);
+    const blobRegistrations = (existingRegs && existingRegs.registrations) || [];
     blobRegistrations.push({
       name, email, phone,
       partySize: qty, seatType,
@@ -229,12 +221,7 @@ exports.handler = async (event) => {
       amountPaid: session.amount_total,
       registeredAt: new Date().toISOString()
     });
-
-    await fetch(`https://api.netlify.com/api/v1/blobs/${siteId}/quarry-registrations/event-${eventId}`, {
-      method: 'PUT',
-      headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ registrations: blobRegistrations })
-    });
+    await writeBlob(regPath, { registrations: blobRegistrations });
 
     // 2. Update events.json in GitHub so the admin panel sees the registration
     try {

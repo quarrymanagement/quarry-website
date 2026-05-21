@@ -16,6 +16,7 @@
 
 const https = require('https');
 const crypto = require('crypto');
+const _blobs = require('./_blobs');
 
 // ---- Coupon table (preserved from Stripe version) -------------------------
 const COUPONS = {
@@ -222,25 +223,17 @@ exports.handler = async function(event) {
 // ---- Helpers for $0 comp flow (no Square checkout needed) -----------------
 async function storeBookingDirect(m) {
   try {
-    const token = process.env.NETLIFY_AUTH_TOKEN;
-    if (!token) return;
-    const siteId = process.env.NETLIFY_SITE_ID || 'd9496ae2-2b01-4229-b6d2-9203c3be7acb';
     const dateKey = (m.date || 'unknown').replace(/\//g, '-');
-    const url = 'https://api.netlify.com/api/v1/blobs/' + siteId + '/golf-bookings/' + dateKey;
-    const existing = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
-    let bookings = [];
-    if (existing.ok) { try { bookings = (await existing.json()).bookings || []; } catch(_) {} }
+    const path = 'golf-bookings/' + dateKey;
+    const existing = await _blobs.readBlob(path);
+    const bookings = (existing && existing.bookings) || [];
     bookings.push({
       bay: m.bay, time: m.time, date: m.date, dateKey,
       duration: m.duration || '50 Minutes', players: m.players, partySize: m.players,
       customerName: m.customerName, customerEmail: m.customerEmail, customerPhone: m.customerPhone,
       amountPaid: '$0.00', source: 'comp', bookedAt: new Date().toISOString()
     });
-    await fetch(url, {
-      method: 'PUT',
-      headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ bookings })
-    });
+    await _blobs.writeBlob(path, { bookings });
   } catch(e) { console.error('storeBookingDirect:', e.message); }
 }
 

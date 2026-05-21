@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "description": "Netlify serverless functions for The Quarry",
   "dependencies": {
+    "@netlify/blobs": "^8.2.0",
+    "googleapis": "^140.0.0",
     "node-fetch": "^2.7.0",
-    "stripe": "^14.0.0",
-    "googleapis": "^140.0.0"
+    "stripe": "^14.0.0"
   }
 }

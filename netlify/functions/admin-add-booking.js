@@ -87,20 +87,14 @@ function sendGridEmail(to, subject, htmlBody) {
   });
 }
 
+// Shared SDK-backed Blobs helper (see _blobs.js for context)
+const _blobs = require('./_blobs');
 async function readBlob(dateKey) {
-  const url = `https://api.netlify.com/api/v1/blobs/${SITE_ID}/golf-bookings/${dateKey}`;
-  const res = await fetch(url, { headers: { Authorization: 'Bearer ' + NETLIFY_TOKEN } });
-  if (!res.ok) return { bookings: [] };
-  try { return await res.json(); } catch (_) { return { bookings: [] }; }
+  return (await _blobs.readBlob('golf-bookings/' + dateKey)) || { bookings: [] };
 }
 async function writeBlob(dateKey, data) {
-  const url = `https://api.netlify.com/api/v1/blobs/${SITE_ID}/golf-bookings/${dateKey}`;
-  const res = await fetch(url, {
-    method: 'PUT',
-    headers: { Authorization: 'Bearer ' + NETLIFY_TOKEN, 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  });
-  if (!res.ok) throw new Error('Blob write ' + res.status);
+  const ok = await _blobs.writeBlob('golf-bookings/' + dateKey, data);
+  if (!ok) throw new Error('Blob write failed for golf-bookings/' + dateKey);
 }
 
 async function createCalendarEvent(b) {

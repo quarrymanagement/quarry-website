@@ -155,31 +155,8 @@ async function createCalendarEvent(summary, description, location, startIso, end
   }
 }
 
-// ============================================================================
-// Helpers - Blob storage
-// ============================================================================
-async function readBlob(path) {
-  const token = process.env.NETLIFY_AUTH_TOKEN;
-  if (!token) return null;
-  const siteId = process.env.NETLIFY_SITE_ID || 'd9496ae2-2b01-4229-b6d2-9203c3be7acb';
-  try {
-    const res = await fetch('https://api.netlify.com/api/v1/blobs/' + siteId + '/' + path, {
-      headers: { Authorization: 'Bearer ' + token }
-    });
-    if (!res.ok) return null;
-    return await res.json();
-  } catch (e) { return null; }
-}
-async function writeBlob(path, data) {
-  const token = process.env.NETLIFY_AUTH_TOKEN;
-  if (!token) return;
-  const siteId = process.env.NETLIFY_SITE_ID || 'd9496ae2-2b01-4229-b6d2-9203c3be7acb';
-  await fetch('https://api.netlify.com/api/v1/blobs/' + siteId + '/' + path, {
-    method: 'PUT',
-    headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  });
-}
+// Blob storage helpers (auto-detect runtime context inside Netlify Functions)
+const { readBlob, writeBlob } = require('./_blobs');
 
 // ============================================================================
 // Signature verification

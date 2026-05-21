@@ -46,32 +46,18 @@ function checkAdmin(p) {
   return p === 'quarry2026';
 }
 
+// Use the shared SDK-backed helpers (the prior direct REST calls to
+// api.netlify.com/api/v1/blobs were silently 404'ing on PUT — see _blobs.js).
+const _blobs = require('./_blobs');
 async function readBlob(dateKey) {
-  const url = `https://api.netlify.com/api/v1/blobs/${SITE_ID}/golf-bookings/${dateKey}`;
-  const res = await fetch(url, { headers: { Authorization: 'Bearer ' + NETLIFY_TOKEN } });
-  if (!res.ok) return { bookings: [] };
-  try { return await res.json(); } catch (_) { return { bookings: [] }; }
+  return (await _blobs.readBlob('golf-bookings/' + dateKey)) || { bookings: [] };
 }
-
 async function writeBlob(dateKey, data) {
-  const url = `https://api.netlify.com/api/v1/blobs/${SITE_ID}/golf-bookings/${dateKey}`;
-  const res = await fetch(url, {
-    method: 'PUT',
-    headers: { Authorization: 'Bearer ' + NETLIFY_TOKEN, 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) {
-    const t = await res.text();
-    throw new Error('Blob write ' + res.status + ': ' + t.slice(0, 200));
-  }
+  const ok = await _blobs.writeBlob('golf-bookings/' + dateKey, data);
+  if (!ok) throw new Error('Blob write failed for golf-bookings/' + dateKey);
 }
-
 async function deleteBlob(dateKey) {
-  const url = `https://api.netlify.com/api/v1/blobs/${SITE_ID}/golf-bookings/${dateKey}`;
-  await fetch(url, {
-    method: 'DELETE',
-    headers: { Authorization: 'Bearer ' + NETLIFY_TOKEN },
-  });
+  return _blobs.deleteBlob('golf-bookings/' + dateKey);
 }
 
 function fmtDateLong(dateKey) {

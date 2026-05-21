@@ -1,5 +1,6 @@
 const Stripe = require('stripe');
 const https = require('https');
+const _blobs = require('./_blobs');
 
 function sendGridEmail(to, subject, htmlBody, fromEmail, fromName) {
   fromEmail = fromEmail || 'management@thequarrystl.com';
@@ -131,21 +132,12 @@ exports.handler = async (event) => {
 
 async function storeBooking(m, amount) {
   try {
-    const token = process.env.NETLIFY_AUTH_TOKEN;
-    const siteId = 'roaring-pegasus-444826';
     const dateKey = (m.date || 'unknown').replace(/\//g, '-');
-    const key = encodeURIComponent('golf-' + dateKey);
-    const existing = await fetch('https://api.netlify.com/api/v1/blobs/' + siteId + '/' + key, {
-      headers: { Authorization: 'Bearer ' + token }
-    });
-    let bookings = [];
-    if (existing.ok) { try { bookings = (await existing.json()).bookings || []; } catch(e){} }
+    const path = 'golf-bookings/' + dateKey;
+    const existing = await _blobs.readBlob(path);
+    const bookings = (existing && existing.bookings) || [];
     bookings.push({ bay: m.bay, time: m.time, name: m.customerName, bookedAt: new Date().toISOString() });
-    await fetch('https://api.netlify.com/api/v1/blobs/' + siteId + '/' + key, {
-      method: 'PUT',
-      headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ bookings })
-    });
+    await _blobs.writeBlob(path, { bookings });
     console.log('Booking stored:', m.bay, m.date, m.time);
   } catch(e) { console.error('storeBooking error:', e.message); }
 }

@@ -8,6 +8,7 @@
 // ============================================================================
 
 const Stripe = require('stripe');
+const { readBlob } = require('./_blobs');
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -72,23 +73,19 @@ exports.handler = async (event) => {
     }
 
     // Merge in pay-at-venue / manual bookings from blob storage (which never
-    // hit Stripe). Walk each day in the range and read the blob.
-    const netlifyToken = process.env.NETLIFY_AUTH_TOKEN;
-    const siteId = process.env.NETLIFY_SITE_ID || 'd9496ae2-2b01-4229-b6d2-9203c3be7acb';
-    if (netlifyToken) {
+    // hit Stripe). Walk each day in the range and read the blob via the SDK
+    // helper (the prior direct REST call was silently returning empty data).
+    {
         const seenSessions = new Set(all.map(b => b.sessionId));
-        // Walk each day in the requested range
         let cursor = startDate;
         let dayCount = 0;
         while (cursor <= endDate && dayCount < 365) {
             try {
-                const blobUrl = `https://api.netlify.com/api/v1/blobs/${siteId}/golf-bookings/${cursor}`;
-                const r = await fetch(blobUrl, { headers: { Authorization: 'Bearer ' + netlifyToken } });
-                if (r.ok) {
-                    const data = await r.json();
+                const data = await readBlob('golf-bookings/' + cursor);
+                if (data) {
                     for (const b of (data.bookings || [])) {
                         if (!b.sessionId || seenSessions.has(b.sessionId)) continue;
-                        // Only include blob-only records (e.g. pay-at-venue / admin-added)
+                        // Only include blob-only records (e.g. pay-at-venue / admin-added).
                         // Stripe-paid records were already added above.
                         if (!(String(b.sessionId).startsWith('admin-') || String(b.paymentMethod) === 'pay-at-venue')) continue;
                         seenSessions.add(b.sessionId);

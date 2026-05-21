@@ -1,5 +1,6 @@
 const Stripe = require('stripe');
 const https = require('https');
+const _blobs = require('./_blobs');
 
 function sendGridEmail(to, subject, htmlBody, fromEmail, fromName) {
   fromEmail = fromEmail || 'management@thequarrystl.com';
@@ -83,17 +84,10 @@ exports.handler = async (event) => {
     }
 
     // Member is verified — store RSVP and notify owner
-    const token = process.env.NETLIFY_AUTH_TOKEN;
-    const siteId = 'roaring-pegasus-444826';
-
-    // Store RSVP in Netlify Blobs
     const rsvpKey = 'wine-rsvp-' + (date || tasting).replace(/\//g, '-').replace(/\s/g, '-');
-    const url = 'https://api.netlify.com/api/v1/blobs/' + siteId + '/wine-rsvps/' + rsvpKey;
-    let rsvps = [];
-    try {
-      const existing = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
-      if (existing.ok) { const d = await existing.json(); rsvps = d.rsvps || []; }
-    } catch(e) {}
+    const path = 'wine-rsvps/' + rsvpKey;
+    const existing = await _blobs.readBlob(path);
+    const rsvps = (existing && existing.rsvps) || [];
 
     // Check if already RSVP'd
     if (rsvps.some(r => r.email.toLowerCase() === email.toLowerCase())) {
@@ -101,11 +95,7 @@ exports.handler = async (event) => {
     }
 
     rsvps.push({ name, email, tasting, date, time, rsvpAt: new Date().toISOString() });
-    await fetch(url, {
-      method: 'PUT',
-      headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ rsvps })
-    });
+    await _blobs.writeBlob(path, { rsvps });
 
     // Notify owner via Netlify Forms
     const formBody = new URLSearchParams({
