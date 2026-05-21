@@ -2689,6 +2689,7 @@
                 <div class="sb-nav-section">Customers</div>
                 <div class="sb-nav-group">
                     <div class="sb-nav-item" data-tab="members"><span class="sb-ic">⭐</span><span class="sb-lbl">Rewards Members</span></div>
+                    <div class="sb-nav-item" data-tab="wineclub"><span class="sb-ic">🍷</span><span class="sb-lbl">Wine Club</span><span id="wineclubBadge" class="sb-badge" style="display:none;">0</span></div>
                     <div class="sb-nav-item" data-tab="crm"><span class="sb-ic">👥</span><span class="sb-lbl">Contacts</span></div>
                     <div class="sb-nav-item" data-tab="potential"><span class="sb-ic">📥</span><span class="sb-lbl">Reservation Inquiries</span></div>
                     <div class="sb-nav-item" data-tab="confirmed"><span class="sb-ic">✓</span><span class="sb-lbl">Confirmed Bookings</span></div>
@@ -3094,7 +3095,170 @@
                 </div>
             </div>
 
-            <!-- ========================================================
+                        <!-- ========================================================
+                 WINE CLUB TAB
+                 ======================================================== -->
+            <div id="wineclubTab" class="tab-content">
+                <div class="bands-header">
+                    <h2>Wine Club Members</h2>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                        <input type="file" id="wcImportFile" accept=".csv" style="display:none;">
+                        <button class="btn-secondary" id="wcImportBtn" type="button">Import CSV</button>
+                        <button class="btn-secondary" id="wcRefreshBtn" type="button">Refresh</button>
+                        <button class="btn-primary" id="wcAddBtn" type="button">+ Add Member</button>
+                    </div>
+                </div>
+
+                <div id="wcLoading" style="text-align:center;padding:40px;color:var(--text-muted);">Loading wine club roster…</div>
+
+                <div id="wcContent" style="display:none;">
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));gap:12px;margin-bottom:24px;">
+                        <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:16px;">
+                            <div style="font-size:0.72rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--text-muted);font-weight:600;margin-bottom:6px;">Total Members</div>
+                            <div id="wcStatTotal" style="font-size:1.6rem;font-weight:600;color:var(--text-primary);">0</div>
+                        </div>
+                        <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:16px;">
+                            <div style="font-size:0.72rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--text-muted);font-weight:600;margin-bottom:6px;">Active</div>
+                            <div id="wcStatActive" style="font-size:1.6rem;font-weight:600;color:var(--green);">0</div>
+                        </div>
+                        <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:16px;">
+                            <div style="font-size:0.72rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--text-muted);font-weight:600;margin-bottom:6px;">Canceled</div>
+                            <div id="wcStatCanceled" style="font-size:1.6rem;font-weight:600;color:var(--text-secondary);">0</div>
+                        </div>
+                        <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:16px;">
+                            <div style="font-size:0.72rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--text-muted);font-weight:600;margin-bottom:6px;">Joined This Month</div>
+                            <div id="wcStatNew" style="font-size:1.6rem;font-weight:600;color:var(--gold);">0</div>
+                        </div>
+                    </div>
+
+                    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:20px;margin-bottom:24px;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
+                            <div>
+                                <div style="font-size:1.05rem;font-weight:600;color:var(--text-primary);">Email all Wine Club members</div>
+                                <div style="font-size:0.85rem;color:var(--text-secondary);margin-top:2px;">Sends to <strong id="wcAudienceCount">0</strong> active member<span id="wcAudiencePl">s</span> via SendGrid. The Quarry header/footer (with required unsubscribe + address) is added automatically.</div>
+                            </div>
+                            <button class="btn-primary" id="wcSendBtn" type="button">Send to active members</button>
+                        </div>
+                        <div style="display:grid;gap:10px;">
+                            <input type="text" id="wcEmailSubject" placeholder="Subject (e.g. May Rock &amp; Vine pickup is ready)" style="width:100%;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;">
+                            <textarea id="wcEmailBody" rows="8" placeholder="Write your message here. You can use {firstName} to personalize." style="width:100%;padding:12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;font-family:Georgia,serif;line-height:1.5;resize:vertical;"></textarea>
+                            <div style="font-size:0.78rem;color:var(--text-muted);">Tip: line breaks become paragraph breaks. Merge tags: <code>{firstName}</code>, <code>{name}</code>, <code>{email}</code>.</div>
+                            <div id="wcSendStatus" style="font-size:0.88rem;display:none;"></div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">
+                        <input type="text" id="wcSearch" placeholder="Search name, email, phone…" style="flex:1;min-width:220px;padding:9px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.92rem;">
+                        <select id="wcStatusFilter" style="padding:9px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.92rem;">
+                            <option value="all">All statuses</option>
+                            <option value="Active" selected>Active only</option>
+                            <option value="Paused">Paused</option>
+                            <option value="Canceled">Canceled</option>
+                        </select>
+                        <select id="wcSourceFilter" style="padding:9px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.92rem;">
+                            <option value="all">All sources</option>
+                            <option value="Square">Square</option>
+                            <option value="Stripe">Stripe</option>
+                            <option value="Wix">Wix</option>
+                            <option value="Manual">Manual</option>
+                            <option value="Import">Import</option>
+                        </select>
+                    </div>
+
+                    <div id="wcEmpty" style="display:none;text-align:center;padding:48px 24px;background:var(--bg-card);border:1px dashed var(--border-subtle);border-radius:var(--radius-md);">
+                        <div style="font-size:2rem;margin-bottom:8px;opacity:0.6;">🍷</div>
+                        <div style="font-weight:600;margin-bottom:6px;">No wine club members yet</div>
+                        <div style="color:var(--text-secondary);font-size:0.92rem;line-height:1.55;max-width:520px;margin:0 auto;">Use <strong>Import CSV</strong> to load your existing roster, or <strong>+ Add Member</strong> for manual entry. New Square subscribers will sync here automatically.</div>
+                    </div>
+
+                    <div id="wcTableWrap" style="overflow-x:auto;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md);">
+                        <table class="bands-table" style="margin:0;">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Plan</th>
+                                    <th>Price</th>
+                                    <th>Joined</th>
+                                    <th>Status</th>
+                                    <th>Source</th>
+                                    <th style="text-align:right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="wcTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="wcMemberModal" class="modal" style="display:none;">
+                <div class="modal-overlay" onclick="wcCloseModal()"></div>
+                <div class="modal-content" style="max-width:560px;">
+                    <div class="modal-header">
+                        <h3 id="wcModalTitle">Add Wine Club Member</h3>
+                        <button class="modal-close" onclick="wcCloseModal()">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="wcMemberForm" style="display:grid;gap:14px;" onsubmit="return false;">
+                            <input type="hidden" id="wcfId">
+                            <div>
+                                <label style="display:block;font-size:0.78rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Full Name *</label>
+                                <input type="text" id="wcfName" required style="width:100%;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;">
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:0.78rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Email *</label>
+                                <input type="email" id="wcfEmail" required style="width:100%;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;">
+                            </div>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+                                <div>
+                                    <label style="display:block;font-size:0.78rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Phone</label>
+                                    <input type="tel" id="wcfPhone" placeholder="(636) 555-0000" style="width:100%;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;">
+                                </div>
+                                <div>
+                                    <label style="display:block;font-size:0.78rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Joined</label>
+                                    <input type="text" id="wcfJoined" placeholder="May 09, 2026" style="width:100%;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;">
+                                </div>
+                            </div>
+                            <div style="display:grid;grid-template-columns:2fr 1fr;gap:14px;">
+                                <div>
+                                    <label style="display:block;font-size:0.78rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Plan</label>
+                                    <input type="text" id="wcfPlan" value="Rock & Vine Wine Club" style="width:100%;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;">
+                                </div>
+                                <div>
+                                    <label style="display:block;font-size:0.78rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Price</label>
+                                    <input type="text" id="wcfPrice" placeholder="$29.99/mo" style="width:100%;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;">
+                                </div>
+                            </div>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+                                <div>
+                                    <label style="display:block;font-size:0.78rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Status</label>
+                                    <select id="wcfStatus" style="width:100%;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;">
+                                        <option>Active</option><option>Paused</option><option>Canceled</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display:block;font-size:0.78rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Source</label>
+                                    <select id="wcfSource" style="width:100%;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;">
+                                        <option>Manual</option><option>Square</option><option>Stripe</option><option>Wix</option><option>Import</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:0.78rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Notes</label>
+                                <textarea id="wcfNotes" rows="2" style="width:100%;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;font-family:var(--font-sans);resize:vertical;"></textarea>
+                            </div>
+                            <div id="wcfError" style="color:var(--red);font-size:0.88rem;display:none;"></div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn-secondary" onclick="wcCloseModal()">Cancel</button>
+                        <button class="btn-primary" id="wcSaveBtn" type="button">Save</button>
+                    </div>
+                </div>
+            </div>
+
+<!-- ========================================================
                  FLOOR PLAN TAB
                  ======================================================== -->
             <div id="floorplanTab" class="tab-content">
@@ -13024,6 +13188,365 @@ function hashCode(str) {
             btn.disabled = false; btn.textContent = 'Save Changes';
         };
     })();
+    
+        // ================================================================
+        // WINE CLUB TAB
+        // ================================================================
+        (function() {
+            const ENDPOINT = '/.netlify/functions/wine-club';
+            let members = [];
+            let loaded  = false;
+
+            const $ = (id) => document.getElementById(id);
+
+            function escapeHtml(s) {
+                return (s == null ? '' : String(s))
+                    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+                    .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+            }
+
+            function fmtJoined(s) {
+                if (!s) return '—';
+                if (/[A-Za-z]/.test(s)) return s;
+                const d = new Date(s);
+                if (isNaN(d)) return s;
+                try {
+                    return new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', year:'numeric', month:'short', day:'2-digit' }).format(d);
+                } catch (e) { return s; }
+            }
+
+            function ctMonthYear(date) {
+                try {
+                    return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago', year:'numeric', month:'2-digit' }).format(date);
+                } catch (e) { return ''; }
+            }
+
+            async function api(action, payload) {
+                const res = await fetch(ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(Object.assign({ action: action }, payload || {}))
+                });
+                const json = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(json.error || ('HTTP ' + res.status));
+                return json;
+            }
+
+            async function load() {
+                $('wcLoading').style.display = '';
+                $('wcContent').style.display = 'none';
+                try {
+                    const res = await api('list');
+                    members = (res.members || []).slice().sort(function(a,b){
+                        const aa = (a.status||'').toLowerCase() === 'active' ? 0 : 1;
+                        const bb = (b.status||'').toLowerCase() === 'active' ? 0 : 1;
+                        if (aa !== bb) return aa - bb;
+                        return (b.joinedAt||'').localeCompare(a.joinedAt||'');
+                    });
+                    loaded = true;
+                    render();
+                } catch (e) {
+                    $('wcLoading').textContent = 'Failed to load: ' + e.message;
+                }
+            }
+
+            function currentFilter() {
+                return {
+                    q:      ($('wcSearch').value || '').toLowerCase().trim(),
+                    status: $('wcStatusFilter').value,
+                    source: $('wcSourceFilter').value
+                };
+            }
+
+            function filtered() {
+                const f = currentFilter();
+                return members.filter(function(m) {
+                    if (f.status !== 'all' && (m.status||'').toLowerCase() !== f.status.toLowerCase()) return false;
+                    if (f.source !== 'all' && (m.source||'').toLowerCase() !== f.source.toLowerCase()) return false;
+                    if (f.q) {
+                        const hay = [m.name, m.email, m.phone, m.notes].join(' ').toLowerCase();
+                        if (hay.indexOf(f.q) < 0) return false;
+                    }
+                    return true;
+                });
+            }
+
+            function render() {
+                $('wcLoading').style.display = 'none';
+                $('wcContent').style.display = '';
+
+                const activeCount   = members.filter(function(m){ return /^active$/i.test(m.status||''); }).length;
+                const canceledCount = members.filter(function(m){ return /^canceled$/i.test(m.status||''); }).length;
+                const thisMonth = ctMonthYear(new Date());
+                const newCount = members.filter(function(m){
+                    if (!m.joinedAt) return false;
+                    const d = new Date(m.joinedAt);
+                    if (isNaN(d)) return false;
+                    return ctMonthYear(d) === thisMonth;
+                }).length;
+
+                $('wcStatTotal').textContent    = members.length;
+                $('wcStatActive').textContent   = activeCount;
+                $('wcStatCanceled').textContent = canceledCount;
+                $('wcStatNew').textContent      = newCount;
+                $('wcAudienceCount').textContent = activeCount;
+                $('wcAudiencePl').textContent = activeCount === 1 ? '' : 's';
+
+                const badge = $('wineclubBadge');
+                if (badge) {
+                    if (activeCount > 0) { badge.textContent = activeCount; badge.style.display = ''; }
+                    else { badge.style.display = 'none'; }
+                }
+
+                const list = filtered();
+                if (members.length === 0) {
+                    $('wcEmpty').style.display = '';
+                    $('wcTableWrap').style.display = 'none';
+                    return;
+                }
+                $('wcEmpty').style.display = 'none';
+                $('wcTableWrap').style.display = '';
+
+                const tbody = $('wcTableBody');
+                if (list.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:24px;">No members match the current filters.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = list.map(function(m) {
+                    const statusColor = /^active$/i.test(m.status||'')   ? 'background:rgba(34,197,94,0.12);color:#16a34a' :
+                                        /^paused$/i.test(m.status||'')   ? 'background:rgba(234,179,8,0.15);color:#a16207' :
+                                        /^canceled$/i.test(m.status||'') ? 'background:rgba(148,163,184,0.18);color:#475569' :
+                                                                           'background:rgba(148,163,184,0.18);color:#475569';
+                    return ''
+                        + '<tr>'
+                        +   '<td><strong>' + escapeHtml(m.name || '—') + '</strong></td>'
+                        +   '<td>' + (m.email ? '<a href="mailto:' + escapeHtml(m.email) + '">' + escapeHtml(m.email) + '</a>' : '—') + '</td>'
+                        +   '<td>' + escapeHtml(m.phone || '—') + '</td>'
+                        +   '<td>' + escapeHtml(m.plan || '—') + '</td>'
+                        +   '<td>' + escapeHtml(m.price || '—') + '</td>'
+                        +   '<td>' + escapeHtml(fmtJoined(m.joinedAt)) + '</td>'
+                        +   '<td><span style="display:inline-block;padding:2px 10px;border-radius:999px;font-size:0.78rem;font-weight:600;' + statusColor + '">' + escapeHtml(m.status || 'Active') + '</span></td>'
+                        +   '<td style="font-size:0.85rem;color:var(--text-secondary);">' + escapeHtml(m.source || 'Manual') + '</td>'
+                        +   '<td style="text-align:right;white-space:nowrap;">'
+                        +     '<button class="btn-small" data-wc-edit="' + escapeHtml(m.id) + '">Edit</button> '
+                        +     '<button class="btn-small delete" data-wc-del="' + escapeHtml(m.id) + '" style="border-color:#f87171;color:#f87171;">Delete</button>'
+                        +   '</td>'
+                        + '</tr>';
+                }).join('');
+
+                tbody.querySelectorAll('[data-wc-edit]').forEach(function(b) {
+                    b.addEventListener('click', function() { openModal(b.getAttribute('data-wc-edit')); });
+                });
+                tbody.querySelectorAll('[data-wc-del]').forEach(function(b) {
+                    b.addEventListener('click', function() { delMember(b.getAttribute('data-wc-del')); });
+                });
+            }
+
+            function openModal(id) {
+                const m = id ? members.find(function(x){ return x.id === id; }) : null;
+                $('wcModalTitle').textContent = m ? 'Edit Wine Club Member' : 'Add Wine Club Member';
+                $('wcfId').value      = m ? m.id : '';
+                $('wcfName').value    = m ? (m.name||'')    : '';
+                $('wcfEmail').value   = m ? (m.email||'')   : '';
+                $('wcfPhone').value   = m ? (m.phone||'')   : '';
+                $('wcfJoined').value  = m ? (m.joinedAt||'') : '';
+                $('wcfPlan').value    = m ? (m.plan||'Rock & Vine Wine Club') : 'Rock & Vine Wine Club';
+                $('wcfPrice').value   = m ? (m.price||'')   : '';
+                $('wcfStatus').value  = m ? (m.status||'Active') : 'Active';
+                $('wcfSource').value  = m ? (m.source||'Manual') : 'Manual';
+                $('wcfNotes').value   = m ? (m.notes||'')   : '';
+                $('wcfError').style.display = 'none';
+                $('wcMemberModal').style.display = 'flex';
+            }
+            window.wcCloseModal = function() { $('wcMemberModal').style.display = 'none'; };
+
+            async function saveMember() {
+                const id = $('wcfId').value;
+                const payload = {
+                    name:     $('wcfName').value.trim(),
+                    email:    $('wcfEmail').value.trim(),
+                    phone:    $('wcfPhone').value.trim(),
+                    joinedAt: $('wcfJoined').value.trim(),
+                    plan:     $('wcfPlan').value.trim(),
+                    price:    $('wcfPrice').value.trim(),
+                    status:   $('wcfStatus').value,
+                    source:   $('wcfSource').value,
+                    notes:    $('wcfNotes').value
+                };
+                if (!payload.name || !payload.email) {
+                    $('wcfError').textContent = 'Name and email are required.';
+                    $('wcfError').style.display = '';
+                    return;
+                }
+                $('wcSaveBtn').disabled = true;
+                $('wcSaveBtn').textContent = 'Saving…';
+                try {
+                    if (id) await api('update', { id: id, patch: payload });
+                    else    await api('add',    { member: payload });
+                    wcCloseModal();
+                    await load();
+                } catch (e) {
+                    $('wcfError').textContent = e.message;
+                    $('wcfError').style.display = '';
+                } finally {
+                    $('wcSaveBtn').disabled = false;
+                    $('wcSaveBtn').textContent = 'Save';
+                }
+            }
+
+            async function delMember(id) {
+                const m = members.find(function(x){ return x.id === id; });
+                if (!m) return;
+                if (!confirm('Remove ' + (m.name || m.email) + ' from the Wine Club roster? This cannot be undone.')) return;
+                try {
+                    await api('delete', { id: id });
+                    await load();
+                } catch (e) {
+                    alert('Delete failed: ' + e.message);
+                }
+            }
+
+            function parseCsv(text) {
+                const rows = [];
+                let cur = [], val = '', inQ = false;
+                for (let i = 0; i < text.length; i++) {
+                    const c = text[i];
+                    if (inQ) {
+                        if (c === '"' && text[i+1] === '"') { val += '"'; i++; }
+                        else if (c === '"') inQ = false;
+                        else val += c;
+                    } else {
+                        if (c === '"') inQ = true;
+                        else if (c === ',') { cur.push(val); val = ''; }
+                        else if (c === '\n') { cur.push(val); rows.push(cur); cur = []; val = ''; }
+                        else if (c === '\r') { /* skip */ }
+                        else val += c;
+                    }
+                }
+                if (val.length || cur.length) { cur.push(val); rows.push(cur); }
+                return rows.filter(function(r){ return r.length && r.some(function(c){ return c && c.trim(); }); });
+            }
+
+            async function importCsv(file) {
+                const text = await file.text();
+                const rows = parseCsv(text);
+                if (rows.length < 2) { alert('CSV is empty or invalid.'); return; }
+                const headers = rows[0].map(function(h){ return h.trim().toLowerCase(); });
+                const idx = function(name) { return headers.indexOf(name); };
+                const iName  = idx('name');
+                const iEmail = idx('email');
+                const iPhone = idx('phone');
+                const iPlan  = idx('plan');
+                const iPrice = idx('price');
+                const iJoin  = idx('subscription start date') >= 0 ? idx('subscription start date') : idx('joined');
+                const iStat  = idx('status');
+                const iSrc   = idx('source');
+                const iNote  = idx('notes');
+                if (iName < 0 || iEmail < 0) {
+                    alert('CSV must include at least "Name" and "Email" columns.');
+                    return;
+                }
+                const out = [];
+                for (let r = 1; r < rows.length; r++) {
+                    const row = rows[r];
+                    if (!row || !row.length) continue;
+                    out.push({
+                        name:     (row[iName]  || '').trim(),
+                        email:    (row[iEmail] || '').trim(),
+                        phone:    iPhone>=0 ? (row[iPhone] || '').trim() : '',
+                        plan:     iPlan>=0  ? (row[iPlan]  || '').trim() : 'Rock & Vine Wine Club',
+                        price:    iPrice>=0 ? (row[iPrice] || '').trim() : '',
+                        joinedAt: iJoin>=0  ? (row[iJoin]  || '').trim() : '',
+                        status:   iStat>=0  ? (row[iStat]  || 'Active').trim() : 'Active',
+                        source:   iSrc>=0   ? (row[iSrc]   || 'Import').trim() : 'Import',
+                        notes:    iNote>=0  ? (row[iNote]  || '').trim() : ''
+                    });
+                }
+                if (!out.length) { alert('No member rows found in the CSV.'); return; }
+                if (!confirm('Import ' + out.length + ' members? Duplicates by email will be merged, not duplicated.')) return;
+                try {
+                    const res = await api('import', { members: out, mode: 'merge' });
+                    alert('Import complete. Added ' + (res.added||0) + ', updated ' + (res.updated||0) + '. Total: ' + (res.total||0) + '.');
+                    await load();
+                } catch (e) {
+                    alert('Import failed: ' + e.message);
+                }
+            }
+
+            function bodyToHtml(plain) {
+                const paragraphs = plain.split(/\n\s*\n/).map(function(p){ return p.trim(); }).filter(Boolean);
+                return paragraphs.map(function(p) {
+                    return '<p style="margin:0 0 14px 0">' + escapeHtml(p).replace(/\n/g, '<br>') + '</p>';
+                }).join('');
+            }
+
+            async function sendEmailAll() {
+                const subject = $('wcEmailSubject').value.trim();
+                const bodyText = $('wcEmailBody').value;
+                const status = $('wcSendStatus');
+                if (!subject || !bodyText.trim()) {
+                    status.textContent = 'Subject and message body are required.';
+                    status.style.color = 'var(--red)';
+                    status.style.display = '';
+                    return;
+                }
+                const activeCount = members.filter(function(m){ return /^active$/i.test(m.status||'') && m.email; }).length;
+                if (!activeCount) {
+                    status.textContent = 'No active members with email addresses on the roster.';
+                    status.style.color = 'var(--red)';
+                    status.style.display = '';
+                    return;
+                }
+                if (!confirm('Send "' + subject + '" to ' + activeCount + ' active Wine Club member' + (activeCount===1?'':'s') + '?')) return;
+
+                $('wcSendBtn').disabled = true;
+                $('wcSendBtn').textContent = 'Sending…';
+                status.style.color = 'var(--text-secondary)';
+                status.textContent = 'Sending to ' + activeCount + ' recipients via SendGrid…';
+                status.style.display = '';
+                try {
+                    const html = bodyToHtml(bodyText);
+                    const res = await api('email-all', { subject: subject, html: html, audience: 'active' });
+                    status.style.color = res.failed ? '#a16207' : '#16a34a';
+                    status.textContent = 'Done. Sent ' + (res.sent||0) + ', failed ' + (res.failed||0) + '.';
+                    if (res.failed && res.errors && res.errors.length) {
+                        console.warn('Wine club send errors', res.errors);
+                    }
+                } catch (e) {
+                    status.style.color = 'var(--red)';
+                    status.textContent = 'Send failed: ' + e.message;
+                } finally {
+                    $('wcSendBtn').disabled = false;
+                    $('wcSendBtn').textContent = 'Send to active members';
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                if (!$('wcAddBtn')) return;
+                $('wcAddBtn').addEventListener('click', function(){ openModal(null); });
+                $('wcRefreshBtn').addEventListener('click', load);
+                $('wcSaveBtn').addEventListener('click', saveMember);
+                $('wcSearch').addEventListener('input', render);
+                $('wcStatusFilter').addEventListener('change', render);
+                $('wcSourceFilter').addEventListener('change', render);
+                $('wcSendBtn').addEventListener('click', sendEmailAll);
+                $('wcImportBtn').addEventListener('click', function(){ $('wcImportFile').click(); });
+                $('wcImportFile').addEventListener('change', function(e){
+                    const f = e.target.files && e.target.files[0];
+                    if (f) importCsv(f);
+                    e.target.value = '';
+                });
+            });
+
+            const origSwitchWC = window.switchTab;
+            if (typeof origSwitchWC === 'function') {
+                window.switchTab = function(name) {
+                    origSwitchWC.apply(this, arguments);
+                    if (name === 'wineclub' && !loaded) load();
+                };
+            }
+        })();
+
     </script>
 </body>
 </html>
