@@ -70,3 +70,11 @@
 # creates patio-perfect or cozy-fireside skeleton drafts for today/tomorrow.
 [functions."social-weather-trigger"]
   schedule = "0 11 * * *"
+
+# ─── REWARDS ────────────────────────────────────────────────────────────────
+# Tier-decay daily check — 14:00 UTC = 9am CDT / 8am CST. Sends a "visit by
+# month-end" warning at 30 days inactive; drops tier one level at 60 days.
+# Points themselves never expire — only the tier perks decay. See
+# expire-tiers.js for the rules; rewards.json defines the windows.
+[functions."expire-tiers"]
+  schedule = "0 14 * * *"

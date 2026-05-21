@@ -15,6 +15,7 @@
 // ============================================================================
 const crypto = require('crypto');
 const https  = require('https');
+const { wrap } = require('./_sentry');
 
 const SECRET           = process.env.MEMBER_AUTH_SECRET || '';
 const GITHUB_TOKEN     = process.env.GITHUB_TOKEN || '';
@@ -68,7 +69,7 @@ function gh(method, path, body) {
   });
 }
 
-exports.handler = async (event) => {
+exports.handler = wrap('register-push-token', async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: CORS, body: '' };
   if (event.httpMethod !== 'POST') return reply(405, { ok: false, error: 'Method not allowed' });
   if (!SECRET || !GITHUB_TOKEN) return reply(500, { ok: false, error: 'Server not configured' });
@@ -135,4 +136,4 @@ exports.handler = async (event) => {
   }
 
   return reply(200, { ok: true, devices: member.devices.length });
-};
+});

@@ -9,11 +9,59 @@
 // ============================================================================
 const crypto = require('crypto');
 const https = require('https');
+const { readBlob, writeBlob } = require('./_blobs');
+const { wrap } = require('./_sentry');
 
 const SECRET = process.env.MEMBER_AUTH_SECRET || '';
 const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY || '';
 const FROM_EMAIL = 'management@thequarrystl.com';
 const FROM_NAME  = 'The Quarry';
+
+// Rate limits (sliding window, stored in Netlify Blobs)
+const EMAIL_LIMIT_PER_HOUR = 3;
+const EMAIL_LIMIT_PER_DAY  = 10;
+const IP_LIMIT_PER_HOUR    = 30;
+const WINDOW_HOUR_MS       = 60 * 60 * 1000;
+const WINDOW_DAY_MS        = 24 * 60 * 60 * 1000;
+
+function sha256short(s) {
+  return crypto.createHash('sha256').update(String(s)).digest('hex').slice(0, 16);
+}
+
+async function checkRateLimit(email, ip) {
+  const now = Date.now();
+  // Per-email — bucket key avoids exposing addresses in blob path
+  const emailKey = 'rate-limit/email-' + sha256short(email.toLowerCase());
+  const ipKey    = 'rate-limit/ip-' + sha256short(ip || 'unknown');
+
+  // Email: hourly + daily
+  let emailRecord = (await readBlob(emailKey)) || { ts: [] };
+  emailRecord.ts = (emailRecord.ts || []).filter((t) => now - t < WINDOW_DAY_MS);
+  const hourCount = emailRecord.ts.filter((t) => now - t < WINDOW_HOUR_MS).length;
+  const dayCount  = emailRecord.ts.length;
+  if (hourCount >= EMAIL_LIMIT_PER_HOUR) {
+    return { allowed: false, reason: 'Too many codes requested for this email in the last hour. Please wait before trying again.' };
+  }
+  if (dayCount >= EMAIL_LIMIT_PER_DAY) {
+    return { allowed: false, reason: 'Daily limit reached for this email. Please try again tomorrow or contact support.' };
+  }
+
+  // IP: hourly only
+  let ipRecord = (await readBlob(ipKey)) || { ts: [] };
+  ipRecord.ts = (ipRecord.ts || []).filter((t) => now - t < WINDOW_HOUR_MS);
+  if (ipRecord.ts.length >= IP_LIMIT_PER_HOUR) {
+    return { allowed: false, reason: 'Too many sign-in code requests from your network. Please wait a bit and try again.' };
+  }
+
+  // Record this request (after the check passes)
+  emailRecord.ts.push(now);
+  ipRecord.ts.push(now);
+  await Promise.all([
+    writeBlob(emailKey, emailRecord),
+    writeBlob(ipKey, ipRecord),
+  ]);
+  return { allowed: true };
+}
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -69,7 +117,7 @@ async function sendEmail(to, code) {
   });
 }
 
-exports.handler = async (event) => {
+exports.handler = wrap('request-code', async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: CORS, body: '' };
   if (event.httpMethod !== 'POST')    return reply(405, { ok: false, error: 'POST only' });
   if (!SECRET)            return reply(500, { ok: false, error: 'MEMBER_AUTH_SECRET not configured' });
@@ -84,6 +132,18 @@ exports.handler = async (event) => {
     return reply(400, { ok: false, error: 'Valid email required' });
   }
 
+  // Anti-abuse: sliding-window rate limit per email + per source IP
+  const clientIp = (event.headers && (event.headers['x-nf-client-connection-ip'] || event.headers['x-forwarded-for'] || '')).split(',')[0].trim();
+  try {
+    const rl = await checkRateLimit(email, clientIp);
+    if (!rl.allowed) {
+      return reply(429, { ok: false, error: rl.reason, rateLimit: true });
+    }
+  } catch (e) {
+    // If the rate-limit store is down, fail open (better UX than locking everyone out)
+    console.warn('Rate limit check failed, allowing:', e && e.message);
+  }
+
   const minute = Math.floor(Date.now() / 60000);
   const code = codeForMinute(email, minute);
 
@@ -96,6 +156,6 @@ exports.handler = async (event) => {
   } catch (e) {
     return reply(500, { ok: false, error: 'Send failed: ' + e.message });
   }
-};
+});
 
 // redeploy: 1777851734.1665862

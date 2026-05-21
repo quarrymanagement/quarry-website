@@ -30,6 +30,7 @@
 // ============================================================================
 const crypto = require('crypto');
 const https  = require('https');
+const { wrap } = require('./_sentry');
 
 const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH || '';
 const GITHUB_TOKEN        = process.env.GITHUB_TOKEN || '';
@@ -166,7 +167,7 @@ function memberMatchesAudience(m, audience, memberEmails) {
   return false;
 }
 
-exports.handler = async (event) => {
+exports.handler = wrap('send-push', async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: CORS, body: '' };
   if (event.httpMethod !== 'POST') return reply(405, { ok: false, error: 'Method not allowed' });
 
@@ -221,4 +222,4 @@ exports.handler = async (event) => {
     failures: errors.length,
     errorSample: errors.slice(0, 5),
   });
-};
+});

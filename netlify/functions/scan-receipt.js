@@ -14,6 +14,7 @@
 
 const crypto = require('crypto');
 const https = require('https');
+const { wrap } = require('./_sentry');
 
 const SECRET            = process.env.MEMBER_AUTH_SECRET || '';
 const GITHUB_TOKEN      = process.env.GITHUB_TOKEN || '';
@@ -453,7 +454,7 @@ function ctOffsetSuffix(yyyymmdd) {
 }
 
 // ─── Main handler ──────────────────────────────────────────────────────────
-exports.handler = async (event) => {
+exports.handler = wrap('scan-receipt', async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: CORS, body: '' };
   if (event.httpMethod !== 'POST') return reply(405, { ok: false, error: 'Method not allowed' });
 
@@ -709,4 +710,4 @@ exports.handler = async (event) => {
     checkNumber: ocr.check_number,
     queueProcessed: pendingResult.credited > 0 ? pendingResult : undefined,
   });
-};
+});

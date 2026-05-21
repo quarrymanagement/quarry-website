@@ -22,6 +22,9 @@
 const https = require('https');
 const crypto = require('crypto');
 const { google } = require('googleapis');
+const { wrap } = require('./_sentry');
+// Blob storage helpers (auto-detect runtime context inside Netlify Functions)
+const { readBlob, writeBlob } = require('./_blobs');
 
 const WEBHOOK_URL = 'https://thequarrystl.com/.netlify/functions/square-webhook';
 
@@ -154,9 +157,6 @@ async function createCalendarEvent(summary, description, location, startIso, end
     return null;
   }
 }
-
-// Blob storage helpers (auto-detect runtime context inside Netlify Functions)
-const { readBlob, writeBlob } = require('./_blobs');
 
 // ============================================================================
 // Signature verification
@@ -491,7 +491,7 @@ function buildEventOwnerHtml(m, amount, paymentId) {
 // ============================================================================
 // Main webhook entrypoint
 // ============================================================================
-exports.handler = async function(event) {
+exports.handler = wrap('square-webhook', async function(event) {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: JSON.stringify({ error: 'Method not allowed' }) };
   }
@@ -584,4 +584,4 @@ exports.handler = async function(event) {
     // Return 200 anyway so Square doesn't keep retrying a malformed event forever.
     return { statusCode: 200, body: JSON.stringify({ received: true, error: err.message }) };
   }
-};
+});

@@ -19,6 +19,7 @@
 // ============================================================================
 const crypto = require('crypto');
 const https = require('https');
+const { wrap } = require('./_sentry');
 
 const SECRET = process.env.MEMBER_AUTH_SECRET || '';
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN || '';
@@ -29,7 +30,10 @@ const SENDGRID_LIST_SUBSCRIBED = process.env.SENDGRID_LIST_SUBSCRIBED || '';
 const SESSION_TTL_DAYS = 30;
 const WELCOME_BONUS = 250;
 const EMAIL_OPTIN_BONUS = 10;
-const SMS_OPTIN_BONUS = 10;
+// SMS opt-in is collected for future use but no Twilio/SMS sending exists yet,
+// so we don't award points until SMS is actually being sent. Flip this back to
+// 10 once Twilio is wired and outbound SMS is live.
+const SMS_OPTIN_BONUS = 0;
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -154,7 +158,7 @@ async function sendWelcomeEmail({ email, firstName, totalBonusPts }) {
 }
 
 // ─── Main handler ──────────────────────────────────────────────────────────
-exports.handler = async (event) => {
+exports.handler = wrap('signup', async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: CORS, body: '' };
   if (event.httpMethod !== 'POST') return reply(405, { ok: false, error: 'Method not allowed' });
   if (!SECRET || !GITHUB_TOKEN) return reply(500, { ok: false, error: 'Server not configured' });
@@ -265,4 +269,4 @@ exports.handler = async (event) => {
     member,
     bonusAwarded: totalBonus,
   });
-};
+});

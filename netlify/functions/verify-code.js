@@ -13,6 +13,7 @@
 // ============================================================================
 const crypto = require('crypto');
 const https = require('https');
+const { wrap } = require('./_sentry');
 
 const SECRET = process.env.MEMBER_AUTH_SECRET || '';
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN || '';
@@ -146,7 +147,7 @@ async function lookupMember(email) {
 }
 
 // ─── Handler ───────────────────────────────────────────────────────────────
-exports.handler = async (event) => {
+exports.handler = wrap('verify-code', async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: CORS, body: '' };
   if (event.httpMethod !== 'POST')    return reply(405, { ok: false, error: 'POST only' });
   if (!SECRET)        return reply(500, { ok: false, error: 'MEMBER_AUTH_SECRET not configured' });
@@ -189,4 +190,4 @@ exports.handler = async (event) => {
     member: result.member,
     isNewMember: result.isNew,
   });
-};
+});
