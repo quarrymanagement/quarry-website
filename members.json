@@ -9,8 +9,8 @@
       "joinedAt": "2026-05-03T22:42:54.383Z",
       "lastVisitAt": "2026-05-21T22:11:29.505Z",
       "tier": "gold",
-      "currentPoints": 5831,
-      "lifetimePoints": 6331,
+      "currentPoints": 6091,
+      "lifetimePoints": 6591,
       "totalRedemptions": 1,
       "marketingOptIn": true,
       "smsOptIn": true,
@@ -151,13 +151,21 @@
           "spendUsd": 42.5,
           "tier": "gold",
           "note": "[TEST] Simulated visit: $42.50"
+        },
+        {
+          "at": "2026-05-21T22:16:52.277Z",
+          "action": "earn",
+          "source": "signup-claim",
+          "delta": 260,
+          "note": "Existing record claimed via password signup (welcome 250 + email +10 + sms +0)"
         }
       ],
       "referralCode": "QRY-ZJ7WBK",
       "welcomeSeriesSent": {
         "day7": "2026-05-21T18:32:49.744Z"
       },
-      "tierWarnedAt": null
+      "tierWarnedAt": null,
+      "passwordHash": "b1024bcfed2da631e8de5e11339312a9:ef69404ff1ba095ec1e41a90cefef5873f74ff248a0937bb3533305675a4dcecf2647115d7421bb0d45056152f7784ae7667d04e4a4c13a215012d3c6b91edd7"
     },
     {
       "id": "m_moqrvmuj_233a",
