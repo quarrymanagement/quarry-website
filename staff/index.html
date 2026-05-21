@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+<meta name="theme-color" content="#1A1A1A" />
+<title>The Quarry — Staff Redeem</title>
+<link rel="icon" href="/assets/icons/icon-192.png" />
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<style>
+:root {
+  --bg: #FAF6EE;
+  --card: #FFFFFF;
+  --ink: #1A1A1A;
+  --muted: rgba(26,26,26,0.55);
+  --gold: #B8933A;
+  --gold-light: #D4AF6A;
+  --gold-soft: #F5E9CC;
+  --border: #E8E0D0;
+  --green: #2F7D32;
+  --red: #B00020;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: 'Montserrat', sans-serif;
+  min-height: 100vh; padding: 18px;
+  font-variant-numeric: tabular-nums;
+}
+.wrap { max-width: 460px; margin: 0 auto; }
+.header {
+  text-align: center; padding: 24px 0 18px;
+}
+.header .brand {
+  font-family: 'Playfair Display', serif;
+  font-weight: 600; letter-spacing: 0.22em;
+  color: var(--ink); text-transform: uppercase; font-size: 1.05rem;
+}
+.header .sub {
+  font-size: 0.62rem; letter-spacing: 0.32em; color: var(--gold);
+  text-transform: uppercase; margin-top: 4px;
+}
+.card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 22px;
+  box-shadow: 0 4px 20px rgba(60,40,20,0.06);
+  margin-bottom: 14px;
+}
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 600; font-size: 1.4rem; margin-bottom: 6px;
+}
+.label {
+  font-size: 0.62rem; letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 8px; font-weight: 600;
+}
+input[type="text"], input[type="password"] {
+  width: 100%; padding: 14px 12px;
+  border: 1px solid var(--border); border-radius: 10px;
+  font-size: 1rem; font-family: 'Montserrat', sans-serif;
+  letter-spacing: 0.04em; background: #FAFAFA;
+}
+input[type="text"]:focus, input[type="password"]:focus {
+  outline: none; border-color: var(--gold); background: #fff;
+}
+#codeInput {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem; letter-spacing: 0.16em; text-align: center;
+  text-transform: uppercase; padding: 18px 12px;
+}
+.btn {
+  width: 100%; padding: 16px;
+  border: 1px solid var(--ink); background: var(--ink); color: var(--gold-light);
+  font-family: 'Montserrat', sans-serif; font-size: 0.78rem;
+  font-weight: 700; letter-spacing: 0.28em; text-transform: uppercase;
+  border-radius: 10px; cursor: pointer;
+  transition: transform 0.1s ease;
+}
+.btn:active { transform: scale(0.98); }
+.btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+.btn.secondary {
+  background: transparent; color: var(--ink); border-color: var(--border);
+}
+.btn.danger {
+  background: transparent; color: var(--red); border-color: var(--red);
+}
+.row { display: flex; gap: 10px; }
+.row .btn { flex: 1; }
+.spacer-sm { height: 12px; }
+.spacer-md { height: 20px; }
+.muted { color: var(--muted); font-size: 0.85rem; }
+
+.lookup {
+  background: var(--gold-soft); border: 1px solid var(--gold);
+  border-radius: 12px; padding: 18px; margin-bottom: 14px;
+}
+.lookup .lbl {
+  font-size: 0.6rem; letter-spacing: 0.3em; color: var(--gold);
+  text-transform: uppercase; font-weight: 700;
+}
+.lookup .reward {
+  font-family: 'Playfair Display', serif; font-size: 1.2rem;
+  margin-top: 6px; color: var(--ink); font-weight: 600;
+}
+.lookup .desc { color: var(--muted); font-size: 0.85rem; margin-top: 4px; }
+.lookup .pts {
+  font-family: 'Playfair Display', serif; font-size: 2rem;
+  color: var(--gold); margin-top: 12px; font-weight: 600;
+}
+.lookup .for {
+  margin-top: 14px; padding-top: 14px;
+  border-top: 1px solid rgba(184,147,58,0.3);
+  font-size: 0.85rem;
+}
+.lookup .for strong { color: var(--ink); }
+
+#status { font-size: 0.85rem; margin-top: 10px; min-height: 1.2em; }
+#status.err { color: var(--red); }
+#status.ok  { color: var(--green); }
+
+.confirmed-card {
+  background: #E8F5E9; border: 1px solid var(--green);
+  text-align: center; padding: 28px 22px;
+}
+.confirmed-card .check {
+  font-size: 2.5rem; color: var(--green); margin-bottom: 8px;
+}
+.confirmed-card .title {
+  font-family: 'Playfair Display', serif; font-size: 1.4rem;
+  font-weight: 600; margin-bottom: 6px;
+}
+.confirmed-card .toast-note {
+  margin-top: 18px; padding: 14px;
+  background: rgba(255,255,255,0.7); border-radius: 8px;
+  text-align: left; font-size: 0.85rem; color: var(--ink);
+  line-height: 1.5;
+}
+.confirmed-card .toast-note strong { color: var(--gold); }
+
+.foot { text-align: center; font-size: 0.7rem; color: var(--muted); margin-top: 24px; }
+.foot a { color: var(--gold); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="header">
+    <div class="brand">The Quarry</div>
+    <div class="sub">Staff · Redeem</div>
+  </div>
+
+  <!-- LOGIN -->
+  <div class="card" id="loginCard">
+    <div class="label">Staff Password</div>
+    <input type="password" id="pwInput" autocomplete="current-password" placeholder="Enter password" />
+    <div class="spacer-sm"></div>
+    <button class="btn" id="loginBtn">Sign In</button>
+    <div id="loginStatus" class="muted" style="margin-top:10px;text-align:center"></div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="mainCard" style="display:none">
+    <div class="card">
+      <h1>Enter Customer Code</h1>
+      <p class="muted" style="margin-bottom:14px">Ask the customer to tap <strong>Redeem</strong> in their app. They'll show you a 6-character code.</p>
+      <div class="label">Code</div>
+      <input type="text" id="codeInput" autocomplete="off" maxlength="6" placeholder="ABC123" />
+      <div id="status"></div>
+      <div class="spacer-sm"></div>
+      <button class="btn" id="lookupBtn">Look Up</button>
+    </div>
+
+    <div id="lookupBlock" class="lookup" style="display:none">
+      <div class="lbl">Ready to redeem</div>
+      <div class="reward" id="lkReward">—</div>
+      <div class="desc" id="lkDesc">—</div>
+      <div class="pts"><span id="lkPts">0</span> pts</div>
+      <div class="for">For <strong id="lkMember">—</strong> &nbsp;·&nbsp; <span id="lkExpires" class="muted"></span></div>
+      <div class="spacer-md"></div>
+      <div class="row">
+        <button class="btn secondary" id="cancelBtn">Cancel</button>
+        <button class="btn" id="confirmBtn">Confirm</button>
+      </div>
+    </div>
+
+    <div id="confirmedBlock" class="card confirmed-card" style="display:none">
+      <div class="check">✓</div>
+      <div class="title">Reward Redeemed</div>
+      <div id="cfReward" class="muted" style="margin-bottom:6px">—</div>
+      <div class="muted">For <strong id="cfMember">—</strong></div>
+      <div class="muted" style="font-size:0.78rem;margin-top:6px">Code: <strong id="cfCode">—</strong> · New balance: <strong id="cfBalance">—</strong></div>
+      <div class="toast-note">
+        <strong>NEXT:</strong> Apply the matching discount in <strong>Toast</strong> to this customer's check.<br>
+        For <strong id="cfRewardName2">—</strong>, use the corresponding Toast comp / promo.
+      </div>
+      <div class="spacer-md"></div>
+      <button class="btn" id="newBtn">New Redemption</button>
+    </div>
+
+    <div class="foot">
+      Signed in · <a href="#" id="signoutLink">Sign out</a>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+(function(){
+  var TOKEN_KEY = 'quarryStaffToken';
+  var lookupCache = null; // last successful redeem-status response
+
+  var $ = function(id){ return document.getElementById(id); };
+
+  // ─── Auth ────────────────────────────────────────────────────────
+  function showMain() { $('loginCard').style.display = 'none'; $('mainCard').style.display = ''; }
+  function showLogin() { $('loginCard').style.display = ''; $('mainCard').style.display = 'none'; }
+
+  function getToken() { return localStorage.getItem(TOKEN_KEY); }
+  function setToken(t) { if (t) localStorage.setItem(TOKEN_KEY, t); else localStorage.removeItem(TOKEN_KEY); }
+
+  async function verifyToken(t) {
+    if (!t) return false;
+    try {
+      var r = await fetch('/.netlify/functions/verify-admin-password', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ action:'verify', token: t })
+      });
+      var b = await r.json();
+      return !!b.ok;
+    } catch (e) { return false; }
+  }
+
+  (async function init() {
+    var t = getToken();
+    if (t && await verifyToken(t)) { showMain(); }
+    else { setToken(null); showLogin(); $('pwInput').focus(); }
+  })();
+
+  $('loginBtn').addEventListener('click', async function() {
+    var pw = $('pwInput').value.trim();
+    if (!pw) { $('loginStatus').textContent = 'Password required'; return; }
+    $('loginBtn').disabled = true; $('loginStatus').textContent = 'Verifying…';
+    try {
+      var r = await fetch('/.netlify/functions/verify-admin-password', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ password: pw })
+      });
+      var b = await r.json().catch(function(){ return {}; });
+      if (b.ok && b.token) {
+        setToken(b.token);
+        $('pwInput').value = '';
+        $('loginStatus').textContent = '';
+        showMain();
+        setTimeout(function(){ $('codeInput').focus(); }, 100);
+      } else {
+        $('loginStatus').textContent = 'Wrong password';
+      }
+    } catch (e) {
+      $('loginStatus').textContent = 'Network error — try again';
+    } finally {
+      $('loginBtn').disabled = false;
+    }
+  });
+
+  $('pwInput').addEventListener('keydown', function(e){ if (e.key === 'Enter') $('loginBtn').click(); });
+
+  $('signoutLink').addEventListener('click', function(e) {
+    e.preventDefault(); setToken(null); resetUI(); showLogin();
+  });
+
+  // ─── Code lookup ─────────────────────────────────────────────────
+  var codeInput = $('codeInput');
+  codeInput.addEventListener('input', function() {
+    this.value = this.value.replace(/[^A-Za-z0-9]/g,'').toUpperCase();
+    if (this.value.length === 6) $('lookupBtn').click();
+  });
+  codeInput.addEventListener('keydown', function(e){ if (e.key === 'Enter') $('lookupBtn').click(); });
+
+  function setStatus(msg, cls) {
+    var el = $('status');
+    el.textContent = msg || '';
+    el.className = cls || '';
+  }
+
+  $('lookupBtn').addEventListener('click', async function() {
+    var code = codeInput.value.trim().toUpperCase();
+    if (code.length !== 6) { setStatus('Enter a 6-character code', 'err'); return; }
+    $('lookupBtn').disabled = true; setStatus('Looking up…');
+    try {
+      var r = await fetch('/.netlify/functions/redeem-status?code=' + encodeURIComponent(code));
+      var b = await r.json();
+      if (!b.ok) throw new Error(b.error || 'lookup failed');
+      if (b.status === 'not-found') { setStatus('Code not found. Ask the customer to tap Redeem again.', 'err'); return; }
+      if (b.status === 'expired')   { setStatus('This code has expired (5-min window). Have the customer tap Redeem again.', 'err'); return; }
+      if (b.status === 'confirmed') { setStatus('This code was already used at ' + new Date(b.confirmedAt).toLocaleTimeString() + '.', 'err'); return; }
+      lookupCache = b;
+      $('lkReward').textContent = b.reward.name || '—';
+      $('lkDesc').textContent   = b.reward.description || '';
+      $('lkPts').textContent    = (b.reward.points || 0).toLocaleString();
+      $('lkMember').textContent = (b.member && b.member.name) ? b.member.name : (b.member && b.member.email) || '—';
+      $('lkExpires').textContent = 'expires ' + new Date(b.expiresAt).toLocaleTimeString();
+      $('lookupBlock').style.display = '';
+      setStatus('', 'ok');
+    } catch (e) {
+      setStatus('Error: ' + e.message, 'err');
+    } finally {
+      $('lookupBtn').disabled = false;
+    }
+  });
+
+  $('cancelBtn').addEventListener('click', function() {
+    $('lookupBlock').style.display = 'none';
+    lookupCache = null;
+    codeInput.value = ''; codeInput.focus();
+    setStatus('');
+  });
+
+  $('confirmBtn').addEventListener('click', async function() {
+    if (!lookupCache) return;
+    $('confirmBtn').disabled = true; $('cancelBtn').disabled = true;
+    setStatus('Confirming…');
+    try {
+      var r = await fetch('/.netlify/functions/redeem-confirm', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          code: lookupCache.code,
+          adminToken: getToken(),
+          staffName: '', // could prompt; for v1 just record 'staff'
+        })
+      });
+      var b = await r.json();
+      if (!r.ok || !b.ok) throw new Error(b.error || 'HTTP ' + r.status);
+
+      $('lookupBlock').style.display = 'none';
+      $('cfReward').textContent  = b.reward.name + ' · ' + b.points + ' pts';
+      $('cfRewardName2').textContent = b.reward.name;
+      $('cfMember').textContent  = b.member.name || b.member.email;
+      $('cfCode').textContent    = b.code;
+      $('cfBalance').textContent = (b.newBalance || 0).toLocaleString() + ' pts';
+      $('confirmedBlock').style.display = '';
+      setStatus('');
+      try { if (navigator.vibrate) navigator.vibrate([60, 40, 60]); } catch(_){}
+    } catch (e) {
+      setStatus('Confirm failed: ' + e.message, 'err');
+    } finally {
+      $('confirmBtn').disabled = false; $('cancelBtn').disabled = false;
+    }
+  });
+
+  $('newBtn').addEventListener('click', function() { resetUI(); });
+
+  function resetUI() {
+    $('confirmedBlock').style.display = 'none';
+    $('lookupBlock').style.display = 'none';
+    lookupCache = null;
+    codeInput.value = ''; setStatus('');
+    setTimeout(function(){ codeInput.focus(); }, 100);
+  }
+})();
+</script>
+
+</body>
+</html>

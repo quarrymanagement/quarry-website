@@ -3121,10 +3121,11 @@ async function submitParty() {
     catalog.forEach(function(r) {
       var pts = Number(r.points || 0);
       var canAfford = balance >= pts;
-      // Existing app convention: Redeem button is a visual indicator. Actual
-      // redemption happens in person — staff deducts points via /admin.
+      // Customer taps "Redeem" → opens a code+QR modal. Staff confirms on /staff.
+      var safeId = (r.id || '').replace(/'/g, "\\'");
+      var safeName = (r.name || '').replace(/'/g, "\\'").replace(/"/g,'&quot;');
       var actionHtml = canAfford
-        ? '<div class="reward-action">Redeem</div>'
+        ? '<div class="reward-action" onclick="openRedeemFlow(\'' + safeId + '\', ' + pts + ', \'' + safeName + '\')">Redeem</div>'
         : '<div class="reward-action disabled">' + (pts - balance).toLocaleString() + ' More</div>';
       html += '<div class="reward-row">' +
         '<div class="reward-info">' +
@@ -3139,6 +3140,134 @@ async function submitParty() {
       '</div>';
     });
     wrap.innerHTML = html;
+  }
+
+  // ─── Redeem flow ────────────────────────────────────────────────────────
+  // Customer taps a Redeem button → POST /redeem-create → modal shows code +
+  // QR → poll /redeem-status until staff confirms or 5min expires.
+  window.openRedeemFlow = async function(rewardId, points, rewardName) {
+    if (!currentMember || !currentMember.email) {
+      alert('Please sign in to redeem rewards.');
+      return;
+    }
+    var balance = (currentMember.currentPoints) || 0;
+    if (balance < points) {
+      alert('You need ' + (points - balance).toLocaleString() + ' more points for ' + rewardName + '.');
+      return;
+    }
+
+    var ovr = document.createElement('div');
+    ovr.id = 'redeemFlowOverlay';
+    ovr.style.cssText = 'position:fixed;inset:0;background:rgba(14,14,14,0.94);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px);';
+    ovr.innerHTML =
+      '<div style="background:#FFFFFF;border:1px solid #E8E0D0;border-radius:18px;padding:30px 26px;max-width:380px;width:100%;text-align:center;font-family:Montserrat,sans-serif;color:#1A1A1A;box-shadow:0 30px 80px rgba(60,40,20,0.25);">' +
+        '<div id="rfLoading">' +
+          '<div style="font-size:0.68rem;letter-spacing:0.32em;color:#B8933A;text-transform:uppercase;margin-bottom:12px">Creating Code…</div>' +
+          '<div style="font-family:Cormorant Garamond,serif;font-style:italic;color:rgba(26,26,26,0.6);font-size:0.95rem">One moment.</div>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(ovr);
+
+    try {
+      var res = await fetch('/.netlify/functions/redeem-create', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ memberEmail: currentMember.email, rewardId: rewardId }),
+      });
+      var data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || 'HTTP ' + res.status);
+
+      _renderRedeemCodeView(ovr, data);
+      _startRedeemPolling(data.code, ovr);
+    } catch (e) {
+      ovr.innerHTML =
+        '<div style="background:#FFFFFF;border:1px solid #E8E0D0;border-radius:18px;padding:30px 26px;max-width:340px;width:100%;text-align:center;font-family:Montserrat,sans-serif;">' +
+          '<div style="font-size:0.7rem;letter-spacing:0.28em;color:#B00020;text-transform:uppercase;margin-bottom:10px">Could not start redemption</div>' +
+          '<div style="color:rgba(26,26,26,0.7);font-size:0.9rem;margin-bottom:18px">' + (e.message || 'Unknown error') + '</div>' +
+          '<button onclick="document.getElementById(\'redeemFlowOverlay\').remove()" style="width:100%;padding:14px;background:#1A1A1A;color:#D4AF6A;border:0;border-radius:8px;font-family:Montserrat,sans-serif;font-size:0.78rem;font-weight:700;letter-spacing:0.28em;text-transform:uppercase;cursor:pointer">Close</button>' +
+        '</div>';
+    }
+  };
+
+  function _renderRedeemCodeView(ovr, data) {
+    // QR via free public quickchart endpoint (no JS dep, just an <img>)
+    var qrUrl = 'https://quickchart.io/qr?text=' + encodeURIComponent(data.code) + '&size=200&margin=2';
+    var expiresMs = new Date(data.expiresAt).getTime() - Date.now();
+    var mins = Math.max(0, Math.floor(expiresMs / 60000));
+    var secs = Math.max(0, Math.floor((expiresMs % 60000) / 1000));
+    ovr.innerHTML =
+      '<div style="background:#FFFFFF;border:1px solid #E8E0D0;border-radius:18px;padding:28px 24px;max-width:380px;width:100%;text-align:center;font-family:Montserrat,sans-serif;color:#1A1A1A;box-shadow:0 30px 80px rgba(60,40,20,0.25);">' +
+        '<div style="font-size:0.68rem;letter-spacing:0.32em;color:#B8933A;text-transform:uppercase;margin-bottom:6px">Show This To Staff</div>' +
+        '<div style="font-family:Playfair Display,serif;font-size:1.3rem;font-weight:600;margin-bottom:4px">' + (data.reward.name || 'Reward') + '</div>' +
+        '<div style="color:rgba(26,26,26,0.55);font-size:0.8rem;margin-bottom:18px">' + (data.reward.points || 0).toLocaleString() + ' points</div>' +
+        '<div style="background:#FAFAFA;border:1px solid #E8E0D0;border-radius:12px;padding:18px;margin-bottom:14px">' +
+          '<img src="' + qrUrl + '" alt="QR" style="width:200px;height:200px;display:block;margin:0 auto 12px" />' +
+          '<div style="font-family:Playfair Display,serif;font-size:2.2rem;letter-spacing:0.18em;font-weight:600;color:#1A1A1A">' + data.code + '</div>' +
+        '</div>' +
+        '<div id="rfCountdown" style="font-size:0.75rem;color:rgba(26,26,26,0.55);margin-bottom:16px">Expires in <strong id="rfCountdownNum">' + mins + ':' + (secs < 10 ? '0' : '') + secs + '</strong></div>' +
+        '<button onclick="cancelRedeemFlow()" style="width:100%;padding:14px;background:transparent;border:1px solid #E8E0D0;color:#1A1A1A;border-radius:8px;font-family:Montserrat,sans-serif;font-size:0.78rem;font-weight:700;letter-spacing:0.28em;text-transform:uppercase;cursor:pointer">Cancel</button>' +
+      '</div>';
+
+    // Countdown
+    var endsAt = new Date(data.expiresAt).getTime();
+    if (window._rfCountdownTimer) clearInterval(window._rfCountdownTimer);
+    window._rfCountdownTimer = setInterval(function() {
+      var left = endsAt - Date.now();
+      var el = document.getElementById('rfCountdownNum');
+      if (!el) { clearInterval(window._rfCountdownTimer); return; }
+      if (left <= 0) {
+        el.textContent = 'expired';
+        clearInterval(window._rfCountdownTimer);
+      } else {
+        var m = Math.floor(left / 60000);
+        var s = Math.floor((left % 60000) / 1000);
+        el.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+      }
+    }, 1000);
+  }
+
+  window.cancelRedeemFlow = function() {
+    if (window._rfPollTimer)      clearInterval(window._rfPollTimer);
+    if (window._rfCountdownTimer) clearInterval(window._rfCountdownTimer);
+    var ovr = document.getElementById('redeemFlowOverlay');
+    if (ovr) ovr.remove();
+  };
+
+  function _startRedeemPolling(code, ovr) {
+    if (window._rfPollTimer) clearInterval(window._rfPollTimer);
+    window._rfPollTimer = setInterval(async function() {
+      try {
+        var r = await fetch('/.netlify/functions/redeem-status?code=' + encodeURIComponent(code));
+        var b = await r.json();
+        if (!b.ok) return;
+        if (b.status === 'confirmed') {
+          clearInterval(window._rfPollTimer);
+          clearInterval(window._rfCountdownTimer);
+          _renderRedeemConfirmedView(ovr, b);
+          // Refresh local member balance from server
+          if (typeof fetchMemberRecord === 'function') fetchMemberRecord();
+        } else if (b.status === 'expired' || b.status === 'not-found') {
+          clearInterval(window._rfPollTimer);
+          var el = document.getElementById('rfCountdownNum');
+          if (el) el.textContent = 'expired';
+        }
+      } catch (_) {}
+    }, 2500);
+  }
+
+  function _renderRedeemConfirmedView(ovr, b) {
+    ovr.innerHTML =
+      '<div style="background:#FFFFFF;border:1px solid #E8E0D0;border-radius:18px;padding:36px 28px;max-width:380px;width:100%;text-align:center;font-family:Montserrat,sans-serif;color:#1A1A1A;box-shadow:0 30px 80px rgba(60,40,20,0.25);">' +
+        '<div style="font-size:3rem;color:#2F7D32;margin-bottom:10px">✓</div>' +
+        '<div style="font-family:Playfair Display,serif;font-size:1.4rem;font-weight:600;margin-bottom:8px">Redeemed</div>' +
+        '<div style="color:rgba(26,26,26,0.7);font-size:0.95rem;margin-bottom:6px">' + (b.reward.name || '') + '</div>' +
+        '<div style="color:rgba(26,26,26,0.55);font-size:0.8rem;margin-bottom:20px">Show staff this screen if needed</div>' +
+        '<div style="background:#FAFAFA;border:1px solid #E8E0D0;border-radius:10px;padding:14px;margin-bottom:18px">' +
+          '<div style="font-size:0.62rem;letter-spacing:0.28em;color:rgba(26,26,26,0.55);text-transform:uppercase;margin-bottom:6px">New Balance</div>' +
+          '<div style="font-family:Playfair Display,serif;font-size:1.8rem;font-weight:600;color:#B8933A">' + (b.newBalance != null ? b.newBalance.toLocaleString() : '—') + ' pts</div>' +
+        '</div>' +
+        '<button onclick="cancelRedeemFlow()" style="width:100%;padding:14px;background:#1A1A1A;color:#D4AF6A;border:0;border-radius:8px;font-family:Montserrat,sans-serif;font-size:0.78rem;font-weight:700;letter-spacing:0.28em;text-transform:uppercase;cursor:pointer">Done</button>' +
+      '</div>';
+    try { if (navigator.vibrate) navigator.vibrate([60, 40, 60]); } catch(_){}
   }
 
   // Greeting strings, time-of-day aware. Override defaults if app-content has them.
