@@ -12,6 +12,8 @@
 //   5. A sample recent order from Toast's API (proves connectivity end-to-end)
 //
 // Once wired this can stay as an ongoing health check.
+//
+// redeploy-marker: 2026-05-21 — pick up rotated TOAST_CLIENT_* env vars
 // ============================================================================
 const crypto = require('crypto');
 const https  = require('https');
