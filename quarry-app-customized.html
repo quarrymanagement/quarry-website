@@ -3702,18 +3702,38 @@ async function submitParty() {
     if (rOv) rOv.classList.remove('open');
   };
 
-  window.openReferModal = function() {
-    var code = (currentMember && currentMember.referralCode) || 'QRY-PENDING';
+  // The main app scope has `let currentMember` which isn't in our closure.
+  // Fetch the fresh member record from /verify-code on demand instead.
+  async function fetchMemberRecord() {
+    var token = tok();
+    if (!token) return null;
+    try {
+      var r = await fetch(apiBase() + '/.netlify/functions/verify-code', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: token }),
+      });
+      var body = await r.json();
+      return (body && body.ok && body.member) ? body.member : null;
+    } catch (_) { return null; }
+  }
+  // Cache the last fetched member so onShareReferral can grab name/code synchronously
+  var _cachedMember = null;
+
+  window.openReferModal = async function() {
     var el = document.getElementById('refCodeBig');
-    if (el) el.textContent = code;
+    if (el) el.textContent = 'Loading…';
     var resEl = document.getElementById('refResult');
     if (resEl) resEl.innerHTML = '';
     document.getElementById('referOverlay').classList.add('open');
+    _cachedMember = await fetchMemberRecord();
+    var code = (_cachedMember && _cachedMember.referralCode) || 'QRY-PENDING';
+    if (el) el.textContent = code;
   };
 
   window.onShareReferral = async function() {
-    var code = (currentMember && currentMember.referralCode) || '';
-    var firstName = (currentMember && currentMember.name || '').split(/\s+/)[0] || 'a friend';
+    if (!_cachedMember) _cachedMember = await fetchMemberRecord();
+    var code = (_cachedMember && _cachedMember.referralCode) || '';
+    var firstName = (_cachedMember && _cachedMember.name || '').split(/\s+/)[0] || 'a friend';
     var shareText = firstName + ' invited you to join Quarry Rewards. Use code ' + code + ' when you sign up — you get a welcome bonus, ' + firstName + ' gets 50 points. https://thequarrystl.com/quarry-rewards.html';
     var result = document.getElementById('refResult');
     // Try native share first (works in Capacitor + many mobile browsers)
