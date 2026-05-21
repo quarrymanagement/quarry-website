@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-21T04:00:47.163Z",
+  "updatedAt": "2026-05-21T13:02:53.685Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -1675,7 +1675,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-05-27T17:00:00-05:00",
       "createdAt": "2026-04-28T03:38:22.281Z",
       "createdBy": "cadence-engine",
@@ -1723,12 +1723,32 @@
           ],
           "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
         },
-        "canvasNote": "Weekend Lineup — covers 2 band(s). Post 3 days before first show."
+        "canvasNote": "Weekend Lineup — covers 2 band(s). Post 3 days before first show.",
+        "reelBrief": "Open with a slow pan across the stone patio in afternoon light (2s), cut to a close-up of a wine glass catching sunlight on the bar top (3s), end on a wide shot of the cliffside lake view with the patio in the foreground (4s). Suggested audio: laid-back acoustic folk or country instrumental. Text overlay: 'Live music this weekend. Free with your visit. Sat & Sun 1–4 PM.'"
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Live music this weekend — no cover, no ticket, just show up.\n\nMark Snell plays Saturday 1–4 PM. Scott and Liz take the Sunday afternoon set, also 1–4 PM. Good music, good wine, and a view that earns the drive out.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#LiveMusicSTL",
+        "#WineBar",
+        "#STLEats",
+        "#OutdoorDining"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Acoustic guitar leaning against a wooden stool on a sun-warmed stone patio, afternoon light casting soft shadows, blurred cliff face and lake water in the background, string lights overhead unlit in daylight, warm golden tones",
+      "variants": {
+        "facebook": "Live music this weekend — and it's always free with a visit.\n\nMark Snell plays Saturday from 1–4 PM. Scott and Liz close out the weekend Sunday, same time. Come for the afternoon, stay for the view. We're at 3960 Highway Z in New Melle.",
+        "instagram": "Live music both days this weekend. Free with your visit.\n\nMark Snell — Saturday 1–4 PM\nScott and Liz — Sunday 1–4 PM\n\nNew Melle. Worth the drive."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "At T-3, the post establishes the full weekend lineup with specific day/time details and reinforces the free music value without urgency — matching the vibe-forward, invitation tone appropriate for band announcements.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-05-21T13:02:53.685Z",
+      "updatedAt": "2026-05-21T13:02:53.685Z"
     },
     {
       "id": "drf-moi2t9s9-10-b6xwl",
@@ -3407,7 +3427,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-05-22T18:00:00-05:00",
       "createdAt": "2026-05-21T04:00:47.160Z",
       "createdBy": "cadence-engine",
@@ -3443,11 +3463,30 @@
         },
         "canvasNote": "One Week Away — Post 7 days before event. (Pace warning: registration is light, lean into urgency / value.)"
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Next Thursday, Rock & Vine Wine Club hosts a tasting with Chateau Sainte Genevieve — $35 covers wine for two, snack pairings, and a guided experience with views of The Quarry. 15 seats total. Link in bio to reserve yours.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWine",
+        "#WineBar",
+        "#STLEvents",
+        "#MissouriWine",
+        "#WineTasting"
+      ],
       "imageUrl": null,
       "userImageUrl": null,
-      "bumpedFromDay": "2026-05-21"
+      "bumpedFromDay": "2026-05-21",
+      "imagePrompt": "Two glasses of white wine on a stone ledge overlooking a calm quarry lake at golden hour, soft warm light, wildflowers and limestone cliffs in the background, shallow depth of field, no faces, no text",
+      "variants": {
+        "facebook": "Next Thursday evening, Rock & Vine Wine Club hosts a seated tasting with Chateau Sainte Genevieve Winery — $35 per person includes wine tasting for two, snack pairings, and a guided experience overlooking The Quarry. Only 15 seats available. Reserve at the link below.",
+        "instagram": "Next Thursday. Chateau Sainte Genevieve tasting — $35, wine for two, snack pairings, views of The Quarry. 15 seats. Link in bio."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "At T-7 with 0% fill, this is a value push — the caption leads with what you get ($35, wine for two, snack pairings, the view) and closes with a soft but clear action, appropriate for a Wine Club lifestyle post without tipping into hard-sell urgency.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-05-21T13:02:16.934Z",
+      "updatedAt": "2026-05-21T13:02:16.934Z"
     },
     {
       "id": "drf-mpeyqou1-3-2u0xf",
@@ -3457,7 +3496,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-05-27T11:00:00-05:00",
       "createdAt": "2026-05-21T04:00:47.161Z",
       "createdBy": "cadence-engine",
@@ -3491,12 +3530,32 @@
           "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "Tomorrow — Post 1 days before event. (Pace warning: registration is light, lean into urgency / value.)"
+        "canvasNote": "Tomorrow — Post 1 days before event. (Pace warning: registration is light, lean into urgency / value.)",
+        "reelBrief": "Open with a slow pour of white wine into a glass on a stone bar top (3s). Cut to wide shot of the quarry lake at dusk, string lights coming on (3s). End on close-up of a charcuterie pairing board with wine glass in frame (3s). Suggested audio: soft acoustic or ambient wine-bar jazz. Text overlay: 'Tomorrow Night · Chateau Sainte Genevieve · $35 · Only 15 Seats'."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Tomorrow night. Chateau Sainte Genevieve. $35 gets you a guided wine tasting for two, snack pairings, and a view of The Quarry you won't forget. Only 15 seats — this one stays small on purpose.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWine",
+        "#WineBar",
+        "#RockAndVineWineClub",
+        "#STLWeekend",
+        "#MissouriWine"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Two glasses of white and rosé wine on a stone ledge at golden hour, soft focus view of a quarry lake and limestone cliffs behind, warm string light bokeh, small wooden board with cheese and crackers beside the glasses, no faces, no text",
+      "variants": {
+        "facebook": "Tomorrow night, the Rock & Vine Wine Club hosts a guided tasting featuring Chateau Sainte Genevieve Winery. $35 per person includes wine tasting for two, snack pairings, and a seat overlooking The Quarry. Only 15 seats total — if you've been on the fence, tonight's the night to grab yours.",
+        "instagram": "Tomorrow night. Chateau Sainte Genevieve. $35, guided tasting for two, snack pairings, and a Quarry view. 15 seats. Link in bio."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "T-1 arc calls for short, punchy, and logistically specific — this version names the winery, the price, the intimacy of 15 seats, and creates quiet urgency without begging, matching the value-push tone appropriate for 0% fill at this late stage.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-05-21T13:02:41.616Z",
+      "updatedAt": "2026-05-21T13:02:41.616Z"
     },
     {
       "id": "drf-mpeyqou1-2-eilcv",
@@ -3506,7 +3565,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-05-25T18:00:00-05:00",
       "createdAt": "2026-05-21T04:00:47.161Z",
       "createdBy": "cadence-engine",
@@ -3540,12 +3599,32 @@
           "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "This Weekend — Post 3 days before event. (Pace warning: registration is light, lean into urgency / value.)"
+        "canvasNote": "This Weekend — Post 3 days before event. (Pace warning: registration is light, lean into urgency / value.)",
+        "reelBrief": "Open with a slow pour of white wine into a glass, hold 3s on the glass catching golden light with the quarry lake blurred behind. Cut to a close-up of a snack pairing board — cheese, crackers, fruit. End on a wide patio shot as the sun dips behind the cliffs. Suggested audio: soft acoustic guitar, warm and unhurried. Text overlay: 'Rock & Vine Wine Club / Chateau Sainte Genevieve / This Thursday, 6pm / $35 · 15 seats'."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "This Thursday, Rock & Vine Wine Club hosts a guided tasting with Chateau Sainte Genevieve — $35 covers wine for two, snack pairings, and a view of The Quarry at golden hour. 15 seats total. Grab yours at the link.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWine",
+        "#WineBar",
+        "#STLEvents",
+        "#MissouriWine",
+        "#WineTasting"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Two glasses of white and rosé wine on a stone ledge overlooking a calm quarry lake at golden hour, wildflowers and small charcuterie bites softly arranged beside them, warm amber light, string lights beginning to glow in the background, no faces, no text",
+      "variants": {
+        "facebook": "This Thursday evening, Rock & Vine Wine Club is hosting a guided tasting featuring Chateau Sainte Genevieve Winery. $35 per person includes wine tasting for two, snack pairings, and a curated experience overlooking The Quarry. Only 15 seats available — details and registration at the link below.",
+        "instagram": "This Thursday. Chateau Sainte Genevieve wines, snack pairings, quarry views. $35 for two. 15 seats. Link in bio."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "At T-3 with 0% fill and a small-capacity ticketed event, the post leads with the specific experience and value, names the seat count to create natural scarcity without false urgency, and closes with a clear but low-pressure CTA — matching the 'value push' guidance for low fillPct at this arc step.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-05-21T13:02:29.633Z",
+      "updatedAt": "2026-05-21T13:02:29.633Z"
     },
     {
       "id": "drf-mpeyqou1-4-mgjk1",
