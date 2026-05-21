@@ -2880,6 +2880,7 @@ async function submitParty() {
       hideOverlay();
       renderMember();
       retryPendingScans(body.token);
+      if (window.registerForPushIfNative) window.registerForPushIfNative(body.token);
     } catch (e) {
       setErr('siErr', 'Network error — try again');
     } finally {
@@ -2914,6 +2915,7 @@ async function submitParty() {
       try { localStorage.setItem(STORAGE_TOKEN, body.token); } catch (_) {}
       hideOverlay();
       renderMember();
+      if (window.registerForPushIfNative) window.registerForPushIfNative(body.token);
       // Friendly toast
       try {
         alert('Welcome! ' + body.bonusAwarded + ' points landed in your account.');
@@ -3335,6 +3337,7 @@ async function submitParty() {
       currentToken = token;
       currentMember = body.member;
       renderMember();
+      if (window.registerForPushIfNative) window.registerForPushIfNative(token);
       // Silently retry pending scans on app load
       try {
         fetch(API_BASE + '/.netlify/functions/scan-receipt', {
@@ -3412,9 +3415,43 @@ async function submitParty() {
     reader.readAsDataURL(file);
   });
 
+  // Native camera path: when running inside the Capacitor wrapper we use the
+  // @capacitor/camera plugin so the user gets a one-tap native camera UI
+  // instead of the browser's file picker. Falls back to the file input on web.
+  async function openCameraIfNative() {
+    var Cap = window.Capacitor;
+    if (!Cap || !Cap.isNativePlatform || !Cap.isNativePlatform() || !Cap.Plugins || !Cap.Plugins.Camera) {
+      return null;
+    }
+    try {
+      var result = await Cap.Plugins.Camera.getPhoto({
+        quality: 85,
+        allowEditing: false,
+        resultType: 'dataUrl',
+        source: 'CAMERA',
+        saveToGallery: false,
+      });
+      return result && result.dataUrl ? result.dataUrl : null;
+    } catch (e) {
+      // User cancelled, denied permission, or platform doesn't support it —
+      // fall back to the <input type=file> path.
+      console.warn('Capacitor Camera failed, falling back:', e && e.message || e);
+      return null;
+    }
+  }
+
   window.onScanAction = async function() {
     if (!pickedDataUrl) {
-      // First click — open camera
+      // First click — try native camera, otherwise the hidden <input type=file>
+      var dataUrl = await openCameraIfNative();
+      if (dataUrl) {
+        pickedDataUrl = dataUrl;
+        var img = document.getElementById('scanPreview');
+        img.src = dataUrl;
+        img.style.display = 'block';
+        document.getElementById('scanActionBtn').textContent = 'Submit Receipt';
+        return;
+      }
       document.getElementById('scanInput').click();
       return;
     }
@@ -3541,6 +3578,61 @@ async function submitParty() {
     var body = (el.getAttribute('data-body') || '').replace(/&#39;/g, "'").replace(/&quot;/g, '"');
     if (window.openEmailPicker) window.openEmailPicker(to, subject, body);
   });
+})();
+</script>
+
+<!-- ============================================================================
+     Native push registration: only fires inside the Capacitor wrapper. After a
+     successful sign-in / sign-up / session restore we request notification
+     permission and POST the device token to /register-push-token. No-op on web.
+     ============================================================================ -->
+<script>
+(function() {
+  window.registerForPushIfNative = async function(memberToken) {
+    var Cap = window.Capacitor;
+    if (!Cap || !Cap.isNativePlatform || !Cap.isNativePlatform()) return;
+    var Push = Cap.Plugins && Cap.Plugins.PushNotifications;
+    if (!Push) return;
+    try {
+      var perm = await Push.requestPermissions();
+      if (!perm || perm.receive !== 'granted') return;
+
+      // Wire one-time listeners. The 'registration' event fires after iOS/Android
+      // returns the APNs/FCM token; we POST it to our backend.
+      if (!window._quarryPushHooked) {
+        window._quarryPushHooked = true;
+        Push.addListener('registration', async function(t) {
+          var deviceToken = (t && (t.value || t.token)) || '';
+          if (!deviceToken) return;
+          var platform = (Cap.getPlatform && Cap.getPlatform()) || 'unknown';
+          try {
+            var apiBase = location.hostname.includes('thequarrystl.com') ? '' : 'https://thequarrystl.com';
+            await fetch(apiBase + '/.netlify/functions/register-push-token', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                token: memberToken,
+                platform: platform === 'ios' ? 'ios' : 'android',
+                deviceToken: deviceToken,
+              }),
+            });
+          } catch (e) { console.warn('push register failed', e && e.message); }
+        });
+        Push.addListener('registrationError', function(e) {
+          console.warn('push registration error', e);
+        });
+        Push.addListener('pushNotificationActionPerformed', function(action) {
+          // Optional deep-link handler: action.notification.data.tab can route
+          // the app to a specific screen. Wire when needed.
+          try { console.log('push tap', action); } catch (_) {}
+        });
+      }
+
+      await Push.register();
+    } catch (e) {
+      console.warn('registerForPushIfNative failed:', e && e.message);
+    }
+  };
 })();
 </script>
 

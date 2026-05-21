@@ -1,0 +1,25 @@
+{
+  "name": "quarry-rewards-mobile",
+  "version": "0.1.0",
+  "description": "Capacitor wrapper for the Quarry customer rewards app (iOS + Android)",
+  "private": true,
+  "scripts": {
+    "sync": "node scripts/bundle.js && npx cap sync",
+    "open:ios": "npx cap open ios",
+    "open:android": "npx cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.3.4",
+    "@capacitor/camera": "^8.2.0",
+    "@capacitor/cli": "^8.3.4",
+    "@capacitor/core": "^8.3.4",
+    "@capacitor/ios": "^8.3.4",
+    "@capacitor/preferences": "^8.0.1",
+    "@capacitor/push-notifications": "^8.1.1"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "sharp": "^0.34.5",
+    "typescript": "^6.0.3"
+  }
+}
