@@ -8,7 +8,7 @@
       "birthday": "05-06",
       "joinedAt": "2026-05-03T22:42:54.383Z",
       "lastVisitAt": "2026-05-21T20:55:30.893Z",
-      "tier": "standard",
+      "tier": "gold",
       "currentPoints": 4769,
       "lifetimePoints": 5269,
       "totalRedemptions": 1,
@@ -123,6 +123,14 @@
           "to": "standard",
           "by": "auto",
           "note": "[TEST] Simulated promotion via simulate-visit"
+        },
+        {
+          "at": "2026-05-21T20:59:48.255Z",
+          "action": "tier-set",
+          "from": "standard",
+          "to": "gold",
+          "by": "admin",
+          "note": "Restore tier — clobbered by recalcTier bug"
         }
       ],
       "referralCode": "QRY-ZJ7WBK",
