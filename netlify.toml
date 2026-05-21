@@ -78,3 +78,9 @@
 # expire-tiers.js for the rules; rewards.json defines the windows.
 [functions."expire-tiers"]
   schedule = "0 14 * * *"
+
+# Welcome-series nudges — 15:00 UTC = 10am CDT / 9am CST. Day-3 "haven't been
+# back yet?" (only if no visits) and Day-7 "how tiers work" educational email.
+# One-per-email guard via member.welcomeSeriesSent.
+[functions."welcome-series"]
+  schedule = "0 15 * * *"

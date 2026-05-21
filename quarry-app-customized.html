@@ -1582,7 +1582,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
 
       <div class="section-rule"><div class="line"></div><div class="label">Rewards Program</div><div class="line"></div></div>
       <div class="account-link" onclick="gotoScreen('screen-onboarding')"><div class="al-label">How Rewards Work</div><div class="al-arrow">›</div></div>
-      <div class="account-link"><div class="al-label">Refer a Friend <span class="al-meta">— earn 500 pts</span></div><div class="al-arrow">›</div></div>
+      <div class="account-link" onclick="openReferModal()"><div class="al-label">Refer a Friend <span class="al-meta">— earn 50 pts per signup</span></div><div class="al-arrow">›</div></div>
       <div class="account-link"><div class="al-label">Birthday <span class="al-meta">— free entrée month of</span></div><div class="al-arrow">›</div></div>
 
       <div class="section-rule"><div class="line"></div><div class="label">Settings</div><div class="line"></div></div>
@@ -2799,8 +2799,13 @@ async function submitParty() {
         '</label>' +
         '<label style="display:flex;gap:10px;align-items:flex-start;font-family:Cormorant Garamond,serif;font-style:italic;font-size:0.92rem;color:rgba(245,240,232,0.75);cursor:pointer;margin-bottom:18px">' +
           '<input id="suSmsOpt" type="checkbox" style="margin-top:3px;accent-color:#B8933A">' +
-          '<span>Text me push notifications &amp; reminders <strong style="color:#D4AF6A;font-style:normal">(+10 pts)</strong></span>' +
+          '<span>Text me reminders &amp; updates</span>' +
         '</label>' +
+        '<div style="margin-bottom:14px">' +
+          '<label style="display:block;font-family:Montserrat,sans-serif;font-size:9px;font-weight:600;letter-spacing:0.22em;text-transform:uppercase;color:rgba(212,175,106,0.7);margin-bottom:5px">Friend\'s referral code (optional)</label>' +
+          '<input id="suRefCode" type="text" placeholder="QRY-XXXXXX" autocomplete="off" autocorrect="off" autocapitalize="characters" style="' + ovrInputCss + 'letter-spacing:0.12em;text-transform:uppercase">' +
+          '<div style="font-family:Cormorant Garamond,serif;font-style:italic;color:rgba(245,240,232,0.55);font-size:0.78rem;margin-top:4px">Your friend gets +50 pts when you sign up.</div>' +
+        '</div>' +
         '<button id="suBtn" style="' + ovrPrimaryBtn + '">Create Account</button>' +
         '<div id="suErr" style="color:#DC2626;font-size:11px;margin-top:12px;text-align:center;display:none"></div>' +
       '</div>' +
@@ -2900,6 +2905,8 @@ async function submitParty() {
     const password = document.getElementById('suPassword').value;
     const marketingOptIn = document.getElementById('suEmailOpt').checked;
     const smsOptIn = document.getElementById('suSmsOpt').checked;
+    const refEl = document.getElementById('suRefCode');
+    const referrerCode = refEl ? (refEl.value || '').trim().toUpperCase() : '';
     if (!name) return setErr('suErr', 'Name is required');
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return setErr('suErr', 'Enter a valid email');
     if ((phone.match(/\d/g) || []).length < 10) return setErr('suErr', 'Enter a valid phone (10+ digits)');
@@ -2908,7 +2915,7 @@ async function submitParty() {
     try {
       const r = await fetch(API_BASE + '/.netlify/functions/signup', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, phone, dob, password, marketingOptIn, smsOptIn }),
+        body: JSON.stringify({ name, email, phone, dob, password, marketingOptIn, smsOptIn, referrerCode }),
       });
       const body = await r.json();
       if (!body.ok) return setErr('suErr', body.error || 'Sign up failed');
@@ -3630,6 +3637,22 @@ async function submitParty() {
   </div>
 </div>
 
+<!-- Refer a Friend modal -->
+<div class="acct-overlay" id="referOverlay" onclick="if(event.target===this)closeAcctModals()">
+  <div class="acct-modal">
+    <h3>Refer a Friend</h3>
+    <div class="acct-sub">Earn 50 pts every time a friend signs up with your code (up to 5/year).</div>
+    <p>Share your personal code. Anyone who enters it when they sign up earns you +50 pts.</p>
+    <div style="text-align:center;background:rgba(212,175,106,0.10);border:1px solid var(--gold-light);padding:18px;margin:18px 0;border-radius:8px;">
+      <div style="font-size:0.6rem;letter-spacing:0.3em;color:rgba(245,240,232,0.6);text-transform:uppercase;margin-bottom:8px;">Your code</div>
+      <div id="refCodeBig" style="font-family:var(--ff-display);font-size:1.9rem;color:var(--gold-light);letter-spacing:0.12em;font-weight:600;">QRY-XXXXXX</div>
+    </div>
+    <button class="acct-btn-primary" id="refShareBtn" onclick="onShareReferral()">Share &amp; Invite</button>
+    <button class="acct-btn-secondary" onclick="closeAcctModals()">Close</button>
+    <div id="refResult"></div>
+  </div>
+</div>
+
 <!-- Delete Account modal -->
 <div class="acct-overlay" id="deleteAcctOverlay" onclick="if(event.target===this)closeAcctModals()">
   <div class="acct-modal">
@@ -3675,6 +3698,39 @@ async function submitParty() {
   window.closeAcctModals = function() {
     document.getElementById('changeEmailOverlay').classList.remove('open');
     document.getElementById('deleteAcctOverlay').classList.remove('open');
+    var rOv = document.getElementById('referOverlay');
+    if (rOv) rOv.classList.remove('open');
+  };
+
+  window.openReferModal = function() {
+    var code = (currentMember && currentMember.referralCode) || 'QRY-PENDING';
+    var el = document.getElementById('refCodeBig');
+    if (el) el.textContent = code;
+    var resEl = document.getElementById('refResult');
+    if (resEl) resEl.innerHTML = '';
+    document.getElementById('referOverlay').classList.add('open');
+  };
+
+  window.onShareReferral = async function() {
+    var code = (currentMember && currentMember.referralCode) || '';
+    var firstName = (currentMember && currentMember.name || '').split(/\s+/)[0] || 'a friend';
+    var shareText = firstName + ' invited you to join Quarry Rewards. Use code ' + code + ' when you sign up — you get a welcome bonus, ' + firstName + ' gets 50 points. https://thequarrystl.com/quarry-rewards.html';
+    var result = document.getElementById('refResult');
+    // Try native share first (works in Capacitor + many mobile browsers)
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Quarry Rewards', text: shareText });
+        result.innerHTML = '<div class="acct-result success">Thanks for sharing!</div>';
+        return;
+      } catch (_) { /* user cancelled — fall through to clipboard */ }
+    }
+    // Fallback: copy to clipboard
+    try {
+      await navigator.clipboard.writeText(shareText);
+      result.innerHTML = '<div class="acct-result success">Copied — paste it in a text or email.</div>';
+    } catch (_) {
+      result.innerHTML = '<div class="acct-result error">Could not copy. Long-press your code above to copy it.</div>';
+    }
   };
 
   window.doSignOut = function() {

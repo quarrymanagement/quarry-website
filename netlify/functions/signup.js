@@ -34,6 +34,18 @@ const EMAIL_OPTIN_BONUS = 10;
 // so we don't award points until SMS is actually being sent. Flip this back to
 // 10 once Twilio is wired and outbound SMS is live.
 const SMS_OPTIN_BONUS = 0;
+// Referral: friend uses your code, you get +50 pts (capped at 5 per year).
+const REFERRAL_BONUS = 50;
+const REFERRAL_YEARLY_CAP = 5;
+
+// Unambiguous alphabet — no O/0, I/1/L confusion when said over a tab
+const CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+function generateReferralCode() {
+  const bytes = crypto.randomBytes(6);
+  let suffix = '';
+  for (let i = 0; i < 6; i++) suffix += CODE_ALPHABET[bytes[i] % CODE_ALPHABET.length];
+  return 'QRY-' + suffix;
+}
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -174,6 +186,11 @@ exports.handler = wrap('signup', async (event) => {
   const password = String(body.password || '');
   const marketingOptIn = !!body.marketingOptIn;
   const smsOptIn = !!body.smsOptIn;
+  // Optional — friend's code. Case-insensitive, accept with or without QRY- prefix.
+  const referrerCodeRaw = String(body.referrerCode || '').trim().toUpperCase();
+  const referrerCode = referrerCodeRaw && !referrerCodeRaw.startsWith('QRY-')
+    ? 'QRY-' + referrerCodeRaw
+    : referrerCodeRaw;
 
   if (!name) return reply(400, { ok: false, error: 'Name is required.' });
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return reply(400, { ok: false, error: 'Enter a valid email.' });
@@ -193,6 +210,38 @@ exports.handler = wrap('signup', async (event) => {
     return reply(409, { ok: false, error: 'An account with this email already exists. Try signing in instead, or use Forgot Password.' });
   }
 
+  // Resolve referrer (if any) before we touch anything. Validate but do not
+  // require — bad code just means no bonus, signup still proceeds.
+  let referrer = null;
+  let referrerNote = null;
+  if (referrerCode) {
+    const ref = (mFile.json.members || []).find((x) => (x.referralCode || '').toUpperCase() === referrerCode);
+    if (!ref) {
+      referrerNote = 'unknown-code';
+    } else if ((ref.email || '').toLowerCase() === email) {
+      referrerNote = 'self-referral-blocked';
+    } else {
+      // Cap: count this calendar year's referral-bonus history entries
+      const yearStart = new Date(new Date().getUTCFullYear(), 0, 1).getTime();
+      const thisYearCount = (ref.history || []).filter((h) =>
+        h.action === 'earn' && h.source === 'referral' && new Date(h.at).getTime() >= yearStart
+      ).length;
+      if (thisYearCount >= REFERRAL_YEARLY_CAP) {
+        referrerNote = 'referrer-yearly-cap-reached';
+      } else {
+        // Block double-credit for the same referred email this year
+        const alreadyCredited = (ref.history || []).some((h) =>
+          h.action === 'earn' && h.source === 'referral' && (h.referredEmail || '').toLowerCase() === email
+        );
+        if (alreadyCredited) {
+          referrerNote = 'already-credited-for-this-email';
+        } else {
+          referrer = ref;
+        }
+      }
+    }
+  }
+
   // Compute total bonus
   const totalBonus = WELCOME_BONUS + (marketingOptIn ? EMAIL_OPTIN_BONUS : 0) + (smsOptIn ? SMS_OPTIN_BONUS : 0);
   const now = new Date().toISOString();
@@ -210,6 +259,8 @@ exports.handler = wrap('signup', async (event) => {
     member.smsOptIn = smsOptIn;
     member.currentPoints = (member.currentPoints || 0) + totalBonus;
     member.lifetimePoints = (member.lifetimePoints || 0) + totalBonus;
+    if (!member.referralCode) member.referralCode = generateReferralCode();
+    if (referrer && !member.referredBy) member.referredBy = referrer.email;
     member.history = member.history || [];
     member.history.push({
       at: now,
@@ -235,6 +286,8 @@ exports.handler = wrap('signup', async (event) => {
       totalRedemptions: 0,
       marketingOptIn,
       smsOptIn,
+      referralCode: generateReferralCode(),
+      referredBy: referrer ? referrer.email : null,
       notes: '',
       history: [{
         at: now,
@@ -247,6 +300,24 @@ exports.handler = wrap('signup', async (event) => {
     mFile.json.members = mFile.json.members || [];
     mFile.json.members.push(member);
   }
+
+  // Credit the referrer (if eligible) — happens on the same members.json save
+  let referralCredited = false;
+  if (referrer) {
+    referrer.currentPoints  = (referrer.currentPoints || 0) + REFERRAL_BONUS;
+    referrer.lifetimePoints = (referrer.lifetimePoints || 0) + REFERRAL_BONUS;
+    referrer.history = referrer.history || [];
+    referrer.history.push({
+      at: now,
+      action: 'earn',
+      source: 'referral',
+      delta: REFERRAL_BONUS,
+      referredEmail: email,
+      note: 'Referred ' + (name || email) + ' to The Quarry',
+    });
+    referralCredited = true;
+  }
+
   mFile.json.lastUpdated = new Date().toISOString().split('T')[0];
 
   try {
@@ -268,5 +339,10 @@ exports.handler = wrap('signup', async (event) => {
     token: makeSessionToken(email),
     member,
     bonusAwarded: totalBonus,
+    referral: {
+      referredBy: referrer ? referrer.email : null,
+      referrerCredited: referralCredited,
+      referrerNote, // "unknown-code" | "self-referral-blocked" | "referrer-yearly-cap-reached" | "already-credited-for-this-email" | null
+    },
   });
 });
