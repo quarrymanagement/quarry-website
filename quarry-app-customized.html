@@ -1437,100 +1437,9 @@ a.account-link:hover .al-arrow { color: var(--gold); }
 
       <div class="section-rule"><div class="line"></div><div class="label">Redeem</div><div class="line"></div></div>
 
-      <div class="reward-row">
-        <div class="reward-info">
-          <div class="reward-name">Free Bucket of Balls</div>
-          <div class="reward-desc">Surfside Hole-In-One · 75 practice balls</div>
-        </div>
-        <div class="reward-cost">
-          <div class="reward-pts">500</div>
-          <div class="reward-pts-label">Points</div>
-          <div class="reward-action">Redeem</div>
-        </div>
-      </div>
-
-      <div class="reward-row">
-        <div class="reward-info">
-          <div class="reward-name">$10 Off Your Bill</div>
-          <div class="reward-desc">Applied to any check at the bar or kitchen</div>
-        </div>
-        <div class="reward-cost">
-          <div class="reward-pts">1,000</div>
-          <div class="reward-pts-label">Points</div>
-          <div class="reward-action">Redeem</div>
-        </div>
-      </div>
-
-      <div class="reward-row">
-        <div class="reward-info">
-          <div class="reward-name">Free Glass of Wine or Beer</div>
-          <div class="reward-desc">House pour or any draft beer · standard pour</div>
-        </div>
-        <div class="reward-cost">
-          <div class="reward-pts">1,250</div>
-          <div class="reward-pts-label">Points</div>
-          <div class="reward-action disabled">10 More</div>
-        </div>
-      </div>
-
-      <div class="reward-row">
-        <div class="reward-info">
-          <div class="reward-name">Free Appetizer</div>
-          <div class="reward-desc">Jumbo Pretzel · Devils · Wings · Flatbread</div>
-        </div>
-        <div class="reward-cost">
-          <div class="reward-pts">1,500</div>
-          <div class="reward-pts-label">Points</div>
-          <div class="reward-action disabled">260 More</div>
-        </div>
-      </div>
-
-      <div class="reward-row">
-        <div class="reward-info">
-          <div class="reward-name">$20 Wine Bottle Credit</div>
-          <div class="reward-desc">Toward any bottle on the wine list</div>
-        </div>
-        <div class="reward-cost">
-          <div class="reward-pts">2,000</div>
-          <div class="reward-pts-label">Points</div>
-          <div class="reward-action disabled">760 More</div>
-        </div>
-      </div>
-
-      <div class="reward-row">
-        <div class="reward-info">
-          <div class="reward-name">Free Entrée + Glass of Wine</div>
-          <div class="reward-desc">Entrée up to $25 · 6 oz house pour</div>
-        </div>
-        <div class="reward-cost">
-          <div class="reward-pts">2,500</div>
-          <div class="reward-pts-label">Points</div>
-          <div class="reward-action disabled">1,260 More</div>
-        </div>
-      </div>
-
-      <div class="reward-row">
-        <div class="reward-info">
-          <div class="reward-name">Free Wine Tasting Admission</div>
-          <div class="reward-desc">Food and wine for two at any monthly tasting</div>
-        </div>
-        <div class="reward-cost">
-          <div class="reward-pts">3,000</div>
-          <div class="reward-pts-label">Points</div>
-          <div class="reward-action disabled">1,760 More</div>
-        </div>
-      </div>
-
-      <div class="reward-row">
-        <div class="reward-info">
-          <div class="reward-name">Free Bottle of Wine</div>
-          <div class="reward-desc">Any bottle from the standard list (excl. reserve & vintage)</div>
-        </div>
-        <div class="reward-cost">
-          <div class="reward-pts">3,500</div>
-          <div class="reward-pts-label">Points</div>
-          <div class="reward-action disabled">2,260 More</div>
-        </div>
+      <!-- Reward rows are rendered dynamically from rewards.json (admin-editable). -->
+      <div id="rewardsList">
+        <div style="padding:24px 22px;text-align:center;color:var(--gray);font-family:var(--ff-script);font-style:italic">Loading rewards…</div>
       </div>
 
       <div class="section-rule"><div class="line"></div><div class="label">Activity History</div><div class="line"></div></div>
@@ -3186,6 +3095,49 @@ async function submitParty() {
       spEl.style.display = 'none';
     }
   }
+  // Cached rewards.json catalog — fetched once per minute, re-rendered when balance changes
+  let rewardsCatalogCache = null;
+  function loadRewardsCatalog() {
+    return fetch('https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/rewards.json?t=' + Math.floor(Date.now() / 60000))
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(j) { rewardsCatalogCache = j; return j; })
+      .catch(function() { return null; });
+  }
+  function renderRewards() {
+    var wrap = document.getElementById('rewardsList');
+    if (!wrap) return;
+    var data = rewardsCatalogCache;
+    var catalog = (data && Array.isArray(data.catalog)) ? data.catalog.filter(function(r) { return r.active !== false; }) : [];
+    if (!catalog.length) {
+      wrap.innerHTML = '<div style="padding:24px 22px;text-align:center;color:var(--gray);font-family:var(--ff-script);font-style:italic">Rewards menu coming soon.</div>';
+      return;
+    }
+    var balance = (currentMember && currentMember.currentPoints) || 0;
+    catalog.sort(function(a, b) { return (a.points || 0) - (b.points || 0); });
+    var html = '';
+    catalog.forEach(function(r) {
+      var pts = Number(r.points || 0);
+      var canAfford = balance >= pts;
+      // Existing app convention: Redeem button is a visual indicator. Actual
+      // redemption happens in person — staff deducts points via /admin.
+      var actionHtml = canAfford
+        ? '<div class="reward-action">Redeem</div>'
+        : '<div class="reward-action disabled">' + (pts - balance).toLocaleString() + ' More</div>';
+      html += '<div class="reward-row">' +
+        '<div class="reward-info">' +
+          '<div class="reward-name">' + (r.name || '') + '</div>' +
+          '<div class="reward-desc">' + (r.description || '') + '</div>' +
+        '</div>' +
+        '<div class="reward-cost">' +
+          '<div class="reward-pts">' + pts.toLocaleString() + '</div>' +
+          '<div class="reward-pts-label">Points</div>' +
+          actionHtml +
+        '</div>' +
+      '</div>';
+    });
+    wrap.innerHTML = html;
+  }
+
   // Greeting strings, time-of-day aware. Override defaults if app-content has them.
   function currentGreeting() {
     var h = new Date().getHours();
@@ -3220,6 +3172,14 @@ async function submitParty() {
       loadAppContent().then(renderAppContentCards);
     } else {
       renderAppContentCards();
+    }
+    // Rewards catalog — fetch once, then re-render whenever balance changes.
+    // After rendering, re-run updateRewardAvailability so the home "Redeem"
+    // card count reflects what's actually affordable.
+    if (!rewardsCatalogCache) {
+      loadRewardsCatalog().then(function() { renderRewards(); updateRewardAvailability(); });
+    } else {
+      renderRewards();
     }
     set('.rh-num', balance);
     set('.rh-tier-name', tierLabel);
