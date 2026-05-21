@@ -224,17 +224,24 @@ async function sendVisitEmail({ member, visitAmount, basePoints, birthdayBonus, 
   const balance = (member.currentPoints || 0).toLocaleString();
   const lifetime = (member.lifetimePoints || 0).toLocaleString();
 
+  // Palette: white background, black text, gold accents
+  //   #FFFFFF  background
+  //   #1A1A1A  primary text (near-black)
+  //   #555555  muted text
+  //   #B8933A  deep gold (label / accent)
+  //   #D4AF6A  light gold (numbers / highlights)
+  //   #E8E0D0  warm hairline border
   const bdayBlock = birthdayBonus > 0
-    ? '<div style="background:rgba(212,175,106,0.12);border:1px solid #B8933A;padding:14px 18px;margin:16px 0;border-radius:6px;text-align:center;">' +
+    ? '<div style="background:#FBF7EE;border:1px solid #D4AF6A;padding:14px 18px;margin:16px 0;border-radius:6px;text-align:center;">' +
         '<div style="font-size:0.7rem;letter-spacing:0.25em;color:#B8933A;margin-bottom:4px;">🎂 BIRTHDAY-MONTH BONUS</div>' +
-        '<div style="font-size:1rem;color:#F5F0E8;">An extra <strong style="color:#D4AF6A">+' + birthdayBonus + ' points</strong> because it\'s your birthday month. Cheers, ' + firstName + '.</div>' +
+        '<div style="font-size:1rem;color:#1A1A1A;">An extra <strong style="color:#B8933A">+' + birthdayBonus + ' points</strong> because it\'s your birthday month. Cheers, ' + firstName + '.</div>' +
       '</div>'
     : '';
 
   const tierBlock = tierChanged
-    ? '<div style="background:rgba(212,175,106,0.18);border:1px solid #D4AF6A;padding:14px 18px;margin:16px 0;border-radius:6px;text-align:center;">' +
-        '<div style="font-size:0.7rem;letter-spacing:0.25em;color:#D4AF6A;margin-bottom:4px;">⬆ TIER PROMOTION</div>' +
-        '<div style="font-size:1rem;color:#F5F0E8;">You just crossed into <strong>' + tierLabel + '</strong>. New perks unlocked.</div>' +
+    ? '<div style="background:#FBF7EE;border:1px solid #B8933A;padding:14px 18px;margin:16px 0;border-radius:6px;text-align:center;">' +
+        '<div style="font-size:0.7rem;letter-spacing:0.25em;color:#B8933A;margin-bottom:4px;">⬆ TIER PROMOTION</div>' +
+        '<div style="font-size:1rem;color:#1A1A1A;">You just crossed into <strong>' + tierLabel + '</strong>. New perks unlocked.</div>' +
       '</div>'
     : '';
 
@@ -246,18 +253,18 @@ async function sendVisitEmail({ member, visitAmount, basePoints, birthdayBonus, 
     content: [{
       type: 'text/html',
       value:
-        '<div style="font-family:Georgia,\'Playfair Display\',serif;max-width:520px;margin:40px auto;padding:36px;background:#1A1A1A;color:#F5F0E8;border-radius:8px;">' +
+        '<div style="font-family:Georgia,\'Playfair Display\',serif;max-width:520px;margin:40px auto;padding:36px;background:#FFFFFF;color:#1A1A1A;border-radius:8px;border:1px solid #E8E0D0;">' +
           '<div style="text-align:center;font-size:0.7rem;letter-spacing:0.32em;color:#B8933A;margin-bottom:22px;">THE QUARRY · NEW MELLE · MO</div>' +
-          '<h1 style="font-size:1.6rem;text-align:center;color:#F5F0E8;font-weight:600;margin-bottom:8px;">Thanks for visiting, ' + firstName + '.</h1>' +
-          '<div style="text-align:center;font-style:italic;color:rgba(245,240,232,0.6);margin-bottom:28px;font-family:Georgia,serif;">It was good to have you in.</div>' +
+          '<h1 style="font-size:1.6rem;text-align:center;color:#1A1A1A;font-weight:600;margin-bottom:8px;">Thanks for visiting, ' + firstName + '.</h1>' +
+          '<div style="text-align:center;font-style:italic;color:#777777;margin-bottom:28px;font-family:Georgia,serif;">It was good to have you in.</div>' +
 
-          '<div style="border:1px solid rgba(196,149,106,0.25);border-radius:6px;padding:22px;margin:24px 0;text-align:center;font-family:Arial,sans-serif;">' +
-            '<div style="font-size:0.65rem;letter-spacing:0.3em;color:rgba(245,240,232,0.55);text-transform:uppercase;margin-bottom:10px;">This visit</div>' +
-            '<div style="font-size:1rem;color:rgba(245,240,232,0.85);margin-bottom:14px;">Tab total: <strong style="color:#F5F0E8">' + formattedAmount + '</strong></div>' +
-            '<div style="font-size:2.4rem;font-weight:600;color:#D4AF6A;letter-spacing:0.04em;">+' + totalPts + '</div>' +
-            '<div style="font-size:0.75rem;letter-spacing:0.18em;color:rgba(245,240,232,0.5);text-transform:uppercase;margin-top:4px;">points earned</div>' +
+          '<div style="border:1px solid #E8E0D0;border-radius:6px;padding:22px;margin:24px 0;text-align:center;font-family:Arial,sans-serif;">' +
+            '<div style="font-size:0.65rem;letter-spacing:0.3em;color:#888888;text-transform:uppercase;margin-bottom:10px;">This visit</div>' +
+            '<div style="font-size:1rem;color:#555555;margin-bottom:14px;">Tab total: <strong style="color:#1A1A1A">' + formattedAmount + '</strong></div>' +
+            '<div style="font-size:2.4rem;font-weight:600;color:#B8933A;letter-spacing:0.04em;">+' + totalPts + '</div>' +
+            '<div style="font-size:0.75rem;letter-spacing:0.18em;color:#888888;text-transform:uppercase;margin-top:4px;">points earned</div>' +
             (basePoints !== totalPts
-              ? '<div style="font-size:0.7rem;color:rgba(245,240,232,0.45);margin-top:10px;">(' + basePoints + ' from your tab + ' + (birthdayBonus || 0) + ' bonus)</div>'
+              ? '<div style="font-size:0.7rem;color:#999999;margin-top:10px;">(' + basePoints + ' from your tab + ' + (birthdayBonus || 0) + ' bonus)</div>'
               : '') +
           '</div>' +
 
@@ -266,22 +273,22 @@ async function sendVisitEmail({ member, visitAmount, basePoints, birthdayBonus, 
 
           '<div style="display:table;width:100%;margin:24px 0;font-family:Arial,sans-serif;">' +
             '<div style="display:table-row;">' +
-              '<div style="display:table-cell;width:50%;padding:14px;border:1px solid rgba(196,149,106,0.18);text-align:center;">' +
-                '<div style="font-size:0.6rem;letter-spacing:0.22em;color:rgba(245,240,232,0.5);text-transform:uppercase;margin-bottom:6px;">Balance</div>' +
-                '<div style="font-size:1.35rem;color:#F5F0E8;font-weight:600;">' + balance + '</div>' +
+              '<div style="display:table-cell;width:50%;padding:14px;border:1px solid #E8E0D0;text-align:center;">' +
+                '<div style="font-size:0.6rem;letter-spacing:0.22em;color:#888888;text-transform:uppercase;margin-bottom:6px;">Balance</div>' +
+                '<div style="font-size:1.35rem;color:#1A1A1A;font-weight:600;">' + balance + '</div>' +
               '</div>' +
-              '<div style="display:table-cell;width:50%;padding:14px;border:1px solid rgba(196,149,106,0.18);border-left:0;text-align:center;">' +
-                '<div style="font-size:0.6rem;letter-spacing:0.22em;color:rgba(245,240,232,0.5);text-transform:uppercase;margin-bottom:6px;">' + tierLabel + ' tier · Lifetime</div>' +
-                '<div style="font-size:1.35rem;color:#D4AF6A;font-weight:600;">' + lifetime + '</div>' +
+              '<div style="display:table-cell;width:50%;padding:14px;border:1px solid #E8E0D0;border-left:0;text-align:center;">' +
+                '<div style="font-size:0.6rem;letter-spacing:0.22em;color:#888888;text-transform:uppercase;margin-bottom:6px;">' + tierLabel + ' tier · Lifetime</div>' +
+                '<div style="font-size:1.35rem;color:#B8933A;font-weight:600;">' + lifetime + '</div>' +
               '</div>' +
             '</div>' +
           '</div>' +
 
           '<div style="text-align:center;margin:32px 0 12px;">' +
-            '<a href="https://thequarrystl.com/quarry-app-customized.html" style="display:inline-block;padding:14px 32px;border:1px solid #B8933A;color:#D4AF6A;font-size:0.78rem;letter-spacing:0.22em;text-transform:uppercase;text-decoration:none;font-family:Arial,sans-serif;">View Your Rewards</a>' +
+            '<a href="https://thequarrystl.com/quarry-app-customized.html" style="display:inline-block;padding:14px 32px;background:#1A1A1A;border:1px solid #1A1A1A;color:#D4AF6A;font-size:0.78rem;letter-spacing:0.22em;text-transform:uppercase;text-decoration:none;font-family:Arial,sans-serif;">View Your Rewards</a>' +
           '</div>' +
 
-          '<div style="margin-top:36px;padding-top:18px;border-top:1px solid rgba(196,149,106,0.15);font-size:0.7rem;color:rgba(245,240,232,0.4);text-align:center;font-family:Arial,sans-serif;">3960 Highway Z · New Melle, MO 63365 · (636) 224-8257</div>' +
+          '<div style="margin-top:36px;padding-top:18px;border-top:1px solid #E8E0D0;font-size:0.7rem;color:#888888;text-align:center;font-family:Arial,sans-serif;">3960 Highway Z · New Melle, MO 63365 · (636) 224-8257</div>' +
         '</div>',
     }],
   });
