@@ -9461,7 +9461,7 @@
                     var res = await fetch('/.netlify/functions/save-github-file', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ filePath: 'forms.json', content: JSON.stringify({ forms: app.forms, submissions: app.formSubmissions }, null, 2), message: 'Update submission status: ' + newStatus })
+                        body: JSON.stringify({ filePath: 'forms.json', content: JSON.stringify({ forms: app.forms, submissions: app.formSubmissions }, null, 2), message: 'Update submission status: ' + newStatus, adminToken: localStorage.getItem('quarryAdminToken') })
                     });
                     if (res.ok) {
                         showSuccess('Status updated to ' + newStatus);
@@ -12698,7 +12698,8 @@ function hashCode(str) {
                             body: JSON.stringify({
                                 filePath: 'rewards.json',
                                 content: JSON.stringify(data, null, 2),
-                                message: 'rewards: update via admin'
+                                message: 'rewards: update via admin',
+                                adminToken: localStorage.getItem('quarryAdminToken')
                             })
                         });
                         const body = await r.json();
@@ -12856,7 +12857,7 @@ function hashCode(str) {
                     data.lastUpdated = new Date().toISOString().split('T')[0];
                     const r = await fetch(SAVE_FN, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ filePath: 'menu.json', content: JSON.stringify(data, null, 2), message: 'menu: update via admin' }),
+                        body: JSON.stringify({ filePath: 'menu.json', content: JSON.stringify(data, null, 2), message: 'menu: update via admin', adminToken: localStorage.getItem('quarryAdminToken') }),
                     });
                     const body = await r.json();
                     if (!r.ok || body.error) throw new Error(body.error || 'HTTP ' + r.status);
@@ -12974,7 +12975,7 @@ function hashCode(str) {
                     data.schemaVersion = data.schemaVersion || 1;
                     const r = await fetch(SAVE_FN, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ filePath: 'app-content.json', content: JSON.stringify(data, null, 2), message: 'app-content: update via admin' }),
+                        body: JSON.stringify({ filePath: 'app-content.json', content: JSON.stringify(data, null, 2), message: 'app-content: update via admin', adminToken: localStorage.getItem('quarryAdminToken') }),
                     });
                     const body = await r.json();
                     if (!r.ok || body.error) throw new Error(body.error || 'HTTP ' + r.status);
@@ -13103,7 +13104,8 @@ function hashCode(str) {
                         body: JSON.stringify({
                             filePath: 'members.json',
                             content: JSON.stringify(data, null, 2),
-                            message: message || 'members: update via admin'
+                            message: message || 'members: update via admin',
+                            adminToken: localStorage.getItem('quarryAdminToken')
                         })
                     });
                     const body = await r.json();

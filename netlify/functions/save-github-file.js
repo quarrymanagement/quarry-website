@@ -1,4 +1,44 @@
+const crypto = require('crypto');
 const https = require('https');
+
+const ADMIN_PASSWORD_HASH    = process.env.ADMIN_PASSWORD_HASH || '';
+const ADMIN_SESSION_SECRET   = process.env.ADMIN_SESSION_SECRET || '';
+const SESSION_TTL_HOURS      = 168; // 7 days — must match verify-admin-password.js
+
+function sha256(s) { return crypto.createHash('sha256').update(s, 'utf8').digest('hex'); }
+function hmac(s, secret) { return crypto.createHmac('sha256', secret).update(s, 'utf8').digest('hex'); }
+
+function checkPassword(p) {
+  if (!p) return false;
+  if (ADMIN_PASSWORD_HASH) return sha256(p) === ADMIN_PASSWORD_HASH;
+  return p === 'quarry2026';
+}
+function checkToken(token) {
+  if (!ADMIN_SESSION_SECRET || !token) return false;
+  const [issued, sig] = String(token).split('.');
+  if (!issued || !sig) return false;
+  if (hmac(issued, ADMIN_SESSION_SECRET) !== sig) return false;
+  const ageHours = (Date.now() - parseInt(issued, 10)) / (1000 * 3600);
+  return ageHours < SESSION_TTL_HOURS;
+}
+function checkAdmin({ password, token }) {
+  if (token && checkToken(token)) return true;
+  if (password && checkPassword(password)) return true;
+  return false;
+}
+
+// Whitelist: only files the admin panel is allowed to write
+const ALLOWED_FILES = new Set([
+  'menu.json',
+  'rewards.json',
+  'app-content.json',
+  'events.json',
+  'forms.json',
+  'crm-notes.json',
+  'schedule.json',
+  'members.json',     // rewards-members tab edits
+  'subscribers.json', // newsletter signups
+]);
 
 function githubRequest(method, path, token, body) {
     return new Promise((resolve, reject) => {
@@ -46,8 +86,14 @@ exports.handler = async (event) => {
         const token = process.env.GITHUB_TOKEN;
         if (!token) throw new Error('GITHUB_TOKEN not configured');
 
-        const { filePath, content, message } = JSON.parse(event.body);
+        const { filePath, content, message, adminPassword, adminToken } = JSON.parse(event.body);
+        if (!checkAdmin({ password: adminPassword, token: adminToken })) {
+            return { statusCode: 401, headers, body: JSON.stringify({ error: 'Admin auth required (adminPassword or adminToken)' }) };
+        }
         if (!filePath || !content) throw new Error('filePath and content are required');
+        if (!ALLOWED_FILES.has(String(filePath).trim())) {
+            return { statusCode: 403, headers, body: JSON.stringify({ error: 'filePath not in allow-list: ' + filePath }) };
+        }
 
         const repo = 'quarrymanagement/quarry-website';
         const commitMsg = message || `Update ${filePath} from admin panel`;
