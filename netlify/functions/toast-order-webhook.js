@@ -102,17 +102,38 @@ function pointsFor(amountDollars, member, rewards) {
   return Math.max(0, Math.round(amountDollars * earnRate * mult));
 }
 
-function recalcTier(lifetimePts, rewards) {
+// Compute tier from trailing-90-day spend, per rewards.json (trailingSpendUsd).
+// PROMOTION-ONLY: never returns a tier lower than the member's current one —
+// downgrades are owned by expire-tiers.js (60-day inactivity rule).
+function computeTrailingSpend(member, windowDays) {
+  const cutoff = Date.now() - (windowDays * 24 * 60 * 60 * 1000);
+  let total = 0;
+  for (const h of (member.history || [])) {
+    if (h.action !== 'earn') continue;
+    if (!h.spendUsd) continue;
+    const t = new Date(h.at).getTime();
+    if (!Number.isFinite(t) || t < cutoff) continue;
+    total += Number(h.spendUsd) || 0;
+  }
+  return total;
+}
+function recalcTier(member, rewards) {
+  const TIER_ORDER = ['standard', 'silver', 'gold', 'elite'];
+  const currentIdx = Math.max(0, TIER_ORDER.indexOf(member.tier || 'standard'));
   if (!rewards || !Array.isArray(rewards.tiers) || !rewards.tiers.length) {
-    if (lifetimePts >= 6000) return 'platinum';
-    if (lifetimePts >= 3000) return 'gold';
-    return 'standard';
+    return member.tier || 'standard';
   }
-  const sorted = [...rewards.tiers].sort((a, b) => (b.minPoints || 0) - (a.minPoints || 0));
+  const window = rewards.tierWindowDays || 90;
+  const trailingSpend = computeTrailingSpend(member, window);
+  // highest tier whose trailingSpendUsd threshold is met
+  const sorted = [...rewards.tiers].sort((a, b) => (b.trailingSpendUsd || 0) - (a.trailingSpendUsd || 0));
+  let earned = member.tier || 'standard';
   for (const t of sorted) {
-    if (lifetimePts >= (t.minPoints || 0)) return t.id;
+    if (trailingSpend >= (t.trailingSpendUsd || 0)) { earned = t.id; break; }
   }
-  return rewards.tiers[0].id;
+  // promotion-only: never return below current tier
+  const earnedIdx = Math.max(0, TIER_ORDER.indexOf(earned));
+  return earnedIdx > currentIdx ? earned : (member.tier || 'standard');
 }
 
 function extractTotal(order) {
@@ -397,8 +418,8 @@ exports.handler = wrap('toast-order-webhook', async (event) => {
     }
   }
 
-  // ─── Tier recalc / promotion ────────────────────────────────────────────
-  const newTier = recalcTier(member.lifetimePoints, rewards);
+  // ─── Tier recalc / promotion (promotion-only, based on trailing spend) ──
+  const newTier = recalcTier(member, rewards);
   const tierChanged = newTier !== oldTier;
   if (tierChanged) {
     member.tier = newTier;

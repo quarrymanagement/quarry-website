@@ -85,16 +85,34 @@ function pointsFor(amountDollars, tier, rewards) {
   return Math.max(0, Math.round(amountDollars * earnRate * mult));
 }
 
-function recalcTier(lifetimePts, rewards) {
-  if (rewards && Array.isArray(rewards.tiers) && rewards.tiers.length) {
-    const sorted = [...rewards.tiers].sort((a, b) => (b.minPoints || 0) - (a.minPoints || 0));
-    for (const t of sorted) {
-      if (lifetimePts >= (t.minPoints || 0)) return t.id;
-    }
-    return rewards.tiers[0].id;
+// Promotion-only: compute trailing-90d spend and only return a HIGHER tier
+// than the member currently has. Downgrades belong to expire-tiers.js.
+function computeTrailingSpend(member, windowDays) {
+  const cutoff = Date.now() - (windowDays * 24 * 60 * 60 * 1000);
+  let total = 0;
+  for (const h of (member.history || [])) {
+    if (h.action !== 'earn' || !h.spendUsd) continue;
+    const t = new Date(h.at).getTime();
+    if (!Number.isFinite(t) || t < cutoff) continue;
+    total += Number(h.spendUsd) || 0;
   }
-  for (const t of TIER_ORDER_BY_PTS) { if (lifetimePts >= t.min) return t.id; }
-  return 'standard';
+  return total;
+}
+function recalcTier(member, rewards) {
+  const ORDER = ['standard', 'silver', 'gold', 'elite'];
+  const currentIdx = Math.max(0, ORDER.indexOf(member.tier || 'standard'));
+  if (!rewards || !Array.isArray(rewards.tiers) || !rewards.tiers.length) {
+    return member.tier || 'standard';
+  }
+  const window = rewards.tierWindowDays || 90;
+  const trailingSpend = computeTrailingSpend(member, window);
+  const sorted = [...rewards.tiers].sort((a, b) => (b.trailingSpendUsd || 0) - (a.trailingSpendUsd || 0));
+  let earned = member.tier || 'standard';
+  for (const t of sorted) {
+    if (trailingSpend >= (t.trailingSpendUsd || 0)) { earned = t.id; break; }
+  }
+  const earnedIdx = Math.max(0, ORDER.indexOf(earned));
+  return earnedIdx > currentIdx ? earned : (member.tier || 'standard');
 }
 
 // ── Visit-confirmation email (identical layout to toast-order-webhook) ─────
@@ -252,7 +270,7 @@ exports.handler = wrap('simulate-visit', async (event) => {
       note: '[TEST] Simulated birthday-month bonus',
     });
   }
-  const newTier = recalcTier(member.lifetimePoints, rewards);
+  const newTier = recalcTier(member, rewards);
   const tierChanged = newTier !== oldTier;
   if (tierChanged) {
     member.tier = newTier;

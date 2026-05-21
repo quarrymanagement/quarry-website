@@ -1,9 +1,10 @@
 // ============================================================================
-// admin-adjust-points.js — admin manually adds (or removes) points to a member
+// admin-adjust-points.js — admin manually adds/removes points and/or sets tier
 //
-// POST { adminPassword, memberEmail, delta, note, source? }
-//   delta: positive int to add, negative to remove
-//   note:  free-text reason ("Walk-in didn't have receipt" / "Refund correction")
+// POST { adminPassword, memberEmail, delta?, note, source?, setTier? }
+//   delta:   positive int to add, negative to remove (optional if setTier given)
+//   setTier: 'standard'|'silver'|'gold'|'elite' (optional manual tier override)
+//   note:    free-text reason ("Walk-in didn't have receipt" / "Refund correction")
 //   source (optional): a short label (defaults to "admin-adjust")
 //
 // Updates currentPoints + lifetimePoints (when adding only) and writes a
@@ -69,12 +70,16 @@ exports.handler = async (event) => {
   if (!checkAdmin(body.adminPassword)) return reply(401, { ok: false, error: 'Invalid admin password' });
 
   const memberEmail = String(body.memberEmail || '').trim().toLowerCase();
-  const delta = parseInt(body.delta, 10);
+  const delta = body.delta != null ? parseInt(body.delta, 10) : 0;
   const note = String(body.note || '').trim();
   const source = String(body.source || 'admin-adjust');
+  const setTier = body.setTier ? String(body.setTier).toLowerCase().trim() : '';
+  const VALID_TIERS = ['standard', 'silver', 'gold', 'elite'];
 
   if (!memberEmail) return reply(400, { ok: false, error: 'memberEmail required' });
-  if (!Number.isFinite(delta) || delta === 0) return reply(400, { ok: false, error: 'delta must be a non-zero integer' });
+  if (setTier && !VALID_TIERS.includes(setTier)) return reply(400, { ok: false, error: 'setTier must be one of: ' + VALID_TIERS.join(', ') });
+  if (delta === 0 && !setTier) return reply(400, { ok: false, error: 'Must provide a non-zero delta or a setTier' });
+  if (delta !== 0 && !Number.isFinite(delta)) return reply(400, { ok: false, error: 'delta must be an integer' });
   if (Math.abs(delta) > 100000) return reply(400, { ok: false, error: 'delta too large; max 100,000' });
   if (!note) return reply(400, { ok: false, error: 'A reason/note is required for audit trail' });
 
@@ -95,25 +100,47 @@ exports.handler = async (event) => {
     return reply(400, { ok: false, error: 'Member only has ' + currentBefore + ' points; cannot deduct ' + Math.abs(delta) });
   }
 
-  member.currentPoints = currentBefore + delta;
-  // Adding to lifetime only on positive delta (don't reduce lifetime on a manual deduct)
-  if (delta > 0) member.lifetimePoints = (member.lifetimePoints || 0) + delta;
-
+  const now = new Date().toISOString();
   member.history = member.history || [];
-  member.history.push({
-    at: new Date().toISOString(),
-    action: delta > 0 ? 'earn' : 'redeem',
-    source,
-    delta,
-    by: 'admin',
-    note,
-  });
-  mFile.json.lastUpdated = new Date().toISOString().split('T')[0];
+
+  if (delta !== 0) {
+    member.currentPoints = currentBefore + delta;
+    // Adding to lifetime only on positive delta (don't reduce lifetime on a manual deduct)
+    if (delta > 0) member.lifetimePoints = (member.lifetimePoints || 0) + delta;
+    member.history.push({
+      at: now,
+      action: delta > 0 ? 'earn' : 'redeem',
+      source,
+      delta,
+      by: 'admin',
+      note,
+    });
+  }
+
+  let tierChanged = false;
+  let oldTier = member.tier || 'standard';
+  if (setTier && setTier !== oldTier) {
+    member.tier = setTier;
+    tierChanged = true;
+    member.history.push({
+      at: now,
+      action: 'tier-set',
+      from: oldTier,
+      to: setTier,
+      by: 'admin',
+      note,
+    });
+  }
+
+  mFile.json.lastUpdated = now.split('T')[0];
 
   try {
     const content = Buffer.from(JSON.stringify(mFile.json, null, 2), 'utf8').toString('base64');
+    const msgBits = [];
+    if (delta !== 0) msgBits.push((delta > 0 ? '+' : '') + delta + ' pts');
+    if (tierChanged) msgBits.push('tier→' + setTier);
     const r = await gh('PUT', '/repos/' + GITHUB_REPO + '/contents/members.json', {
-      message: (delta > 0 ? '+' : '') + delta + ' pts (admin) — ' + memberEmail + ': ' + note.substring(0, 60),
+      message: msgBits.join(' ') + ' (admin) — ' + memberEmail + ': ' + note.substring(0, 60),
       content, sha: mFile.sha,
     });
     if (r.status !== 200 && r.status !== 201) throw new Error('HTTP ' + r.status);
@@ -125,5 +152,7 @@ exports.handler = async (event) => {
     delta,
     newBalance: member.currentPoints,
     lifetimePoints: member.lifetimePoints,
+    tier: member.tier,
+    tierChanged,
   });
 };
