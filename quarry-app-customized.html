@@ -1522,7 +1522,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
       <div class="account-link"><div class="al-label">Birthday <span class="al-meta">— free entrée month of</span></div><div class="al-arrow">›</div></div>
 
       <div class="section-rule"><div class="line"></div><div class="label">Settings</div><div class="line"></div></div>
-      <div class="account-link"><div class="al-label">Notification Preferences</div><div class="al-arrow">›</div></div>
+      <div class="account-link" onclick="openNotificationPrefs()"><div class="al-label">Notification Preferences</div><div class="al-arrow">›</div></div>
       <a class="account-link" href="https://thequarrystl.com/quarry-giftcards" target="_blank" rel="noopener"><div class="al-label">Gift Cards</div><div class="al-arrow">›</div></a>
       <div class="account-link" onclick="openChangeEmail()"><div class="al-label">Change Email</div><div class="al-arrow">›</div></div>
       <div class="account-link" onclick="gotoScreen('screen-contact')"><div class="al-label">Contact The Quarry</div><div class="al-arrow">›</div></div>
@@ -3141,6 +3141,39 @@ async function submitParty() {
     });
     wrap.innerHTML = html;
   }
+
+  // Notification Preferences — open iOS/Android system settings (where users
+  // can toggle notifications for The Quarry app). On web/browser there's no
+  // such page, so show a small explanatory modal instead.
+  window.openNotificationPrefs = function() {
+    var isNative = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+    if (isNative) {
+      // Capacitor App plugin: openSettings opens the system settings for this app.
+      try {
+        if (window.Capacitor.Plugins && window.Capacitor.Plugins.App && typeof window.Capacitor.Plugins.App.openSettings === 'function') {
+          window.Capacitor.Plugins.App.openSettings();
+          return;
+        }
+      } catch (_) { /* fall through */ }
+      // iOS URL scheme fallback
+      try { window.location.href = 'app-settings:'; return; } catch (_) {}
+    }
+    // Browser fallback — explanatory modal
+    var ovr = document.createElement('div');
+    ovr.style.cssText = 'position:fixed;inset:0;background:rgba(14,14,14,0.94);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px);';
+    ovr.innerHTML =
+      '<div style="background:#FFFFFF;border:1px solid #E8E0D0;border-radius:16px;padding:28px 24px;max-width:380px;width:100%;text-align:center;font-family:Montserrat,sans-serif;color:#1A1A1A;">' +
+        '<div style="font-size:0.68rem;letter-spacing:0.3em;color:#B8933A;text-transform:uppercase;margin-bottom:10px">Notification Preferences</div>' +
+        '<div style="font-family:Playfair Display,serif;font-size:1.2rem;font-weight:600;margin-bottom:10px">Manage in System Settings</div>' +
+        '<div style="color:rgba(26,26,26,0.7);font-size:0.92rem;line-height:1.5;margin-bottom:18px">' +
+          'Notifications are controlled by your phone\'s settings. In the Quarry app, go to:<br><br>' +
+          '<strong>iOS</strong> · Settings → Notifications → The Quarry<br>' +
+          '<strong>Android</strong> · Settings → Apps → The Quarry → Notifications' +
+        '</div>' +
+        '<button onclick="this.closest(\'div[style*=fixed]\').remove()" style="width:100%;padding:14px;background:#1A1A1A;color:#D4AF6A;border:0;border-radius:8px;font-family:Montserrat,sans-serif;font-size:0.78rem;font-weight:700;letter-spacing:0.28em;text-transform:uppercase;cursor:pointer">Got It</button>' +
+      '</div>';
+    document.body.appendChild(ovr);
+  };
 
   // ─── Redeem flow ────────────────────────────────────────────────────────
   // Customer taps a Redeem button → POST /redeem-create → modal shows code +

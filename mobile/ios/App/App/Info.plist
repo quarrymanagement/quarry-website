@@ -55,5 +55,9 @@
 	<string>The Quarry needs access to your photos so you can attach an existing receipt photo to earn rewards points.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>The Quarry may save a receipt photo back to your photo library for your records.</string>
+	<!-- Export compliance: app uses only standard HTTPS / Apple-provided crypto.
+	     Declaring this makes App Store Connect skip the export questionnaire each upload. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>
