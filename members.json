@@ -9,7 +9,7 @@
       "joinedAt": "2026-05-03T22:42:54.383Z",
       "lastVisitAt": "2026-05-21T23:08:43.665Z",
       "tier": "gold",
-      "currentPoints": 6529,
+      "currentPoints": 6091,
       "lifetimePoints": 9029,
       "totalRedemptions": 1,
       "marketingOptIn": true,
@@ -225,6 +225,14 @@
           "spendUsd": 35,
           "tier": "gold",
           "note": "[TEST] Simulated visit: $35.00"
+        },
+        {
+          "at": "2026-05-21T23:08:46.813Z",
+          "action": "redeem",
+          "source": "test-cleanup",
+          "delta": -438,
+          "by": "admin",
+          "note": "Reverse the +438 from email-test simulate-visit"
         }
       ],
       "referralCode": "QRY-ZJ7WBK",
