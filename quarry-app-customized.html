@@ -8,7 +8,7 @@
 
 <!-- PWA / Add-to-Home-Screen support -->
 <link rel="manifest" href="quarry-app-manifest.json" />
-<meta name="theme-color" content="#1A1A1A" />
+<meta name="theme-color" content="#FFFFFF" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="The Quarry" />
@@ -18,25 +18,28 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  /* Quarry brand palette — matches thequarrystl.com */
-  --cream:        #F5F0E8;
-  --cream-soft:   rgba(245,240,232,0.85);
-  --cream-dim:    rgba(245,240,232,0.55);
-  --brown-dark:   #2C1A0E;
-  --brown-mid:    #5C3D2E;
-  --brown-warm:   #8B5E3C;
-  --brown-light:  #C4956A;
-  --gold:         #B8933A;
-  --gold-light:   #D4AF6A;
+  /* Quarry brand palette — LIGHT THEME (matches white/gold/black email).
+     Variable names are kept for backwards compatibility; semantic meaning
+     is preserved (--cream is still TEXT color, --brown-dark/--charcoal are
+     still BACKGROUND colors), but the values are inverted from dark to light. */
+  --cream:        #1A1A1A;                /* primary text — near-black */
+  --cream-soft:   rgba(26,26,26,0.78);    /* slightly muted text */
+  --cream-dim:    rgba(26,26,26,0.55);    /* more muted */
+  --brown-dark:   #FFFFFF;                /* primary surface (was dark bg) */
+  --brown-mid:    #FAF8F3;                /* alt surface, very faint warm */
+  --brown-warm:   #F5F0E8;                /* warm card tone */
+  --brown-light:  #C4956A;                /* warm accent (unchanged) */
+  --gold:         #B8933A;                /* primary gold (unchanged) */
+  --gold-light:   #D4AF6A;                /* light gold accent (unchanged) */
   --gold-dim:     rgba(184,147,58,0.14);
-  --charcoal:     #1A1A1A;
-  --charcoal-mid: #232323;
-  --charcoal-soft:#2A2520;
-  --gray:         rgba(245,240,232,0.45);
-  --gray-light:   rgba(245,240,232,0.28);
-  --border-light: rgba(196,149,106,0.22);
-  --border-mid:   rgba(196,149,106,0.45);
-  --border-soft:  rgba(245,240,232,0.05);
+  --charcoal:     #FFFFFF;                /* card/modal surface (was dark) */
+  --charcoal-mid: #FAF7F0;                /* alt card tint */
+  --charcoal-soft:#F0EBE0;
+  --gray:         rgba(26,26,26,0.55);    /* secondary/muted text */
+  --gray-light:   rgba(26,26,26,0.35);    /* even more muted */
+  --border-light: #E8E0D0;                /* warm hairline border */
+  --border-mid:   #D4AF6A;
+  --border-soft:  rgba(0,0,0,0.06);
 
   --ff-display: 'Playfair Display', serif;
   --ff-script:  'Cormorant Garamond', serif;
@@ -49,7 +52,7 @@
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
 body {
-  background: #0E0E0E;
+  background: #F0EBE0;
   display: flex; justify-content: center; align-items: flex-start;
   min-height: 100vh;
   font-family: var(--ff-body); color: var(--cream);
@@ -66,7 +69,7 @@ body {
   border-radius: 48px;
   overflow: hidden;
   position: relative;
-  box-shadow: 0 40px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(196,149,106,0.18), inset 0 0 0 1px rgba(245,240,232,0.04);
+  box-shadow: 0 20px 60px rgba(60,40,20,0.18), 0 0 0 1px rgba(196,149,106,0.22), inset 0 0 0 1px rgba(255,255,255,0.6);
   display: flex; flex-direction: column;
 }
 .status-bar {
@@ -166,7 +169,7 @@ body {
 }
 .sync-pill.live { color: var(--gold-light); border-color: var(--border-light); }
 .sync-pill.live .dot { background: #6FBF73; box-shadow: 0 0 6px rgba(111,191,115,0.6); }
-.sync-pill.demo { color: rgba(245,240,232,0.4); }
+.sync-pill.demo { color: rgba(26,26,26,0.4); }
 .sync-pill.demo .dot { background: var(--gold); }
 
 /* Footer mark — anchors brand at bottom of Account screen */
@@ -227,13 +230,13 @@ body {
 
 /* Admin-editable cards (Happy Hour, Staff Pick) driven by app-content.json */
 .ac-card { margin: 14px 18px 0; padding: 16px 18px; background: rgba(212,175,106,0.07); border: 1px solid rgba(212,175,106,0.28); border-radius: 12px; }
-.ac-card--staff { background: rgba(245,240,232,0.04); border-color: rgba(245,240,232,0.14); }
+.ac-card--staff { background: rgba(26,26,26,0.04); border-color: rgba(26,26,26,0.14); }
 .ac-card .ac-label { font-family: var(--ff-body); font-size: 0.6rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold-light); margin-bottom: 6px; }
 .ac-card--staff .ac-label { color: var(--cream-soft); }
 .ac-card .ac-title { font-family: var(--ff-display); font-size: 1.15rem; color: var(--cream); line-height: 1.2; margin-bottom: 4px; }
 .ac-card .ac-sub { font-family: var(--ff-script); font-style: italic; font-size: 0.92rem; color: var(--cream-soft); line-height: 1.45; }
-.ac-card .ac-detail { font-family: var(--ff-body); font-size: 0.78rem; color: rgba(245,240,232,0.7); margin-top: 6px; line-height: 1.45; }
-.ac-card .ac-byline { font-family: var(--ff-script); font-style: italic; font-size: 0.75rem; color: rgba(245,240,232,0.55); margin-top: 6px; }
+.ac-card .ac-detail { font-family: var(--ff-body); font-size: 0.78rem; color: rgba(26,26,26,0.7); margin-top: 6px; line-height: 1.45; }
+.ac-card .ac-byline { font-family: var(--ff-script); font-style: italic; font-size: 0.75rem; color: rgba(26,26,26,0.55); margin-top: 6px; }
 .hero-points-row { display: flex; align-items: baseline; justify-content: space-between; }
 .hero-pts-num {
   font-family: var(--ff-display); font-weight: 400;
@@ -263,7 +266,7 @@ body {
   font-size: 9px; color: var(--gray); margin-bottom: 7px;
   letter-spacing: 0.22em; text-transform: uppercase;
 }
-.progress-track { height: 2px; background: rgba(245,240,232,0.08); }
+.progress-track { height: 2px; background: rgba(26,26,26,0.08); }
 .progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-light)); width: 52%; }
 
 .home-cards {
@@ -496,7 +499,7 @@ body {
   letter-spacing: 0.28em; text-transform: uppercase; color: var(--gold-light);
 }
 .rh-tier-sub { font-family: var(--ff-script); font-style: italic; font-size: 0.85rem; color: var(--gray); margin-top: 2px; }
-.tp-track { height: 2px; background: rgba(245,240,232,0.08); }
+.tp-track { height: 2px; background: rgba(26,26,26,0.08); }
 .tp-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-light)); }
 .tp-label {
   display: flex; justify-content: space-between;
@@ -881,7 +884,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
   font-family: var(--ff-body); font-size: 9px; font-weight: 600;
   letter-spacing: 0.18em; text-transform: uppercase;
   border-radius: 20px;
-  background: rgba(245,240,232,0.05); color: var(--gray);
+  background: rgba(26,26,26,0.05); color: var(--gray);
 }
 .scan-rules { margin: 14px 0 22px; line-height: 1.8; }
 .scan-btn-row { display: flex; gap: 10px; }
@@ -2683,17 +2686,17 @@ async function submitParty() {
   overlay.id = 'signinOverlay';
   overlay.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(14,14,14,0.96);z-index:9999;backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:20px;overflow-y:auto;';
   // Common styles
-  const ovrInputCss = 'width:100%;padding:12px 0;background:transparent;border:0;border-bottom:1px solid rgba(196,149,106,0.25);color:#F5F0E8;font-size:14px;font-family:Montserrat,sans-serif;outline:none;letter-spacing:0.04em;';
+  const ovrInputCss = 'width:100%;padding:12px 0;background:transparent;border:0;border-bottom:1px solid rgba(196,149,106,0.25);color:#1A1A1A;font-size:14px;font-family:Montserrat,sans-serif;outline:none;letter-spacing:0.04em;';
   const ovrInputCssMargin = ovrInputCss + 'margin-bottom:16px;';
   const ovrPrimaryBtn = 'width:100%;background:#B8933A;color:#1A1A1A;border:1px solid #B8933A;padding:14px;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.32em;text-transform:uppercase;cursor:pointer;border-radius:6px;';
   const ovrSecondaryBtn = 'width:100%;background:transparent;color:#D4AF6A;border:1px solid #B8933A;padding:14px;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.32em;text-transform:uppercase;cursor:pointer;border-radius:6px;';
-  const ovrTabBtn = 'flex:1;padding:12px 8px;font-family:Montserrat,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.28em;text-transform:uppercase;background:transparent;color:rgba(245,240,232,0.5);border:0;border-bottom:2px solid transparent;cursor:pointer;';
+  const ovrTabBtn = 'flex:1;padding:12px 8px;font-family:Montserrat,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.28em;text-transform:uppercase;background:transparent;color:rgba(26,26,26,0.55);border:0;border-bottom:2px solid transparent;cursor:pointer;';
   const ovrTabBtnActive = ovrTabBtn + 'color:#D4AF6A;border-bottom-color:#D4AF6A;';
 
   overlay.innerHTML =
-    '<div style="background:#1A1A1A;border:1px solid rgba(196,149,106,0.25);border-radius:18px;padding:32px 28px 28px;max-width:380px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,0.6);max-height:90vh;overflow-y:auto">' +
+    '<div style="background:#FFFFFF;border:1px solid rgba(196,149,106,0.25);border-radius:18px;padding:32px 28px 28px;max-width:380px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,0.6);max-height:90vh;overflow-y:auto">' +
       '<div style="text-align:center;margin-bottom:18px">' +
-        '<div style="font-family:Playfair Display,serif;font-size:1.1rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#F5F0E8">The Quarry</div>' +
+        '<div style="font-family:Playfair Display,serif;font-size:1.1rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#1A1A1A">The Quarry</div>' +
         '<div style="font-size:0.7rem;letter-spacing:0.32em;color:#D4AF6A;text-transform:uppercase;margin-top:6px">Members Club</div>' +
       '</div>' +
       // Tabs
@@ -2704,40 +2707,40 @@ async function submitParty() {
 
       // SIGN IN PANEL
       '<div id="panelSignIn">' +
-        '<div style="font-family:Cormorant Garamond,serif;font-style:italic;color:rgba(245,240,232,0.7);font-size:0.95rem;text-align:center;margin-bottom:18px;line-height:1.5">Welcome back. Sign in to see your points.</div>' +
+        '<div style="font-family:Cormorant Garamond,serif;font-style:italic;color:rgba(26,26,26,0.7);font-size:0.95rem;text-align:center;margin-bottom:18px;line-height:1.5">Welcome back. Sign in to see your points.</div>' +
         '<input id="siEmail" type="email" placeholder="Email" autocomplete="email" style="' + ovrInputCssMargin + '">' +
         '<input id="siPassword" type="password" placeholder="Password" autocomplete="current-password" style="' + ovrInputCssMargin + '">' +
         '<button id="siBtn" style="' + ovrPrimaryBtn + '">Sign In</button>' +
         '<div id="siErr" style="color:#DC2626;font-size:11px;margin-top:12px;text-align:center;display:none"></div>' +
         '<div style="display:flex;justify-content:space-between;margin-top:18px;font-size:0.85rem">' +
-          '<a href="#" id="siForgot" style="font-family:Cormorant Garamond,serif;font-style:italic;color:rgba(245,240,232,0.55);text-decoration:none">Forgot password?</a>' +
-          '<a href="#" id="siGuest" style="font-family:Cormorant Garamond,serif;font-style:italic;color:rgba(245,240,232,0.4);text-decoration:none">Continue as guest</a>' +
+          '<a href="#" id="siForgot" style="font-family:Cormorant Garamond,serif;font-style:italic;color:rgba(26,26,26,0.55);text-decoration:none">Forgot password?</a>' +
+          '<a href="#" id="siGuest" style="font-family:Cormorant Garamond,serif;font-style:italic;color:rgba(26,26,26,0.4);text-decoration:none">Continue as guest</a>' +
         '</div>' +
       '</div>' +
 
       // SIGN UP PANEL
       '<div id="panelSignUp" style="display:none">' +
-        '<div style="font-family:Cormorant Garamond,serif;font-style:italic;color:rgba(245,240,232,0.7);font-size:0.95rem;text-align:center;margin-bottom:14px;line-height:1.5">Create your account and earn up to <strong style="color:#D4AF6A;font-style:normal">260 welcome points</strong> instantly.</div>' +
+        '<div style="font-family:Cormorant Garamond,serif;font-style:italic;color:rgba(26,26,26,0.7);font-size:0.95rem;text-align:center;margin-bottom:14px;line-height:1.5">Create your account and earn up to <strong style="color:#D4AF6A;font-style:normal">260 welcome points</strong> instantly.</div>' +
         '<input id="suName" type="text" placeholder="Full name" autocomplete="name" style="' + ovrInputCssMargin + '">' +
         '<input id="suEmail" type="email" placeholder="Email" autocomplete="email" style="' + ovrInputCssMargin + '">' +
         '<input id="suPhone" type="tel" placeholder="Phone (xxx) xxx-xxxx" autocomplete="tel" style="' + ovrInputCssMargin + '">' +
         '<div style="display:flex;gap:10px;margin-bottom:16px;align-items:baseline">' +
           '<label style="flex:0 0 auto;font-family:Montserrat,sans-serif;font-size:9px;font-weight:600;letter-spacing:0.22em;text-transform:uppercase;color:#D4AF6A;white-space:nowrap">Date of birth</label>' +
-          '<input id="suDob" type="date" style="' + ovrInputCss + 'flex:1;color-scheme:dark;color:#F5F0E8;font-size:13px">' +
+          '<input id="suDob" type="date" style="' + ovrInputCss + 'flex:1;color-scheme:dark;color:#1A1A1A;font-size:13px">' +
         '</div>' +
         '<input id="suPassword" type="password" placeholder="Password (8+ chars)" autocomplete="new-password" style="' + ovrInputCssMargin + '">' +
-        '<label style="display:flex;gap:10px;align-items:flex-start;font-family:Cormorant Garamond,serif;font-style:italic;font-size:0.92rem;color:rgba(245,240,232,0.75);cursor:pointer;margin-bottom:10px">' +
+        '<label style="display:flex;gap:10px;align-items:flex-start;font-family:Cormorant Garamond,serif;font-style:italic;font-size:0.92rem;color:rgba(26,26,26,0.75);cursor:pointer;margin-bottom:10px">' +
           '<input id="suEmailOpt" type="checkbox" checked style="margin-top:3px;accent-color:#B8933A">' +
           '<span>Email me about events &amp; rewards <strong style="color:#D4AF6A;font-style:normal">(+10 pts)</strong></span>' +
         '</label>' +
-        '<label style="display:flex;gap:10px;align-items:flex-start;font-family:Cormorant Garamond,serif;font-style:italic;font-size:0.92rem;color:rgba(245,240,232,0.75);cursor:pointer;margin-bottom:18px">' +
+        '<label style="display:flex;gap:10px;align-items:flex-start;font-family:Cormorant Garamond,serif;font-style:italic;font-size:0.92rem;color:rgba(26,26,26,0.75);cursor:pointer;margin-bottom:18px">' +
           '<input id="suSmsOpt" type="checkbox" style="margin-top:3px;accent-color:#B8933A">' +
           '<span>Text me reminders &amp; updates</span>' +
         '</label>' +
         '<div style="margin-bottom:14px">' +
           '<label style="display:block;font-family:Montserrat,sans-serif;font-size:9px;font-weight:600;letter-spacing:0.22em;text-transform:uppercase;color:rgba(212,175,106,0.7);margin-bottom:5px">Friend\'s referral code (optional)</label>' +
           '<input id="suRefCode" type="text" placeholder="QRY-XXXXXX" autocomplete="off" autocorrect="off" autocapitalize="characters" style="' + ovrInputCss + 'letter-spacing:0.12em;text-transform:uppercase">' +
-          '<div style="font-family:Cormorant Garamond,serif;font-style:italic;color:rgba(245,240,232,0.55);font-size:0.78rem;margin-top:4px">Your friend gets +50 pts when you sign up.</div>' +
+          '<div style="font-family:Cormorant Garamond,serif;font-style:italic;color:rgba(26,26,26,0.55);font-size:0.78rem;margin-top:4px">Your friend gets +50 pts when you sign up.</div>' +
         '</div>' +
         '<button id="suBtn" style="' + ovrPrimaryBtn + '">Create Account</button>' +
         '<div id="suErr" style="color:#DC2626;font-size:11px;margin-top:12px;text-align:center;display:none"></div>' +
@@ -2745,20 +2748,20 @@ async function submitParty() {
 
       // FORGOT PASSWORD PANEL
       '<div id="panelForgot" style="display:none">' +
-        '<div style="font-family:Playfair Display,serif;font-size:1.2rem;color:#F5F0E8;text-align:center;margin-bottom:6px">Reset Password</div>' +
+        '<div style="font-family:Playfair Display,serif;font-size:1.2rem;color:#1A1A1A;text-align:center;margin-bottom:6px">Reset Password</div>' +
         '<div id="fpStep1">' +
-          '<div style="font-family:Cormorant Garamond,serif;font-style:italic;color:rgba(245,240,232,0.7);font-size:0.95rem;text-align:center;margin-bottom:18px;line-height:1.5">Enter your email — we\'ll send a 6-digit code.</div>' +
+          '<div style="font-family:Cormorant Garamond,serif;font-style:italic;color:rgba(26,26,26,0.7);font-size:0.95rem;text-align:center;margin-bottom:18px;line-height:1.5">Enter your email — we\'ll send a 6-digit code.</div>' +
           '<input id="fpEmail" type="email" placeholder="Email" style="' + ovrInputCssMargin + '">' +
           '<button id="fpSendBtn" style="' + ovrPrimaryBtn + '">Send Code</button>' +
         '</div>' +
         '<div id="fpStep2" style="display:none">' +
-          '<div style="font-family:Cormorant Garamond,serif;font-style:italic;color:rgba(245,240,232,0.7);font-size:0.95rem;text-align:center;margin-bottom:14px;line-height:1.5">We sent a code to<br><span id="fpEmailEcho" style="color:#F5F0E8;font-style:normal;letter-spacing:0.04em"></span></div>' +
+          '<div style="font-family:Cormorant Garamond,serif;font-style:italic;color:rgba(26,26,26,0.7);font-size:0.95rem;text-align:center;margin-bottom:14px;line-height:1.5">We sent a code to<br><span id="fpEmailEcho" style="color:#1A1A1A;font-style:normal;letter-spacing:0.04em"></span></div>' +
           '<input id="fpCode" type="text" inputmode="numeric" maxlength="6" placeholder="000000" style="' + ovrInputCssMargin + 'font-size:1.6rem;font-family:Playfair Display,serif;letter-spacing:0.32em;text-align:center;padding:14px 0">' +
           '<input id="fpNewPass" type="password" placeholder="New password (8+ chars)" autocomplete="new-password" style="' + ovrInputCssMargin + '">' +
           '<button id="fpResetBtn" style="' + ovrPrimaryBtn + '">Reset Password</button>' +
         '</div>' +
         '<div id="fpErr" style="color:#DC2626;font-size:11px;margin-top:12px;text-align:center;display:none"></div>' +
-        '<div style="text-align:center;margin-top:18px"><a href="#" id="fpBack" style="font-family:Cormorant Garamond,serif;font-style:italic;color:rgba(245,240,232,0.55);text-decoration:none;font-size:0.9rem">Back to sign in</a></div>' +
+        '<div style="text-align:center;margin-top:18px"><a href="#" id="fpBack" style="font-family:Cormorant Garamond,serif;font-style:italic;color:rgba(26,26,26,0.55);text-decoration:none;font-size:0.9rem">Back to sign in</a></div>' +
       '</div>' +
 
     '</div>';
@@ -3274,22 +3277,22 @@ async function submitParty() {
     wrap.id = 'confirmRedeemOverlay';
     wrap.style.cssText = 'position:fixed;inset:0;background:rgba(14,14,14,0.94);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px);';
     wrap.innerHTML =
-      '<div style="background:#1A1A1A;border:1px solid rgba(196,149,106,0.45);border-radius:18px;padding:28px 24px;max-width:360px;width:100%;text-align:center">' +
+      '<div style="background:#FFFFFF;border:1px solid rgba(196,149,106,0.45);border-radius:18px;padding:28px 24px;max-width:360px;width:100%;text-align:center">' +
         '<div style="font-size:0.65rem;letter-spacing:0.32em;color:#D4AF6A;text-transform:uppercase;margin-bottom:8px">Confirm Redemption</div>' +
-        '<div style="font-family:Playfair Display,serif;font-size:1.4rem;color:#F5F0E8;margin-bottom:16px">' + rewardName + '</div>' +
-        '<div style="font-family:Cormorant Garamond,serif;font-style:italic;color:rgba(245,240,232,0.7);font-size:1rem;line-height:1.55;margin-bottom:18px">Are you sure you want to redeem this reward?</div>' +
+        '<div style="font-family:Playfair Display,serif;font-size:1.4rem;color:#1A1A1A;margin-bottom:16px">' + rewardName + '</div>' +
+        '<div style="font-family:Cormorant Garamond,serif;font-style:italic;color:rgba(26,26,26,0.7);font-size:1rem;line-height:1.55;margin-bottom:18px">Are you sure you want to redeem this reward?</div>' +
         '<div style="display:flex;justify-content:space-between;padding:14px 18px;background:rgba(184,147,58,0.08);border:1px solid rgba(196,149,106,0.18);border-radius:8px;margin-bottom:22px;align-items:center">' +
           '<div style="text-align:left">' +
-            '<div style="font-size:0.6rem;letter-spacing:0.32em;color:rgba(245,240,232,0.45);text-transform:uppercase">Cost</div>' +
+            '<div style="font-size:0.6rem;letter-spacing:0.32em;color:rgba(26,26,26,0.45);text-transform:uppercase">Cost</div>' +
             '<div style="font-family:Playfair Display,serif;font-size:1.1rem;color:#D4AF6A;font-weight:600">−' + cost.toLocaleString() + ' pts</div>' +
           '</div>' +
           '<div style="text-align:right">' +
-            '<div style="font-size:0.6rem;letter-spacing:0.32em;color:rgba(245,240,232,0.45);text-transform:uppercase">After</div>' +
-            '<div style="font-family:Playfair Display,serif;font-size:1.1rem;color:#F5F0E8;font-weight:500">' + remaining.toLocaleString() + ' pts</div>' +
+            '<div style="font-size:0.6rem;letter-spacing:0.32em;color:rgba(26,26,26,0.45);text-transform:uppercase">After</div>' +
+            '<div style="font-family:Playfair Display,serif;font-size:1.1rem;color:#1A1A1A;font-weight:500">' + remaining.toLocaleString() + ' pts</div>' +
           '</div>' +
         '</div>' +
         '<div style="display:flex;gap:10px">' +
-          '<button id="cancelRedeemBtn" style="flex:1;background:transparent;color:rgba(245,240,232,0.7);border:1px solid rgba(196,149,106,0.25);padding:14px;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.28em;text-transform:uppercase;border-radius:8px;cursor:pointer">Cancel</button>' +
+          '<button id="cancelRedeemBtn" style="flex:1;background:transparent;color:rgba(26,26,26,0.7);border:1px solid rgba(196,149,106,0.25);padding:14px;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.28em;text-transform:uppercase;border-radius:8px;cursor:pointer">Cancel</button>' +
           '<button id="okRedeemBtn" style="flex:1;background:#B8933A;color:#1A1A1A;border:1px solid #B8933A;padding:14px;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.28em;text-transform:uppercase;border-radius:8px;cursor:pointer">Redeem</button>' +
         '</div>' +
       '</div>';
@@ -3333,12 +3336,12 @@ async function submitParty() {
     wrap.id = 'redemptionOverlay';
     wrap.style.cssText = 'position:fixed;inset:0;background:rgba(14,14,14,0.94);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px);';
     wrap.innerHTML =
-      '<div style="background:#1A1A1A;border:1px solid #B8933A;border-radius:18px;padding:32px;max-width:340px;width:100%;text-align:center;">' +
+      '<div style="background:#FFFFFF;border:1px solid #B8933A;border-radius:18px;padding:32px;max-width:340px;width:100%;text-align:center;">' +
         '<div style="font-size:0.65rem;letter-spacing:0.32em;color:#D4AF6A;text-transform:uppercase;margin-bottom:8px;">Show this at the bar</div>' +
-        '<div style="font-family:Playfair Display,serif;font-size:1.3rem;color:#F5F0E8;margin-bottom:24px;">' + (red.rewardName || '') + '</div>' +
+        '<div style="font-family:Playfair Display,serif;font-size:1.3rem;color:#1A1A1A;margin-bottom:24px;">' + (red.rewardName || '') + '</div>' +
         '<div style="font-family:Playfair Display,serif;font-size:2.8rem;font-weight:700;letter-spacing:0.18em;color:#D4AF6A;padding:24px 0;background:rgba(184,147,58,0.1);border-radius:8px;border:1px solid rgba(196,149,106,0.25);margin-bottom:18px;">' + red.code + '</div>' +
-        '<div id="redCountdown" style="font-family:Cormorant Garamond,serif;font-style:italic;font-size:0.95rem;color:rgba(245,240,232,0.55);margin-bottom:22px;">Loading…</div>' +
-        '<button id="redCloseBtn" style="background:transparent;color:rgba(245,240,232,0.55);border:1px solid rgba(196,149,106,0.25);padding:11px 22px;font-family:Montserrat,sans-serif;font-size:10px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;">Close</button>' +
+        '<div id="redCountdown" style="font-family:Cormorant Garamond,serif;font-style:italic;font-size:0.95rem;color:rgba(26,26,26,0.55);margin-bottom:22px;">Loading…</div>' +
+        '<button id="redCloseBtn" style="background:transparent;color:rgba(26,26,26,0.55);border:1px solid rgba(196,149,106,0.25);padding:11px 22px;font-family:Montserrat,sans-serif;font-size:10px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;">Close</button>' +
       '</div>';
     document.body.appendChild(wrap);
     document.getElementById('redCloseBtn').addEventListener('click', () => wrap.remove());
@@ -3510,7 +3513,7 @@ async function submitParty() {
     }
     const btn = document.getElementById('scanActionBtn');
     btn.disabled = true; btn.textContent = 'Verifying…'; busy = true;
-    document.getElementById('scanResult').innerHTML = '<div class="scan-result" style="background:rgba(245,240,232,0.04);color:var(--gray);font-style:italic">Reading receipt and checking with Toast…</div>';
+    document.getElementById('scanResult').innerHTML = '<div class="scan-result" style="background:rgba(26,26,26,0.04);color:var(--gray);font-style:italic">Reading receipt and checking with Toast…</div>';
 
     try {
       const apiBase = location.hostname.includes('thequarrystl.com') ? '' : 'https://thequarrystl.com';
@@ -3571,15 +3574,15 @@ async function submitParty() {
 
 <!-- Email-registration picker (yoga events etc.) -->
 <div id="emailPickerModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:5000;align-items:center;justify-content:center;padding:20px">
-  <div style="background:#232323;border:1px solid #B8933A;border-radius:14px;padding:22px 20px;max-width:380px;width:100%;color:#F5F0E8;font-family:Montserrat,sans-serif">
+  <div style="background:#FFFFFF;border:1px solid #B8933A;border-radius:14px;padding:22px 20px;max-width:380px;width:100%;color:#1A1A1A;font-family:Montserrat,sans-serif">
     <div style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:600;color:#D4AF6A;margin-bottom:6px" id="emailPickerTitle">Send RSVP</div>
-    <div style="font-size:0.8rem;color:rgba(245,240,232,0.6);margin-bottom:16px" id="emailPickerSub">Choose how to open the email.</div>
+    <div style="font-size:0.8rem;color:rgba(26,26,26,0.6);margin-bottom:16px" id="emailPickerSub">Choose how to open the email.</div>
     <div style="display:flex;flex-direction:column;gap:10px">
       <a id="emailPickerGmail" target="_blank" rel="noopener" style="text-align:center;padding:12px;background:#B8933A;color:#1A1A1A;border-radius:8px;text-decoration:none;font-weight:700;font-size:0.85rem;letter-spacing:0.08em;text-transform:uppercase">Open in Gmail</a>
       <a id="emailPickerOutlook" target="_blank" rel="noopener" style="text-align:center;padding:12px;background:transparent;color:#D4AF6A;border:1px solid #B8933A;border-radius:8px;text-decoration:none;font-weight:700;font-size:0.85rem;letter-spacing:0.08em;text-transform:uppercase">Open in Outlook</a>
       <a id="emailPickerDefault" style="text-align:center;padding:12px;background:transparent;color:#D4AF6A;border:1px solid #B8933A;border-radius:8px;text-decoration:none;font-weight:700;font-size:0.85rem;letter-spacing:0.08em;text-transform:uppercase">Default Mail App</a>
     </div>
-    <button id="emailPickerClose" type="button" style="margin-top:14px;width:100%;padding:10px;background:transparent;color:rgba(245,240,232,0.55);border:0;font-family:inherit;font-size:0.78rem;cursor:pointer;letter-spacing:0.1em;text-transform:uppercase">Cancel</button>
+    <button id="emailPickerClose" type="button" style="margin-top:14px;width:100%;padding:10px;background:transparent;color:rgba(26,26,26,0.55);border:0;font-family:inherit;font-size:0.78rem;cursor:pointer;letter-spacing:0.1em;text-transform:uppercase">Cancel</button>
   </div>
 </div>
 <script>
@@ -3635,13 +3638,13 @@ async function submitParty() {
 <style>
 .acct-overlay { display:none; position:fixed; inset:0; background:rgba(14,14,14,0.96); z-index:9999; backdrop-filter:blur(10px); align-items:center; justify-content:center; padding:20px; overflow-y:auto; }
 .acct-overlay.open { display:flex; }
-.acct-modal { background:linear-gradient(180deg, #1a1a1a 0%, #0e0e0e 100%); border:1px solid rgba(212,175,106,0.3); border-radius:14px; padding:30px 26px; max-width:420px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.6); }
+.acct-modal { background:linear-gradient(180deg, #FFFFFF 0%, #FAF8F3 100%); border:1px solid rgba(212,175,106,0.3); border-radius:14px; padding:30px 26px; max-width:420px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.6); }
 .acct-modal h3 { font-family:var(--ff-display); color:var(--gold-light); font-size:1.4rem; margin:0 0 6px; letter-spacing:0.02em; text-align:center; }
 .acct-modal .acct-sub { font-family:var(--ff-script); font-style:italic; color:var(--cream-soft); font-size:0.95rem; margin-bottom:18px; text-align:center; }
 .acct-modal p { color:var(--cream-soft); font-size:0.9rem; line-height:1.55; margin:0 0 14px; }
 .acct-modal label { display:block; font-size:0.7rem; letter-spacing:0.2em; color:var(--cream-soft); text-transform:uppercase; margin-bottom:6px; margin-top:14px; }
 .acct-modal input[type=email],
-.acct-modal input[type=text] { width:100%; padding:13px 14px; background:rgba(245,240,232,0.04); border:1px solid rgba(245,240,232,0.15); border-radius:8px; color:var(--cream); font-family:var(--ff-body); font-size:1rem; box-sizing:border-box; }
+.acct-modal input[type=text] { width:100%; padding:13px 14px; background:rgba(26,26,26,0.04); border:1px solid rgba(26,26,26,0.15); border-radius:8px; color:var(--cream); font-family:var(--ff-body); font-size:1rem; box-sizing:border-box; }
 .acct-modal input:focus { outline:none; border-color:var(--gold-light); }
 .acct-btn-primary { display:block; width:100%; padding:14px 18px; background:var(--gold); color:var(--brown-dark); font-family:var(--ff-body); font-size:11px; font-weight:700; letter-spacing:0.22em; text-transform:uppercase; border:none; border-radius:8px; cursor:pointer; margin-top:18px; margin-bottom:10px; }
 .acct-btn-primary.danger { background:rgba(220,80,80,0.85); color:#fff; }
@@ -3682,7 +3685,7 @@ async function submitParty() {
     <div class="acct-sub">Earn 50 pts every time a friend signs up with your code (up to 5/year).</div>
     <p>Share your personal code. Anyone who enters it when they sign up earns you +50 pts.</p>
     <div style="text-align:center;background:rgba(212,175,106,0.10);border:1px solid var(--gold-light);padding:18px;margin:18px 0;border-radius:8px;">
-      <div style="font-size:0.6rem;letter-spacing:0.3em;color:rgba(245,240,232,0.6);text-transform:uppercase;margin-bottom:8px;">Your code</div>
+      <div style="font-size:0.6rem;letter-spacing:0.3em;color:rgba(26,26,26,0.6);text-transform:uppercase;margin-bottom:8px;">Your code</div>
       <div id="refCodeBig" style="font-family:var(--ff-display);font-size:1.9rem;color:var(--gold-light);letter-spacing:0.12em;font-weight:600;">QRY-XXXXXX</div>
     </div>
     <button class="acct-btn-primary" id="refShareBtn" onclick="onShareReferral()">Share &amp; Invite</button>
@@ -3957,14 +3960,14 @@ async function submitParty() {
 <style>
 .review-overlay { display:none; position:fixed; inset:0; background:rgba(14,14,14,0.96); z-index:9999; backdrop-filter:blur(10px); align-items:center; justify-content:center; padding:20px; overflow-y:auto; }
 .review-overlay.open { display:flex; }
-.review-modal { background:linear-gradient(180deg, #1a1a1a 0%, #0e0e0e 100%); border:1px solid rgba(212,175,106,0.3); border-radius:14px; padding:32px 26px; max-width:420px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.6); }
+.review-modal { background:linear-gradient(180deg, #FFFFFF 0%, #FAF8F3 100%); border:1px solid rgba(212,175,106,0.3); border-radius:14px; padding:32px 26px; max-width:420px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.6); }
 .review-modal h3 { font-family:var(--ff-display); color:var(--gold-light); font-size:1.45rem; margin:0 0 6px; letter-spacing:0.02em; text-align:center; }
 .review-modal .review-pts { display:block; text-align:center; font-family:var(--ff-script); font-style:italic; color:var(--cream-soft); font-size:1rem; margin-bottom:18px; }
 .review-modal p { color:var(--cream-soft); font-size:0.92rem; line-height:1.55; margin:0 0 16px; }
-.review-modal .review-disclaimer { font-size:0.72rem; color:var(--gray); font-style:italic; line-height:1.5; margin:14px 0 18px; padding:10px 12px; background:rgba(245,240,232,0.03); border-left:2px solid rgba(212,175,106,0.4); border-radius:4px; }
+.review-modal .review-disclaimer { font-size:0.72rem; color:var(--gray); font-style:italic; line-height:1.5; margin:14px 0 18px; padding:10px 12px; background:rgba(26,26,26,0.03); border-left:2px solid rgba(212,175,106,0.4); border-radius:4px; }
 .review-btn-primary { display:block; width:100%; padding:14px 18px; background:var(--gold); color:var(--brown-dark); font-family:var(--ff-body); font-size:11px; font-weight:700; letter-spacing:0.22em; text-transform:uppercase; border:none; border-radius:8px; cursor:pointer; text-decoration:none; text-align:center; margin-bottom:10px; }
 .review-btn-primary:disabled { opacity:0.5; cursor:wait; }
-.review-btn-secondary { display:block; width:100%; padding:13px 18px; background:transparent; color:var(--cream); font-family:var(--ff-body); font-size:11px; font-weight:600; letter-spacing:0.22em; text-transform:uppercase; border:1px solid rgba(245,240,232,0.2); border-radius:8px; cursor:pointer; margin-bottom:10px; }
+.review-btn-secondary { display:block; width:100%; padding:13px 18px; background:transparent; color:var(--cream); font-family:var(--ff-body); font-size:11px; font-weight:600; letter-spacing:0.22em; text-transform:uppercase; border:1px solid rgba(26,26,26,0.2); border-radius:8px; cursor:pointer; margin-bottom:10px; }
 .review-btn-tertiary { display:block; width:100%; padding:11px; background:transparent; color:var(--gray); font-family:var(--ff-body); font-size:10px; letter-spacing:0.2em; text-transform:uppercase; border:none; cursor:pointer; }
 .review-result { margin-top:14px; padding:12px 14px; border-radius:8px; font-size:0.9rem; line-height:1.5; }
 .review-result.success { background:rgba(212,175,106,0.10); border:1px solid var(--gold-light); color:var(--cream); }
