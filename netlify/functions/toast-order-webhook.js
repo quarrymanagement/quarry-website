@@ -1,14 +1,22 @@
 // ============================================================================
-// toast-order-webhook.js  (v2 — adds tier-promotion email via SendGrid)
+// toast-order-webhook.js  (v3 — birthday-month bonus + post-visit confirmation)
 //
 // Receives Toast webhook events for closed/updated orders and credits points
 // to matching Quarry members in members.json. When a member crosses a tier
-// threshold, fires a "Welcome to <tier>" email.
+// threshold, fires a "Welcome to <tier>" email. Awards a +250 birthday-month
+// bonus once per year on the first qualifying visit during the birth month.
+// Sends a "thanks for your visit" email showing points earned and balance.
 //
-// ENV: TOAST_WEBHOOK_SECRET, GITHUB_TOKEN, SENDGRID_API_KEY (for tier emails)
+// ENV: TOAST_WEBHOOK_SECRET, GITHUB_TOKEN, SENDGRID_API_KEY
 // ============================================================================
 const crypto = require('crypto');
 const https = require('https');
+const { wrap } = require('./_sentry');
+
+const BIRTHDAY_BONUS = 250;
+// Throttle visit emails — no more than one per 6 hours per member so lunch
+// + dinner on the same day don't double-send.
+const VISIT_EMAIL_MIN_GAP_HOURS = 6;
 
 const GITHUB_REPO   = 'quarrymanagement/quarry-website';
 const MEMBERS_PATH  = 'members.json';
@@ -183,8 +191,110 @@ async function sendTierEmail(email, name, tier) {
   });
 }
 
+// ─── Visit confirmation email (fire-and-forget) ────────────────────────────
+async function sendVisitEmail({ member, visitAmount, basePoints, birthdayBonus, newTier, oldTier, tierChanged }) {
+  const apiKey = process.env.SENDGRID_API_KEY;
+  if (!apiKey || !member.email) return;
+
+  const firstName = (member.name || member.email).split(/[\s@]/)[0] || 'Friend';
+  const totalPts = basePoints + (birthdayBonus || 0);
+  const formattedAmount = '$' + Number(visitAmount).toFixed(2);
+  const tierLabel = (newTier || 'standard').charAt(0).toUpperCase() + (newTier || 'standard').slice(1);
+  const balance = (member.currentPoints || 0).toLocaleString();
+  const lifetime = (member.lifetimePoints || 0).toLocaleString();
+
+  const bdayBlock = birthdayBonus > 0
+    ? '<div style="background:rgba(212,175,106,0.12);border:1px solid #B8933A;padding:14px 18px;margin:16px 0;border-radius:6px;text-align:center;">' +
+        '<div style="font-size:0.7rem;letter-spacing:0.25em;color:#B8933A;margin-bottom:4px;">🎂 BIRTHDAY-MONTH BONUS</div>' +
+        '<div style="font-size:1rem;color:#F5F0E8;">An extra <strong style="color:#D4AF6A">+' + birthdayBonus + ' points</strong> because it\'s your birthday month. Cheers, ' + firstName + '.</div>' +
+      '</div>'
+    : '';
+
+  const tierBlock = tierChanged
+    ? '<div style="background:rgba(212,175,106,0.18);border:1px solid #D4AF6A;padding:14px 18px;margin:16px 0;border-radius:6px;text-align:center;">' +
+        '<div style="font-size:0.7rem;letter-spacing:0.25em;color:#D4AF6A;margin-bottom:4px;">⬆ TIER PROMOTION</div>' +
+        '<div style="font-size:1rem;color:#F5F0E8;">You just crossed into <strong>' + tierLabel + '</strong>. New perks unlocked.</div>' +
+      '</div>'
+    : '';
+
+  const body = JSON.stringify({
+    personalizations: [{ to: [{ email: member.email }] }],
+    from: { email: 'management@thequarrystl.com', name: 'The Quarry' },
+    subject: 'Thanks for your visit — ' + totalPts + ' points earned',
+    categories: ['quarry-visit-confirmation'],
+    content: [{
+      type: 'text/html',
+      value:
+        '<div style="font-family:Georgia,\'Playfair Display\',serif;max-width:520px;margin:40px auto;padding:36px;background:#1A1A1A;color:#F5F0E8;border-radius:8px;">' +
+          '<div style="text-align:center;font-size:0.7rem;letter-spacing:0.32em;color:#B8933A;margin-bottom:22px;">THE QUARRY · NEW MELLE · MO</div>' +
+          '<h1 style="font-size:1.6rem;text-align:center;color:#F5F0E8;font-weight:600;margin-bottom:8px;">Thanks for visiting, ' + firstName + '.</h1>' +
+          '<div style="text-align:center;font-style:italic;color:rgba(245,240,232,0.6);margin-bottom:28px;font-family:Georgia,serif;">It was good to have you in.</div>' +
+
+          '<div style="border:1px solid rgba(196,149,106,0.25);border-radius:6px;padding:22px;margin:24px 0;text-align:center;font-family:Arial,sans-serif;">' +
+            '<div style="font-size:0.65rem;letter-spacing:0.3em;color:rgba(245,240,232,0.55);text-transform:uppercase;margin-bottom:10px;">This visit</div>' +
+            '<div style="font-size:1rem;color:rgba(245,240,232,0.85);margin-bottom:14px;">Tab total: <strong style="color:#F5F0E8">' + formattedAmount + '</strong></div>' +
+            '<div style="font-size:2.4rem;font-weight:600;color:#D4AF6A;letter-spacing:0.04em;">+' + totalPts + '</div>' +
+            '<div style="font-size:0.75rem;letter-spacing:0.18em;color:rgba(245,240,232,0.5);text-transform:uppercase;margin-top:4px;">points earned</div>' +
+            (basePoints !== totalPts
+              ? '<div style="font-size:0.7rem;color:rgba(245,240,232,0.45);margin-top:10px;">(' + basePoints + ' from your tab + ' + (birthdayBonus || 0) + ' bonus)</div>'
+              : '') +
+          '</div>' +
+
+          bdayBlock +
+          tierBlock +
+
+          '<div style="display:table;width:100%;margin:24px 0;font-family:Arial,sans-serif;">' +
+            '<div style="display:table-row;">' +
+              '<div style="display:table-cell;width:50%;padding:14px;border:1px solid rgba(196,149,106,0.18);text-align:center;">' +
+                '<div style="font-size:0.6rem;letter-spacing:0.22em;color:rgba(245,240,232,0.5);text-transform:uppercase;margin-bottom:6px;">Balance</div>' +
+                '<div style="font-size:1.35rem;color:#F5F0E8;font-weight:600;">' + balance + '</div>' +
+              '</div>' +
+              '<div style="display:table-cell;width:50%;padding:14px;border:1px solid rgba(196,149,106,0.18);border-left:0;text-align:center;">' +
+                '<div style="font-size:0.6rem;letter-spacing:0.22em;color:rgba(245,240,232,0.5);text-transform:uppercase;margin-bottom:6px;">' + tierLabel + ' tier · Lifetime</div>' +
+                '<div style="font-size:1.35rem;color:#D4AF6A;font-weight:600;">' + lifetime + '</div>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+
+          '<div style="text-align:center;margin:32px 0 12px;">' +
+            '<a href="https://thequarrystl.com/quarry-app-customized.html" style="display:inline-block;padding:14px 32px;border:1px solid #B8933A;color:#D4AF6A;font-size:0.78rem;letter-spacing:0.22em;text-transform:uppercase;text-decoration:none;font-family:Arial,sans-serif;">View Your Rewards</a>' +
+          '</div>' +
+
+          '<div style="margin-top:36px;padding-top:18px;border-top:1px solid rgba(196,149,106,0.15);font-size:0.7rem;color:rgba(245,240,232,0.4);text-align:center;font-family:Arial,sans-serif;">3960 Highway Z · New Melle, MO 63365 · (636) 224-8257</div>' +
+        '</div>',
+    }],
+  });
+
+  return new Promise((resolve) => {
+    const req = https.request({
+      hostname: 'api.sendgrid.com',
+      path: '/v3/mail/send',
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + apiKey,
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(body),
+      },
+    }, (res) => {
+      let d = '';
+      res.on('data', (c) => d += c);
+      res.on('end', () => resolve({ status: res.statusCode, body: d }));
+    });
+    req.on('error', () => resolve({ status: 0 }));
+    req.write(body);
+    req.end();
+  });
+}
+
+function hoursSince(iso) {
+  if (!iso) return Infinity;
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return Infinity;
+  return (Date.now() - t) / (60 * 60 * 1000);
+}
+
 // ─── Main handler ───────────────────────────────────────────────────────────
-exports.handler = async (event) => {
+exports.handler = wrap('toast-order-webhook', async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: CORS, body: '' };
   if (event.httpMethod !== 'POST')    return reply(405, { ok: false, error: 'POST only' });
 
@@ -234,4 +344,122 @@ exports.handler = async (event) => {
 
   member.history = member.history || [];
   const already = member.history.find((h) => h.orderId === orderId && h.action === 'earn');
-  if (already) return reply(200, { ok: true
+  if (already) return reply(200, { ok: true, alreadyCredited: true, orderId });
+
+  // ─── Award visit points ─────────────────────────────────────────────────
+  const pointsEarned = pointsFor(total, member, rewards);
+  if (pointsEarned <= 0) {
+    return reply(200, { ok: true, skipped: 'zero points after multiplier', orderId, total });
+  }
+
+  const now = new Date().toISOString();
+  const oldTier = member.tier || 'standard';
+
+  member.currentPoints  = (member.currentPoints || 0) + pointsEarned;
+  member.lifetimePoints = (member.lifetimePoints || 0) + pointsEarned;
+  member.lastVisitAt    = now;
+  member.tierWarnedAt   = null; // a real visit resets the tier-decay warning
+  member.history.push({
+    at: now,
+    action: 'earn',
+    source: 'toast-webhook',
+    orderId,
+    delta: pointsEarned,
+    spendUsd: total,
+    tier: oldTier,
+    note: 'Closed tab: $' + total.toFixed(2),
+  });
+
+  // ─── Birthday-month bonus (once per calendar year) ──────────────────────
+  let birthdayBonus = 0;
+  if (member.birthday && /^\d{4}-\d{2}-\d{2}$/.test(member.birthday)) {
+    const nowDate = new Date(now);
+    const currentMonth = nowDate.getUTCMonth() + 1;
+    const currentYear  = nowDate.getUTCFullYear();
+    const birthMonth   = parseInt(member.birthday.slice(5, 7), 10);
+    if (currentMonth === birthMonth) {
+      const alreadyThisYear = member.history.some((h) =>
+        h.action === 'earn' && h.source === 'birthday-month' && h.year === currentYear
+      );
+      if (!alreadyThisYear) {
+        birthdayBonus = BIRTHDAY_BONUS;
+        member.currentPoints  += birthdayBonus;
+        member.lifetimePoints += birthdayBonus;
+        member.history.push({
+          at: now,
+          action: 'earn',
+          source: 'birthday-month',
+          delta: birthdayBonus,
+          year: currentYear,
+          note: 'Birthday-month visit bonus',
+        });
+      }
+    }
+  }
+
+  // ─── Tier recalc / promotion ────────────────────────────────────────────
+  const newTier = recalcTier(member.lifetimePoints, rewards);
+  const tierChanged = newTier !== oldTier;
+  if (tierChanged) {
+    member.tier = newTier;
+    member.history.push({
+      at: now,
+      action: 'tier-promotion',
+      from: oldTier,
+      to: newTier,
+      by: 'auto',
+      note: 'Crossed lifetime-points threshold via Toast visit',
+    });
+  }
+
+  membersFile.json.lastUpdated = now.split('T')[0];
+
+  // ─── Persist ────────────────────────────────────────────────────────────
+  try {
+    const msgParts = ['toast: +' + pointsEarned + ' pts'];
+    if (birthdayBonus) msgParts.push('+' + birthdayBonus + ' bday');
+    if (tierChanged)   msgParts.push('→ ' + newTier);
+    msgParts.push('(' + (member.email || member.phone || member.id) + ')');
+    await saveJson(MEMBERS_PATH, membersFile.json, membersFile.sha, msgParts.join(' '));
+  } catch (e) {
+    return reply(500, { ok: false, error: 'Save failed: ' + e.message });
+  }
+
+  // ─── Emails (fire-and-forget — webhook returns immediately) ─────────────
+  // Throttle the visit-confirmation email so lunch + dinner same day don't double-fire
+  const lastVisitEmailAt = member.lastVisitEmailAt;
+  const sinceLast = hoursSince(lastVisitEmailAt);
+  const shouldSendVisitEmail = sinceLast >= VISIT_EMAIL_MIN_GAP_HOURS;
+  if (shouldSendVisitEmail) {
+    member.lastVisitEmailAt = now;
+    // Don't await the save of this field — the next visit will pick it up.
+    sendVisitEmail({
+      member,
+      visitAmount: total,
+      basePoints: pointsEarned,
+      birthdayBonus,
+      newTier,
+      oldTier,
+      tierChanged,
+    }).catch((e) => console.warn('visit email failed:', e && e.message));
+  }
+  if (tierChanged) {
+    sendTierEmail(member.email, member.name, newTier).catch((e) => console.warn('tier email failed:', e && e.message));
+  }
+
+  return reply(200, {
+    ok: true,
+    orderId,
+    memberEmail: member.email,
+    memberId: member.id,
+    pointsEarned,
+    birthdayBonus,
+    totalPointsThisVisit: pointsEarned + birthdayBonus,
+    newBalance: member.currentPoints,
+    lifetimePoints: member.lifetimePoints,
+    oldTier,
+    newTier,
+    tierChanged,
+    visitEmailSent: shouldSendVisitEmail,
+  });
+});

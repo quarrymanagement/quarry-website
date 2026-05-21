@@ -1588,9 +1588,11 @@ a.account-link:hover .al-arrow { color: var(--gold); }
       <div class="section-rule"><div class="line"></div><div class="label">Settings</div><div class="line"></div></div>
       <div class="account-link"><div class="al-label">Notification Preferences</div><div class="al-arrow">›</div></div>
       <a class="account-link" href="https://thequarrystl.com/quarry-giftcards" target="_blank" rel="noopener"><div class="al-label">Gift Cards</div><div class="al-arrow">›</div></a>
+      <div class="account-link" onclick="openChangeEmail()"><div class="al-label">Change Email</div><div class="al-arrow">›</div></div>
       <div class="account-link" onclick="gotoScreen('screen-contact')"><div class="al-label">Contact The Quarry</div><div class="al-arrow">›</div></div>
-      <div class="account-link"><div class="al-label">Privacy &amp; Terms</div><div class="al-arrow">›</div></div>
-      <div class="account-link"><div class="al-label" style="color:var(--gray)">Sign Out</div><div class="al-arrow">›</div></div>
+      <a class="account-link" href="https://thequarrystl.com/privacy.html" target="_blank" rel="noopener"><div class="al-label">Privacy &amp; Terms</div><div class="al-arrow">›</div></a>
+      <div class="account-link" onclick="doSignOut()"><div class="al-label" style="color:var(--gray)">Sign Out</div><div class="al-arrow">›</div></div>
+      <div class="account-link" onclick="openDeleteAccount()"><div class="al-label" style="color:rgba(220,80,80,0.75);font-size:0.85rem;">Delete My Account</div><div class="al-arrow">›</div></div>
 
       <!-- Brand footer mark -->
       <div class="footer-mark">
@@ -3578,6 +3580,202 @@ async function submitParty() {
     var body = (el.getAttribute('data-body') || '').replace(/&#39;/g, "'").replace(/&quot;/g, '"');
     if (window.openEmailPicker) window.openEmailPicker(to, subject, body);
   });
+})();
+</script>
+
+<!-- ============================================================================
+     Account-management modals: Change Email (two-step) + Delete Account.
+     Sign-out simply clears the local token and shows the sign-in overlay.
+     ============================================================================ -->
+<style>
+.acct-overlay { display:none; position:fixed; inset:0; background:rgba(14,14,14,0.96); z-index:9999; backdrop-filter:blur(10px); align-items:center; justify-content:center; padding:20px; overflow-y:auto; }
+.acct-overlay.open { display:flex; }
+.acct-modal { background:linear-gradient(180deg, #1a1a1a 0%, #0e0e0e 100%); border:1px solid rgba(212,175,106,0.3); border-radius:14px; padding:30px 26px; max-width:420px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.6); }
+.acct-modal h3 { font-family:var(--ff-display); color:var(--gold-light); font-size:1.4rem; margin:0 0 6px; letter-spacing:0.02em; text-align:center; }
+.acct-modal .acct-sub { font-family:var(--ff-script); font-style:italic; color:var(--cream-soft); font-size:0.95rem; margin-bottom:18px; text-align:center; }
+.acct-modal p { color:var(--cream-soft); font-size:0.9rem; line-height:1.55; margin:0 0 14px; }
+.acct-modal label { display:block; font-size:0.7rem; letter-spacing:0.2em; color:var(--cream-soft); text-transform:uppercase; margin-bottom:6px; margin-top:14px; }
+.acct-modal input[type=email],
+.acct-modal input[type=text] { width:100%; padding:13px 14px; background:rgba(245,240,232,0.04); border:1px solid rgba(245,240,232,0.15); border-radius:8px; color:var(--cream); font-family:var(--ff-body); font-size:1rem; box-sizing:border-box; }
+.acct-modal input:focus { outline:none; border-color:var(--gold-light); }
+.acct-btn-primary { display:block; width:100%; padding:14px 18px; background:var(--gold); color:var(--brown-dark); font-family:var(--ff-body); font-size:11px; font-weight:700; letter-spacing:0.22em; text-transform:uppercase; border:none; border-radius:8px; cursor:pointer; margin-top:18px; margin-bottom:10px; }
+.acct-btn-primary.danger { background:rgba(220,80,80,0.85); color:#fff; }
+.acct-btn-primary:disabled { opacity:0.5; cursor:wait; }
+.acct-btn-secondary { display:block; width:100%; padding:12px; background:transparent; color:var(--gray); font-family:var(--ff-body); font-size:10px; letter-spacing:0.2em; text-transform:uppercase; border:none; cursor:pointer; }
+.acct-result { margin-top:14px; padding:12px 14px; border-radius:8px; font-size:0.9rem; line-height:1.5; }
+.acct-result.success { background:rgba(212,175,106,0.10); border:1px solid var(--gold-light); color:var(--cream); }
+.acct-result.error { background:rgba(180,60,60,0.10); border:1px solid rgba(220,80,80,0.6); color:#f5d6d6; }
+.acct-warning { background:rgba(220,80,80,0.08); border-left:3px solid rgba(220,80,80,0.6); padding:11px 14px; margin:14px 0; border-radius:4px; color:#f5d6d6; font-size:0.82rem; line-height:1.5; }
+</style>
+
+<!-- Change Email modal -->
+<div class="acct-overlay" id="changeEmailOverlay" onclick="if(event.target===this)closeAcctModals()">
+  <div class="acct-modal">
+    <h3>Change Your Email</h3>
+    <div class="acct-sub">We'll send a code to your new address to confirm it's yours.</div>
+    <div id="ceStep1">
+      <label for="ceNewEmail">New email address</label>
+      <input type="email" id="ceNewEmail" placeholder="you@newaddress.com" autocomplete="email">
+      <button class="acct-btn-primary" id="ceSendBtn" onclick="ceSendCode()">Send Confirmation Code</button>
+      <button class="acct-btn-secondary" onclick="closeAcctModals()">Cancel</button>
+    </div>
+    <div id="ceStep2" style="display:none">
+      <p>Enter the 6-digit code we sent to <strong id="ceEmailEcho" style="color:var(--gold-light)"></strong>.</p>
+      <label for="ceCode">Confirmation code</label>
+      <input type="text" id="ceCode" inputmode="numeric" maxlength="6" placeholder="000000" style="font-size:1.6rem;letter-spacing:0.4em;text-align:center;">
+      <button class="acct-btn-primary" id="ceConfirmBtn" onclick="ceConfirm()">Confirm New Email</button>
+      <button class="acct-btn-secondary" onclick="closeAcctModals()">Cancel</button>
+    </div>
+    <div id="ceResult"></div>
+  </div>
+</div>
+
+<!-- Delete Account modal -->
+<div class="acct-overlay" id="deleteAcctOverlay" onclick="if(event.target===this)closeAcctModals()">
+  <div class="acct-modal">
+    <h3 style="color:rgba(220,80,80,0.9)">Delete Your Account</h3>
+    <div class="acct-sub">This cannot be undone.</div>
+    <div class="acct-warning">
+      Your points balance, visit history, and contact details will be permanently removed within 30 days as required by our privacy policy. You will not receive any more rewards emails. If you change your mind later, you can sign up again — but past points cannot be restored.
+    </div>
+    <p>To confirm, type <strong style="color:rgba(220,80,80,0.9)">DELETE MY ACCOUNT</strong> below (uppercase, exactly as shown):</p>
+    <input type="text" id="daConfirm" placeholder="DELETE MY ACCOUNT" autocomplete="off" autocorrect="off" autocapitalize="characters">
+    <button class="acct-btn-primary danger" id="daConfirmBtn" onclick="daConfirmDelete()">Permanently Delete My Account</button>
+    <button class="acct-btn-secondary" onclick="closeAcctModals()">Cancel</button>
+    <div id="daResult"></div>
+  </div>
+</div>
+
+<script>
+(function() {
+  function apiBase() {
+    return location.hostname.includes('thequarrystl.com') ? '' : 'https://thequarrystl.com';
+  }
+  function tok() {
+    try { return localStorage.getItem('quarry_member_token'); } catch (_) { return null; }
+  }
+
+  window.openChangeEmail = function() {
+    document.getElementById('ceStep1').style.display = '';
+    document.getElementById('ceStep2').style.display = 'none';
+    document.getElementById('ceNewEmail').value = '';
+    document.getElementById('ceCode').value = '';
+    document.getElementById('ceResult').innerHTML = '';
+    document.getElementById('changeEmailOverlay').classList.add('open');
+    setTimeout(function(){ var el = document.getElementById('ceNewEmail'); if (el) el.focus(); }, 100);
+  };
+
+  window.openDeleteAccount = function() {
+    document.getElementById('daConfirm').value = '';
+    document.getElementById('daResult').innerHTML = '';
+    document.getElementById('deleteAcctOverlay').classList.add('open');
+    setTimeout(function(){ var el = document.getElementById('daConfirm'); if (el) el.focus(); }, 100);
+  };
+
+  window.closeAcctModals = function() {
+    document.getElementById('changeEmailOverlay').classList.remove('open');
+    document.getElementById('deleteAcctOverlay').classList.remove('open');
+  };
+
+  window.doSignOut = function() {
+    try { localStorage.removeItem('quarry_member_token'); } catch (_) {}
+    // Reload to reset client state — the sign-in overlay will appear on init
+    location.reload();
+  };
+
+  window.ceSendCode = async function() {
+    var newEmail = (document.getElementById('ceNewEmail').value || '').trim().toLowerCase();
+    var result = document.getElementById('ceResult');
+    result.innerHTML = '';
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(newEmail)) {
+      result.innerHTML = '<div class="acct-result error">Enter a valid email address.</div>';
+      return;
+    }
+    var btn = document.getElementById('ceSendBtn');
+    btn.disabled = true; btn.textContent = 'Sending…';
+    try {
+      var r = await fetch(apiBase() + '/.netlify/functions/change-email', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: tok(), newEmail: newEmail }),
+      });
+      var body = await r.json();
+      if (!body.ok) {
+        result.innerHTML = '<div class="acct-result error">' + (body.error || 'Could not send code') + '</div>';
+        btn.disabled = false; btn.textContent = 'Send Confirmation Code';
+        return;
+      }
+      document.getElementById('ceEmailEcho').textContent = newEmail;
+      document.getElementById('ceStep1').style.display = 'none';
+      document.getElementById('ceStep2').style.display = '';
+      setTimeout(function(){ var el = document.getElementById('ceCode'); if (el) el.focus(); }, 100);
+    } catch (e) {
+      result.innerHTML = '<div class="acct-result error">Network error: ' + (e.message || e) + '</div>';
+      btn.disabled = false; btn.textContent = 'Send Confirmation Code';
+    }
+  };
+
+  window.ceConfirm = async function() {
+    var newEmail = (document.getElementById('ceNewEmail').value || '').trim().toLowerCase();
+    var code = (document.getElementById('ceCode').value || '').replace(/\D/g, '');
+    var result = document.getElementById('ceResult');
+    result.innerHTML = '';
+    if (code.length !== 6) {
+      result.innerHTML = '<div class="acct-result error">Enter the 6-digit code from your email.</div>';
+      return;
+    }
+    var btn = document.getElementById('ceConfirmBtn');
+    btn.disabled = true; btn.textContent = 'Confirming…';
+    try {
+      var r = await fetch(apiBase() + '/.netlify/functions/change-email', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: tok(), newEmail: newEmail, code: code }),
+      });
+      var body = await r.json();
+      if (!body.ok) {
+        result.innerHTML = '<div class="acct-result error">' + (body.error || 'Could not confirm') + '</div>';
+        btn.disabled = false; btn.textContent = 'Confirm New Email';
+        return;
+      }
+      // Update local session token to the new one bound to the new email
+      try { localStorage.setItem('quarry_member_token', body.token); } catch (_) {}
+      result.innerHTML = '<div class="acct-result success"><strong style="color:var(--gold-light)">Done.</strong> Your account is now under <strong>' + newEmail + '</strong>.</div>';
+      btn.textContent = 'Email Updated';
+      setTimeout(function(){ closeAcctModals(); location.reload(); }, 2000);
+    } catch (e) {
+      result.innerHTML = '<div class="acct-result error">Network error: ' + (e.message || e) + '</div>';
+      btn.disabled = false; btn.textContent = 'Confirm New Email';
+    }
+  };
+
+  window.daConfirmDelete = async function() {
+    var confirm = (document.getElementById('daConfirm').value || '').trim();
+    var result = document.getElementById('daResult');
+    result.innerHTML = '';
+    if (confirm !== 'DELETE MY ACCOUNT') {
+      result.innerHTML = '<div class="acct-result error">Type the phrase exactly as shown to confirm.</div>';
+      return;
+    }
+    var btn = document.getElementById('daConfirmBtn');
+    btn.disabled = true; btn.textContent = 'Deleting…';
+    try {
+      var r = await fetch(apiBase() + '/.netlify/functions/delete-member', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: tok(), confirm: 'DELETE MY ACCOUNT' }),
+      });
+      var body = await r.json();
+      if (!body.ok) {
+        result.innerHTML = '<div class="acct-result error">' + (body.error || 'Could not delete') + '</div>';
+        btn.disabled = false; btn.textContent = 'Permanently Delete My Account';
+        return;
+      }
+      try { localStorage.removeItem('quarry_member_token'); } catch (_) {}
+      result.innerHTML = '<div class="acct-result success">Your account has been deleted. We sent a confirmation email. Reloading…</div>';
+      setTimeout(function(){ location.reload(); }, 2500);
+    } catch (e) {
+      result.innerHTML = '<div class="acct-result error">Network error: ' + (e.message || e) + '</div>';
+      btn.disabled = false; btn.textContent = 'Permanently Delete My Account';
+    }
+  };
 })();
 </script>
 
