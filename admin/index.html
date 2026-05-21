@@ -2892,16 +2892,17 @@
             <div id="appMenuTab" class="tab-content">
                 <div class="bands-header">
                     <h2>Menu</h2>
+                    <div style="display:flex;gap:12px;align-items:center;">
+                        <span id="menuStatus" style="font-size:0.85rem;color:var(--text-muted);"></span>
+                        <button class="btn-secondary" id="addMenuSectionBtn" style="font-size:0.82rem;">+ Add Section</button>
+                        <button class="btn-primary" id="saveMenuBtn" style="opacity:0.5;pointer-events:none;">Save Changes</button>
+                    </div>
                 </div>
-                <div style="background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:24px;max-width:720px;">
-                    <div style="font-weight:600;margin-bottom:8px;">Editor coming next</div>
-                    <p style="color:var(--text-secondary);font-size:0.95rem;line-height:1.6;margin-bottom:16px;">
-                        This will load <code style="background:var(--bg-card);padding:1px 5px;border-radius:3px;">menu.json</code> from your repo and let you add, edit, reorder, and remove items across categories (Cocktails, Wine, Beer, Shareables, Sandwiches, Flatbreads, Salads, Kids, Desserts, etc.). One edit updates both <code style="background:var(--bg-card);padding:1px 5px;border-radius:3px;">quarry-menu.html</code> on the website and the Menu screen in the app.
-                    </p>
-                    <p style="color:var(--text-secondary);font-size:0.95rem;line-height:1.6;margin:0;">
-                        Today the menu lives as hardcoded HTML inside <code style="background:var(--bg-card);padding:1px 5px;border-radius:3px;">quarry-menu.html</code> and <code style="background:var(--bg-card);padding:1px 5px;border-radius:3px;">quarry-drinks.html</code>. The first build step is extracting that into <code style="background:var(--bg-card);padding:1px 5px;border-radius:3px;">menu.json</code> and updating both consumers to read from it.
-                    </p>
-                </div>
+                <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:18px;max-width:720px;">
+                    Edits land in <code style="background:var(--bg-elevated);padding:1px 5px;border-radius:3px;">menu.json</code>, which the app's Menu tab and any consumer reading that file pick up within ~60 seconds.
+                </p>
+                <div id="menuLoading" style="text-align:center;padding:40px;color:var(--text-muted);">Loading menu…</div>
+                <div id="menuEditor" style="display:none;max-width:960px;"></div>
             </div>
 
             <!-- ========================================================
@@ -2970,15 +2971,78 @@
             <div id="appContentTab" class="tab-content">
                 <div class="bands-header">
                     <h2>Home Content</h2>
+                    <div style="display:flex;gap:12px;align-items:center;">
+                        <span id="appContentStatus" style="font-size:0.85rem;color:var(--text-muted);"></span>
+                        <button class="btn-primary" id="saveAppContentBtn" style="opacity:0.5;pointer-events:none;">Save Changes</button>
+                    </div>
                 </div>
-                <div style="background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:24px;max-width:720px;">
-                    <div style="font-weight:600;margin-bottom:8px;">Editor coming next</div>
-                    <p style="color:var(--text-secondary);font-size:0.95rem;line-height:1.6;margin-bottom:16px;">
-                        Two pieces of copy on the app's home screen change weekly and need an editor: the <strong>Happy Hour</strong> card (currently "3 – 6 PM · All day Wednesday · Thu &amp; Fri 3 – 6") and the <strong>Staff Pick</strong> card (currently "New Melle Well Water — Gray Whale Gin, 7up &amp; Squirt · $12"). This editor will save those to <code style="background:var(--bg-card);padding:1px 5px;border-radius:3px;">app-content.json</code> and the app picks them up on next open.
-                    </p>
-                    <p style="color:var(--text-secondary);font-size:0.95rem;line-height:1.6;margin:0;">
-                        Also where the welcome greeting, onboarding three-step copy, and program rules text get edited if you ever want to refine the wording.
-                    </p>
+                <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:18px;max-width:720px;">
+                    Two cards on the app's home screen that change frequently. Edits land in <code style="background:var(--bg-elevated);padding:1px 5px;border-radius:3px;">app-content.json</code> and the app picks them up within ~60 seconds.
+                </p>
+                <div id="appContentLoading" style="text-align:center;padding:40px;color:var(--text-muted);">Loading content…</div>
+                <div id="appContentEditor" style="display:none;max-width:720px;">
+                    <!-- Happy Hour card -->
+                    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:20px;margin-bottom:20px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                            <h3 style="font-size:1rem;font-weight:600;">Happy Hour Card</h3>
+                            <label style="display:flex;gap:6px;align-items:center;font-size:0.85rem;color:var(--text-secondary);cursor:pointer;">
+                                <input type="checkbox" id="acHappyActive" data-ac-dirty> Show on home screen
+                            </label>
+                        </div>
+                        <label style="display:block;font-size:0.78rem;color:var(--text-muted);margin-bottom:4px;">Title</label>
+                        <input type="text" id="acHappyTitle" data-ac-dirty
+                            style="width:100%;padding:9px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;margin-bottom:12px;">
+                        <label style="display:block;font-size:0.78rem;color:var(--text-muted);margin-bottom:4px;">Subtitle / hours</label>
+                        <input type="text" id="acHappySubtitle" data-ac-dirty
+                            style="width:100%;padding:9px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;margin-bottom:12px;">
+                        <label style="display:block;font-size:0.78rem;color:var(--text-muted);margin-bottom:4px;">Details (optional, one line)</label>
+                        <input type="text" id="acHappyDetails" data-ac-dirty
+                            style="width:100%;padding:9px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;">
+                    </div>
+
+                    <!-- Staff Pick card -->
+                    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:20px;margin-bottom:20px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                            <h3 style="font-size:1rem;font-weight:600;">Staff Pick Card</h3>
+                            <label style="display:flex;gap:6px;align-items:center;font-size:0.85rem;color:var(--text-secondary);cursor:pointer;">
+                                <input type="checkbox" id="acStaffActive" data-ac-dirty> Show on home screen
+                            </label>
+                        </div>
+                        <label style="display:block;font-size:0.78rem;color:var(--text-muted);margin-bottom:4px;">Title (drink/dish name)</label>
+                        <input type="text" id="acStaffTitle" data-ac-dirty
+                            style="width:100%;padding:9px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;margin-bottom:12px;">
+                        <label style="display:block;font-size:0.78rem;color:var(--text-muted);margin-bottom:4px;">Subtitle (ingredients · price)</label>
+                        <input type="text" id="acStaffSubtitle" data-ac-dirty
+                            style="width:100%;padding:9px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;margin-bottom:12px;">
+                        <label style="display:block;font-size:0.78rem;color:var(--text-muted);margin-bottom:4px;">Byline (e.g. "Picked by Sarah")</label>
+                        <input type="text" id="acStaffByline" data-ac-dirty
+                            style="width:100%;padding:9px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;">
+                    </div>
+
+                    <!-- Welcome greeting -->
+                    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:20px;">
+                        <h3 style="margin-bottom:8px;font-size:1rem;font-weight:600;">Welcome Greeting</h3>
+                        <p style="color:var(--text-secondary);font-size:0.85rem;line-height:1.55;margin-bottom:14px;">
+                            Shown above the points number on the home screen, time-of-day aware.
+                        </p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+                            <div>
+                                <label style="display:block;font-size:0.78rem;color:var(--text-muted);margin-bottom:4px;">Morning (before 12pm)</label>
+                                <input type="text" id="acGreetMorning" data-ac-dirty
+                                    style="width:100%;padding:9px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;">
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:0.78rem;color:var(--text-muted);margin-bottom:4px;">Afternoon (12–5pm)</label>
+                                <input type="text" id="acGreetAfternoon" data-ac-dirty
+                                    style="width:100%;padding:9px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;">
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:0.78rem;color:var(--text-muted);margin-bottom:4px;">Evening (after 5pm)</label>
+                                <input type="text" id="acGreetEvening" data-ac-dirty
+                                    style="width:100%;padding:9px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;">
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -12655,6 +12719,279 @@ function hashCode(str) {
                 window.switchTab = function(name) {
                     origSwitch.apply(this, arguments);
                     if (name === 'appRewards' && !data) load();
+                };
+            }
+        })();
+
+        /* ================================================================
+           APP — MENU EDITOR (appMenuTab)
+           Loads + saves menu.json through save-github-file Netlify fn.
+           Sections are reorderable; items have name / price / description.
+           ================================================================ */
+        (function(){
+            const FEED = 'https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/menu.json';
+            const SAVE_FN = '/.netlify/functions/save-github-file';
+            let data = null;
+            let dirty = false;
+            const $ = (id) => document.getElementById(id);
+            const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+            function setStatus(msg, color) {
+                const el = $('menuStatus');
+                if (el) { el.textContent = msg; el.style.color = color || 'var(--text-muted)'; }
+            }
+            function setDirty(d) {
+                dirty = d;
+                const btn = $('saveMenuBtn');
+                if (btn) {
+                    btn.style.opacity = d ? '1' : '0.5';
+                    btn.style.pointerEvents = d ? 'auto' : 'none';
+                }
+                if (d) setStatus('Unsaved changes', 'var(--yellow)');
+            }
+            async function load() {
+                setStatus('Loading…');
+                try {
+                    const r = await fetch(FEED + '?t=' + Date.now());
+                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                    data = await r.json();
+                    if (!data.sections) data.sections = [];
+                    render();
+                    $('menuLoading').style.display = 'none';
+                    $('menuEditor').style.display = 'block';
+                    setStatus('Synced with GitHub', 'var(--green)');
+                    setDirty(false);
+                } catch (e) {
+                    setStatus('Load failed: ' + e.message, 'var(--red)');
+                    $('menuLoading').textContent = 'Could not load menu.json: ' + e.message;
+                }
+            }
+            function render() {
+                if (!data) return;
+                $('menuEditor').innerHTML = data.sections.map((sec, si) => `
+                    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:18px;margin-bottom:18px;">
+                        <div style="display:grid;grid-template-columns:90px 1fr auto auto auto;gap:10px;align-items:center;margin-bottom:14px;">
+                            <input type="text" value="${esc(sec.id)}" placeholder="id (slug)" data-sec-i="${si}" data-sec-k="id"
+                                style="padding:8px 10px;border:1px solid var(--border-subtle);border-radius:4px;font-size:0.85rem;font-family:monospace;color:var(--text-muted);">
+                            <input type="text" value="${esc(sec.title)}" placeholder="Section title (e.g. Cocktails)" data-sec-i="${si}" data-sec-k="title"
+                                style="padding:8px 10px;border:1px solid var(--border-subtle);border-radius:4px;font-size:1rem;font-weight:600;">
+                            <button class="btn-small" data-sec-up="${si}" ${si === 0 ? 'disabled' : ''} style="padding:6px 10px;border:1px solid var(--border-subtle);border-radius:4px;font-size:0.8rem;background:var(--bg-elevated);cursor:pointer;">↑</button>
+                            <button class="btn-small" data-sec-down="${si}" ${si === data.sections.length - 1 ? 'disabled' : ''} style="padding:6px 10px;border:1px solid var(--border-subtle);border-radius:4px;font-size:0.8rem;background:var(--bg-elevated);cursor:pointer;">↓</button>
+                            <button class="btn-small" data-sec-del="${si}" style="padding:6px 10px;background:var(--red-dim);color:var(--red);border:1px solid var(--red);border-radius:4px;font-size:0.78rem;cursor:pointer;">Delete section</button>
+                        </div>
+                        <div data-sec-items="${si}" style="display:grid;gap:8px;">
+                            ${(sec.items || []).map((it, ii) => `
+                                <div style="display:grid;grid-template-columns:1.5fr 90px 3fr auto;gap:8px;align-items:center;padding:8px;background:var(--bg-elevated);border-radius:6px;">
+                                    <input type="text" value="${esc(it.name)}" placeholder="Item name" data-it-si="${si}" data-it-ii="${ii}" data-it-k="name"
+                                        style="padding:7px 9px;border:1px solid var(--border-subtle);border-radius:4px;font-size:0.88rem;">
+                                    <input type="text" value="${esc(it.price)}" placeholder="$0.00" data-it-si="${si}" data-it-ii="${ii}" data-it-k="price"
+                                        style="padding:7px 9px;border:1px solid var(--border-subtle);border-radius:4px;font-size:0.88rem;text-align:right;font-variant-numeric:tabular-nums;">
+                                    <input type="text" value="${esc(it.desc)}" placeholder="Description" data-it-si="${si}" data-it-ii="${ii}" data-it-k="desc"
+                                        style="padding:7px 9px;border:1px solid var(--border-subtle);border-radius:4px;font-size:0.88rem;">
+                                    <button class="btn-small" data-it-del data-it-si="${si}" data-it-ii="${ii}" style="padding:5px 8px;background:var(--red-dim);color:var(--red);border:1px solid var(--red);border-radius:4px;font-size:0.75rem;cursor:pointer;">×</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <button class="btn-secondary" data-sec-additem="${si}" style="margin-top:10px;font-size:0.82rem;">+ Add Item</button>
+                    </div>
+                `).join('');
+            }
+            // Field edits
+            document.addEventListener('input', (e) => {
+                if (!data) return;
+                const t = e.target;
+                if (t.dataset.secI != null) {
+                    data.sections[+t.dataset.secI][t.dataset.secK] = t.value;
+                    setDirty(true);
+                } else if (t.dataset.itSi != null) {
+                    data.sections[+t.dataset.itSi].items[+t.dataset.itIi][t.dataset.itK] = t.value;
+                    setDirty(true);
+                }
+            });
+            // Button clicks
+            document.addEventListener('click', (e) => {
+                if (!data) return;
+                const t = e.target;
+                if (t.dataset.secUp != null) {
+                    const i = +t.dataset.secUp;
+                    if (i > 0) {
+                        [data.sections[i], data.sections[i - 1]] = [data.sections[i - 1], data.sections[i]];
+                        render(); setDirty(true);
+                    }
+                } else if (t.dataset.secDown != null) {
+                    const i = +t.dataset.secDown;
+                    if (i < data.sections.length - 1) {
+                        [data.sections[i], data.sections[i + 1]] = [data.sections[i + 1], data.sections[i]];
+                        render(); setDirty(true);
+                    }
+                } else if (t.dataset.secDel != null) {
+                    if (confirm('Delete this whole section and all its items?')) {
+                        data.sections.splice(+t.dataset.secDel, 1);
+                        render(); setDirty(true);
+                    }
+                } else if (t.dataset.secAdditem != null) {
+                    const sec = data.sections[+t.dataset.secAdditem];
+                    sec.items = sec.items || [];
+                    sec.items.push({ name: '', price: '', desc: '' });
+                    render(); setDirty(true);
+                } else if (t.dataset.itDel != null) {
+                    data.sections[+t.dataset.itSi].items.splice(+t.dataset.itIi, 1);
+                    render(); setDirty(true);
+                }
+            });
+            // Add Section
+            const addSecBtn = $('addMenuSectionBtn');
+            if (addSecBtn) addSecBtn.addEventListener('click', () => {
+                if (!data) return;
+                data.sections.push({ id: 'new-section-' + Date.now().toString(36).slice(-4), title: 'New Section', items: [] });
+                render(); setDirty(true);
+            });
+            // Save
+            const saveBtn = $('saveMenuBtn');
+            if (saveBtn) saveBtn.addEventListener('click', async () => {
+                if (!data || !dirty) return;
+                setStatus('Saving…', 'var(--yellow)');
+                saveBtn.disabled = true;
+                try {
+                    data.lastUpdated = new Date().toISOString().split('T')[0];
+                    const r = await fetch(SAVE_FN, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ filePath: 'menu.json', content: JSON.stringify(data, null, 2), message: 'menu: update via admin' }),
+                    });
+                    const body = await r.json();
+                    if (!r.ok || body.error) throw new Error(body.error || 'HTTP ' + r.status);
+                    setStatus('Saved · live in app within ~60s', 'var(--green)');
+                    setDirty(false);
+                } catch (e) {
+                    setStatus('Save failed: ' + e.message, 'var(--red)');
+                } finally {
+                    saveBtn.disabled = false;
+                }
+            });
+            // Lazy-load on tab switch
+            const origSwitch = window.switchTab;
+            if (typeof origSwitch === 'function') {
+                window.switchTab = function(name) {
+                    origSwitch.apply(this, arguments);
+                    if (name === 'appMenu' && !data) load();
+                };
+            }
+        })();
+
+        /* ================================================================
+           APP — HOME CONTENT EDITOR (appContentTab)
+           Loads + saves app-content.json through save-github-file Netlify fn.
+           ================================================================ */
+        (function(){
+            const FEED = 'https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/app-content.json';
+            const SAVE_FN = '/.netlify/functions/save-github-file';
+            let data = null;
+            let dirty = false;
+            const $ = (id) => document.getElementById(id);
+            function setStatus(msg, color) {
+                const el = $('appContentStatus');
+                if (el) { el.textContent = msg; el.style.color = color || 'var(--text-muted)'; }
+            }
+            function setDirty(d) {
+                dirty = d;
+                const btn = $('saveAppContentBtn');
+                if (btn) {
+                    btn.style.opacity = d ? '1' : '0.5';
+                    btn.style.pointerEvents = d ? 'auto' : 'none';
+                }
+                if (d) setStatus('Unsaved changes', 'var(--yellow)');
+            }
+            async function load() {
+                setStatus('Loading…');
+                try {
+                    const r = await fetch(FEED + '?t=' + Date.now());
+                    if (r.status === 404) {
+                        // File doesn't exist yet — start with defaults
+                        data = {
+                            happyHour: { title: 'Happy Hour', subtitle: '', details: '', active: false },
+                            staffPick: { title: '', subtitle: '', byline: '', active: false },
+                            welcomeGreeting: { morning: 'Good morning', afternoon: 'Good afternoon', evening: 'Good evening' },
+                            schemaVersion: 1,
+                        };
+                    } else if (!r.ok) {
+                        throw new Error('HTTP ' + r.status);
+                    } else {
+                        data = await r.json();
+                    }
+                    // Hydrate fields
+                    $('acHappyTitle').value     = (data.happyHour && data.happyHour.title)     || '';
+                    $('acHappySubtitle').value  = (data.happyHour && data.happyHour.subtitle)  || '';
+                    $('acHappyDetails').value   = (data.happyHour && data.happyHour.details)   || '';
+                    $('acHappyActive').checked  = !!(data.happyHour && data.happyHour.active);
+                    $('acStaffTitle').value     = (data.staffPick && data.staffPick.title)     || '';
+                    $('acStaffSubtitle').value  = (data.staffPick && data.staffPick.subtitle)  || '';
+                    $('acStaffByline').value    = (data.staffPick && data.staffPick.byline)    || '';
+                    $('acStaffActive').checked  = !!(data.staffPick && data.staffPick.active);
+                    $('acGreetMorning').value   = (data.welcomeGreeting && data.welcomeGreeting.morning)   || 'Good morning';
+                    $('acGreetAfternoon').value = (data.welcomeGreeting && data.welcomeGreeting.afternoon) || 'Good afternoon';
+                    $('acGreetEvening').value   = (data.welcomeGreeting && data.welcomeGreeting.evening)   || 'Good evening';
+                    $('appContentLoading').style.display = 'none';
+                    $('appContentEditor').style.display = 'block';
+                    setStatus('Synced with GitHub', 'var(--green)');
+                    setDirty(false);
+                } catch (e) {
+                    setStatus('Load failed: ' + e.message, 'var(--red)');
+                    $('appContentLoading').textContent = 'Could not load app-content.json: ' + e.message;
+                }
+            }
+            // Mark dirty on any data-ac-dirty input change
+            document.addEventListener('input', (e) => {
+                if (e.target.hasAttribute && e.target.hasAttribute('data-ac-dirty')) setDirty(true);
+            });
+            document.addEventListener('change', (e) => {
+                if (e.target.hasAttribute && e.target.hasAttribute('data-ac-dirty')) setDirty(true);
+            });
+            // Save
+            const saveBtn = $('saveAppContentBtn');
+            if (saveBtn) saveBtn.addEventListener('click', async () => {
+                if (!data || !dirty) return;
+                setStatus('Saving…', 'var(--yellow)');
+                saveBtn.disabled = true;
+                try {
+                    data.happyHour = {
+                        title:    $('acHappyTitle').value.trim(),
+                        subtitle: $('acHappySubtitle').value.trim(),
+                        details:  $('acHappyDetails').value.trim(),
+                        active:   $('acHappyActive').checked,
+                    };
+                    data.staffPick = {
+                        title:    $('acStaffTitle').value.trim(),
+                        subtitle: $('acStaffSubtitle').value.trim(),
+                        byline:   $('acStaffByline').value.trim(),
+                        active:   $('acStaffActive').checked,
+                    };
+                    data.welcomeGreeting = {
+                        morning:   $('acGreetMorning').value.trim()   || 'Good morning',
+                        afternoon: $('acGreetAfternoon').value.trim() || 'Good afternoon',
+                        evening:   $('acGreetEvening').value.trim()   || 'Good evening',
+                    };
+                    data.lastUpdated = new Date().toISOString().split('T')[0];
+                    data.schemaVersion = data.schemaVersion || 1;
+                    const r = await fetch(SAVE_FN, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ filePath: 'app-content.json', content: JSON.stringify(data, null, 2), message: 'app-content: update via admin' }),
+                    });
+                    const body = await r.json();
+                    if (!r.ok || body.error) throw new Error(body.error || 'HTTP ' + r.status);
+                    setStatus('Saved · live in app within ~60s', 'var(--green)');
+                    setDirty(false);
+                } catch (e) {
+                    setStatus('Save failed: ' + e.message, 'var(--red)');
+                } finally {
+                    saveBtn.disabled = false;
+                }
+            });
+            // Lazy-load on tab switch
+            const origSwitch2 = window.switchTab;
+            if (typeof origSwitch2 === 'function') {
+                window.switchTab = function(name) {
+                    origSwitch2.apply(this, arguments);
+                    if (name === 'appContent' && !data) load();
                 };
             }
         })();
