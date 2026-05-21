@@ -3675,14 +3675,16 @@ async function submitParty() {
 <script>
 (function() {
   // ── Google review URL ─────────────────────────────────────────────────────
-  // BEST: drop in a real Place ID for direct-to-review-form opening:
-  //   https://search.google.com/local/writereview?placeid=YOUR_PLACE_ID
-  // FALLBACK (used until we have the Place ID): Google Maps search URL that
-  // lands on The Quarry's listing, where the user taps "Reviews → Write a review."
-  var QUARRY_GOOGLE_PLACE_ID = ''; // TODO: paste Place ID for direct review link
+  // Lands the customer on The Quarry's actual Google Maps listing (looked up
+  // by the business's CID — Customer ID — which is stable for the lifetime of
+  // the listing). They tap a star at the top of the panel to open the review
+  // form. If we ever obtain the standard ChIJ-format Place ID we can switch
+  // to the direct write-review URL by setting QUARRY_GOOGLE_PLACE_ID below.
+  var QUARRY_GOOGLE_CID      = '17583834394715294269';
+  var QUARRY_GOOGLE_PLACE_ID = ''; // optional: ChIJ-format Place ID (if known)
   var GOOGLE_REVIEW_URL = QUARRY_GOOGLE_PLACE_ID
     ? 'https://search.google.com/local/writereview?placeid=' + QUARRY_GOOGLE_PLACE_ID
-    : 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('The Quarry 3960 Highway Z New Melle MO');
+    : 'https://www.google.com/maps?cid=' + QUARRY_GOOGLE_CID;
 
   var busy = false;
 
