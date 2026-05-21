@@ -23,6 +23,7 @@
 
 const https = require('https');
 const crypto = require('crypto');
+const { readBlob, writeBlob } = require('./_blobs');
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -32,37 +33,17 @@ const CORS = {
 };
 
 const BLOB_KEY = 'wine-club-members';
-const SITE_ID  = process.env.NETLIFY_SITE_ID || 'd9496ae2-2b01-4229-b6d2-9203c3be7acb';
 
 // ---------- Blob storage ----------
 async function readRoster() {
-  const token = process.env.NETLIFY_AUTH_TOKEN;
-  if (!token) return { members: [] };
-  try {
-    const res = await fetch('https://api.netlify.com/api/v1/blobs/' + SITE_ID + '/' + BLOB_KEY, {
-      headers: { Authorization: 'Bearer ' + token }
-    });
-    if (!res.ok) return { members: [] };
-    const json = await res.json();
-    return (json && Array.isArray(json.members)) ? json : { members: [] };
-  } catch (e) {
-    console.error('wine-club readRoster:', e.message);
-    return { members: [] };
-  }
+  const data = await readBlob(BLOB_KEY);
+  if (!data || !Array.isArray(data.members)) return { members: [] };
+  return data;
 }
 
 async function writeRoster(roster) {
-  const token = process.env.NETLIFY_AUTH_TOKEN;
-  if (!token) throw new Error('NETLIFY_AUTH_TOKEN missing');
-  const res = await fetch('https://api.netlify.com/api/v1/blobs/' + SITE_ID + '/' + BLOB_KEY, {
-    method: 'PUT',
-    headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
-    body: JSON.stringify(roster)
-  });
-  if (!res.ok) {
-    const t = await res.text();
-    throw new Error('Blob write failed: ' + res.status + ' ' + t);
-  }
+  const ok = await writeBlob(BLOB_KEY, roster);
+  if (!ok) throw new Error('Blob write failed (see function logs)');
 }
 
 // ---------- SendGrid ----------
