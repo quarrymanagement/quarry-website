@@ -9,8 +9,8 @@
       "joinedAt": "2026-05-03T22:42:54.383Z",
       "lastVisitAt": "2026-05-04T05:28:26.182Z",
       "tier": "gold",
-      "currentPoints": 4188,
-      "lifetimePoints": 4688,
+      "currentPoints": 4238,
+      "lifetimePoints": 4738,
       "totalRedemptions": 1,
       "marketingOptIn": true,
       "smsOptIn": true,
@@ -97,6 +97,14 @@
           "delta": 50,
           "referredEmail": "referral-test-1@example.com",
           "note": "Referred Referral Test User to The Quarry"
+        },
+        {
+          "at": "2026-05-21T18:45:22.119Z",
+          "action": "earn",
+          "source": "referral",
+          "delta": 50,
+          "referredEmail": "demo-guest-walkthrough@example.com",
+          "note": "Referred Demo Guest to The Quarry"
         }
       ],
       "referralCode": "QRY-ZJ7WBK",
@@ -183,6 +191,34 @@
       ],
       "referralCode": "QRY-5MJHUC",
       "welcomeSeriesSent": {}
+    },
+    {
+      "id": "m_mpfuc9sy_422c",
+      "name": "Demo Guest",
+      "email": "demo-guest-walkthrough@example.com",
+      "phone": "5559876543",
+      "birthday": "1992-05-21",
+      "passwordHash": "e3b6af0acfaaeb4ad2fb4e0ac898a7dc:eb1086113538857934dac8924b0f00347c8e9018b2b306b7fa166a1c91652a702de0ca45e345b701aa970ee03c2999e4d88497c6202e305efdc2154343134ce4",
+      "joinedAt": "2026-05-21T18:45:22.119Z",
+      "lastVisitAt": null,
+      "tier": "standard",
+      "currentPoints": 260,
+      "lifetimePoints": 260,
+      "totalRedemptions": 0,
+      "marketingOptIn": true,
+      "smsOptIn": false,
+      "referralCode": "QRY-7FE8R9",
+      "referredBy": "management@thequarrystl.com",
+      "notes": "",
+      "history": [
+        {
+          "at": "2026-05-21T18:45:22.119Z",
+          "action": "earn",
+          "source": "signup",
+          "delta": 260,
+          "note": "Welcome bonus 250 + email opt-in +10"
+        }
+      ]
     }
   ],
   "lastUpdated": "2026-05-21",
