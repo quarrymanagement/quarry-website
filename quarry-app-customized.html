@@ -1399,6 +1399,18 @@ a.account-link:hover .al-arrow { color: var(--gold); }
         <div class="scan-cta-arrow">›</div>
       </div>
 
+      <!-- Leave a Review CTA — +100 pts, any rating (Google policy compliant) -->
+      <div class="scan-cta" onclick="openReviewModal()">
+        <div class="scan-cta-icon">
+          <svg viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 17,14 19,21 12,17 5,21 7,14 2,9 9,9"/></svg>
+        </div>
+        <div class="scan-cta-body">
+          <div class="scan-cta-title">Leave a Review · +100 pts</div>
+          <div class="scan-cta-sub">Share your honest experience on Google — any rating earns the bonus.</div>
+        </div>
+        <div class="scan-cta-arrow">›</div>
+      </div>
+
       <div class="section-rule"><div class="line"></div><div class="label">Redeem</div><div class="line"></div></div>
 
       <div class="reward-row">
@@ -3529,6 +3541,114 @@ async function submitParty() {
     var body = (el.getAttribute('data-body') || '').replace(/&#39;/g, "'").replace(/&quot;/g, '"');
     if (window.openEmailPicker) window.openEmailPicker(to, subject, body);
   });
+})();
+</script>
+
+<!-- ============================================================================
+     Leave-a-review flow: opens Google review URL, then on return the member
+     can self-attest and claim +100 pts. ANY rating qualifies (Google policy
+     forbids incentivizing positive reviews specifically — never imply rating
+     affects the credit). 90-day cooldown enforced server-side.
+     ============================================================================ -->
+<style>
+.review-overlay { display:none; position:fixed; inset:0; background:rgba(14,14,14,0.96); z-index:9999; backdrop-filter:blur(10px); align-items:center; justify-content:center; padding:20px; overflow-y:auto; }
+.review-overlay.open { display:flex; }
+.review-modal { background:linear-gradient(180deg, #1a1a1a 0%, #0e0e0e 100%); border:1px solid rgba(212,175,106,0.3); border-radius:14px; padding:32px 26px; max-width:420px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.6); }
+.review-modal h3 { font-family:var(--ff-display); color:var(--gold-light); font-size:1.45rem; margin:0 0 6px; letter-spacing:0.02em; text-align:center; }
+.review-modal .review-pts { display:block; text-align:center; font-family:var(--ff-script); font-style:italic; color:var(--cream-soft); font-size:1rem; margin-bottom:18px; }
+.review-modal p { color:var(--cream-soft); font-size:0.92rem; line-height:1.55; margin:0 0 16px; }
+.review-modal .review-disclaimer { font-size:0.72rem; color:var(--gray); font-style:italic; line-height:1.5; margin:14px 0 18px; padding:10px 12px; background:rgba(245,240,232,0.03); border-left:2px solid rgba(212,175,106,0.4); border-radius:4px; }
+.review-btn-primary { display:block; width:100%; padding:14px 18px; background:var(--gold); color:var(--brown-dark); font-family:var(--ff-body); font-size:11px; font-weight:700; letter-spacing:0.22em; text-transform:uppercase; border:none; border-radius:8px; cursor:pointer; text-decoration:none; text-align:center; margin-bottom:10px; }
+.review-btn-primary:disabled { opacity:0.5; cursor:wait; }
+.review-btn-secondary { display:block; width:100%; padding:13px 18px; background:transparent; color:var(--cream); font-family:var(--ff-body); font-size:11px; font-weight:600; letter-spacing:0.22em; text-transform:uppercase; border:1px solid rgba(245,240,232,0.2); border-radius:8px; cursor:pointer; margin-bottom:10px; }
+.review-btn-tertiary { display:block; width:100%; padding:11px; background:transparent; color:var(--gray); font-family:var(--ff-body); font-size:10px; letter-spacing:0.2em; text-transform:uppercase; border:none; cursor:pointer; }
+.review-result { margin-top:14px; padding:12px 14px; border-radius:8px; font-size:0.9rem; line-height:1.5; }
+.review-result.success { background:rgba(212,175,106,0.10); border:1px solid var(--gold-light); color:var(--cream); }
+.review-result.error { background:rgba(180,60,60,0.10); border:1px solid rgba(220,80,80,0.6); color:#f5d6d6; }
+</style>
+
+<div class="review-overlay" id="reviewOverlay" onclick="if(event.target===this)closeReviewModal()">
+  <div class="review-modal">
+    <h3>Leave a Review</h3>
+    <span class="review-pts">Earn 100 points · any rating qualifies</span>
+    <p>Tap below to open the Google review form for The Quarry. Post your honest review — any star rating — then come back here and tap <em>"I posted my review"</em> to claim your bonus.</p>
+    <a id="reviewOpenBtn" class="review-btn-primary" target="_blank" rel="noopener">Open Google Review &rarr;</a>
+    <button class="review-btn-secondary" id="reviewClaimBtn" onclick="onReviewClaim()">I posted my review · Claim 100 pts</button>
+    <button class="review-btn-tertiary" onclick="closeReviewModal()">Cancel</button>
+    <div class="review-disclaimer">We reward you for sharing your honest feedback — the points are credited for posting a review of any rating. Limit one review credit per platform every 90 days. Falsely claiming a review may forfeit your rewards account.</div>
+    <div id="reviewResult"></div>
+  </div>
+</div>
+
+<script>
+(function() {
+  // ── Google review URL ─────────────────────────────────────────────────────
+  // BEST: drop in a real Place ID for direct-to-review-form opening:
+  //   https://search.google.com/local/writereview?placeid=YOUR_PLACE_ID
+  // FALLBACK (used until we have the Place ID): Google Maps search URL that
+  // lands on The Quarry's listing, where the user taps "Reviews → Write a review."
+  var QUARRY_GOOGLE_PLACE_ID = ''; // TODO: paste Place ID for direct review link
+  var GOOGLE_REVIEW_URL = QUARRY_GOOGLE_PLACE_ID
+    ? 'https://search.google.com/local/writereview?placeid=' + QUARRY_GOOGLE_PLACE_ID
+    : 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('The Quarry 3960 Highway Z New Melle MO');
+
+  var busy = false;
+
+  window.openReviewModal = function() {
+    busy = false;
+    var btn = document.getElementById('reviewOpenBtn');
+    if (btn) btn.href = GOOGLE_REVIEW_URL;
+    var claim = document.getElementById('reviewClaimBtn');
+    if (claim) { claim.disabled = false; claim.textContent = 'I posted my review · Claim 100 pts'; }
+    var result = document.getElementById('reviewResult');
+    if (result) result.innerHTML = '';
+    document.getElementById('reviewOverlay').classList.add('open');
+  };
+
+  window.closeReviewModal = function() {
+    if (busy) return;
+    document.getElementById('reviewOverlay').classList.remove('open');
+  };
+
+  window.onReviewClaim = async function() {
+    var token = (function(){ try { return localStorage.getItem('quarry_member_token'); } catch(_) { return null; } })();
+    var result = document.getElementById('reviewResult');
+    if (!token) {
+      result.innerHTML = '<div class="review-result error">Please sign in first to claim your bonus.</div>';
+      return;
+    }
+    var btn = document.getElementById('reviewClaimBtn');
+    btn.disabled = true; btn.textContent = 'Claiming…'; busy = true;
+
+    try {
+      var apiBase = location.hostname.includes('thequarrystl.com') ? '' : 'https://thequarrystl.com';
+      var r = await fetch(apiBase + '/.netlify/functions/credit-review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: token, platform: 'google' }),
+      });
+      var body = await r.json();
+      if (body.ok) {
+        result.innerHTML = '<div class="review-result success"><strong style="color:var(--gold-light);font-family:var(--ff-display);font-size:1.15rem">+' + body.delta + ' points!</strong><br>New balance: <strong>' + (body.newBalance || 0).toLocaleString() + '</strong> pts. Thank you for sharing your honest feedback.</div>';
+        btn.textContent = 'Claimed';
+        // Refresh the dashboard in the background
+        if (window.refreshMemberData) { try { window.refreshMemberData(); } catch(_) {} }
+        busy = false;
+      } else if (body.cooldown) {
+        result.innerHTML = '<div class="review-result error">You\'ve already earned a Google review bonus recently. You can earn another in <strong>' + (body.daysUntilEligible || 90) + ' days</strong>.</div>';
+        btn.textContent = 'On cooldown';
+        busy = false;
+      } else {
+        result.innerHTML = '<div class="review-result error">' + (body.error || 'Could not credit the review right now. Please try again later.') + '</div>';
+        btn.disabled = false; btn.textContent = 'I posted my review · Claim 100 pts';
+        busy = false;
+      }
+    } catch (e) {
+      result.innerHTML = '<div class="review-result error">Network error: ' + (e.message || e) + '</div>';
+      btn.disabled = false; btn.textContent = 'I posted my review · Claim 100 pts';
+      busy = false;
+    }
+  };
 })();
 </script>
 
