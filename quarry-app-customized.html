@@ -224,6 +224,16 @@ body {
   font-size: 1rem; color: var(--cream-dim); margin-bottom: 18px;
 }
 .hero-greeting .name { color: var(--cream-soft); }
+
+/* Admin-editable cards (Happy Hour, Staff Pick) driven by app-content.json */
+.ac-card { margin: 14px 18px 0; padding: 16px 18px; background: rgba(212,175,106,0.07); border: 1px solid rgba(212,175,106,0.28); border-radius: 12px; }
+.ac-card--staff { background: rgba(245,240,232,0.04); border-color: rgba(245,240,232,0.14); }
+.ac-card .ac-label { font-family: var(--ff-body); font-size: 0.6rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold-light); margin-bottom: 6px; }
+.ac-card--staff .ac-label { color: var(--cream-soft); }
+.ac-card .ac-title { font-family: var(--ff-display); font-size: 1.15rem; color: var(--cream); line-height: 1.2; margin-bottom: 4px; }
+.ac-card .ac-sub { font-family: var(--ff-script); font-style: italic; font-size: 0.92rem; color: var(--cream-soft); line-height: 1.45; }
+.ac-card .ac-detail { font-family: var(--ff-body); font-size: 0.78rem; color: rgba(245,240,232,0.7); margin-top: 6px; line-height: 1.45; }
+.ac-card .ac-byline { font-family: var(--ff-script); font-style: italic; font-size: 0.75rem; color: rgba(245,240,232,0.55); margin-top: 6px; }
 .hero-points-row { display: flex; align-items: baseline; justify-content: space-between; }
 .hero-pts-num {
   font-family: var(--ff-display); font-weight: 400;
@@ -1272,6 +1282,20 @@ a.account-link:hover .al-arrow { color: var(--gold); }
           <div class="scan-cta-sub">Earn points from your latest visit.</div>
         </div>
         <div class="scan-cta-arrow">›</div>
+      </div>
+
+      <!-- Admin-editable Happy Hour & Staff Pick cards (driven by app-content.json) -->
+      <div id="hhCard" class="ac-card" style="display:none">
+        <div class="ac-label">Happy Hour</div>
+        <div class="ac-title" id="hhTitle">Happy Hour</div>
+        <div class="ac-sub" id="hhSub"></div>
+        <div class="ac-detail" id="hhDetail"></div>
+      </div>
+      <div id="spCard" class="ac-card ac-card--staff" style="display:none">
+        <div class="ac-label">Staff Pick</div>
+        <div class="ac-title" id="spTitle"></div>
+        <div class="ac-sub" id="spSub"></div>
+        <div class="ac-byline" id="spByline"></div>
       </div>
 
       <!-- Quick actions — type only, no icons -->
@@ -3129,6 +3153,48 @@ async function submitParty() {
     wrap.innerHTML = html;
   }
 
+  // Cached app-content.json (Happy Hour, Staff Pick, greetings) — fetched once per app load
+  let appContentCache = null;
+  function loadAppContent() {
+    return fetch('https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/app-content.json?t=' + Math.floor(Date.now() / 60000))
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(j) { appContentCache = j; return j; })
+      .catch(function() { return null; });
+  }
+  function renderAppContentCards() {
+    var c = appContentCache;
+    var hhEl = document.getElementById('hhCard');
+    var spEl = document.getElementById('spCard');
+    if (c && c.happyHour && c.happyHour.active && hhEl) {
+      var hh = c.happyHour;
+      var setT = function(id, t) { var e = document.getElementById(id); if (e) e.textContent = t || ''; };
+      setT('hhTitle', hh.title || 'Happy Hour');
+      setT('hhSub', hh.subtitle || '');
+      setT('hhDetail', hh.details || '');
+      hhEl.style.display = '';
+    } else if (hhEl) {
+      hhEl.style.display = 'none';
+    }
+    if (c && c.staffPick && c.staffPick.active && spEl) {
+      var sp = c.staffPick;
+      var setS = function(id, t) { var e = document.getElementById(id); if (e) e.textContent = t || ''; };
+      setS('spTitle', sp.title || '');
+      setS('spSub', sp.subtitle || '');
+      setS('spByline', sp.byline || '');
+      spEl.style.display = '';
+    } else if (spEl) {
+      spEl.style.display = 'none';
+    }
+  }
+  // Greeting strings, time-of-day aware. Override defaults if app-content has them.
+  function currentGreeting() {
+    var h = new Date().getHours();
+    var bucket = h < 12 ? 'morning' : (h < 17 ? 'afternoon' : 'evening');
+    var defaults = { morning: 'Good morning', afternoon: 'Good afternoon', evening: 'Good evening' };
+    var custom = appContentCache && appContentCache.welcomeGreeting;
+    return (custom && custom[bucket]) || defaults[bucket];
+  }
+
   function renderMember() {
     if (!currentMember) return;
     const m = currentMember;
@@ -3142,7 +3208,19 @@ async function submitParty() {
     set('.hero-pts-num', balance);
     set('.hero-tier-name', tierLabel);
     set('.hero-tier-multi', tierMult + ' earn rate');
-    set('.hero-greeting .name', firstName);
+    // Greeting line (time-of-day aware + customizable via app-content.json)
+    var greetEl = document.querySelector('.hero-greeting');
+    if (greetEl) {
+      greetEl.innerHTML = currentGreeting() + ', <span class="name">' + firstName + '</span>';
+    } else {
+      set('.hero-greeting .name', firstName);
+    }
+    // Refresh admin-editable cards on every renderMember (they're cheap to re-render)
+    if (!appContentCache) {
+      loadAppContent().then(renderAppContentCards);
+    } else {
+      renderAppContentCards();
+    }
     set('.rh-num', balance);
     set('.rh-tier-name', tierLabel);
     set('.rh-tier-sub', tierMult + ' earn rate');
