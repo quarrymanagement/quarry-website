@@ -2684,6 +2684,7 @@
                     <div class="sb-nav-item" data-tab="appMenu"><span class="sb-ic">🍽️</span><span class="sb-lbl">Menu</span></div>
                     <div class="sb-nav-item" data-tab="appRewards"><span class="sb-ic">⭐</span><span class="sb-lbl">Rewards Setup</span></div>
                     <div class="sb-nav-item" data-tab="appContent"><span class="sb-ic">🎯</span><span class="sb-lbl">Home Content</span></div>
+                    <div class="sb-nav-item" data-tab="appPush"><span class="sb-ic">🔔</span><span class="sb-lbl">Push Notifications</span></div>
                 </div>
 
                 <div class="sb-nav-section">Customers</div>
@@ -3043,6 +3044,82 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- ========================================================
+                 MEMBER APP — PUSH NOTIFICATIONS
+                 Compose + send pushes to iOS/Android via send-push fn
+                 ======================================================== -->
+            <div id="appPushTab" class="tab-content">
+                <div class="bands-header">
+                    <h2>Push Notifications</h2>
+                    <span id="appPushStatus" style="font-size:0.85rem;color:var(--text-muted);"></span>
+                </div>
+                <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:18px;max-width:720px;">
+                    Send a push notification to customers who installed the app. They'll see it on their lock screen and tap to open the app to the section you pick.
+                </p>
+
+                <div style="max-width:720px;">
+                    <!-- Audience -->
+                    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:20px;margin-bottom:18px;">
+                        <h3 style="font-size:1rem;font-weight:600;margin-bottom:12px;">Who Gets It</h3>
+                        <select id="apAudience" style="width:100%;padding:11px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;background:var(--bg-elevated);color:var(--text-primary);">
+                            <option value="all">Everyone with the app</option>
+                            <option value="tier-gold">Gold &amp; Elite members only</option>
+                            <option value="tier-elite">Elite members only</option>
+                            <option value="low-points">Members with under 500 pts (encourage visits)</option>
+                            <option value="specific">Specific emails (comma-separated)</option>
+                        </select>
+                        <input type="text" id="apEmails" placeholder="alice@example.com, bob@example.com"
+                            style="display:none;width:100%;padding:11px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;margin-top:10px;">
+                    </div>
+
+                    <!-- Message -->
+                    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:20px;margin-bottom:18px;">
+                        <h3 style="font-size:1rem;font-weight:600;margin-bottom:12px;">Message</h3>
+                        <label style="display:block;font-size:0.78rem;color:var(--text-muted);margin-bottom:4px;">Title (bold line shown on lock screen)</label>
+                        <input type="text" id="apTitle" maxlength="50" placeholder="Music Bingo tonight"
+                            style="width:100%;padding:11px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;margin-bottom:12px;">
+                        <label style="display:block;font-size:0.78rem;color:var(--text-muted);margin-bottom:4px;">Body (1–2 lines)</label>
+                        <textarea id="apBody" maxlength="160" rows="3" placeholder="Get tickets before 5pm — only 3 spots left."
+                            style="width:100%;padding:11px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;resize:vertical;"></textarea>
+                        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:6px;">
+                            <span id="apCharCount">0</span> / 160 chars
+                        </div>
+                    </div>
+
+                    <!-- Deep link -->
+                    <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:20px;margin-bottom:18px;">
+                        <h3 style="font-size:1rem;font-weight:600;margin-bottom:12px;">When They Tap, Open To…</h3>
+                        <select id="apDeepLink" style="width:100%;padding:11px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;background:var(--bg-elevated);color:var(--text-primary);">
+                            <option value="home">Home screen (default)</option>
+                            <option value="events">Events tab</option>
+                            <option value="rewards">Rewards / Redeem screen</option>
+                            <option value="menu">Menu</option>
+                        </select>
+                    </div>
+
+                    <!-- Preview -->
+                    <div style="background:#1A1A1A;color:#F5F0E8;border:1px solid var(--border-subtle);border-radius:14px;padding:18px;margin-bottom:18px;">
+                        <div style="font-size:0.72rem;letter-spacing:0.22em;color:#B8933A;text-transform:uppercase;margin-bottom:10px;">Lock-Screen Preview</div>
+                        <div style="background:rgba(245,240,232,0.06);border-radius:10px;padding:14px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+                            <div style="display:flex;gap:10px;align-items:flex-start;">
+                                <div style="width:36px;height:36px;border-radius:8px;background:#B8933A;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700;color:#1A1A1A;font-family:serif;">Q</div>
+                                <div style="flex:1;min-width:0;">
+                                    <div style="display:flex;justify-content:space-between;align-items:baseline;">
+                                        <div style="font-size:0.78rem;font-weight:600;color:#F5F0E8;">The Quarry</div>
+                                        <div style="font-size:0.7rem;color:rgba(245,240,232,0.55);">now</div>
+                                    </div>
+                                    <div id="apPreviewTitle" style="font-size:0.92rem;font-weight:700;color:#F5F0E8;margin-top:2px;word-wrap:break-word;">Title goes here</div>
+                                    <div id="apPreviewBody" style="font-size:0.85rem;color:rgba(245,240,232,0.85);margin-top:1px;word-wrap:break-word;">Body text appears here.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn-primary" id="apSendBtn" style="width:100%;padding:14px;font-size:0.92rem;font-weight:600;">Send Push Now</button>
+                    <div id="apResult" style="margin-top:14px;font-size:0.9rem;"></div>
                 </div>
             </div>
 
@@ -12995,6 +13072,107 @@ function hashCode(str) {
                     if (name === 'appContent' && !data) load();
                 };
             }
+        })();
+
+        /* ================================================================
+           PUSH NOTIFICATIONS TAB (appPushTab)
+           Wraps the existing send-push.js Netlify function.
+           ================================================================ */
+        (function(){
+            const $ = (id) => document.getElementById(id);
+            function setStatus(msg, color) {
+                const el = $('appPushStatus');
+                if (el) { el.textContent = msg; el.style.color = color || 'var(--text-muted)'; }
+            }
+
+            // Live preview as the user types
+            function updatePreview() {
+                const t = $('apTitle').value || 'Title goes here';
+                const b = $('apBody').value || 'Body text appears here.';
+                $('apPreviewTitle').textContent = t;
+                $('apPreviewBody').textContent = b;
+                $('apCharCount').textContent = ($('apBody').value || '').length;
+            }
+            const inputsToWatch = ['apTitle', 'apBody'];
+            inputsToWatch.forEach(function(id) {
+                document.addEventListener('input', function(e) {
+                    if (e.target && e.target.id === id) updatePreview();
+                });
+            });
+
+            // Audience picker — show email box if "specific"
+            document.addEventListener('change', function(e) {
+                if (e.target && e.target.id === 'apAudience') {
+                    $('apEmails').style.display = (e.target.value === 'specific') ? '' : 'none';
+                }
+            });
+
+            // Send button
+            document.addEventListener('click', async function(e) {
+                if (!e.target || e.target.id !== 'apSendBtn') return;
+                const title = ($('apTitle').value || '').trim();
+                const body  = ($('apBody').value || '').trim();
+                if (!title) { setStatus('Title required', 'var(--red)'); return; }
+                if (!body)  { setStatus('Body required', 'var(--red)'); return; }
+
+                const audience = $('apAudience').value;
+                const payload = {
+                    adminPassword: 'quarry2026', // legacy fallback; send-push will check
+                    title: title,
+                    body: body,
+                    audience: audience,
+                    data: { tab: $('apDeepLink').value || 'home' },
+                };
+                if (audience === 'specific') {
+                    const emails = ($('apEmails').value || '').split(',').map(s => s.trim()).filter(Boolean);
+                    if (!emails.length) { setStatus('Enter at least one email', 'var(--red)'); return; }
+                    payload.memberEmails = emails;
+                }
+
+                // Confirm before fire — pushes are loud
+                const audienceLabel = {
+                    'all': 'EVERYONE with the app',
+                    'tier-gold': 'Gold + Elite members',
+                    'tier-elite': 'Elite members only',
+                    'low-points': 'members under 500 pts',
+                    'specific': (payload.memberEmails || []).length + ' specific email(s)',
+                }[audience] || audience;
+                if (!confirm('Send this push to ' + audienceLabel + '?\n\n"' + title + '"\n' + body)) return;
+
+                $('apSendBtn').disabled = true;
+                $('apSendBtn').textContent = 'Sending…';
+                setStatus('Dispatching…');
+                $('apResult').innerHTML = '';
+                try {
+                    const r = await fetch('/.netlify/functions/send-push', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload),
+                    });
+                    const result = await r.json();
+                    if (!r.ok) {
+                        if (r.status === 503) {
+                            $('apResult').innerHTML = '<div style="padding:14px;background:rgba(255,200,80,0.12);border:1px solid #FCD34D;border-radius:8px;color:#92400E;">⚠ Push not yet enabled on the server. ' + (result.error || '') + '</div>';
+                            setStatus('Push backend not ready', 'var(--red)');
+                        } else {
+                            throw new Error(result.error || ('HTTP ' + r.status));
+                        }
+                    } else {
+                        const sent = result.sent || result.successCount || 0;
+                        const failed = result.failed || result.failureCount || 0;
+                        $('apResult').innerHTML = '<div style="padding:14px;background:rgba(80,200,120,0.12);border:1px solid #6FBF73;border-radius:8px;color:#2F7D32;"><strong>✓ Sent to ' + sent + ' device' + (sent === 1 ? '' : 's') + '</strong>' + (failed ? ' · ' + failed + ' failed' : '') + '</div>';
+                        setStatus('Sent', 'var(--green)');
+                        // Clear the form for next send
+                        $('apTitle').value = ''; $('apBody').value = '';
+                        updatePreview();
+                    }
+                } catch (err) {
+                    $('apResult').innerHTML = '<div style="padding:14px;background:rgba(220,80,80,0.12);border:1px solid #DC2626;border-radius:8px;color:#991B1B;">Error: ' + (err.message || 'Send failed') + '</div>';
+                    setStatus('Send failed', 'var(--red)');
+                } finally {
+                    $('apSendBtn').disabled = false;
+                    $('apSendBtn').textContent = 'Send Push Now';
+                }
+            });
         })();
 
         /* ================================================================
