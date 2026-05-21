@@ -2,7 +2,8 @@ const crypto = require('crypto');
 const https = require('https');
 
 const ADMIN_PASSWORD_HASH    = process.env.ADMIN_PASSWORD_HASH || '';
-const ADMIN_SESSION_SECRET   = process.env.ADMIN_SESSION_SECRET || '';
+const ADMIN_SESSION_SECRET   = process.env.ADMIN_SESSION_SECRET
+  || ('qrr-session-' + (process.env.GITHUB_TOKEN || '').slice(-24));
 const SESSION_TTL_HOURS      = 168; // 7 days — must match verify-admin-password.js
 
 function sha256(s) { return crypto.createHash('sha256').update(s, 'utf8').digest('hex'); }

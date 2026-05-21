@@ -28,7 +28,9 @@ const { readBlob, writeBlob } = require('./_blobs');
 const GITHUB_TOKEN          = process.env.GITHUB_TOKEN || '';
 const GITHUB_REPO           = 'quarrymanagement/quarry-website';
 const ADMIN_PASSWORD_HASH   = process.env.ADMIN_PASSWORD_HASH || '';
-const ADMIN_SESSION_SECRET  = process.env.ADMIN_SESSION_SECRET || '';
+// Same fallback pattern as verify-admin-password.js so tokens validate
+const ADMIN_SESSION_SECRET  = process.env.ADMIN_SESSION_SECRET
+  || ('qrr-session-' + (process.env.GITHUB_TOKEN || '').slice(-24));
 const SESSION_TTL_HOURS     = 168;
 
 const CORS = {

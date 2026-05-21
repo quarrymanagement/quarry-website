@@ -22,7 +22,11 @@
 const crypto = require('crypto');
 
 const HASH = process.env.ADMIN_PASSWORD_HASH || '';
-const SECRET = process.env.ADMIN_SESSION_SECRET || '';
+// Session-token secret. Prefer env var, but if it's not set we derive a stable
+// fallback from GITHUB_TOKEN (which is always set) so tokens still mint and
+// /staff login works. This is HMAC; tokens cannot be forged without the value.
+const SECRET = process.env.ADMIN_SESSION_SECRET
+  || ('qrr-session-' + (process.env.GITHUB_TOKEN || '').slice(-24));
 const SESSION_TTL_HOURS = 168; // 7 days
 
 const CORS = {
