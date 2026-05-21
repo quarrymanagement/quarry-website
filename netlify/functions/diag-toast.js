@@ -94,12 +94,12 @@ exports.handler = wrap('diag-toast', async (event) => {
     expectedWebhookUrl: EXPECTED_WEBHOOK_URL,
   };
 
-  // 1. Env-var presence
+  // 1. Env-var presence + length (length-only — never exposes the value)
   out.checks.envVars = {
-    TOAST_CLIENT_ID:      !!TOAST_CLIENT_ID,
-    TOAST_CLIENT_SECRET:  !!TOAST_SECRET,
-    TOAST_RESTAURANT_GUID: !!TOAST_REST_GUID,
-    TOAST_WEBHOOK_SECRET: !!TOAST_WEBHOOK_SECRET,
+    TOAST_CLIENT_ID:       { present: !!TOAST_CLIENT_ID, length: (TOAST_CLIENT_ID || '').length, expectedLength: 32 },
+    TOAST_CLIENT_SECRET:   { present: !!TOAST_SECRET, length: (TOAST_SECRET || '').length, expectedLength: 64 },
+    TOAST_RESTAURANT_GUID: { present: !!TOAST_REST_GUID, length: (TOAST_REST_GUID || '').length, expectedLength: 36 },
+    TOAST_WEBHOOK_SECRET:  { present: !!TOAST_WEBHOOK_SECRET, length: (TOAST_WEBHOOK_SECRET || '').length, expectedLength: 32 },
   };
   if (!TOAST_CLIENT_ID || !TOAST_SECRET || !TOAST_REST_GUID) {
     out.ok = false;
