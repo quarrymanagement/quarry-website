@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-21T18:39:49.280Z",
+  "updatedAt": "2026-05-21T19:01:36.338Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -31813,6 +31813,17 @@
       "sgEventId": "ZHJvcC0xMDYwMzc3NjUtZ2RrZ1ppMEhSWmVlQmktUW9ZS1NQZy0w",
       "userAgent": null,
       "category": "quarry-account-deleted"
+    },
+    {
+      "ts": "2026-05-21T19:01:20.000Z",
+      "type": "open",
+      "draftId": null,
+      "ruleId": null,
+      "email": "management@thequarrystl.com",
+      "url": null,
+      "sgEventId": "qjSv676xRU2f7IpFGen91Q",
+      "userAgent": "YahooMailProxy; https://help.yahoo.com/kb/yahoo-mail-proxy-SLN28749.html",
+      "category": "quarry-welcome-day7"
     }
   ],
   "aggregates": {
