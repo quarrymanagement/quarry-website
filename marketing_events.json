@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-21T17:51:07.302Z",
+  "updatedAt": "2026-05-21T17:51:11.000Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -31668,6 +31668,17 @@
       "email": "ratelimit-test+1@example.com",
       "url": null,
       "sgEventId": "ZHJvcC0xMDYwMzc3NjUtSktxNXNKQWZSOTJZT0dITzdKN2JfUS0w",
+      "userAgent": null,
+      "category": null
+    },
+    {
+      "ts": "2026-05-21T17:51:01.000Z",
+      "type": "dropped",
+      "draftId": null,
+      "ruleId": null,
+      "email": "ratelimit-test-same@example.com",
+      "url": null,
+      "sgEventId": "ZHJvcC0xMDYwMzc3NjUtMVB2VGl6R25UVGUwd2RUcWNuQ1ZEUS0w",
       "userAgent": null,
       "category": null
     }
