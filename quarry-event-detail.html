@@ -6,6 +6,10 @@
   <script defer src="/assets/js/ga4-events.js"></script>
 
     <meta charset="UTF-8">
+    <!-- Prevent iOS Safari from caching this page so admin updates are visible immediately -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
@@ -127,9 +131,14 @@
         .footer a { color: #d4af37; text-decoration: none; }
 
         /* ─── LOADING STATE ─── */
-        .loading { display: flex; align-items: center; justify-content: center; min-height: 60vh; }
+        .loading { display: flex; align-items: center; justify-content: center; min-height: 60vh; animation: ls-hide 5s 1 forwards; }
         .loading-spinner { width: 40px; height: 40px; border: 3px solid rgba(212,175,55,.2); border-top-color: #d4af37; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
+        /* CSS-only safety net: if JS never finishes for any reason (Safari cache,
+           script parse error, etc.), force the spinner to disappear after 5s. */
+        @keyframes ls-hide { 0%,99% { opacity:1; } 100% { opacity:0; display:none; visibility:hidden; height:0; } }
+        #ec-auto-fallback { display: none; animation: ec-show 5s 1 forwards; }
+        @keyframes ec-show { 0%,99% { display:none; opacity:0; } 100% { display:block; opacity:1; } }
 
         /* ─── RESPONSIVE ─── */
         @media (max-width: 900px) {
@@ -169,6 +178,25 @@
     <!-- LOADING STATE -->
     <div id="loadingState" class="loading">
         <div class="loading-spinner"></div>
+    </div>
+
+    <!-- CSS-only fallback: appears after 5s if JS hasn't shown the real content.
+         iOS Safari is aggressive about HTML caching; this guarantees the user
+         always gets a way forward, even on a totally broken JS path. -->
+    <div id="ec-auto-fallback" style="padding:60px 20px;text-align:center;color:#ccc;font-family:Arial,sans-serif;">
+        <h2 style="color:#d4af37;font-family:'Playfair Display',serif;">Rock &amp; Vine Wine Club</h2>
+        <p style="font-size:1rem;">Chateau Sainte Genevieve Wine Tasting</p>
+        <p style="font-size:.9rem;color:#aaa;">Thursday, June 4, 2026 &middot; 6:00 PM &middot; $39.99 per admission</p>
+        <p style="margin-top:1.5rem;">
+            <a href="/quarry-event-detail.html?id=chateau-sainte-genevieve-may-2026"
+               style="display:inline-block;background:#d4af37;color:#1a1a1a;padding:14px 28px;border-radius:6px;text-decoration:none;font-weight:600;">
+                Reserve Your Spot &rarr;
+            </a>
+        </p>
+        <p style="font-size:.75rem;color:#888;margin-top:1rem;">
+            (If you keep seeing only this message, try refreshing or
+            <a href="/quarry-events" style="color:#d4af37;">browse all events</a>.)
+        </p>
     </div>
 
     <!-- MAIN CONTENT (hidden until loaded) -->
@@ -296,6 +324,8 @@
                 // doesn't leave the user staring at a forever-loading spinner.
                 document.getElementById('loadingState').style.display = 'none';
                 document.getElementById('eventContent').style.display = 'block';
+                var fb = document.getElementById('ec-auto-fallback');
+                if (fb) { fb.style.display = 'none'; fb.style.animation = 'none'; }
                 try {
                     renderEvent(evt);
                 } catch (renderErr) {
