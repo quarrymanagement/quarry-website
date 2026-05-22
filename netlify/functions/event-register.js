@@ -217,7 +217,7 @@ exports.handler = async function(event) {
       idempotency_key: crypto.randomUUID(),
       order: {
         location_id: process.env.SQUARE_LOCATION_ID,
-        reference_id: 'event-' + eventId + '-' + Date.now(),
+        reference_id: ('e-' + crypto.createHash('md5').update(String(eventId)).digest('hex').slice(0,8) + '-' + Date.now()).slice(0,40),
         line_items: squareLineItems,
         metadata: safeMeta
       },
