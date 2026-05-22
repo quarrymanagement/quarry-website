@@ -261,25 +261,41 @@
             return;
         }
 
-        // Fetch events.json
-        fetch('/events.json?t=' + Date.now())
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                var evt = null;
-                for (var i = 0; i < data.events.length; i++) {
-                    if (data.events[i].id === eventId || data.events[i].slug === eventId) {
-                        evt = data.events[i];
-                        break;
-                    }
-                }
-                if (!evt) {
-                    window.location.href = '/quarry-events';
-                    return;
-                }
+        // Fast path: single-event endpoint (returns ~5KB instead of 6MB).
+        // Falls back to full events.json scan if the function fails.
+        function loadEvent() {
+            return fetch('/.netlify/functions/get-event-public?id=' + encodeURIComponent(eventId))
+                .then(function(r) {
+                    if (!r.ok) throw new Error('fast endpoint ' + r.status);
+                    return r.json();
+                })
+                .then(function(data) {
+                    if (!data.event) throw new Error('no event in response');
+                    return data.event;
+                })
+                .catch(function() {
+                    // Fallback: full events.json (slower but always works)
+                    return fetch('/events.json?t=' + Date.now())
+                        .then(function(r) { return r.json(); })
+                        .then(function(data) {
+                            for (var i = 0; i < data.events.length; i++) {
+                                if (data.events[i].id === eventId || data.events[i].slug === eventId) {
+                                    return data.events[i];
+                                }
+                            }
+                            return null;
+                        });
+                });
+        }
+
+        loadEvent()
+            .then(function(evt) {
+                if (!evt) { window.location.href = '/quarry-events'; return; }
                 eventData = evt;
                 renderEvent(evt);
             })
-            .catch(function() {
+            .catch(function(err) {
+                console.error('Event load failed:', err);
                 window.location.href = '/quarry-events';
             });
 
