@@ -220,7 +220,7 @@ exports.handler = async function(event) {
       ? squareLineItems.map(function(li){ return li.quantity + 'x ' + li.name.split(' - ')[0]; }).join(' + ')
       : ticketTier;
 
-    const safeMeta = {
+    const rawMeta = {
       bookingType: 'event',
       eventId: String(eventId).slice(0, 255),
       eventName: String(evData.name || '').slice(0, 255),
@@ -234,6 +234,15 @@ exports.handler = async function(event) {
       ticketTier: String(tierSummary).slice(0, 255),
       couponCode: String(couponCode).slice(0, 60)
     };
+    // Square rejects empty-string metadata values with MISSING_REQUIRED_PARAMETER.
+    // Strip any key whose value is empty/whitespace before sending.
+    const safeMeta = {};
+    Object.keys(rawMeta).forEach(function(k) {
+      const v = rawMeta[k];
+      if (v !== undefined && v !== null && String(v).trim() !== '') {
+        safeMeta[k] = String(v);
+      }
+    });
 
     const linkRequest = {
       idempotency_key: crypto.randomUUID(),
