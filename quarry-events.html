@@ -1420,7 +1420,6 @@
                         <a href="/quarry-private-events">Private Events</a>
                     </div>
                 </div>
-                <div class="nav-item"><a href="/quarry-app-customized.html" class="nav-link" style="color:var(--gold-light);">Rewards</a></div>
                 <div class="nav-item"><a href="/quarry-giftcards" class="nav-link">Gift Cards</a></div>
                 <div class="nav-item">
                     <a href="#" class="nav-link">Connect ▾</a>
@@ -2071,7 +2070,7 @@
                             ` : (event.tiers || []).map(tier => `
                                 <div class="tier">
                                     <div class="tier-name">${tier.name}</div>
-                                    <div class="tier-price">${tier.priceLabel}/person</div>
+                                    <div class="tier-price">${tier.priceLabel}${tier.priceUnit === '' ? '' : '/' + (tier.priceUnit || 'person')}</div>
                                 </div>
                             `).join('')}
                             ${event.seatingOptions ? `
@@ -2181,7 +2180,7 @@
             // Populate ticket tier dropdown
             const tierSelect = document.getElementById("ticketTier");
             tierSelect.innerHTML = currentEventForModal.tiers.map(tier =>
-                `<option value="${tier.name}" data-price="${tier.pricePerPerson}">${tier.name} — ${tier.priceLabel}/person</option>`
+                `<option value="${tier.name}" data-price="${tier.pricePerPerson}">${tier.name} — ${tier.priceLabel}${tier.priceUnit === '' ? '' : '/' + (tier.priceUnit || 'person')}</option>`
             ).join("");
 
             // Show seating options if event has them, otherwise show simple quantity
@@ -2310,10 +2309,13 @@
             const totalCents = pricePerPerson * numPeople;
             const totalDollars = (totalCents / 100).toFixed(2);
 
+            // Determine unit suffix: per-tier override > 'ea' default. Empty string = no suffix.
+            const tierObjForSummary = (currentEventForModal.tiers || []).find(t => t.name === tierName) || {};
+            const summaryUnit = tierObjForSummary.priceUnit === '' ? '' : '/' + (tierObjForSummary.priceUnit || 'ea');
             detailsDiv.innerHTML = `
                 <div style="display:flex;justify-content:space-between;">
                     <span>${tierName}</span>
-                    <span>$${(pricePerPerson/100).toFixed(2)}/ea</span>
+                    <span>$${(pricePerPerson/100).toFixed(2)}${summaryUnit}</span>
                 </div>
                 <div style="display:flex;justify-content:space-between;">
                     <span>${seatingLabel}${currentEventForModal.seatingOptions ? ' (' + numPeople + ' people)' : ''}</span>
