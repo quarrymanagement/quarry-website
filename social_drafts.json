@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-22T12:05:46.660Z",
+  "updatedAt": "2026-05-22T13:00:59.882Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -3634,7 +3634,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-05-28T09:00:00-05:00",
       "createdAt": "2026-05-21T04:00:47.161Z",
       "createdBy": "cadence-engine",
@@ -3668,12 +3668,32 @@
           "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "Today / Tonight — Post 0 days before event. (Pace warning: registration is light, lean into urgency / value.)"
+        "canvasNote": "Today / Tonight — Post 0 days before event. (Pace warning: registration is light, lean into urgency / value.)",
+        "reelBrief": "Open with a slow pour of white wine into a glass on a stone surface, hold 3s. Cut to a wide shot of the quarry lake at dusk. End on a close-up of a snack board — cheese, crackers, grapes — with string lights blurred behind. Suggested audio: soft acoustic or French café instrumental. Text overlay: 'Tonight. 6pm. Rock & Vine Wine Club — Chateau Sainte Genevieve. $35 per couple. 15 seats.'"
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Tonight at 6pm — Rock & Vine Wine Club hosts Chateau Sainte Genevieve Winery. $35 per couple covers a guided tasting, snack pairings, and a view of The Quarry that makes the whole thing feel like a getaway. 15 seats total. Grab yours at the link.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWine",
+        "#WineBar",
+        "#RockAndVineWineClub",
+        "#STLWeekend",
+        "#MissouriWine"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Two glasses of white and rosé wine on a stone ledge overlooking a calm quarry lake at golden hour, soft warm light, wildflowers in the foreground, cliffs softly blurred in the background, no faces, no text",
+      "variants": {
+        "facebook": "Tonight at 6pm, Rock & Vine Wine Club hosts a guided tasting with Chateau Sainte Genevieve Winery — $35 per couple includes wine tasting for two, snack pairings, and the whole experience overlooking The Quarry. Only 15 seats available. Grab yours here: [link]",
+        "instagram": "Tonight at 6pm — Chateau Sainte Genevieve guided tasting, snack pairings, quarry views. $35 per couple. 15 seats. Link in bio."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "T-0 calls for 'tonight' specificity with time, price, and a soft logistical nudge — this leans into the lifestyle/belonging tone appropriate for Wine Club posts while keeping urgency grounded in the real 15-seat cap rather than manufactured pressure.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-05-22T13:00:59.882Z",
+      "updatedAt": "2026-05-22T13:00:59.882Z"
     },
     {
       "id": "drf-mpgt8sre-1-8shzo",
@@ -3683,7 +3703,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-05-24T16:00:00-05:00",
       "createdAt": "2026-05-22T11:02:26.715Z",
       "createdBy": "weather-trigger",
@@ -3707,12 +3727,30 @@
         },
         "canvasNote": "Patio-perfect day (69°F). Caption hooks on the weather."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "65 degrees. No clouds worth mentioning. The patio is ready when you are.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#PatioSeason",
+        "#WineBar",
+        "#STLEats",
+        "#OutdoorDining"
+      ],
       "imageUrl": null,
       "userImageUrl": null,
       "bumpedFromDay": "2026-05-22",
-      "updatedAt": "2026-05-22T12:05:46.660Z"
+      "updatedAt": "2026-05-22T13:00:47.400Z",
+      "imagePrompt": "Wide shot of a stone-edged patio overlooking a calm quarry lake, late afternoon light casting long golden shadows across empty wooden tables set with wine glasses, string lights beginning to glow overhead, soft green hillside and limestone cliffs in the background, no people, warm and inviting, photographic style",
+      "variants": {
+        "facebook": "65 degrees and a 6% chance of rain. That's about as close to perfect as a May afternoon gets. Come sit outside for a while.",
+        "instagram": "65 degrees. No clouds worth mentioning. The patio is ready when you are."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "Atmosphere posts live or die on specificity — anchoring to the actual forecast temperature makes this feel real and timely rather than generic, matching the patio-perfect weather context without any forced CTA.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-05-22T13:00:46.592Z"
     }
   ],
   "history": [],
