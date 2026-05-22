@@ -1,8 +1,10 @@
 # Short, shareable URLs for The Quarry events.
 # Format:  /short-path   /actual-page   200  (rewrite, URL bar keeps short path)
 
-# Chateau Sainte Genevieve wine tasting - June 4, 2026
-# Pointed at a dedicated static page so it can't break even if the events
-# system has issues.
-/chateau                       /quarry-chateau.html   200
-/chateau-sainte-genevieve      /quarry-chateau.html   200
+# Augusta Winery wine tasting - June 4, 2026
+/augusta                       /quarry-augusta.html   200
+/augusta-winery                /quarry-augusta.html   200
+
+# Old chateau short URL — points at Augusta now since that's the new winery
+/chateau                       /quarry-augusta.html   200
+/chateau-sainte-genevieve      /quarry-augusta.html   200
