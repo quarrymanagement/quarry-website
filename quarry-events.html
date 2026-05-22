@@ -1673,11 +1673,12 @@
                 if (!resp.ok) throw new Error('Failed to fetch events data');
                 const data = await resp.json();
                 allEvents = (data.events || []).map(evt => {
-                    // Skip auto-capacity for any event NOT using on-site Stripe registration
-                    // (free walk-ups + external email registration like Yoga with Charity)
+                    // Skip auto-capacity for any event NOT using on-site Square registration
+                    // (free walk-ups, external email registration, or external landing pages)
                     const isFreeWalkup = evt.noRegistration || evt.registrationType === 'none' || evt.eventType === 'free';
                     const isEmailReg   = evt.registrationType === 'email';
-                    if (isFreeWalkup || isEmailReg) {
+                    const isExternalReg = evt.registrationType === 'external';
+                    if (isFreeWalkup || isEmailReg || isExternalReg) {
                         evt.status = evt.status === 'inactive' ? 'inactive' : 'available';
                     } else {
                         // Auto-calculate status from capacity
@@ -2032,6 +2033,8 @@
             const availabilityInfo = getAvailabilityText(event);
             const isFreeWalkup = event.noRegistration || event.registrationType === "none" || event.eventType === "free";
             const isEmailReg   = event.registrationType === "email";
+            const isExternalReg = event.registrationType === "external";
+            const externalRegUrl = event.registrationUrl || event.externalRegistrationUrl || '';
             // Build mailto: link if this event uses external email registration
             let mailtoHref = '';
             if (isEmailReg && event.registrationEmail) {
@@ -2083,6 +2086,8 @@
                             <span class="availability-text ${availabilityInfo.class}">${availabilityInfo.text}</span>
                             ${event.status === "sold-out" ? `
                                 <button class="event-button" disabled>Sold Out</button>
+                            ` : isExternalReg && externalRegUrl ? `
+                                <a class="event-button" href="${externalRegUrl}" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;">Register Now</a>
                             ` : isEmailReg ? `
                                 <a class="event-button" href="${mailtoHref}" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;">Email to RSVP</a>
                             ` : isFreeWalkup ? `
@@ -2557,29 +2562,3 @@
             const allLinks = document.querySelectorAll("nav a");
             allLinks.forEach(link => {
                 link.addEventListener("click", function() {
-                    if (!this.textContent.includes("▾")) {
-                        const nav = document.getElementById("mainNav");
-                        nav.classList.remove("active");
-                    }
-                });
-            });
-
-            // Close modal when clicking outside of it
-            const modal = document.getElementById("registrationModal");
-            modal.addEventListener("click", function(e) {
-                if (e.target === modal) {
-                    closeModal();
-                }
-            });
-
-            // Show loading state
-            const grid = document.getElementById("eventsGrid");
-            grid.innerHTML = '<div style="text-align:center;padding:3rem;color:#888;grid-column:1/-1;"><p style="font-size:1.2rem;">Loading events...</p></div>';
-
-            // Load events from GitHub, then render
-            await loadEventsFromGitHub();
-            renderEvents();
-        });
-    </script>
-</body>
-</html>
