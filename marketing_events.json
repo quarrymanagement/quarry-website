@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-22T14:22:00.889Z",
+  "updatedAt": "2026-05-22T16:00:50.588Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -32627,6 +32627,30 @@
       "sgEventId": "_DcYTQsqS1ylACLM41UOUQ",
       "userAgent": "Mozilla/5.0 (Windows NT 5.1; rv:11.0) Gecko Firefox/11.0 (via ggpht.com GoogleImageProxy)",
       "category": "quarry-visit-confirmation"
+    },
+    {
+      "ts": "2026-05-22T16:00:50.391Z",
+      "type": "poll",
+      "draftId": "f1c820f9-f469-430e-b1a1-2fed9d01f64a",
+      "sendId": "7a62ca53-4809-11f1-8238-e6db3a268033",
+      "summary": {
+        "opens": 184,
+        "clicks": 17,
+        "bounces": 6,
+        "unsubs": 0
+      }
+    },
+    {
+      "ts": "2026-05-22T16:00:50.588Z",
+      "type": "poll",
+      "draftId": "d4d01b90-a7a2-4061-b5d7-dd442f9acf7b",
+      "sendId": "92c78bd3-44af-11f1-81cc-0a22d60890ee",
+      "summary": {
+        "opens": 248,
+        "clicks": 4,
+        "bounces": 9,
+        "unsubs": 0
+      }
     }
   ],
   "aggregates": {
@@ -32656,8 +32680,8 @@
     },
     "d4d01b90-a7a2-4061-b5d7-dd442f9acf7b": {
       "delivered": 469,
-      "open": 367,
-      "uniqueOpen": 246,
+      "open": 372,
+      "uniqueOpen": 248,
       "click": 7,
       "uniqueClick": 4,
       "bounce": 9,
@@ -32674,12 +32698,12 @@
       "urlsClicked": {},
       "requests": 483,
       "block": 0,
-      "lastPolledAt": "2026-05-21T16:00:38.489Z"
+      "lastPolledAt": "2026-05-22T16:00:50.588Z"
     },
     "f1c820f9-f469-430e-b1a1-2fed9d01f64a": {
       "delivered": 486,
-      "open": 325,
-      "uniqueOpen": 182,
+      "open": 328,
+      "uniqueOpen": 184,
       "click": 34,
       "uniqueClick": 17,
       "bounce": 6,
@@ -32702,7 +32726,7 @@
       },
       "requests": 498,
       "block": 0,
-      "lastPolledAt": "2026-05-21T16:00:38.361Z"
+      "lastPolledAt": "2026-05-22T16:00:50.391Z"
     }
   }
 }
