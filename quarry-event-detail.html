@@ -292,12 +292,52 @@
             .then(function(evt) {
                 if (!evt) { window.location.href = '/quarry-events'; return; }
                 eventData = evt;
-                renderEvent(evt);
+                // Show content + hide spinner BEFORE rendering so a render error
+                // doesn't leave the user staring at a forever-loading spinner.
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('eventContent').style.display = 'block';
+                try {
+                    renderEvent(evt);
+                } catch (renderErr) {
+                    console.error('Event render error:', renderErr);
+                    // Show a friendly message so user knows what's happening
+                    var ec = document.getElementById('eventContent');
+                    if (ec) {
+                        ec.insertAdjacentHTML('afterbegin',
+                            '<div style="background:#3a1414;color:#ffb;padding:14px;margin:16px;border-radius:6px;font-family:Arial;">' +
+                            'Some details could not load. <a href="/quarry-events" style="color:#d4af37;">Back to events</a>' +
+                            '</div>');
+                    }
+                }
             })
             .catch(function(err) {
                 console.error('Event load failed:', err);
-                window.location.href = '/quarry-events';
+                document.getElementById('loadingState').style.display = 'none';
+                var grid = document.getElementById('eventContent');
+                if (grid) {
+                    grid.style.display = 'block';
+                    grid.innerHTML = '<div style="padding:60px 20px;text-align:center;color:#ccc;font-family:Arial;">' +
+                        '<h2 style="color:#d4af37;">Could not load this event</h2>' +
+                        '<p>Please try refreshing or <a href="/quarry-events" style="color:#d4af37;">view all events</a>.</p>' +
+                        '<p style="font-size:11px;opacity:0.5;margin-top:20px;">' + (err.message || err) + '</p></div>';
+                }
             });
+
+        // Safety net: if rendering hasn't completed in 8s for any reason,
+        // force-hide the spinner so the user isn't stuck forever.
+        setTimeout(function() {
+            var ls = document.getElementById('loadingState');
+            if (ls && ls.style.display !== 'none') {
+                ls.style.display = 'none';
+                var ec = document.getElementById('eventContent');
+                if (ec && ec.style.display === 'none') {
+                    ec.style.display = 'block';
+                    ec.innerHTML = '<div style="padding:60px 20px;text-align:center;color:#ccc;font-family:Arial;">' +
+                        '<h2 style="color:#d4af37;">Loading is taking longer than expected</h2>' +
+                        '<p>Please refresh the page or <a href="/quarry-events" style="color:#d4af37;">view all events</a>.</p></div>';
+                }
+            }
+        }, 8000);
 
         function formatTime(timeStr) {
             if (!timeStr) return '';
@@ -392,9 +432,8 @@
             // Registration card
             renderRegCard(evt, isSoldOut);
 
-            // Show content, hide loading
-            document.getElementById('loadingState').style.display = 'none';
-            document.getElementById('eventContent').style.display = 'block';
+            // (Spinner is hidden by the caller before render starts, so we don't
+            // need to do it here. Leaving renderEvent body for the rest of the work.)
         }
 
         function formatPrice(cents) {
