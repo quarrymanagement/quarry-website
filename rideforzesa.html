@@ -418,24 +418,16 @@
         <label for="email">Email Address *</label>
         <input type="email" id="email" name="email" required placeholder="you@example.com" autocomplete="email">
 
-        <div class="form-row">
-          <div>
-            <label for="vehicle">Side-by-Side Make / Model</label>
-            <input type="text" id="vehicle" name="vehicle" placeholder="e.g., Polaris RZR XP 1000">
-          </div>
-          <div>
-            <label for="passengers">Number of Passengers</label>
-            <select id="passengers" name="passengers" onchange="updateTotal()">
-              <option value="0">0 — Just me</option>
-              <option value="1" selected>1 passenger</option>
-              <option value="2">2 passengers</option>
-              <option value="3">3 passengers</option>
-              <option value="4">4 passengers</option>
-              <option value="5">5 passengers</option>
-              <option value="6">6 passengers</option>
-            </select>
-          </div>
-        </div>
+        <label for="passengers">Number of Passengers</label>
+        <select id="passengers" name="passengers" onchange="updateTotal()">
+          <option value="0">0 — Just me</option>
+          <option value="1" selected>1 passenger</option>
+          <option value="2">2 passengers</option>
+          <option value="3">3 passengers</option>
+          <option value="4">4 passengers</option>
+          <option value="5">5 passengers</option>
+          <option value="6">6 passengers</option>
+        </select>
 
         <label for="passengerNames">Passenger Names (optional)</label>
         <input type="text" id="passengerNames" name="passengerNames" placeholder="Names of your passengers, comma-separated">
@@ -527,7 +519,6 @@
 
     var passengers = parseInt(document.getElementById('passengers').value, 10) || 0;
     var driverName = document.getElementById('fullName').value.trim();
-    var vehicle = document.getElementById('vehicle').value.trim();
     var passengerNames = document.getElementById('passengerNames').value.trim();
 
     var lineItems = [
@@ -539,7 +530,6 @@
 
     // Build a single "additional info" string in the guestName slot so it shows up in admin/webhook metadata
     var meta = [];
-    if (vehicle) meta.push('Vehicle: ' + vehicle);
     if (passengerNames) meta.push('Passengers: ' + passengerNames);
 
     var payload = {
