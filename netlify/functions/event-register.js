@@ -70,6 +70,18 @@ function fetchJSON(url) {
   });
 }
 
+// Normalize US phone numbers to E.164 (+1XXXXXXXXXX) for Square's strict validator.
+// Returns undefined if the input can't be confidently normalized — better to drop
+// the optional pre-populated phone than fail the whole checkout.
+function normalizePhoneE164(raw) {
+  if (!raw) return undefined;
+  const digits = String(raw).replace(/\D+/g, '');
+  if (digits.length === 10) return '+1' + digits;
+  if (digits.length === 11 && digits[0] === '1') return '+' + digits;
+  if (digits.length > 11 && digits.length <= 15) return '+' + digits; // international fallback
+  return undefined;
+}
+
 exports.handler = async function(event) {
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -231,7 +243,7 @@ exports.handler = async function(event) {
       },
       pre_populated_data: {
         buyer_email: email,
-        buyer_phone_number: phone || undefined
+        buyer_phone_number: normalizePhoneE164(phone) || undefined
       },
       payment_note: 'Event - ' + (evData.name || '') + ' x' + qty
     };
