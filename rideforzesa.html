@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google Analytics 4 (injected at build time from GA4_MEASUREMENT_ID env var) -->
+  <script>(function(){var id='__GA4_MEASUREMENT_ID__';if(!id||id.indexOf('__')===0)return;var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id='+id;document.head.appendChild(s);window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments)};gtag('js',new Date());gtag('config',id,{anonymize_ip:true});})();</script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ride for Zesa — Side by Side Poker Run | The Quarry, New Melle MO</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta name="description" content="Side by Side Poker Run benefiting Zesa Bollinger — Saturday, July 11, 2026 at The Quarry, New Melle, MO. $25 per driver, $10 per passenger. All proceeds support Zesa's recovery.">
+  <meta property="og:title" content="Ride for Zesa — Side by Side Poker Run">
+  <meta property="og:description" content="Saturday, July 11, 2026. Brunch check-in at The Quarry, five stops, best hand wins. All proceeds to Zesa Bollinger.">
+  <meta property="og:image" content="https://thequarrystl.com/assets/img/events/poker-run-2026-07-11.jpg">
+  <meta property="og:url" content="https://thequarrystl.com/rideforzesa">
+  <meta property="og:type" content="event">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@500;600;700&family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #0d0d0d;
+      --card: #1a1a1a;
+      --card-2: #232323;
+      --line: #2a2a2a;
+      --text: #ececec;
+      --muted: #9b9b9b;
+      --gold: #d4af37;
+      --red: #b81d1d;
+      --red-bright: #d92626;
+      --cream: #f4ead8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+    a { color: inherit; text-decoration: none; }
+
+    /* Header / Nav */
+    .nav { background: #050505; padding: 14px 24px; border-bottom: 1px solid #1f1f1f; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+    .nav-logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--gold); letter-spacing: 0.06em; }
+    .nav-logo span { display: block; font-size: 0.55rem; color: #888; letter-spacing: 0.25em; margin-top: 2px; font-family: 'Montserrat'; }
+    .nav-links a { color: #ccc; margin-left: 20px; font-size: 0.85rem; }
+    .nav-links a:hover { color: var(--gold); }
+
+    /* Hero */
+    .hero {
+      position: relative;
+      padding: 70px 20px 50px;
+      background:
+        radial-gradient(ellipse at 80% 20%, rgba(184,29,29,0.18), transparent 55%),
+        radial-gradient(ellipse at 10% 80%, rgba(212,175,55,0.08), transparent 55%),
+        linear-gradient(180deg, #111 0%, #0a0a0a 100%);
+      border-bottom: 1px solid #1a1a1a;
+      overflow: hidden;
+      text-align: center;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        repeating-linear-gradient(95deg, transparent 0 80px, rgba(255,255,255,0.018) 80px 82px),
+        repeating-linear-gradient(85deg, transparent 0 80px, rgba(255,255,255,0.012) 80px 82px);
+      pointer-events: none;
+    }
+    .hero-inner { position: relative; max-width: 980px; margin: 0 auto; }
+    .hero-eyebrow {
+      font-family: 'Oswald', sans-serif;
+      letter-spacing: 0.35em;
+      font-size: 0.78rem;
+      color: var(--gold);
+      margin-bottom: 14px;
+      text-transform: uppercase;
+    }
+    .hero-title {
+      font-family: 'Bebas Neue', 'Oswald', sans-serif;
+      font-size: clamp(2.6rem, 7vw, 5.2rem);
+      letter-spacing: 0.02em;
+      line-height: 0.95;
+      color: var(--cream);
+      text-shadow: 0 2px 0 #000, 0 6px 18px rgba(0,0,0,0.6);
+    }
+    .hero-title .accent { color: var(--red-bright); display: block; }
+    .hero-tag {
+      font-family: 'Oswald', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: #d8d8d8;
+      margin-top: 18px;
+      font-size: clamp(0.85rem, 1.6vw, 1.05rem);
+    }
+    .hero-date {
+      display: inline-block;
+      margin-top: 26px;
+      padding: 12px 22px;
+      background: rgba(184,29,29,0.92);
+      color: #fff;
+      font-family: 'Oswald', sans-serif;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-weight: 600;
+      border: 2px solid #5b0e0e;
+      box-shadow: 0 6px 0 rgba(0,0,0,0.5);
+    }
+    .hero-cta-row {
+      margin-top: 30px;
+      display: flex; justify-content: center; gap: 14px; flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-block; padding: 14px 26px; font-family: 'Oswald', sans-serif;
+      text-transform: uppercase; letter-spacing: 0.14em; font-weight: 600;
+      border: 2px solid transparent; cursor: pointer; transition: transform .15s ease, opacity .15s ease;
+      font-size: 0.92rem;
+    }
+    .btn-primary { background: var(--red-bright); color: #fff; border-color: #5b0e0e; box-shadow: 0 4px 0 rgba(0,0,0,0.45); }
+    .btn-primary:hover { transform: translateY(-1px); }
+    .btn-ghost { background: transparent; color: var(--cream); border-color: rgba(255,255,255,0.25); }
+    .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* Content sections */
+    .section { padding: 60px 20px; }
+    .section-narrow { max-width: 980px; margin: 0 auto; }
+    .panel {
+      background: linear-gradient(180deg, #1d1d1d 0%, #161616 100%);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 32px;
+    }
+
+    /* Quick facts */
+    .facts {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px; margin-bottom: 36px;
+    }
+    .fact {
+      background: #141414; border: 1px solid var(--line); padding: 22px; text-align: center; border-radius: 6px;
+    }
+    .fact-label { font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 0.18em; color: var(--gold); font-size: 0.72rem; margin-bottom: 8px; }
+    .fact-value { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: #fff; font-weight: 700; }
+    .fact-sub { color: var(--muted); font-size: 0.82rem; margin-top: 6px; }
+
+    /* Two-column: route + beneficiary */
+    .two-col {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 36px;
+    }
+    @media (max-width: 800px) { .two-col { grid-template-columns: 1fr; } }
+
+    .section-title {
+      font-family: 'Bebas Neue', 'Oswald', sans-serif; font-size: 2rem; letter-spacing: 0.04em;
+      color: var(--cream); margin-bottom: 6px;
+    }
+    .section-title .underline {
+      display: block; width: 60px; height: 3px; background: var(--red-bright); margin-top: 8px;
+    }
+    .section-sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 22px; }
+
+    /* Route list */
+    .route { list-style: none; counter-reset: stop; padding: 0; }
+    .route li {
+      counter-increment: stop;
+      display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px dashed #2a2a2a;
+    }
+    .route li:last-child { border-bottom: none; }
+    .route li::before {
+      content: counter(stop);
+      flex: 0 0 36px; height: 36px; width: 36px;
+      border-radius: 50%; background: #000; color: var(--gold);
+      border: 2px solid var(--gold);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 0.95rem;
+    }
+    .route .stop-name { color: var(--cream); font-weight: 700; font-size: 1.02rem; letter-spacing: 0.02em; text-transform: uppercase; }
+    .route .stop-addr { color: var(--muted); font-size: 0.85rem; margin-top: 2px; }
+
+    /* Beneficiary block */
+    .beneficiary { display: flex; flex-direction: column; gap: 18px; align-items: center; text-align: center; }
+    .beneficiary-photo {
+      width: 100%; max-width: 320px; aspect-ratio: 1 / 1;
+      border-radius: 8px; background: #2a2a2a center/cover no-repeat;
+      border: 3px solid var(--gold);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.45);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--muted); font-size: 0.82rem; font-style: italic;
+    }
+    .beneficiary h3 {
+      font-family: 'Playfair Display', serif; color: var(--cream); font-size: 1.4rem;
+    }
+    .beneficiary p { color: #c8c8c8; font-size: 0.95rem; }
+    .beneficiary .accent-line { color: var(--red-bright); font-weight: 700; font-style: italic; }
+
+    /* Pricing strip */
+    .price-strip {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 36px;
+    }
+    @media (max-width: 700px) { .price-strip { grid-template-columns: 1fr; } }
+    .price-card {
+      background: #141414; border: 1px solid var(--line); padding: 26px 20px; text-align: center; border-radius: 6px;
+    }
+    .price-card .label { font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 0.2em; color: var(--gold); font-size: 0.78rem; margin-bottom: 10px; }
+    .price-card .amount { font-family: 'Bebas Neue', sans-serif; font-size: 3rem; color: #fff; line-height: 1; }
+    .price-card .note { color: var(--muted); font-size: 0.82rem; margin-top: 8px; }
+    .price-card.proceeds .amount { font-size: 1.6rem; color: var(--red-bright); font-family: 'Playfair Display', serif; font-weight: 700; }
+
+    /* Form */
+    .form-section { background: #141414; border: 1px solid var(--line); border-radius: 8px; padding: 36px; }
+    .form-section h2 { font-family: 'Bebas Neue', sans-serif; font-size: 2.2rem; letter-spacing: 0.04em; color: var(--cream); text-align: center; }
+    .form-sub { text-align: center; color: var(--muted); font-size: 0.88rem; margin-top: 6px; margin-bottom: 28px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+    label { display: block; font-size: 0.74rem; font-weight: 600; color: #bbb; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.07em; }
+    input[type="text"], input[type="email"], input[type="tel"], input[type="number"], select {
+      width: 100%; padding: 12px 14px; background: #0e0e0e; border: 1px solid #333; border-radius: 4px;
+      color: #fff; font-size: 0.95rem; font-family: inherit; margin-bottom: 14px;
+    }
+    input:focus, select:focus { outline: none; border-color: var(--gold); }
+    .total-box {
+      margin-top: 18px; padding: 18px; background: rgba(184,29,29,0.08); border: 1px solid rgba(184,29,29,0.4);
+      border-radius: 6px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .total-box .total-label { font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 0.2em; color: var(--cream); font-size: 0.9rem; }
+    .total-box .total-amount { font-family: 'Bebas Neue', sans-serif; font-size: 2.4rem; color: var(--red-bright); line-height: 1; }
+    .submit-btn {
+      display: block; width: 100%; padding: 18px; background: var(--red-bright); color: #fff;
+      border: 2px solid #5b0e0e; border-radius: 4px; font-weight: 700; font-size: 1.05rem; letter-spacing: 0.1em;
+      text-transform: uppercase; cursor: pointer; margin-top: 18px; font-family: 'Oswald', sans-serif;
+      box-shadow: 0 4px 0 rgba(0,0,0,0.45); transition: transform .15s ease, opacity .15s ease;
+    }
+    .submit-btn:hover { transform: translateY(-1px); }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    #formError {
+      background: #3a1414; color: #ffd; padding: 12px; border-radius: 6px; margin-top: 12px;
+      display: none; font-size: 0.88rem; border: 1px solid #5b1d1d;
+    }
+    #formSuccess {
+      background: #143a1a; color: #d8ffd8; padding: 18px; border-radius: 6px; margin-top: 14px;
+      text-align: center; display: none; border: 1px solid #1f5a2a;
+    }
+
+    /* Partners */
+    .partners {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px; margin-top: 12px;
+    }
+    .partner {
+      background: #141414; border: 1px solid var(--line); padding: 18px; text-align: center; border-radius: 6px;
+    }
+    .partner .name { font-family: 'Playfair Display', serif; color: var(--gold); font-size: 1.05rem; font-weight: 700; }
+    .partner .addr { color: var(--muted); font-size: 0.78rem; margin-top: 6px; line-height: 1.45; }
+
+    .deadline-strip {
+      text-align: center; padding: 22px; background: var(--red); color: #fff;
+      font-family: 'Oswald', sans-serif; letter-spacing: 0.22em; text-transform: uppercase;
+      font-weight: 600; font-size: 1rem; margin: 30px 0;
+    }
+    .deadline-strip strong { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: 0.06em; }
+
+    .closing { text-align: center; padding: 40px 20px; color: var(--gold); }
+    .closing-line {
+      font-family: 'Bebas Neue', sans-serif; font-size: clamp(1.4rem, 3vw, 2rem);
+      letter-spacing: 0.2em;
+    }
+    .closing-line span { color: var(--red-bright); }
+
+    .footer {
+      background: #050505; text-align: center; padding: 30px 20px; color: #666; font-size: 0.8rem;
+      border-top: 1px solid #1a1a1a;
+    }
+    .footer a { color: #888; }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="/" class="nav-logo">THE QUARRY<span>NEW MELLE, MISSOURI</span></a>
+  <div class="nav-links">
+    <a href="/quarry-events">All Events</a>
+    <a href="/quarry-menu">Menu</a>
+    <a href="/quarry-contact">Contact</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Saturday · July 11, 2026 · Benefiting Zesa Bollinger</div>
+    <h1 class="hero-title">
+      Q Side by Side
+      <span class="accent">Poker Run</span>
+    </h1>
+    <div class="hero-tag">Ride for a cause. Every hand helps.</div>
+    <div class="hero-date">Check-in 10 AM · Return by 5 PM</div>
+    <div class="hero-cta-row">
+      <a href="#register" class="btn btn-primary">Register Now</a>
+      <a href="#route" class="btn btn-ghost">See the Route</a>
+    </div>
+  </div>
+</section>
+
+<!-- QUICK FACTS -->
+<section class="section">
+  <div class="section-narrow">
+    <div class="facts">
+      <div class="fact">
+        <div class="fact-label">Check-In</div>
+        <div class="fact-value">10:00 AM</div>
+        <div class="fact-sub">at The Quarry, brunch service</div>
+      </div>
+      <div class="fact">
+        <div class="fact-label">Return</div>
+        <div class="fact-value">5:00 PM</div>
+        <div class="fact-sub">final check-in by 4:30 PM</div>
+      </div>
+      <div class="fact">
+        <div class="fact-label">Entry</div>
+        <div class="fact-value">$25 / $10</div>
+        <div class="fact-sub">per driver / per passenger</div>
+      </div>
+      <div class="fact">
+        <div class="fact-label">Register By</div>
+        <div class="fact-value">July 7</div>
+        <div class="fact-sub">limited entries — secure yours</div>
+      </div>
+    </div>
+
+    <!-- ROUTE + BENEFICIARY -->
+    <div class="two-col" id="route">
+      <div class="panel">
+        <h2 class="section-title">The Run Route<span class="underline"></span></h2>
+        <p class="section-sub">Five stops. Draw a card at each. Best hand wins.</p>
+        <ol class="route">
+          <li>
+            <div>
+              <div class="stop-name">The Quarry</div>
+              <div class="stop-addr">3960 Highway Z · New Melle, MO 63385</div>
+            </div>
+          </li>
+          <li>
+            <div>
+              <div class="stop-name">Liz's Bar &amp; Grill</div>
+              <div class="stop-addr">3585 Mill Street · New Melle, MO 63365</div>
+            </div>
+          </li>
+          <li>
+            <div>
+              <div class="stop-name">Treloar Bar &amp; Grill</div>
+              <div class="stop-addr">16843 State Highway N · Marthasville, MO 63357</div>
+            </div>
+          </li>
+          <li>
+            <div>
+              <div class="stop-name">Cori's Twin Gables</div>
+              <div class="stop-addr">101 State Highway 47 · Marthasville, MO 63357</div>
+            </div>
+          </li>
+          <li>
+            <div>
+              <div class="stop-name">Return to The Quarry</div>
+              <div class="stop-addr">Final check-in by 4:30 PM · Return by 5:00 PM</div>
+            </div>
+          </li>
+        </ol>
+      </div>
+
+      <div class="panel">
+        <h2 class="section-title">Benefiting Zesa Bollinger<span class="underline"></span></h2>
+        <p class="section-sub">100% of proceeds support Zesa's recovery.</p>
+        <div class="beneficiary">
+          <div class="beneficiary-photo"
+               style="background-image:url('/assets/img/events/zesa-bollinger.jpg');"
+               aria-label="Zesa Bollinger">
+            <noscript>Photo of Zesa Bollinger</noscript>
+          </div>
+          <h3>Zesa Bollinger</h3>
+          <p>Zesa is a 22-year-old who was involved in a horrific head-on collision on April 29, 2026.</p>
+          <p class="accent-line">Zesa has an extremely long and tedious recovery ahead.</p>
+          <p style="color:var(--gold);font-family:'Oswald',sans-serif;letter-spacing:0.14em;text-transform:uppercase;font-size:0.85rem;">All proceeds go to Zesa Bollinger</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRICING STRIP -->
+    <div class="price-strip">
+      <div class="price-card">
+        <div class="label">Per Driver</div>
+        <div class="amount">$25</div>
+        <div class="note">Includes brunch &amp; poker hand</div>
+      </div>
+      <div class="price-card">
+        <div class="label">Per Passenger</div>
+        <div class="amount">$10</div>
+        <div class="note">Includes brunch &amp; poker hand</div>
+      </div>
+      <div class="price-card proceeds">
+        <div class="label">Where It Goes</div>
+        <div class="amount">100% to Zesa</div>
+        <div class="note">Every dollar supports her recovery</div>
+      </div>
+    </div>
+
+    <!-- REGISTRATION FORM -->
+    <div class="form-section" id="register">
+      <h2>Register Today</h2>
+      <p class="form-sub">Secure payment by Square. You'll receive a confirmation by email.</p>
+
+      <form id="regForm" onsubmit="return submitReg(event)">
+        <div class="form-row">
+          <div>
+            <label for="fullName">Driver Name *</label>
+            <input type="text" id="fullName" name="fullName" required placeholder="Your full name" autocomplete="name">
+          </div>
+          <div>
+            <label for="phone">Phone Number *</label>
+            <input type="tel" id="phone" name="phone" required placeholder="(636) 555-1234" autocomplete="tel">
+          </div>
+        </div>
+
+        <label for="email">Email Address *</label>
+        <input type="email" id="email" name="email" required placeholder="you@example.com" autocomplete="email">
+
+        <div class="form-row">
+          <div>
+            <label for="vehicle">Side-by-Side Make / Model</label>
+            <input type="text" id="vehicle" name="vehicle" placeholder="e.g., Polaris RZR XP 1000">
+          </div>
+          <div>
+            <label for="passengers">Number of Passengers</label>
+            <select id="passengers" name="passengers" onchange="updateTotal()">
+              <option value="0">0 — Just me</option>
+              <option value="1" selected>1 passenger</option>
+              <option value="2">2 passengers</option>
+              <option value="3">3 passengers</option>
+              <option value="4">4 passengers</option>
+              <option value="5">5 passengers</option>
+              <option value="6">6 passengers</option>
+            </select>
+          </div>
+        </div>
+
+        <label for="passengerNames">Passenger Names (optional)</label>
+        <input type="text" id="passengerNames" name="passengerNames" placeholder="Names of your passengers, comma-separated">
+
+        <div class="total-box">
+          <div>
+            <div class="total-label">Total Today</div>
+            <div id="breakdown" style="font-size:0.78rem;color:var(--muted);margin-top:4px;">1 driver · 1 passenger</div>
+          </div>
+          <div class="total-amount" id="totalAmount">$35</div>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">Register &amp; Pay <span id="btnAmount">$35</span> &rarr;</button>
+
+        <div id="formError"></div>
+        <div id="formSuccess">
+          <h3 style="color:var(--gold);font-family:'Playfair Display',serif;margin-bottom:8px;">Redirecting to secure payment...</h3>
+          <p>You'll be taken to Square to complete your registration.</p>
+        </div>
+      </form>
+    </div>
+
+    <!-- DEADLINE STRIP -->
+    <div class="deadline-strip">
+      Register by <strong>July 7, 2026</strong>
+    </div>
+
+    <!-- PARTNERS -->
+    <h2 class="section-title" style="text-align:center;margin-bottom:18px;">Route Partners<span class="underline" style="margin-left:auto;margin-right:auto;"></span></h2>
+    <div class="partners">
+      <div class="partner">
+        <div class="name">The Quarry</div>
+        <div class="addr">3960 Highway Z<br>New Melle, MO 63385</div>
+      </div>
+      <div class="partner">
+        <div class="name">Liz's Bar &amp; Grill</div>
+        <div class="addr">3585 Mill Street<br>New Melle, MO 63365</div>
+      </div>
+      <div class="partner">
+        <div class="name">Treloar Bar &amp; Grill</div>
+        <div class="addr">16843 State Highway N<br>Marthasville, MO 63357</div>
+      </div>
+      <div class="partner">
+        <div class="name">Cori's Twin Gables</div>
+        <div class="addr">101 State Highway 47<br>Marthasville, MO 63357</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CLOSING -->
+<div class="closing">
+  <div class="closing-line">Ride safe. <span>·</span> Ride strong. <span>·</span> Ride for Zesa.</div>
+</div>
+
+<div class="footer">
+  &copy; 2026 The Quarry &middot; 3960 Highway Z, New Melle, MO 63385 &middot;
+  <a href="tel:6362248257">636-224-8257</a> &middot;
+  <a href="/quarry-events">All Events</a>
+</div>
+
+<script>
+  // Live total update
+  var DRIVER_PRICE = 2500;      // cents
+  var PASSENGER_PRICE = 1000;   // cents
+
+  function updateTotal() {
+    var passengers = parseInt(document.getElementById('passengers').value, 10) || 0;
+    var driverCount = 1;
+    var totalCents = (driverCount * DRIVER_PRICE) + (passengers * PASSENGER_PRICE);
+    var dollars = '$' + (totalCents / 100).toFixed(totalCents % 100 === 0 ? 0 : 2);
+    document.getElementById('totalAmount').textContent = dollars;
+    document.getElementById('btnAmount').textContent = dollars;
+    var breakdown = driverCount + ' driver';
+    if (passengers > 0) breakdown += ' · ' + passengers + ' passenger' + (passengers === 1 ? '' : 's');
+    document.getElementById('breakdown').textContent = breakdown;
+  }
+  updateTotal();
+
+  async function submitReg(e) {
+    e.preventDefault();
+    var btn = document.getElementById('submitBtn');
+    var err = document.getElementById('formError');
+    var ok = document.getElementById('formSuccess');
+    err.style.display = 'none';
+    var originalLabel = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = 'Processing...';
+
+    var passengers = parseInt(document.getElementById('passengers').value, 10) || 0;
+    var driverName = document.getElementById('fullName').value.trim();
+    var vehicle = document.getElementById('vehicle').value.trim();
+    var passengerNames = document.getElementById('passengerNames').value.trim();
+
+    var lineItems = [
+      { tierName: 'Driver', qty: 1 }
+    ];
+    if (passengers > 0) {
+      lineItems.push({ tierName: 'Passenger', qty: passengers });
+    }
+
+    // Build a single "additional info" string in the guestName slot so it shows up in admin/webhook metadata
+    var meta = [];
+    if (vehicle) meta.push('Vehicle: ' + vehicle);
+    if (passengerNames) meta.push('Passengers: ' + passengerNames);
+
+    var payload = {
+      eventId: 'evt-rideforzesa-2026-07-11',
+      name: driverName,
+      email: document.getElementById('email').value.trim(),
+      phone: document.getElementById('phone').value.trim(),
+      additionalGuestName: meta.join(' | '),
+      partySize: 1 + passengers,
+      seatType: 'general',
+      ticketTier: passengers > 0 ? 'Driver + ' + passengers + ' Passenger' + (passengers === 1 ? '' : 's') : 'Driver',
+      lineItems: lineItems,
+      successUrl: window.location.origin + '/rideforzesa',
+      cancelUrl: window.location.origin + '/rideforzesa'
+    };
+
+    try {
+      var res = await fetch('/.netlify/functions/event-register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      var data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || ('HTTP ' + res.status));
+      if (data.checkoutUrl) {
+        ok.style.display = 'block';
+        window.location.href = data.checkoutUrl;
+      } else {
+        throw new Error('No checkout URL returned');
+      }
+    } catch (e2) {
+      err.textContent = 'Could not start checkout: ' + (e2.message || 'Please try again or call 636-224-8257.');
+      err.style.display = 'block';
+      btn.disabled = false;
+      btn.innerHTML = originalLabel;
+    }
+  }
+
+  // If user landed here from a successful payment redirect
+  (function() {
+    var qs = new URLSearchParams(window.location.search);
+    if (qs.get('registration') === 'success') {
+      var ok = document.getElementById('formSuccess');
+      ok.innerHTML = '<h3 style="color:var(--gold);font-family:Playfair Display,serif;margin-bottom:8px;">You\'re registered. Thank you for riding for Zesa.</h3>' +
+                     '<p>Check your email for confirmation. See you Saturday, July 11 at 10 AM at The Quarry.</p>';
+      ok.style.display = 'block';
+      ok.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  })();
+</script>
+
+</body>
+</html>
