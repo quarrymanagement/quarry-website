@@ -82,6 +82,16 @@ function normalizePhoneE164(raw) {
   return undefined;
 }
 
+// Pass email to Square's pre-populated buyer email only if it passes a basic format check.
+// Square's strict validator will 400 the whole request on a marginal email. Dropping it
+// just means the customer types it again on the Square checkout page (still required).
+function safeBuyerEmail(raw) {
+  if (!raw) return undefined;
+  const e = String(raw).trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e)) return undefined;
+  return e;
+}
+
 exports.handler = async function(event) {
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -242,7 +252,7 @@ exports.handler = async function(event) {
         allow_tipping: false
       },
       pre_populated_data: {
-        buyer_email: email,
+        buyer_email: safeBuyerEmail(email) || undefined,
         buyer_phone_number: normalizePhoneE164(phone) || undefined
       },
       payment_note: 'Event - ' + (evData.name || '') + ' x' + qty
