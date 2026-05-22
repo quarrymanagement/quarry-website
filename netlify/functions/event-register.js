@@ -1,17 +1,24 @@
 // ============================================================================
 // event-register.js
 //
-// Handles event ticket purchases. Now powered by Square Checkout.
+// Handles event ticket purchases. Powered by Square Checkout.
 // Response shape preserved for the front-end:  { checkoutUrl, sessionId }
 //
 // Required env vars:
 //   SQUARE_ACCESS_TOKEN, SQUARE_LOCATION_ID, SQUARE_ENVIRONMENT
+//
+// Supports two checkout shapes:
+//   (a) Single-tier:  body = { ticketTier, partySize, ... }
+//   (b) Multi-tier:   body = { lineItems: [{ tierName, qty }, ...], ... }
+//       Used when one transaction covers mixed tiers, e.g. the Poker Run
+//       (1 driver + N passengers). Server validates each tierName against
+//       events.json so the client cannot tamper with prices.
 // ============================================================================
 
 const https = require('https');
 const crypto = require('crypto');
 
-// Coupon table (manual - Square doesn't have native promo codes for hosted checkout)
+// Coupon table (manual - Square does not have native promo codes for hosted checkout)
 const EVENT_COUPONS = {
   'QUARRY10': { pct: 10 },
   'QUARRY20': { pct: 20 },
@@ -87,6 +94,10 @@ exports.handler = async function(event) {
     const couponCode = body.couponCode || '';
     const successUrl = body.successUrl;
     const cancelUrl = body.cancelUrl;
+    // Optional: multi-line cart for events that mix tiers in one checkout
+    // (e.g., Poker Run: 1 driver + N passengers). Each item: { tierName, qty }
+    // When present, this bypasses the single-tier lookup below.
+    const lineItemsIn = Array.isArray(body.lineItems) ? body.lineItems : null;
 
     if (!eventId || !name || !email || !seatType) {
       return { statusCode: 400, headers, body: JSON.stringify({ error: 'Missing required fields' }) };
@@ -106,39 +117,87 @@ exports.handler = async function(event) {
     if (evData.status === 'sold-out') {
       return { statusCode: 409, headers, body: JSON.stringify({ error: 'Event is sold out' }) };
     }
+    // Total quantity = sum of line item qtys if provided, otherwise partySize
+    let qty = partySize || 1;
+    if (lineItemsIn && lineItemsIn.length) {
+      qty = lineItemsIn.reduce(function(s, li) { return s + (parseInt(li.qty, 10) || 0); }, 0) || 1;
+    }
     const remaining = (evData.totalCapacity || 0) - (evData.registeredCount || 0);
-    const qty = partySize || 1;
     if (evData.totalCapacity && remaining < qty) {
       return { statusCode: 409, headers, body: JSON.stringify({ error: 'Not enough seats. Only ' + remaining + ' remaining.' }) };
     }
 
-    // Price lookup
-    let unitPrice = evData.pricePerSeat || evData.price || 0;
+    // Build the Square line_items array.
+    // Two paths: (a) caller-supplied lineItems for mixed-tier carts, (b) single-tier fallback.
+    let squareLineItems = [];
     let tierName = evData.name;
-    if (ticketTier && evData.tiers && evData.tiers.length > 0) {
-      const matchedTier = evData.tiers.find(function(t) { return t.name === ticketTier; });
-      if (matchedTier) {
-        unitPrice = matchedTier.pricePerPerson || unitPrice;
-        tierName = matchedTier.name;
-      }
-    }
-    if (!unitPrice || unitPrice <= 0) {
-      return { statusCode: 400, headers, body: JSON.stringify({ error: 'Could not determine ticket price' }) };
-    }
-
-    // Apply coupon (server-side, on per-seat price)
+    let unitPrice = evData.pricePerSeat || evData.price || 0;
     let effectiveUnitPrice = unitPrice;
-    if (couponCode) {
-      const code = couponCode.toUpperCase().trim();
-      const c = EVENT_COUPONS[code];
-      if (c) {
-        effectiveUnitPrice = c.pct !== undefined
-          ? Math.round(unitPrice * (1 - c.pct / 100))
-          : Math.max(0, unitPrice - c.flat);
+
+    if (lineItemsIn && lineItemsIn.length) {
+      // Validate each line item against the event tier table to prevent client-side price tampering.
+      const tierMap = {};
+      (evData.tiers || []).forEach(function(t) { tierMap[String(t.name).toLowerCase()] = t; });
+      for (let i = 0; i < lineItemsIn.length; i++) {
+        const li = lineItemsIn[i];
+        const liQty = parseInt(li.qty, 10) || 0;
+        if (liQty <= 0) continue;
+        const tName = String(li.tierName || '').trim();
+        const matched = tierMap[tName.toLowerCase()];
+        // Server-side price = the event tier price; ignore any amount the client sent.
+        const liPrice = matched ? (matched.pricePerPerson || 0) : 0;
+        if (!matched || liPrice <= 0) {
+          return { statusCode: 400, headers, body: JSON.stringify({ error: 'Unknown ticket tier: ' + tName }) };
+        }
+        squareLineItems.push({
+          name: matched.name + ' - ' + (evData.name || ''),
+          note: (evData.date || '') + ' at The Quarry',
+          quantity: String(liQty),
+          base_price_money: { amount: liPrice, currency: 'USD' }
+        });
       }
+      if (squareLineItems.length === 0) {
+        return { statusCode: 400, headers, body: JSON.stringify({ error: 'No valid line items provided' }) };
+      }
+      // For metadata/payment_note labeling
+      tierName = squareLineItems.map(function(li){ return li.quantity + 'x ' + li.name.split(' - ')[0]; }).join(', ');
+    } else {
+      // Single-tier path (legacy behavior)
+      if (ticketTier && evData.tiers && evData.tiers.length > 0) {
+        const matchedTier = evData.tiers.find(function(t) { return t.name === ticketTier; });
+        if (matchedTier) {
+          unitPrice = matchedTier.pricePerPerson || unitPrice;
+          tierName = matchedTier.name;
+        }
+      }
+      if (!unitPrice || unitPrice <= 0) {
+        return { statusCode: 400, headers, body: JSON.stringify({ error: 'Could not determine ticket price' }) };
+      }
+      // Apply coupon (server-side, on per-seat price)
+      effectiveUnitPrice = unitPrice;
+      if (couponCode) {
+        const code = couponCode.toUpperCase().trim();
+        const c = EVENT_COUPONS[code];
+        if (c) {
+          effectiveUnitPrice = c.pct !== undefined
+            ? Math.round(unitPrice * (1 - c.pct / 100))
+            : Math.max(0, unitPrice - c.flat);
+        }
+      }
+      squareLineItems.push({
+        name: tierName + ' - ' + (evData.name || ''),
+        note: (evData.date || '') + ' at The Quarry',
+        quantity: String(qty),
+        base_price_money: { amount: effectiveUnitPrice, currency: 'USD' }
+      });
     }
 
     // Build Square Payment Link
+    // For multi-tier carts, summarize the breakdown in ticketTier metadata
+    const tierSummary = (lineItemsIn && lineItemsIn.length)
+      ? squareLineItems.map(function(li){ return li.quantity + 'x ' + li.name.split(' - ')[0]; }).join(' + ')
+      : ticketTier;
+
     const safeMeta = {
       bookingType: 'event',
       eventId: String(eventId).slice(0, 255),
@@ -150,7 +209,7 @@ exports.handler = async function(event) {
       partySize: String(qty),
       seatType: String(seatType).slice(0, 60),
       tableId: String(tableId).slice(0, 60),
-      ticketTier: String(ticketTier).slice(0, 255),
+      ticketTier: String(tierSummary).slice(0, 255),
       couponCode: String(couponCode).slice(0, 60)
     };
 
@@ -159,12 +218,7 @@ exports.handler = async function(event) {
       order: {
         location_id: process.env.SQUARE_LOCATION_ID,
         reference_id: 'event-' + eventId + '-' + Date.now(),
-        line_items: [{
-          name: tierName + ' - ' + (evData.name || ''),
-          note: (evData.date || '') + ' at The Quarry',
-          quantity: String(qty),
-          base_price_money: { amount: effectiveUnitPrice, currency: 'USD' }
-        }],
+        line_items: squareLineItems,
         metadata: safeMeta
       },
       checkout_options: {
