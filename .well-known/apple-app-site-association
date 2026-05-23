@@ -1,0 +1,31 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": [
+          "V8Z5N22GW4.com.thequarrystl.rewards",
+          "V8Z5N22GW4.com.thequarrystl.rewards.Clip"
+        ],
+        "components": [
+          {
+            "/": "/quarry-app-customized",
+            "comment": "Deep-link the legacy PWA URL into the native app"
+          },
+          {
+            "/": "/clip/*",
+            "comment": "Invoke the App Clip from QR codes at the venue"
+          },
+          {
+            "/": "/rewards",
+            "comment": "Open the Rewards tab directly"
+          }
+        ]
+      }
+    ]
+  },
+  "appclips": {
+    "apps": [
+      "V8Z5N22GW4.com.thequarrystl.rewards.Clip"
+    ]
+  }
+}
