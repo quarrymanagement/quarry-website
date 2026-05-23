@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-23T12:07:46.372Z",
+  "updatedAt": "2026-05-23T13:03:10.304Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -3766,7 +3766,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-05-28T18:00:00-05:00",
       "createdAt": "2026-05-22T20:03:38.730Z",
       "createdBy": "cadence-engine",
@@ -3800,12 +3800,32 @@
           "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "One Week Away — Post 7 days before event. (Pace warning: registration is light, lean into urgency / value.)"
+        "canvasNote": "One Week Away — Post 7 days before event. (Pace warning: registration is light, lean into urgency / value.)",
+        "reelBrief": "Open with a slow pan across the quarry lake at dusk (3s), cut to a close-up of wine being poured into a glass with the cliff face softly behind (3s), hold on a styled shot of a snack board on a stone surface (2s), end on the patio string lights coming on at twilight (3s). Suggested audio: soft acoustic or ambient jazz, low volume. Text overlay: 'Augusta Winery Tasting · June 4 · 6pm · Rock & Vine Wine Club'."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Augusta Winery comes to The Quarry next Thursday. Rock & Vine Wine Club is hosting a guided tasting for two — wine, snack pairings, and a view of the lake and cliffs at golden hour. $39.99 per seat. Only 15 spots total. Link in bio to reserve yours.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWine",
+        "#WineBar",
+        "#STLEvents",
+        "#AugustaWinery",
+        "#WineTasting"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Two glasses of white and rosé wine on a stone ledge overlooking a calm quarry lake at golden hour, warm amber light, soft focus cliffs and green treeline in background, small wooden board with cheese and crackers beside the glasses, string lights beginning to glow in the upper frame",
+      "variants": {
+        "facebook": "Augusta Winery is coming to The Quarry on Thursday, June 4. Rock & Vine Wine Club is hosting a guided tasting experience — wine for two, snack pairings, and an evening overlooking the lake and cliffs. $39.99 per seat. Just 15 spots available. Reserve yours at the link below.",
+        "instagram": "Augusta Winery. Guided tasting for two. The Quarry at golden hour. June 4 · 6pm · $39.99 · 15 spots. Link in bio."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "At T-7 with 0% fill, this is a value-push moment — the caption leads with the experience and specifics (what, when, cost, capacity) to drive action without false urgency, matching the lifestyle/belonging tone appropriate for a Wine Club ticketed event.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-05-23T13:03:10.304Z",
+      "updatedAt": "2026-05-23T13:03:10.304Z"
     },
     {
       "id": "drf-mphcksbv-2-aa9xx",
@@ -4256,7 +4276,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-05-25T16:00:00-05:00",
       "createdAt": "2026-05-23T11:02:43.712Z",
       "createdBy": "weather-trigger",
@@ -4280,12 +4300,30 @@
         },
         "canvasNote": "Patio-perfect day (80°F). Caption hooks on the weather."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "73 degrees. No rain in sight. The patio is ready when you are.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#PatioSeason",
+        "#WineBar",
+        "#STLEats",
+        "#OutdoorDining"
+      ],
       "imageUrl": null,
       "userImageUrl": null,
       "bumpedFromDay": "2026-05-23",
-      "updatedAt": "2026-05-23T12:07:46.372Z"
+      "updatedAt": "2026-05-23T13:02:57.730Z",
+      "imagePrompt": "Wide shot of a stone-edged patio overlooking a calm quarry lake at golden hour, empty bistro tables with simple settings, string lights just beginning to glow against a warm blue-gold sky, lush green treeline reflecting in the water, no people, no text, warm cinematic tone",
+      "variants": {
+        "facebook": "73 degrees and a 13% chance of rain. In other words — patio weather. Come find a table and stay a while. We're open Wednesday through Sunday.",
+        "instagram": "73 degrees. No rain in sight. The patio is ready when you are."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "Atmosphere post with no event hook calls for pure sensory simplicity — the weather data becomes the copy, no CTA needed, and the 11am post time catches the weekend lunch and planning crowd.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-05-23T13:02:56.702Z"
     },
     {
       "id": "drf-mpi8p0jk-2-khity",
@@ -4295,7 +4333,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-05-24T16:00:00.000Z",
       "createdAt": "2026-05-23T11:02:43.712Z",
       "createdBy": "weather-trigger",
@@ -4319,10 +4357,29 @@
         },
         "canvasNote": "Patio-perfect day (82°F). Caption hooks on the weather."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "72 degrees. No rain in sight. The patio is ready when you are.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#WineBar",
+        "#PatioSeason",
+        "#STLEats",
+        "#OutdoorDining"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Wide shot of a stone-edged patio at golden hour, string lights beginning to glow overhead, two wine glasses catching warm late-afternoon light on a wooden table, soft green hillside and quarry lake visible in the background, clear blue sky, no people, no text",
+      "variants": {
+        "facebook": "72 degrees and a 14% chance of rain — basically a perfect patio day. Come find a table, pour something cold, and stay a while. We're open Wednesday through Sunday at 3960 Highway Z in New Melle.",
+        "instagram": "72 degrees. No rain in sight. The patio is ready when you are."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "Atmosphere posts need no CTA — the weather data is the hook, and 'ready when you are' is an invitation not a command, matching the vibe-forward guidance for non-event content at the 4-5pm dinner-planning window.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-05-23T13:02:47.479Z",
+      "updatedAt": "2026-05-23T13:02:48.942Z"
     }
   ],
   "history": [],
