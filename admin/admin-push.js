@@ -195,11 +195,43 @@
     }
   }
 
+  // ===== Override the wireframe "Push not yet enabled" status =====
+  // The existing admin/index.html ships with a hardcoded status message
+  // ("Push not yet enabled on the server") next to the section heading.
+  // Once our script loads, the system IS configured, so flip it to a
+  // green "Ready" indicator. We poll for the element a few times in case
+  // the section renders lazily on tab switch.
+  function setStatusReady() {
+    const el = document.getElementById('appPushStatus');
+    if (!el) return false;
+    el.textContent = '● Ready';
+    el.style.color = '#1f7a3f';
+    el.style.fontWeight = '600';
+    return true;
+  }
+
   // ===== Wire up =====
   function init() {
+    // Try immediately, then poll a few times for the status pill in case
+    // the admin tab hasn't been rendered yet.
+    setStatusReady();
+    let tries = 0;
+    const poll = setInterval(() => {
+      if (setStatusReady() || ++tries > 30) clearInterval(poll);
+    }, 1000);
+
     const btn = document.getElementById('apSendBtn');
     if (!btn) {
       console.warn('[admin-push] #apSendBtn not found — Push UI not on page yet.');
+      // Watch for the button being added later (admin uses tab switching).
+      const obs = new MutationObserver(() => {
+        const b = document.getElementById('apSendBtn');
+        if (b && b.dataset.quarryPushBound !== '1') {
+          obs.disconnect();
+          init();
+        }
+      });
+      obs.observe(document.body, { childList: true, subtree: true });
       return;
     }
     // Prevent double-binding if the script runs twice (e.g. tab re-renders).
