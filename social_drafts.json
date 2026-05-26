@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-26T12:07:00.071Z",
+  "updatedAt": "2026-05-26T13:02:19.341Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -225,7 +225,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-06-01T10:00:00-05:00",
       "createdAt": "2026-04-28T03:33:43.330Z",
       "createdBy": "cadence-engine",
@@ -251,10 +251,29 @@
         },
         "canvasNote": "Now Accepting Members — recurring monthly post for the Rock & Vine Wine Club."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "June is open for Rock & Vine Wine Club members. Each month: two curated bottles, a private tasting, and member-only events at the Quarry. No guesswork, no markup hunting — just good wine waiting for you.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWine",
+        "#WineBar",
+        "#WineClub",
+        "#STLEats",
+        "#STLWeekend"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Two bottles of red and white wine resting on a rustic wooden surface beside a single filled wine glass, warm golden evening light filtering through, soft-focus stone cliff and lake in the background, string lights barely visible overhead, rich warm tones",
+      "variants": {
+        "facebook": "June is open for Rock & Vine Wine Club members.\n\nEach month you get two curated bottles, a private tasting at the Quarry, and access to member-only events — all without leaving St. Charles County. If you've been thinking about joining, this is the month to do it.",
+        "instagram": "June is open for Rock & Vine Wine Club members. Two curated bottles, private tastings, member events. Good wine, no guesswork."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "Arc step is 'Now Accepting Members' — this is a lifestyle/belonging post, not a hard sell, so the copy leads with what members get and ends with a low-pressure invitation that matches the warm, confident brand voice.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-05-26T13:02:06.519Z",
+      "updatedAt": "2026-05-26T13:02:06.519Z"
     },
     {
       "id": "drf-moi2najm-px6xg",
@@ -3874,7 +3893,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-06-01T18:00:00-05:00",
       "createdAt": "2026-05-22T20:03:38.731Z",
       "createdBy": "cadence-engine",
@@ -3908,12 +3927,32 @@
           "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "This Weekend — Post 3 days before event. (Pace warning: registration is light, lean into urgency / value.)"
+        "canvasNote": "This Weekend — Post 3 days before event. (Pace warning: registration is light, lean into urgency / value.)",
+        "reelBrief": "Open with a slow pan across the quarry lake at dusk (3s), cut to a close-up of wine being poured into a glass on the stone bar (2s), hold on a wide shot of the intimate outdoor tasting setup — two chairs, small bites, two glasses, cliff backdrop (4s). End on the lake reflection fading to dark. Suggested audio: soft acoustic or light jazz instrumental. Text overlay: 'Augusta Winery Tasting · Thursday · $39 for two · The Quarry'."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "This Thursday — Rock & Vine Wine Club hosts Augusta Winery for an intimate tasting at The Quarry. $39.99 covers wine for two, snack pairings, and a guided experience with views of the lake and cliffs. Only 15 seats total. Tickets at the link.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWine",
+        "#WineBar",
+        "#STLEvents",
+        "#MissouriWine",
+        "#AugustaWinery"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Two glasses of Missouri white wine on a stone ledge overlooking a still quarry lake at golden hour, warm amber light, wildflowers softly out of focus in foreground, limestone cliffs reflected in water behind",
+      "variants": {
+        "facebook": "This Thursday evening, Rock & Vine Wine Club hosts Augusta Winery for a guided tasting at The Quarry. $39.99 gets you wine for two, snack pairings, and a relaxed experience overlooking the lake and cliffs — just 15 seats. Grab yours at the link before it fills.",
+        "instagram": "Augusta Winery comes to The Quarry this Thursday. $39.99 — wine for two, snack pairings, guided tasting, lake views. 15 seats. Link in bio."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "T-3 'This Weekend' arc calls for day-specific clarity and a soft value push — fillPct is 0 so the copy leans into what's included and the intimate scale (15 seats) to create natural urgency without manufactured pressure.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-05-26T13:02:19.341Z",
+      "updatedAt": "2026-05-26T13:02:19.341Z"
     },
     {
       "id": "drf-mphcksbw-3-96oke",
@@ -4526,7 +4565,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-05-29T16:00:00-05:00",
       "createdAt": "2026-05-26T11:02:58.981Z",
       "createdBy": "weather-trigger",
@@ -4550,12 +4589,30 @@
         },
         "canvasNote": "Patio-perfect day (85°F). Caption hooks on the weather."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "76 degrees, a light breeze, and a view of the quarry lake. Some days the patio just does the work.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#WineBar",
+        "#PatioSeason",
+        "#STLEats",
+        "#OutdoorDining"
+      ],
       "imageUrl": null,
       "userImageUrl": null,
       "bumpedFromDay": "2026-05-27",
-      "updatedAt": "2026-05-26T12:07:00.071Z"
+      "updatedAt": "2026-05-26T13:01:56.470Z",
+      "imagePrompt": "Wide shot of a stone-edged patio overlooking a calm quarry lake at golden hour, empty wine glasses and a small vase of wildflowers on a wood table in the foreground, string lights overhead beginning to glow, warm amber light on limestone cliffs in the background, soft bokeh, no people, no text",
+      "variants": {
+        "facebook": "76 degrees, a light breeze, and a view of the quarry lake. Some days the patio just does the work. We're open today — come find a seat outside.",
+        "instagram": "76 degrees, a light breeze, and a view of the quarry lake. Some days the patio just does the work."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "Pure atmosphere post with no CTA pressure — sensory-first language lets the weather and setting sell the visit on a patio-perfect May afternoon, timed for the 4-5pm dinner-planning window.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-05-26T13:01:54.754Z"
     }
   ],
   "history": [],
