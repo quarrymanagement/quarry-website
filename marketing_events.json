@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-26T11:14:34.392Z",
+  "updatedAt": "2026-05-26T11:44:19.537Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -34040,6 +34040,17 @@
       "sgEventId": "ZV2SZwA0SJicObvx20UwLA",
       "userAgent": "Mozilla/5.0",
       "category": "quarry-marketing"
+    },
+    {
+      "ts": "2026-05-26T11:44:12.000Z",
+      "type": "delivered",
+      "draftId": null,
+      "ruleId": null,
+      "email": "carla@catalafacialretreat.com",
+      "url": null,
+      "sgEventId": "ZGVsaXZlcmVkLTAtMTA2MDM3NzY1LTVwUHlSNDM1U3l1bzFzUjVqVjlYZVEtMA",
+      "userAgent": null,
+      "category": "quarry-event-ticket"
     }
   ],
   "aggregates": {
