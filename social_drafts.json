@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-27T16:41:42.454Z",
+  "updatedAt": "2026-05-27T16:51:33.991Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -3560,7 +3560,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "approved",
+      "status": "failed",
       "scheduledFor": "2026-05-27T11:00:00-05:00",
       "createdAt": "2026-05-21T04:00:47.161Z",
       "createdBy": "cadence-engine",
@@ -3619,9 +3619,22 @@
       "aiReasoning": "T-1 arc calls for short, punchy, and logistically specific — this version names the winery, the price, the intimacy of 15 seats, and creates quiet urgency without begging, matching the value-push tone appropriate for 0% fill at this late stage.",
       "model": "claude-sonnet-4-6",
       "hydratedAt": "2026-05-21T13:02:41.616Z",
-      "updatedAt": "2026-05-27T16:41:42.454Z",
+      "updatedAt": "2026-05-27T16:51:33.991Z",
       "approvedAt": "2026-05-27T16:41:42.454Z",
-      "approvedBy": "admin"
+      "approvedBy": "admin",
+      "failureReason": "facebook: meta-post 500 | instagram: meta-post 500",
+      "platformErrors": [
+        {
+          "platform": "facebook",
+          "ok": false,
+          "error": "meta-post 500"
+        },
+        {
+          "platform": "instagram",
+          "ok": false,
+          "error": "meta-post 500"
+        }
+      ]
     },
     {
       "id": "drf-mpeyqou1-2-eilcv",
