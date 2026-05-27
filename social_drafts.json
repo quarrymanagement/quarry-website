@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-27T12:06:16.103Z",
+  "updatedAt": "2026-05-27T13:03:19.045Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -4720,7 +4720,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-05-29T16:00:00-05:00",
       "createdAt": "2026-05-27T11:04:37.447Z",
       "createdBy": "weather-trigger",
@@ -4744,12 +4744,30 @@
         },
         "canvasNote": "Patio-perfect day (88°F). Caption hooks on the weather."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "77 degrees. 3% chance of rain. The patio is calling and it has very good taste.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#WineBar",
+        "#PatioSeason",
+        "#STLEats",
+        "#OutdoorDining"
+      ],
       "imageUrl": null,
       "userImageUrl": null,
       "bumpedFromDay": "2026-05-28",
-      "updatedAt": "2026-05-27T12:06:16.103Z"
+      "updatedAt": "2026-05-27T13:03:19.045Z",
+      "imagePrompt": "Wide shot of a sunlit stone patio at a lakeside venue, late afternoon golden hour, empty wine glasses and a small vase of wildflowers on a wooden table, string lights overhead catching the warm light, soft cliff and water view in the background, no people, no text, warm neutral tones with deep blue sky",
+      "variants": {
+        "facebook": "77 degrees. 3% chance of rain. The patio is calling — and it has very good taste. We're open Wednesday through Sunday. Come sit outside for a while.",
+        "instagram": "77 degrees. 3% chance of rain. The patio is calling and it has very good taste."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "Atmosphere posts need no CTA — the weather data does the work; the dry wit lands with the 30-65 local audience without overselling, and the short hook stays well inside the 90-char fold.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-05-27T13:03:17.351Z"
     }
   ],
   "history": [],
