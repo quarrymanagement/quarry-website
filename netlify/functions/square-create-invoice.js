@@ -212,8 +212,8 @@ exports.handler = async function(event) {
           ]
         }],
         delivery_method: 'EMAIL',
-        title: title,
-        description: description,
+        title: (title && title.length > 0) ? title : "Invoice from The Quarry",
+        description: (description && description.length > 0) ? description : undefined,
         accepted_payment_methods: {
           card: true,
           square_gift_card: false,
