@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-27T16:51:33.991Z",
+  "updatedAt": "2026-05-28T13:01:49.571Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -2176,7 +2176,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-06-03T18:00:00-05:00",
       "createdAt": "2026-05-05T00:04:04.632Z",
       "createdBy": "cadence-engine",
@@ -2210,12 +2210,33 @@
           "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "This Weekend — Post 3 days before event. (Pace warning: registration is light, lean into urgency / value.)"
+        "canvasNote": "This Weekend — Post 3 days before event. (Pace warning: registration is light, lean into urgency / value.)",
+        "reelBrief": "Open with a slow pan across the patio at morning light — empty mats laid out, string lights still glowing against sunrise. Hold 3s on a close-up of a mimosa glass catching the light on a stone ledge. End on a wide shot of the cliff and lake with soft morning haze. Suggested audio: calm acoustic or lo-fi morning instrumental. Text overlay: 'Yoga. Then wine. This Saturday 9 AM.'"
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Yoga on the patio this Saturday morning. Then wine, mimosas, or a bloody mary — your call.\n\nUn-Wine-D & Align with Yoga with Charity, June 7, 9–10 AM. All levels welcome. Bring your mat. Stay for brunch (10% off for attendees).\n\n$20/seat — link in bio to register.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#STLEvents",
+        "#YogaSTL",
+        "#WineBar",
+        "#OutdoorYoga",
+        "#STLEats"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Wide yoga mat unrolled on a stone patio at golden morning light, a glass of mimosa with orange slice resting on a nearby ledge, soft quarry cliff and calm lake water visible in the background, warm hazy sunrise atmosphere, no people, no text",
+      "variants": {
+        "facebook": "Yoga on the patio this Saturday morning — then unwind with wine, a mimosa, or a bloody mary.\n\nUn-Wine-D & Align with Yoga with Charity is June 7, 9–10 AM at The Quarry. All levels welcome. Bring your mat. Attendees also get 10% off brunch after the session.\n\n$20/seat. Grab your spot at the link below.",
+        "instagram": "Yoga on the patio. Then mimosas.\n\nUn-Wine-D & Align — this Saturday, 9 AM. All levels. $20/seat. Link in bio."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "T-3 'this weekend' arc calls for day-specific logistics and a soft value push — the post names the date, time, price, and post-yoga perk without urgency language, keeping the tone invitational while the low fill percentage warrants emphasizing what attendees get.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-05-28T13:01:49.571Z",
+      "updatedAt": "2026-05-28T13:01:49.571Z"
     },
     {
       "id": "drf-morv8nfc-6-hskc1",
@@ -3977,7 +3998,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-06-03T11:00:00-05:00",
       "createdAt": "2026-05-22T20:03:38.732Z",
       "createdBy": "cadence-engine",
@@ -4013,10 +4034,29 @@
         },
         "canvasNote": "Tomorrow — Post 1 days before event. (Pace warning: registration is light, lean into urgency / value.)"
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Tomorrow night — Augusta Winery comes to The Quarry. $39.99 covers wine tasting for two, snack pairings, and a guided experience with views of the lake. 15 seats total. See you at 6.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#RockAndVineWineClub",
+        "#STLWine",
+        "#WineBar",
+        "#AugustaWinery",
+        "#STLWeekend"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Two glasses of white and rosé wine on a stone ledge at golden hour, a charcuterie board with soft cheeses and dried fruit beside them, warm string lights blurred in background, quarry lake and limestone cliffs softly out of focus",
+      "variants": {
+        "facebook": "Tomorrow night, Augusta Winery comes to The Quarry for a Rock & Vine Wine Club tasting experience. $39.99 per seat includes wine tasting for two, snack pairings, and a guided tasting overlooking the lake. Doors at 6pm. Only 15 seats — a few still available.",
+        "instagram": "Tomorrow night — Augusta Winery at The Quarry. $39.99 covers wine for two, snack pairings, and a guided tasting with lake views. 6pm. 15 seats."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "T-1 arc calls for short and specific — this leads with the date, names the winery, states the value clearly, and closes with a soft 'see you at 6' invitation rather than a hard sell, appropriate for a lifestyle/belonging wine club post with 0% fill and a small intimate capacity.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-05-28T13:01:35.807Z",
+      "updatedAt": "2026-05-28T13:01:35.807Z"
     },
     {
       "id": "drf-mphcksbx-7-zkghc",
