@@ -21,7 +21,10 @@
 //     lineItems: [ { name, qty, priceCents, note? } ],
 //     title: "Wedding deposit - Smith/Jones",
 //     description: "Optional invoice description",
-//     dueDate: "2026-06-15"   // optional, ISO date
+//     dueDate: "2026-06-15",   // optional, ISO date
+//     taxPercent: 7.45,        // optional, sales tax % applied to subtotal
+//     gratuityPercent: 18,     // optional, gratuity % applied to subtotal
+//     gratuityAmount: 25.00    // optional, flat gratuity in dollars (ignored if gratuityPercent set)
 //   }
 //
 // Response:
@@ -127,6 +130,13 @@ exports.handler = async function(event) {
       dueDate = d.toISOString().slice(0, 10); // YYYY-MM-DD
     }
 
+    // Optional tax + gratuity (additive). Default tax from env (SQUARE_TAX_PERCENT) if caller omits.
+    const taxPercent = (body.taxPercent === 0 || body.taxPercent === '0')
+      ? 0
+      : (parseFloat(body.taxPercent) || parseFloat(process.env.SQUARE_TAX_PERCENT) || 0);
+    const gratuityPercent = parseFloat(body.gratuityPercent) || 0;
+    const gratuityAmount = parseFloat(body.gratuityAmount) || 0;  // dollars
+
     if (!cust.email || !cust.name) {
       return { statusCode: 400, headers, body: JSON.stringify({ error: 'customer.name and customer.email required' }) };
     }
@@ -152,6 +162,31 @@ exports.handler = async function(event) {
             note: li.note || undefined
           };
         }),
+        taxes: (taxPercent > 0) ? [{
+          name: 'Sales Tax',
+          percentage: String(taxPercent),
+          scope: 'ORDER',
+          type: 'ADDITIVE'
+        }] : undefined,
+        service_charges: (function() {
+          const charges = [];
+          if (gratuityPercent > 0) {
+            charges.push({
+              name: 'Gratuity',
+              percentage: String(gratuityPercent),
+              calculation_phase: 'SUBTOTAL_PHASE',
+              taxable: false
+            });
+          } else if (gratuityAmount > 0) {
+            charges.push({
+              name: 'Gratuity',
+              amount_money: { amount: Math.round(gratuityAmount * 100), currency: 'USD' },
+              calculation_phase: 'SUBTOTAL_PHASE',
+              taxable: false
+            });
+          }
+          return charges.length ? charges : undefined;
+        })(),
         metadata: {
           source: 'admin-invoice',
           createdBy: 'admin-portal'
