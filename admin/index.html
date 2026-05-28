@@ -3946,14 +3946,30 @@
                         updateInvoiceTotal();
                     };
                     window.updateInvoiceTotal = function() {
-                        let total = 0;
+                        let subtotal = 0;
                         document.querySelectorAll('.inv-line').forEach(function(row){
                             const qty = parseFloat(row.querySelector('.inv-qty').value || '0');
                             const price = parseFloat(row.querySelector('.inv-price').value || '0');
-                            if (!isNaN(qty) && !isNaN(price)) total += qty * price;
+                            if (!isNaN(qty) && !isNaN(price)) subtotal += qty * price;
                         });
+                        const taxPctEl = document.getElementById('invTaxPercent');
+                        const gratPctEl = document.getElementById('invGratuityPercent');
+                        const gratFlatEl = document.getElementById('invGratuityFlat');
+                        const taxPct = taxPctEl ? parseFloat(taxPctEl.value || '0') : 0;
+                        const gratPct = gratPctEl ? parseFloat(gratPctEl.value || '0') : 0;
+                        const gratFlat = gratFlatEl ? parseFloat(gratFlatEl.value || '0') : 0;
+                        const taxAmt = subtotal * (taxPct / 100);
+                        const gratAmt = gratPct > 0 ? subtotal * (gratPct / 100) : gratFlat;
+                        const total = subtotal + taxAmt + gratAmt;
                         const el = document.getElementById('invTotal');
-                        if (el) el.textContent = '$' + total.toFixed(2);
+                        if (el) {
+                            el.innerHTML = '$' + total.toFixed(2) +
+                                ' <span style="font-size:0.72rem;font-weight:400;color:#888;">' +
+                                '(sub $' + subtotal.toFixed(2) +
+                                (taxAmt > 0 ? ' + tax $' + taxAmt.toFixed(2) : '') +
+                                (gratAmt > 0 ? ' + grat $' + gratAmt.toFixed(2) : '') +
+                                ')</span>';
+                        }
                     };
                     window.sendSquareInvoice = async function() {
                         const btn = document.getElementById('invSendBtn');
@@ -5102,7 +5118,7 @@
 
     <div class="modal-overlay" id="invoiceModal">
         <div class="modal">
-            <h2 class="modal-header">Create Invoice</h2>
+            <h2 class="modal-header">Create Invoice (Quick)</h2>
             <form id="invoiceForm">
                 <div class="form-group">
                     <label class="form-label">Customer Name</label>
@@ -5113,16 +5129,31 @@
                     <input type="email" class="form-input" id="invoiceCustomerEmail" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Description</label>
+                    <label class="form-label">Description (shows on the invoice)</label>
                     <input type="text" class="form-input" id="invoiceDescription" placeholder="What is this invoice for?" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Amount ($)</label>
+                    <label class="form-label">Amount ($) — subtotal before tax/gratuity</label>
                     <input type="number" class="form-input" id="invoiceAmount" step="0.01" min="0.01" required>
                 </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label class="form-label">Sales Tax %</label>
+                        <input type="number" class="form-input" id="invoiceTaxPercent" step="0.01" min="0" max="20" value="7.45">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label class="form-label">Gratuity %</label>
+                        <input type="number" class="form-input" id="invoiceGratuityPercent" step="0.5" min="0" max="50" placeholder="0">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label class="form-label">or Gratuity $</label>
+                        <input type="number" class="form-input" id="invoiceGratuityFlat" step="0.01" min="0" placeholder="0.00">
+                    </div>
+                </div>
+                <p style="font-size:0.78rem;color:#888;margin-top:-4px;margin-bottom:12px;">For multiple line items, due dates, or notes, use the <b>Send Invoice</b> tab in the sidebar.</p>
                 <div class="modal-actions">
                     <button type="button" class="modal-btn modal-btn-secondary" onclick="document.getElementById('invoiceModal').classList.remove('active')">Cancel</button>
-                    <button type="submit" class="modal-btn modal-btn-primary">Create & Send Invoice</button>
+                    <button type="submit" class="modal-btn modal-btn-primary">Create &amp; Send Invoice</button>
                 </div>
             </form>
         </div>
@@ -8023,35 +8054,53 @@
             const email = document.getElementById('invoiceCustomerEmail').value.trim();
             const description = document.getElementById('invoiceDescription').value.trim();
             const amount = parseFloat(document.getElementById('invoiceAmount').value);
+            const taxPercent = parseFloat(document.getElementById('invoiceTaxPercent').value) || 0;
+            const gratuityPercent = parseFloat(document.getElementById('invoiceGratuityPercent').value) || 0;
+            const gratuityFlat = parseFloat(document.getElementById('invoiceGratuityFlat').value) || 0;
 
             if (!name || !email || !description || !amount) return;
 
-            showConfirmModal('Create Invoice?', `Send a $${amount.toFixed(2)} invoice to ${email} for "${description}"?`, async () => {
-                try {
-                    const invRes = await fetch('/.netlify/functions/stripe-data?action=create-invoice', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            customer_email: email,
-                            customer_name: name,
-                            description,
-                            amount: Math.round(amount * 100),
-                        }),
-                    });
+            // Compute preview total for the confirm prompt
+            const taxAmt = amount * (taxPercent / 100);
+            const gratAmt = gratuityPercent > 0 ? amount * (gratuityPercent / 100) : gratuityFlat;
+            const grandTotal = amount + taxAmt + gratAmt;
 
-                    const invData = await invRes.json();
-                    if (invRes.ok && invData.success) {
-                        showSuccess('Invoice created and sent!');
-                        document.getElementById('invoiceModal').classList.remove('active');
-                        document.getElementById('invoiceForm').reset();
-                        loadPaymentsData();
-                    } else {
-                        throw new Error(invData.error || 'Failed to create invoice');
+            showConfirmModal(
+                'Create Invoice?',
+                `Send a $${grandTotal.toFixed(2)} invoice to ${email} for "${description}"?<br><span style="color:#888;font-size:0.85rem;">Subtotal $${amount.toFixed(2)}${taxAmt>0?' + tax $'+taxAmt.toFixed(2):''}${gratAmt>0?' + gratuity $'+gratAmt.toFixed(2):''}</span>`,
+                async () => {
+                    const password = prompt('Admin password to confirm:');
+                    if (!password) return;
+                    try {
+                        const invRes = await fetch('/.netlify/functions/square-create-invoice', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                password: password,
+                                customer: { name: name, email: email },
+                                lineItems: [{ name: description, qty: 1, priceCents: Math.round(amount * 100) }],
+                                title: description,
+                                description: '',
+                                taxPercent: taxPercent,
+                                gratuityPercent: gratuityPercent,
+                                gratuityAmount: gratuityFlat
+                            })
+                        });
+                        const invData = await invRes.json();
+                        if (invRes.ok && invData.invoiceId) {
+                            showSuccess('Invoice created and sent! Status: ' + (invData.status || 'UNPAID'));
+                            document.getElementById('invoiceModal').classList.remove('active');
+                            document.getElementById('invoiceForm').reset();
+                            document.getElementById('invoiceTaxPercent').value = '7.45';
+                            if (typeof loadPaymentsData === 'function') loadPaymentsData();
+                        } else {
+                            throw new Error(invData.error || ('HTTP ' + invRes.status));
+                        }
+                    } catch (err) {
+                        alert('Error creating invoice: ' + (err.message || err));
                     }
-                } catch (err) {
-                    alert('Error creating invoice: ' + err.message);
                 }
-            });
+            );
         });
 
         // Create Payment Link
