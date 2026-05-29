@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-29T15:44:38.978Z",
+  "updatedAt": "2026-05-29T15:44:47.435Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -36395,6 +36395,17 @@
       "url": null,
       "sgEventId": "ZGVsaXZlcmVkLTAtMTA2MDM3NzY1LUJKbTgtZE85VEg2ZjVxc3JJNFhZbmctMA",
       "userAgent": null,
+      "category": null
+    },
+    {
+      "ts": "2026-05-29T15:44:36.000Z",
+      "type": "click",
+      "draftId": null,
+      "ruleId": null,
+      "email": "colt5940@gmail.com",
+      "url": "https://nkulhtalltbieicvmmad.supabase.co/auth/v1/verify?token=pkce_1dc91b6910d41799aaed972741b90fcf3a211a16b952e7f7fd400c2b&type=signup&redirect_to=http://localhost:3000",
+      "sgEventId": "Ti-xlswBRsG8NauLXHt_4A",
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_6_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Mobile/15E148 Safari/604.1",
       "category": null
     }
   ],
