@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-29T12:08:14.021Z",
+  "updatedAt": "2026-05-29T13:06:08.618Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -4262,7 +4262,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-06-04T09:00:00-05:00",
       "createdAt": "2026-05-22T20:03:38.732Z",
       "createdBy": "cadence-engine",
@@ -4296,12 +4296,32 @@
           "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "Today / Tonight — Post 0 days before event. (Pace warning: registration is light, lean into urgency / value.)"
+        "canvasNote": "Today / Tonight — Post 0 days before event. (Pace warning: registration is light, lean into urgency / value.)",
+        "reelBrief": "Open with a slow pour of white wine into a glass, hold 3s on the glass catching golden evening light with the quarry lake blurred behind. Cut to a wide shot of the stone patio set for an intimate tasting — small plates, wine glasses, candles. End on a still frame of the cliff and lake at dusk. Suggested audio: soft acoustic instrumental, warm and unhurried. Text overlay: 'Tonight. Augusta Winery Tasting. 6pm. Rock & Vine Wine Club.'"
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Tonight at 6pm — Rock & Vine Wine Club hosts Augusta Winery. $39.99 per couple includes a guided tasting, snack pairings, and a view of The Quarry that makes the wine taste even better. Seats are limited. Link in bio to register.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWine",
+        "#WineBar",
+        "#STLEvents",
+        "#RockAndVineWineClub",
+        "#WineTasting"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Two glasses of white wine on a stone ledge overlooking a calm quarry lake at golden hour, soft warm light, wildflowers in the foreground, cliffs reflected in still water, no faces, no text",
+      "variants": {
+        "facebook": "Tonight at 6pm, Rock & Vine Wine Club hosts Augusta Winery for an intimate guided tasting overlooking The Quarry. $39.99 per couple covers wine, snack pairings, and the full experience — just 15 seats total. Register at the link below if you still need a spot.",
+        "instagram": "Tonight at 6pm — Augusta Winery tasting with Rock & Vine. $39.99 covers wine, snacks, and a view worth the drive. Link in bio."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "T-0 calls for tonight-specific language with time, price, and a soft logistical nudge — fillPct is 0 so no urgency language, but the limited 15-seat capacity is worth naming as a natural, honest detail.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-05-29T13:06:08.618Z",
+      "updatedAt": "2026-05-29T13:06:08.618Z"
     },
     {
       "id": "drf-mphcksbx-8-e8po1",
@@ -4832,7 +4852,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-05-31T16:00:00-05:00",
       "createdAt": "2026-05-29T11:03:08.662Z",
       "createdBy": "weather-trigger",
@@ -4856,12 +4876,30 @@
         },
         "canvasNote": "Patio-perfect day (86°F). Caption hooks on the weather."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "75 degrees, a light breeze, and a view of the water. Some Fridays just line up right.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#WineBar",
+        "#PatioSeason",
+        "#STLEats",
+        "#OutdoorDining"
+      ],
       "imageUrl": null,
       "userImageUrl": null,
       "bumpedFromDay": "2026-05-29",
-      "updatedAt": "2026-05-29T12:08:14.021Z"
+      "updatedAt": "2026-05-29T13:05:55.726Z",
+      "imagePrompt": "Sun-drenched patio table at a lakeside venue, two glasses of chilled white wine catching afternoon light, stone cliff face softly blurred in background, string lights overhead not yet lit, warm golden-hour glow, no people, no text",
+      "variants": {
+        "facebook": "75 degrees and a 15% chance of rain — we'll take those odds. The patio is open, the view is doing its thing, and we're pouring cold whites all afternoon. Come see what a Friday evening out here actually feels like.",
+        "instagram": "75 degrees, a light breeze, and a view of the water. Some Fridays just line up right."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "Pure atmosphere post with no CTA or event details — sensory and inviting, timed at 4pm when dinner planning peaks, letting the weather and setting do the selling without any pressure.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-05-29T13:05:53.680Z"
     }
   ],
   "history": [],
