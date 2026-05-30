@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-29T13:06:08.618Z",
+  "updatedAt": "2026-05-30T13:05:43.209Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -2246,7 +2246,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-06-05T11:00:00-05:00",
       "createdAt": "2026-05-05T00:04:04.632Z",
       "createdBy": "cadence-engine",
@@ -2280,12 +2280,32 @@
           "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "Tomorrow — Post 1 days before event. (Pace warning: registration is light, lean into urgency / value.)"
+        "canvasNote": "Tomorrow — Post 1 days before event. (Pace warning: registration is light, lean into urgency / value.)",
+        "reelBrief": "Open with a slow pan across the Quarry lake at morning light (7–8 AM golden hour), hold on a yoga mat unrolled on the patio deck for 3s, cut to a close-up of a mimosa glass catching the morning sun. Suggested audio: soft acoustic ambient, low tempo. Text overlay: 'Tomorrow. 9 AM. Outdoor yoga + brunch drinks. The Quarry — New Melle.'"
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Outdoor yoga at The Quarry — tomorrow morning, 9 AM. One hour with Yoga with Charity, then wine, mimosas, or a bloody mary on the patio. 10% off brunch after. All levels, bring your mat. $20/seat — a few spots still open.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#STLEvents",
+        "#YogaSTL",
+        "#WineBar",
+        "#OutdoorYoga"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "A rolled yoga mat resting on a wooden deck at golden morning light, dewy grass visible beyond the railing, a glass of mimosa with orange slice sitting beside the mat on the deck boards, soft quarry cliffs and still water blurred in the background, warm sunrise tones",
+      "variants": {
+        "facebook": "Tomorrow morning — outdoor yoga at The Quarry with Yoga with Charity. 9–10 AM session on the patio, then unwind with wine, a mimosa, or a bloody mary. 10% off brunch after. All levels welcome. $20/seat, 25 spots total — a few still available. Link to register in the comments.",
+        "instagram": "Outdoor yoga at The Quarry — tomorrow, 9 AM. One hour, then mimosas and brunch. $20, all levels welcome. Link in bio."
+      },
+      "suggestedTimeHourCT": 17,
+      "aiReasoning": "T-1 arc calls for short and punchy with a single specific reason to act — the tomorrow-morning timing and low price point are the hook, with a soft value push (10% brunch discount) since fillPct is 0 and seats are available.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-05-30T13:05:43.209Z",
+      "updatedAt": "2026-05-30T13:05:43.209Z"
     },
     {
       "id": "drf-morv8nfc-7-jqzld",
