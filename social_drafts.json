@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-30T13:05:43.209Z",
+  "updatedAt": "2026-05-31T11:00:29.577Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -4920,6 +4920,43 @@
       "aiReasoning": "Pure atmosphere post with no CTA or event details — sensory and inviting, timed at 4pm when dinner planning peaks, letting the weather and setting do the selling without any pressure.",
       "model": "claude-sonnet-4-6",
       "hydratedAt": "2026-05-29T13:05:53.680Z"
+    },
+    {
+      "id": "drf-mpto4ydl-1-lq6x6",
+      "cadenceTag": "weather:2026-05-31:patio",
+      "type": "atmosphere",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-05-31T16:00:00.000Z",
+      "createdAt": "2026-05-31T11:00:29.577Z",
+      "createdBy": "weather-trigger",
+      "context": {
+        "sourceType": "weather",
+        "sourceId": "2026-05-31",
+        "weatherMode": "patio",
+        "temperatureRange": "70-86°F",
+        "maxPrecipChance": 13,
+        "arcLabel": "Patio-perfect day"
+      },
+      "graphicBrief": {
+        "type": "atmosphere_photo",
+        "templateRef": "No graphic needed — ideally a real venue patio shot from the asset library",
+        "dimensions": "1080x1080 or 1080x1350 (4:5)",
+        "toneMode": "patio-perfect",
+        "spec": {
+          "backgroundIdea": "Beautiful Quarry patio at golden hour — empty table, string lights, lake/cliff in soft focus. 86°F today.",
+          "title": "",
+          "footerText": "optional small Q logo bottom-right"
+        },
+        "canvasNote": "Patio-perfect day (86°F). Caption hooks on the weather."
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
     }
   ],
   "history": [],
