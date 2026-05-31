@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-31T11:00:29.577Z",
+  "updatedAt": "2026-05-31T13:04:30.487Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -2315,7 +2315,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-06-06T09:00:00-05:00",
       "createdAt": "2026-05-05T00:04:04.632Z",
       "createdBy": "cadence-engine",
@@ -2349,12 +2349,32 @@
           "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "Today / Tonight — Post 0 days before event. (Pace warning: registration is light, lean into urgency / value.)"
+        "canvasNote": "Today / Tonight — Post 0 days before event. (Pace warning: registration is light, lean into urgency / value.)",
+        "reelBrief": "Open with a slow pan across the quarry lake at morning light, hold on the outdoor deck space for 3s, cut to a close-up of a mimosa glass on a wooden table with the lake softly out of focus. Suggested audio: ambient acoustic, soft and unhurried. Text overlay: 'Yoga. Then brunch. 9 AM this morning at The Quarry.'"
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Outdoor yoga starts at 9 AM this morning — then stay for wine, a mimosa, or a bloody mary and 10% off brunch. Yoga with Charity is leading the session at The Quarry. All levels, bring your mat.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#YogaSTL",
+        "#WineBar",
+        "#BrunchSTL",
+        "#OutdoorYoga"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "A rolled yoga mat resting on a wooden deck overlooking a calm quarry lake at early morning golden hour, soft mist over the water, string lights still faintly glowing overhead, warm peaceful atmosphere, no people, no text",
+      "variants": {
+        "facebook": "Outdoor yoga with Yoga with Charity starts at 9 AM this morning at The Quarry — right on the deck with the lake and cliffs as your backdrop. Session runs 9–10 AM, then unwind with your choice of wine, mimosa, or bloody mary and 10% off brunch. All levels welcome. Just bring your mat.",
+        "instagram": "Outdoor yoga at 9 AM this morning. Stay after for mimosas and 10% off brunch. All levels welcome — just bring your mat."
+      },
+      "suggestedTimeHourCT": 7,
+      "aiReasoning": "T-0 calls for short, time-specific, action-present language — the caption leads with the time and what's happening right now, with just enough detail to get someone out the door.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-05-31T13:04:30.487Z",
+      "updatedAt": "2026-05-31T13:04:30.487Z"
     },
     {
       "id": "drf-morv8nfc-8-8uotl",
@@ -4929,7 +4949,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-05-31T16:00:00.000Z",
       "createdAt": "2026-05-31T11:00:29.577Z",
       "createdBy": "weather-trigger",
@@ -4953,10 +4973,29 @@
         },
         "canvasNote": "Patio-perfect day (86°F). Caption hooks on the weather."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "70s, no clouds, and a patio that earns it. Come find a seat.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#PatioSeason",
+        "#WineBar",
+        "#STLEats",
+        "#OutdoorDining"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Wide shot of a stone-edged patio overlooking a calm quarry lake at golden hour, empty wrought-iron chairs and wood tables with a single glass of white wine catching the late afternoon light, string lights beginning to glow overhead, warm amber sky, lush green treeline reflected in still water, no people, no text",
+      "variants": {
+        "facebook": "70s, barely a cloud, and a patio that was made for a day like this. We're open Wednesday through Sunday — come pull up a chair and stay a while.",
+        "instagram": "70s, no clouds, and a patio that earns it. Come find a seat."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "Pure atmosphere post with no CTA pressure — short, sensory, and confident, matching the patio-perfect weather context and the brand voice of a friend telling you where to be this afternoon.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-05-31T13:04:17.421Z",
+      "updatedAt": "2026-05-31T13:04:18.751Z"
     }
   ],
   "history": [],
