@@ -265,8 +265,95 @@
     }
   }
 
+  // ===== Self-inject the section HTML if not already present =====
+  // Lets us drop a single <script> tag into admin/index.html and have
+  // the full Manage Rewards panel appear automatically. If the HTML
+  // section is already present (e.g. someone hand-placed it elsewhere),
+  // we use the existing one.
+  function ensureSection() {
+    if (document.getElementById('arSection')) return;
+
+    // Find a sensible mount point — prefer the existing Push Notifications
+    // section so Manage Rewards sits next to its sibling admin panel.
+    // Fall back to <main>, then <body>.
+    function findMount() {
+      const allH2 = Array.from(document.querySelectorAll('h2, h3'));
+      const pushHeading = allH2.find(h => /push notifications/i.test(h.textContent || ''));
+      if (pushHeading) {
+        const card = pushHeading.closest('section, .card, .panel, div');
+        if (card) return { node: card, place: 'after' };
+      }
+      return { node: document.querySelector('main') || document.body, place: 'append' };
+    }
+
+    const mount = findMount();
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML =
+      '<section id="arSection" style="background:#fff;border:1px solid #ddd;border-radius:10px;padding:20px;margin:20px auto;max-width:900px">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px">' +
+          '<h2 style="margin:0;font-size:20px;color:#222">⭐ iOS App Rewards</h2>' +
+          '<div style="display:flex;gap:8px">' +
+            '<button id="arRefreshBtn" type="button" style="padding:6px 14px;font-size:13px;cursor:pointer;border:1px solid #c8a14a;background:#fff;border-radius:6px">↻ Refresh</button>' +
+            '<button id="arAddBtn" type="button" style="padding:6px 14px;font-size:13px;cursor:pointer;border:none;background:#c8a14a;color:#fff;border-radius:6px;font-weight:600">+ Add new reward</button>' +
+          '</div>' +
+        '</div>' +
+        '<p style="margin:0 0 16px 0;color:#666;font-size:13px;line-height:1.5">' +
+          'These are the rewards members can redeem in the iOS app\'s Rewards tab. ' +
+          '<strong>Changes are live in the app within seconds</strong> — no resubmit, no update needed. ' +
+          'To temporarily hide a reward without losing it, use <em>Hide</em> instead of <em>Delete</em>.' +
+        '</p>' +
+        '<div id="arStatus" style="display:none"></div>' +
+        '<div id="arEditor" style="display:none;border:1px solid #c8a14a;border-radius:8px;padding:16px;margin:12px 0;background:#fdf9ef">' +
+          '<h3 id="arEditorTitle" style="margin:0 0 12px 0;font-size:16px;color:#222">Add new reward</h3>' +
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">' +
+            '<label style="grid-column:1/-1;font-size:12px;color:#555">Title <span style="color:#b3261e">*</span>' +
+              '<input id="arFieldTitle" type="text" maxlength="120" placeholder="e.g. Free appetizer" style="width:100%;padding:8px;margin-top:4px;border:1px solid #ccc;border-radius:6px;font-size:14px">' +
+            '</label>' +
+            '<label style="grid-column:1/-1;font-size:12px;color:#555">Description (shown under the title)' +
+              '<input id="arFieldDesc" type="text" maxlength="500" placeholder="e.g. Any starter from the kitchen menu." style="width:100%;padding:8px;margin-top:4px;border:1px solid #ccc;border-radius:6px;font-size:14px">' +
+            '</label>' +
+            '<label style="font-size:12px;color:#555">Points cost <span style="color:#b3261e">*</span>' +
+              '<input id="arFieldPoints" type="number" min="0" max="1000000" step="50" placeholder="1500" style="width:100%;padding:8px;margin-top:4px;border:1px solid #ccc;border-radius:6px;font-size:14px">' +
+            '</label>' +
+            '<label style="font-size:12px;color:#555">Approx. value (optional)' +
+              '<input id="arFieldValue" type="text" maxlength="50" placeholder="e.g. ≈ $15" style="width:100%;padding:8px;margin-top:4px;border:1px solid #ccc;border-radius:6px;font-size:14px">' +
+            '</label>' +
+            '<label style="font-size:12px;color:#555">Minimum tier' +
+              '<select id="arFieldTier" style="width:100%;padding:8px;margin-top:4px;border:1px solid #ccc;border-radius:6px;font-size:14px;background:#fff">' +
+                '<option value="standard">Standard (everyone)</option>' +
+                '<option value="silver">Silver+</option>' +
+                '<option value="gold">Gold+</option>' +
+                '<option value="elite">Elite only</option>' +
+              '</select>' +
+            '</label>' +
+            '<label style="font-size:12px;color:#555">Display order' +
+              '<input id="arFieldOrder" type="number" min="0" max="10000" step="10" placeholder="e.g. 10, 20, 30…" style="width:100%;padding:8px;margin-top:4px;border:1px solid #ccc;border-radius:6px;font-size:14px">' +
+              '<span style="font-size:11px;color:#888">Lower = shown first. Use 10, 20, 30… for easy reordering.</span>' +
+            '</label>' +
+            '<label style="grid-column:1/-1;font-size:13px;color:#333;display:flex;align-items:center;gap:8px;margin-top:4px">' +
+              '<input id="arFieldActive" type="checkbox" checked style="width:18px;height:18px">' +
+              'Active — show this reward in the app' +
+            '</label>' +
+          '</div>' +
+          '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px">' +
+            '<button id="arCancelBtn" type="button" style="padding:8px 16px;font-size:13px;cursor:pointer;border:1px solid #ccc;background:#fff;border-radius:6px">Cancel</button>' +
+            '<button id="arSaveBtn" type="button" style="padding:8px 16px;font-size:13px;cursor:pointer;border:none;background:#c8a14a;color:#fff;border-radius:6px;font-weight:600">Save</button>' +
+          '</div>' +
+        '</div>' +
+        '<div id="arList" style="margin-top:8px"></div>' +
+      '</section>';
+
+    const section = wrapper.firstElementChild;
+    if (mount.place === 'after') {
+      mount.node.parentNode.insertBefore(section, mount.node.nextSibling);
+    } else {
+      mount.node.appendChild(section);
+    }
+  }
+
   // ===== Wire up =====
   function init() {
+    ensureSection();
     const list = document.getElementById('arList');
     if (!list) {
       // Section not rendered yet — try again shortly.
