@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-31T13:04:30.487Z",
+  "updatedAt": "2026-06-02T00:02:34.120Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -4996,6 +4996,45 @@
       "model": "claude-sonnet-4-6",
       "hydratedAt": "2026-05-31T13:04:17.421Z",
       "updatedAt": "2026-05-31T13:04:18.751Z"
+    },
+    {
+      "id": "drf-mpvvik8y-1-i2fsf",
+      "cadenceTag": "wineclub:2026-08-01:wc-month-open",
+      "type": "wine_club",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-08-01T10:00:00-05:00",
+      "createdAt": "2026-06-02T00:02:34.118Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "wine_club",
+        "sourceId": "rock-and-vine",
+        "monthLabel": "August 2026",
+        "arcStep": "wc-month-open",
+        "arcLabel": "Now Accepting Members"
+      },
+      "graphicBrief": {
+        "type": "wine_club_poster",
+        "templateRef": "Lifestyle poster — wine glass + Quarry view, \"Rock & Vine\" branding",
+        "neededBy": null,
+        "dimensions": "1080x1080 square",
+        "toneMode": "invitation",
+        "spec": {
+          "backgroundIdea": "Wine glass, sunset over Quarry lake, member tasting moment",
+          "title": "JOIN ROCK & VINE",
+          "subtitle": "August 2026 membership now open",
+          "callout": "Monthly subscription — start anytime",
+          "footerText": "THE QUARRY  •  ROCK & VINE WINE CLUB"
+        },
+        "canvasNote": "Now Accepting Members — recurring monthly post for the Rock & Vine Wine Club."
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
     }
   ],
   "history": [],
