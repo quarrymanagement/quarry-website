@@ -14,7 +14,9 @@
 //   update        -> { ok, member }              body: {id, patch:{...}}
 //   delete        -> { ok }                      body: {id}
 //   import        -> { ok, added, updated }      body: {members:[...], mode:"merge"|"replace"}
-//   email-all     -> { ok, sent, failed }        body: {subject, html, audience:"active"|"all"}
+//   email-all     -> { ok, sent, failed, sendId } body: {subject, html, audience:"active"|"all", attachments:[]}
+//   email-test    -> { ok, sendId, messageId }   body: {to, subject?, html?}
+//   send-history  -> { sends: [...] }
 //
 // Member shape:
 //   { id, name, email, phone, plan, price, joinedAt, status, source,
@@ -33,6 +35,8 @@ const CORS = {
 };
 
 const BLOB_KEY = 'wine-club-members';
+const SEND_LOG_BLOB = 'wine-club-send-log';
+const MAX_LOG_ENTRIES = 200;
 
 // ---------- Blob storage ----------
 async function readRoster() {
@@ -44,6 +48,19 @@ async function readRoster() {
 async function writeRoster(roster) {
   const ok = await writeBlob(BLOB_KEY, roster);
   if (!ok) throw new Error('Blob write failed (see function logs)');
+}
+
+async function readSendLog() {
+  const data = await readBlob(SEND_LOG_BLOB);
+  if (!data || !Array.isArray(data.sends)) return { sends: [] };
+  return data;
+}
+
+async function appendSendLog(entry) {
+  const log = await readSendLog();
+  log.sends.unshift(entry); // newest first
+  if (log.sends.length > MAX_LOG_ENTRIES) log.sends.length = MAX_LOG_ENTRIES;
+  await writeBlob(SEND_LOG_BLOB, log);
 }
 
 // ---------- SendGrid ----------
@@ -88,7 +105,8 @@ function sendGridEmail(to, subject, htmlBody, fromEmail, fromName, category, att
       let body = '';
       res.on('data', function(c){ body += c; });
       res.on('end', function() {
-        if (res.statusCode >= 200 && res.statusCode < 300) resolve({ statusCode: res.statusCode });
+        const messageId = (res.headers && (res.headers['x-message-id'] || res.headers['X-Message-Id'])) || null;
+        if (res.statusCode >= 200 && res.statusCode < 300) resolve({ statusCode: res.statusCode, messageId: messageId });
         else reject(new Error('SendGrid ' + res.statusCode + ': ' + body));
       });
     });
@@ -263,14 +281,15 @@ exports.handler = async function(event) {
 
       let sent = 0, failed = 0;
       const errors = [];
-      // Send individually so each recipient gets their own unsubscribe link
+      const deliveries = []; // per-recipient outcome for the send log
       for (const r of recipients) {
+        const rec = { email: r.email, name: r.name || '', status: 'failed', messageId: null, error: null };
         try {
           const personalized = htmlBody
             .replace(/\{firstName\}/g, (r.name || '').split(' ')[0] || '')
             .replace(/\{name\}/g, r.name || '')
             .replace(/\{email\}/g, r.email || '');
-          await sendGridEmail(
+          const sgRes = await sendGridEmail(
             r.email,
             subject,
             wrapEmailHtml(subject, personalized, r.email),
@@ -279,13 +298,73 @@ exports.handler = async function(event) {
             'quarry-wine-club',
             attachments
           );
+          rec.status = 'sent';
+          rec.messageId = sgRes && sgRes.messageId || null;
           sent++;
         } catch (e) {
+          rec.error = e.message;
           failed++;
           errors.push({ email: r.email, error: e.message });
         }
+        deliveries.push(rec);
       }
-      return { statusCode: 200, headers: CORS, body: JSON.stringify({ ok: true, sent: sent, failed: failed, audience: audience, recipients: recipients.length, attachments: attachments.length, errors: errors.slice(0, 5) }) };
+      const entry = {
+        id:         'send_' + Date.now().toString(36) + '_' + crypto.randomBytes(3).toString('hex'),
+        sentAt:     nowIso(),
+        subject:    subject,
+        audience:   audience,
+        sent:       sent,
+        failed:     failed,
+        recipients: recipients.length,
+        attachments: attachments.map(function(a){ return { filename: a.filename, size: a.size || (a.content ? a.content.length : 0), type: a.type || '' }; }),
+        deliveries: deliveries,
+        bodyPreview: htmlBody.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 200)
+      };
+      try { await appendSendLog(entry); } catch (e) { console.error('appendSendLog failed:', e.message); }
+      return { statusCode: 200, headers: CORS, body: JSON.stringify({ ok: true, sendId: entry.id, sent: sent, failed: failed, audience: audience, recipients: recipients.length, attachments: attachments.length, errors: errors.slice(0, 5) }) };
+    }
+
+    if (action === 'send-history') {
+      const log = await readSendLog();
+      return { statusCode: 200, headers: CORS, body: JSON.stringify({ sends: log.sends }) };
+    }
+
+    if (action === 'email-test') {
+      // Send to a single specified email address via the same path as email-all.
+      // Used for deliverability checks without spamming the full roster.
+      if (!process.env.SENDGRID_API_KEY) {
+        return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: 'SENDGRID_API_KEY not configured' }) };
+      }
+      const to = (body.to || '').toString().trim().toLowerCase();
+      const subject = (body.subject || '').toString().trim() || 'Wine Club test send';
+      const htmlIn  = (body.html    || '').toString() || '<p>This is a one-recipient test from the Wine Club admin.</p>';
+      if (!to) return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'to required' }) };
+      try {
+        const sgRes = await sendGridEmail(
+          to,
+          subject,
+          wrapEmailHtml(subject, htmlIn, to),
+          'bookings@thequarrystl.com',
+          'The Quarry STL',
+          'quarry-wine-club'
+        );
+        const entry = {
+          id:         'send_' + Date.now().toString(36) + '_' + crypto.randomBytes(3).toString('hex'),
+          sentAt:     nowIso(),
+          subject:    subject,
+          audience:   'test',
+          sent:       1,
+          failed:     0,
+          recipients: 1,
+          attachments: [],
+          deliveries: [{ email: to, name: '', status: 'sent', messageId: sgRes && sgRes.messageId || null, error: null }],
+          bodyPreview: htmlIn.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 200)
+        };
+        try { await appendSendLog(entry); } catch (e) { console.error('appendSendLog failed:', e.message); }
+        return { statusCode: 200, headers: CORS, body: JSON.stringify({ ok: true, sendId: entry.id, messageId: sgRes && sgRes.messageId || null }) };
+      } catch (e) {
+        return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: e.message }) };
+      }
     }
 
     return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'Unknown action: ' + action }) };
