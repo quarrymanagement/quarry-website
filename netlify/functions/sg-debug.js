@@ -126,6 +126,30 @@ exports.handler = async (event) => {
             return respond(200, { email, result });
         }
 
+        if (action === 'category-stats') {
+            // Aggregate stats for a category over a date range.
+            const category = params.category || 'quarry-wine-club';
+            const start = params.start || new Date(Date.now() - 30*24*3600*1000).toISOString().slice(0,10);
+            const end   = params.end   || new Date().toISOString().slice(0,10);
+            const url = `https://api.sendgrid.com/v3/categories/stats?categories=${encodeURIComponent(category)}&start_date=${start}&end_date=${end}&aggregated_by=day`;
+            const r = await fetch(url, { headers: { 'Authorization': `Bearer ${SG_KEY}` } });
+            const text = await r.text();
+            let data; try { data = JSON.parse(text); } catch { data = text; }
+            return respond(200, { status: r.status, category, start, end, data });
+        }
+
+        if (action === 'messages-search') {
+            // SendGrid Email Activity API — requires paid add-on. Returns recent messages matching a query.
+            // ?q=category="quarry-wine-club" AND last_event_time BETWEEN TIMESTAMP "..." AND TIMESTAMP "..."
+            const q = params.q || 'category="quarry-wine-club"';
+            const limit = params.limit || 50;
+            const url = `https://api.sendgrid.com/v3/messages?query=${encodeURIComponent(q)}&limit=${limit}`;
+            const r = await fetch(url, { headers: { 'Authorization': `Bearer ${SG_KEY}` } });
+            const text = await r.text();
+            let data; try { data = JSON.parse(text); } catch { data = text; }
+            return respond(200, { status: r.status, q, data });
+        }
+
         if (action === 'send-test') {
             // Send a single test email and return the full SendGrid response (headers + body).
             // GET /sg-debug?action=send-test&to=foo@bar.com&subject=...&from=bookings@thequarrystl.com
@@ -161,7 +185,7 @@ exports.handler = async (event) => {
             return respond(200, { status: r.status, data });
         }
 
-        return respond(400, { error: 'unknown action', actions: ['list-count', 'list-info', 'cancel-singlesend', 'singlesend-info', 'upsert-test', 'lookup', 'job-status', 'suppressions', 'send-test'] });
+        return respond(400, { error: 'unknown action', actions: ['list-count', 'list-info', 'cancel-singlesend', 'singlesend-info', 'upsert-test', 'lookup', 'job-status', 'suppressions', 'send-test', 'category-stats', 'messages-search'] });
     } catch (err) {
         return respond(500, { error: err.message });
     }
