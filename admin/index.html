@@ -3293,6 +3293,19 @@
                         </div>
                     </div>
 
+                    <details id="wcSentWrap" style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:16px 20px;margin-bottom:24px;">
+                        <summary style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;list-style:none;">
+                            <div>
+                                <div style="font-size:1.05rem;font-weight:600;color:var(--text-primary);">Sent Emails <span id="wcSentCount" style="font-size:0.78rem;color:var(--text-muted);font-weight:400;margin-left:6px;">(0)</span></div>
+                                <div style="font-size:0.85rem;color:var(--text-secondary);margin-top:2px;">History of every wine club email sent, with per-recipient delivery status and SendGrid message IDs.</div>
+                            </div>
+                            <button class="btn-secondary" id="wcRefreshSentBtn" type="button" style="padding:6px 12px;font-size:0.85rem;">Refresh</button>
+                        </summary>
+                        <div id="wcSentList" style="margin-top:14px;display:grid;gap:10px;font-size:0.92rem;">
+                            <div style="color:var(--text-muted);font-size:0.88rem;">Click Refresh to load history.</div>
+                        </div>
+                    </details>
+
                     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">
                         <input type="text" id="wcSearch" placeholder="Search name, email, phone…" style="flex:1;min-width:220px;padding:9px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.92rem;">
                         <select id="wcStatusFilter" style="padding:9px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.92rem;">
@@ -14159,6 +14172,9 @@ function hashCode(str) {
                         pendingAttachments = [];
                         renderAttachments();
                     }
+                    if (window._wcSentLoaded && typeof window.wcReloadSentHistory === 'function') {
+                        window.wcReloadSentHistory();
+                    }
                 } catch (e) {
                     status.style.color = 'var(--red)';
                     status.textContent = 'Send failed: ' + e.message;
@@ -14190,7 +14206,86 @@ function hashCode(str) {
                         e.target.value = '';
                     });
                 }
+                if ($('wcRefreshSentBtn')) {
+                    $('wcRefreshSentBtn').addEventListener('click', function(ev){
+                        ev.preventDefault(); ev.stopPropagation();
+                        loadSentHistory();
+                    });
+                }
+                if ($('wcSentWrap')) {
+                    $('wcSentWrap').addEventListener('toggle', function() {
+                        if (this.open && !window._wcSentLoaded) {
+                            window._wcSentLoaded = true;
+                            loadSentHistory();
+                        }
+                    });
+                }
             });
+
+            function fmtSentDate(iso) {
+                try {
+                    return new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }).format(new Date(iso));
+                } catch (e) { return iso || ''; }
+            }
+
+            async function loadSentHistory() {
+                const wrap = $('wcSentList');
+                const countEl = $('wcSentCount');
+                wrap.innerHTML = '<div style="color:var(--text-muted);font-size:0.88rem;">Loading sent history\u2026</div>';
+                try {
+                    const res = await api('send-history');
+                    const sends = res.sends || [];
+                    if (countEl) countEl.textContent = '(' + sends.length + ')';
+                    if (!sends.length) {
+                        wrap.innerHTML = '<div style="color:var(--text-muted);font-size:0.88rem;">No sends recorded yet. Future wine club emails (and test sends) will appear here.</div>';
+                        return;
+                    }
+                    wrap.innerHTML = sends.map(function(s) {
+                        const failedColor = s.failed > 0 ? 'color:#dc2626' : 'color:#16a34a';
+                        const audBadge = s.audience === 'test'
+                            ? '<span style="background:rgba(234,179,8,0.15);color:#a16207;padding:1px 8px;border-radius:999px;font-size:0.72rem;font-weight:600;margin-left:6px;">TEST</span>'
+                            : '';
+                        const attachLine = (s.attachments && s.attachments.length)
+                            ? '<div style="font-size:0.82rem;color:var(--text-muted);margin-top:4px;">\ud83d\udcce ' + s.attachments.map(function(a){ return escapeHtml(a.filename); }).join(', ') + '</div>'
+                            : '';
+                        const deliveriesHtml = (s.deliveries || []).map(function(d) {
+                            const dotColor = d.status === 'sent' ? '#16a34a' : '#dc2626';
+                            const mid = d.messageId ? '<code style="font-size:0.74rem;color:var(--text-muted);">' + escapeHtml(d.messageId) + '</code>' : '';
+                            const err = d.error ? '<span style="color:#dc2626;font-size:0.8rem;">' + escapeHtml(d.error) + '</span>' : '';
+                            return '<tr>'
+                                +   '<td style="padding:4px 8px;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + dotColor + ';margin-right:6px;"></span>' + escapeHtml(d.email) + '</td>'
+                                +   '<td style="padding:4px 8px;font-size:0.85rem;">' + escapeHtml(d.name || '') + '</td>'
+                                +   '<td style="padding:4px 8px;">' + (d.status === 'sent' ? mid : err) + '</td>'
+                                + '</tr>';
+                        }).join('');
+                        return ''
+                            + '<details style="border:1px solid var(--border-subtle);border-radius:8px;padding:10px 14px;">'
+                            +   '<summary style="cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;">'
+                            +     '<div>'
+                            +       '<div style="font-weight:600;">' + escapeHtml(s.subject || '(no subject)') + audBadge + '</div>'
+                            +       '<div style="font-size:0.82rem;color:var(--text-muted);margin-top:2px;">' + fmtSentDate(s.sentAt) + ' \u00b7 audience: ' + escapeHtml(s.audience || 'active') + '</div>'
+                            +       attachLine
+                            +     '</div>'
+                            +     '<div style="text-align:right;white-space:nowrap;">'
+                            +       '<div style="font-size:0.9rem;"><strong style="color:#16a34a;">' + (s.sent||0) + '</strong> sent'
+                            +       (s.failed > 0 ? ' \u00b7 <strong style="' + failedColor + '">' + s.failed + '</strong> failed' : '')
+                            +       '</div>'
+                            +       '<div style="font-size:0.78rem;color:var(--text-muted);">' + (s.recipients||0) + ' recipient' + ((s.recipients||0)===1?'':'s') + '</div>'
+                            +     '</div>'
+                            +   '</summary>'
+                            +   '<div style="margin-top:10px;">'
+                            +     (s.bodyPreview ? '<div style="font-size:0.85rem;color:var(--text-secondary);font-style:italic;margin-bottom:8px;">"' + escapeHtml(s.bodyPreview) + (s.bodyPreview.length>=200?'\u2026':'') + '"</div>' : '')
+                            +     '<table style="width:100%;font-size:0.88rem;border-collapse:collapse;"><thead><tr style="background:rgba(154,123,42,0.06);text-align:left;"><th style="padding:4px 8px;font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);">Recipient</th><th style="padding:4px 8px;font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);">Name</th><th style="padding:4px 8px;font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);">SendGrid Message ID / Error</th></tr></thead><tbody>'
+                            +     deliveriesHtml
+                            +     '</tbody></table>'
+                            +   '</div>'
+                            + '</details>';
+                    }).join('');
+                } catch (e) {
+                    wrap.innerHTML = '<div style="color:var(--red);">Failed to load history: ' + escapeHtml(e.message) + '</div>';
+                }
+            }
+            window.wcReloadSentHistory = loadSentHistory;
 
             const origSwitchWC = window.switchTab;
             if (typeof origSwitchWC === 'function') {
