@@ -3283,7 +3283,12 @@
                         <div style="display:grid;gap:10px;">
                             <input type="text" id="wcEmailSubject" placeholder="Subject (e.g. May Rock &amp; Vine pickup is ready)" style="width:100%;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;">
                             <textarea id="wcEmailBody" rows="8" placeholder="Write your message here. You can use {firstName} to personalize." style="width:100%;padding:12px;border:1px solid var(--border-subtle);border-radius:6px;font-size:0.95rem;font-family:Georgia,serif;line-height:1.5;resize:vertical;"></textarea>
-                            <div style="font-size:0.78rem;color:var(--text-muted);">Tip: line breaks become paragraph breaks. Merge tags: <code>{firstName}</code>, <code>{name}</code>, <code>{email}</code>.</div>
+                            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                                <input type="file" id="wcAttachInput" multiple style="display:none;">
+                                <button type="button" class="btn-secondary" id="wcAttachBtn" style="padding:6px 12px;font-size:0.85rem;">📎 Add attachment</button>
+                                <div id="wcAttachList" style="font-size:0.85rem;color:var(--text-secondary);display:flex;gap:8px;flex-wrap:wrap;"></div>
+                            </div>
+                            <div style="font-size:0.78rem;color:var(--text-muted);">Tip: line breaks become paragraph breaks. Merge tags: <code>{firstName}</code>, <code>{name}</code>, <code>{email}</code>. Attachments up to ~5 MB total.</div>
                             <div id="wcSendStatus" style="font-size:0.88rem;display:none;"></div>
                         </div>
                     </div>
@@ -14046,6 +14051,70 @@ function hashCode(str) {
                 }).join('');
             }
 
+            // ---- Attachments ----
+            let pendingAttachments = []; // [{filename, type, content (base64), size}]
+
+            function fmtBytes(n) {
+                if (n < 1024) return n + ' B';
+                if (n < 1024*1024) return (n/1024).toFixed(0) + ' KB';
+                return (n/1024/1024).toFixed(1) + ' MB';
+            }
+
+            function totalAttachmentBytes() {
+                return pendingAttachments.reduce(function(s, a){ return s + (a.size||0); }, 0);
+            }
+
+            function renderAttachments() {
+                const wrap = $('wcAttachList');
+                if (!pendingAttachments.length) { wrap.innerHTML = ''; return; }
+                wrap.innerHTML = pendingAttachments.map(function(a, i) {
+                    return '<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(154,123,42,0.10);border:1px solid var(--border-subtle);border-radius:999px;padding:3px 10px;">'
+                         + '<span>📎 ' + escapeHtml(a.filename) + ' <span style="color:var(--text-muted);">(' + fmtBytes(a.size) + ')</span></span>'
+                         + '<button type="button" data-rm="' + i + '" style="background:none;border:none;cursor:pointer;color:var(--red);font-weight:600;padding:0 2px;">×</button>'
+                         + '</span>';
+                }).join('');
+                wrap.querySelectorAll('[data-rm]').forEach(function(b) {
+                    b.addEventListener('click', function() {
+                        pendingAttachments.splice(parseInt(b.getAttribute('data-rm'), 10), 1);
+                        renderAttachments();
+                    });
+                });
+            }
+
+            function readFileAsBase64(file) {
+                return new Promise(function(resolve, reject) {
+                    const reader = new FileReader();
+                    reader.onload = function() {
+                        const idx = reader.result.indexOf(',');
+                        resolve(reader.result.slice(idx + 1));
+                    };
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            async function handleAttachmentPick(fileList) {
+                const SOFT_LIMIT = 5 * 1024 * 1024;
+                for (const f of Array.from(fileList || [])) {
+                    if (totalAttachmentBytes() + f.size > SOFT_LIMIT) {
+                        alert('Attachment ' + f.name + ' would push total above 5 MB. SendGrid + Netlify limits would reject the send. Remove a file first or use a smaller version.');
+                        break;
+                    }
+                    try {
+                        const b64 = await readFileAsBase64(f);
+                        pendingAttachments.push({
+                            filename: f.name,
+                            type:     f.type || 'application/octet-stream',
+                            content:  b64,
+                            size:     f.size
+                        });
+                    } catch (e) {
+                        alert('Could not read ' + f.name + ': ' + e.message);
+                    }
+                }
+                renderAttachments();
+            }
+
             async function sendEmailAll() {
                 const subject = $('wcEmailSubject').value.trim();
                 const bodyText = $('wcEmailBody').value;
@@ -14063,7 +14132,10 @@ function hashCode(str) {
                     status.style.display = '';
                     return;
                 }
-                if (!confirm('Send "' + subject + '" to ' + activeCount + ' active Wine Club member' + (activeCount===1?'':'s') + '?')) return;
+                const attachmentNote = pendingAttachments.length
+                    ? '\n\nIncludes ' + pendingAttachments.length + ' attachment' + (pendingAttachments.length===1?'':'s') + ' (' + fmtBytes(totalAttachmentBytes()) + ' total).'
+                    : '';
+                if (!confirm('Send "' + subject + '" to ' + activeCount + ' active Wine Club member' + (activeCount===1?'':'s') + '?' + attachmentNote)) return;
 
                 $('wcSendBtn').disabled = true;
                 $('wcSendBtn').textContent = 'Sending…';
@@ -14072,11 +14144,20 @@ function hashCode(str) {
                 status.style.display = '';
                 try {
                     const html = bodyToHtml(bodyText);
-                    const res = await api('email-all', { subject: subject, html: html, audience: 'active' });
+                    const res = await api('email-all', {
+                        subject: subject,
+                        html: html,
+                        audience: 'active',
+                        attachments: pendingAttachments
+                    });
                     status.style.color = res.failed ? '#a16207' : '#16a34a';
                     status.textContent = 'Done. Sent ' + (res.sent||0) + ', failed ' + (res.failed||0) + '.';
                     if (res.failed && res.errors && res.errors.length) {
                         console.warn('Wine club send errors', res.errors);
+                    }
+                    if (!res.failed) {
+                        pendingAttachments = [];
+                        renderAttachments();
                     }
                 } catch (e) {
                     status.style.color = 'var(--red)';
@@ -14102,6 +14183,13 @@ function hashCode(str) {
                     if (f) importCsv(f);
                     e.target.value = '';
                 });
+                if ($('wcAttachBtn')) {
+                    $('wcAttachBtn').addEventListener('click', function(){ $('wcAttachInput').click(); });
+                    $('wcAttachInput').addEventListener('change', function(e){
+                        handleAttachmentPick(e.target.files);
+                        e.target.value = '';
+                    });
+                }
             });
 
             const origSwitchWC = window.switchTab;
