@@ -100,6 +100,55 @@ exports.handler = async (event) => {
             return respond(200, { status: r.status, data });
         }
 
+        if (action === 'suppressions') {
+            // Check ALL suppression lists for an email: bounces, blocks, spam reports, invalid, unsubscribes (asm).
+            const email = params.email;
+            if (!email) return respond(400, { error: 'email required' });
+            const endpoints = {
+                bounces:        `https://api.sendgrid.com/v3/suppression/bounces/${encodeURIComponent(email)}`,
+                blocks:         `https://api.sendgrid.com/v3/suppression/blocks/${encodeURIComponent(email)}`,
+                spam_reports:   `https://api.sendgrid.com/v3/suppression/spam_reports/${encodeURIComponent(email)}`,
+                invalid_emails: `https://api.sendgrid.com/v3/suppression/invalid_emails/${encodeURIComponent(email)}`,
+                global_unsub:   `https://api.sendgrid.com/v3/asm/suppressions/global/${encodeURIComponent(email)}`,
+                asm_groups:     `https://api.sendgrid.com/v3/asm/suppressions/${encodeURIComponent(email)}`
+            };
+            const result = {};
+            for (const [name, url] of Object.entries(endpoints)) {
+                try {
+                    const r = await fetch(url, { headers: { 'Authorization': `Bearer ${SG_KEY}` } });
+                    const text = await r.text();
+                    let data; try { data = JSON.parse(text); } catch { data = text; }
+                    result[name] = { status: r.status, data };
+                } catch (e) {
+                    result[name] = { error: e.message };
+                }
+            }
+            return respond(200, { email, result });
+        }
+
+        if (action === 'send-test') {
+            // Send a single test email and return the full SendGrid response (headers + body).
+            // GET /sg-debug?action=send-test&to=foo@bar.com&subject=...&from=bookings@thequarrystl.com
+            const to = params.to;
+            const subject = params.subject || 'Quarry sg-debug test';
+            const from = params.from || 'bookings@thequarrystl.com';
+            if (!to) return respond(400, { error: 'to required' });
+            const r = await fetch('https://api.sendgrid.com/v3/mail/send', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${SG_KEY}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    personalizations: [{ to: [{ email: to }] }],
+                    from: { email: from, name: 'The Quarry STL' },
+                    subject,
+                    content: [{ type: 'text/html', value: '<p>This is a sg-debug test send from the wine-club deployment.</p>' }],
+                    categories: ['quarry-sg-debug']
+                })
+            });
+            const messageId = r.headers.get('x-message-id') || null;
+            const bodyText = await r.text();
+            return respond(200, { status: r.status, messageId, body: bodyText });
+        }
+
         if (action === 'job-status') {
             // GET status of a contacts upsert job
             const jobId = params.jobId;
@@ -112,7 +161,7 @@ exports.handler = async (event) => {
             return respond(200, { status: r.status, data });
         }
 
-        return respond(400, { error: 'unknown action', actions: ['list-count', 'list-info', 'cancel-singlesend', 'singlesend-info', 'upsert-test', 'lookup', 'job-status'] });
+        return respond(400, { error: 'unknown action', actions: ['list-count', 'list-info', 'cancel-singlesend', 'singlesend-info', 'upsert-test', 'lookup', 'job-status', 'suppressions', 'send-test'] });
     } catch (err) {
         return respond(500, { error: err.message });
     }
