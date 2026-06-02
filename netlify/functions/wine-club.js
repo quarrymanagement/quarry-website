@@ -47,11 +47,11 @@ async function writeRoster(roster) {
 }
 
 // ---------- SendGrid ----------
-function sendGridEmail(to, subject, htmlBody, fromEmail, fromName, category) {
+function sendGridEmail(to, subject, htmlBody, fromEmail, fromName, category, attachments) {
   fromEmail = fromEmail || 'bookings@thequarrystl.com';
   fromName  = fromName  || 'The Quarry STL';
   const toArray = Array.isArray(to) ? to : [to];
-  const payload = JSON.stringify({
+  const body = {
     personalizations: [{ to: toArray.map(function(e){ return { email: e }; }) }],
     from: { email: fromEmail, name: fromName },
     subject: subject,
@@ -61,7 +61,20 @@ function sendGridEmail(to, subject, htmlBody, fromEmail, fromName, category) {
       click_tracking: { enable: true, enable_text: false },
       open_tracking:  { enable: true }
     }
-  });
+  };
+  if (Array.isArray(attachments) && attachments.length) {
+    body.attachments = attachments
+      .filter(function(a){ return a && a.content && a.filename; })
+      .map(function(a) {
+        return {
+          content:     a.content,
+          filename:    a.filename,
+          type:        a.type || 'application/octet-stream',
+          disposition: 'attachment'
+        };
+      });
+  }
+  const payload = JSON.stringify(body);
   return new Promise(function(resolve, reject) {
     const req = https.request({
       hostname: 'api.sendgrid.com',
@@ -227,12 +240,19 @@ exports.handler = async function(event) {
       if (!process.env.SENDGRID_API_KEY) {
         return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: 'SENDGRID_API_KEY not configured' }) };
       }
-      const subject  = (body.subject || '').toString().trim();
-      const htmlBody = (body.html    || '').toString();
-      const audience = body.audience || 'active';
+      const subject     = (body.subject || '').toString().trim();
+      const htmlBody    = (body.html    || '').toString();
+      const audience    = body.audience || 'active';
+      const attachments = Array.isArray(body.attachments) ? body.attachments : [];
       if (!subject || !htmlBody) {
         return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'subject and html required' }) };
       }
+      // base64 inflates raw file size ~1.33x; cap around 7MB to stay under Netlify Functions limits
+      const attachBytes = attachments.reduce(function(s, a){ return s + ((a && a.content && a.content.length) || 0); }, 0);
+      if (attachBytes > 7 * 1024 * 1024) {
+        return { statusCode: 413, headers: CORS, body: JSON.stringify({ error: 'Attachments exceed safe size (~5 MB). Use smaller files.' }) };
+      }
+
       const roster = await readRoster();
       const recipients = (roster.members || []).filter(function(m) {
         if (!m.email) return false;
@@ -256,7 +276,8 @@ exports.handler = async function(event) {
             wrapEmailHtml(subject, personalized, r.email),
             'bookings@thequarrystl.com',
             'The Quarry STL',
-            'quarry-wine-club'
+            'quarry-wine-club',
+            attachments
           );
           sent++;
         } catch (e) {
@@ -264,7 +285,7 @@ exports.handler = async function(event) {
           errors.push({ email: r.email, error: e.message });
         }
       }
-      return { statusCode: 200, headers: CORS, body: JSON.stringify({ ok: true, sent: sent, failed: failed, audience: audience, recipients: recipients.length, errors: errors.slice(0, 5) }) };
+      return { statusCode: 200, headers: CORS, body: JSON.stringify({ ok: true, sent: sent, failed: failed, audience: audience, recipients: recipients.length, attachments: attachments.length, errors: errors.slice(0, 5) }) };
     }
 
     return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'Unknown action: ' + action }) };
