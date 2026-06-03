@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-03T03:08:42.772Z",
+  "updatedAt": "2026-06-03T03:13:27.954Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -38412,6 +38412,17 @@
       "sgEventId": "9YGLjuzzTYeoHmyhnLFn9Q",
       "userAgent": "Mozilla/5.0",
       "category": "quarry-wine-club"
+    },
+    {
+      "ts": "2026-06-03T03:13:12.000Z",
+      "type": "dropped",
+      "draftId": null,
+      "ruleId": null,
+      "email": "apple-review@thequarrystl.com",
+      "url": null,
+      "sgEventId": "ZHJvcC0xMDYwMzc3NjUtYW1rZ29FOU9UMGUxNG5OUVJNdlo5US0w",
+      "userAgent": null,
+      "category": null
     }
   ],
   "aggregates": {
