@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-03T03:13:27.954Z",
+  "updatedAt": "2026-06-03T03:14:39.559Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -38421,6 +38421,17 @@
       "email": "apple-review@thequarrystl.com",
       "url": null,
       "sgEventId": "ZHJvcC0xMDYwMzc3NjUtYW1rZ29FOU9UMGUxNG5OUVJNdlo5US0w",
+      "userAgent": null,
+      "category": null
+    },
+    {
+      "ts": "2026-06-03T03:14:27.000Z",
+      "type": "dropped",
+      "draftId": null,
+      "ruleId": null,
+      "email": "apple-review@thequarrystl.com",
+      "url": null,
+      "sgEventId": "ZHJvcC0xMDYwMzc3NjUtWEdpWVhqS09ReEdRaGlaMmdIeU93QS0w",
       "userAgent": null,
       "category": null
     }
