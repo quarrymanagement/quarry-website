@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <!-- Google Analytics 4 (injected at build time from GA4_MEASUREMENT_ID env var) -->
-  <script>(function(){var id='__GA4_MEASUREMENT_ID__';if(!id||id.indexOf('__')===0)return;var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id='+id;document.head.appendChild(s);window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments)};gtag('js',new Date());gtag('config',id,{anonymize_ip:true});})();</script>
+  <script>(function(){var id='G-9B3TR15T62';if(!id||id.indexOf('__')===0)return;var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id='+id;document.head.appendChild(s);window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments)};gtag('js',new Date());gtag('config',id,{anonymize_ip:true});})();</script>
   <script defer src="/assets/js/ga4-events.js"></script>
 
     <meta charset="UTF-8">
@@ -1416,10 +1416,11 @@
                     <a href="#" class="nav-link">Reservations ▾</a>
                     <div class="dropdown">
                         <a href="/quarry-reservations">Book a Reservation</a>
-                        <a href="/weddings/">Weddings</a>
                         <a href="/quarry-private-events">Private Events</a>
                     </div>
                 </div>
+                <div class="nav-item"><a href="/weddings/" class="nav-link">Weddings</a></div>
+                <div class="nav-item"><a href="/quarry-app-customized" class="nav-link" style="color:var(--gold-light);">Rewards</a></div>
                 <div class="nav-item"><a href="/quarry-giftcards" class="nav-link">Gift Cards</a></div>
                 <div class="nav-item">
                     <a href="#" class="nav-link">Connect ▾</a>
@@ -1597,7 +1598,7 @@
             <div class="mailing-list-eyebrow">Stay in the Loop</div>
             <h2>Join Our Mailing List</h2>
             <p class="mailing-list-text">Be first to hear about events, live music, wine tastings, and specials at The Quarry.</p>
-            <form name="mailing-list" method="POST" netlify class="mailing-form" onsubmit="handleMailingListSubmit(event)">
+            <form class='mailing-form' method='POST' name='mailing-list' onsubmit='handleMailingListSubmit(event)'><input type='hidden' name='form-name' value='mailing-list' />
                 <input type="email" name="email" placeholder="Enter your email address" required>
                 <button type="submit">Subscribe</button>
             </form>
