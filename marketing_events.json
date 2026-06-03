@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-03T05:18:25.208Z",
+  "updatedAt": "2026-06-03T05:30:24.296Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -38467,6 +38467,17 @@
       "sgEventId": "ZGVsaXZlcmVkLTAtMTA2MDM3NzY1LXQ5dXJlc1BMUmptNEdOZ3I4cmpwS2ctMA",
       "userAgent": null,
       "category": "quarry-marketing:welcome"
+    },
+    {
+      "ts": "2026-06-03T05:30:09.000Z",
+      "type": "delivered",
+      "draftId": null,
+      "ruleId": null,
+      "email": "sharonsmith_us1721@yahoo.com",
+      "url": null,
+      "sgEventId": "ZGVsaXZlcmVkLTEzLTEwNjAzNzc2NS0tUklPVUZ0dFRacTE5S0txeDFyQmZ3LTA",
+      "userAgent": null,
+      "category": "quarry-wine-club"
     }
   ],
   "aggregates": {
