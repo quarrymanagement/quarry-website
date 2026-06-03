@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-03T12:01:12.929Z",
+  "updatedAt": "2026-06-03T13:02:37.198Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -5150,7 +5150,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-06-05T16:00:00-05:00",
       "createdAt": "2026-06-03T11:06:07.747Z",
       "createdBy": "weather-trigger",
@@ -5174,12 +5174,30 @@
         },
         "canvasNote": "Patio-perfect day (85°F). Caption hooks on the weather."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "76 degrees, 11% chance of rain, and a patio that faces the cliffs. Some days just line up.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#DefianceWineCountry",
+        "#StCharlesCounty",
+        "#STLWeekend",
+        "#WineBar",
+        "#PatioSeason",
+        "#STLEats",
+        "#OutdoorDining"
+      ],
       "imageUrl": null,
       "userImageUrl": null,
       "bumpedFromDay": "2026-06-04",
-      "updatedAt": "2026-06-03T12:01:12.929Z"
+      "updatedAt": "2026-06-03T13:02:37.198Z",
+      "imagePrompt": "Wide shot of a stone-edged patio overlooking a calm quarry lake at golden hour, empty bistro chairs and small tables with wine glasses catching warm late-afternoon light, limestone cliffs softly lit in the background, string lights beginning to glow overhead, no people, no text, rich warm tones",
+      "variants": {
+        "facebook": "76 degrees and an 11% chance of rain. The patio is open, the cliffs are doing their thing, and the wine list isn't going anywhere. Wednesday through Sunday, Highway Z, New Melle.",
+        "instagram": "76 degrees, 11% chance of rain, and a patio that faces the cliffs. Some days just line up."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "Atmosphere posts need no CTA — this one lets the weather data do the selling naturally, staying vibe-forward and sensory without begging, perfectly matched to a patio-perfect day arc at the 4-5pm dinner-planning peak hour.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-03T13:02:35.734Z"
     }
   ],
   "history": [],
