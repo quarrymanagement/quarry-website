@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-03T17:17:35.293Z",
+  "updatedAt": "2026-06-03T17:17:38.314Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -38797,6 +38797,17 @@
       "sgEventId": "ioZu1V3hRpeRtv4nCIJxdw",
       "userAgent": "Mozilla/5.0 (Windows NT 5.1; rv:11.0) Gecko Firefox/11.0 (via ggpht.com GoogleImageProxy)",
       "category": "quarry-form-notification"
+    },
+    {
+      "ts": "2026-06-03T17:17:25.000Z",
+      "type": "click",
+      "draftId": null,
+      "ruleId": null,
+      "email": "jimkrug12@charter.net",
+      "url": "https://thequarrystl.com/.netlify/functions/unsubscribe?email=jimkrug12%40charter.net&list=wine-club",
+      "sgEventId": "nuJmLP78Sa-lZ9tF0ZOKyA",
+      "userAgent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Mobile Safari/537.36",
+      "category": "quarry-wine-club"
     }
   ],
   "aggregates": {
