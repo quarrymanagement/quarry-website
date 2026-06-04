@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-04T12:02:17.110Z",
+  "updatedAt": "2026-06-04T13:03:45.315Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -5207,7 +5207,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-06-06T09:00:00-05:00",
       "createdAt": "2026-06-03T16:06:53.242Z",
       "createdBy": "cadence-engine",
@@ -5241,13 +5241,33 @@
           "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "Today / Tonight — Post 0 days before event. (Pace warning: registration is light, lean into urgency / value.)"
+        "canvasNote": "Today / Tonight — Post 0 days before event. (Pace warning: registration is light, lean into urgency / value.)",
+        "reelBrief": "Open with a slow pan across the patio as golden hour light hits the string lights — hold 3s. Cut to a close shot of a bourbon glass on a barrel-top, condensation catching the light — hold 2s. End on a wide shot of the dance floor space filling with warm light. Suggested audio: upbeat country two-step instrumental. Text overlay: 'Boots & Bourbon — Tonight — Doors 5:30 PM — $5 Cover — 21+'."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Boots & Bourbon is tonight. Doors open at 5:30, dance instruction kicks off at 6, and social dancing runs 7–11 PM with DJ Dray Entertainment. $5 at the door. 21+ only. Come as you are.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#BootsAndBourbon",
+        "#CountryDancing",
+        "#STLEvents",
+        "#LiveMusicSTL"
+      ],
       "imageUrl": null,
       "userImageUrl": null,
-      "bumpedFromDay": "2026-06-05"
+      "bumpedFromDay": "2026-06-05",
+      "imagePrompt": "Warm golden-hour light falling across a wooden dance floor on an outdoor patio, string lights overhead, a pair of worn cowboy boots resting beside a short glass of amber bourbon on a barrel-top table, stone cliff wall softly out of focus in the background, no people, no text",
+      "variants": {
+        "facebook": "Boots & Bourbon is tonight at The Quarry. Doors open at 5:30 PM, dance instruction at 6, and social dancing with DJ Dray Entertainment runs 7–11 PM. $5 cover at the door. 21+ event. 3960 Highway Z, New Melle — see you out here.",
+        "instagram": "Boots & Bourbon is tonight. Doors 5:30 · Dance instruction 6 PM · DJ Dray 7–11 PM. $5 cover, 21+. New Melle."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "T-0 calls for short, specific, logistical copy — tonight's details front and center with a calm invitation close, no urgency theater needed since this is a $5 walk-in cover event with no capacity concern.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-04T13:03:20.589Z",
+      "updatedAt": "2026-06-04T13:03:20.589Z"
     },
     {
       "id": "drf-mpy9ejax-1-yon2s",
@@ -5257,7 +5277,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-06-07T11:00:00-05:00",
       "createdAt": "2026-06-03T16:06:53.241Z",
       "createdBy": "cadence-engine",
@@ -5291,13 +5311,33 @@
           "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "Tomorrow — Post 1 days before event. (Pace warning: registration is light, lean into urgency / value.)"
+        "canvasNote": "Tomorrow — Post 1 days before event. (Pace warning: registration is light, lean into urgency / value.)",
+        "reelBrief": "Open with a slow pan across the patio string lights at dusk (2s), cut to a close-up of a bourbon glass on a wooden bar top catching the warm light (3s), end on a wide shot of the open dance floor with chairs cleared and lights glowing (3s). Suggested audio: upbeat country line-dance track, mid-tempo. Text overlay: 'Boots & Bourbon — Tomorrow 5:30 PM — $5 at the door — 21+'."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Tomorrow night: Boots & Bourbon. Country music, dancing, and bourbon out here in New Melle. Doors at 5:30, dance instruction at 6, social dancing runs 7–11 PM. $5 at the door. 21+.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#STLEvents",
+        "#LiveMusicSTL",
+        "#CountryDancing",
+        "#BootsAndBourbon"
+      ],
       "imageUrl": null,
       "userImageUrl": null,
-      "bumpedFromDay": "2026-06-04"
+      "bumpedFromDay": "2026-06-04",
+      "imagePrompt": "Warm golden-hour shot of a rustic wooden dance floor on an outdoor patio, string lights overhead casting soft amber glow, a pair of worn cowboy boots resting near a low wooden stool with a short glass of bourbon beside them, stone cliff wall softly out of focus in the background, no people, no text",
+      "variants": {
+        "facebook": "Tomorrow night is Boots & Bourbon at The Quarry. DJ Dray Entertainment brings a full night of country music and dancing — with a free dance lesson at 6 PM to get you warmed up before social dancing runs 7–11. Just $5 at the door. 21+ event. Doors open at 5:30 PM. See you out here.",
+        "instagram": "Tomorrow night: Boots & Bourbon. Country music, dancing, bourbon. Doors 5:30 — dance lesson at 6 — dancing till 11. $5 cover. 21+."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "T-1 arc calls for short, punchy, and logistical — this caption leads with the name and vibe, delivers all the key details (time, cost, age restriction) without hype or urgency, and closes with an implicit invitation suited to a $5 walk-in event.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-04T13:03:34.103Z",
+      "updatedAt": "2026-06-04T13:03:34.103Z"
     },
     {
       "id": "drf-mpzdxlh1-1-xle4t",
@@ -5307,7 +5347,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-06-07T16:00:00-05:00",
       "createdAt": "2026-06-04T11:01:27.157Z",
       "createdBy": "weather-trigger",
@@ -5331,12 +5371,30 @@
         },
         "canvasNote": "Patio-perfect day (88°F). Caption hooks on the weather."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "79 degrees, 19% chance of rain, and a cold glass of something good waiting on the patio. Some days just line up right.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#WineBar",
+        "#PatioSeason",
+        "#STLEats",
+        "#OutdoorDining"
+      ],
       "imageUrl": null,
       "userImageUrl": null,
       "bumpedFromDay": "2026-06-05",
-      "updatedAt": "2026-06-04T12:02:17.110Z"
+      "updatedAt": "2026-06-04T13:03:45.315Z",
+      "imagePrompt": "Wide patio view at The Quarry on a warm summer evening, golden late-afternoon light washing across stone tables and wooden chairs, string lights beginning to glow overhead, a sweating glass of white wine in the foreground on a stone ledge, soft cliff and lake visible in the background, lush green foliage, warm hazy sky, no people, no text",
+      "variants": {
+        "facebook": "79 degrees and a 19% chance of rain. We'll take those odds. The patio is open and the wine is cold — come find a seat before the weekend crowd does.",
+        "instagram": "79 degrees, 19% chance of rain, and a cold glass waiting on the patio. Some days just line up right."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "Atmosphere posts need sensory specificity over generic 'come hang' language — using the actual forecast numbers makes it feel real and timely, and the low-key tone matches the brand's 'friend who runs a great spot' voice without any hard sell.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-04T13:03:43.806Z"
     }
   ],
   "history": [],
