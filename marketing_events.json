@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-04T21:45:51.102Z",
+  "updatedAt": "2026-06-04T22:16:59.621Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -39985,6 +39985,17 @@
       "sgEventId": "ZGVsaXZlcmVkLTAtMTA2MDM3NzY1LXd2MUhGcnBFVHJTd1BGQUs0WmJhVGctMA",
       "userAgent": null,
       "category": "quarry-form-notification"
+    },
+    {
+      "ts": "2026-06-04T22:16:45.000Z",
+      "type": "click",
+      "draftId": null,
+      "ruleId": null,
+      "email": "jhill@hillscars.com",
+      "url": "https://www.thequarrystl.com/quarry-reservations.html?utm_source=email&utm_medium=marketing&utm_campaign=welcome",
+      "sgEventId": "e3J1DeI-Q4u2PcN4Bb2bYA",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0",
+      "category": "quarry-marketing:welcome"
     }
   ],
   "aggregates": {
