@@ -14197,7 +14197,44 @@ function hashCode(str) {
         })();
 
     </script>
+<section id="amSection" style="background:#fff; border:1px solid #e8e0d0; border-radius:12px; padding:24px; margin-top:24px;">
+  <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:18px; flex-wrap:wrap;">
+    <div>
+      <h2 style="font-family:Georgia,serif; font-size:24px; margin:0;">Members</h2>
+      <p style="color:#6b7280; font-size:13px; margin:4px 0 0;">Search, audit, edit, credit, or disable rewards-app members.</p>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <input id="amSearchInput" type="text" placeholder="Search email, name, or referral code"
+             style="padding:8px 12px; border:1px solid #d4cfc1; border-radius:6px; font-size:14px; min-width:260px;">
+      <button id="amSearchBtn" style="background:#b8933a; color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:600;">Search</button>
+      <button id="amRefreshBtn" style="background:#fff; color:#b8933a; border:1px solid #b8933a; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:600;">Refresh</button>
+    </div>
+  </div>
+  <div id="amStatus" style="font-size:13px; color:#6b7280; margin-bottom:10px;"></div>
+  <div style="overflow-x:auto;">
+    <table style="width:100%; border-collapse:collapse; font-size:14px;">
+      <thead>
+        <tr style="background:#fafaf7; border-bottom:1px solid #e5e7eb; text-align:left;">
+          <th style="padding:10px 12px; font-weight:600; color:#374151;">Name</th>
+          <th style="padding:10px 12px; font-weight:600; color:#374151;">Email</th>
+          <th style="padding:10px 12px; font-weight:600; color:#374151;">Phone</th>
+          <th style="padding:10px 12px; font-weight:600; color:#374151; text-align:right;">Balance</th>
+          <th style="padding:10px 12px; font-weight:600; color:#374151;">Signed up</th>
+          <th style="padding:10px 12px; font-weight:600; color:#374151;">Status</th>
+        </tr>
+      </thead>
+      <tbody id="amList"></tbody>
+    </table>
+  </div>
+</section>
+
+<div id="amDetail" style="display:none; position:fixed; top:0; right:0; bottom:0; width:520px; max-width:100vw; background:#fff; box-shadow:-8px 0 32px rgba(0,0,0,0.18); z-index:1000; overflow-y:auto;">
+  <button id="amDetailClose" aria-label="Close" style="position:sticky; top:0; right:0; float:right; background:#fafaf7; border:none; padding:10px 14px; font-size:18px; cursor:pointer; border-bottom-left-radius:8px; z-index:1;">×</button>
+  <div id="amDetailBody"></div>
+</div>
+
 <script src="./admin-push.js"></script>
 <script src="./admin-rewards.js"></script>
+<script src="./admin-members.js"></script>
 </body>
 </html>
