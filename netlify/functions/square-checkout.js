@@ -136,6 +136,12 @@ exports.handler = async function(event) {
     // ---- Build Square Payment Link request ------------------------------
     // We use the "order" mode so we can attach metadata that survives to the webhook.
     // Metadata keys must be alphanumeric + underscore, value is a string up to 255 chars.
+    // Square caps order metadata at 10 key/value pairs. We keep exactly the
+    // fields the webhook needs to record a booking. `duration` is always the
+    // constant "50 Minutes" (the webhook defaults to it) and `coupon` is not
+    // read by the booking webhook — the discount is already applied to the
+    // charged amount — so both are omitted here and surfaced in the note text
+    // below instead.
     const safeMeta = {
       bookingType:     'golf',
       customerName:    String(m.customerName || '').slice(0, 255),
@@ -144,11 +150,9 @@ exports.handler = async function(event) {
       bay:             String(m.bay || '').slice(0, 255),
       eventDate:       String(m.date || '').slice(0, 255),
       eventTime:       String(m.time || '').slice(0, 255),
-      duration:        String(m.duration || '50 Minutes').slice(0, 255),
       players:         String(m.players || '').slice(0, 255),
       extraBalls:      String(m.extraBalls || 0),
       extraBallsPrice: String(m.extraBallsPrice || 0),
-      coupon:          String(body.coupon || '').slice(0, 60),
     };
     // Square rejects empty metadata values (MISSING_REQUIRED_PARAMETER),
     // so strip any blank fields before sending.
@@ -181,7 +185,7 @@ exports.handler = async function(event) {
         line_items: [{
           uid: lineItemUid,
           name: 'Hole-In-One Golf - ' + (m.bay || 'Bay'),
-          note: (m.date || '') + ' at ' + (m.time || '') + ' | ' + (m.duration || '50 min') + ' | ' + (m.players || '2') + ' players',
+          note: (m.date || '') + ' at ' + (m.time || '') + ' | ' + (m.duration || '50 min') + ' | ' + (m.players || '2') + ' players' + (body.coupon ? ' | coupon ' + body.coupon : ''),
           quantity: '1',
           base_price_money: { amount: amountCents, currency: 'USD' },
           applied_taxes: [{ tax_uid: taxUid }]
