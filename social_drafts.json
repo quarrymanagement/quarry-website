@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-06T12:05:25.379Z",
+  "updatedAt": "2026-06-06T13:03:39.323Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -6707,7 +6707,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-06-08T16:00:00-05:00",
       "createdAt": "2026-06-06T11:06:14.324Z",
       "createdBy": "weather-trigger",
@@ -6731,12 +6731,30 @@
         },
         "canvasNote": "Patio-perfect day (86°F). Caption hooks on the weather."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "76 degrees, 12% chance of rain, and a patio that faces the cliffs. Some days just line up.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#PatioSeason",
+        "#WineBar",
+        "#STLEats",
+        "#OutdoorDining"
+      ],
       "imageUrl": null,
       "userImageUrl": null,
       "bumpedFromDay": "2026-06-06",
-      "updatedAt": "2026-06-06T12:05:25.379Z"
+      "updatedAt": "2026-06-06T13:03:30.928Z",
+      "imagePrompt": "Wide shot of a sun-drenched stone patio overlooking a quarry lake and limestone cliffs, late afternoon golden light, string bulbs overhead catching the sun, two empty wine glasses on a wooden table in the foreground, wildflowers in a small vase, warm hazy sky, no people, no text",
+      "variants": {
+        "facebook": "76 degrees and a 12% chance of rain. The patio is open, the cliffs are doing what they do, and the wine list isn't going anywhere. Come out to New Melle this weekend.",
+        "instagram": "76 degrees, 12% chance of rain, and a patio that faces the cliffs. Some days just line up."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "Atmosphere posts need no CTA — the weather data gives the caption a grounded, specific hook that feels like a friend texting you, and the 4pm post time catches the dinner-planning window on a patio-perfect day.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-06T13:03:29.600Z"
     },
     {
       "id": "drf-mq28zgdw-2-hj3ue",
@@ -6746,7 +6764,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-06-09T16:00:00-05:00",
       "createdAt": "2026-06-06T11:06:14.324Z",
       "createdBy": "weather-trigger",
@@ -6770,12 +6788,30 @@
         },
         "canvasNote": "Stormy / cold day. Lean into \"perfect day to come in and warm up\" vibes."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Some evenings just settle right into you. Warm air, a cold glass, nowhere to be.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#DefianceWineCountry",
+        "#StCharlesCounty",
+        "#STLWeekend",
+        "#WineBar",
+        "#PatioSeason",
+        "#STLEats",
+        "#OutdoorDining"
+      ],
       "imageUrl": null,
       "userImageUrl": null,
       "bumpedFromDay": "2026-06-07",
-      "updatedAt": "2026-06-06T12:05:25.379Z"
+      "updatedAt": "2026-06-06T13:03:39.323Z",
+      "imagePrompt": "Two glasses of chilled white wine sweating lightly on a worn wooden table, warm late-afternoon light filtering through tree canopy, soft bokeh of string lights and a limestone cliff face in the background, golden hour haze, no people, no text",
+      "variants": {
+        "facebook": "Some evenings just settle right into you. Warm air, a cold glass, nowhere to be. That's the patio at The Quarry — out on Highway Z in New Melle, Wed through Sun.",
+        "instagram": "Some evenings just settle right into you. Warm air, a cold glass, nowhere to be."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "Cozy weather context with a slight rain chance calls for a sensory, in-the-moment caption that romanticizes the warm-but-moody evening without any hard sell — pure atmosphere, no CTA, exactly what this post type asks for.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-06T13:03:39.084Z"
     }
   ],
   "history": [],
