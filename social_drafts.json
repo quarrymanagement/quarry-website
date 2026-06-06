@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-05T13:06:47.284Z",
+  "updatedAt": "2026-06-06T11:06:14.324Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -6698,6 +6698,80 @@
       "model": "claude-sonnet-4-6",
       "hydratedAt": "2026-06-05T13:06:22.542Z",
       "updatedAt": "2026-06-05T13:06:22.542Z"
+    },
+    {
+      "id": "drf-mq28zgdw-1-vtm62",
+      "cadenceTag": "weather:2026-06-06:patio",
+      "type": "atmosphere",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-06-06T16:00:00.000Z",
+      "createdAt": "2026-06-06T11:06:14.324Z",
+      "createdBy": "weather-trigger",
+      "context": {
+        "sourceType": "weather",
+        "sourceId": "2026-06-06",
+        "weatherMode": "patio",
+        "temperatureRange": "76-86°F",
+        "maxPrecipChance": 12,
+        "arcLabel": "Patio-perfect day"
+      },
+      "graphicBrief": {
+        "type": "atmosphere_photo",
+        "templateRef": "No graphic needed — ideally a real venue patio shot from the asset library",
+        "dimensions": "1080x1080 or 1080x1350 (4:5)",
+        "toneMode": "patio-perfect",
+        "spec": {
+          "backgroundIdea": "Beautiful Quarry patio at golden hour — empty table, string lights, lake/cliff in soft focus. 86°F today.",
+          "title": "",
+          "footerText": "optional small Q logo bottom-right"
+        },
+        "canvasNote": "Patio-perfect day (86°F). Caption hooks on the weather."
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
+    },
+    {
+      "id": "drf-mq28zgdw-2-hj3ue",
+      "cadenceTag": "weather:2026-06-07:cozy",
+      "type": "atmosphere",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-06-07T16:00:00.000Z",
+      "createdAt": "2026-06-06T11:06:14.324Z",
+      "createdBy": "weather-trigger",
+      "context": {
+        "sourceType": "weather",
+        "sourceId": "2026-06-07",
+        "weatherMode": "cozy",
+        "temperatureRange": "75-89°F",
+        "maxPrecipChance": 63,
+        "arcLabel": "Cozy weather"
+      },
+      "graphicBrief": {
+        "type": "atmosphere_photo",
+        "templateRef": "No graphic needed — interior fireplace / cozy bar / warm food shot",
+        "dimensions": "1080x1080 or 1080x1350 (4:5)",
+        "toneMode": "cozy-indoors",
+        "spec": {
+          "backgroundIdea": "Warm interior — fireplace, candles on the bar, glass of red wine in foreground, soft ambient light",
+          "title": "",
+          "footerText": "optional small Q logo bottom-right"
+        },
+        "canvasNote": "Stormy / cold day. Lean into \"perfect day to come in and warm up\" vibes."
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
     }
   ],
   "history": [],
