@@ -150,6 +150,26 @@ exports.handler = async function(event) {
       extraBallsPrice: String(m.extraBallsPrice || 0),
       coupon:          String(body.coupon || '').slice(0, 60),
     };
+    // Square rejects empty metadata values (MISSING_REQUIRED_PARAMETER),
+    // so strip any blank fields before sending.
+    Object.keys(safeMeta).forEach(function(k) {
+      if (!safeMeta[k]) delete safeMeta[k];
+    });
+
+    // Square requires buyer_phone_number in E.164 format (+13145550000).
+    // Normalize US numbers; omit anything we can't normalize so checkout
+    // never fails over an optional pre-fill field.
+    function toE164(p) {
+      const digits = String(p || '').replace(/\D/g, '');
+      if (digits.length === 10) return '+1' + digits;
+      if (digits.length === 11 && digits.charAt(0) === '1') return '+' + digits;
+      return null;
+    }
+    const prePop = {};
+    const email = String(m.customerEmail || '').trim();
+    if (email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) prePop.buyer_email = email;
+    const e164Phone = toE164(m.customerPhone);
+    if (e164Phone) prePop.buyer_phone_number = e164Phone;
 
     const taxUid = 'mo-sales-tax';
     const lineItemUid = 'golf-bay-line';
@@ -186,14 +206,25 @@ exports.handler = async function(event) {
         },
         allow_tipping: false
       },
-      pre_populated_data: {
-        buyer_email: m.customerEmail || undefined,
-        buyer_phone_number: m.customerPhone || undefined
-      },
       payment_note: 'Hole-In-One Golf - ' + (m.bay || 'Bay') + ' - ' + (m.date || '') + ' ' + (m.time || '')
     };
+    if (Object.keys(prePop).length) linkRequest.pre_populated_data = prePop;
 
-    const result = await squareApi('POST', '/v2/online-checkout/payment-links', linkRequest);
+    let result;
+    try {
+      result = await squareApi('POST', '/v2/online-checkout/payment-links', linkRequest);
+    } catch (firstErr) {
+      // If Square still rejects the pre-fill data, retry once without it
+      // rather than blocking the customer's booking.
+      const msg = String(firstErr.message || '');
+      if (linkRequest.pre_populated_data && /INVALID_PHONE_NUMBER|INVALID_EMAIL_ADDRESS/.test(msg)) {
+        delete linkRequest.pre_populated_data;
+        linkRequest.idempotency_key = crypto.randomUUID();
+        result = await squareApi('POST', '/v2/online-checkout/payment-links', linkRequest);
+      } else {
+        throw firstErr;
+      }
+    }
     const pl = result.payment_link || {};
     if (!pl.url) throw new Error('Square did not return a checkout URL');
 
