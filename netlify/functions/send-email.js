@@ -14,29 +14,23 @@ const response = (statusCode, body) => ({
 
 const handleOptions = () => response(200, { message: 'OK' });
 
-// Replace merge tags in template
-const replaceMergeTags = (htmlBody, recipientData) => {
-  let result = htmlBody;
-  result = result.replace(/{firstName}/g, recipientData.firstName || '');
-  result = result.replace(/{lastName}/g, recipientData.lastName || '');
-  result = result.replace(/{email}/g, recipientData.email || '');
-  return result;
-};
-
-// Send individual email via SendGrid
-function sendGridEmail(to, subject, htmlBody, fromEmail, fromName) {
+// SendGrid bulk send with per-recipient personalization.
+// One API call can carry up to 1000 personalizations — each with its own
+// `to` and its own `substitutions` map (for merge tags like {firstName}).
+// This is the difference between "sends in 1 second" and "times out at 10s".
+function sendGridBulk(personalizations, subject, htmlBody, fromEmail, fromName) {
   fromEmail = fromEmail || 'management@thequarrystl.com';
   fromName = fromName || 'The Quarry STL';
-  var toArray = Array.isArray(to) ? to : [to];
-  var payload = JSON.stringify({
-    personalizations: [{ to: toArray.map(function(email) { return { email: email }; }) }],
+
+  const payload = JSON.stringify({
+    personalizations: personalizations,
     from: { email: fromEmail, name: fromName },
     subject: subject,
     content: [{ type: 'text/html', value: htmlBody }],
   });
 
-  return new Promise(function(resolve, reject) {
-    var req = https.request({
+  return new Promise(function (resolve, reject) {
+    const req = https.request({
       hostname: 'api.sendgrid.com',
       path: '/v3/mail/send',
       method: 'POST',
@@ -44,10 +38,10 @@ function sendGridEmail(to, subject, htmlBody, fromEmail, fromName) {
         'Authorization': 'Bearer ' + process.env.SENDGRID_API_KEY,
         'Content-Type': 'application/json',
       },
-    }, function(res) {
-      var body = '';
-      res.on('data', function(chunk) { body += chunk; });
-      res.on('end', function() {
+    }, function (res) {
+      let body = '';
+      res.on('data', function (chunk) { body += chunk; });
+      res.on('end', function () {
         if (res.statusCode >= 200 && res.statusCode < 300) {
           resolve({ statusCode: res.statusCode, body: body });
         } else {
@@ -82,14 +76,27 @@ exports.handler = async (event) => {
     // Build recipient list - support both formats
     let recipientList = [];
     if (recipients && Array.isArray(recipients) && recipients.length > 0) {
-      recipientList = recipients.map(r => ({
-        email: r.email,
-        firstName: r.firstName || '',
-        lastName: r.lastName || '',
-      }));
+      recipientList = recipients
+        .filter(r => r && r.email)
+        .map(r => ({
+          email: String(r.email).trim(),
+          firstName: r.firstName || '',
+          lastName: r.lastName || '',
+        }));
     } else if (to && Array.isArray(to) && to.length > 0) {
-      recipientList = to.map(email => ({ email, firstName: '', lastName: '' }));
+      recipientList = to
+        .filter(email => email)
+        .map(email => ({ email: String(email).trim(), firstName: '', lastName: '' }));
     }
+
+    // Deduplicate by email (case-insensitive) so we never send the same person twice
+    const seen = new Set();
+    recipientList = recipientList.filter(r => {
+      const k = r.email.toLowerCase();
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
 
     if (recipientList.length === 0) {
       return response(400, {
@@ -106,21 +113,39 @@ exports.handler = async (event) => {
       return response(400, { success: false, error: 'Missing required field: htmlBody' });
     }
 
+    // SendGrid v3 lets us put up to 1,000 personalizations in a SINGLE API call.
+    // Each personalization can carry its own `substitutions` map — SendGrid
+    // replaces those tokens in the subject + content at delivery time.
+    // We use the same token format the legacy loop used: {firstName}, {lastName}, {email}.
+    const BATCH_SIZE = 900; // stay under SendGrid's 1000 limit with a safety margin
+
     let sentCount = 0;
     let failedCount = 0;
     const errors = [];
 
-    // Send to each recipient individually (supports merge tags)
-    for (const recipient of recipientList) {
-      try {
-        const personalizedHtml = replaceMergeTags(htmlBody, recipient);
+    for (let i = 0; i < recipientList.length; i += BATCH_SIZE) {
+      const chunk = recipientList.slice(i, i + BATCH_SIZE);
+      const personalizations = chunk.map(r => ({
+        to: [{ email: r.email }],
+        substitutions: {
+          '{firstName}': r.firstName || '',
+          '{lastName}': r.lastName || '',
+          '{email}': r.email || '',
+        },
+      }));
 
-        await sendGridEmail(recipient.email, subject, personalizedHtml, fromEmail, fromName);
-        sentCount++;
+      try {
+        await sendGridBulk(personalizations, subject, htmlBody, fromEmail, fromName);
+        sentCount += chunk.length;
       } catch (error) {
-        console.error(`Failed to send to ${recipient.email}:`, error.message);
-        failedCount++;
-        errors.push({ email: recipient.email, error: error.message });
+        console.error('Batch send failed (' + i + '-' + (i + chunk.length) + '):', error.message);
+        failedCount += chunk.length;
+        // Record one error per failed batch (avoid blowing up the response payload)
+        errors.push({
+          batchStart: i,
+          batchEnd: i + chunk.length,
+          error: error.message,
+        });
       }
     }
 
