@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-08T08:03:24.859Z",
+  "updatedAt": "2026-06-08T13:04:03.589Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -6897,7 +6897,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-06-10T17:00:00-05:00",
       "createdAt": "2026-06-08T08:03:24.856Z",
       "createdBy": "cadence-engine",
@@ -6934,13 +6934,32 @@
           ],
           "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
         },
-        "canvasNote": "Weekend Lineup — covers 1 band(s). Post 3 days before first show."
+        "canvasNote": "Weekend Lineup — covers 1 band(s). Post 3 days before first show.",
+        "reelBrief": "Open with a slow pan across the stone patio at golden hour (3s), cut to a close-up of a wine glass on a wood bar top with string lights reflected in it (2s), end on a wide shot of the outdoor stage area as the light fades. Suggested audio: warm acoustic country/Americana instrumental. Text overlay: 'Ed Callison — Live Friday, June 12 — 7 PM — No Cover'."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Ed Callison plays live this Friday, June 12 — 7 to 10 PM. No cover, no ticket. Just good music and a reason to make a night of it out in New Melle.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#LiveMusicSTL",
+        "#WineBar",
+        "#STLEats"
+      ],
       "imageUrl": null,
       "userImageUrl": null,
-      "bumpedFromDay": "2026-06-09"
+      "bumpedFromDay": "2026-06-09",
+      "imagePrompt": "Acoustic guitar leaning against a wooden stool on a warm stone patio at dusk, string lights glowing overhead, soft bokeh of a lake and limestone cliffs in the background, golden evening light, no people, no text",
+      "variants": {
+        "facebook": "Ed Callison plays live this Friday, June 12 from 7 to 10 PM. No cover charge — just show up, grab a glass, and settle in. We're out on Highway Z in New Melle if you've been looking for a reason to get out of the house this weekend.",
+        "instagram": "Ed Callison plays live this Friday — 7 to 10 PM. No cover, no ticket. Just show up. 🎶"
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "At T-3 (weekend lineup), the post shifts to 'this Friday' specificity and logistical clarity — day, time, no-cover note — while keeping the tone as a warm invitation rather than a push, matching the brand voice and band-post guidance to stay vibe-forward.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-08T13:04:03.589Z",
+      "updatedAt": "2026-06-08T13:04:03.589Z"
     }
   ],
   "history": [],
