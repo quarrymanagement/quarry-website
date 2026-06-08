@@ -2858,7 +2858,7 @@
             <div id="appOverviewTab" class="tab-content">
                 <div class="bands-header">
                     <h2>Member App</h2>
-                    <a href="/quarry-app-customized.html" target="_blank" class="btn-primary" style="text-decoration:none;">↗ Open App Preview</a>
+                    <a class='btn-primary' href='/quarry-app-customized' style='text-decoration:none;' target='_blank'>↗ Open App Preview</a>
                 </div>
                 <p style="color:var(--text-secondary);margin-bottom:24px;max-width:680px;">
                     The Quarry member app at <code style="background:var(--bg-elevated);padding:2px 6px;border-radius:4px;">/quarry-app-customized.html</code> already shares Events and Live Bands with this admin (any change made under Operations appears in the app within a minute). The sections below let you manage the parts of the app that don't go through the calendar.
@@ -13176,16 +13176,68 @@ function hashCode(str) {
                 return 'standard';
             }
 
+            // SB_URL points at the live Supabase Edge Function that returns iOS-app + auto-claimed
+            // website members. We merge those into legacy members.json (manual add-friends-of-the-house
+            // entries) so the table reflects the full member base. Legacy entries fill in tier + last_visit
+            // fields that Supabase's list endpoint doesn't return; Supabase entries win on collision.
+            const SB_LIST_URL = 'https://nkulhtalltbieicvmmad.supabase.co/functions/v1/admin-manage-members?action=list&limit=500';
+
             async function load() {
+                $('membersLoading').textContent = 'Loading members…';
                 try {
-                    const r = await fetch(FEED + '?t=' + Date.now());
-                    if (!r.ok) throw new Error('HTTP ' + r.status);
-                    data = await r.json();
+                    const adminSecret = localStorage.getItem('quarryAdminPushSecret') || '';
+                    const [feedRes, sbRes] = await Promise.all([
+                        fetch(FEED + '?t=' + Date.now()).catch(() => null),
+                        fetch(SB_LIST_URL, { headers: { 'x-admin-secret': adminSecret } }).catch(() => null)
+                    ]);
+
+                    let legacyMembers = [];
+                    if (feedRes && feedRes.ok) {
+                        try {
+                            const feedData = await feedRes.json();
+                            legacyMembers = (feedData.members || []).map(m => ({ ...m, __source: 'legacy' }));
+                            data = feedData; // keep for legacy add/save flow
+                        } catch (_) {}
+                    }
+
+                    let supabaseMembers = [];
+                    if (sbRes && sbRes.ok) {
+                        try {
+                            const sbData = await sbRes.json();
+                            supabaseMembers = (sbData.rows || []).map(r => {
+                                const pts = Number(r.balance) || 0;
+                                const name = ((r.first_name || '') + ' ' + (r.last_name || '')).trim() || r.email;
+                                return {
+                                    id: r.id,
+                                    name,
+                                    email: r.email,
+                                    phone: r.phone || '',
+                                    tier: tierFromPoints(pts),
+                                    currentPoints: pts,
+                                    lifetimePoints: pts,
+                                    joinedAt: r.created_at,
+                                    lastVisitAt: null,
+                                    disabled: !!r.disabled,
+                                    __source: 'supabase'
+                                };
+                            });
+                        } catch (_) {}
+                    } else if (sbRes && sbRes.status === 401) {
+                        console.warn('[members] Supabase rejected admin secret; only legacy members.json will show.');
+                    }
+
+                    // Merge by email — Supabase entries overwrite legacy on collision.
+                    const byEmail = new Map();
+                    for (const m of legacyMembers) byEmail.set((m.email || '').toLowerCase(), m);
+                    for (const m of supabaseMembers) byEmail.set((m.email || '').toLowerCase(), m);
+                    if (!data) data = { members: [] };
+                    data.members = Array.from(byEmail.values());
+
                     render();
                     $('membersLoading').style.display = 'none';
                     $('membersContent').style.display = 'block';
                 } catch (e) {
-                    $('membersLoading').textContent = 'Could not load members.json: ' + e.message;
+                    $('membersLoading').textContent = 'Could not load members: ' + e.message;
                 }
             }
 
