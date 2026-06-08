@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-07T13:06:21.317Z",
+  "updatedAt": "2026-06-08T08:03:24.859Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -6888,6 +6888,59 @@
       "aiReasoning": "Atmosphere post with ideal weather context calls for a sensory, low-pressure observation — no CTA, no urgency, just a specific and honest reason to think about being outside at The Quarry today.",
       "model": "claude-sonnet-4-6",
       "hydratedAt": "2026-06-07T13:06:08.638Z"
+    },
+    {
+      "id": "drf-mq4xc1mg-1-y5xlt",
+      "cadenceTag": "bands:2026-06-05:T-3",
+      "type": "band_announce",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-06-10T17:00:00-05:00",
+      "createdAt": "2026-06-08T08:03:24.856Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "band",
+        "sourceId": "2026-06-05",
+        "weekendOf": "2026-06-05",
+        "bands": [
+          {
+            "name": "Ed Callison",
+            "date": "2026-06-12",
+            "timeSlot": "7 PM - 10 PM",
+            "type": "evening"
+          }
+        ],
+        "arcStep": "T-3",
+        "arcLabel": "Weekend Lineup"
+      },
+      "graphicBrief": {
+        "type": "band_lineup_poster",
+        "templateRef": "Match the 3-card \"LIVE BANDS AT THE QUARRY\" poster you already use",
+        "neededBy": "2026-06-08",
+        "dimensions": "1080x1080 square",
+        "toneMode": "weekend-hype",
+        "spec": {
+          "backgroundIdea": "Quarry lake/patio at golden hour or evening string lights",
+          "title": "LIVE BANDS THIS WEEKEND",
+          "cards": [
+            {
+              "day": "Friday, Jun 12",
+              "bandName": "Ed Callison",
+              "time": "7 PM - 10 PM"
+            }
+          ],
+          "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
+        },
+        "canvasNote": "Weekend Lineup — covers 1 band(s). Post 3 days before first show."
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null,
+      "bumpedFromDay": "2026-06-09"
     }
   ],
   "history": [],
