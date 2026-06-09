@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-08T13:04:03.589Z",
+  "updatedAt": "2026-06-09T13:06:28.036Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -283,7 +283,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-06-15T17:00:00-05:00",
       "createdAt": "2026-04-28T03:33:43.330Z",
       "createdBy": "cadence-engine",
@@ -309,10 +309,29 @@
         },
         "canvasNote": "Member Benefit Spotlight — recurring monthly post for the Rock & Vine Wine Club."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Rock & Vine Wine Club members get more than a bottle — they get a reason to come back every month. June selections are in, and they're worth the drive out to New Melle.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWine",
+        "#WineBar",
+        "#STLEats",
+        "#WineClub",
+        "#MissouriWine"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Two glasses of white and red wine side by side on a worn wooden bar top, warm late-afternoon light, stone wall softly out of focus in the background, golden hour glow, no faces, no text",
+      "variants": {
+        "facebook": "Rock & Vine Wine Club members get more than a bottle — they get a reason to come back every month. June selections are in, and they're worth the drive out to New Melle. Not a member yet? Ask us about joining when you're in next.",
+        "instagram": "Rock & Vine Wine Club — June selections are in. Worth the drive out to New Melle."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "Mid-month member benefit spotlight calls for lifestyle and belonging tone — this frames the club as a recurring ritual rather than a transaction, which fits the arc step and the 30-65 local audience who respond to 'worth the drive' framing.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-09T13:06:28.036Z",
+      "updatedAt": "2026-06-09T13:06:28.036Z"
     },
     {
       "id": "drf-moi2t9s7-r-d9eca",
