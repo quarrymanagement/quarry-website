@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-10T15:24:44.698Z",
+  "updatedAt": "2026-06-10T16:44:45.101Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -46134,6 +46134,17 @@
       "sgEventId": "7sZ_fYjhRdy59psAJjXSIw",
       "userAgent": "Mozilla/5.0 (Windows NT 5.1; rv:11.0) Gecko Firefox/11.0 (via ggpht.com GoogleImageProxy)",
       "category": null
+    },
+    {
+      "ts": "2026-06-10T16:44:38.000Z",
+      "type": "click",
+      "draftId": null,
+      "ruleId": null,
+      "email": "jhill@hillscars.com",
+      "url": "https://www.thequarrystl.com/quarry-bands.html?utm_source=email&utm_medium=marketing&utm_campaign=welcome&utm_content=music",
+      "sgEventId": "PPxkzinsTwGu1dOIIZJSCQ",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 Edg/149.0.0.0",
+      "category": "quarry-marketing:welcome"
     }
   ],
   "aggregates": {
