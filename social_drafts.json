@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-11T11:05:26.817Z",
+  "updatedAt": "2026-06-11T13:07:42.983Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -6417,7 +6417,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-06-17T17:00:00-05:00",
       "createdAt": "2026-06-05T04:05:12.148Z",
       "createdBy": "cadence-engine",
@@ -6487,12 +6487,32 @@
           ],
           "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
         },
-        "canvasNote": "Weekend Lineup — covers 4 band(s). Post 3 days before first show."
+        "canvasNote": "Weekend Lineup — covers 4 band(s). Post 3 days before first show.",
+        "reelBrief": "Open with a slow pan across the patio — string lights, lake in background, late afternoon sun. Cut to a wide shot of an empty stage set and ready. Hold 3s. Close on two wine glasses on a stone rail, cliffs soft behind them. Suggested audio: upbeat acoustic country instrumental. Text overlay: 'Live Music This Weekend — Free with Your Visit // Sat & Sun at The Quarry'."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "This weekend is stacked with live music — all free with your visit.\n\nSaturday: Scott Logan 1–4 PM, then Andrew Weber takes the evening 7–10 PM.\nSunday: No Exit Wound 1–4 PM.\n\nPick an afternoon, stay for dinner, or make a full weekend of it. The patio's ready.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#LiveMusicSTL",
+        "#STLEats",
+        "#WineBar",
+        "#OutdoorDining"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Acoustic guitar leaning against a wooden stool on a stone-accented outdoor stage, warm afternoon golden-hour light, string lights overhead beginning to glow, blurred lake and cliff backdrop in soft focus, no faces, no text",
+      "variants": {
+        "facebook": "This weekend is stacked with live music — and it's always free with your visit.\n\nSaturday brings Scott Logan in the afternoon (1–4 PM) followed by Andrew Weber for the evening set (7–10 PM). Sunday afternoon, No Exit Wound takes the stage 1–4 PM.\n\nCome for lunch, stay through the music, or plan a full Saturday night out. 3960 Highway Z, New Melle — open Wed–Sun.",
+        "instagram": "Live music all weekend, free with your visit.\n\nSat: Scott Logan 1–4 PM · Andrew Weber 7–10 PM\nSun: No Exit Wound 1–4 PM\n\nPatio's open. See you out here."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "T-3 weekend lineup posts should be specific and logistical — this gives the full schedule clearly, frames it as an easy 'pick your moment' invitation, and avoids urgency that doesn't fit free live music.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-11T13:07:42.983Z",
+      "updatedAt": "2026-06-11T13:07:42.983Z"
     },
     {
       "id": "drf-mq0ei5at-6-gtrhb",
@@ -7093,7 +7113,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-06-12T16:00:00.000Z",
       "createdAt": "2026-06-11T11:05:26.817Z",
       "createdBy": "weather-trigger",
@@ -7117,10 +7137,29 @@
         },
         "canvasNote": "Patio-perfect day (82°F). Caption hooks on the weather."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "73 degrees, zero chance of rain, and a patio that looks out over the water. Some Fridays just line up right.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#WineBar",
+        "#PatioSeason",
+        "#STLEats",
+        "#OutdoorDining"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Wide shot of a stone-edged patio at golden hour, string lights beginning to glow overhead, two wine glasses catching warm light on a wooden table, calm lake and limestone cliffs softly out of focus in the background, 73-degree summer evening feel, no people, no text",
+      "variants": {
+        "facebook": "73 degrees and not a cloud in the forecast. The patio is open, the wine is cold, and the view hasn't changed a bit. Come find a table tonight.",
+        "instagram": "73 degrees, zero chance of rain, and a patio that looks out over the water. Some Fridays just line up right."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "No-urgency atmosphere post leans into the specific weather conditions as the hook, letting the sensory detail do the work — no CTA, no event, just an invitation framed as observation, timed at 4pm when dinner decisions are being made.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-11T13:07:27.555Z",
+      "updatedAt": "2026-06-11T13:07:29.003Z"
     }
   ],
   "history": [],
