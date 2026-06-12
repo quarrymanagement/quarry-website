@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-12T11:07:09.325Z",
+  "updatedAt": "2026-06-12T13:06:29.605Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -2932,7 +2932,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-06-18T10:00:00-05:00",
       "createdAt": "2026-05-08T20:01:56.382Z",
       "createdBy": "cadence-engine",
@@ -2966,12 +2966,33 @@
           "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "Save the Date — Post 30 days before event. "
+        "canvasNote": "Save the Date — Post 30 days before event. ",
+        "reelBrief": "Open with a slow pan across a chrome bumper and hood detail catching golden-hour light, hold on a wide shot of the Quarry patio and cliffs for 3s, end on a close-up of a cold drink on a stone ledge with car silhouettes blurred behind. Suggested audio: classic rock instrumental or low-key country guitar. Text overlay: 'Quarry Classics Car Cruise / July 18 / 5 PM / Free — No Registration'."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Quarry Classics Car Cruise is coming July 18. Classics, muscle, trucks, bikes — all makes and models welcome. Cruise in, park, and hang out. Live band starts at 7 PM. Free, no registration, family and pet friendly. Doors (and lots) open at 5.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#STLEvents",
+        "#CarShow",
+        "#ClassicCars",
+        "#LiveMusicSTL",
+        "#MuscleCarSTL"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "A row of polished classic American muscle cars parked on a gravel lot at golden hour, warm amber light glinting off chrome and painted hoods, stone cliff face and tree line softly blurred in the background, string lights beginning to glow overhead, no people, no text, wide cinematic shot",
+      "variants": {
+        "facebook": "Quarry Classics Car Cruise is on the calendar — Saturday, July 18, starting at 5 PM.\n\nClassics, muscle, trucks, bikes — all makes and models welcome. Cruise in, park, and hang out. Live band kicks off at 7. Free event, no registration required, and yes — family and pets are welcome too.\n\nSave the date. More details to come.",
+        "instagram": "Quarry Classics Car Cruise — July 18. All makes and models welcome. Free, no registration. Live band at 7 PM. Gates open at 5."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "At T-30 this is a pure save-the-date — the caption establishes all the key facts (date, time, format, free entry, live music) without urgency or hype, matching the announcement arc step and the audience's preference for straightforward, friendly information.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-12T13:06:29.605Z",
+      "updatedAt": "2026-06-12T13:06:29.605Z"
     },
     {
       "id": "drf-mp3av3ms-1-sjwq5",
@@ -7169,7 +7190,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-06-13T16:00:00.000Z",
       "createdAt": "2026-06-12T11:07:09.325Z",
       "createdBy": "weather-trigger",
@@ -7193,10 +7214,29 @@
         },
         "canvasNote": "Stormy / cold day. Lean into \"perfect day to come in and warm up\" vibes."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Some nights, the rain stays just far enough away. Warm air, cold glass, nowhere to be.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#WineBar",
+        "#PatioSeason",
+        "#STLEats",
+        "#OutdoorDining"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Two glasses of chilled white wine on a stone patio table, warm humid evening light, dark dramatic clouds softly blurred on the horizon behind limestone cliffs and a still lake, string lights overhead beginning to glow in the dusk, shallow depth of field, golden-green tones, no faces, no text",
+      "variants": {
+        "facebook": "Some nights, the rain stays just far enough away. Warm air, cold glass, nowhere to be. We're open Wednesday through Sunday — come find your table.",
+        "instagram": "Some nights, the rain stays just far enough away. Warm air, cold glass, nowhere to be."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "Cozy-weather atmosphere posts perform best as sensory snapshots with no CTA — this caption leans into the 78-87° humid-but-clear tension and invites the audience to project themselves into the scene, matching the vibe-only brief and the 4-5pm dinner-planning window.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-12T13:06:15.690Z",
+      "updatedAt": "2026-06-12T13:06:17.159Z"
     }
   ],
   "history": [],
