@@ -8444,8 +8444,8 @@
     "emailStatus": "Subscribed",
     "smsStatus": "",
     "source": "Form Submission",
-    "lastActivity": "",
-    "lastActivityDate": "",
+    "lastActivity": "Form: mailing-list",
+    "lastActivityDate": "2026-06-13T23:32:28.328Z",
     "address": {
       "street": "",
       "city": "",
@@ -8453,9 +8453,17 @@
       "zip": "",
       "country": ""
     },
-    "events": [],
+    "events": [
+      {
+        "type": "mailing-list",
+        "timestamp": "2026-06-13T23:32:28.328Z",
+        "marketingOptIn": false,
+        "details": null
+      }
+    ],
     "tags": [
-      "Subscriptions"
+      "Subscriptions",
+      "Subscribed"
     ]
   },
   {
