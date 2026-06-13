@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-13T11:01:08.393Z",
+  "updatedAt": "2026-06-13T13:05:06.234Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -7246,7 +7246,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-06-14T16:00:00.000Z",
       "createdAt": "2026-06-13T11:01:08.393Z",
       "createdBy": "weather-trigger",
@@ -7270,10 +7270,29 @@
         },
         "canvasNote": "Patio-perfect day (75°F). Caption hooks on the weather."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "67 degrees. Zero clouds. The patio is exactly what you think it is right now.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#WineBar",
+        "#PatioSeason",
+        "#STLEats",
+        "#OutdoorDining"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Wide shot of a stone-edged patio overlooking a calm quarry lake, late morning light casting long warm shadows across empty wooden tables with simple glassware, lush green treeline reflected in still water, soft natural haze, no people, no text, cinematic and unhurried",
+      "variants": {
+        "facebook": "67 degrees. Zero clouds. The patio is exactly what you think it is right now. We're open Wednesday through Sunday — come find your table.",
+        "instagram": "67 degrees. Zero clouds. The patio is exactly what you think it is right now."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "Pure atmosphere post with no event hook — the short, declarative copy lets the weather and implied setting do the work, matching the 'patio-perfect day' brief without over-explaining or pushing a CTA.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-13T13:05:04.926Z",
+      "updatedAt": "2026-06-13T13:05:06.234Z"
     }
   ],
   "history": [],
