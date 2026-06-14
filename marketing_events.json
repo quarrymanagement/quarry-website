@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-14T02:58:54.150Z",
+  "updatedAt": "2026-06-14T03:07:10.952Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -49543,6 +49543,17 @@
       "url": null,
       "sgEventId": "Ecwoyj6USJ2YLZPCpfV7ug",
       "userAgent": "Mozilla/5.0",
+      "category": null
+    },
+    {
+      "ts": "2026-06-14T03:07:03.000Z",
+      "type": "delivered",
+      "draftId": null,
+      "ruleId": null,
+      "email": "carolynuti6@gmail.com",
+      "url": null,
+      "sgEventId": "ZGVsaXZlcmVkLTAtMTA2MDM3NzY1LV9FMTVRNlpLUkxDSFJ0WFBncVhobUEtMA",
+      "userAgent": null,
       "category": null
     }
   ],
