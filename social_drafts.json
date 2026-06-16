@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-16T11:06:01.883Z",
+  "updatedAt": "2026-06-16T13:06:54.180Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -7497,7 +7497,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-06-17T16:00:00.000Z",
       "createdAt": "2026-06-16T11:06:01.883Z",
       "createdBy": "weather-trigger",
@@ -7521,10 +7521,29 @@
         },
         "canvasNote": "Stormy / cold day. Lean into \"perfect day to come in and warm up\" vibes."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Rain on the way. That means the patio is cool, the wine is cold, and the cliffs look like a painting. Good day to stay a while.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#WineBar",
+        "#STLEats",
+        "#PatioSeason",
+        "#MissouriWine"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Wide shot of a stone-edged patio overlooking a still quarry lake, overcast dramatic sky with warm amber light breaking through at the horizon, string lights glowing softly overhead, two empty wine glasses on a weathered wood table in the foreground, lush green cliffs in the background, moody and inviting, no faces, no text",
+      "variants": {
+        "facebook": "Rain in the forecast, but that just means the patio is cool, the wine is cold, and the cliffs look like a painting. No better day to slow down and stay a while. We're open Wed–Sun out on Highway Z.",
+        "instagram": "Rain on the way. Cool patio, cold wine, cliffs that look like a painting. Good day to stay a while."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "Cozy weather mode with 85% precip chance calls for sensory, in-the-moment copy that reframes rain as an asset — moody atmosphere, no urgency, no CTA, just an invitation to be present at the venue.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-16T13:06:52.840Z",
+      "updatedAt": "2026-06-16T13:06:54.180Z"
     }
   ],
   "history": [],
