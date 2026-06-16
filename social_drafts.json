@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-15T13:02:57.567Z",
+  "updatedAt": "2026-06-16T00:05:05.237Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -7395,6 +7395,94 @@
           "qLogo": "top-center, gold"
         },
         "canvasNote": "This Weekend — Post 3 days before event. (Pace warning: registration is light, lean into urgency / value.)"
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
+    },
+    {
+      "id": "drf-mqfvrq6g-1-d6i9t",
+      "cadenceTag": "event:evt-yoga-2026-08-15:T-1",
+      "type": "event_promo",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-08-14T11:00:00-05:00",
+      "createdAt": "2026-06-16T00:05:05.230Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "event",
+        "sourceId": "evt-yoga-2026-08-15",
+        "eventName": "Un-Wine-D & Align — Outdoor Yoga",
+        "eventDate": "2026-08-15",
+        "eventTime": "09:00",
+        "eventDescription": "Outdoor yoga with Yoga with Charity at The Quarry. 9–10 AM session, then unwind with your choice of wine, mimosa, or bloody mary — plus 10% off brunch at the venue. All levels welcome. Bring your mat, come as you are.",
+        "pricePerSeat": 2000,
+        "totalCapacity": 25,
+        "registeredCount": 0,
+        "fillPct": 0,
+        "arcStep": "T-1",
+        "arcLabel": "Tomorrow"
+      },
+      "graphicBrief": {
+        "type": "event_poster",
+        "templateRef": "Event poster — match Boots & Bourbon / Live Bands template style",
+        "neededBy": "2026-08-12",
+        "dimensions": "1080x1080 square (Instagram + Facebook safe)",
+        "toneMode": "discount-push",
+        "spec": {
+          "backgroundIdea": "Use a Quarry-relevant photographic background that matches the event theme (e.g. country/boots for Boot Scootin, bingo balls/80s for Music Bingo, vineyard for Chateau trip, etc.)",
+          "title": "UN-WINE-D & ALIGN — OUTDOOR YOGA",
+          "subtitle": "Outdoor yoga with Yoga with Charity at The Quarry. 9–10 AM session, then unwind with your choice of ",
+          "date": "SATURDAY, AUGUST 15",
+          "time": "9:00 AM",
+          "callout": "EARLY-BIRD PRICING ENDS SOON",
+          "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
+          "qLogo": "top-center, gold"
+        },
+        "canvasNote": "Tomorrow — Post 1 days before event. (Pace warning: registration is light, lean into urgency / value.)"
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
+    },
+    {
+      "id": "drf-mqfvrq6r-2-j7iv0",
+      "cadenceTag": "wineclub:2026-08-15:wc-month-mid",
+      "type": "wine_club",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-08-15T17:00:00-05:00",
+      "createdAt": "2026-06-16T00:05:05.236Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "wine_club",
+        "sourceId": "rock-and-vine",
+        "monthLabel": "August 2026",
+        "arcStep": "wc-month-mid",
+        "arcLabel": "Member Benefit Spotlight"
+      },
+      "graphicBrief": {
+        "type": "wine_club_poster",
+        "templateRef": "Lifestyle poster — wine glass + Quarry view, \"Rock & Vine\" branding",
+        "neededBy": null,
+        "dimensions": "1080x1080 square",
+        "toneMode": "lifestyle",
+        "spec": {
+          "backgroundIdea": "Wine glass, sunset over Quarry lake, member tasting moment",
+          "title": "LIFE AS A ROCK & VINE MEMBER",
+          "subtitle": "Curated wines • Member tastings • Exclusive events",
+          "callout": "Monthly subscription — start anytime",
+          "footerText": "THE QUARRY  •  ROCK & VINE WINE CLUB"
+        },
+        "canvasNote": "Member Benefit Spotlight — recurring monthly post for the Rock & Vine Wine Club."
       },
       "caption": "",
       "hashtags": [],
