@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-17T11:07:17.694Z",
+  "updatedAt": "2026-06-17T13:01:55.663Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -7602,7 +7602,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-06-18T16:00:00.000Z",
       "createdAt": "2026-06-17T11:07:17.694Z",
       "createdBy": "weather-trigger",
@@ -7626,10 +7626,29 @@
         },
         "canvasNote": "Patio-perfect day (76°F). Caption hooks on the weather."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "64 degrees, no rain in sight, and a patio that earns it. Come out tonight.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#WineBar",
+        "#PatioSeason",
+        "#STLEats",
+        "#OutdoorDining"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Wide shot of a stone-edged patio overlooking a calm quarry lake at golden hour, empty wine glasses on a weathered wood table, string lights beginning to glow against a pale blue evening sky, warm amber light catching the cliff face in the background, no people, no text",
+      "variants": {
+        "facebook": "64 degrees and a 24% chance of rain that isn't going to happen. The patio is open, the views are doing their thing. See you out here tonight.",
+        "instagram": "64 degrees, no rain in sight, and a patio that earns it. Come out tonight."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "Atmosphere posts need sensory specificity, not hype — leading with the actual temperature grounds it in today and gives locals an immediate reason to consider coming out, with no CTA pressure.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-17T13:01:54.350Z",
+      "updatedAt": "2026-06-17T13:01:55.663Z"
     }
   ],
   "history": [],
