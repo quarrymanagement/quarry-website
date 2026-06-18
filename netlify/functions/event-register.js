@@ -267,7 +267,21 @@ exports.handler = async function(event) {
       payment_note: 'Event - ' + (evData.name || '') + ' x' + qty
     };
 
-    const result = await squareApi('POST', '/v2/online-checkout/payment-links', linkRequest);
+    // Square validates buyer_email / buyer_phone_number in pre_populated_data and
+    // rejects fake/odd-format values with a 400. The prefill is only a convenience,
+    // so if that happens, retry once without it (customer enters contact on Square's page).
+    let result;
+    try {
+      result = await squareApi('POST', '/v2/online-checkout/payment-links', linkRequest);
+    } catch (e1) {
+      const m1 = String((e1 && (e1.body ? JSON.stringify(e1.body) : e1.message)) || e1);
+      if (/INVALID_PHONE_NUMBER|INVALID_EMAIL_ADDRESS|INVALID_EMAIL|pre_populated/i.test(m1)) {
+        delete linkRequest.pre_populated_data;
+        result = await squareApi('POST', '/v2/online-checkout/payment-links', linkRequest);
+      } else {
+        throw e1;
+      }
+    }
     const pl = result.payment_link || {};
     if (!pl.url) throw new Error('Square did not return a checkout URL');
 
