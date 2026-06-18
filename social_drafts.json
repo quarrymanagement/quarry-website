@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-18T11:08:10.727Z",
+  "updatedAt": "2026-06-18T13:03:42.133Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -6601,7 +6601,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-06-24T17:00:00-05:00",
       "createdAt": "2026-06-05T04:05:12.149Z",
       "createdBy": "cadence-engine",
@@ -6660,12 +6660,32 @@
           ],
           "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
         },
-        "canvasNote": "Weekend Lineup — covers 3 band(s). Post 3 days before first show."
+        "canvasNote": "Weekend Lineup — covers 3 band(s). Post 3 days before first show.",
+        "reelBrief": "Open with a slow pan across the patio at golden hour — empty tables just starting to fill. Cut to a close-up of a wine glass catching the light. End on the stage area with string lights lit. Suggested audio: upbeat acoustic country instrumental. Text overlay: 'Live music this weekend · No cover · The Quarry · New Melle, MO'"
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Live music this weekend — no cover, no ticket, just show up.\n\nSaturday: Crystal O'Connor 1–4 PM · James Jones 7–10 PM\nSunday: Scott & Liz 1–4 PM\n\nCome for the music, stay for the view.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#LiveMusicSTL",
+        "#WineBar",
+        "#STLEats",
+        "#OutdoorDining"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Acoustic guitar leaning against a wooden stool on a stone patio stage, warm late-afternoon golden light, string lights beginning to glow overhead, soft blur of a lake and limestone cliffs in the background, no faces, no text",
+      "variants": {
+        "facebook": "Live music this weekend — and it's always free with your visit.\n\nSaturday, June 27: Crystal O'Connor 1–4 PM, then James Jones takes the evening 7–10 PM.\nSunday, June 28: Scott & Liz close out the weekend 1–4 PM.\n\nNo cover. No reservations needed. Just come out to New Melle and enjoy the view.",
+        "instagram": "Live music this weekend — no cover, just show up.\n\nSat: Crystal O'Connor 1–4 · James Jones 7–10\nSun: Scott & Liz 1–4"
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "At T-3 the post shifts to 'this Saturday' specificity with full logistics — day, name, time — while keeping the tone as a relaxed invitation rather than a push, consistent with band post guidance.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-18T13:03:42.133Z",
+      "updatedAt": "2026-06-18T13:03:42.133Z"
     },
     {
       "id": "drf-mq0ei5au-8-c22go",
@@ -7707,7 +7727,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-06-19T17:00:00-05:00",
       "createdAt": "2026-06-18T04:01:36.556Z",
       "createdBy": "cadence-engine",
@@ -7741,12 +7761,32 @@
           "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "What to Expect — Post 14 days before event. "
+        "canvasNote": "What to Expect — Post 14 days before event. ",
+        "reelBrief": "Open with a slow pan across the patio at golden hour — string lights, cold drinks on tables, water in background. Cut to a close-up of a bingo card next to a sweating beer glass. End on a wide shot of the full patio setup as the sun drops behind the cliffs. Suggested audio: upbeat patriotic-adjacent country instrumental. Text overlay: 'FREE Bingo · July 3rd · 5:30pm · The Quarry'."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "4th of July weekend bingo — free to play, walk-ins welcome. July 3rd at 5:30pm. DJ, cold drinks, and patriotic fun out on the water. Reserve a table of 4 for just a $10 deposit (goes straight to your tab). Only 34 tables total.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#STLEvents",
+        "#FourthOfJuly",
+        "#BingoNight",
+        "#STLEats"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Wide shot of a festive outdoor patio at dusk, string lights overhead, red white and blue bunting draped along a wooden railing, cold drinks in frosted glasses on a picnic-style table, warm golden light reflecting off a still quarry lake in the background, no faces, no text",
+      "variants": {
+        "facebook": "4th of July weekend bingo — and it's free to play. Join us Friday, July 3rd at 5:30pm for an evening of bingo, a DJ, cold drinks, and good food right on the water. Walk-ins are always welcome, but if you want a guaranteed table for your group of 4, you can reserve one with a $10 deposit — applied in full to your food and drink tab. Only 34 tables, so it's worth locking one in. Link to reserve: [LINK]",
+        "instagram": "Free bingo on the water. July 3rd at 5:30pm — DJ, cold drinks, 4th of July weekend vibes. Reserve a table of 4 for $10 (applied to your tab). Link in bio."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "At T-14 the goal is 'what to expect' — this copy lays out the full value proposition (free to play, DJ, food, drinks, waterfront setting, easy deposit) without urgency, matching the arc step and the low fill percentage with a detail-forward, inviting tone.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-18T13:03:30.596Z",
+      "updatedAt": "2026-06-18T13:03:30.596Z"
     },
     {
       "id": "drf-mqiz3lm5-2-p81uh",
@@ -7903,7 +7943,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-06-19T16:00:00.000Z",
       "createdAt": "2026-06-18T11:08:10.727Z",
       "createdBy": "weather-trigger",
@@ -7927,10 +7967,29 @@
         },
         "canvasNote": "Patio-perfect day (85°F). Caption hooks on the weather."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "76 degrees. No clouds. A cold glass of wine and a view of the water. Some days the patio just does the work.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#DefianceWineCountry",
+        "#StCharlesCounty",
+        "#STLWeekend",
+        "#WineBar",
+        "#PatioSeason",
+        "#STLEats",
+        "#OutdoorDining"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Wide shot of a sunlit stone-edged patio overlooking a calm quarry lake, two empty wine glasses on a weathered wood table in the foreground, soft natural light, no clouds, lush green treeline reflected in the water, warm midday glow, no people, no text",
+      "variants": {
+        "facebook": "76 degrees. No clouds. A cold glass of wine and a view of the water.\n\nSome days the patio just does the work. Come see us this week — Wed through Sun, out on Highway Z in New Melle.",
+        "instagram": "76 degrees. No clouds. A cold glass of wine and a view of the water. Some days the patio just does the work."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "Pure atmosphere post — no CTA, no event details — lets the weather and sensory detail carry the moment, matching the 'patio-perfect day' context and the brand's warm, understated voice.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-18T13:03:15.622Z",
+      "updatedAt": "2026-06-18T13:03:17.221Z"
     }
   ],
   "history": [],
