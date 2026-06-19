@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-19T12:03:57.004Z",
+  "updatedAt": "2026-06-19T13:02:39.126Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -2403,7 +2403,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-06-25T10:00:00-05:00",
       "createdAt": "2026-05-05T00:04:04.632Z",
       "createdBy": "cadence-engine",
@@ -2437,12 +2437,32 @@
           "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "Save the Date — Post 30 days before event. "
+        "canvasNote": "Save the Date — Post 30 days before event. ",
+        "reelBrief": "Open with a slow pan across the quarry lake at morning light (golden, misty). Cut to a yoga mat unrolling on the patio deck. Hold 3s on a mimosa or bloody mary on a stone ledge with the lake blurred behind. End on the patio wide shot, string lights still lit. Suggested audio: soft acoustic or lo-fi morning instrumental. Text overlay: 'Un-Wine-D & Align · July 25 · 9 AM · $20'."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Yoga on the patio. Wine after. That's the plan.\n\nUn-Wine-D & Align is a Saturday morning outdoor yoga session with Yoga with Charity — 9 to 10 AM — followed by your choice of wine, mimosa, or bloody mary and 10% off brunch. All levels welcome. Bring your mat.\n\nSaturday, July 25 · 9 AM · $20/seat · 25 spots total.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#STLEvents",
+        "#YogaSTL",
+        "#WineBar",
+        "#BrunchSTL"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Wide shot of a wooden patio deck overlooking a calm quarry lake at golden morning light, soft mist on the water, a neatly rolled yoga mat resting against a wooden railing with a glass of pale sparkling wine beside it, warm sunrise tones, string lights still faintly glowing overhead, no people, no text",
+      "variants": {
+        "facebook": "Yoga on the patio. Wine after. That's the plan.\n\nUn-Wine-D & Align is a Saturday morning outdoor yoga session with Yoga with Charity — 9 to 10 AM at The Quarry — followed by your choice of wine, mimosa, or bloody mary and 10% off brunch. All levels welcome. Just bring your mat.\n\nSaturday, July 25 · 9 AM · $20/seat · 25 spots. Link to register in the comments.",
+        "instagram": "Yoga on the patio. Wine after. That's the plan.\n\nJuly 25 · 9 AM · $20 · 25 spots. Link in bio to register."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "At T-30 with 0% fill, this is a clean announcement — no urgency, just a clear and appealing picture of the morning so the right audience saves the date and follows the registration link when it drops.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-19T13:02:39.126Z",
+      "updatedAt": "2026-06-19T13:02:39.126Z"
     },
     {
       "id": "drf-motarbd0-1-skeph",
@@ -7999,7 +8019,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-06-21T16:00:00-05:00",
       "createdAt": "2026-06-19T11:08:25.084Z",
       "createdBy": "weather-trigger",
@@ -8023,12 +8043,30 @@
         },
         "canvasNote": "Patio-perfect day (82°F). Caption hooks on the weather."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "71 degrees, almost no clouds, and a patio that looks out over the quarry lake. Tonight is exactly what weeknights were made for.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLEats",
+        "#PatioSeason",
+        "#WineBar",
+        "#STLWeekend",
+        "#OutdoorDining"
+      ],
       "imageUrl": null,
       "userImageUrl": null,
       "bumpedFromDay": "2026-06-20",
-      "updatedAt": "2026-06-19T12:03:57.004Z"
+      "updatedAt": "2026-06-19T13:02:25.761Z",
+      "imagePrompt": "Wide shot of a stone-edged patio overlooking a calm quarry lake at golden hour, two wine glasses on a wooden table in the foreground, warm amber light raking across limestone cliffs in the background, string lights just beginning to glow against a pale blue evening sky, no people, no text",
+      "variants": {
+        "facebook": "71 degrees and a 6% chance of rain. The patio is open, the lake is calm, and there's a glass of something cold with your name on it. We're open tonight — no reservation needed.",
+        "instagram": "71 degrees, almost no clouds, a patio over the quarry lake. Tonight is exactly what weeknights were made for."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "No arc urgency needed for a weather-driven atmosphere post — the sensory specificity of the temperature and setting does the work, and the soft 'tonight' framing invites without pushing.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-19T13:02:24.378Z"
     }
   ],
   "history": [],
