@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-20T12:09:33.078Z",
+  "updatedAt": "2026-06-20T13:06:06.146Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -7816,7 +7816,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-06-26T18:00:00-05:00",
       "createdAt": "2026-06-18T04:01:36.557Z",
       "createdBy": "cadence-engine",
@@ -7850,12 +7850,32 @@
           "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "One Week Away — Post 7 days before event. (Pace warning: registration is light, lean into urgency / value.)"
+        "canvasNote": "One Week Away — Post 7 days before event. (Pace warning: registration is light, lean into urgency / value.)",
+        "reelBrief": "Open with a slow pan across the patio at dusk — string lights coming on, tables filling. Hold 3s on a cold drink sweating in warm light. Cut to a bingo card close-up, hand hovering. End on the cliff/lake view at golden hour. Suggested audio: upbeat Americana or summer country instrumental. Text overlay: 'FREEdom Bingo / This Friday 5:30pm / The Quarry, New Melle'."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "4th of July weekend bingo — free to play, walk-ins welcome. This Friday at 5:30pm at The Quarry. Only 34 tables. Reserve yours with a $10 deposit (applied to your tab) or just show up. DJ, cold drinks, patriotic good time out in New Melle.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#STLWeekend",
+        "#DefianceWineCountry",
+        "#WentzvilleMO",
+        "#STLEvents",
+        "#FourthOfJuly",
+        "#BingoNight"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Wide shot of a festive outdoor patio at golden hour, string lights overhead, red white and blue bunting draped along a wooden railing, cold drinks on a rustic table in the foreground, stone cliff and lake softly out of focus in the background, warm summer evening light",
+      "variants": {
+        "facebook": "4th of July weekend bingo — and it's free to play. This Friday, July 3rd at 5:30pm. DJ, cold drinks, great food, and 34 tables with a view of the Quarry lake. Walk-ins welcome, or lock in a table of 4 with a $10 deposit that goes straight toward your food and drink tab. See you out there.",
+        "instagram": "Free bingo this Friday for 4th of July weekend. 5:30pm, 34 tables, walk-ins welcome. Reserve a table of 4 with a $10 deposit — link in bio."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "At T-7 with 0% fill, this is a value push — the copy leads with 'free to play' and the deposit-applied-to-tab detail to lower the barrier, while the 34-table capacity creates soft natural urgency without manufactured pressure.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-20T13:06:06.146Z",
+      "updatedAt": "2026-06-20T13:06:06.146Z"
     },
     {
       "id": "drf-mqiz3lm6-3-nx3op",
@@ -8076,7 +8096,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-06-22T16:00:00-05:00",
       "createdAt": "2026-06-20T11:08:23.967Z",
       "createdBy": "weather-trigger",
@@ -8100,12 +8120,30 @@
         },
         "canvasNote": "Stormy / cold day. Lean into \"perfect day to come in and warm up\" vibes."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Rain on the way, fire pit lit, wine poured. Some Saturdays just work out.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#DefianceWineCountry",
+        "#StCharlesCounty",
+        "#STLWeekend",
+        "#WineBar",
+        "#PatioSeason",
+        "#STLEats",
+        "#FirePitVibes"
+      ],
       "imageUrl": null,
       "userImageUrl": null,
       "bumpedFromDay": "2026-06-21",
-      "updatedAt": "2026-06-20T12:09:33.078Z"
+      "updatedAt": "2026-06-20T13:05:53.519Z",
+      "imagePrompt": "Stone fire pit glowing amber on a covered patio at dusk, a half-full glass of red wine resting on the arm of a wooden Adirondack chair, soft rain visible beyond the overhang in the background, string lights overhead casting warm gold light, moody blue-grey sky, no people, no text",
+      "variants": {
+        "facebook": "Rain on the way, fire pit lit, wine poured. Some Saturdays just work out. We're open Wed–Sun out on Highway Z — come find a seat before the weather rolls in.",
+        "instagram": "Rain on the way, fire pit lit, wine poured. Some Saturdays just work out."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "Cozy weather mode with 79% precip chance calls for sensory, in-the-moment framing — no CTA, just the feeling of being warm and sheltered with a glass of wine while the rain moves in, which is exactly the escape this audience craves on a June weekend.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-20T13:05:52.084Z"
     }
   ],
   "history": [],
