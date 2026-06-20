@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-20T17:38:53.069Z",
+  "updatedAt": "2026-06-20T17:46:11.121Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -55440,6 +55440,17 @@
       "sgEventId": "-Z49ojAzRbiRgdF9ZIXOcQ",
       "userAgent": "YahooMailProxy; https://help.yahoo.com/kb/yahoo-mail-proxy-SLN28749.html",
       "category": "quarry-form-notification"
+    },
+    {
+      "ts": "2026-06-20T17:45:55.000Z",
+      "type": "delivered",
+      "draftId": null,
+      "ruleId": null,
+      "email": "robertwcre@gmail.com",
+      "url": null,
+      "sgEventId": "ZGVsaXZlcmVkLTAtMTA2MDM3NzY1LTNLb3RHblF5UjF1a1lpRkxLQ3ptRVEtMA",
+      "userAgent": null,
+      "category": null
     }
   ],
   "aggregates": {
