@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-20T02:48:50.596Z",
+  "updatedAt": "2026-06-20T03:07:37.202Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -55231,6 +55231,17 @@
       "sgEventId": "jdFVnOtFR-q6s37CVO_kIA",
       "userAgent": "Mozilla/5.0 (Windows NT 5.1; rv:11.0) Gecko Firefox/11.0 (via ggpht.com GoogleImageProxy)",
       "category": "quarry-golf-booking"
+    },
+    {
+      "ts": "2026-06-20T03:07:26.000Z",
+      "type": "dropped",
+      "draftId": null,
+      "ruleId": null,
+      "email": "rob@thequarrystl.com",
+      "url": null,
+      "sgEventId": "ZHJvcC0xMDYwMzc3NjUtdWE1cDI4d2dSLWU0VUYycy12dWphQS0y",
+      "userAgent": null,
+      "category": null
     }
   ],
   "aggregates": {
