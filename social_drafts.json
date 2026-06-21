@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-20T13:06:06.146Z",
+  "updatedAt": "2026-06-21T13:08:09.834Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -2766,7 +2766,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-06-27T17:00:00-05:00",
       "createdAt": "2026-05-07T20:01:10.196Z",
       "createdBy": "cadence-engine",
@@ -2800,12 +2800,33 @@
           "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "What to Expect — Post 14 days before event. "
+        "canvasNote": "What to Expect — Post 14 days before event. ",
+        "reelBrief": "Open with a slow pan across a parked classic car at golden hour — chrome, curves, warm light. Cut to the stone quarry cliff backdrop at dusk. Hold on string lights flickering on over the patio for 3s. End on a wide shot of the lot with soft crowd silhouettes (no faces). Suggested audio: low-key classic rock instrumental or a warm country guitar riff. Text overlay: 'Quarry Classics Car Cruise / July 11 / 5 PM / Free — No Registration'."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Two weeks out: Quarry Classics Car Cruise rolls in July 11. Classics, muscle, trucks, bikes — all makes and models welcome. Show up at 5 PM, cruise in, find a spot, stay a while. Live band kicks off at 7. Free, no registration, family and pets welcome.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#CarShow",
+        "#ClassicCars",
+        "#STLCars",
+        "#MuscleCarSTL",
+        "#LiveMusicSTL"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Wide shot of a sun-drenched gravel lot at golden hour, a vintage American muscle car parked in the foreground with warm amber light catching chrome details, stone quarry cliff and tree line softly out of focus in the background, string lights beginning to glow overhead, no people, no text",
+      "variants": {
+        "facebook": "Two weeks out: Quarry Classics Car Cruise is July 11, starting at 5 PM. Classics, muscle, trucks, bikes — all makes and models welcome. Cruise in, park, and hang out. Live band starts at 7. It's free, no registration needed, and the whole family (pets included) is welcome. Just show up. 3960 Highway Z, New Melle.",
+        "instagram": "Quarry Classics Car Cruise — July 11, 5 PM. All makes and models welcome. Live band at 7. Free, no registration, family and pets welcome."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "At T-14, the priority is painting a clear picture of what the day looks like — who it's for, what happens when, and why it's worth the drive out — without any urgency since this is a free walk-in event.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-21T13:08:09.834Z",
+      "updatedAt": "2026-06-21T13:08:09.834Z"
     },
     {
       "id": "drf-mowt73xc-1-x1lzl",
@@ -5701,7 +5722,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-06-27T14:00:00-05:00",
       "createdAt": "2026-06-05T04:05:12.149Z",
       "createdBy": "cadence-engine",
@@ -5760,12 +5781,32 @@
           ],
           "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
         },
-        "canvasNote": "Tonight — covers 3 band(s). Post 0 days before first show."
+        "canvasNote": "Tonight — covers 3 band(s). Post 0 days before first show.",
+        "reelBrief": "Open with a slow pan across the patio as guests settle in — tables, wine glasses, afternoon light. Cut to a tight shot of a guitar or mic stand on the small stage. Hold 3s on the lake-and-cliff view. End on a wide patio shot with string lights just starting to glow. Suggested audio: laid-back acoustic country instrumental. Text overlay: 'Crystal O'Connor · 1–4 PM / James Jones · 7–10 PM / Live & Free · The Quarry'"
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Live music starts at 1 PM today — Crystal O'Connor plays through 4 PM, then James Jones takes the evening set from 7 to 10. Both free with your visit. Come as you are.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#LiveMusicSTL",
+        "#WineBar",
+        "#STLEats",
+        "#OutdoorDining"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Acoustic guitar leaning against a wooden stool on a warm stone patio, string lights glowing overhead in soft afternoon light, blurred lake and cliff backdrop, golden hour warmth, no people, no text",
+      "variants": {
+        "facebook": "Live music is on all day today at The Quarry. Crystal O'Connor plays 1–4 PM this afternoon, and James Jones brings the evening set from 7–10 PM. Both are free with your visit — no cover, no ticket. Come out to New Melle and make a day of it.",
+        "instagram": "Live music all day — Crystal O'Connor 1–4 PM, James Jones 7–10 PM. Free with your visit."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "T-0 calls for a short, present-tense 'it's happening now' tone — this leads with today's full lineup, anchors the free-with-visit fact, and closes with a low-pressure invitation rather than a push.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-21T13:07:57.401Z",
+      "updatedAt": "2026-06-21T13:07:57.401Z"
     },
     {
       "id": "drf-mq0ei5au-b-36io4",
