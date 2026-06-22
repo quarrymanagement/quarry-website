@@ -13149,8 +13149,8 @@
     "emailStatus": "Subscribed",
     "smsStatus": "Never subscribed",
     "source": "Form Submission",
-    "lastActivity": "",
-    "lastActivityDate": "",
+    "lastActivity": "Form: reservations",
+    "lastActivityDate": "2026-06-22T16:59:15.470Z",
     "address": {
       "street": "",
       "city": "O Fallon",
@@ -13158,9 +13158,28 @@
       "zip": "63376",
       "country": "United States"
     },
-    "events": [],
+    "events": [
+      {
+        "type": "reservations",
+        "timestamp": "2026-06-22T16:59:15.470Z",
+        "marketingOptIn": false,
+        "details": {
+          "occasion": "Group Gathering",
+          "date": "2026-07-17",
+          "time": "12:00 PM",
+          "guests": "22",
+          "location": "Outside",
+          "catering": "No",
+          "notes": "Ladies lunchroom meets third Friday of every month at noon. Separate checks.",
+          "ip": "47.233.43.62",
+          "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 26_5_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/149.0.7827.137 Mobile/15E148 Safari/604.1",
+          "referrer": "https://thequarrystl.com/quarry-reservations"
+        }
+      }
+    ],
     "tags": [
-      "Subscriptions"
+      "Subscriptions",
+      "Subscribed"
     ]
   },
   {
