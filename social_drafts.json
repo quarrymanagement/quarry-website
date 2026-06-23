@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-23T11:01:09.979Z",
+  "updatedAt": "2026-06-23T13:06:01.039Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -8234,7 +8234,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-06-24T16:00:00.000Z",
       "createdAt": "2026-06-23T11:01:09.979Z",
       "createdBy": "weather-trigger",
@@ -8258,10 +8258,29 @@
         },
         "canvasNote": "Patio-perfect day (82°F). Caption hooks on the weather."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "76 degrees, a light breeze, and a view of the quarry lake. Some evenings just work.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#DefianceWineCountry",
+        "#StCharlesCounty",
+        "#STLWeekend",
+        "#WineBar",
+        "#PatioSeason",
+        "#STLEats",
+        "#OutdoorDining"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Wide shot of a stone-edged patio overlooking a calm quarry lake at golden hour, two wine glasses on a weathered wood table in the foreground, warm amber light catching the water, soft cliff face visible in the background, string lights beginning to glow overhead, no people, no text",
+      "variants": {
+        "facebook": "76 degrees, a light breeze, and a view of the quarry lake. Some evenings just work. We're open Wednesday through Sunday — come see for yourself.",
+        "instagram": "76 degrees, a light breeze, and a view of the quarry lake. Some evenings just work."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "A pure atmosphere post needs no CTA — the sensory specificity (temperature, breeze, lake view) does the work, and the 4pm post time catches dinner planners while the patio is still the story.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-23T13:05:59.579Z",
+      "updatedAt": "2026-06-23T13:06:01.039Z"
     }
   ],
   "history": [],
