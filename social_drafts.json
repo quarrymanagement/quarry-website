@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-23T13:06:01.039Z",
+  "updatedAt": "2026-06-24T13:07:10.995Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -7966,7 +7966,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-06-30T18:00:00-05:00",
       "createdAt": "2026-06-18T04:01:36.558Z",
       "createdBy": "cadence-engine",
@@ -8000,12 +8000,32 @@
           "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "This Weekend — Post 3 days before event. (Pace warning: registration is light, lean into urgency / value.)"
+        "canvasNote": "This Weekend — Post 3 days before event. (Pace warning: registration is light, lean into urgency / value.)",
+        "reelBrief": "Open with a slow pan across the patio string lights at dusk (2s). Cut to a close-up of a cold drink sweating on a wooden table (2s). Cut to a wide shot of the stone cliff and lake at golden hour (3s). End on a static title card: 'FREEdom Bingo — July 3rd, 5:30pm — Free to Play.' Suggested audio: upbeat Americana or classic rock instrumental. Text overlay: 'Free bingo. Cold drinks. July 3rd.'"
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "FREEdom Bingo is this Friday — July 3rd at 5:30pm. Free to play, walk-ins welcome. DJ, cold drinks, and a full menu to go with it. Tables of 4 can reserve with a $10 deposit (goes straight to your bill). Only 34 tables total.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#4thOfJuly",
+        "#STLEvents",
+        "#FamilyFriendlySTL",
+        "#OFallonMO"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Wide shot of a festive outdoor patio at golden hour — string lights overhead, red white and blue bunting draped along a wooden railing, cold drinks on a rustic table, soft warm light, stone cliff backdrop in soft focus, no people, no text",
+      "variants": {
+        "facebook": "FREEdom Bingo is this Friday, July 3rd at 5:30pm — and it's free to play. Walk in, grab a table, and enjoy a full evening of bingo, a DJ, cold drinks, and great food. Want to guarantee your spot? Reserve a table of 4 with a $10 deposit (fully applied to your food and drink bill). Only 34 tables, so if you're planning to come out, locking one in is worth it. Link in bio to reserve.",
+        "instagram": "Free bingo. DJ. Cold drinks. July 3rd at 5:30pm. Walk-ins welcome — or reserve a table of 4 with a $10 deposit. Only 34 tables."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "T-3 'This Weekend' arc calls for day-of-week specificity and a soft logistical nudge toward reserving — the deposit detail and table count create gentle urgency without overselling a free event.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-24T13:07:10.995Z",
+      "updatedAt": "2026-06-24T13:07:10.995Z"
     },
     {
       "id": "drf-mqiz3lm6-5-xto3p",
