@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-25T11:02:51.775Z",
+  "updatedAt": "2026-06-25T13:09:23.502Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -1878,7 +1878,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-07-01T10:00:00-05:00",
       "createdAt": "2026-05-02T00:02:46.746Z",
       "createdBy": "cadence-engine",
@@ -1904,10 +1904,29 @@
         },
         "canvasNote": "Now Accepting Members — recurring monthly post for the Rock & Vine Wine Club."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "July is open for Rock & Vine Wine Club. A curated selection delivered monthly, plus member tastings and events at the Quarry. If you've been thinking about it, now's the time.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWine",
+        "#WineBar",
+        "#WineClub",
+        "#STLEats",
+        "#WentzvilleMO"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Two glasses of white and rosé wine side by side on a worn stone bar top, warm afternoon light filtering through, soft-focus view of a lake and limestone cliffs in the background, golden hour glow, no faces, no text",
+      "variants": {
+        "facebook": "July is open for Rock & Vine Wine Club. Each month: a curated wine selection, member tastings, and exclusive events right here at the Quarry. It's a low-commitment way to discover something new and have a reason to come out more often. Details at the link.",
+        "instagram": "July is open for Rock & Vine Wine Club. Curated wines, member tastings, and events at the Quarry — monthly."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "Arc step 'wc-month-open' calls for a calm, belonging-forward invitation that establishes availability without urgency — lifestyle pull, not a hard sell.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-25T13:09:23.502Z",
+      "updatedAt": "2026-06-25T13:09:23.502Z"
     },
     {
       "id": "drf-morv8nfb-2-a6hgr",
@@ -8310,7 +8329,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-06-26T16:00:00.000Z",
       "createdAt": "2026-06-25T11:02:51.775Z",
       "createdBy": "weather-trigger",
@@ -8334,10 +8353,29 @@
         },
         "canvasNote": "Stormy / cold day. Lean into \"perfect day to come in and warm up\" vibes."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Some nights the rain stays just far enough away. Warm air, a glass of something good, and nowhere to be.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#DefianceWineCountry",
+        "#StCharlesCounty",
+        "#STLWeekend",
+        "#WineBar",
+        "#PatioSeason",
+        "#STLEats",
+        "#OutdoorDining"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Empty stone patio at dusk, string lights glowing warm overhead, light overcast sky with soft purple-gray clouds, a half-full glass of red wine resting on a weathered wood table, candle flickering nearby, quarry cliffs barely visible in the misty background, no people, no text, moody golden warmth against cool evening air",
+      "variants": {
+        "facebook": "Some nights the rain stays just far enough away. Warm air, a glass of something good, and nowhere to be. That's a Thursday at The Quarry.",
+        "instagram": "Some nights the rain stays just far enough away. Warm air, a glass of something good, and nowhere to be."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "Cozy weather context calls for sensory, in-the-moment writing with no CTA — this leans into the 76-82° overcast mood and positions The Quarry as a refuge without overselling it.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-25T13:09:14.175Z",
+      "updatedAt": "2026-06-25T13:09:15.524Z"
     }
   ],
   "history": [],
