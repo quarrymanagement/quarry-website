@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-26T12:04:11.254Z",
+  "updatedAt": "2026-06-26T13:05:37.047Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -6815,7 +6815,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-07-02T17:00:00-05:00",
       "createdAt": "2026-06-05T04:05:12.150Z",
       "createdBy": "cadence-engine",
@@ -6863,12 +6863,32 @@
           ],
           "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
         },
-        "canvasNote": "Weekend Lineup — covers 2 band(s). Post 3 days before first show."
+        "canvasNote": "Weekend Lineup — covers 2 band(s). Post 3 days before first show.",
+        "reelBrief": "Open with a slow pan across the string-lit patio at dusk (2s), cut to a close-up of a wine glass on a stone bar top catching warm light (3s), end on a wide shot of the outdoor stage area with empty chairs set up and cliffs behind (3s). Suggested audio: upbeat acoustic/country instrumental. Text overlay: 'Live Music This Weekend · No Cover · The Quarry, New Melle'."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Live music this weekend — no cover, no ticket needed.\n\nTOFU plays Sunday afternoon (1–4 PM), and Kellie Renee takes the stage Friday evening (7–10 PM). Come for the wine, stay for the music.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#LiveMusicSTL",
+        "#WineBar",
+        "#STLEats",
+        "#OutdoorLiveMusic"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Acoustic guitar leaning against a wooden stool on a stone patio, warm golden-hour light, string lights glowing softly overhead, blurred cliff and lake in the background — no faces, no text",
+      "variants": {
+        "facebook": "Live music this weekend — and it's always free with your visit.\n\nTOFU plays this Sunday afternoon from 1–4 PM. Kellie Renee is up Friday evening, 7–10 PM. Pull up a chair, pour a glass, and let the weekend do its thing.",
+        "instagram": "Live music this weekend — no cover, no ticket needed.\n\nTOFU Sunday 1–4 PM · Kellie Renee Friday 7–10 PM. Come as you are."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "At T-3 (weekend lineup), the post establishes the full two-act lineup with day-of-week specificity and reinforces the free music value prop without urgency — inviting rather than selling, per band post guidance.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-26T13:05:37.047Z",
+      "updatedAt": "2026-06-26T13:05:37.047Z"
     },
     {
       "id": "drf-mq0ei5aq-1-tbok9",
@@ -7798,7 +7818,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-07-02T11:00:00-05:00",
       "createdAt": "2026-06-18T04:01:36.558Z",
       "createdBy": "cadence-engine",
@@ -7832,12 +7852,32 @@
           "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "Tomorrow — Post 1 days before event. (Pace warning: registration is light, lean into urgency / value.)"
+        "canvasNote": "Tomorrow — Post 1 days before event. (Pace warning: registration is light, lean into urgency / value.)",
+        "reelBrief": "Open with a slow pan across a set patio table — drinks, bingo cards, string lights overhead. Cut to a quick shot of the lake and cliffs at golden hour. End on a close-up of a bingo dauber hitting a card. Suggested audio: upbeat patriotic-adjacent Americana instrumental. Text overlay: 'FREEdom Bingo / Tomorrow 5:30pm / The Quarry, New Melle'."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Tomorrow: FREEdom Bingo at The Quarry. Free to play, 5:30pm, 4th of July weekend energy — DJ, cold drinks, great food. Reserve a table of 4 with a $10 deposit (goes straight to your bill). Only 34 tables. Walk-ins welcome too.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#STLEvents",
+        "#FourthOfJuly",
+        "#BingoNight",
+        "#STLEats"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Overhead view of a bingo card and dauber on a dark wood table, cold beer and a glass of white wine alongside, warm string-light bokeh in background, soft golden evening light, patriotic red and blue accents in a small floral centerpiece — no faces, no text on card",
+      "variants": {
+        "facebook": "Tomorrow night: FREEdom Bingo at The Quarry — free to play, 5:30pm, 4th of July weekend. DJ spinning, cold drinks, great food. Reserve a table of 4 with a $10 deposit (applied to your bill), or just walk in. Only 34 tables total, so if you want a spot locked in, grab it tonight. Link in bio.",
+        "instagram": "Tomorrow: FREEdom Bingo. Free to play, 5:30pm, 4th of July weekend. DJ, drinks, 34 tables — walk-ins welcome or reserve yours."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "T-1 arc calls for short, punchy, logistical — this leads with 'Tomorrow' for immediacy, names the free-to-play hook, gives the time and the one action worth taking (reserve or walk in), and keeps urgency honest given 0% fill.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-26T13:05:25.582Z",
+      "updatedAt": "2026-06-26T13:05:25.582Z"
     },
     {
       "id": "drf-mqiz3lm4-1-0j13u",
@@ -8385,7 +8425,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-06-29T16:00:00-05:00",
       "createdAt": "2026-06-26T11:06:28.454Z",
       "createdBy": "weather-trigger",
@@ -8409,12 +8449,30 @@
         },
         "canvasNote": "Patio-perfect day (85°F). Caption hooks on the weather."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "76 degrees. Low chance of rain. A cold glass of wine and a view of the water. That's a Saturday.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#WineBar",
+        "#PatioSeason",
+        "#STLEats",
+        "#OutdoorDining"
+      ],
       "imageUrl": null,
       "userImageUrl": null,
       "bumpedFromDay": "2026-06-27",
-      "updatedAt": "2026-06-26T12:04:11.254Z"
+      "updatedAt": "2026-06-26T13:05:12.446Z",
+      "imagePrompt": "Wide-angle view of a stone-edged patio overlooking a calm quarry lake at golden hour, two wine glasses on a wooden table in the foreground, string lights beginning to glow overhead, warm 76-degree late-afternoon light, soft cliffs in the background, no people, no text, photographic, rich warm tones",
+      "variants": {
+        "facebook": "76 degrees and an 11% chance of rain. That's about as close to perfect as a June afternoon gets around here. Come find a seat on the patio — we're open Wednesday through Sunday.",
+        "instagram": "76 degrees. Low chance of rain. A cold glass of wine and a view of the water. That's a Saturday."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "Atmosphere posts perform best when they make the viewer feel like they're missing something pleasant — the specific temperature and low precip chance grounds it in real conditions without overselling, matching the warm-casual brand voice for a patio-perfect day arc.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-26T13:05:10.960Z"
     }
   ],
   "history": [],
