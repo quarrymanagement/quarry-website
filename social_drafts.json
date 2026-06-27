@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-26T13:05:37.047Z",
+  "updatedAt": "2026-06-27T13:07:51.301Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -8094,7 +8094,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-07-03T09:00:00-05:00",
       "createdAt": "2026-06-18T04:01:36.558Z",
       "createdBy": "cadence-engine",
@@ -8128,12 +8128,31 @@
           "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "Today / Tonight — Post 0 days before event. (Pace warning: registration is light, lean into urgency / value.)"
+        "canvasNote": "Today / Tonight — Post 0 days before event. (Pace warning: registration is light, lean into urgency / value.)",
+        "reelBrief": "Open with a slow pan across the patio as guests arrive — string lights just starting to glow at dusk. Cut to a close shot of a bingo card and a cold drink on the table. Hold 3s on the lake/cliff view in the background. End on the DJ setup with crowd energy blurred behind. Suggested audio: upbeat patriotic-adjacent summer track, mid-tempo. Text overlay: 'FREEdom Bingo — Tonight at 5:30 — The Quarry, New Melle'."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "FREEdom Bingo is tonight. Show up, play bingo, eat well, and catch the DJ — no ticket needed. Tables of 4 can reserve with a $10 deposit (goes straight to your tab). Only 34 tables, so come early. Doors at 5:30.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#STLEvents",
+        "#FourthOfJuly",
+        "#STLEats"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Outdoor patio at golden hour, string lights glowing overhead, a cold drink in a pint glass on a wooden table with a bingo card and dauber beside it, warm patriotic red and blue accents in soft bokeh background, stone cliff wall visible behind the patio, no faces, no text",
+      "variants": {
+        "facebook": "FREEdom Bingo is tonight at The Quarry. Free to play, walk-ins welcome — just show up and grab a seat. Tables of 4 can reserve with a $10 deposit that goes right to your food and drink tab. DJ, patriotic fun, cold drinks, great food. Doors at 5:30. Only 34 tables total, so come early.",
+        "instagram": "FREEdom Bingo is tonight. Free to play, no ticket needed. Doors at 5:30 — come early, only 34 tables."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "T-0 calls for short, logistical, tonight-specific copy — this version leads with the action (it's happening now), gives the one key detail (5:30 doors), and keeps urgency practical rather than pushy, matching the walk-in, free-play nature of the event.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-27T13:07:51.301Z",
+      "updatedAt": "2026-06-27T13:07:51.301Z"
     },
     {
       "id": "drf-mqjec67a-1-bnu57",
