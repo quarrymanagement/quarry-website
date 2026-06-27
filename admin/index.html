@@ -6239,7 +6239,23 @@
                     const eventsData = await eventsRes.json();
                     if (eventsData.events && Array.isArray(eventsData.events)) {
                         app.events = eventsData.events;
-                        app.registrations = eventsData.registrations || {};
+                        // Read registrations from each event's per-event array (the source of truth
+                        // the Square webhook + public site write to), falling back to the legacy
+                        // top-level registrations map for older events that predate that format.
+                        const legacyRegs = eventsData.registrations || {};
+                        app.registrations = {};
+                        app.events.forEach(ev => {
+                            const perEvent = Array.isArray(ev.registrations) ? ev.registrations : [];
+                            if (perEvent.length) {
+                                app.registrations[ev.id] = perEvent.map(r => ({
+                                    ...r,
+                                    tickets: r.tickets || r.qty || 1,
+                                    amount: r.amount || r.amountPaid || ((r.qty || 1) * ((ev.pricePerSeat || ev.price || 0) / 100))
+                                }));
+                            } else if (legacyRegs[ev.id]) {
+                                app.registrations[ev.id] = legacyRegs[ev.id].map(r => ({ ...r, tickets: r.tickets || r.qty || 1 }));
+                            }
+                        });
                         app.bands = eventsData.bands || [];
                         app.floorPlan = eventsData.floorPlan || { tables: [], labels: [], barSeats: [] };
                         app.floorPlans = eventsData.floorPlans || [];
