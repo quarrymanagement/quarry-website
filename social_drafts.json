@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-27T13:07:51.301Z",
+  "updatedAt": "2026-06-28T13:04:31.817Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -2598,7 +2598,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-07-04T18:00:00-05:00",
       "createdAt": "2026-05-07T20:01:10.197Z",
       "createdBy": "cadence-engine",
@@ -2632,12 +2632,32 @@
           "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "One Week Away — Post 7 days before event. (Pace warning: registration is light, lean into urgency / value.)"
+        "canvasNote": "One Week Away — Post 7 days before event. (Pace warning: registration is light, lean into urgency / value.)",
+        "reelBrief": "Open with a slow pan across a chrome grille and hood detail at golden hour, cut to a wide shot of the quarry cliffs and patio with string lights coming on, end on a close-up of a cold drink on a stone ledge with blurred car silhouettes behind. Suggested audio: low-key classic rock instrumental or country twang riff. Text overlay: 'Quarry Classics Car Cruise / July 12 · 5 PM / Live Band at 7 / Free · No Registration'"
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Next Saturday — Quarry Classics Car Cruise. Classics, muscle, trucks, bikes. Roll in, park, hang out. Live band starts at 7 PM. Free, no registration, family and pet friendly. Doors at 5.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#CarShow",
+        "#ClassicCars",
+        "#STLCars",
+        "#LiveMusicSTL"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "A row of classic American muscle cars parked on a gravel lot at golden hour, warm amber light raking across chrome bumpers and painted hoods, stone quarry cliffs softly visible in the background, string lights beginning to glow in the early evening dusk, no people, no text",
+      "variants": {
+        "facebook": "Next Saturday — Quarry Classics Car Cruise at The Quarry in New Melle. All makes and models welcome: classics, muscle, trucks, bikes. Roll in, park, and hang out. Live band kicks off at 7 PM. Free event, no registration needed. Family and pet friendly. Gates open at 5. 3960 Highway Z, New Melle, MO.",
+        "instagram": "Next Saturday. Classics, muscle, trucks, bikes — all welcome. Live band at 7. Free, no registration. 🚗 July 12 · 5 PM · New Melle, MO"
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "At T-7 the post establishes the full what/when/why with a soft 'see you there' invitation tone — no urgency needed for a free walk-in event, so the copy leans on specifics and accessibility to drive casual weekend planning.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-28T13:04:18.962Z",
+      "updatedAt": "2026-06-28T13:04:18.962Z"
     },
     {
       "id": "drf-movwvtpv-1-fazj8",
@@ -4272,7 +4292,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-07-04T18:00:00-05:00",
       "createdAt": "2026-05-22T20:03:38.733Z",
       "createdBy": "cadence-engine",
@@ -4306,12 +4326,32 @@
           "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "One Week Away — Post 7 days before event. (Pace warning: registration is light, lean into urgency / value.)"
+        "canvasNote": "One Week Away — Post 7 days before event. (Pace warning: registration is light, lean into urgency / value.)",
+        "reelBrief": "Open with a slow pan across the Quarry stone exterior on a bright summer morning, hold 3s on the patio set up for brunch. Cut to a wide shot of open Missouri backroads — rolling hills, gravel, morning light. End on a close-up of poker cards fanned on a wood table with a coffee cup beside them. Suggested audio: upbeat Americana/country instrumental. Text overlay: 'RIDE FOR ZESA — July 11 — The Quarry'."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Next Saturday, The Quarry is the starting line. Ride for Zesa kicks off July 11 at 10am — brunch check-in here, then a five-stop side-by-side poker run through New Melle and Marthasville. Every entry benefits Zesa Bollinger's recovery. $25 to register. See you at the starting line.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#RideForZesa",
+        "#PokerRun",
+        "#SideBySide",
+        "#STLEvents"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Wide shot of a gravel lot at golden hour, two side-by-side UTVs parked near a stone building entrance with string lights overhead, warm summer light raking across the vehicles, no faces visible, soft green Missouri hills in the background",
+      "variants": {
+        "facebook": "Next Saturday, The Quarry is the starting line.\n\nRide for Zesa kicks off July 11 at 10am with brunch check-in here, then a five-stop side-by-side poker run through New Melle and Marthasville. Best hand at the end wins — but every entry goes directly to Zesa Bollinger's recovery.\n\n$25 per entry. Register at the link below and we'll see you here Saturday morning.",
+        "instagram": "Next Saturday, The Quarry is the starting line. Ride for Zesa — July 11 at 10am. Brunch, a five-stop poker run, and every entry benefits Zesa's recovery. $25 to register — link in bio."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "At T-7 with 0% fill, this is a value-push moment — the caption leads with the experience and the cause, surfaces the low $25 entry price, and closes with a soft 'see you there' invitation rather than a hard sell.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-28T13:04:31.817Z",
+      "updatedAt": "2026-06-28T13:04:31.817Z"
     },
     {
       "id": "drf-mphcksbw-5-z7odh",
