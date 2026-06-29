@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-28T13:04:31.817Z",
+  "updatedAt": "2026-06-29T13:07:57.935Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -2931,7 +2931,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-07-05T17:00:00-05:00",
       "createdAt": "2026-05-08T20:01:56.383Z",
       "createdBy": "cadence-engine",
@@ -2965,14 +2965,33 @@
           "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "What to Expect — Post 14 days before event. "
+        "canvasNote": "What to Expect — Post 14 days before event. ",
+        "reelBrief": "Open with a slow pan across a classic car hood in golden evening light (3s). Cut to a wide shot of the Quarry patio with string lights and crowd energy (3s). End on a tight shot of a cold drink on a stone bar top with the cliffs behind (2s). Suggested audio: upbeat classic rock instrumental or country guitar riff. Text overlay: 'Quarry Classics Car Cruise / July 18 / 5 PM / Free'."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Two weeks out: Quarry Classics Car Cruise is July 18. Classics, muscle, trucks, bikes — all makes and models welcome. Roll in anytime after 5 PM, park on the grounds, and stay for live music starting at 7. Free to attend, no registration. Bring the family, bring the dog.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#CarCruiseSTL",
+        "#ClassicCars",
+        "#STLCars",
+        "#LiveMusicSTL"
+      ],
       "imageUrl": null,
       "userImageUrl": null,
       "bumpedFromDay": "2026-07-04",
-      "updatedAt": "2026-05-22T20:03:38.740Z"
+      "updatedAt": "2026-06-29T13:07:57.935Z",
+      "imagePrompt": "Wide shot of a polished vintage muscle car parked on a gravel lot at golden hour, warm amber light raking across the hood, a stone cliff face and tree line softly blurred in the background, string lights beginning to glow overhead, no people, no text",
+      "variants": {
+        "facebook": "Two weeks out: Quarry Classics Car Cruise is Saturday, July 18. Classics, muscle, trucks, bikes — all makes and models welcome. Cruise in anytime after 5 PM, park on the grounds, and stay for live music starting at 7. It's free, no registration required, and family and pet friendly. See you out here.",
+        "instagram": "Quarry Classics Car Cruise — July 18, 5 PM. All makes and models welcome. Free, no registration. Live music at 7."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "T-14 'What to Expect' arc calls for painting the full picture — who it's for, what happens when, and why it's worth the drive — without urgency, since this is a free walk-in event with no capacity pressure.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-29T13:07:57.935Z"
     },
     {
       "id": "drf-moxcco0v-2-u1fr6",
@@ -5654,7 +5673,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-07-05T14:00:00-05:00",
       "createdAt": "2026-06-05T04:05:12.150Z",
       "createdBy": "cadence-engine",
@@ -5702,12 +5721,31 @@
           ],
           "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
         },
-        "canvasNote": "Tonight — covers 2 band(s). Post 0 days before first show."
+        "canvasNote": "Tonight — covers 2 band(s). Post 0 days before first show.",
+        "reelBrief": "Open with a slow pan across an empty sun-drenched patio table with two wine glasses, hold 3s on string lights swaying gently overhead, cut to a close-up of a guitar neck resting on a stool. Suggested audio: upbeat acoustic indie or light country instrumental. Text overlay: 'TOFU — Live Today 1–4 PM — No Cover'."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "TOFU plays today from 1–4 PM. Grab a table, pour a glass, and let the afternoon take care of itself. No cover, no ticket — just show up.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#LiveMusicSTL",
+        "#WineBar",
+        "#STLEats"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Acoustic guitar leaning against a wooden stool on a sunlit stone patio, warm midday light filtering through overhead string bulbs, blurred green treeline and cliff face in the soft background, no people, no text",
+      "variants": {
+        "facebook": "TOFU is live today from 1–4 PM on the patio. Come out for an afternoon of music, wine, and fresh air — no cover, no reservation needed. Just show up and settle in.",
+        "instagram": "TOFU plays today 1–4 PM. No cover. Just show up. 🎶"
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "T-0 calls for a short, present-tense invitation that creates immediate pull — the copy removes friction (no cover, no reservation) and ends with a confident 'just show up' rather than a command.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-29T13:07:46.644Z",
+      "updatedAt": "2026-06-29T13:07:46.644Z"
     },
     {
       "id": "drf-mq0ei5at-5-6rcxs",
