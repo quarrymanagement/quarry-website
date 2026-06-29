@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-29T17:06:57.658Z",
+  "updatedAt": "2026-06-29T18:00:30.483Z",
   "_schema": {
     "events": "Append-only log of SendGrid event webhooks. Pruned to last 90 days by the optimizer. Keep flat for fast scanning.",
     "eventShape": {
@@ -61180,6 +61180,17 @@
       "email": "rob@thequarrystl.com",
       "url": null,
       "sgEventId": "ZHJvcC0xMDYwMzc3NjUtT3R1dEFNaWFTeHEzNjB2S08ybEt3dy0y",
+      "userAgent": null,
+      "category": null
+    },
+    {
+      "ts": "2026-06-29T18:00:21.000Z",
+      "type": "delivered",
+      "draftId": null,
+      "ruleId": null,
+      "email": "management@thequarrystl.com",
+      "url": null,
+      "sgEventId": "ZGVsaXZlcmVkLTAtMTA2MDM3NzY1LUh5bWlGelBvUkgtU19ic1BZQUdxcUEtMA",
       "userAgent": null,
       "category": null
     }
