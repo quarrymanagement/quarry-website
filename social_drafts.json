@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-29T13:07:57.935Z",
+  "updatedAt": "2026-06-30T13:03:27.933Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -2491,7 +2491,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-07-06T11:00:00-05:00",
       "createdAt": "2026-05-06T00:06:15.876Z",
       "createdBy": "cadence-engine",
@@ -2525,14 +2525,34 @@
           "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "Weekly Hype — Post 21 days before event. "
+        "canvasNote": "Weekly Hype — Post 21 days before event. ",
+        "reelBrief": "Open with a slow pan across the stone patio at early morning light — dew on the railing, lake visible behind. Cut to a yoga mat being unrolled on the deck. Hold 3s on a mimosa glass catching the morning sun against the cliff backdrop. End on a wide patio shot, string lights still faintly glowing. Suggested audio: soft acoustic or lo-fi morning instrumental. Text overlay: 'Yoga. Then wine. July 25 — 9 AM.'"
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Yoga on the patio. Wine after. That's a Saturday morning worth setting an alarm for.\n\nUn-Wine-D & Align is July 25 — a 9–10 AM outdoor yoga session with Yoga with Charity, followed by your choice of wine, mimosa, or bloody mary and 10% off brunch. All levels welcome. Bring your mat.\n\nTickets are $20. Link in bio to grab your spot.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#STLYoga",
+        "#YogaAndWine",
+        "#OutdoorYoga",
+        "#STLBrunch",
+        "#WineBar"
+      ],
       "imageUrl": null,
       "userImageUrl": null,
       "bumpedFromDay": "2026-07-04",
-      "updatedAt": "2026-06-05T04:05:12.158Z"
+      "updatedAt": "2026-06-30T13:03:27.933Z",
+      "imagePrompt": "Wide shot of a yoga mat unrolled on a stone patio at golden morning light, a single wine glass and a small mimosa flute resting nearby on a low wooden surface, soft bokeh of cliffside and lake in the background, warm sunrise haze, no people, no text",
+      "variants": {
+        "facebook": "Yoga on the patio. Wine after. That's a Saturday morning worth setting an alarm for.\n\nUn-Wine-D & Align is July 25 — a 9–10 AM outdoor yoga session with Yoga with Charity, right here at The Quarry. After class, unwind with your choice of wine, mimosa, or bloody mary, plus 10% off brunch. All levels welcome. Just bring your mat.\n\nSpots are limited to 25 — tickets are $20 at the link below.",
+        "instagram": "Yoga on the patio. Wine after. July 25, 9 AM.\n\nUn-Wine-D & Align with Yoga with Charity — all levels welcome. $20 includes a post-class drink + 10% off brunch. Link in bio."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "At T-21 with 0% fill, this is a clean announcement — no urgency, just clear value framing (yoga + wine + brunch discount) that makes the $20 ticket feel like an easy yes for the target audience.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-06-30T13:03:27.933Z"
     },
     {
       "id": "drf-movdpyth-1-cosrw",
