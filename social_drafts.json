@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-30T13:03:27.933Z",
+  "updatedAt": "2026-07-02T13:01:38.409Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -4658,7 +4658,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-07-08T18:00:00-05:00",
       "createdAt": "2026-05-22T20:03:38.733Z",
       "createdBy": "cadence-engine",
@@ -4692,12 +4692,32 @@
           "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "This Weekend — Post 3 days before event. (Pace warning: registration is light, lean into urgency / value.)"
+        "canvasNote": "This Weekend — Post 3 days before event. (Pace warning: registration is light, lean into urgency / value.)",
+        "reelBrief": "Open with a wide shot of the Quarry patio in morning light (brunch spread visible on a table), cut to a slow pan of a side-by-side parked near the venue entrance, hold 3s on a close-up of a poker card face-down on a wooden surface. End on the venue sign or stone exterior. Suggested audio: upbeat country instrumental, mid-tempo. Text overlay: 'Ride for Zesa — This Saturday — Starts at The Quarry — 10am'."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "This Saturday, The Quarry is the starting line. Ride for Zesa kicks off at 10am — brunch check-in, five stops through New Melle and Marthasville, and every dollar from your entry goes directly to Zesa Bollinger's recovery. Best poker hand takes the pot. See you at the start.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#PokerRun",
+        "#SideBySide",
+        "#RideForZesa",
+        "#MissouriOffRoad"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "A side-by-side UTV parked on a gravel path at golden hour, rolling Missouri hills and tree line in soft focus behind it, warm late-morning light, no faces visible, rustic outdoor atmosphere",
+      "variants": {
+        "facebook": "This Saturday, The Quarry is the starting line.\n\nRide for Zesa — a side-by-side poker run benefiting Zesa Bollinger — kicks off at 10am with brunch check-in right here. From there, five stops through New Melle and Marthasville, and the best hand wins. Every entry goes directly to Zesa's recovery.\n\nRegistration is $25. Come ride for something that matters.",
+        "instagram": "This Saturday at 10am — brunch check-in, five stops, best hand wins. Every entry goes directly to Zesa Bollinger's recovery. See you at the start."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "T-3 'This Weekend' arc calls for day-specific language, logistical clarity, and a soft emotional close — this caption leads with place and time, delivers the cause without overselling, and ends with an understated invitation rather than a command.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-07-02T13:01:38.409Z",
+      "updatedAt": "2026-07-02T13:01:38.409Z"
     },
     {
       "id": "drf-mphcksbx-9-8xkfd",
@@ -6239,7 +6259,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-07-08T17:00:00-05:00",
       "createdAt": "2026-06-05T04:05:12.150Z",
       "createdBy": "cadence-engine",
@@ -6320,12 +6340,32 @@
           ],
           "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
         },
-        "canvasNote": "Weekend Lineup — covers 5 band(s). Post 3 days before first show."
+        "canvasNote": "Weekend Lineup — covers 5 band(s). Post 3 days before first show.",
+        "reelBrief": "Open with a slow pan across the patio at golden hour — empty tables, string lights, cliff backdrop. Cut to a close-up of a wine glass being set down on a stone bar top. Hold 3s on the lake view. End on the patio filling with soft evening light. Suggested audio: upbeat acoustic country instrumental. Text overlay: 'This Saturday & Sunday — Live Music, No Cover — The Quarry, New Melle MO'."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "This weekend at The Quarry — four live acts, no cover.\n\nSaturday: Ed Callison (1–4 PM) then Biscuits and Gravy (7–10 PM).\nSunday: Wild Horse (1–4 PM).\n\nCome for lunch, stay for the afternoon, or make it a full Saturday night. Free with your visit.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#LiveMusicSTL",
+        "#STLEats",
+        "#WineBar",
+        "#OutdoorDining"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Acoustic guitar leaning against a wooden stool on a stone patio, warm afternoon golden light, string lights overhead not yet lit, soft blur of a lake and limestone cliff in the background, no people, no text",
+      "variants": {
+        "facebook": "This weekend at The Quarry — four live acts, no cover charge.\n\nSaturday: Ed Callison plays 1–4 PM, then Biscuits and Gravy takes the evening from 7–10 PM.\nSunday: Wild Horse closes out the weekend 1–4 PM.\n\nWalk in, grab a table, and enjoy. 3960 Highway Z, New Melle.",
+        "instagram": "Four live acts this weekend. No cover.\n\nSat: Ed Callison 1–4 PM · Biscuits and Gravy 7–10 PM\nSun: Wild Horse 1–4 PM\n\nFree with your visit — New Melle, MO."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "T-3 Weekend arc calls for specific day-and-time logistics with an inviting (not urgent) tone — live music posts stay vibe-forward and never push urgency, so the copy frames the full lineup as an easy 'come as you are' weekend plan.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-07-02T13:01:25.437Z",
+      "updatedAt": "2026-07-02T13:01:25.437Z"
     },
     {
       "id": "drf-mq0ei5av-e-3ygcb",
