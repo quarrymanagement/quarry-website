@@ -974,10 +974,10 @@
       "birthday": "1974-04-10",
       "passwordHash": "a974fa99a92ff227411938befe4a4454:dc6f8df18e6919a861bd3dd3ef8c5341419ab2b666f518a63d47fae1f1f2dfb39eb055068d8567b338406b00126c4e877f7e81334954e5866bb91cf6253b10d9",
       "joinedAt": "2026-07-02T20:49:09.597Z",
-      "lastVisitAt": null,
+      "lastVisitAt": "2026-07-02T21:21:42.304Z",
       "tier": "standard",
-      "currentPoints": 260,
-      "lifetimePoints": 260,
+      "currentPoints": 729,
+      "lifetimePoints": 729,
       "totalRedemptions": 0,
       "marketingOptIn": true,
       "smsOptIn": true,
@@ -991,6 +991,20 @@
           "source": "signup",
           "delta": 260,
           "note": "Welcome bonus 250 + email opt-in +10 + sms opt-in +0"
+        },
+        {
+          "at": "2026-07-02T21:21:42.304Z",
+          "action": "earn",
+          "source": "receipt-scan",
+          "delta": 469,
+          "orderId": "e62d58e4-d403-4270-b630-c17cda77fd8c",
+          "checkNumber": "12",
+          "spendUsd": 45.9,
+          "finalTotalUsd": 45.9,
+          "subtotalUsd": 44,
+          "tier": "standard",
+          "multiplier": 1,
+          "note": "Receipt scan"
         }
       ]
     }
