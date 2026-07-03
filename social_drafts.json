@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-07-02T13:01:38.409Z",
+  "updatedAt": "2026-07-03T00:07:01.529Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -8630,6 +8630,45 @@
       "aiReasoning": "Atmosphere posts perform best when they make the viewer feel like they're missing something pleasant — the specific temperature and low precip chance grounds it in real conditions without overselling, matching the warm-casual brand voice for a patio-perfect day arc.",
       "model": "claude-sonnet-4-6",
       "hydratedAt": "2026-06-26T13:05:10.960Z"
+    },
+    {
+      "id": "drf-mr46bp94-1-0bne3",
+      "cadenceTag": "wineclub:2026-09-01:wc-month-open",
+      "type": "wine_club",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-09-01T10:00:00-05:00",
+      "createdAt": "2026-07-03T00:07:01.528Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "wine_club",
+        "sourceId": "rock-and-vine",
+        "monthLabel": "September 2026",
+        "arcStep": "wc-month-open",
+        "arcLabel": "Now Accepting Members"
+      },
+      "graphicBrief": {
+        "type": "wine_club_poster",
+        "templateRef": "Lifestyle poster — wine glass + Quarry view, \"Rock & Vine\" branding",
+        "neededBy": null,
+        "dimensions": "1080x1080 square",
+        "toneMode": "invitation",
+        "spec": {
+          "backgroundIdea": "Wine glass, sunset over Quarry lake, member tasting moment",
+          "title": "JOIN ROCK & VINE",
+          "subtitle": "September 2026 membership now open",
+          "callout": "Monthly subscription — start anytime",
+          "footerText": "THE QUARRY  •  ROCK & VINE WINE CLUB"
+        },
+        "canvasNote": "Now Accepting Members — recurring monthly post for the Rock & Vine Wine Club."
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
     }
   ],
   "history": [],
