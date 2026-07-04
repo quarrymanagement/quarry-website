@@ -9438,8 +9438,8 @@
     "emailStatus": "Subscribed",
     "smsStatus": "Never subscribed",
     "source": "Form Submission",
-    "lastActivity": "",
-    "lastActivityDate": "",
+    "lastActivity": "Form: mailing-list",
+    "lastActivityDate": "2026-07-04T11:59:11.957Z",
     "address": {
       "street": "",
       "city": "Wentzville",
@@ -9447,9 +9447,21 @@
       "zip": "63385-6535",
       "country": "United States"
     },
-    "events": [],
+    "events": [
+      {
+        "type": "mailing-list",
+        "timestamp": "2026-07-04T11:59:11.957Z",
+        "marketingOptIn": false,
+        "details": {
+          "ip": "206.192.201.98",
+          "user_agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Mobile Safari/537.36",
+          "referrer": "https://thequarrystl.com/"
+        }
+      }
+    ],
     "tags": [
-      "Subscriptions"
+      "Subscriptions",
+      "Subscribed"
     ]
   },
   {
