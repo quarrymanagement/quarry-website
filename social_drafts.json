@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-07-09T11:09:11.654Z",
+  "updatedAt": "2026-07-09T13:04:29.595Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -3513,7 +3513,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-07-15T18:00:00-05:00",
       "createdAt": "2026-05-17T00:06:24.039Z",
       "createdBy": "cadence-engine",
@@ -3547,12 +3547,32 @@
           "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "This Weekend — Post 3 days before event. (Pace warning: registration is light, lean into urgency / value.)"
+        "canvasNote": "This Weekend — Post 3 days before event. (Pace warning: registration is light, lean into urgency / value.)",
+        "reelBrief": "Open with a slow pan across a chrome hood or wheel well detail, warm golden-hour light. Cut to wide shot of cars lined up with the quarry cliff in the background. Hold 3s. End on the patio string lights coming on at dusk. Suggested audio: low-key classic rock instrumental or vintage Americana. Text overlay: 'Quarry Classics Car Cruise / This Saturday 5 PM / Live Band at 7 / Free — All Welcome'."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "This Saturday — bring the car, bring the family, bring the dog. Quarry Classics Car Cruise rolls in at 5 PM. All makes, all models, free to attend. Live band kicks off at 7.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#CarShow",
+        "#ClassicCars",
+        "#STLCars",
+        "#LiveMusicSTL"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "A row of classic American muscle cars and vintage trucks parked on a gravel lot at golden hour, warm amber light raking across chrome and painted hoods, stone quarry cliff and green treeline softly out of focus in the background, no people, no text",
+      "variants": {
+        "facebook": "This Saturday, the Quarry lot fills up with classics, muscle cars, trucks, and bikes — all makes and models welcome. Cruise in at 5 PM, find a spot, and hang out. Live band starts at 7. Free to attend, no registration needed. Family and pet friendly. 3960 Highway Z, New Melle.",
+        "instagram": "This Saturday — cars in at 5, live band at 7. All makes welcome. Free, no registration. Bring everyone."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "T-3 calls for 'this Saturday' specificity with logistical clarity — time, free admission, no registration — delivered as a warm invitation rather than a push, matching the casual family-friendly tone of the event.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-07-09T13:04:29.595Z",
+      "updatedAt": "2026-07-09T13:04:29.595Z"
     },
     {
       "id": "drf-mpafzbqc-1-ypu6g",
@@ -6189,7 +6209,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-07-15T17:00:00-05:00",
       "createdAt": "2026-06-05T04:05:12.151Z",
       "createdBy": "cadence-engine",
@@ -6259,12 +6279,32 @@
           ],
           "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
         },
-        "canvasNote": "Weekend Lineup — covers 4 band(s). Post 3 days before first show."
+        "canvasNote": "Weekend Lineup — covers 4 band(s). Post 3 days before first show.",
+        "reelBrief": "Open with a slow pan across the patio at golden hour — string lights, empty glasses, stone backdrop. Cut to a close-up of a wine glass being filled. Hold 3s on the lake/cliff view. End on the patio filling with guests (wide shot, no identifiable faces). Suggested audio: upbeat acoustic folk, mid-tempo. Text overlay: 'Live music this weekend. No cover. Just show up.' — fade in at 8s."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "This weekend's live music lineup — no cover, no tickets, just show up.\n\nSaturday, July 18: Richie & Janet play twice — 1–4 PM and again 7–10 PM.\nSunday, July 19: Mixology takes the afternoon set, 1–4 PM.\n\nGrab a glass, find a seat on the patio, and let the weekend do its thing. 3960 Highway Z, New Melle.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#LiveMusicSTL",
+        "#WineBar",
+        "#STLEats",
+        "#OutdoorDining"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Acoustic guitar leaning against a wooden stool on a stone patio at golden hour, warm string lights glowing overhead, soft blur of a lake and limestone cliffs in the background, no faces, no text",
+      "variants": {
+        "facebook": "Two days of live music this weekend — and it's always free with your visit.\n\nSaturday, July 18: Richie & Janet play an afternoon set (1–4 PM) and come back for the evening (7–10 PM). A full day of music if you want it.\nSunday, July 19: Mixology brings the afternoon vibes, 1–4 PM.\n\nNo cover. No reservations needed. Just come out to New Melle and settle in. We're at 3960 Highway Z.",
+        "instagram": "Live music all weekend — no cover, just show up.\n\nSat 7/18: Richie & Janet, 1–4 PM + 7–10 PM\nSun 7/19: Mixology, 1–4 PM\n\n3960 Hwy Z, New Melle."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "At T-3 (weekend preview), the post establishes the full lineup with specific times and reinforces the free/walk-in nature of live music — inviting rather than urgent, with logistical clarity that helps weekend planners commit.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-07-09T13:04:14.651Z",
+      "updatedAt": "2026-07-09T13:04:14.651Z"
     },
     {
       "id": "drf-mq0ei5av-d-xb08x",
@@ -8778,7 +8818,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-07-10T16:00:00.000Z",
       "createdAt": "2026-07-09T11:09:11.654Z",
       "createdBy": "weather-trigger",
@@ -8802,10 +8842,29 @@
         },
         "canvasNote": "Stormy / cold day. Lean into \"perfect day to come in and warm up\" vibes."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Some nights, the rain stays just far enough away. Wine in hand, cliffs in view — this is what a summer evening out here looks like.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#DefianceWineCountry",
+        "#StCharlesCounty",
+        "#STLWeekend",
+        "#WineBar",
+        "#PatioSeason",
+        "#STLEats",
+        "#MissouriWine"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Two glasses of chilled white wine on a stone patio railing, warm overcast summer light, quarry cliffs and still lake water softly out of focus in the background, string lights beginning to glow in the early evening haze, moody golden-grey atmosphere, no faces, no text",
+      "variants": {
+        "facebook": "Some nights, the rain stays just far enough away. Wine in hand, cliffs in view — this is what a summer evening out here looks like. Come find your table Wednesday through Sunday.",
+        "instagram": "Some nights, the rain stays just far enough away. Wine in hand, cliffs in view."
+      },
+      "suggestedTimeHourCT": 16,
+      "aiReasoning": "Cozy/moody weather mode at 83-88°F with 60% precip chance calls for sensory atmosphere copy that romanticizes the near-miss with rain rather than ignoring it — no CTA, no event details, just the feeling of being here on a warm, slightly dramatic summer evening.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-07-09T13:03:58.829Z",
+      "updatedAt": "2026-07-09T13:04:00.301Z"
     }
   ],
   "history": [],
