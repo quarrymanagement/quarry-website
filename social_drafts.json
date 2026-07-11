@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-07-10T13:08:06.860Z",
+  "updatedAt": "2026-07-11T13:03:35.552Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -3669,7 +3669,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-07-17T11:00:00-05:00",
       "createdAt": "2026-05-19T00:03:04.375Z",
       "createdBy": "cadence-engine",
@@ -3703,12 +3703,32 @@
           "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "Tomorrow — Post 1 days before event. (Pace warning: registration is light, lean into urgency / value.)"
+        "canvasNote": "Tomorrow — Post 1 days before event. (Pace warning: registration is light, lean into urgency / value.)",
+        "reelBrief": "Open with a slow pan across a classic car hood reflecting golden light (3s), cut to a wide shot of the quarry cliffs and patio at dusk (2s), end on a close-up of a cold drink on a stone bar top with string lights blurred behind (3s). Suggested audio: classic rock or blues instrumental, mid-tempo. Text overlay: 'Quarry Classics Car Cruise / Tomorrow 5 PM / Live Music at 7 / Free — No Registration'."
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Tomorrow evening, bring the car, bring the family, bring the dog. Quarry Classics Car Cruise starts at 5 PM — all makes and models welcome, free to attend, no registration needed. Live band kicks off at 7. See you out there.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#CarShow",
+        "#ClassicCars",
+        "#LiveMusicSTL",
+        "#STLEvents"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Wide shot of a sun-drenched gravel lot at golden hour, classic American muscle cars and vintage trucks parked in rows, warm amber light raking across chrome and paint, stone quarry cliffs softly visible in the background, string lights beginning to glow overhead, no people, no text",
+      "variants": {
+        "facebook": "Tomorrow evening, bring the car, bring the family, bring the dog. Quarry Classics Car Cruise rolls in at 5 PM — classics, muscle, trucks, bikes, all makes and models welcome. It's free, no registration required. Live band starts at 7. 3960 Highway Z, New Melle. See you out there.",
+        "instagram": "Tomorrow. Cars in at 5, live band at 7. All makes and models welcome — free, no registration. Bring the family, bring the dog."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "T-1 calls for short and punchy with logistical specifics — time, free admission, no registration — framed as a warm invitation rather than a push, matching the free community-event tone and the 'see you there' CTA style that outperforms commands.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-07-11T13:03:35.552Z",
+      "updatedAt": "2026-07-11T13:03:35.552Z"
     },
     {
       "id": "drf-mpdaqw7l-1-wn6xw",
