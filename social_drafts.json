@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-07-11T13:03:35.552Z",
+  "updatedAt": "2026-07-12T13:03:03.521Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -3738,7 +3738,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-07-18T09:00:00-05:00",
       "createdAt": "2026-05-20T00:01:19.761Z",
       "createdBy": "cadence-engine",
@@ -3772,12 +3772,32 @@
           "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
           "qLogo": "top-center, gold"
         },
-        "canvasNote": "Today / Tonight — Post 0 days before event. (Pace warning: registration is light, lean into urgency / value.)"
+        "canvasNote": "Today / Tonight — Post 0 days before event. (Pace warning: registration is light, lean into urgency / value.)",
+        "reelBrief": "Open with a slow pan across the parking area as the first cars arrive, 3s hold on a classic muscle car hood in golden light. Cut to the patio filling up — families, dogs, cold drinks. End on the stage as the band sets up, string lights coming on at dusk. Suggested audio: upbeat classic rock instrumental or crowd ambient. Text overlay: 'Quarry Classics Car Cruise — Tonight, 5 PM. Live music at 7.'"
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "The Quarry Classics Car Cruise is today. Classics, muscle, trucks, bikes — all makes and models welcome starting at 5 PM. Live band kicks off at 7. Bring the family, bring the dog. No registration, no cover. Just show up.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#CarCruiseSTL",
+        "#ClassicCars",
+        "#LiveMusicSTL",
+        "#STLEvents"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Wide shot of a sun-drenched gravel lot at golden hour, a vintage American muscle car parked in the foreground with warm late-afternoon light raking across its hood, stone quarry cliffs and green treeline softly blurred in the background, string lights beginning to glow overhead on a wooden patio structure, no people, no text",
+      "variants": {
+        "facebook": "The Quarry Classics Car Cruise is today. Gates open at 5 PM — classics, muscle cars, trucks, bikes, all makes and models welcome. Live band starts at 7. Free event, no registration needed, family and pet friendly. See you at 3960 Highway Z.",
+        "instagram": "Car cruise is today. Gates open at 5, live band at 7. All makes welcome — no cover, no registration, bring the family."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "T-0 calls for 'tonight' specificity with logistics front and center — time, what to expect, zero friction to attend — matching the free, walk-up nature of this event without manufactured urgency.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-07-12T13:02:50.249Z",
+      "updatedAt": "2026-07-12T13:02:50.249Z"
     },
     {
       "id": "drf-mpdaqw7m-2-7u6j4",
@@ -6372,7 +6392,7 @@
         "facebook",
         "instagram"
       ],
-      "status": "skeleton",
+      "status": "pending",
       "scheduledFor": "2026-07-18T14:00:00-05:00",
       "createdAt": "2026-06-05T04:05:12.151Z",
       "createdBy": "cadence-engine",
@@ -6442,12 +6462,31 @@
           ],
           "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
         },
-        "canvasNote": "Tonight — covers 4 band(s). Post 0 days before first show."
+        "canvasNote": "Tonight — covers 4 band(s). Post 0 days before first show.",
+        "reelBrief": "Open with a slow pan across the sun-lit patio at midday — empty tables, string lights, cliff backdrop. Cut to a close-up of a wine glass catching afternoon light. Hold 3s. End on a wide shot of the outdoor stage area, warm and inviting. Suggested audio: upbeat acoustic folk instrumental. Text overlay: 'Richie & Janet — Today 1 PM & 7 PM — Free with your visit.'"
       },
-      "caption": "",
-      "hashtags": [],
+      "caption": "Richie & Janet play twice today — 1 PM and again at 7 PM. Free with your visit, no tickets needed. Come for lunch, stay for the evening.",
+      "hashtags": [
+        "#NewMelleMO",
+        "#StCharlesCounty",
+        "#DefianceWineCountry",
+        "#STLWeekend",
+        "#LiveMusicSTL",
+        "#WineBar",
+        "#STLEats"
+      ],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "imagePrompt": "Acoustic guitar leaning against a wooden stool on a sunlit stone patio, warm afternoon light filtering through overhead string bulbs, blurred lake and cliff face softly visible in the background, golden hour tone, no people, no text",
+      "variants": {
+        "facebook": "Richie & Janet are here today — twice. Afternoon set runs 1–4 PM, then back at 7 PM for the evening. No cover, no tickets. Just show up, grab a table, and settle in.",
+        "instagram": "Richie & Janet play today at 1 PM and again at 7 PM. Free with your visit — no tickets, just show up."
+      },
+      "suggestedTimeHourCT": 11,
+      "aiReasoning": "T-0 calls for 'today/tonight' specificity with time and logistics front-loaded — the double set is the hook, and the free-with-visit detail removes any barrier to action.",
+      "model": "claude-sonnet-4-6",
+      "hydratedAt": "2026-07-12T13:03:03.521Z",
+      "updatedAt": "2026-07-12T13:03:03.521Z"
     },
     {
       "id": "drf-mq0ei5au-a-cwryy",
