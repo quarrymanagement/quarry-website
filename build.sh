@@ -48,3 +48,23 @@ if [ ! -z "$GA4_MEASUREMENT_ID" ]; then
 else
   echo "WARNING: GA4_MEASUREMENT_ID not set — analytics will not collect data"
 fi
+
+# ── Site notice banner ──
+# Adds notice.js to every public page so hours/event notices only ever need
+# editing in ONE file (notice.js) instead of ~30 HTML files. Runs after the
+# homepage restore above, so the real index.html gets it too.
+# Admin/staff/employee tooling is deliberately excluded.
+NOTICE_SKIP="quarry-admin.html quarry-form.html"
+NOTICE_COUNT=0
+for f in *.html; do
+  [ -e "$f" ] || continue
+  case " $NOTICE_SKIP " in *" $f "*) continue ;; esac
+  # already injected? (idempotent — safe to re-run)
+  grep -q 'src="/notice.js"' "$f" && continue
+  # needs a </body> to inject before, and a <header> to attach to
+  grep -q '</body>' "$f" || continue
+  grep -qi '<header' "$f" || continue
+  sed -i 's|</body>|<script src="/notice.js" defer></script>\n</body>|' "$f"
+  NOTICE_COUNT=$((NOTICE_COUNT + 1))
+done
+echo "Site notice banner injected into $NOTICE_COUNT pages"
