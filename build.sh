@@ -53,7 +53,13 @@ fi
 # Adds notice.js to every public page so hours/event notices only ever need
 # editing in ONE file (notice.js) instead of ~30 HTML files. Runs after the
 # homepage restore above, so the real index.html gets it too.
-# Admin/staff/employee tooling is deliberately excluded.
+#
+# Injected into <head> with defer, NOT before </body>. Several pages have no
+# </body> at all (homepage.html, quarry-menu.html, quarry-brunch.html,
+# quarry-drinks.html, quarry-catering.html, quarry-giftcards.html) and
+# homepage.html actually ends mid-script, so anything appended at the end of
+# the file would land inside an unclosed <script> and never run. Every page
+# has exactly one </head>; defer still runs it after the DOM is parsed.
 NOTICE_SKIP="quarry-admin.html quarry-form.html"
 NOTICE_COUNT=0
 for f in *.html; do
@@ -61,10 +67,10 @@ for f in *.html; do
   case " $NOTICE_SKIP " in *" $f "*) continue ;; esac
   # already injected? (idempotent — safe to re-run)
   grep -q 'src="/notice.js"' "$f" && continue
-  # needs a </body> to inject before, and a <header> to attach to
-  grep -q '</body>' "$f" || continue
+  grep -q '</head>' "$f" || continue
+  # the banner attaches itself to <header>; skip pages that have none
   grep -qi '<header' "$f" || continue
-  sed -i 's|</body>|<script src="/notice.js" defer></script>\n</body>|' "$f"
+  sed -i 's|</head>|<script src="/notice.js" defer></script>\n</head>|' "$f"
   NOTICE_COUNT=$((NOTICE_COUNT + 1))
 done
 echo "Site notice banner injected into $NOTICE_COUNT pages"
