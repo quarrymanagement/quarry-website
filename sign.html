@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Sign Document · The Quarry STL</title>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Great+Vibes&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+  :root{ --red:#6b2020; --red2:#8a2b2b; --cream:#f6f2ee; --ink:#232022; --line:#e4ddd4; }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#efe9e2;color:var(--ink);}
+  header{background:var(--red);color:#fff;padding:12px 18px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,.15);}
+  header .logo{font-weight:800;letter-spacing:.5px;font-size:18px;}
+  header .doc{font-size:13px;opacity:.9;margin-left:auto;text-align:right;}
+  .wrap{max-width:900px;margin:0 auto;padding:18px 14px 140px;}
+  .intro{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:18px;}
+  .intro h1{margin:0 0 6px;font-size:20px;color:var(--red);}
+  .intro .msg{background:var(--cream);border-radius:8px;padding:12px 14px;margin-top:10px;font-size:14px;white-space:pre-wrap;}
+  .pagewrap{position:relative;margin:0 auto 16px;background:#fff;box-shadow:0 2px 14px rgba(0,0,0,.12);border-radius:4px;overflow:hidden;width:fit-content;max-width:100%;}
+  .pagewrap canvas{display:block;max-width:100%;}
+  .overlay{position:absolute;inset:0;}
+  .field{position:absolute;border:2px dashed var(--red2);background:rgba(138,43,43,.07);border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:var(--red);overflow:hidden;transition:background .15s;}
+  .field:hover{background:rgba(138,43,43,.14);}
+  .field.done{border-style:solid;border-color:#2e7d32;background:rgba(46,125,50,.06);}
+  .field.req::after{content:"●";position:absolute;top:2px;right:3px;color:#c62828;font-size:8px;}
+  .field input{width:100%;height:100%;border:0;background:transparent;font-size:inherit;text-align:center;color:var(--ink);outline:none;padding:0 4px;}
+  .field img{max-width:100%;max-height:100%;object-fit:contain;}
+  .field .tag{pointer-events:none;font-weight:600;text-transform:uppercase;font-size:9px;letter-spacing:.4px;opacity:.75;}
+  /* footer bar */
+  .bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);padding:12px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;box-shadow:0 -3px 12px rgba(0,0,0,.08);z-index:60;}
+  .bar .consent{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:#555;flex:1;min-width:220px;}
+  .bar .consent input{margin-top:2px;width:18px;height:18px;flex:none;}
+  .btn{background:var(--red);color:#fff;border:0;border-radius:8px;padding:13px 26px;font-size:15px;font-weight:700;cursor:pointer;}
+  .btn:disabled{opacity:.45;cursor:not-allowed;}
+  .btn.ghost{background:#eee;color:#444;}
+  .progress{font-size:12px;color:#777;}
+  /* modal */
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:100;padding:16px;}
+  .modal.on{display:flex;}
+  .card{background:#fff;border-radius:14px;width:100%;max-width:460px;overflow:hidden;}
+  .card h3{margin:0;padding:16px 18px;background:var(--red);color:#fff;font-size:16px;}
+  .tabs{display:flex;border-bottom:1px solid var(--line);}
+  .tabs button{flex:1;padding:12px;border:0;background:#fff;font-size:14px;cursor:pointer;color:#666;border-bottom:3px solid transparent;}
+  .tabs button.on{color:var(--red);border-bottom-color:var(--red);font-weight:700;}
+  .pane{padding:18px;}
+  #sigCanvas{width:100%;height:170px;border:1px dashed var(--line);border-radius:8px;background:#fffdfa;touch-action:none;}
+  #typeIn{width:100%;padding:12px;font-size:16px;border:1px solid var(--line);border-radius:8px;}
+  #typePreview{height:120px;display:flex;align-items:center;justify-content:center;font-family:'Great Vibes',cursive;font-size:46px;color:#111;border:1px dashed var(--line);border-radius:8px;margin-top:12px;}
+  .cardfoot{display:flex;gap:10px;padding:0 18px 18px;}
+  .cardfoot .btn{flex:1;padding:12px;}
+  .state{max-width:520px;margin:60px auto;background:#fff;border-radius:14px;padding:38px 30px;text-align:center;box-shadow:0 2px 14px rgba(0,0,0,.1);}
+  .state h2{color:var(--red);margin-top:0;}
+  .spinner{width:34px;height:34px;border:4px solid var(--cream);border-top-color:var(--red);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 14px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+<header>
+  <span class="logo">THE QUARRY</span>
+  <span class="doc" id="hdrDoc"></span>
+</header>
+
+<div id="app">
+  <div class="state"><div class="spinner"></div><p>Loading your document…</p></div>
+</div>
+
+<!-- Signature modal -->
+<div class="modal" id="sigModal">
+  <div class="card">
+    <h3 id="sigTitle">Add your signature</h3>
+    <div class="tabs">
+      <button id="tabDraw" class="on" onclick="sigTab('draw')">✍️ Draw</button>
+      <button id="tabType" onclick="sigTab('type')">⌨️ Type</button>
+    </div>
+    <div class="pane" id="paneDraw"><canvas id="sigCanvas"></canvas></div>
+    <div class="pane" id="paneType" style="display:none;">
+      <input id="typeIn" placeholder="Type your full name" oninput="document.getElementById('typePreview').textContent=this.value||'Your name'">
+      <div id="typePreview">Your name</div>
+    </div>
+    <div class="cardfoot">
+      <button class="btn ghost" onclick="clearSig()">Clear</button>
+      <button class="btn" onclick="applySig()">Apply</button>
+    </div>
+  </div>
+</div>
+
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+// --- Config: Supabase edge function endpoint (Quarry project) ---
+const FN_BASE = 'https://nkulhtalltbieicvmmad.supabase.co/functions/v1/esign';
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5rdWxodGFsbHRiaWVpY3ZtbWFkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMTU0NzksImV4cCI6MjA4OTY5MTQ3OX0.CqNu8CaZle-v5Sw5P7YAFk5HV8aAkqBdXPIvVqPBves'; // publishable anon key (safe for client)
+
+const params = new URLSearchParams(location.search);
+const TOKEN = params.get('t') || params.get('token') || '';
+let DOC=null, FIELDS=[], RECIP=null, activeField=null, sigMode='draw';
+const values = {}; // fieldId -> value (text or dataURL)
+
+async function api(action, extra={}){
+  const r = await fetch(FN_BASE, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':ANON_KEY,'Authorization':'Bearer '+ANON_KEY},
+    body: JSON.stringify({action, token:TOKEN, ...extra})
+  });
+  return r.json();
+}
+
+function stateBox(html){ document.getElementById('app').innerHTML = '<div class="state">'+html+'</div>'; }
+
+async function load(){
+  if(!TOKEN){ stateBox('<h2>Invalid link</h2><p>This signing link is missing its token.</p>'); return; }
+  let d;
+  try{ d = await api('sign_load'); }catch(e){ stateBox('<h2>Connection error</h2><p>Please try again.</p>'); return; }
+  if(d.error){ stateBox('<h2>'+(d.voided?'Document voided':'Unavailable')+'</h2><p>'+d.error+'</p>'); return; }
+  DOC=d.document; FIELDS=d.fields||[]; RECIP=d.recipient;
+  document.getElementById('hdrDoc').textContent = DOC.title;
+  if(d.already_signed){ stateBox('<h2>Already signed ✓</h2><p>You signed <strong>'+DOC.title+'</strong> on '+new Date(RECIP.signed_at).toLocaleString()+'. A copy will be emailed when all parties finish.</p>'); return; }
+  render(d.pdf_url);
+}
+
+async function render(pdfUrl){
+  const app = document.getElementById('app');
+  app.innerHTML = '<div class="wrap"><div class="intro"><h1>'+esc(DOC.title)+'</h1>'
+    + '<div style="font-size:13px;color:#777;">Signing as <strong>'+esc(RECIP.name)+'</strong> ('+esc(RECIP.email)+')</div>'
+    + (DOC.message?'<div class="msg">'+esc(DOC.message)+'</div>':'')
+    + '<p style="font-size:13px;color:#777;margin-bottom:0;">Tap each highlighted box to complete it, then press <strong>Finish &amp; Sign</strong>.</p></div>'
+    + '<div id="pages"></div></div>';
+
+  // prefill auto fields
+  FIELDS.forEach(f=>{
+    if(f.type==='name') values[f.id]=RECIP.name;
+    if(f.type==='email') values[f.id]=RECIP.email;
+    if(f.type==='date') values[f.id]=new Date().toLocaleDateString('en-US');
+  });
+
+  const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
+  const pagesEl = document.getElementById('pages');
+  const containerW = Math.min(pagesEl.clientWidth||860, 860);
+  for(let p=1;p<=pdf.numPages;p++){
+    const page = await pdf.getPage(p);
+    const vp0 = page.getViewport({scale:1});
+    const scale = containerW / vp0.width;
+    const vp = page.getViewport({scale});
+    const pw = document.createElement('div'); pw.className='pagewrap'; pw.style.width=vp.width+'px';
+    const cv = document.createElement('canvas'); cv.width=vp.width; cv.height=vp.height;
+    pw.appendChild(cv);
+    const ov = document.createElement('div'); ov.className='overlay'; pw.appendChild(ov);
+    pagesEl.appendChild(pw);
+    await page.render({canvasContext:cv.getContext('2d'), viewport:vp}).promise;
+    FIELDS.filter(f=>f.page===p).forEach(f=>addField(ov,f));
+  }
+  addBar();
+  updateProgress();
+}
+
+function addField(ov,f){
+  const el=document.createElement('div');
+  el.className='field'+(f.required?' req':'');
+  el.style.left=(f.x*100)+'%'; el.style.top=(f.y*100)+'%';
+  el.style.width=(f.w*100)+'%'; el.style.height=(f.h*100)+'%';
+  el.dataset.fid=f.id;
+  if(f.type==='signature'||f.type==='initials'){
+    el.innerHTML='<span class="tag">'+(f.type==='initials'?'Initials':'Sign')+'</span>';
+    el.onclick=()=>openSig(f,el);
+  } else if(f.type==='checkbox'){
+    el.innerHTML='<span class="tag">✓</span>';
+    el.onclick=()=>{ const on=values[f.id]!=='X'; values[f.id]=on?'X':''; el.innerHTML=on?'✕':'<span class="tag">✓</span>'; el.classList.toggle('done',on); updateProgress(); };
+  } else {
+    const inp=document.createElement('input');
+    inp.type = f.type==='email'?'email':'text';
+    inp.value = values[f.id]||'';
+    inp.placeholder = f.placeholder || (f.type==='date'?'MM/DD/YYYY':f.type);
+    inp.oninput=()=>{ values[f.id]=inp.value; el.classList.toggle('done',!!inp.value); updateProgress(); };
+    el.appendChild(inp);
+    if(values[f.id]) el.classList.add('done');
+  }
+  ov.appendChild(el);
+}
+
+function esc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+/* ---------- signature modal ---------- */
+let ctx, drawing=false, hasInk=false;
+function openSig(f,el){
+  activeField={f,el};
+  document.getElementById('sigTitle').textContent = f.type==='initials'?'Add your initials':'Add your signature';
+  document.getElementById('sigModal').classList.add('on');
+  sigTab('draw'); setupCanvas();
+}
+function setupCanvas(){
+  const c=document.getElementById('sigCanvas');
+  const r=c.getBoundingClientRect();
+  c.width=r.width*2; c.height=r.height*2;
+  ctx=c.getContext('2d'); ctx.scale(2,2); ctx.lineWidth=2.5; ctx.lineCap='round'; ctx.strokeStyle='#111'; hasInk=false;
+  const pos=e=>{const b=c.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return{x:t.clientX-b.left,y:t.clientY-b.top};};
+  const start=e=>{drawing=true;hasInk=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);e.preventDefault();};
+  const move=e=>{if(!drawing)return;const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();e.preventDefault();};
+  const end=()=>{drawing=false;};
+  c.onmousedown=start;c.onmousemove=move;c.onmouseup=end;c.onmouseleave=end;
+  c.ontouchstart=start;c.ontouchmove=move;c.ontouchend=end;
+}
+function sigTab(m){ sigMode=m;
+  document.getElementById('tabDraw').classList.toggle('on',m==='draw');
+  document.getElementById('tabType').classList.toggle('on',m==='type');
+  document.getElementById('paneDraw').style.display=m==='draw'?'':'none';
+  document.getElementById('paneType').style.display=m==='type'?'':'none';
+}
+function clearSig(){ if(sigMode==='draw'){setupCanvas();} else {document.getElementById('typeIn').value='';document.getElementById('typePreview').textContent='Your name';} }
+function applySig(){
+  let dataUrl=null;
+  if(sigMode==='draw'){
+    if(!hasInk){ alert('Please draw your signature.'); return; }
+    dataUrl=document.getElementById('sigCanvas').toDataURL('image/png');
+  } else {
+    const txt=document.getElementById('typeIn').value.trim();
+    if(!txt){ alert('Please type your name.'); return; }
+    const cv=document.createElement('canvas'); cv.width=600; cv.height=200;
+    const x=cv.getContext('2d'); x.fillStyle='#111'; x.font='72px "Great Vibes", cursive'; x.textBaseline='middle';
+    x.fillText(txt,20,110); dataUrl=cv.toDataURL('image/png');
+  }
+  const {f,el}=activeField;
+  values[f.id]=dataUrl;
+  el.innerHTML='<img src="'+dataUrl+'">'; el.classList.add('done');
+  document.getElementById('sigModal').classList.remove('on');
+  updateProgress();
+}
+
+/* ---------- footer / submit ---------- */
+function addBar(){
+  const bar=document.createElement('div'); bar.className='bar';
+  bar.innerHTML='<label class="consent"><input type="checkbox" id="consent" onchange="updateProgress()"> I agree to sign this document electronically, and that my electronic signature is legally binding.</label>'
+    +'<span class="progress" id="prog"></span>'
+    +'<button class="btn" id="finishBtn" onclick="finish()" disabled>Finish &amp; Sign</button>';
+  document.body.appendChild(bar);
+}
+function requiredLeft(){ return FIELDS.filter(f=>f.required && !values[f.id]).length; }
+function updateProgress(){
+  const left=requiredLeft(); const consent=document.getElementById('consent')?.checked;
+  const p=document.getElementById('prog'); const b=document.getElementById('finishBtn');
+  if(p) p.textContent = left>0? (left+' field'+(left>1?'s':'')+' left') : 'All fields complete';
+  if(b) b.disabled = !(left===0 && consent);
+}
+async function finish(){
+  const b=document.getElementById('finishBtn'); b.disabled=true; b.textContent='Signing…';
+  const payload = FIELDS.map(f=>({id:f.id, value:values[f.id]||''}));
+  const res = await api('sign_submit',{consent:true, fields:payload});
+  if(res.error){ alert(res.error); b.disabled=false; b.textContent='Finish & Sign'; return; }
+  document.querySelector('.bar')?.remove();
+  stateBox('<h2>Thank you — signed ✓</h2><p>You have successfully signed <strong>'+esc(DOC.title)+'</strong>.'
+    + (res.status==='completed'?' All parties have now signed; a completed copy is on its way to your email.':' A copy will be emailed once everyone has signed.')
+    + '</p><p style="font-size:12px;color:#999;">The Quarry STL · '+new Date().toLocaleString()+'</p>');
+  window.scrollTo(0,0);
+}
+
+load();
+</script>
+</body>
+</html>
