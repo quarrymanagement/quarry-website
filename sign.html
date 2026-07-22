@@ -24,7 +24,7 @@
   .field:hover{background:rgba(138,43,43,.14);}
   .field.done{border-style:solid;border-color:#2e7d32;background:rgba(46,125,50,.06);}
   .field.req::after{content:"●";position:absolute;top:2px;right:3px;color:#c62828;font-size:8px;}
-  .field input{width:100%;height:100%;border:0;background:transparent;font-size:inherit;text-align:center;color:var(--ink);outline:none;padding:0 4px;}
+  .field input{width:100%;height:100%;border:0;background:transparent;font-size:inherit;text-align:left;color:var(--ink);outline:none;padding:0 3px;}
   .field img{max-width:100%;max-height:100%;object-fit:contain;}
   .field .tag{pointer-events:none;font-weight:600;text-transform:uppercase;font-size:9px;letter-spacing:.4px;opacity:.75;}
   /* footer bar */
@@ -137,17 +137,20 @@ async function render(pdfUrl){
   const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
   const pagesEl = document.getElementById('pages');
   const containerW = Math.min(pagesEl.clientWidth||860, 860);
+  const dpr = Math.max(2, window.devicePixelRatio||1); // render at >=2x so document text is crisp, not blurry
   for(let p=1;p<=pdf.numPages;p++){
     const page = await pdf.getPage(p);
     const vp0 = page.getViewport({scale:1});
     const scale = containerW / vp0.width;
     const vp = page.getViewport({scale});
     const pw = document.createElement('div'); pw.className='pagewrap'; pw.style.width=vp.width+'px';
-    const cv = document.createElement('canvas'); cv.width=vp.width; cv.height=vp.height;
+    const cv = document.createElement('canvas');
+    cv.width = Math.floor(vp.width*dpr); cv.height = Math.floor(vp.height*dpr);
+    cv.style.width = vp.width+'px'; cv.style.height = vp.height+'px';
     pw.appendChild(cv);
     const ov = document.createElement('div'); ov.className='overlay'; pw.appendChild(ov);
     pagesEl.appendChild(pw);
-    await page.render({canvasContext:cv.getContext('2d'), viewport:vp}).promise;
+    await page.render({canvasContext:cv.getContext('2d'), viewport:vp, transform:[dpr,0,0,dpr,0,0]}).promise;
     FIELDS.filter(f=>f.page===p).forEach(f=>addField(ov,f));
   }
   addBar();
