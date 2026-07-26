@@ -54,7 +54,7 @@
       '<span class="qjk-lbl"><span class="qjk-dot"><i class="p"></i><i></i></span>' +
       '<span class="qjk-cap">Live Jackpot</span></span>' +
       '<span class="qjk-amt" id="qjk-amt">$1,000</span>' +
-      '<span class="qjk-sub">+$5 every bucket</span>';
+      '<span class="qjk-sub">+$5 every golf bucket</span>';
     document.body.appendChild(badge);
     amtEl = document.getElementById("qjk-amt");
     position();
