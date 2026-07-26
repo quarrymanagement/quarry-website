@@ -74,3 +74,10 @@ for f in *.html; do
   NOTICE_COUNT=$((NOTICE_COUNT + 1))
 done
 echo "Site notice banner injected into $NOTICE_COUNT pages"
+
+# ── Golf jackpot badge — golf page only ──
+# Pins the live progressive jackpot chip under the header on quarry-golf.html.
+if [ -f quarry-golf.html ] && ! grep -q 'golf-jackpot.js' quarry-golf.html; then
+  sed -i 's|</head>|<script src="/golf-jackpot.js" defer></script>\n</head>|' quarry-golf.html
+  echo "Golf jackpot badge injected into quarry-golf.html"
+fi
