@@ -16932,8 +16932,8 @@
     "emailStatus": "Subscribed",
     "smsStatus": "Never subscribed",
     "source": "Site Members",
-    "lastActivity": "",
-    "lastActivityDate": "",
+    "lastActivity": "Form: contact",
+    "lastActivityDate": "2026-07-30T18:06:46.916Z",
     "address": {
       "street": "",
       "city": "wentzville",
@@ -16941,9 +16941,23 @@
       "zip": "63385",
       "country": "United States"
     },
-    "events": [],
+    "events": [
+      {
+        "type": "contact",
+        "timestamp": "2026-07-30T18:06:46.916Z",
+        "marketingOptIn": true,
+        "details": {
+          "subject": "General Question",
+          "message": "hi I am wondering if you have happy hour and the details if you do",
+          "ip": "67.6.8.65",
+          "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+          "referrer": "https://thequarrystl.com/quarry-contact"
+        }
+      }
+    ],
     "tags": [
-      "Subscriptions"
+      "Subscriptions",
+      "Subscribed"
     ]
   },
   {
