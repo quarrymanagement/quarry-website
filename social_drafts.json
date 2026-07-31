@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-07-31T12:13:41.578Z",
+  "updatedAt": "2026-07-31T16:03:26.183Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -5512,7 +5512,7 @@
         "instagram"
       ],
       "status": "skeleton",
-      "scheduledFor": "2026-08-01T10:00:00-05:00",
+      "scheduledFor": "2026-08-02T10:00:00-05:00",
       "createdAt": "2026-06-02T00:02:34.118Z",
       "createdBy": "cadence-engine",
       "context": {
@@ -5540,7 +5540,9 @@
       "caption": "",
       "hashtags": [],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "bumpedFromDay": "2026-08-01",
+      "updatedAt": "2026-07-31T16:03:26.183Z"
     },
     {
       "id": "drf-mpwj1wcl-1-a28h4",
@@ -8013,7 +8015,7 @@
         "instagram"
       ],
       "status": "skeleton",
-      "scheduledFor": "2026-08-15T17:00:00-05:00",
+      "scheduledFor": "2026-08-16T17:00:00-05:00",
       "createdAt": "2026-06-16T00:05:05.236Z",
       "createdBy": "cadence-engine",
       "context": {
@@ -8041,7 +8043,9 @@
       "caption": "",
       "hashtags": [],
       "imageUrl": null,
-      "userImageUrl": null
+      "userImageUrl": null,
+      "bumpedFromDay": "2026-08-15",
+      "updatedAt": "2026-07-31T16:03:26.183Z"
     },
     {
       "id": "drf-mqgjdpga-1-wk8if",
@@ -9270,6 +9274,704 @@
       "userImageUrl": null,
       "bumpedFromDay": "2026-08-01",
       "updatedAt": "2026-07-31T12:13:41.578Z"
+    },
+    {
+      "id": "drf-ms94ti76-4-p5h1f",
+      "cadenceTag": "bands:2026-07-31:T-0",
+      "type": "band_announce",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-08-01T14:00:00-05:00",
+      "createdAt": "2026-07-31T16:03:26.178Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "band",
+        "sourceId": "2026-07-31",
+        "weekendOf": "2026-07-31",
+        "bands": [
+          {
+            "name": "Sarah Hoth Music",
+            "date": "2026-08-01",
+            "timeSlot": "1 PM - 4 PM",
+            "type": "afternoon"
+          },
+          {
+            "name": "Dandy STL",
+            "date": "2026-08-01",
+            "timeSlot": "7 PM - 10 PM",
+            "type": "evening"
+          },
+          {
+            "name": "Scott and Liz",
+            "date": "2026-08-02",
+            "timeSlot": "1 PM - 4 PM",
+            "type": "afternoon"
+          },
+          {
+            "name": "B&G",
+            "date": "2026-08-07",
+            "timeSlot": "7 PM - 10 PM (Patio)",
+            "type": "evening"
+          }
+        ],
+        "arcStep": "T-0",
+        "arcLabel": "Tonight"
+      },
+      "graphicBrief": {
+        "type": "band_lineup_poster",
+        "templateRef": "Match the 3-card \"LIVE BANDS AT THE QUARRY\" poster you already use",
+        "neededBy": "2026-07-31",
+        "dimensions": "1080x1080 square",
+        "toneMode": "tonight",
+        "spec": {
+          "backgroundIdea": "Quarry lake/patio at golden hour or evening string lights",
+          "title": "TONIGHT — LIVE MUSIC",
+          "cards": [
+            {
+              "day": "Saturday, Aug 1",
+              "bandName": "Sarah Hoth Music",
+              "time": "1 PM - 4 PM"
+            },
+            {
+              "day": "Saturday, Aug 1",
+              "bandName": "Dandy STL",
+              "time": "7 PM - 10 PM"
+            },
+            {
+              "day": "Sunday, Aug 2",
+              "bandName": "Scott and Liz",
+              "time": "1 PM - 4 PM"
+            },
+            {
+              "day": "Friday, Aug 7",
+              "bandName": "B&G",
+              "time": "7 PM - 10 PM (Patio)"
+            }
+          ],
+          "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
+        },
+        "canvasNote": "Tonight — covers 4 band(s). Post 0 days before first show."
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
+    },
+    {
+      "id": "drf-ms94ti77-6-sqdd8",
+      "cadenceTag": "bands:2026-08-07:T-0",
+      "type": "band_announce",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-08-08T14:00:00-05:00",
+      "createdAt": "2026-07-31T16:03:26.179Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "band",
+        "sourceId": "2026-08-07",
+        "weekendOf": "2026-08-07",
+        "bands": [
+          {
+            "name": "Closed for a private event",
+            "date": "2026-08-08",
+            "timeSlot": "",
+            "type": "closed"
+          },
+          {
+            "name": "Mixology",
+            "date": "2026-08-09",
+            "timeSlot": "1 PM - 4 PM",
+            "type": "afternoon"
+          },
+          {
+            "name": "Russo and Company",
+            "date": "2026-08-14",
+            "timeSlot": "7 PM - 10 PM",
+            "type": "evening"
+          }
+        ],
+        "arcStep": "T-0",
+        "arcLabel": "Tonight"
+      },
+      "graphicBrief": {
+        "type": "band_lineup_poster",
+        "templateRef": "Match the 3-card \"LIVE BANDS AT THE QUARRY\" poster you already use",
+        "neededBy": "2026-08-07",
+        "dimensions": "1080x1080 square",
+        "toneMode": "tonight",
+        "spec": {
+          "backgroundIdea": "Quarry lake/patio at golden hour or evening string lights",
+          "title": "TONIGHT — LIVE MUSIC",
+          "cards": [
+            {
+              "day": "Saturday, Aug 8",
+              "bandName": "Closed for a private event",
+              "time": ""
+            },
+            {
+              "day": "Sunday, Aug 9",
+              "bandName": "Mixology",
+              "time": "1 PM - 4 PM"
+            },
+            {
+              "day": "Friday, Aug 14",
+              "bandName": "Russo and Company",
+              "time": "7 PM - 10 PM"
+            }
+          ],
+          "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
+        },
+        "canvasNote": "Tonight — covers 3 band(s). Post 0 days before first show."
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
+    },
+    {
+      "id": "drf-ms94ti77-7-gj0to",
+      "cadenceTag": "bands:2026-08-14:T-3",
+      "type": "band_announce",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-08-12T17:00:00-05:00",
+      "createdAt": "2026-07-31T16:03:26.179Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "band",
+        "sourceId": "2026-08-14",
+        "weekendOf": "2026-08-14",
+        "bands": [
+          {
+            "name": "Closed for a private event",
+            "date": "2026-08-15",
+            "timeSlot": "",
+            "type": "closed"
+          },
+          {
+            "name": "Ed Callison Trio",
+            "date": "2026-08-16",
+            "timeSlot": "1 PM - 4 PM",
+            "type": "afternoon"
+          },
+          {
+            "name": "Closed for a private event",
+            "date": "2026-08-21",
+            "timeSlot": "",
+            "type": "closed"
+          }
+        ],
+        "arcStep": "T-3",
+        "arcLabel": "Weekend Lineup"
+      },
+      "graphicBrief": {
+        "type": "band_lineup_poster",
+        "templateRef": "Match the 3-card \"LIVE BANDS AT THE QUARRY\" poster you already use",
+        "neededBy": "2026-08-11",
+        "dimensions": "1080x1080 square",
+        "toneMode": "weekend-hype",
+        "spec": {
+          "backgroundIdea": "Quarry lake/patio at golden hour or evening string lights",
+          "title": "LIVE BANDS THIS WEEKEND",
+          "cards": [
+            {
+              "day": "Saturday, Aug 15",
+              "bandName": "Closed for a private event",
+              "time": ""
+            },
+            {
+              "day": "Sunday, Aug 16",
+              "bandName": "Ed Callison Trio",
+              "time": "1 PM - 4 PM"
+            },
+            {
+              "day": "Friday, Aug 21",
+              "bandName": "Closed for a private event",
+              "time": ""
+            }
+          ],
+          "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
+        },
+        "canvasNote": "Weekend Lineup — covers 3 band(s). Post 3 days before first show."
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
+    },
+    {
+      "id": "drf-ms94ti78-8-bxq2x",
+      "cadenceTag": "bands:2026-08-14:T-0",
+      "type": "band_announce",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-08-15T14:00:00-05:00",
+      "createdAt": "2026-07-31T16:03:26.180Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "band",
+        "sourceId": "2026-08-14",
+        "weekendOf": "2026-08-14",
+        "bands": [
+          {
+            "name": "Closed for a private event",
+            "date": "2026-08-15",
+            "timeSlot": "",
+            "type": "closed"
+          },
+          {
+            "name": "Ed Callison Trio",
+            "date": "2026-08-16",
+            "timeSlot": "1 PM - 4 PM",
+            "type": "afternoon"
+          },
+          {
+            "name": "Closed for a private event",
+            "date": "2026-08-21",
+            "timeSlot": "",
+            "type": "closed"
+          }
+        ],
+        "arcStep": "T-0",
+        "arcLabel": "Tonight"
+      },
+      "graphicBrief": {
+        "type": "band_lineup_poster",
+        "templateRef": "Match the 3-card \"LIVE BANDS AT THE QUARRY\" poster you already use",
+        "neededBy": "2026-08-14",
+        "dimensions": "1080x1080 square",
+        "toneMode": "tonight",
+        "spec": {
+          "backgroundIdea": "Quarry lake/patio at golden hour or evening string lights",
+          "title": "TONIGHT — LIVE MUSIC",
+          "cards": [
+            {
+              "day": "Saturday, Aug 15",
+              "bandName": "Closed for a private event",
+              "time": ""
+            },
+            {
+              "day": "Sunday, Aug 16",
+              "bandName": "Ed Callison Trio",
+              "time": "1 PM - 4 PM"
+            },
+            {
+              "day": "Friday, Aug 21",
+              "bandName": "Closed for a private event",
+              "time": ""
+            }
+          ],
+          "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
+        },
+        "canvasNote": "Tonight — covers 3 band(s). Post 0 days before first show."
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
+    },
+    {
+      "id": "drf-ms94ti6t-1-dusfv",
+      "cadenceTag": "event:evt-boots-bourbon-2026-08-06:T-3",
+      "type": "event_promo",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-08-03T18:00:00-05:00",
+      "createdAt": "2026-07-31T16:03:26.165Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "event",
+        "sourceId": "evt-boots-bourbon-2026-08-06",
+        "eventName": "Boots & Bourbon",
+        "eventDate": "2026-08-06",
+        "eventTime": "18:00",
+        "eventDescription": "A full night of country music, dancing, and bourbon with DJ Dr. Draper. 6 PM to 10 PM, $5 cover at the door - no reservations needed. Happy hour all night long. 21+ event. Kitchen open all day and night (flatbreads after 9 PM).",
+        "pricePerSeat": 0,
+        "totalCapacity": 0,
+        "registeredCount": 0,
+        "fillPct": 0,
+        "arcStep": "T-3",
+        "arcLabel": "This Weekend"
+      },
+      "graphicBrief": {
+        "type": "event_poster",
+        "templateRef": "Event poster — match Boots & Bourbon / Live Bands template style",
+        "neededBy": "2026-08-01",
+        "dimensions": "1080x1080 square (Instagram + Facebook safe)",
+        "toneMode": "discount-push",
+        "spec": {
+          "backgroundIdea": "Use a Quarry-relevant photographic background that matches the event theme (e.g. country/boots for Boot Scootin, bingo balls/80s for Music Bingo, vineyard for Chateau trip, etc.)",
+          "title": "BOOTS & BOURBON",
+          "subtitle": "A full night of country music, dancing, and bourbon with DJ Dr. Draper. 6 PM to 10 PM, $5 cover at t",
+          "date": "THURSDAY, AUGUST 6",
+          "time": "6:00 PM",
+          "callout": "EARLY-BIRD PRICING ENDS SOON",
+          "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
+          "qLogo": "top-center, gold"
+        },
+        "canvasNote": "This Weekend — Post 3 days before event. (Pace warning: registration is light, lean into urgency / value.)"
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
+    },
+    {
+      "id": "drf-ms94ti6v-2-xc2ys",
+      "cadenceTag": "event:evt-boots-bourbon-2026-08-06:T-1",
+      "type": "event_promo",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-08-05T11:00:00-05:00",
+      "createdAt": "2026-07-31T16:03:26.167Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "event",
+        "sourceId": "evt-boots-bourbon-2026-08-06",
+        "eventName": "Boots & Bourbon",
+        "eventDate": "2026-08-06",
+        "eventTime": "18:00",
+        "eventDescription": "A full night of country music, dancing, and bourbon with DJ Dr. Draper. 6 PM to 10 PM, $5 cover at the door - no reservations needed. Happy hour all night long. 21+ event. Kitchen open all day and night (flatbreads after 9 PM).",
+        "pricePerSeat": 0,
+        "totalCapacity": 0,
+        "registeredCount": 0,
+        "fillPct": 0,
+        "arcStep": "T-1",
+        "arcLabel": "Tomorrow"
+      },
+      "graphicBrief": {
+        "type": "event_poster",
+        "templateRef": "Event poster — match Boots & Bourbon / Live Bands template style",
+        "neededBy": "2026-08-03",
+        "dimensions": "1080x1080 square (Instagram + Facebook safe)",
+        "toneMode": "discount-push",
+        "spec": {
+          "backgroundIdea": "Use a Quarry-relevant photographic background that matches the event theme (e.g. country/boots for Boot Scootin, bingo balls/80s for Music Bingo, vineyard for Chateau trip, etc.)",
+          "title": "BOOTS & BOURBON",
+          "subtitle": "A full night of country music, dancing, and bourbon with DJ Dr. Draper. 6 PM to 10 PM, $5 cover at t",
+          "date": "THURSDAY, AUGUST 6",
+          "time": "6:00 PM",
+          "callout": "EARLY-BIRD PRICING ENDS SOON",
+          "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
+          "qLogo": "top-center, gold"
+        },
+        "canvasNote": "Tomorrow — Post 1 days before event. (Pace warning: registration is light, lean into urgency / value.)"
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
+    },
+    {
+      "id": "drf-ms94ti77-5-6vi8j",
+      "cadenceTag": "bands:2026-08-07:T-3",
+      "type": "band_announce",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-08-05T17:00:00-05:00",
+      "createdAt": "2026-07-31T16:03:26.179Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "band",
+        "sourceId": "2026-08-07",
+        "weekendOf": "2026-08-07",
+        "bands": [
+          {
+            "name": "Closed for a private event",
+            "date": "2026-08-08",
+            "timeSlot": "",
+            "type": "closed"
+          },
+          {
+            "name": "Mixology",
+            "date": "2026-08-09",
+            "timeSlot": "1 PM - 4 PM",
+            "type": "afternoon"
+          },
+          {
+            "name": "Russo and Company",
+            "date": "2026-08-14",
+            "timeSlot": "7 PM - 10 PM",
+            "type": "evening"
+          }
+        ],
+        "arcStep": "T-3",
+        "arcLabel": "Weekend Lineup"
+      },
+      "graphicBrief": {
+        "type": "band_lineup_poster",
+        "templateRef": "Match the 3-card \"LIVE BANDS AT THE QUARRY\" poster you already use",
+        "neededBy": "2026-08-04",
+        "dimensions": "1080x1080 square",
+        "toneMode": "weekend-hype",
+        "spec": {
+          "backgroundIdea": "Quarry lake/patio at golden hour or evening string lights",
+          "title": "LIVE BANDS THIS WEEKEND",
+          "cards": [
+            {
+              "day": "Saturday, Aug 8",
+              "bandName": "Closed for a private event",
+              "time": ""
+            },
+            {
+              "day": "Sunday, Aug 9",
+              "bandName": "Mixology",
+              "time": "1 PM - 4 PM"
+            },
+            {
+              "day": "Friday, Aug 14",
+              "bandName": "Russo and Company",
+              "time": "7 PM - 10 PM"
+            }
+          ],
+          "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
+        },
+        "canvasNote": "Weekend Lineup — covers 3 band(s). Post 3 days before first show."
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
+    },
+    {
+      "id": "drf-ms94ti6v-3-86j3g",
+      "cadenceTag": "event:evt-boots-bourbon-2026-08-06:T-0",
+      "type": "event_promo",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-08-06T09:00:00-05:00",
+      "createdAt": "2026-07-31T16:03:26.167Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "event",
+        "sourceId": "evt-boots-bourbon-2026-08-06",
+        "eventName": "Boots & Bourbon",
+        "eventDate": "2026-08-06",
+        "eventTime": "18:00",
+        "eventDescription": "A full night of country music, dancing, and bourbon with DJ Dr. Draper. 6 PM to 10 PM, $5 cover at the door - no reservations needed. Happy hour all night long. 21+ event. Kitchen open all day and night (flatbreads after 9 PM).",
+        "pricePerSeat": 0,
+        "totalCapacity": 0,
+        "registeredCount": 0,
+        "fillPct": 0,
+        "arcStep": "T-0",
+        "arcLabel": "Today / Tonight"
+      },
+      "graphicBrief": {
+        "type": "event_poster",
+        "templateRef": "Event poster — match Boots & Bourbon / Live Bands template style",
+        "neededBy": "2026-08-04",
+        "dimensions": "1080x1080 square (Instagram + Facebook safe)",
+        "toneMode": "discount-push",
+        "spec": {
+          "backgroundIdea": "Use a Quarry-relevant photographic background that matches the event theme (e.g. country/boots for Boot Scootin, bingo balls/80s for Music Bingo, vineyard for Chateau trip, etc.)",
+          "title": "BOOTS & BOURBON",
+          "subtitle": "A full night of country music, dancing, and bourbon with DJ Dr. Draper. 6 PM to 10 PM, $5 cover at t",
+          "date": "THURSDAY, AUGUST 6",
+          "time": "6:00 PM",
+          "callout": "EARLY-BIRD PRICING ENDS SOON",
+          "footerText": "THE QUARRY  •  EAT  •  DRINK  •  RELAX",
+          "qLogo": "top-center, gold"
+        },
+        "canvasNote": "Today / Tonight — Post 0 days before event. (Pace warning: registration is light, lean into urgency / value.)"
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
+    },
+    {
+      "id": "drf-ms94ti78-9-4v2lw",
+      "cadenceTag": "bands:2026-08-21:T-3",
+      "type": "band_announce",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-08-19T17:00:00-05:00",
+      "createdAt": "2026-07-31T16:03:26.180Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "band",
+        "sourceId": "2026-08-21",
+        "weekendOf": "2026-08-21",
+        "bands": [
+          {
+            "name": "Joe and Jim",
+            "date": "2026-08-22",
+            "timeSlot": "1 PM - 4 PM",
+            "type": "afternoon"
+          },
+          {
+            "name": "Scott and Liz",
+            "date": "2026-08-22",
+            "timeSlot": "7 PM - 10 PM",
+            "type": "evening"
+          },
+          {
+            "name": "Garden Party",
+            "date": "2026-08-23",
+            "timeSlot": "1 PM - 4 PM",
+            "type": "afternoon"
+          },
+          {
+            "name": "Double D",
+            "date": "2026-08-28",
+            "timeSlot": "7 PM - 10 PM",
+            "type": "evening"
+          }
+        ],
+        "arcStep": "T-3",
+        "arcLabel": "Weekend Lineup"
+      },
+      "graphicBrief": {
+        "type": "band_lineup_poster",
+        "templateRef": "Match the 3-card \"LIVE BANDS AT THE QUARRY\" poster you already use",
+        "neededBy": "2026-08-18",
+        "dimensions": "1080x1080 square",
+        "toneMode": "weekend-hype",
+        "spec": {
+          "backgroundIdea": "Quarry lake/patio at golden hour or evening string lights",
+          "title": "LIVE BANDS THIS WEEKEND",
+          "cards": [
+            {
+              "day": "Saturday, Aug 22",
+              "bandName": "Joe and Jim",
+              "time": "1 PM - 4 PM"
+            },
+            {
+              "day": "Saturday, Aug 22",
+              "bandName": "Scott and Liz",
+              "time": "7 PM - 10 PM"
+            },
+            {
+              "day": "Sunday, Aug 23",
+              "bandName": "Garden Party",
+              "time": "1 PM - 4 PM"
+            },
+            {
+              "day": "Friday, Aug 28",
+              "bandName": "Double D",
+              "time": "7 PM - 10 PM"
+            }
+          ],
+          "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
+        },
+        "canvasNote": "Weekend Lineup — covers 4 band(s). Post 3 days before first show."
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
+    },
+    {
+      "id": "drf-ms94ti78-a-gpeyi",
+      "cadenceTag": "bands:2026-08-21:T-0",
+      "type": "band_announce",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-08-22T14:00:00-05:00",
+      "createdAt": "2026-07-31T16:03:26.180Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "band",
+        "sourceId": "2026-08-21",
+        "weekendOf": "2026-08-21",
+        "bands": [
+          {
+            "name": "Joe and Jim",
+            "date": "2026-08-22",
+            "timeSlot": "1 PM - 4 PM",
+            "type": "afternoon"
+          },
+          {
+            "name": "Scott and Liz",
+            "date": "2026-08-22",
+            "timeSlot": "7 PM - 10 PM",
+            "type": "evening"
+          },
+          {
+            "name": "Garden Party",
+            "date": "2026-08-23",
+            "timeSlot": "1 PM - 4 PM",
+            "type": "afternoon"
+          },
+          {
+            "name": "Double D",
+            "date": "2026-08-28",
+            "timeSlot": "7 PM - 10 PM",
+            "type": "evening"
+          }
+        ],
+        "arcStep": "T-0",
+        "arcLabel": "Tonight"
+      },
+      "graphicBrief": {
+        "type": "band_lineup_poster",
+        "templateRef": "Match the 3-card \"LIVE BANDS AT THE QUARRY\" poster you already use",
+        "neededBy": "2026-08-21",
+        "dimensions": "1080x1080 square",
+        "toneMode": "tonight",
+        "spec": {
+          "backgroundIdea": "Quarry lake/patio at golden hour or evening string lights",
+          "title": "TONIGHT — LIVE MUSIC",
+          "cards": [
+            {
+              "day": "Saturday, Aug 22",
+              "bandName": "Joe and Jim",
+              "time": "1 PM - 4 PM"
+            },
+            {
+              "day": "Saturday, Aug 22",
+              "bandName": "Scott and Liz",
+              "time": "7 PM - 10 PM"
+            },
+            {
+              "day": "Sunday, Aug 23",
+              "bandName": "Garden Party",
+              "time": "1 PM - 4 PM"
+            },
+            {
+              "day": "Friday, Aug 28",
+              "bandName": "Double D",
+              "time": "7 PM - 10 PM"
+            }
+          ],
+          "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
+        },
+        "canvasNote": "Tonight — covers 4 band(s). Post 0 days before first show."
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
     }
   ],
   "history": [],
