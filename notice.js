@@ -40,7 +40,7 @@ var NOTICES = [
 
   var STORE_KEY = "quarry-notice-dismissed";
 
-  /* Today's date in New Melle, as YYYY-MM-DD, so notices turn over at local
+  /* Today’s date in New Melle, as YYYY-MM-DD, so notices turn over at local
      midnight no matter where the visitor is. */
   function today() {
     try {
@@ -50,9 +50,9 @@ var NOTICES = [
     }
   }
 
-  function active() {
+  function active(list) {
     var now = today();
-    return (NOTICES || []).filter(function (n) {
+    return (list || []).filter(function (n) {
       if (!n || !n.text) return false;
       if (n.from && now < n.from) return false;
       if (n.to && now > n.to) return false;
@@ -138,7 +138,7 @@ var NOTICES = [
   }
 
   /* The banner sits in normal flow so it scrolls away with the page.
-     The catch: these pages do not agree on how the header is positioned.
+     The catch: these pages don’t agree on how the header is positioned.
        index.html      header is fixed, nothing reserves space for it
        quarry-menu     header is sticky on desktop (still takes up flow space)
        under 768px     header is fixed and body reserves 64px — but the header
@@ -156,8 +156,33 @@ var NOTICES = [
     banner.style.marginTop = Math.max(0, Math.round(shortfall)) + "px";
   }
 
-  function init() {
-    var list = active();
+  /* Notices are managed from /admin and live in the site_notices table.
+     Fetch the active ones; if the request fails, fall back to the hardcoded
+     NOTICES list above so the banner never goes dark. */
+  var NOTICE_SUPA = "https://nkulhtalltbieicvmmad.supabase.co";
+  var NOTICE_KEY = "sb_publishable_FQK59Bn8P2jV8yGL0nPi7w_jVHFMBSl";
+  var NOTICE_URL = NOTICE_SUPA + "/rest/v1/site_notices?active=eq.true&order=sort_order,id&select=day_label,message,from_date,to_date";
+
+  function loadNotices(cb) {
+    try {
+      fetch(NOTICE_URL, { headers: { apikey: NOTICE_KEY, Authorization: "Bearer " + NOTICE_KEY } })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (rows) {
+          if (rows && rows.length) {
+            cb(rows.map(function (r) {
+              return { day: r.day_label, text: r.message, from: r.from_date, to: r.to_date };
+            }));
+          } else {
+            cb(NOTICES || []);
+          }
+        })
+        .catch(function () { cb(NOTICES || []); });
+    } catch (e) {
+      cb(NOTICES || []);
+    }
+  }
+
+  function render(list) {
     if (!list.length || dismissedToday()) return;
 
     var header = document.querySelector("header");
@@ -185,6 +210,10 @@ var NOTICES = [
         place(banner, header);
       }, 120);
     });
+  }
+
+  function init() {
+    loadNotices(function (list) { render(active(list)); });
   }
 
   if (document.readyState === "loading") {
