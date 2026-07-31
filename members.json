@@ -1382,8 +1382,8 @@
       "joinedAt": "2026-07-22T22:00:59.144Z",
       "lastVisitAt": null,
       "tier": "standard",
-      "currentPoints": 250,
-      "lifetimePoints": 250,
+      "currentPoints": 300,
+      "lifetimePoints": 300,
       "totalRedemptions": 0,
       "marketingOptIn": false,
       "smsOptIn": false,
@@ -1397,6 +1397,14 @@
           "source": "signup",
           "delta": 250,
           "note": "Welcome bonus 250"
+        },
+        {
+          "at": "2026-07-31T20:44:15.797Z",
+          "action": "earn",
+          "source": "referral",
+          "delta": 50,
+          "referredEmail": "brianmontani@gmail.com",
+          "note": "Referred Brian Montani to The Quarry"
         }
       ]
     },
@@ -1595,9 +1603,37 @@
           "note": "Welcome bonus 250 + email opt-in +10"
         }
       ]
+    },
+    {
+      "id": "m_ms9eunj9_76cb",
+      "name": "Brian Montani",
+      "email": "brianmontani@gmail.com",
+      "phone": "13147130730",
+      "birthday": "2026-08-01",
+      "passwordHash": "53304093299b582ba45ccdba9713d29b:32dea4651412c4c6ed0728fc0c4a0cd735af43434082ff7c1acfa7fde43622c5a8e700d298b46ca8f1516907da1088854558edb1b435fc0718259f829688cafd",
+      "joinedAt": "2026-07-31T20:44:15.797Z",
+      "lastVisitAt": null,
+      "tier": "standard",
+      "currentPoints": 250,
+      "lifetimePoints": 250,
+      "totalRedemptions": 0,
+      "marketingOptIn": false,
+      "smsOptIn": true,
+      "referralCode": "QRY-C2F4WM",
+      "referredBy": "kehavrilka@gmail.com",
+      "notes": "",
+      "history": [
+        {
+          "at": "2026-07-31T20:44:15.797Z",
+          "action": "earn",
+          "source": "signup",
+          "delta": 250,
+          "note": "Welcome bonus 250 + sms opt-in +0"
+        }
+      ]
     }
   ],
-  "lastUpdated": "2026-07-30",
+  "lastUpdated": "2026-07-31",
   "schemaVersion": 1,
   "fields": {
     "id": "Internal stable id (e.g. m_1730468400_3a2)",
