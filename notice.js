@@ -24,16 +24,10 @@ var TITLE = "Hours Update";
 
 var NOTICES = [
   {
-    day:  "Sat July 18",
-    text: "Opening at <b>12 PM</b> due to a private party.",
-    from: "2026-07-15",
-    to:   "2026-07-18"
-  },
-  {
-    day:  "Sun July 19",
-    text: "Opening at <b>11 AM</b> — no brunch service while we change over our menu.",
-    from: "2026-07-15",
-    to:   "2026-07-19"
+    day:  "Sat Aug 1",
+    text: "Opening at <b>12 PM</b> due to a private event.",
+    from: "2026-07-31",
+    to:   "2026-08-01"
   }
 ];
 
