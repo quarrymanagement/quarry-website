@@ -8212,7 +8212,10 @@
 
                 const res = await fetch('/.netlify/functions/save-events', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-admin-token': (localStorage.getItem('quarrySaveToken') || 'quarry2026')
+                    },
                     body: JSON.stringify(eventsData),
                 });
 
