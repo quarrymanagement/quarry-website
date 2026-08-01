@@ -6806,6 +6806,102 @@
             saveEvent();
         });
 
+        // ---- Ticket tiers + seating options repeaters -------------------
+        const seatingUI = (function () {
+            let tiers = [];
+            let seating = [];
+            const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+            const slug = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || ('opt-' + Date.now().toString(36).slice(-4));
+
+            function renderTiers() {
+                const el = document.getElementById('tiersEditor');
+                if (!el) return;
+                el.innerHTML = tiers.map((t, i) => `
+                    <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
+                        <input type="text" value="${esc(t.name)}" placeholder="e.g. Brunch + Bottomless" data-tier-i="${i}" data-tier-k="name" style="flex:2;">
+                        <input type="number" value="${t.dollars != null ? t.dollars : ''}" placeholder="45.00" step="0.01" min="0" data-tier-i="${i}" data-tier-k="dollars" style="flex:1;">
+                        <button type="button" class="remove-row-btn" data-tier-del="${i}">&times;</button>
+                    </div>`).join('');
+            }
+            function renderSeating() {
+                const el = document.getElementById('seatingEditor');
+                if (!el) return;
+                el.innerHTML = seating.map((s, i) => `
+                    <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
+                        <input type="text" value="${esc(s.name)}" placeholder="e.g. 4-Top Table" data-seat-i="${i}" data-seat-k="name" style="flex:2;">
+                        <input type="number" value="${s.seats != null ? s.seats : ''}" placeholder="seats" min="1" data-seat-i="${i}" data-seat-k="seats" style="flex:1;">
+                        <input type="number" value="${s.available != null ? s.available : ''}" placeholder="how many" min="0" data-seat-i="${i}" data-seat-k="available" style="flex:1;">
+                        <button type="button" class="remove-row-btn" data-seat-del="${i}">&times;</button>
+                    </div>`).join('');
+            }
+
+            function bind(containerId, onInput, onClick) {
+                const el = document.getElementById(containerId);
+                if (!el) return;
+                el.addEventListener('input', onInput);
+                el.addEventListener('click', onClick);
+            }
+
+            function init() {
+                bind('tiersEditor', (e) => {
+                    const t = e.target; if (t.dataset.tierI == null) return;
+                    const i = +t.dataset.tierI;
+                    if (t.dataset.tierK === 'dollars') tiers[i].dollars = t.value === '' ? null : parseFloat(t.value);
+                    else tiers[i][t.dataset.tierK] = t.value;
+                }, (e) => {
+                    const t = e.target.closest('[data-tier-del]'); if (!t) return;
+                    e.preventDefault(); tiers.splice(+t.dataset.tierDel, 1); renderTiers();
+                });
+                bind('seatingEditor', (e) => {
+                    const t = e.target; if (t.dataset.seatI == null) return;
+                    const i = +t.dataset.seatI;
+                    if (t.dataset.seatK === 'name') seating[i].name = t.value;
+                    else seating[i][t.dataset.seatK] = t.value === '' ? null : parseInt(t.value, 10);
+                }, (e) => {
+                    const t = e.target.closest('[data-seat-del]'); if (!t) return;
+                    e.preventDefault(); seating.splice(+t.dataset.seatDel, 1); renderSeating();
+                });
+                const at = document.getElementById('addTierBtn');
+                if (at) at.addEventListener('click', (e) => { e.preventDefault(); tiers.push({ name: '', dollars: null }); renderTiers(); });
+                const as = document.getElementById('addSeatingBtn');
+                if (as) as.addEventListener('click', (e) => { e.preventDefault(); seating.push({ name: '', seats: null, available: null }); renderSeating(); });
+            }
+
+            return {
+                init,
+                load(ev) {
+                    tiers = ((ev && ev.tiers) || []).map(t => ({
+                        name: t.name || '',
+                        dollars: t.pricePerPerson != null ? (t.pricePerPerson / 100) : null
+                    }));
+                    seating = ((ev && ev.seatingOptions) || []).map(s => ({
+                        id: s.id || '', name: s.name || '',
+                        seats: s.seats != null ? s.seats : null,
+                        available: s.available != null ? s.available : null
+                    }));
+                    renderTiers(); renderSeating();
+                },
+                collect() {
+                    const outTiers = tiers.filter(t => (t.name || '').trim() !== '').map(t => {
+                        const cents = Math.round((parseFloat(t.dollars) || 0) * 100);
+                        return {
+                            name: t.name.trim(),
+                            pricePerPerson: cents,
+                            priceLabel: '$' + (cents / 100).toFixed(2).replace(/\.00$/, ''),
+                            priceUnit: 'person'
+                        };
+                    });
+                    const outSeating = seating.filter(s => (s.name || '').trim() !== '').map(s => {
+                        const o = { id: s.id || slug(s.name), name: s.name.trim(), seats: parseInt(s.seats, 10) || 1 };
+                        if (s.available != null && s.available !== '') o.available = parseInt(s.available, 10);
+                        return o;
+                    });
+                    return { tiers: outTiers, seatingOptions: outSeating };
+                }
+            };
+        })();
+        seatingUI.init();
+
         function saveEvent() {
             const eventData = {
                 id: app.currentEvent?.id || 'event_' + Date.now(),
