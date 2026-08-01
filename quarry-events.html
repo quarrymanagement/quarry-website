@@ -2272,7 +2272,7 @@
             document.getElementById("modalFooter").style.display = "flex";
 
             // Check if this event has a floor plan — show table map step first
-            const hasFloorPlan = currentEventForModal.floorPlan || currentEventForModal.seatingOptions;
+            const hasFloorPlan = currentEventForModal.floorPlan;
             const tableMapStep = document.getElementById("tableMapStep");
             const formStepLabel = document.getElementById("formStepLabel");
             const selectTableBtn = document.getElementById("selectTableBtn");
