@@ -2487,11 +2487,21 @@
                 // Determine party size from seating option or direct input
                 let partySize = 1;
                 let seatType = 'general';
+                let seatingOptionId = '';
+                let lineItems = null;
                 if (currentEventForModal.seatingOptions) {
                     const seatingSelect = document.getElementById("seatingOption");
                     const selectedSeating = seatingSelect.options[seatingSelect.selectedIndex];
                     partySize = parseInt(selectedSeating.dataset.seats) || 1;
-                    seatType = seatingSelect.value.toLowerCase().replace(/\s+/g, '-');
+                    seatingOptionId = seatingSelect.value;
+                    // Backend requires a non-empty seatType; use the same id.
+                    seatType = seatingOptionId;
+                    const evTiers = currentEventForModal.tiers || [];
+                    if (evTiers.length > 1) {
+                        lineItems = collectTierQuantities();
+                    } else if (evTiers.length === 1) {
+                        lineItems = [{ tierName: evTiers[0].name, qty: partySize }];
+                    }
                 } else {
                     partySize = parseInt(formData.get("partySize")) || 1;
                 }
@@ -2511,6 +2521,13 @@
                     cancelUrl: window.location.origin + '/quarry-events'
                 };
 
+                if (seatingOptionId) {
+                    payload.seatingOptionId = seatingOptionId;
+                }
+                if (lineItems && lineItems.length) {
+                    payload.lineItems = lineItems;
+                }
+
                 const response = await fetch("/.netlify/functions/event-register", {
                     method: "POST",
                     headers: {
@@ -2519,11 +2536,12 @@
                     body: JSON.stringify(payload)
                 });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+                const data = await response.json().catch(() => ({}));
 
-                const data = await response.json();
+                if (!response.ok) {
+                    // Surface the backend's message (e.g. "all 4-Tops are taken")
+                    throw new Error((data && data.error) ? data.error : `HTTP error! status: ${response.status}`);
+                }
 
                 // For free events, show success message
                 if (data.free) {
