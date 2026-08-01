@@ -4948,6 +4948,17 @@
                 <label class="form-label">Capacity</label>
                 <input type="number" class="form-input" id="eventCapacity" min="1" required>
             </div>
+            <div class="form-group" style="border-top:1px solid var(--border-medium);padding-top:16px;margin-top:16px;">
+                <label style="font-weight:700;">Ticket Tiers <span style="font-weight:400;opacity:.7;">— leave empty for simple per-person pricing</span></label>
+                <div id="tiersEditor"></div>
+                <button type="button" class="add-row-btn" id="addTierBtn">+ Add ticket tier</button>
+            </div>
+            <div class="form-group">
+                <label style="font-weight:700;">Table Sizes &amp; Bar Seats <span style="font-weight:400;opacity:.7;">— leave empty to sell individual tickets</span></label>
+                <div id="seatingEditor"></div>
+                <button type="button" class="add-row-btn" id="addSeatingBtn">+ Add table size</button>
+                <div style="font-size:.78rem;opacity:.7;margin-top:6px;">Guests pick one of these, then split its seats across your tiers. "How many" is how many of that size you have; leave blank for unlimited.</div>
+            </div>
             <div class="form-group">
                 <label class="form-label">Use Table Chart</label>
                 <div class="pricing-type-group">
