@@ -6656,6 +6656,7 @@
                     document.getElementById('eventAdditionalInfo').value = event.additionalInfo || '';
                     document.getElementById('eventCapacity').value = event.capacity || event.totalCapacity || '';
                     document.getElementById('eventStatus').value = event.status || 'available';
+                    seatingUI.load(event);
 
                     if (event.image) {
                         const img = document.getElementById('imagePreview');
