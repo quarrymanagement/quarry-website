@@ -1533,7 +1533,13 @@
 
                     <div class="form-group" id="seatingGroup" style="display:none;">
                         <label for="seatingOption">Seating Option *</label>
-                        <select id="seatingOption" name="seatingOption" required onchange="updateOrderSummary()"></select>
+                        <select id="seatingOption" name="seatingOption" required onchange="renderTierSplit(); updateOrderSummary();"></select>
+                    </div>
+
+                    <div class="form-group" id="tierSplitGroup" style="display:none;">
+                        <label>Who's coming? <span style="font-weight:400;opacity:.75;">Assign every seat at your table</span></label>
+                        <div id="tierSplitRows"></div>
+                        <div id="tierSplitStatus" style="font-size:13px;margin-top:6px;"></div>
                     </div>
 
                     <div class="form-group" id="partySizeGroup" style="display:none;">
