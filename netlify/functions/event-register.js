@@ -7,12 +7,28 @@
 // Required env vars:
 //   SQUARE_ACCESS_TOKEN, SQUARE_LOCATION_ID, SQUARE_ENVIRONMENT
 //
-// Supports two checkout shapes:
+// Supports three checkout shapes:
 //   (a) Single-tier:  body = { ticketTier, partySize, ... }
 //   (b) Multi-tier:   body = { lineItems: [{ tierName, qty }, ...], ... }
 //       Used when one transaction covers mixed tiers, e.g. the Poker Run
 //       (1 driver + N passengers). Server validates each tierName against
 //       events.json so the client cannot tamper with prices.
+//   (c) Table booking (added 2026-07-31):
+//       body = { seatingOptionId, lineItems: [{ tierName, qty }, ...], ... }
+//       The guest picks a table size (2/4/6/8-top, bar seat, ...) and splits
+//       those seats across price tiers — e.g. a 4-top with 2 x "Brunch +
+//       Bottomless" and 2 x "Brunch Only". The server checks that:
+//         - the seatingOptionId is a real option on the event
+//         - the line item quantities sum to exactly that option's seat count
+//         - that table size is not already sold out
+//
+// PER-SIZE INVENTORY
+// Availability for a seating option is DERIVED from the event's registration
+// log rather than stored as a counter, so it can never drift out of sync:
+//     used  = number of paid registrations carrying that seatingOptionId
+//     left  = option.available - used
+// The Square webhook records seatingOptionId on each registration, taken from
+// the order metadata this function sets below.
 // ============================================================================
 
 const https = require('https');
@@ -71,8 +87,6 @@ function fetchJSON(url) {
 }
 
 // Normalize US phone numbers to E.164 (+1XXXXXXXXXX) for Square's strict validator.
-// Returns undefined if the input can't be confidently normalized — better to drop
-// the optional pre-populated phone than fail the whole checkout.
 function normalizePhoneE164(raw) {
   if (!raw) return undefined;
   const digits = String(raw).replace(/\D+/g, '');
@@ -83,13 +97,41 @@ function normalizePhoneE164(raw) {
 }
 
 // Pass email to Square's pre-populated buyer email only if it passes a basic format check.
-// Square's strict validator will 400 the whole request on a marginal email. Dropping it
-// just means the customer types it again on the Square checkout page (still required).
 function safeBuyerEmail(raw) {
   if (!raw) return undefined;
   const e = String(raw).trim();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e)) return undefined;
   return e;
+}
+
+// ---------------------------------------------------------------------------
+// Seating option helpers
+// ---------------------------------------------------------------------------
+
+function findSeatingOption(evData, optionId) {
+  const opts = Array.isArray(evData.seatingOptions) ? evData.seatingOptions : [];
+  if (!opts.length) return null;
+  const want = String(optionId || '').trim().toLowerCase();
+  if (!want) return null;
+  // Match on id first, then fall back to the display name, so a client that
+  // sends either one still resolves to the right option.
+  return opts.find(function(o) {
+    return String(o.id || '').trim().toLowerCase() === want;
+  }) || opts.find(function(o) {
+    return String(o.name || '').trim().toLowerCase() === want;
+  }) || null;
+}
+
+// How many of this seating option have already been sold, counted from the
+// registration log. Falls back gracefully for legacy registrations that predate
+// the seatingOptionId field.
+function countSeatingOptionUsed(evData, option) {
+  const regs = Array.isArray(evData.registrations) ? evData.registrations : [];
+  const id = String(option.id || option.name || '').trim().toLowerCase();
+  return regs.reduce(function(n, r) {
+    const rid = String((r && (r.seatingOptionId || r.seatType)) || '').trim().toLowerCase();
+    return rid === id ? n + 1 : n;
+  }, 0);
 }
 
 exports.handler = async function(event) {
@@ -116,9 +158,8 @@ exports.handler = async function(event) {
     const couponCode = body.couponCode || '';
     const successUrl = body.successUrl;
     const cancelUrl = body.cancelUrl;
+    const seatingOptionId = body.seatingOptionId || '';
     // Optional: multi-line cart for events that mix tiers in one checkout
-    // (e.g., Poker Run: 1 driver + N passengers). Each item: { tierName, qty }
-    // When present, this bypasses the single-tier lookup below.
     const lineItemsIn = Array.isArray(body.lineItems) ? body.lineItems : null;
 
     if (!eventId || !name || !email || !seatType) {
@@ -144,13 +185,47 @@ exports.handler = async function(event) {
     if (lineItemsIn && lineItemsIn.length) {
       qty = lineItemsIn.reduce(function(s, li) { return s + (parseInt(li.qty, 10) || 0); }, 0) || 1;
     }
+
+    // ---- SEATING OPTION VALIDATION + PER-SIZE INVENTORY ------------------
+    // Only enforced for events that actually define seatingOptions, so every
+    // existing event keeps working exactly as before.
+    let chosenOption = null;
+    if (Array.isArray(evData.seatingOptions) && evData.seatingOptions.length > 0) {
+      if (!seatingOptionId) {
+        return { statusCode: 400, headers, body: JSON.stringify({ error: 'Please choose a table size.' }) };
+      }
+      chosenOption = findSeatingOption(evData, seatingOptionId);
+      if (!chosenOption) {
+        return { statusCode: 400, headers, body: JSON.stringify({ error: 'Unknown table option: ' + seatingOptionId }) };
+      }
+
+      const seats = parseInt(chosenOption.seats, 10) || 1;
+      if (qty !== seats) {
+        return {
+          statusCode: 400, headers,
+          body: JSON.stringify({ error: 'Please assign all ' + seats + ' seat' + (seats === 1 ? '' : 's') + ' at this ' + (chosenOption.name || 'table') + '. You have assigned ' + qty + '.' })
+        };
+      }
+
+      // available === null/undefined means "unlimited"; 0 means none left.
+      if (chosenOption.available !== undefined && chosenOption.available !== null && chosenOption.available !== '') {
+        const cap = parseInt(chosenOption.available, 10) || 0;
+        const used = countSeatingOptionUsed(evData, chosenOption);
+        if (used >= cap) {
+          return {
+            statusCode: 409, headers,
+            body: JSON.stringify({ error: 'Sorry — all ' + (chosenOption.name || 'tables of this size') + ' are taken. Please choose another size.' })
+          };
+        }
+      }
+    }
+
     const remaining = (evData.totalCapacity || 0) - (evData.registeredCount || 0);
     if (evData.totalCapacity && remaining < qty) {
       return { statusCode: 409, headers, body: JSON.stringify({ error: 'Not enough seats. Only ' + remaining + ' remaining.' }) };
     }
 
     // Build the Square line_items array.
-    // Two paths: (a) caller-supplied lineItems for mixed-tier carts, (b) single-tier fallback.
     let squareLineItems = [];
     let tierName = evData.name;
     let unitPrice = evData.pricePerSeat || evData.price || 0;
@@ -168,9 +243,11 @@ exports.handler = async function(event) {
         const matched = tierMap[tName.toLowerCase()];
         // Server-side price = the event tier price; ignore any amount the client sent.
         const liPrice = matched ? (matched.pricePerPerson || 0) : 0;
-        if (!matched || liPrice <= 0) {
+        if (!matched) {
           return { statusCode: 400, headers, body: JSON.stringify({ error: 'Unknown ticket tier: ' + tName }) };
         }
+        // A $0 tier is legitimate (e.g. a free kids' seat at a paid table), but
+        // the whole order still has to come to something payable — checked below.
         squareLineItems.push({
           name: matched.name + ' - ' + (evData.name || ''),
           note: (evData.date || '') + ' at The Quarry',
@@ -180,6 +257,12 @@ exports.handler = async function(event) {
       }
       if (squareLineItems.length === 0) {
         return { statusCode: 400, headers, body: JSON.stringify({ error: 'No valid line items provided' }) };
+      }
+      const orderTotal = squareLineItems.reduce(function(s, li) {
+        return s + (li.base_price_money.amount * parseInt(li.quantity, 10));
+      }, 0);
+      if (orderTotal <= 0) {
+        return { statusCode: 400, headers, body: JSON.stringify({ error: 'Could not determine ticket price' }) };
       }
       // For metadata/payment_note labeling
       tierName = squareLineItems.map(function(li){ return li.quantity + 'x ' + li.name.split(' - ')[0]; }).join(', ');
@@ -215,7 +298,6 @@ exports.handler = async function(event) {
     }
 
     // Build Square Payment Link
-    // For multi-tier carts, summarize the breakdown in ticketTier metadata
     const tierSummary = (lineItemsIn && lineItemsIn.length)
       ? squareLineItems.map(function(li){ return li.quantity + 'x ' + li.name.split(' - ')[0]; }).join(' + ')
       : ticketTier;
@@ -231,11 +313,14 @@ exports.handler = async function(event) {
       partySize: String(qty),
       seatType: String(seatType).slice(0, 60),
       tableId: String(tableId).slice(0, 60),
+      // New: which table size was bought. The Square webhook reads this back to
+      // keep per-size inventory honest.
+      seatingOptionId: String(chosenOption ? (chosenOption.id || chosenOption.name) : '').slice(0, 60),
+      seatingOptionName: String(chosenOption ? (chosenOption.name || '') : '').slice(0, 120),
       ticketTier: String(tierSummary).slice(0, 255),
       couponCode: String(couponCode).slice(0, 60)
     };
     // Square rejects empty-string metadata values with MISSING_REQUIRED_PARAMETER.
-    // Strip any key whose value is empty/whitespace before sending.
     const safeMeta = {};
     Object.keys(rawMeta).forEach(function(k) {
       const v = rawMeta[k];
@@ -264,12 +349,11 @@ exports.handler = async function(event) {
         buyer_email: safeBuyerEmail(email) || undefined,
         buyer_phone_number: normalizePhoneE164(phone) || undefined
       },
+      // NOTE: the Square webhook parses this string. It matches /x(\d+)\s*$/ to
+      // read the quantity, so the "xN" MUST stay at the very end.
       payment_note: 'Event - ' + (evData.name || '') + ' x' + qty
     };
 
-    // Square validates buyer_email / buyer_phone_number in pre_populated_data and
-    // rejects fake/odd-format values with a 400. The prefill is only a convenience,
-    // so if that happens, retry once without it (customer enters contact on Square's page).
     let result;
     try {
       result = await squareApi('POST', '/v2/online-checkout/payment-links', linkRequest);
