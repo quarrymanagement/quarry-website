@@ -2242,8 +2242,15 @@
             form.reset();
             // Re-set the tier select after reset
             tierSelect.selectedIndex = 0;
+            window.allSeatingSoldOut = false;
             if (currentEventForModal.seatingOptions) {
-                seatingSelect.selectedIndex = 0;
+                // Select the first option that is not sold out
+                let firstOpen = -1;
+                for (let i = 0; i < seatingSelect.options.length; i++) {
+                    if (!seatingSelect.options[i].disabled) { firstOpen = i; break; }
+                }
+                window.allSeatingSoldOut = (firstOpen === -1);
+                seatingSelect.selectedIndex = firstOpen >= 0 ? firstOpen : 0;
             } else {
                 partySizeInput.value = 1;
             }
@@ -2251,7 +2258,11 @@
             document.getElementById("formError").classList.remove("show");
             document.getElementById("submitBtn").disabled = false;
             document.getElementById("submitBtn").textContent = "Proceed to Payment";
-
+            if (window.allSeatingSoldOut) {
+                document.getElementById("submitBtn").disabled = true;
+                document.getElementById("submitBtn").textContent = "Sold Out";
+            }
+            renderTierSplit();
             // Restore modal body if it was replaced by success message
             const modalBody = document.getElementById("modalFormContent");
             if (!modalBody.querySelector("form")) {
