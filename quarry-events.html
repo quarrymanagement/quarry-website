@@ -2558,7 +2558,7 @@
                 }
             } catch (error) {
                 console.error("Form submission error:", error);
-                errorDiv.textContent = "An error occurred. Please try again.";
+                errorDiv.textContent = (error && error.message) ? error.message : "An error occurred. Please try again.";
                 errorDiv.classList.add("show");
                 submitBtn.disabled = false;
                 submitBtn.textContent = "Proceed to Payment";
