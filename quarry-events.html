@@ -2216,7 +2216,7 @@
                         return String((r && (r.seatingOptionId || r.seatType)) || '').toLowerCase().trim() === key;
                     }).length;
                     const left = (opt.available == null || opt.available === '') ? Infinity : (opt.available - used);
-                    let label = `${opt.name} (${opt.seats} seats)`;
+                    let label = `${opt.name} (${opt.seats} ${Number(opt.seats) === 1 ? 'seat' : 'seats'})`;
                     if (left <= 0) {
                         label += ' — sold out';
                     } else if (isFinite(left) && left <= 3) {
