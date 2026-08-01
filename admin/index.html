@@ -6839,6 +6839,11 @@
             if (imagePreview.src && !imagePreview.classList.contains('hidden')) {
                 eventData.image = imagePreview.src;
             }
+            const seatingCfg = seatingUI.collect();
+            eventData.tiers = seatingCfg.tiers;
+            eventData.seatingOptions = seatingCfg.seatingOptions;
+            eventData.totalCapacity = parseInt(document.getElementById('eventCapacity').value, 10) || 0;
+
 
             if (app.currentEvent) {
                 const index = app.events.findIndex(e => e.id === app.currentEvent.id);
