@@ -2208,9 +2208,21 @@
                 seatingSelect.required = true;
                 partySizeInput.required = false;
 
-                seatingSelect.innerHTML = currentEventForModal.seatingOptions.map(opt =>
-                    `<option value="${opt.name}" data-seats="${opt.seats}" data-available="${opt.available}">${opt.name} (${opt.seats} ${opt.seats === 1 ? 'person' : 'people'})${opt.available <= 2 ? ' — ' + opt.available + ' left!' : ''}</option>`
-                ).join("");
+                const regsForSeating = currentEventForModal.registrations || [];
+                seatingSelect.innerHTML = currentEventForModal.seatingOptions.map(opt => {
+                    const key = String(opt.id || opt.name || '').toLowerCase().trim();
+                    const used = regsForSeating.filter(function (r) {
+                        return String((r && (r.seatingOptionId || r.seatType)) || '').toLowerCase().trim() === key;
+                    }).length;
+                    const left = (opt.available == null || opt.available === '') ? Infinity : (opt.available - used);
+                    let label = `${opt.name} (${opt.seats} seats)`;
+                    if (left <= 0) {
+                        label += ' — sold out';
+                    } else if (isFinite(left) && left <= 3) {
+                        label += ' — ' + left + ' left';
+                    }
+                    return `<option value="${opt.id || opt.name}" data-seats="${opt.seats}" data-left="${left}"${left <= 0 ? ' disabled' : ''}>${label}</option>`;
+                }).join("");
             } else {
                 // Simple event — just pick quantity
                 seatingGroup.style.display = "none";
