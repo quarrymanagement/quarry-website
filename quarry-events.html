@@ -2314,6 +2314,49 @@
         }
 
         /**
+         * Render one quantity input per ticket tier so a party can split the
+         * seats at their table across tiers. Only shown when the event has
+         * seating options AND more than one tier.
+         */
+        function renderTierSplit() {
+            const ev = currentEventForModal;
+            const group = document.getElementById('tierSplitGroup');
+            const rows = document.getElementById('tierSplitRows');
+            if (!group || !rows || !ev) return;
+            const tiers = ev.tiers || [];
+            const hasSeating = Array.isArray(ev.seatingOptions) && ev.seatingOptions.length > 0;
+            if (!hasSeating || tiers.length < 2) { group.style.display = 'none'; rows.innerHTML = ''; return; }
+            group.style.display = 'block';
+            const sel = document.getElementById('seatingOption');
+            const seats = parseInt(sel && sel.options[sel.selectedIndex] && sel.options[sel.selectedIndex].dataset.seats, 10) || 1;
+            rows.innerHTML = tiers.map((t, i) => `
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:6px 0;">
+                    <span style="font-size:14px;">${t.name} <span style="opacity:.7;">${t.priceLabel || ''}</span></span>
+                    <input type="number" min="0" max="${seats}" value="${i === 0 ? seats : 0}" data-tierqty="${t.name}" style="width:80px;">
+                </div>`).join('');
+            rows.querySelectorAll('input[data-tierqty]').forEach(inp => {
+                inp.addEventListener('input', () => { updateOrderSummary(); });
+            });
+            updateOrderSummary();
+        }
+
+        /**
+         * Read the per-tier quantities back out as lineItems for the backend.
+         */
+        function collectTierQuantities() {
+            const ev = currentEventForModal;
+            const tiers = (ev && ev.tiers) || [];
+            const rows = document.querySelectorAll('#tierSplitRows input[data-tierqty]');
+            if (!rows.length) return null;
+            const out = [];
+            rows.forEach(inp => {
+                const q = parseInt(inp.value, 10) || 0;
+                if (q > 0) out.push({ tierName: inp.dataset.tierqty, qty: q });
+            });
+            return out;
+        }
+
+        /**
          * Update order summary based on selections
          */
         function updateOrderSummary() {
@@ -2334,11 +2377,63 @@
             if (currentEventForModal.seatingOptions) {
                 const seatingSelect = document.getElementById("seatingOption");
                 const selectedSeating = seatingSelect.options[seatingSelect.selectedIndex];
-                numPeople = parseInt(selectedSeating.dataset.seats) || 1;
-                seatingLabel = selectedSeating.value;
+                numPeople = (selectedSeating && parseInt(selectedSeating.dataset.seats)) || 1;
+                seatingLabel = selectedSeating ? selectedSeating.textContent.replace(/ — .*$/, '') : '';
             } else {
                 numPeople = parseInt(document.getElementById("partySize").value) || 1;
                 seatingLabel = numPeople === 1 ? "1 ticket" : numPeople + " tickets";
+            }
+
+            // Multi-tier table booking: total = sum of (tier price x qty) across the split rows
+            const evTiers = currentEventForModal.tiers || [];
+            const splitRows = Array.prototype.slice.call(document.querySelectorAll('#tierSplitRows input[data-tierqty]'));
+            if (currentEventForModal.seatingOptions && evTiers.length > 1 && splitRows.length) {
+                let assigned = 0;
+                let splitTotalCents = 0;
+                let lines = '';
+                splitRows.forEach(inp => {
+                    const q = parseInt(inp.value, 10) || 0;
+                    if (q <= 0) return;
+                    const t = evTiers.find(x => x.name === inp.dataset.tierqty) || {};
+                    const price = parseInt(t.pricePerPerson) || 0;
+                    assigned += q;
+                    splitTotalCents += price * q;
+                    lines += `
+                <div style="display:flex;justify-content:space-between;">
+                    <span>${t.name || inp.dataset.tierqty} × ${q}</span>
+                    <span>$${((price * q) / 100).toFixed(2)}</span>
+                </div>`;
+                });
+
+                const statusEl = document.getElementById('tierSplitStatus');
+                const submitBtnEl = document.getElementById('submitBtn');
+                if (statusEl) {
+                    if (assigned < numPeople) {
+                        statusEl.textContent = 'Assign ' + (numPeople - assigned) + ' more seat(s)';
+                        statusEl.style.color = '#b45309';
+                    } else if (assigned > numPeople) {
+                        statusEl.textContent = "That's " + (assigned - numPeople) + ' too many for this table';
+                        statusEl.style.color = '#b00020';
+                    } else {
+                        statusEl.textContent = '';
+                    }
+                }
+                if (submitBtnEl) {
+                    if (assigned !== numPeople) {
+                        submitBtnEl.disabled = true;
+                    } else if (!window.allSeatingSoldOut) {
+                        submitBtnEl.disabled = false;
+                    }
+                }
+
+                detailsDiv.innerHTML = `
+                <div style="display:flex;justify-content:space-between;">
+                    <span>${seatingLabel}</span>
+                    <span>${numPeople} seats</span>
+                </div>` + lines;
+                totalDiv.textContent = "$" + (splitTotalCents / 100).toFixed(2);
+                summaryDiv.style.display = "block";
+                return;
             }
 
             const totalCents = pricePerPerson * numPeople;
