@@ -6711,6 +6711,7 @@
                 // Reset table chart toggle
                 document.querySelector('input[name="useTableChart"][value="no"]').checked = true;
                 document.getElementById('tableChartSelectGroup').classList.add('hidden');
+                seatingUI.load(null);
             }
 
             panel.classList.add('open');
