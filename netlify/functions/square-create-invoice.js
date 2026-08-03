@@ -34,16 +34,14 @@
 const https = require('https');
 const crypto = require('crypto');
 
-// Default admin password if no hash configured
-const DEFAULT_ADMIN_PW = 'quarry2026';
+// Fail closed: with no ADMIN_PASSWORD_HASH configured there is no way to
+// authenticate. The plaintext fallback was removed 2026-08-03 — it was a live
+// credential sitting in a public repo.
 function checkAdminPassword(pw) {
-  if (!pw) return false;
   const expectedHash = process.env.ADMIN_PASSWORD_HASH;
-  if (expectedHash) {
-    const got = crypto.createHash('sha256').update(pw).digest('hex');
-    return got === expectedHash;
-  }
-  return pw === DEFAULT_ADMIN_PW;
+  if (!pw || !expectedHash) return false;
+  const got = crypto.createHash('sha256').update(pw).digest('hex');
+  return got === expectedHash;
 }
 
 function squareApi(method, path, body) {
