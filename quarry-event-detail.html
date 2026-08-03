@@ -490,6 +490,20 @@
             } else if (evt.pricingType === 'both') {
                 html += '<p style="color:#ccc;font-size:.9rem;line-height:1.6;">' + formatPrice(evt.pricePerPerson) + ' per person &mdash; or &mdash; ' + formatPrice(evt.pricePerTable) + ' per table of ' + evt.tableSize + '</p>';
             }
+            // Table / seat based events list what each seating option costs.
+            if (Array.isArray(evt.seatingOptions) && evt.seatingOptions.length > 0) {
+                for (var s = 0; s < evt.seatingOptions.length; s++) {
+                    var so = evt.seatingOptions[s];
+                    var soSeats = parseInt(so.seats, 10) || 1;
+                    var soPer = parseInt(so.pricePerSeat, 10) || 0;
+                    var line = so.name + ' (' + soSeats + ' ' + (soSeats === 1 ? 'seat' : 'seats') + ')';
+                    if (soPer > 0) {
+                        line += ' &mdash; ' + formatPrice(soPer) + ' per seat';
+                        if (soSeats > 1) line += ' (' + formatPrice(soPer * soSeats) + ' total)';
+                    }
+                    html += '<p style="color:#ccc;font-size:.9rem;line-height:1.6;margin-top:6px;">' + line + '</p>';
+                }
+            }
             if (et === 'ticketed' && evt.tiers && evt.tiers.length > 0) {
                 for (var i = 0; i < evt.tiers.length; i++) {
                     var t = evt.tiers[i];
