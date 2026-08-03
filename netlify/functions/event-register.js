@@ -200,6 +200,44 @@ function countArrivalSlotUsed(evData, slot) {
   }, 0);
 }
 
+// Fetch events.json straight from the repo via the authenticated Contents API,
+// so checkout always prices against the current data rather than whatever was
+// baked into the last Netlify build. Falls back to the deployed copy on failure,
+// because a stale price is still better than a dead checkout.
+function fetchEventsData(siteUrl) {
+  const token = process.env.GITHUB_TOKEN;
+  if (!token) return fetchJSON(siteUrl + '/events.json');
+  return new Promise(function(resolve) {
+    const req = https.request({
+      hostname: 'api.github.com',
+      path: '/repos/quarrymanagement/quarry-website/contents/events.json',
+      method: 'GET',
+      headers: {
+        'Authorization': 'token ' + token,
+        'User-Agent': 'Quarry-Event-Register',
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    }, function(res) {
+      let data = '';
+      res.on('data', function(c) { data += c; });
+      res.on('end', function() {
+        try {
+          const meta = JSON.parse(data);
+          if (meta && meta.content && meta.encoding === 'base64') {
+            return resolve(JSON.parse(Buffer.from(meta.content, 'base64').toString('utf8')));
+          }
+        } catch (e) { /* fall through */ }
+        // Contents API omits `content` for files over 1MB; fall back to the site copy.
+        fetchJSON(siteUrl + '/events.json').then(resolve, function() { resolve({ events: [] }); });
+      });
+    });
+    req.on('error', function() {
+      fetchJSON(siteUrl + '/events.json').then(resolve, function() { resolve({ events: [] }); });
+    });
+    req.end();
+  });
+}
+
 exports.handler = async function(event) {
   const headers = {
     'Access-Control-Allow-Origin': '*',
