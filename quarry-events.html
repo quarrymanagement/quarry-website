@@ -2053,6 +2053,17 @@
         }
 
         /**
+         * Click anywhere on a card to open the full event page. Nested links and
+         * buttons handle their own navigation, so ignore clicks that came from
+         * one of those (otherwise we'd double-fire and override them).
+         */
+        function handleEventCardClick(e, url) {
+            if (!url) return;
+            if (e && e.target && e.target.closest && e.target.closest('a, button')) return;
+            window.location.href = url;
+        }
+
+        /**
          * Create event card HTML
          */
         function createEventCard(event) {
