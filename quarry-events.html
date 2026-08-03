@@ -1533,7 +1533,7 @@
 
                     <div class="form-group" id="seatingGroup" style="display:none;">
                         <label for="seatingOption">Seating Option *</label>
-                        <select id="seatingOption" name="seatingOption" required onchange="updateUnitCountUI(); renderTierSplit(); updateOrderSummary();"></select>
+                        <select id="seatingOption" name="seatingOption" required onchange="updateUnitCountUI(); renderArrivalSlots(); renderTierSplit(); updateOrderSummary();"></select>
                     </div>
 
                     <div class="form-group" id="unitCountGroup" style="display:none;">
@@ -1551,6 +1551,12 @@
                     <div class="form-group" id="partySizeGroup" style="display:none;">
                         <label for="partySize">Number of Tickets *</label>
                         <input type="number" id="partySize" name="partySize" min="1" max="10" value="1" required onchange="updateOrderSummary()">
+                    </div>
+
+                    <div class="form-group" id="arrivalGroup" style="display:none;">
+                        <label for="arrivalSlot">Arrival Time *</label>
+                        <select id="arrivalSlot" name="arrivalSlot" onchange="applyArrivalLock()"></select>
+                        <div id="arrivalHint" style="font-size:13px;opacity:.75;margin-top:4px;">We stagger arrivals so the buffet and bar aren't swamped. Please arrive at your chosen time.</div>
                     </div>
 
                     <input type="hidden" id="selectedTableId" name="selectedTableId" value="">
@@ -1954,6 +1960,7 @@
             document.getElementById('partySize').value = selectedMapTable.seats;
 
             updateUnitCountUI();
+            renderArrivalSlots();
             renderTierSplit();
             updateOrderSummary();
         }
@@ -2294,6 +2301,7 @@
                 document.getElementById("submitBtn").textContent = "Sold Out";
             }
             updateUnitCountUI();
+            renderArrivalSlots();
             renderTierSplit();
             // Restore modal body if it was replaced by success message
             const modalBody = document.getElementById("modalFormContent");
@@ -2350,6 +2358,138 @@
          * seats at their table across tiers. Only shown when the event has
          * seating options AND more than one tier.
          */
+        // ═══ Arrival-wave support (staggered seating times) ═══
+        // Mirrors the seating-option logic below: capacity is counted in UNITS
+        // (a unit = one table, or one bar seat) and derived from the
+        // registration log, never from a stored counter. Events with no
+        // arrivalSlots behave exactly as they always did.
+
+        function arrivalSlotsForModal() {
+            const ev = currentEventForModal;
+            return (ev && Array.isArray(ev.arrivalSlots)) ? ev.arrivalSlots : [];
+        }
+
+        /** Look a registration's seating option back up so we know its seat count. */
+        function findSeatingOptionById(id) {
+            const ev = currentEventForModal;
+            const want = String(id || '').toLowerCase().trim();
+            if (!want || !ev || !Array.isArray(ev.seatingOptions)) return null;
+            return ev.seatingOptions.find(function (o) {
+                return String(o.id || '').toLowerCase().trim() === want;
+            }) || ev.seatingOptions.find(function (o) {
+                return String(o.name || '').toLowerCase().trim() === want;
+            }) || null;
+        }
+
+        /**
+         * May this seating option book this wave? No appliesTo (or an empty
+         * one) means the wave is open to every option.
+         */
+        function arrivalSlotAllowsOption(slot, opt) {
+            const applies = (slot && Array.isArray(slot.appliesTo) ? slot.appliesTo : [])
+                .map(function (a) { return String(a || '').toLowerCase().trim(); })
+                .filter(function (a) { return a !== ''; });
+            if (!applies.length) return true;
+            if (!opt) return true;
+            const id = String(opt.id || '').toLowerCase().trim();
+            const nm = String(opt.name || '').toLowerCase().trim();
+            return applies.indexOf(id) !== -1 || (nm !== '' && applies.indexOf(nm) !== -1);
+        }
+
+        /**
+         * How many UNITS of a wave are already taken. Each registration
+         * consumes round(qty / seatsOfItsOwnOption) units; registrations with
+         * no arrivalSlot count toward nothing.
+         */
+        function arrivalUnitsUsed(slot) {
+            const ev = currentEventForModal;
+            const regs = (ev && ev.registrations) || [];
+            const key = String((slot && slot.id) || '').toLowerCase().trim();
+            if (!key) return 0;
+            return regs.reduce(function (n, r) {
+                const rid = String((r && r.arrivalSlot) || '').toLowerCase().trim();
+                if (!rid || rid !== key) return n;
+                const o = findSeatingOptionById(r && (r.seatingOptionId || r.seatType));
+                const seats = parseInt(o && o.seats, 10) || 1;
+                const boughtSeats = parseInt(r && r.qty, 10) || seats;
+                return n + Math.max(1, Math.round(boughtSeats / seats));
+            }, 0);
+        }
+
+        /** Units still free in a wave. No capacity means unlimited. */
+        function arrivalSlotLeft(slot) {
+            if (!slot || slot.capacity == null || slot.capacity === '') return Infinity;
+            return (parseInt(slot.capacity, 10) || 0) - arrivalUnitsUsed(slot);
+        }
+
+        /**
+         * Rebuild the arrival dropdown for the currently chosen seating option.
+         * Keeps the guest's pick if it is still valid for the new option,
+         * otherwise falls back to the first wave with space.
+         */
+        function renderArrivalSlots() {
+            const sel = document.getElementById('arrivalSlot');
+            const grp = document.getElementById('arrivalGroup');
+            if (!sel) return;
+            const slots = arrivalSlotsForModal();
+            if (!slots.length) {
+                if (grp) grp.style.display = 'none';
+                sel.required = false;
+                sel.innerHTML = '';
+                window.allArrivalFull = false;
+                return;
+            }
+            const opt = getSelectedSeatingOption();
+            const prev = sel.value;
+            let permitted = 0;
+            let anyOpen = false;
+            let out = '';
+            for (let i = 0; i < slots.length; i++) {
+                const s = slots[i];
+                if (!arrivalSlotAllowsOption(s, opt)) continue;
+                permitted++;
+                const left = arrivalSlotLeft(s);
+                let label = String(s.label || s.id || '');
+                if (left <= 0) {
+                    label += ' — full';
+                } else {
+                    anyOpen = true;
+                    if (isFinite(left) && left <= 3) label += ' — ' + left + ' left';
+                }
+                out += `<option value="${s.id || ''}" data-left="${left}"${left <= 0 ? ' disabled' : ''}>${label}</option>`;
+            }
+            sel.innerHTML = out;
+
+            let pick = -1;
+            for (let k = 0; k < sel.options.length; k++) {
+                if (sel.options[k].value === prev && !sel.options[k].disabled) { pick = k; break; }
+            }
+            if (pick === -1) {
+                for (let m = 0; m < sel.options.length; m++) {
+                    if (!sel.options[m].disabled) { pick = m; break; }
+                }
+            }
+            sel.selectedIndex = pick >= 0 ? pick : 0;
+
+            if (grp) grp.style.display = permitted > 0 ? 'block' : 'none';
+            sel.required = permitted > 0;
+            window.allArrivalFull = (permitted > 0 && !anyOpen);
+            applyArrivalLock();
+        }
+
+        /** Every permitted wave full beats whatever the pricing logic decided. */
+        function applyArrivalLock() {
+            const btn = document.getElementById('submitBtn');
+            if (!btn) return;
+            if (window.allArrivalFull) {
+                btn.disabled = true;
+                btn.textContent = 'Arrival times full';
+            } else if (btn.textContent === 'Arrival times full') {
+                btn.disabled = false;
+                btn.textContent = 'Proceed to Payment';
+            }
+        }
+
         /**
          * How many UNITS of a seating option are already taken. Mirrors the
          * backend: each registration consumes round(qty / seats) units, so one
@@ -2543,6 +2683,7 @@
                 </div>`;
                 totalDiv.textContent = "$" + (priced.totalCents / 100).toFixed(2);
                 summaryDiv.style.display = "block";
+            applyArrivalLock();
                 return;
             }
 
@@ -2595,6 +2736,7 @@
                 </div>` + lines;
                 totalDiv.textContent = "$" + (splitTotalCents / 100).toFixed(2);
                 summaryDiv.style.display = "block";
+            applyArrivalLock();
                 return;
             }
 
@@ -2616,6 +2758,7 @@
             `;
             totalDiv.textContent = "$" + totalDollars;
             summaryDiv.style.display = "block";
+            applyArrivalLock();
         }
 
         /**
@@ -2696,6 +2839,10 @@
 
                 if (seatingOptionId) {
                     payload.seatingOptionId = seatingOptionId;
+                }
+                const arrivalSel = document.getElementById("arrivalSlot");
+                if (arrivalSel && arrivalSel.value) {
+                    payload.arrivalSlot = arrivalSel.value;
                 }
                 if (lineItems && lineItems.length) {
                     payload.lineItems = lineItems;
