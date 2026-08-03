@@ -216,6 +216,18 @@ exports.handler = async (event) => {
     delete incomingData.adminToken;
     delete incomingData.adminPassword;
 
+    // ---- SHAPE GUARD -----------------------------------------------------
+    // A payload with no events array would replace the whole file with
+    // whatever was sent. That is exactly how events.json was wiped in April
+    // 2026, and again by a stray probe request on 2026-08-03. An authenticated
+    // caller is not necessarily a correct one, so refuse anything that does not
+    // look like a real events document.
+    if (!Array.isArray(incomingData.events)) {
+      return response(400, {
+        error: 'Refusing to save: payload has no events array. This would erase every event.'
+      });
+    }
+
     // Get file metadata — this gives us the SHA (always fresh from GitHub API)
     const metaRes = await githubRequest('GET', `/repos/${repo}/contents/${filePath}`, token);
     let fileSha = '';
