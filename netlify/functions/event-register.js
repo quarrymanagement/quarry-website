@@ -122,15 +122,24 @@ function findSeatingOption(evData, optionId) {
   }) || null;
 }
 
-// How many of this seating option have already been sold, counted from the
-// registration log. Falls back gracefully for legacy registrations that predate
-// the seatingOptionId field.
+// How many UNITS of this seating option have already been sold (a unit = one
+// table, or one bar seat), counted from the registration log.
+//
+// A registration stores the total seats it bought (`qty`) and which option it
+// bought (`seatingOptionId`), so units = qty / seats. That means someone who
+// takes three 4-tops in one transaction correctly consumes three of them,
+// without the webhook needing to record a separate unit count.
+//
+// Falls back gracefully for legacy registrations that predate seatingOptionId.
 function countSeatingOptionUsed(evData, option) {
   const regs = Array.isArray(evData.registrations) ? evData.registrations : [];
   const id = String(option.id || option.name || '').trim().toLowerCase();
+  const seats = parseInt(option.seats, 10) || 1;
   return regs.reduce(function(n, r) {
     const rid = String((r && (r.seatingOptionId || r.seatType)) || '').trim().toLowerCase();
-    return rid === id ? n + 1 : n;
+    if (rid !== id) return n;
+    const boughtSeats = parseInt(r.qty, 10) || seats;
+    return n + Math.max(1, Math.round(boughtSeats / seats));
   }, 0);
 }
 
@@ -190,6 +199,7 @@ exports.handler = async function(event) {
     // Only enforced for events that actually define seatingOptions, so every
     // existing event keeps working exactly as before.
     let chosenOption = null;
+    let units = Math.max(1, parseInt(body.units, 10) || 1);
     if (Array.isArray(evData.seatingOptions) && evData.seatingOptions.length > 0) {
       if (!seatingOptionId) {
         return { statusCode: 400, headers, body: JSON.stringify({ error: 'Please choose a table size.' }) };
@@ -200,10 +210,25 @@ exports.handler = async function(event) {
       }
 
       const seats = parseInt(chosenOption.seats, 10) || 1;
-      if (qty !== seats) {
+      // A guest may take more than one of the same thing (e.g. three 4-tops).
+      // maxUnits caps how many per transaction; absent means no extra cap.
+      const maxUnits = parseInt(chosenOption.maxUnits, 10) || 0;
+      if (maxUnits > 0 && units > maxUnits) {
+        return { statusCode: 400, headers, body: JSON.stringify({ error: 'You can book at most ' + maxUnits + ' of these at a time. Please call us for larger groups.' }) };
+      }
+      const requiredSeats = seats * units;
+
+      // ---- Per-option pricing -------------------------------------------
+      // When the option carries its own pricePerSeat, that price wins and the
+      // tier split does not apply — used when the price depends on WHERE you
+      // sit (a $30 bar seat vs a $25 seat at a table) rather than on what kind
+      // of guest you are.
+      if (chosenOption.pricePerSeat) {
+        qty = requiredSeats;
+      } else if (qty !== requiredSeats) {
         return {
           statusCode: 400, headers,
-          body: JSON.stringify({ error: 'Please assign all ' + seats + ' seat' + (seats === 1 ? '' : 's') + ' at this ' + (chosenOption.name || 'table') + '. You have assigned ' + qty + '.' })
+          body: JSON.stringify({ error: 'Please assign all ' + requiredSeats + ' seat' + (requiredSeats === 1 ? '' : 's') + '. You have assigned ' + qty + '.' })
         };
       }
 
@@ -211,10 +236,17 @@ exports.handler = async function(event) {
       if (chosenOption.available !== undefined && chosenOption.available !== null && chosenOption.available !== '') {
         const cap = parseInt(chosenOption.available, 10) || 0;
         const used = countSeatingOptionUsed(evData, chosenOption);
-        if (used >= cap) {
+        const left = cap - used;
+        if (left <= 0) {
           return {
             statusCode: 409, headers,
-            body: JSON.stringify({ error: 'Sorry — all ' + (chosenOption.name || 'tables of this size') + ' are taken. Please choose another size.' })
+            body: JSON.stringify({ error: 'Sorry — all ' + (chosenOption.name || 'tables of this size') + ' are taken. Please choose another option.' })
+          };
+        }
+        if (units > left) {
+          return {
+            statusCode: 409, headers,
+            body: JSON.stringify({ error: 'Only ' + left + ' x ' + (chosenOption.name || 'of these') + ' left — please reduce how many you are booking.' })
           };
         }
       }
@@ -231,7 +263,23 @@ exports.handler = async function(event) {
     let unitPrice = evData.pricePerSeat || evData.price || 0;
     let effectiveUnitPrice = unitPrice;
 
-    if (lineItemsIn && lineItemsIn.length) {
+    if (chosenOption && chosenOption.pricePerSeat) {
+      // Per-option pricing: one Square line per unit booked, priced at
+      // seats x pricePerSeat. A guest taking three 4-tops at $25/seat sees
+      // "3 x 4-Top Table" at $100 each.
+      const seats = parseInt(chosenOption.seats, 10) || 1;
+      const perUnit = (parseInt(chosenOption.pricePerSeat, 10) || 0) * seats;
+      if (perUnit <= 0) {
+        return { statusCode: 400, headers, body: JSON.stringify({ error: 'Could not determine ticket price' }) };
+      }
+      tierName = chosenOption.name || evData.name;
+      squareLineItems.push({
+        name: (chosenOption.name || 'Seat') + ' - ' + (evData.name || ''),
+        note: (evData.date || '') + ' at The Quarry',
+        quantity: String(units),
+        base_price_money: { amount: perUnit, currency: 'USD' }
+      });
+    } else if (lineItemsIn && lineItemsIn.length) {
       // Validate each line item against the event tier table to prevent client-side price tampering.
       const tierMap = {};
       (evData.tiers || []).forEach(function(t) { tierMap[String(t.name).toLowerCase()] = t; });
@@ -298,9 +346,11 @@ exports.handler = async function(event) {
     }
 
     // Build Square Payment Link
-    const tierSummary = (lineItemsIn && lineItemsIn.length)
-      ? squareLineItems.map(function(li){ return li.quantity + 'x ' + li.name.split(' - ')[0]; }).join(' + ')
-      : ticketTier;
+    const tierSummary = (chosenOption && chosenOption.pricePerSeat)
+      ? (units + 'x ' + (chosenOption.name || ''))
+      : (lineItemsIn && lineItemsIn.length)
+        ? squareLineItems.map(function(li){ return li.quantity + 'x ' + li.name.split(' - ')[0]; }).join(' + ')
+        : ticketTier;
 
     const rawMeta = {
       bookingType: 'event',
