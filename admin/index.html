@@ -5537,15 +5537,6 @@
                     if (errorEl) errorEl.textContent = 'Could not reach the login service. Please try again.';
                 }
             })();
-            return; // skip the legacy plaintext branch below
-            if (password === 'quarry2026') {
-                sessionStorage.setItem('quarryAuth', 'true');
-                app.authenticated = true;
-                document.getElementById('loginOverlay').classList.add('hidden');
-                showApp();
-            } else {
-                errorEl.textContent = 'Invalid password. Try again.';
-            }
         });
 
         function showApp() {
