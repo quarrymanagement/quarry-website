@@ -9,10 +9,12 @@ const SESSION_TTL_HOURS      = 168; // 7 days — must match verify-admin-passwo
 function sha256(s) { return crypto.createHash('sha256').update(s, 'utf8').digest('hex'); }
 function hmac(s, secret) { return crypto.createHmac('sha256', secret).update(s, 'utf8').digest('hex'); }
 
+// Fail closed: with no ADMIN_PASSWORD_HASH configured there is no way to
+// authenticate. The plaintext fallback was removed 2026-08-03 — it was a live
+// credential sitting in a public repo.
 function checkPassword(p) {
-  if (!p) return false;
-  if (ADMIN_PASSWORD_HASH) return sha256(p) === ADMIN_PASSWORD_HASH;
-  return p === 'quarry2026';
+  if (!p || !ADMIN_PASSWORD_HASH) return false;
+  return sha256(p) === ADMIN_PASSWORD_HASH;
 }
 function checkToken(token) {
   if (!ADMIN_SESSION_SECRET || !token) return false;
