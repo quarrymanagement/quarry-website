@@ -33,6 +33,7 @@
 // ============================================================================
 
 const https = require('https');
+const crypto = require('crypto');
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
