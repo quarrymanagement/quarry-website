@@ -49,24 +49,30 @@ const response = (statusCode, body) => ({
 
 const handleOptions = () => response(200, { message: 'OK' });
 
-// Legacy admin password. Only used when ADMIN_SAVE_TOKEN is unset, so that
-// deploying this change cannot lock the admin panel out of saving.
-const LEGACY_ADMIN_PASSWORD = 'quarry2026';
+// Same secret derivation as netlify/functions/verify-admin-password.js, so the
+// token minted at login verifies here. Keep the two in sync.
+const SESSION_SECRET = process.env.ADMIN_SESSION_SECRET
+  || ('qrr-session-' + (process.env.GITHUB_TOKEN || '').slice(-24));
+const SESSION_TTL_HOURS = 168;
+
+function hmac(s, secret) { return crypto.createHmac('sha256', secret).update(s, 'utf8').digest('hex'); }
 
 function isAuthorized(event, body) {
   const supplied =
     (event.headers && (event.headers['x-admin-token'] || event.headers['X-Admin-Token'])) ||
-    (body && (body.adminToken || body.adminPassword)) ||
-    '';
-  const expected = process.env.ADMIN_SAVE_TOKEN || LEGACY_ADMIN_PASSWORD;
-  if (!supplied) return false;
-  // Constant-time-ish compare; these are short strings so this is belt and braces.
-  const a = Buffer.from(String(supplied));
-  const b = Buffer.from(String(expected));
-  if (a.length !== b.length) return false;
+    (body && body.adminToken) || '';
+  if (!supplied || !SESSION_SECRET) return false;
+  const parts = String(supplied).split('.');
+  if (parts.length !== 2) return false;
+  const [issued, sig] = parts;
+  if (!/^\d+$/.test(issued)) return false;
+  const expected = hmac(issued, SESSION_SECRET);
+  if (expected.length !== sig.length) return false;
   let diff = 0;
-  for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i];
-  return diff === 0;
+  for (let i = 0; i < expected.length; i++) diff |= expected.charCodeAt(i) ^ sig.charCodeAt(i);
+  if (diff !== 0) return false;
+  const ageHours = (Date.now() - parseInt(issued, 10)) / (1000 * 3600);
+  return ageHours < SESSION_TTL_HOURS;
 }
 
 // GitHub API helper
