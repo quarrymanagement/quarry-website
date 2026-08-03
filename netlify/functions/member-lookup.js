@@ -8,7 +8,7 @@
 // currentPoints, lifetimePoints, last 5 history entries, pendingRedemption
 // (if any), bottle discount % (computed from tier).
 //
-// ENV: GITHUB_TOKEN, ADMIN_PASSWORD_HASH (or quarry2026 fallback)
+// ENV: GITHUB_TOKEN, ADMIN_PASSWORD_HASH (required — no fallback)
 // ============================================================================
 const crypto = require('crypto');
 const https = require('https');
@@ -29,10 +29,12 @@ const CORS = {
 const reply = (s, b) => ({ statusCode: s, headers: CORS, body: JSON.stringify(b) });
 
 function sha256(s) { return crypto.createHash('sha256').update(s, 'utf8').digest('hex'); }
+// Fail closed: with no ADMIN_PASSWORD_HASH configured there is no way to
+// authenticate. The old plaintext fallback was removed 2026-08-03 — it was a
+// live credential sitting in source.
 function checkAdmin(p) {
-  if (!p) return false;
-  if (ADMIN_PASSWORD_HASH) return sha256(p) === ADMIN_PASSWORD_HASH;
-  return p === 'quarry2026';
+  if (!p || !ADMIN_PASSWORD_HASH) return false;
+  return sha256(p) === ADMIN_PASSWORD_HASH;
 }
 
 function gh(method, path, body) {
@@ -105,6 +107,7 @@ exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: CORS, body: '' };
   if (event.httpMethod !== 'POST') return reply(405, { ok: false, error: 'Method not allowed' });
   if (!GITHUB_TOKEN) return reply(500, { ok: false, error: 'Server not configured' });
+  if (!ADMIN_PASSWORD_HASH) return reply(500, { ok: false, error: 'Admin auth not configured on the server.' });
 
   let body;
   try { body = JSON.parse(event.body || '{}'); }
