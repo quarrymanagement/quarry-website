@@ -8317,7 +8317,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'x-admin-token': (localStorage.getItem('quarrySaveToken') || 'quarry2026')
+                        'x-admin-token': (localStorage.getItem('quarryAdminToken') || '')
                     },
                     body: JSON.stringify(eventsData),
                 });
