@@ -62,16 +62,10 @@ exports.handler = async (event) => {
     if (event.httpMethod !== 'POST') return respond(405, { ok: false, error: 'POST only' });
 
     if (!HASH) {
-        // Fallback: if no hash configured yet, accept the legacy plaintext for
-        // continuity. This makes the migration safe — admin keeps working until
-        // you set the env var, then plaintext stops working.
-        try {
-            const body = JSON.parse(event.body || '{}');
-            if (body.password === 'quarry2026') {
-                return respond(200, { ok: true, token: makeToken(), legacy: true });
-            }
-        } catch (_) {}
-        return respond(401, { ok: false, error: 'ADMIN_PASSWORD_HASH not configured. Falling back to plaintext denied.' });
+        // No hash configured means admin auth is not set up. Fail closed. The
+        // old plaintext fallback was removed 2026-08-03 — it was the last copy
+        // of the password living in source, and this repo is public.
+        return respond(503, { ok: false, error: 'Admin login is not configured on the server.' });
     }
 
     let body;
