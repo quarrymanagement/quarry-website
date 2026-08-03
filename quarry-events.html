@@ -2477,10 +2477,13 @@
             const detailsDiv = document.getElementById("summaryDetails");
             const totalDiv = document.getElementById("summaryTotal");
 
+            // An event may have seatingOptions with their own pricePerSeat and NO tiers
+            // at all, in which case this select is empty. Stay null-safe: the
+            // per-option pricing branch below does not need a tier.
             const tierSelect = document.getElementById("ticketTier");
-            const selectedTier = tierSelect.options[tierSelect.selectedIndex];
-            const pricePerPerson = parseInt(selectedTier.dataset.price) || 0;
-            const tierName = selectedTier.value;
+            const selectedTier = tierSelect ? tierSelect.options[tierSelect.selectedIndex] : null;
+            const pricePerPerson = (selectedTier && parseInt(selectedTier.dataset.price)) || 0;
+            const tierName = selectedTier ? selectedTier.value : "";
 
             let numPeople = 1;
             let seatingLabel = "";
