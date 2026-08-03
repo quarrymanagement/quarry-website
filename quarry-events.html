@@ -2122,10 +2122,8 @@
                                 <a class="event-button" href="${externalRegUrl}" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;">Register Now</a>
                             ` : isEmailReg ? `
                                 <a class="event-button" href="${mailtoHref}" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;">Email to RSVP</a>
-                            ` : isFreeWalkup ? `
-                                <button class="event-button" onclick="openModal(${allEvents.indexOf(event)})">Event Details</button>
                             ` : `
-                                <button class="event-button" onclick="openModal(${allEvents.indexOf(event)})">Get Tickets</button>
+                                <a class="event-button" href="${detailUrl}" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;">Event Details</a>
                             `}
                         </div>
                     </div>
