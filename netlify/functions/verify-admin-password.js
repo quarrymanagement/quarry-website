@@ -12,9 +12,9 @@
 // client can persist it and we can verify expiry without a session store.
 //
 // Setup once:
-//   1. In Netlify env: ADMIN_PASSWORD_HASH = sha256("yourpassword")
-//      Compute via: echo -n "quarry2026" | shasum -a 256
-//      e.g. for "quarry2026" -> 8c2ba0b3eea0fdee06b64c0bd06b22b25f74b3c11fe98a1e4cb29d6b2e5b8b9d
+//   1. In Netlify env: ADMIN_PASSWORD_HASH = sha256 of the admin password
+//      Compute via: echo -n "<your password>" | shasum -a 256
+//      (Never commit the password or its hash to this repo — it is public.)
 //   2. ADMIN_SESSION_SECRET = any 32+ char random string
 //   3. Remove the plaintext password check from admin/index.html (done in this PR)
 // ============================================================================
