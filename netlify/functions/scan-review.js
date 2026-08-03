@@ -8,7 +8,7 @@
 // Approved scans: appends to credited-orders.json so the same receipt can't
 // be re-scanned. Same point math as scan-receipt.js.
 //
-// ENV: GITHUB_TOKEN, ADMIN_PASSWORD_HASH (or quarry2026 fallback)
+// ENV: GITHUB_TOKEN, ADMIN_PASSWORD_HASH (required — no fallback)
 // ============================================================================
 const crypto = require('crypto');
 const https = require('https');
@@ -27,10 +27,12 @@ const CORS = {
 const reply = (s, b) => ({ statusCode: s, headers: CORS, body: JSON.stringify(b) });
 
 function sha256(s) { return crypto.createHash('sha256').update(s, 'utf8').digest('hex'); }
+// Fail closed: with no ADMIN_PASSWORD_HASH configured there is no way to
+// authenticate. The plaintext fallback was removed 2026-08-03 — it was a live
+// credential sitting in a public repo.
 function checkAdmin(p) {
-  if (!p) return false;
-  if (ADMIN_PASSWORD_HASH) return sha256(p) === ADMIN_PASSWORD_HASH;
-  return p === 'quarry2026';
+  if (!p || !ADMIN_PASSWORD_HASH) return false;
+  return sha256(p) === ADMIN_PASSWORD_HASH;
 }
 
 function gh(method, path, body) {
