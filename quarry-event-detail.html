@@ -502,6 +502,7 @@
         function renderRegCard(evt, isSoldOut) {
             var card = document.getElementById('regCard');
             var et = evt.eventType || 'ticketed';
+            var hasSeating = Array.isArray(evt.seatingOptions) && evt.seatingOptions.length > 0;
 
             // Free / Informational events — no registration
             if (et === 'free') {
@@ -535,9 +536,11 @@
             html += '<label>Phone Number</label>';
             html += '<input type="tel" name="phone" id="detailPhone" placeholder="(555) 555-5555">';
 
-            // Ticket Tier dropdown
+            // Ticket Tier dropdown. Events that sell seating options price themselves
+            // per-seat (or split across tiers below), so the tier picker is hidden.
+            html += '<div id="detailTierGroup"' + (hasSeating ? ' style="display:none;"' : '') + '>';
             html += '<label>Ticket Tier *</label>';
-            html += '<select name="ticketTier" id="detailTicketTier" required onchange="onDetailTierChange()">';
+            html += '<select name="ticketTier" id="detailTicketTier"' + (hasSeating ? '' : ' required') + ' onchange="onDetailTierChange()">';
             if (evt.tiers && evt.tiers.length > 0) {
                 for (var i = 0; i < evt.tiers.length; i++) {
                     var t = evt.tiers[i];
@@ -551,6 +554,7 @@
             }
             html += '</select>';
             html += '<div id="detailTierAvailability" style="display:none;font-size:13px;color:#888;margin:-4px 0 12px;"></div>';
+            html += '</div>';
 
             // Vendor fields (hidden by default, shown when vendor tier selected)
             html += '<div id="detailVendorFields" style="display:none;">';
@@ -560,9 +564,47 @@
             html += '<input type="text" name="businessType" id="detailBusinessType" placeholder="e.g. Photography, Catering, Florist">';
             html += '</div>';
 
-            // Number of Tickets
-            html += '<label>Number of Tickets *</label>';
-            html += '<input type="number" name="partySize" id="detailPartySize" min="1" max="20" value="1" required onchange="updateDetailSummary()">';
+            if (hasSeating) {
+                // ─── Table / seat based events ───
+                var regsForSeating = evt.registrations || [];
+                html += '<label>Seating *</label>';
+                html += '<select name="seatingOption" id="detailSeatingOption" required onchange="onDetailSeatingChange()">';
+                for (var s = 0; s < evt.seatingOptions.length; s++) {
+                    var opt = evt.seatingOptions[s];
+                    var seatsN = parseInt(opt.seats, 10) || 1;
+                    var used = detailSeatingUnitsUsed(regsForSeating, opt);
+                    var left = (opt.available == null || opt.available === '') ? Infinity : (opt.available - used);
+                    var optLabel = opt.name + ' (' + seatsN + ' ' + (seatsN === 1 ? 'seat' : 'seats') + ')';
+                    if (left <= 0) {
+                        optLabel += ' — sold out';
+                    } else if (isFinite(left) && left <= 3) {
+                        optLabel += ' — ' + left + ' left';
+                    }
+                    html += '<option value="' + (opt.id || opt.name) + '"' +
+                            ' data-seats="' + seatsN + '"' +
+                            ' data-left="' + left + '"' +
+                            ' data-priceperseat="' + (opt.pricePerSeat != null ? opt.pricePerSeat : '') + '"' +
+                            ' data-maxunits="' + (opt.maxUnits != null ? opt.maxUnits : '') + '"' +
+                            (left <= 0 ? ' disabled' : '') + '>' + optLabel + '</option>';
+                }
+                html += '</select>';
+
+                html += '<div id="detailUnitCountGroup" style="display:none;">';
+                html += '<label>How Many? *</label>';
+                html += '<input type="number" id="detailUnitCount" min="1" value="1" onchange="onDetailUnitsChange()" oninput="onDetailUnitsChange()">';
+                html += '<div id="detailUnitCountHint" style="font-size:13px;color:#888;margin-top:6px;"></div>';
+                html += '</div>';
+
+                html += '<div id="detailTierSplitGroup" style="display:none;margin-top:16px;">';
+                html += '<label style="margin-top:0;">Assign Seats to Ticket Types *</label>';
+                html += '<div id="detailTierSplitRows"></div>';
+                html += '<div id="detailTierSplitStatus" style="font-size:13px;margin-top:6px;color:#e67e22;"></div>';
+                html += '</div>';
+            } else {
+                // Number of Tickets
+                html += '<label>Number of Tickets *</label>';
+                html += '<input type="number" name="partySize" id="detailPartySize" min="1" max="20" value="1" required onchange="updateDetailSummary()">';
+            }
 
             // Coupon Code
             html += '<div style="margin-top:16px;">';
@@ -598,7 +640,185 @@
 
             // Initialize tier change handler and order summary
             onDetailTierChange();
+
+            // Seating events: auto-select the first option that still has units
+            // left, and lock the form down entirely if they are all gone.
+            if (hasSeating) {
+                var seatSel = document.getElementById('detailSeatingOption');
+                var firstOpen = -1;
+                for (var k = 0; k < seatSel.options.length; k++) {
+                    if (!seatSel.options[k].disabled) { firstOpen = k; break; }
+                }
+                detailAllSeatingSoldOut = (firstOpen === -1);
+                seatSel.selectedIndex = firstOpen >= 0 ? firstOpen : 0;
+                var soBtn = document.getElementById('detailSubmitBtn');
+                if (detailAllSeatingSoldOut && soBtn) {
+                    soBtn.disabled = true;
+                    soBtn.textContent = 'Sold Out';
+                }
+                updateDetailUnitCountUI();
+                renderDetailTierSplit();
+                updateDetailSummary();
+            }
         }
+
+        // ═══ Seating-option support (tables / bar seats) ═══
+        // Mirrors the logic used by the registration modal on /quarry-events.
+
+        var detailAllSeatingSoldOut = false;
+
+        /**
+         * How many UNITS of a seating option are already taken. Mirrors the
+         * backend: each registration consumes round(qty / seats) units, so one
+         * guest who took three 4-tops correctly uses up three of them.
+         */
+        function detailSeatingUnitsUsed(regs, opt) {
+            var key = String((opt && (opt.id || opt.name)) || '').toLowerCase().trim();
+            var seats = parseInt(opt && opt.seats, 10) || 1;
+            return (regs || []).reduce(function (n, r) {
+                var rid = String((r && (r.seatingOptionId || r.seatType)) || '').toLowerCase().trim();
+                if (rid !== key) return n;
+                var boughtSeats = parseInt(r && r.qty, 10) || seats;
+                return n + Math.max(1, Math.round(boughtSeats / seats));
+            }, 0);
+        }
+
+        /** The seatingOptions entry currently chosen in the dropdown. */
+        function getDetailSeatingOption() {
+            if (!eventData || !Array.isArray(eventData.seatingOptions)) return null;
+            var sel = document.getElementById('detailSeatingOption');
+            if (!sel || sel.selectedIndex < 0) return null;
+            var val = String(sel.value);
+            for (var i = 0; i < eventData.seatingOptions.length; i++) {
+                var o = eventData.seatingOptions[i];
+                if (String(o.id || o.name) === val) return o;
+            }
+            return null;
+        }
+
+        /** How many of the chosen option the guest is booking (always >= 1). */
+        function getDetailUnits() {
+            var grp = document.getElementById('detailUnitCountGroup');
+            var inp = document.getElementById('detailUnitCount');
+            if (!grp || !inp || grp.style.display === 'none') return 1;
+            return Math.max(1, parseInt(inp.value, 10) || 1);
+        }
+
+        /**
+         * Show the "How many?" box only when booking more than one makes sense,
+         * and cap it at min(units left, option.maxUnits).
+         */
+        function updateDetailUnitCountUI() {
+            var grp = document.getElementById('detailUnitCountGroup');
+            var inp = document.getElementById('detailUnitCount');
+            var hint = document.getElementById('detailUnitCountHint');
+            if (!grp || !inp) return;
+            var sel = document.getElementById('detailSeatingOption');
+            var optEl = (sel && sel.selectedIndex >= 0) ? sel.options[sel.selectedIndex] : null;
+            var opt = getDetailSeatingOption();
+            if (!opt || !optEl) {
+                grp.style.display = 'none';
+                inp.value = 1;
+                if (hint) hint.textContent = '';
+                return;
+            }
+            var seats = parseInt(opt.seats, 10) || 1;
+            var rawLeft = optEl.dataset.left;
+            var left = (rawLeft === 'Infinity' || rawLeft == null || rawLeft === '') ? Infinity : (parseInt(rawLeft, 10) || 0);
+            var maxUnits = parseInt(opt.maxUnits, 10) || 0;
+            var effMax = left;
+            if (maxUnits > 0) effMax = Math.min(effMax, maxUnits);
+
+            if (seats > 1 || left > 1) {
+                grp.style.display = 'block';
+                if (isFinite(effMax) && effMax > 0) { inp.max = effMax; } else { inp.removeAttribute('max'); }
+                inp.value = 1;
+                if (hint) hint.textContent = (isFinite(effMax) && effMax > 0) ? ('Up to ' + effMax + ' available') : '';
+            } else {
+                grp.style.display = 'none';
+                inp.value = 1;
+                if (hint) hint.textContent = '';
+            }
+        }
+
+        /**
+         * Price for the current selection. When the seating option carries its
+         * own pricePerSeat the tier split does not apply: price is simply
+         * units x seats x pricePerSeat.
+         */
+        function computeDetailSelectionPrice() {
+            var opt = getDetailSeatingOption();
+            var units = getDetailUnits();
+            var seats = parseInt(opt && opt.seats, 10) || 1;
+            var perSeat = parseInt(opt && opt.pricePerSeat, 10) || 0;
+            if (opt && perSeat > 0) {
+                return {
+                    hasOptionPrice: true,
+                    units: units,
+                    seats: seats,
+                    pricePerSeat: perSeat,
+                    perUnitCents: perSeat * seats,
+                    totalCents: units * seats * perSeat
+                };
+            }
+            return { hasOptionPrice: false, units: units, seats: seats, pricePerSeat: 0, perUnitCents: 0, totalCents: 0 };
+        }
+
+        /**
+         * One quantity input per ticket tier so a party can split the seats at
+         * their table across tiers. Only when the option has no pricePerSeat
+         * AND the event has 2+ tiers.
+         */
+        function renderDetailTierSplit() {
+            var group = document.getElementById('detailTierSplitGroup');
+            var rows = document.getElementById('detailTierSplitRows');
+            if (!group || !rows || !eventData) return;
+            var tiers = eventData.tiers || [];
+            var hasSeating = Array.isArray(eventData.seatingOptions) && eventData.seatingOptions.length > 0;
+            if (!hasSeating || tiers.length < 2) { group.style.display = 'none'; rows.innerHTML = ''; return; }
+            var pricedOpt = getDetailSeatingOption();
+            if (pricedOpt && (parseInt(pricedOpt.pricePerSeat, 10) || 0) > 0) {
+                // The option prices itself — there is nothing to split across tiers.
+                group.style.display = 'none';
+                rows.innerHTML = '';
+                return;
+            }
+            group.style.display = 'block';
+            var seatsPerUnit = parseInt(pricedOpt && pricedOpt.seats, 10) || 1;
+            var seats = seatsPerUnit * getDetailUnits();
+            var out = '';
+            for (var i = 0; i < tiers.length; i++) {
+                var t = tiers[i];
+                out += '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:6px 0;">' +
+                       '<span style="font-size:14px;color:#ccc;">' + t.name + ' <span style="opacity:.7;">' + (t.priceLabel || '') + '</span></span>' +
+                       '<input type="number" min="0" max="' + seats + '" value="' + (i === 0 ? seats : 0) + '" data-tierqty="' + t.name + '" style="width:80px;" oninput="updateDetailSummary()" onchange="updateDetailSummary()">' +
+                       '</div>';
+            }
+            rows.innerHTML = out;
+        }
+
+        /** Read the per-tier quantities back out as lineItems for the backend. */
+        function collectDetailTierQuantities() {
+            var rows = document.querySelectorAll('#detailTierSplitRows input[data-tierqty]');
+            if (!rows.length) return null;
+            var out = [];
+            for (var i = 0; i < rows.length; i++) {
+                var q = parseInt(rows[i].value, 10) || 0;
+                if (q > 0) out.push({ tierName: rows[i].dataset.tierqty, qty: q });
+            }
+            return out;
+        }
+
+        window.onDetailSeatingChange = function () {
+            updateDetailUnitCountUI();
+            renderDetailTierSplit();
+            updateDetailSummary();
+        };
+
+        window.onDetailUnitsChange = function () {
+            renderDetailTierSplit();
+            updateDetailSummary();
+        };
 
         // ─── Tier change handler for detail page ───
         window.onDetailTierChange = function() {
@@ -609,8 +829,11 @@
             var availDiv = document.getElementById('detailTierAvailability');
             var bnInput = document.getElementById('detailBusinessName');
             var btInput = document.getElementById('detailBusinessType');
+            // Seating events hide the tier picker entirely, so its vendor flag
+            // must never turn on required-but-hidden inputs.
+            var tierHidden = !!(eventData && Array.isArray(eventData.seatingOptions) && eventData.seatingOptions.length > 0);
 
-            if (selected && selected.dataset.vendor === '1') {
+            if (!tierHidden && selected && selected.dataset.vendor === '1') {
                 vendorFields.style.display = 'block';
                 bnInput.required = true;
                 btInput.required = true;
@@ -620,13 +843,13 @@
                 if (btInput) { btInput.required = false; btInput.value = ''; }
             }
 
-            if (selected && parseInt(selected.dataset.capacity) > 0) {
+            if (!tierHidden && selected && parseInt(selected.dataset.capacity) > 0) {
                 var cap = parseInt(selected.dataset.capacity);
                 var reg = parseInt(selected.dataset.registered) || 0;
                 var remain = cap - reg;
                 availDiv.textContent = remain + ' of ' + cap + ' ' + selected.value + ' spots remaining';
                 availDiv.style.display = 'block';
-            } else {
+            } else if (availDiv) {
                 availDiv.style.display = 'none';
             }
 
@@ -639,17 +862,86 @@
         // ─── Update order summary ───
         window.updateDetailSummary = function() {
             if (!eventData) return;
-            var tierSelect = document.getElementById('detailTicketTier');
-            if (!tierSelect) return;
-            var selectedOption = tierSelect.options[tierSelect.selectedIndex];
-            var pricePerPerson = parseInt(selectedOption.dataset.price) || 0;
-            var tierName = selectedOption.value;
-            var qty = parseInt(document.getElementById('detailPartySize').value) || 1;
+            var detailsDiv = document.getElementById('detailSummaryDetails');
+            var totalDiv = document.getElementById('detailSummaryTotal');
+            if (!detailsDiv || !totalDiv) return;
 
-            var subtotalCents = pricePerPerson * qty;
+            var hasSeating = Array.isArray(eventData.seatingOptions) && eventData.seatingOptions.length > 0;
+            var tierSelect = document.getElementById('detailTicketTier');
+            var selectedOption = (tierSelect && tierSelect.selectedIndex >= 0) ? tierSelect.options[tierSelect.selectedIndex] : null;
+            var pricePerPerson = (selectedOption && parseInt(selectedOption.dataset.price)) || 0;
+            var tierName = selectedOption ? selectedOption.value : '';
+            var submitBtn = document.getElementById('detailSubmitBtn');
+
+            var subtotalCents = 0;
+            var numPeople = 1;
+            var html = '';
+
+            if (hasSeating) {
+                var priced = computeDetailSelectionPrice();
+                var optObj = getDetailSeatingOption() || {};
+                var units = priced.units;
+                numPeople = units * priced.seats;
+
+                if (priced.hasOptionPrice) {
+                    // units x seats x pricePerSeat — ticket tiers do not apply.
+                    subtotalCents = priced.totalCents;
+                    html += '<div style="display:flex;justify-content:space-between;"><span>' + units + ' &times; ' + (optObj.name || 'Seating') + '</span><span>$' + (priced.perUnitCents / 100).toFixed(2) + ' ea</span></div>';
+                    html += '<div style="display:flex;justify-content:space-between;"><span>' + numPeople + ' seat' + (numPeople === 1 ? '' : 's') + '</span><span>$' + (priced.pricePerSeat / 100).toFixed(2) + '/seat</span></div>';
+                    if (submitBtn && !detailAllSeatingSoldOut) submitBtn.disabled = false;
+                } else {
+                    var splitRows = document.querySelectorAll('#detailTierSplitRows input[data-tierqty]');
+                    var evTiers = eventData.tiers || [];
+                    html += '<div style="display:flex;justify-content:space-between;"><span>' + (optObj.name || 'Seating') + (units > 1 ? ' &times; ' + units : '') + '</span><span>' + numPeople + ' seat' + (numPeople === 1 ? '' : 's') + '</span></div>';
+                    if (splitRows.length) {
+                        var assigned = 0;
+                        for (var i = 0; i < splitRows.length; i++) {
+                            var q = parseInt(splitRows[i].value, 10) || 0;
+                            if (q <= 0) continue;
+                            var tObj = null;
+                            for (var j = 0; j < evTiers.length; j++) {
+                                if (evTiers[j].name === splitRows[i].dataset.tierqty) { tObj = evTiers[j]; break; }
+                            }
+                            var price = (tObj && parseInt(tObj.pricePerPerson, 10)) || 0;
+                            assigned += q;
+                            subtotalCents += price * q;
+                            html += '<div style="display:flex;justify-content:space-between;"><span>' + ((tObj && tObj.name) || splitRows[i].dataset.tierqty) + ' &times; ' + q + '</span><span>$' + ((price * q) / 100).toFixed(2) + '</span></div>';
+                        }
+                        var statusEl = document.getElementById('detailTierSplitStatus');
+                        if (statusEl) {
+                            if (assigned < numPeople) {
+                                statusEl.textContent = 'Assign ' + (numPeople - assigned) + ' more seat(s)';
+                                statusEl.style.color = '#e67e22';
+                            } else if (assigned > numPeople) {
+                                statusEl.textContent = "That's " + (assigned - numPeople) + ' too many for this table';
+                                statusEl.style.color = '#e74c3c';
+                            } else {
+                                statusEl.textContent = '';
+                            }
+                        }
+                        if (submitBtn) {
+                            if (assigned !== numPeople) {
+                                submitBtn.disabled = true;
+                            } else if (!detailAllSeatingSoldOut) {
+                                submitBtn.disabled = false;
+                            }
+                        }
+                    } else {
+                        subtotalCents = pricePerPerson * numPeople;
+                        html += '<div style="display:flex;justify-content:space-between;"><span>' + tierName + '</span><span>$' + (pricePerPerson / 100).toFixed(2) + '/ea</span></div>';
+                        if (submitBtn && !detailAllSeatingSoldOut) submitBtn.disabled = false;
+                    }
+                }
+            } else {
+                var qtyEl = document.getElementById('detailPartySize');
+                numPeople = (qtyEl && parseInt(qtyEl.value, 10)) || 1;
+                subtotalCents = pricePerPerson * numPeople;
+                html += '<div style="display:flex;justify-content:space-between;"><span>' + tierName + '</span><span>$' + (pricePerPerson / 100).toFixed(2) + '/ea</span></div>';
+                html += '<div style="display:flex;justify-content:space-between;"><span>' + numPeople + ' ticket' + (numPeople > 1 ? 's' : '') + '</span><span>&times; ' + numPeople + '</span></div>';
+            }
+
             var discountCents = 0;
             var discountLabel = '';
-
             if (detailCoupon) {
                 if (detailCoupon.percent_off) {
                     discountCents = Math.round(subtotalCents * detailCoupon.percent_off / 100);
@@ -661,11 +953,6 @@
             }
 
             var totalCents = Math.max(0, subtotalCents - discountCents);
-            var detailsDiv = document.getElementById('detailSummaryDetails');
-            var totalDiv = document.getElementById('detailSummaryTotal');
-
-            var html = '<div style="display:flex;justify-content:space-between;"><span>' + tierName + '</span><span>$' + (pricePerPerson / 100).toFixed(2) + '/ea</span></div>';
-            html += '<div style="display:flex;justify-content:space-between;"><span>' + qty + ' ticket' + (qty > 1 ? 's' : '') + '</span><span>&times; ' + qty + '</span></div>';
 
             if (discountCents > 0) {
                 html += '<div style="display:flex;justify-content:space-between;color:#3cb464;margin-top:4px;"><span>' + discountLabel + '</span><span>-$' + (discountCents / 100).toFixed(2) + '</span></div>';
