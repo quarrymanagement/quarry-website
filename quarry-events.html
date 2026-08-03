@@ -1533,7 +1533,13 @@
 
                     <div class="form-group" id="seatingGroup" style="display:none;">
                         <label for="seatingOption">Seating Option *</label>
-                        <select id="seatingOption" name="seatingOption" required onchange="renderTierSplit(); updateOrderSummary();"></select>
+                        <select id="seatingOption" name="seatingOption" required onchange="updateUnitCountUI(); renderTierSplit(); updateOrderSummary();"></select>
+                    </div>
+
+                    <div class="form-group" id="unitCountGroup" style="display:none;">
+                        <label for="unitCount">How many?</label>
+                        <input type="number" id="unitCount" min="1" value="1" onchange="renderTierSplit(); updateOrderSummary();" oninput="renderTierSplit(); updateOrderSummary();">
+                        <div id="unitCountHint" style="font-size:13px;opacity:.75;margin-top:4px;"></div>
                     </div>
 
                     <div class="form-group" id="tierSplitGroup" style="display:none;">
@@ -1935,6 +1941,7 @@
             // Set party size for simple events
             document.getElementById('partySize').value = selectedMapTable.seats;
 
+            updateUnitCountUI();
             renderTierSplit();
             updateOrderSummary();
         }
@@ -2211,10 +2218,7 @@
 
                 const regsForSeating = currentEventForModal.registrations || [];
                 seatingSelect.innerHTML = currentEventForModal.seatingOptions.map(opt => {
-                    const key = String(opt.id || opt.name || '').toLowerCase().trim();
-                    const used = regsForSeating.filter(function (r) {
-                        return String((r && (r.seatingOptionId || r.seatType)) || '').toLowerCase().trim() === key;
-                    }).length;
+                    const used = seatingUnitsUsed(regsForSeating, opt);
                     const left = (opt.available == null || opt.available === '') ? Infinity : (opt.available - used);
                     let label = `${opt.name} (${opt.seats} ${Number(opt.seats) === 1 ? 'seat' : 'seats'})`;
                     if (left <= 0) {
@@ -2222,7 +2226,7 @@
                     } else if (isFinite(left) && left <= 3) {
                         label += ' — ' + left + ' left';
                     }
-                    return `<option value="${opt.id || opt.name}" data-seats="${opt.seats}" data-left="${left}"${left <= 0 ? ' disabled' : ''}>${label}</option>`;
+                    return `<option value="${opt.id || opt.name}" data-seats="${opt.seats}" data-left="${left}" data-priceperseat="${opt.pricePerSeat != null ? opt.pricePerSeat : ''}" data-maxunits="${opt.maxUnits != null ? opt.maxUnits : ''}"${left <= 0 ? ' disabled' : ''}>${label}</option>`;
                 }).join("");
             } else {
                 // Simple event — just pick quantity
@@ -2263,6 +2267,7 @@
                 document.getElementById("submitBtn").disabled = true;
                 document.getElementById("submitBtn").textContent = "Sold Out";
             }
+            updateUnitCountUI();
             renderTierSplit();
             // Restore modal body if it was replaced by success message
             const modalBody = document.getElementById("modalFormContent");
@@ -2319,6 +2324,102 @@
          * seats at their table across tiers. Only shown when the event has
          * seating options AND more than one tier.
          */
+        /**
+         * How many UNITS of a seating option are already taken. Mirrors the
+         * backend: each registration consumes round(qty / seats) units, so one
+         * guest who took three 4-tops correctly uses up three of them.
+         */
+        function seatingUnitsUsed(regs, opt) {
+            const key = String((opt && (opt.id || opt.name)) || '').toLowerCase().trim();
+            const seats = parseInt(opt && opt.seats, 10) || 1;
+            return (regs || []).reduce(function (n, r) {
+                const rid = String((r && (r.seatingOptionId || r.seatType)) || '').toLowerCase().trim();
+                if (rid !== key) return n;
+                const boughtSeats = parseInt(r && r.qty, 10) || seats;
+                return n + Math.max(1, Math.round(boughtSeats / seats));
+            }, 0);
+        }
+
+        /** The seatingOptions entry currently chosen in the dropdown. */
+        function getSelectedSeatingOption() {
+            const ev = currentEventForModal;
+            if (!ev || !Array.isArray(ev.seatingOptions)) return null;
+            const sel = document.getElementById('seatingOption');
+            if (!sel || sel.selectedIndex < 0) return null;
+            const val = String(sel.value);
+            return ev.seatingOptions.find(function (o) {
+                return String(o.id || o.name) === val;
+            }) || null;
+        }
+
+        /** How many of the chosen option the guest is booking (always >= 1). */
+        function getSelectedUnits() {
+            const grp = document.getElementById('unitCountGroup');
+            const inp = document.getElementById('unitCount');
+            if (!grp || !inp || grp.style.display === 'none') return 1;
+            return Math.max(1, parseInt(inp.value, 10) || 1);
+        }
+
+        /**
+         * Show the "How many?" box only when booking more than one makes sense,
+         * and cap it at min(units left, option.maxUnits).
+         */
+        function updateUnitCountUI() {
+            const grp = document.getElementById('unitCountGroup');
+            const inp = document.getElementById('unitCount');
+            const hint = document.getElementById('unitCountHint');
+            if (!grp || !inp) return;
+            const sel = document.getElementById('seatingOption');
+            const optEl = (sel && sel.selectedIndex >= 0) ? sel.options[sel.selectedIndex] : null;
+            const opt = getSelectedSeatingOption();
+            if (!opt || !optEl) {
+                grp.style.display = 'none';
+                inp.value = 1;
+                if (hint) hint.textContent = '';
+                return;
+            }
+            const seats = parseInt(opt.seats, 10) || 1;
+            const rawLeft = optEl.dataset.left;
+            const left = (rawLeft === 'Infinity' || rawLeft == null || rawLeft === '') ? Infinity : (parseInt(rawLeft, 10) || 0);
+            const maxUnits = parseInt(opt.maxUnits, 10) || 0;
+            let effMax = left;
+            if (maxUnits > 0) effMax = Math.min(effMax, maxUnits);
+
+            if (seats > 1 || left > 1) {
+                grp.style.display = 'block';
+                if (isFinite(effMax) && effMax > 0) inp.max = effMax; else inp.removeAttribute('max');
+                inp.value = 1;
+                if (hint) hint.textContent = (isFinite(effMax) && effMax > 0) ? ('Up to ' + effMax + ' available') : '';
+            } else {
+                grp.style.display = 'none';
+                inp.value = 1;
+                if (hint) hint.textContent = '';
+            }
+        }
+
+        /**
+         * Price for the current selection. When the seating option carries its
+         * own pricePerSeat the tier split does not apply: price is simply
+         * units x seats x pricePerSeat.
+         */
+        function computeSelectionPrice() {
+            const opt = getSelectedSeatingOption();
+            const units = getSelectedUnits();
+            const seats = parseInt(opt && opt.seats, 10) || 1;
+            const perSeat = parseInt(opt && opt.pricePerSeat, 10) || 0;
+            if (opt && perSeat > 0) {
+                return {
+                    hasOptionPrice: true,
+                    units: units,
+                    seats: seats,
+                    pricePerSeat: perSeat,
+                    perUnitCents: perSeat * seats,
+                    totalCents: units * seats * perSeat
+                };
+            }
+            return { hasOptionPrice: false, units: units, seats: seats, pricePerSeat: 0, perUnitCents: 0, totalCents: 0 };
+        }
+
         function renderTierSplit() {
             const ev = currentEventForModal;
             const group = document.getElementById('tierSplitGroup');
@@ -2327,9 +2428,18 @@
             const tiers = ev.tiers || [];
             const hasSeating = Array.isArray(ev.seatingOptions) && ev.seatingOptions.length > 0;
             if (!hasSeating || tiers.length < 2) { group.style.display = 'none'; rows.innerHTML = ''; return; }
+            // The option prices itself — there is nothing to split across tiers.
+            const pricedOpt = getSelectedSeatingOption();
+            if (pricedOpt && (parseInt(pricedOpt.pricePerSeat, 10) || 0) > 0) {
+                group.style.display = 'none';
+                rows.innerHTML = '';
+                updateOrderSummary();
+                return;
+            }
             group.style.display = 'block';
             const sel = document.getElementById('seatingOption');
-            const seats = parseInt(sel && sel.options[sel.selectedIndex] && sel.options[sel.selectedIndex].dataset.seats, 10) || 1;
+            const seatsPerUnit = parseInt(sel && sel.options[sel.selectedIndex] && sel.options[sel.selectedIndex].dataset.seats, 10) || 1;
+            const seats = seatsPerUnit * getSelectedUnits();
             rows.innerHTML = tiers.map((t, i) => `
                 <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:6px 0;">
                     <span style="font-size:14px;">${t.name} <span style="opacity:.7;">${t.priceLabel || ''}</span></span>
@@ -2378,11 +2488,33 @@
             if (currentEventForModal.seatingOptions) {
                 const seatingSelect = document.getElementById("seatingOption");
                 const selectedSeating = seatingSelect.options[seatingSelect.selectedIndex];
-                numPeople = (selectedSeating && parseInt(selectedSeating.dataset.seats)) || 1;
+                numPeople = ((selectedSeating && parseInt(selectedSeating.dataset.seats)) || 1) * getSelectedUnits();
                 seatingLabel = selectedSeating ? selectedSeating.textContent.replace(/ — .*$/, '') : '';
             } else {
                 numPeople = parseInt(document.getElementById("partySize").value) || 1;
                 seatingLabel = numPeople === 1 ? "1 ticket" : numPeople + " tickets";
+            }
+
+            // Per-option pricing: the seating option carries its own $/seat, so the
+            // tier split does not apply — just units x seats x pricePerSeat.
+            const priced = currentEventForModal.seatingOptions ? computeSelectionPrice() : { hasOptionPrice: false };
+            if (priced.hasOptionPrice) {
+                const optName = (getSelectedSeatingOption() || {}).name || seatingLabel;
+                const totalSeats = priced.units * priced.seats;
+                const pricedSubmitBtn = document.getElementById('submitBtn');
+                if (pricedSubmitBtn && !window.allSeatingSoldOut) pricedSubmitBtn.disabled = false;
+                detailsDiv.innerHTML = `
+                <div style="display:flex;justify-content:space-between;">
+                    <span>${priced.units} × ${optName}</span>
+                    <span>$${(priced.perUnitCents / 100).toFixed(2)} ea</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;">
+                    <span>${totalSeats} seat${totalSeats === 1 ? '' : 's'}</span>
+                    <span>$${(priced.pricePerSeat / 100).toFixed(2)}/seat</span>
+                </div>`;
+                totalDiv.textContent = "$" + (priced.totalCents / 100).toFixed(2);
+                summaryDiv.style.display = "block";
+                return;
             }
 
             // Multi-tier table booking: total = sum of (tier price x qty) across the split rows
@@ -2487,21 +2619,31 @@
 
                 // Determine party size from seating option or direct input
                 let partySize = 1;
+                let units = 1;
                 let seatType = 'general';
                 let seatingOptionId = '';
                 let lineItems = null;
                 if (currentEventForModal.seatingOptions) {
                     const seatingSelect = document.getElementById("seatingOption");
                     const selectedSeating = seatingSelect.options[seatingSelect.selectedIndex];
-                    partySize = parseInt(selectedSeating.dataset.seats) || 1;
+                    const seatsPerUnit = parseInt(selectedSeating.dataset.seats) || 1;
+                    units = getSelectedUnits();
+                    partySize = seatsPerUnit * units;
                     seatingOptionId = seatingSelect.value;
                     // Backend requires a non-empty seatType; use the same id.
                     seatType = seatingOptionId;
-                    const evTiers = currentEventForModal.tiers || [];
-                    if (evTiers.length > 1) {
-                        lineItems = collectTierQuantities();
-                    } else if (evTiers.length === 1) {
-                        lineItems = [{ tierName: evTiers[0].name, qty: partySize }];
+                    const optObj = getSelectedSeatingOption();
+                    const perSeat = parseInt(optObj && optObj.pricePerSeat, 10) || 0;
+                    if (perSeat > 0) {
+                        // The option prices itself — no tier split to send.
+                        lineItems = null;
+                    } else {
+                        const evTiers = currentEventForModal.tiers || [];
+                        if (evTiers.length > 1) {
+                            lineItems = collectTierQuantities();
+                        } else if (evTiers.length === 1) {
+                            lineItems = [{ tierName: evTiers[0].name, qty: partySize }];
+                        }
                     }
                 } else {
                     partySize = parseInt(formData.get("partySize")) || 1;
@@ -2514,6 +2656,7 @@
                     phone: formData.get("phone"),
                     additionalGuestName: formData.get("additionalGuestName") || '',
                     partySize: partySize,
+                    units: units,
                     seatType: seatType,
                     tableId: selectedMapTable ? selectedMapTable.id : (formData.get("selectedTableId") || ''),
                     ticketTier: formData.get("ticketTier"),
