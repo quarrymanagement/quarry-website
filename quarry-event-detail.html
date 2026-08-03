@@ -605,8 +605,8 @@
                 html += '</select>';
 
                 html += '<div id="detailUnitCountGroup" style="display:none;">';
-                html += '<label>How Many? *</label>';
-                html += '<input type="number" id="detailUnitCount" min="1" value="1" onchange="onDetailUnitsChange()" oninput="onDetailUnitsChange()">';
+                html += '<label id="detailUnitCountLabel" for="detailUnitCount">How Many? *</label>';
+                html += '<select id="detailUnitCount" onchange="onDetailUnitsChange()"><option value="1">1</option></select>';
                 html += '<div id="detailUnitCountHint" style="font-size:13px;color:#888;margin-top:6px;"></div>';
                 html += '</div>';
 
@@ -682,16 +682,21 @@
                     soBtn.disabled = true;
                     soBtn.textContent = 'Sold Out';
                 }
-                updateDetailUnitCountUI();
-                renderDetailTierSplit();
-                updateDetailSummary();
             }
 
             // Arrival waves: build the list for whatever seating option ended
             // up selected, auto-pick the first wave with space, and lock the
-            // form down if every permitted wave is full.
+            // form down if every permitted wave is full. This runs BEFORE the
+            // quantity dropdown is built, because how many units a guest may
+            // buy is capped by the space left in their chosen wave.
             if (hasArrival) {
                 renderDetailArrivalSlots();
+            }
+
+            if (hasSeating) {
+                updateDetailUnitCountUI();
+                renderDetailTierSplit();
+                updateDetailSummary();
             }
         }
 
@@ -829,7 +834,29 @@
 
         window.onDetailArrivalChange = function () {
             applyDetailArrivalLock();
+            // A different wave may have fewer units left, so the quantity
+            // dropdown has to be rebuilt.
+            updateDetailUnitCountUI();
+            renderDetailTierSplit();
+            updateDetailSummary();
         };
+
+        /**
+         * Units still free in the arrival wave the guest currently has picked.
+         * Infinity when the event has no waves or the wave has no capacity.
+         */
+        function detailSelectedArrivalLeft() {
+            var grp = document.getElementById('detailArrivalGroup');
+            var sel = document.getElementById('detailArrivalSlot');
+            if (!sel || !sel.options.length) return Infinity;
+            if (grp && grp.style.display === 'none') return Infinity;
+            var el = sel.options[sel.selectedIndex >= 0 ? sel.selectedIndex : 0];
+            if (!el) return Infinity;
+            var raw = el.getAttribute('data-left');
+            if (raw === 'Infinity' || raw == null || raw === '') return Infinity;
+            var n = parseInt(raw, 10);
+            return isNaN(n) ? Infinity : n;
+        }
 
         // ═══ Seating-option support (tables / bar seats) ═══
         // Mirrors the logic used by the registration modal on /quarry-events.
@@ -873,41 +900,87 @@
             return Math.max(1, parseInt(inp.value, 10) || 1);
         }
 
+        // ─── "How many?" quantity dropdown ───
+        // A bare number box was ambiguous: a guest picking "4-Top Table" could
+        // read "How many?" as "how many people" and type 4, buying four tables
+        // (16 seats) instead of one table for four. Every option now spells out
+        // exactly what is being bought, so it cannot be misread.
+
+        // Only used when BOTH the seating option and the arrival wave are
+        // uncapped — a <select> cannot offer an unbounded list.
+        var DETAIL_UNIT_UNCAPPED_CHOICES = 10;
+
         /**
-         * Show the "How many?" box only when booking more than one makes sense,
-         * and cap it at min(units left, option.maxUnits).
+         * The noun for one unit of a seating option, taken from its own name:
+         * "4-Top Table" -> "table", "6-Top Table" -> "table", "Bar Seat" ->
+         * "bar seat". Pluralised by appending "s".
+         */
+        function detailUnitNoun(opt, n) {
+            var name = String((opt && opt.name) || 'unit').trim();
+            var noun = /^\d+\s*-?\s*top\b/i.test(name) ? 'table' : name.toLowerCase();
+            return (n === 1) ? noun : noun + 's';
+        }
+
+        /** "$100" for whole dollars, "$12.50" otherwise. */
+        function detailUnitMoney(cents) {
+            return '$' + ((cents % 100 === 0) ? String(cents / 100) : (cents / 100).toFixed(2));
+        }
+
+        /**
+         * "1 table · seats 4 · $100" / "2 bar seats · $60". The seat count is
+         * dropped for single-seat options (it would just repeat the quantity)
+         * and the price is dropped for tier-priced options, which have no
+         * pricePerSeat of their own.
+         */
+        function detailUnitOptionLabel(opt, n) {
+            var seats = parseInt(opt && opt.seats, 10) || 1;
+            var parts = [n + ' ' + detailUnitNoun(opt, n)];
+            if (seats > 1) parts.push('seats ' + (seats * n));
+            var priced = computeDetailSelectionPrice(n, opt);
+            if (priced.hasOptionPrice) parts.push(detailUnitMoney(priced.totalCents));
+            return parts.join(' · ');
+        }
+
+        /**
+         * Rebuild the quantity dropdown for the chosen seating option and
+         * arrival wave. One option per bookable unit, capped by the smaller of
+         * (units left for the option) and (units left in the wave) — and by
+         * option.maxUnits when the event sets one. Even a single option is
+         * rendered, so the guest still reads "1 table · seats 4 · $100".
          */
         function updateDetailUnitCountUI() {
             var grp = document.getElementById('detailUnitCountGroup');
-            var inp = document.getElementById('detailUnitCount');
+            var box = document.getElementById('detailUnitCount');
             var hint = document.getElementById('detailUnitCountHint');
-            if (!grp || !inp) return;
+            var lbl = document.getElementById('detailUnitCountLabel');
+            if (!grp || !box) return;
             var sel = document.getElementById('detailSeatingOption');
             var optEl = (sel && sel.selectedIndex >= 0) ? sel.options[sel.selectedIndex] : null;
             var opt = getDetailSeatingOption();
             if (!opt || !optEl) {
                 grp.style.display = 'none';
-                inp.value = 1;
+                box.innerHTML = '<option value="1">1</option>';
                 if (hint) hint.textContent = '';
                 return;
             }
-            var seats = parseInt(opt.seats, 10) || 1;
-            var rawLeft = optEl.dataset.left;
+            var prev = parseInt(box.value, 10) || 0;
+            var rawLeft = optEl.getAttribute('data-left');
             var left = (rawLeft === 'Infinity' || rawLeft == null || rawLeft === '') ? Infinity : (parseInt(rawLeft, 10) || 0);
             var maxUnits = parseInt(opt.maxUnits, 10) || 0;
-            var effMax = left;
+            var effMax = Math.min(left, detailSelectedArrivalLeft());
             if (maxUnits > 0) effMax = Math.min(effMax, maxUnits);
 
-            if (seats > 1 || left > 1) {
-                grp.style.display = 'block';
-                if (isFinite(effMax) && effMax > 0) { inp.max = effMax; } else { inp.removeAttribute('max'); }
-                inp.value = 1;
-                if (hint) hint.textContent = (isFinite(effMax) && effMax > 0) ? ('Up to ' + effMax + ' available') : '';
-            } else {
-                grp.style.display = 'none';
-                inp.value = 1;
-                if (hint) hint.textContent = '';
+            var count = isFinite(effMax) ? Math.max(1, effMax) : DETAIL_UNIT_UNCAPPED_CHOICES;
+            var out = '';
+            for (var n = 1; n <= count; n++) {
+                out += '<option value="' + n + '">' + detailUnitOptionLabel(opt, n) + '</option>';
             }
+            box.innerHTML = out;
+            box.value = (prev >= 1 && prev <= count) ? String(prev) : '1';
+
+            grp.style.display = 'block';
+            if (lbl) lbl.textContent = 'How many ' + detailUnitNoun(opt, 2) + '? *';
+            if (hint) hint.textContent = (isFinite(effMax) && effMax > 0) ? ('Up to ' + effMax + ' available') : '';
         }
 
         /**
@@ -915,9 +988,9 @@
          * own pricePerSeat the tier split does not apply: price is simply
          * units x seats x pricePerSeat.
          */
-        function computeDetailSelectionPrice() {
-            var opt = getDetailSeatingOption();
-            var units = getDetailUnits();
+        function computeDetailSelectionPrice(unitsOverride, optOverride) {
+            var opt = optOverride || getDetailSeatingOption();
+            var units = (unitsOverride != null) ? unitsOverride : getDetailUnits();
             var seats = parseInt(opt && opt.seats, 10) || 1;
             var perSeat = parseInt(opt && opt.pricePerSeat, 10) || 0;
             if (opt && perSeat > 0) {
@@ -979,10 +1052,11 @@
         }
 
         window.onDetailSeatingChange = function () {
-            updateDetailUnitCountUI();
             // Bar seats may only be allowed in one wave, so the list is rebuilt
-            // every time the seating option changes.
+            // every time the seating option changes — and it goes first, because
+            // the quantity dropdown is capped by the chosen wave.
             renderDetailArrivalSlots();
+            updateDetailUnitCountUI();
             renderDetailTierSplit();
             updateDetailSummary();
         };
