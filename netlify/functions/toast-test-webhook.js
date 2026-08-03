@@ -29,14 +29,14 @@ const CORS = {
 };
 const reply = (status, obj) => ({ statusCode: status, headers: CORS, body: JSON.stringify(obj) });
 
-// Reuse the same admin auth check the main admin uses (verify-admin-password)
+// Same check verify-admin-password.js performs: sha256 of the submitted
+// password against ADMIN_PASSWORD_HASH. Fails closed when the env var is
+// missing. The plaintext fast-path was removed 2026-08-03 — it was a live
+// credential sitting in a public repo.
 async function verifyAdmin(password) {
-  if (!password) return false;
-  // Quick fast-path: legacy plaintext check (the verify fn itself falls back
-  // to this if ADMIN_PASSWORD_HASH isn't set, which is the current state)
-  if (password === 'quarry2026') return true;
-  // If a hash IS set we'd want to call verify-admin-password — defer for now
-  return false;
+  const expectedHash = process.env.ADMIN_PASSWORD_HASH || '';
+  if (!password || !expectedHash) return false;
+  return crypto.createHash('sha256').update(String(password), 'utf8').digest('hex') === expectedHash;
 }
 
 function postJson(hostname, path, body, headers) {
