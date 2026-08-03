@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-02T00:06:35.756Z",
+  "updatedAt": "2026-08-03T08:01:43.781Z",
   "_schema": {
     "drafts": "Queue of generated social posts awaiting approval, scheduled, or posted.",
     "draftShape": {
@@ -10045,6 +10045,58 @@
           "footerText": "THE QUARRY  •  ROCK & VINE WINE CLUB"
         },
         "canvasNote": "Now Accepting Members — recurring monthly post for the Rock & Vine Wine Club."
+      },
+      "caption": "",
+      "hashtags": [],
+      "imageUrl": null,
+      "userImageUrl": null
+    },
+    {
+      "id": "drf-mscxxkyq-1-irwh6",
+      "cadenceTag": "bands:2026-07-31:T-3",
+      "type": "band_announce",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "status": "skeleton",
+      "scheduledFor": "2026-08-04T17:00:00-05:00",
+      "createdAt": "2026-08-03T08:01:43.778Z",
+      "createdBy": "cadence-engine",
+      "context": {
+        "sourceType": "band",
+        "sourceId": "2026-07-31",
+        "weekendOf": "2026-07-31",
+        "bands": [
+          {
+            "name": "B&G",
+            "date": "2026-08-07",
+            "timeSlot": "7 PM - 10 PM (Patio)",
+            "type": "evening"
+          }
+        ],
+        "arcStep": "T-3",
+        "arcLabel": "Weekend Lineup"
+      },
+      "graphicBrief": {
+        "type": "band_lineup_poster",
+        "templateRef": "Match the 3-card \"LIVE BANDS AT THE QUARRY\" poster you already use",
+        "neededBy": "2026-08-03",
+        "dimensions": "1080x1080 square",
+        "toneMode": "weekend-hype",
+        "spec": {
+          "backgroundIdea": "Quarry lake/patio at golden hour or evening string lights",
+          "title": "LIVE BANDS THIS WEEKEND",
+          "cards": [
+            {
+              "day": "Friday, Aug 7",
+              "bandName": "B&G",
+              "time": "7 PM - 10 PM (Patio)"
+            }
+          ],
+          "footerText": "THE QUARRY  •  GREAT VIEWS  •  GREAT FOOD  •  GOOD TIMES"
+        },
+        "canvasNote": "Weekend Lineup — covers 1 band(s). Post 3 days before first show."
       },
       "caption": "",
       "hashtags": [],
