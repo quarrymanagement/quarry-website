@@ -343,10 +343,23 @@ input[type="text"]:focus, input[type="password"]:focus {
     var listEl = $('checksList');
     listEl.innerHTML = '<div class="muted" style="padding:14px;text-align:center;font-style:italic">Loading open checks from Toast…</div>';
     try {
+      // The admin password is no longer hardcoded here (it used to be, in a public
+      // repo). Reuse the same sessionStorage slot bartender.html already uses, and
+      // prompt once per session if it isn't set yet.
+      var adminPass = sessionStorage.getItem('quarry_admin_pass') || '';
+      if (!adminPass) {
+        adminPass = (window.prompt('Manager password (once per session, to load open checks):') || '').trim();
+        if (!adminPass) throw new Error('Manager password needed to load open checks.');
+        sessionStorage.setItem('quarry_admin_pass', adminPass);
+      }
       var r = await fetch('/.netlify/functions/list-open-checks', {
         method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ adminPassword: 'quarry2026' }) // staff token doesn't help here; legacy fallback OK
+        body: JSON.stringify({ adminPassword: adminPass })
       });
+      if (r.status === 401) {
+        sessionStorage.removeItem('quarry_admin_pass');
+        throw new Error('That manager password was not accepted. Tap Retry to try again.');
+      }
       var b = await r.json();
       if (!b.ok) throw new Error(b.error || 'load failed');
       openChecksCache = b.checks || [];
