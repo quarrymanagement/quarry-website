@@ -143,6 +143,63 @@ function countSeatingOptionUsed(evData, option) {
   }, 0);
 }
 
+// ---------------------------------------------------------------------------
+// Arrival-time ("wave") helpers
+// ---------------------------------------------------------------------------
+// An event may stagger arrivals so the buffet and bar are not swamped:
+//     "arrivalSlots": [
+//       { "id": "w0830", "label": "8:30 AM", "capacity": 11,
+//         "appliesTo": ["4-top-table"] }, ...
+//     ]
+// capacity is counted in UNITS (a unit = one table, or one bar seat), exactly
+// like seatingOptions.available. appliesTo restricts which seatingOptions may
+// choose that wave; omitted or empty means every option may.
+// Events with no arrivalSlots are completely unaffected.
+
+function getArrivalSlots(evData) {
+  return Array.isArray(evData && evData.arrivalSlots) ? evData.arrivalSlots : [];
+}
+
+function findArrivalSlot(evData, slotId) {
+  const want = String(slotId || '').trim().toLowerCase();
+  if (!want) return null;
+  return getArrivalSlots(evData).find(function(s) {
+    return String(s.id || '').trim().toLowerCase() === want;
+  }) || null;
+}
+
+// May this seating option book this wave? No appliesTo (or an empty one) means
+// the wave is open to everybody.
+function arrivalSlotAllowsOption(slot, option) {
+  const applies = (Array.isArray(slot && slot.appliesTo) ? slot.appliesTo : [])
+    .map(function(a) { return String(a || '').trim().toLowerCase(); })
+    .filter(function(a) { return a !== ''; });
+  if (!applies.length) return true;
+  if (!option) return true;
+  const id = String(option.id || '').trim().toLowerCase();
+  const nm = String(option.name || '').trim().toLowerCase();
+  return applies.indexOf(id) !== -1 || (nm !== '' && applies.indexOf(nm) !== -1);
+}
+
+// How many UNITS of a wave are already taken, derived from the registration
+// log so it can never drift. Each registration consumes
+// round(qty / seatsOfItsOwnSeatingOption) units, mirroring
+// countSeatingOptionUsed. Registrations with no arrivalSlot (anything booked
+// before waves existed) count toward nothing.
+function countArrivalSlotUsed(evData, slot) {
+  const regs = Array.isArray(evData.registrations) ? evData.registrations : [];
+  const want = String((slot && slot.id) || '').trim().toLowerCase();
+  if (!want) return 0;
+  return regs.reduce(function(n, r) {
+    const rid = String((r && r.arrivalSlot) || '').trim().toLowerCase();
+    if (!rid || rid !== want) return n;
+    const regOpt = findSeatingOption(evData, (r.seatingOptionId || r.seatType));
+    const seats = parseInt(regOpt && regOpt.seats, 10) || 1;
+    const boughtSeats = parseInt(r.qty, 10) || seats;
+    return n + Math.max(1, Math.round(boughtSeats / seats));
+  }, 0);
+}
+
 exports.handler = async function(event) {
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -168,6 +225,8 @@ exports.handler = async function(event) {
     const successUrl = body.successUrl;
     const cancelUrl = body.cancelUrl;
     const seatingOptionId = body.seatingOptionId || '';
+    // Optional: staggered arrival wave, for events that define arrivalSlots.
+    const arrivalSlotId = body.arrivalSlot || '';
     // Optional: multi-line cart for events that mix tiers in one checkout
     const lineItemsIn = Array.isArray(body.lineItems) ? body.lineItems : null;
 
@@ -247,6 +306,44 @@ exports.handler = async function(event) {
           return {
             statusCode: 409, headers,
             body: JSON.stringify({ error: 'Only ' + left + ' x ' + (chosenOption.name || 'of these') + ' left — please reduce how many you are booking.' })
+          };
+        }
+      }
+    }
+
+    // ---- ARRIVAL WAVE VALIDATION + PER-WAVE INVENTORY --------------------
+    // Only enforced for events that actually define arrivalSlots, so every
+    // existing event keeps working exactly as before.
+    let chosenArrivalSlot = null;
+    const arrivalSlots = getArrivalSlots(evData);
+    if (arrivalSlots.length > 0) {
+      if (!arrivalSlotId) {
+        return { statusCode: 400, headers, body: JSON.stringify({ error: 'Please choose an arrival time.' }) };
+      }
+      chosenArrivalSlot = findArrivalSlot(evData, arrivalSlotId);
+      if (!chosenArrivalSlot) {
+        return { statusCode: 400, headers, body: JSON.stringify({ error: 'Unknown arrival time: ' + arrivalSlotId }) };
+      }
+      if (!arrivalSlotAllowsOption(chosenArrivalSlot, chosenOption)) {
+        const allowedLabels = arrivalSlots.filter(function(s) {
+          return arrivalSlotAllowsOption(s, chosenOption);
+        }).map(function(s) { return String(s.label || s.id || ''); });
+        const what = (chosenOption && chosenOption.name) ? (chosenOption.name + 's') : 'That seating option';
+        const msg = allowedLabels.length
+          ? (what + ' are only available at the ' + allowedLabels.join(' or ') + ' arrival.')
+          : (what + ' cannot be booked at any arrival time. Please call us on (636) 224-8257.');
+        return { statusCode: 400, headers, body: JSON.stringify({ error: msg }) };
+      }
+      // capacity null/undefined/'' means "unlimited"; 0 means none available.
+      if (chosenArrivalSlot.capacity !== undefined && chosenArrivalSlot.capacity !== null && chosenArrivalSlot.capacity !== '') {
+        const slotCap = parseInt(chosenArrivalSlot.capacity, 10) || 0;
+        const slotUsed = countArrivalSlotUsed(evData, chosenArrivalSlot);
+        const slotLeft = slotCap - slotUsed;
+        // Booking three tables needs three free unit slots in the wave.
+        if (slotLeft < units) {
+          return {
+            statusCode: 409, headers,
+            body: JSON.stringify({ error: 'That arrival time is full \u2014 please pick another.' })
           };
         }
       }
@@ -367,6 +464,10 @@ exports.handler = async function(event) {
       // keep per-size inventory honest.
       seatingOptionId: String(chosenOption ? (chosenOption.id || chosenOption.name) : '').slice(0, 60),
       seatingOptionName: String(chosenOption ? (chosenOption.name || '') : '').slice(0, 120),
+      // Staggered arrival wave. The webhook must record arrivalSlot on the
+      // registration, otherwise per-wave inventory cannot be counted back.
+      arrivalSlot: String(chosenArrivalSlot ? (chosenArrivalSlot.id || '') : '').slice(0, 60),
+      arrivalLabel: String(chosenArrivalSlot ? (chosenArrivalSlot.label || '') : '').slice(0, 60),
       ticketTier: String(tierSummary).slice(0, 255),
       couponCode: String(couponCode).slice(0, 60)
     };
@@ -381,6 +482,7 @@ exports.handler = async function(event) {
       'customerName',
       'customerEmail',
       'seatingOptionId',    // per-size inventory depends on this
+      'arrivalSlot',        // per-wave inventory depends on this
       'partySize',
       'seatType',
       'customerPhone',   // wanted for follow-up marketing - keep above ticketTier
@@ -389,6 +491,7 @@ exports.handler = async function(event) {
       'couponCode',
       'tableId',
       'seatingOptionName',  // cosmetic - derivable from seatingOptionId
+      'arrivalLabel',       // cosmetic - derivable from arrivalSlot
       'eventName'           // derivable from eventId
     ];
     const SQUARE_META_MAX = 10;
@@ -431,7 +534,11 @@ exports.handler = async function(event) {
       },
       // NOTE: the Square webhook parses this string. It matches /x(\d+)\s*$/ to
       // read the quantity, so the "xN" MUST stay at the very end.
-      payment_note: 'Event - ' + (evData.name || '') + ' x' + qty
+      // The arrival label is inserted BEFORE the trailing " xN" so the
+      // quantity stays at the very end of the string, where the regex expects.
+      payment_note: 'Event - ' + (evData.name || '')
+        + ((chosenArrivalSlot && chosenArrivalSlot.label) ? ' - ' + chosenArrivalSlot.label + ' arrival' : '')
+        + ' x' + qty
     };
 
     let result;
