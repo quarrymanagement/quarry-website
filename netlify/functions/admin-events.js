@@ -1,16 +1,28 @@
 // admin-events.js — admin CRUD for the quarry-events blob store.
 // Migrated to SDK-backed blob ops (the prior direct REST calls were 404'ing
 // silently — see _blobs.js).
+const crypto = require('crypto');
 const Stripe = require('stripe');
 const { readBlob, writeBlob, deleteBlob, listKeys } = require('./_blobs');
 
-const PW = process.env.ADMIN_PASSWORD || 'quarry2026';
+// Admin auth. Prefers the plaintext ADMIN_PASSWORD env var if one is set,
+// otherwise falls back to the sha256 ADMIN_PASSWORD_HASH used by every other
+// admin function. Fails closed when neither is configured — the hardcoded
+// password fallback was removed 2026-08-03 (live credential in a public repo).
+const PW = process.env.ADMIN_PASSWORD || '';
+const PW_HASH = process.env.ADMIN_PASSWORD_HASH || '';
+function checkAdmin(p) {
+  if (!p) return false;
+  if (PW) return String(p) === PW;
+  if (PW_HASH) return crypto.createHash('sha256').update(String(p), 'utf8').digest('hex') === PW_HASH;
+  return false;
+}
 
 exports.handler = async (event) => {
   const headers = { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' };
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
   const body = JSON.parse(event.body || '{}');
-  if (body.password !== PW) return { statusCode: 401, headers, body: JSON.stringify({ error: 'Unauthorized' }) };
+  if (!checkAdmin(body.password)) return { statusCode: 401, headers, body: JSON.stringify({ error: 'Unauthorized' }) };
 
   const action = body.action;
   try {
