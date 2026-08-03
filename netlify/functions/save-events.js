@@ -7,13 +7,14 @@
 //
 //   1. AUTHENTICATION. This endpoint previously accepted an unauthenticated
 //      POST from anywhere on the internet and overwrote the entire events.json.
-//      It now requires an admin token, supplied either as the `x-admin-token`
-//      header or as `adminToken` in the JSON body.
+//      It now requires the admin SESSION TOKEN minted at login, supplied either
+//      as the `x-admin-token` header or as `adminToken` in the JSON body.
 //
-//      Valid token = process.env.ADMIN_SAVE_TOKEN.
-//      If that env var is not set, we fall back to the legacy admin password so
-//      that nothing breaks the moment this deploys. SET ADMIN_SAVE_TOKEN IN
-//      NETLIFY and the legacy fallback stops being used.
+//      The token is "<issuedMs>.<hmacSha256(issuedMs, SESSION_SECRET)>", issued
+//      by netlify/functions/verify-admin-password.js after a successful password
+//      check. We re-verify the HMAC here using the same secret derivation and
+//      reject anything malformed or older than SESSION_TTL_HOURS. No static or
+//      plaintext password is accepted any more.
 //
 //   2. REGISTRATION PRESERVATION (per-event). The admin panel uploads whatever
 //      snapshot of events.json its browser happens to be holding. If a Square
