@@ -260,6 +260,22 @@ exports.handler = async (event) => {
       });
     }
 
+    // ---- BULK-DELETION GUARD --------------------------------------------
+    // On 2026-04-15 a stale admin tab silently deleted four live events. A
+    // legitimate edit never halves the calendar in one save, so require an
+    // explicit confirmDeletions flag for anything that drastic.
+    if (currentData && Array.isArray(currentData.events)) {
+      const before = currentData.events.length;
+      const after = incomingData.events.length;
+      if (before >= 4 && after < Math.ceil(before / 2) && !incomingData.confirmDeletions) {
+        return response(409, {
+          error: 'Refusing to save: this would cut events from ' + before + ' to ' + after +
+                 '. If that is deliberate, delete them a few at a time.'
+        });
+      }
+    }
+    delete incomingData.confirmDeletions;
+
     // Build image map from current file (so we don't lose images stripped by admin)
     const currentImageMap = {};
     if (currentData && currentData.events) {
