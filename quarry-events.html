@@ -1718,6 +1718,18 @@
                     const evtDate = new Date(dateStr + 'T23:59:59'); // event "passes" only after the day ends
                     return evtDate >= today;
                 });
+
+                // Soonest first. events.json is in the order things were added,
+                // which put an October event ahead of August ones on the page.
+                allEvents.sort((a, b) => {
+                    const da = a.date || a.eventDate || a.startDate || '';
+                    const db = b.date || b.eventDate || b.startDate || '';
+                    if (!da && !db) return 0;
+                    if (!da) return 1;   // undated events sink to the bottom
+                    if (!db) return -1;
+                    if (da !== db) return da < db ? -1 : 1;
+                    return String(a.time || '').localeCompare(String(b.time || ''));
+                });
             } catch (err) {
                 console.error('Could not load events from GitHub:', err);
                 // Show a user-friendly message
