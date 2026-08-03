@@ -517,6 +517,7 @@
             var card = document.getElementById('regCard');
             var et = evt.eventType || 'ticketed';
             var hasSeating = Array.isArray(evt.seatingOptions) && evt.seatingOptions.length > 0;
+            var hasArrival = Array.isArray(evt.arrivalSlots) && evt.arrivalSlots.length > 0;
 
             // Free / Informational events — no registration
             if (et === 'free') {
@@ -620,6 +621,17 @@
                 html += '<input type="number" name="partySize" id="detailPartySize" min="1" max="20" value="1" required onchange="updateDetailSummary()">';
             }
 
+            // ─── Staggered arrival wave ───
+            // Options are filled in by renderDetailArrivalSlots(), because the
+            // permitted set depends on which seating option is chosen.
+            if (hasArrival) {
+                html += '<div id="detailArrivalGroup" style="margin-top:16px;">';
+                html += '<label>Arrival Time *</label>';
+                html += '<select name="arrivalSlot" id="detailArrivalSlot" required onchange="onDetailArrivalChange()"></select>';
+                html += '<div id="detailArrivalHint" style="font-size:13px;color:#888;margin-top:6px;">We stagger arrivals so the buffet and bar aren\'t swamped. Please arrive at your chosen time.</div>';
+                html += '</div>';
+            }
+
             // Coupon Code
             html += '<div style="margin-top:16px;">';
             html += '<label>Coupon Code</label>';
@@ -674,7 +686,150 @@
                 renderDetailTierSplit();
                 updateDetailSummary();
             }
+
+            // Arrival waves: build the list for whatever seating option ended
+            // up selected, auto-pick the first wave with space, and lock the
+            // form down if every permitted wave is full.
+            if (hasArrival) {
+                renderDetailArrivalSlots();
+            }
         }
+
+        // ═══ Arrival-wave support (staggered seating times) ═══
+        // Mirrors the seating-option logic above: capacity is counted in UNITS
+        // (a unit = one table, or one bar seat) and derived from the
+        // registration log, never from a stored counter.
+
+        var detailAllArrivalFull = false;
+
+        function detailArrivalSlots() {
+            return (eventData && Array.isArray(eventData.arrivalSlots)) ? eventData.arrivalSlots : [];
+        }
+
+        /** Look a registration's seating option back up so we know its seat count. */
+        function detailFindSeatingOptionById(id) {
+            var want = String(id || '').toLowerCase().trim();
+            if (!want || !eventData || !Array.isArray(eventData.seatingOptions)) return null;
+            var opts = eventData.seatingOptions;
+            for (var i = 0; i < opts.length; i++) {
+                if (String(opts[i].id || '').toLowerCase().trim() === want) return opts[i];
+            }
+            for (var j = 0; j < opts.length; j++) {
+                if (String(opts[j].name || '').toLowerCase().trim() === want) return opts[j];
+            }
+            return null;
+        }
+
+        /**
+         * May this seating option book this wave? No appliesTo (or an empty
+         * one) means the wave is open to every option.
+         */
+        function detailArrivalAllowsOption(slot, opt) {
+            var applies = (slot && Array.isArray(slot.appliesTo) ? slot.appliesTo : [])
+                .map(function (a) { return String(a || '').toLowerCase().trim(); })
+                .filter(function (a) { return a !== ''; });
+            if (!applies.length) return true;
+            if (!opt) return true;
+            var id = String(opt.id || '').toLowerCase().trim();
+            var nm = String(opt.name || '').toLowerCase().trim();
+            return applies.indexOf(id) !== -1 || (nm !== '' && applies.indexOf(nm) !== -1);
+        }
+
+        /**
+         * How many UNITS of a wave are already taken. Mirrors the backend:
+         * each registration consumes round(qty / seatsOfItsOwnOption) units.
+         * Registrations with no arrivalSlot count toward nothing.
+         */
+        function detailArrivalUnitsUsed(slot) {
+            var regs = (eventData && eventData.registrations) || [];
+            var key = String((slot && slot.id) || '').toLowerCase().trim();
+            if (!key) return 0;
+            return regs.reduce(function (n, r) {
+                var rid = String((r && r.arrivalSlot) || '').toLowerCase().trim();
+                if (!rid || rid !== key) return n;
+                var o = detailFindSeatingOptionById(r && (r.seatingOptionId || r.seatType));
+                var seats = parseInt(o && o.seats, 10) || 1;
+                var boughtSeats = parseInt(r && r.qty, 10) || seats;
+                return n + Math.max(1, Math.round(boughtSeats / seats));
+            }, 0);
+        }
+
+        /** Units still free in a wave. No capacity means unlimited. */
+        function detailArrivalLeft(slot) {
+            if (!slot || slot.capacity == null || slot.capacity === '') return Infinity;
+            return (parseInt(slot.capacity, 10) || 0) - detailArrivalUnitsUsed(slot);
+        }
+
+        /**
+         * Rebuild the arrival dropdown for the currently chosen seating option.
+         * Keeps the guest's pick if it is still valid, otherwise falls back to
+         * the first wave with space.
+         */
+        function renderDetailArrivalSlots() {
+            var sel = document.getElementById('detailArrivalSlot');
+            var grp = document.getElementById('detailArrivalGroup');
+            if (!sel) return;
+            var slots = detailArrivalSlots();
+            if (!slots.length) {
+                if (grp) grp.style.display = 'none';
+                sel.required = false;
+                return;
+            }
+            var opt = getDetailSeatingOption();
+            var prev = sel.value;
+            var out = '';
+            var permitted = 0;
+            var anyOpen = false;
+            for (var i = 0; i < slots.length; i++) {
+                var s = slots[i];
+                if (!detailArrivalAllowsOption(s, opt)) continue;
+                permitted++;
+                var left = detailArrivalLeft(s);
+                var label = String(s.label || s.id || '');
+                if (left <= 0) {
+                    label += ' — full';
+                } else {
+                    anyOpen = true;
+                    if (isFinite(left) && left <= 3) label += ' — ' + left + ' left';
+                }
+                out += '<option value="' + (s.id || '') + '" data-left="' + left + '"' +
+                       (left <= 0 ? ' disabled' : '') + '>' + label + '</option>';
+            }
+            sel.innerHTML = out;
+
+            var pick = -1;
+            for (var k = 0; k < sel.options.length; k++) {
+                if (sel.options[k].value === prev && !sel.options[k].disabled) { pick = k; break; }
+            }
+            if (pick === -1) {
+                for (var m = 0; m < sel.options.length; m++) {
+                    if (!sel.options[m].disabled) { pick = m; break; }
+                }
+            }
+            sel.selectedIndex = pick >= 0 ? pick : 0;
+
+            if (grp) grp.style.display = permitted > 0 ? 'block' : 'none';
+            sel.required = permitted > 0;
+            detailAllArrivalFull = (permitted > 0 && !anyOpen);
+            applyDetailArrivalLock();
+        }
+
+        /** Every permitted wave full beats whatever the pricing logic decided. */
+        function applyDetailArrivalLock() {
+            var btn = document.getElementById('detailSubmitBtn');
+            if (!btn) return;
+            if (detailAllArrivalFull) {
+                btn.disabled = true;
+                btn.textContent = 'Arrival times full';
+            } else if (btn.textContent === 'Arrival times full') {
+                btn.disabled = false;
+                btn.textContent = 'Proceed to Payment';
+            }
+        }
+
+        window.onDetailArrivalChange = function () {
+            applyDetailArrivalLock();
+        };
 
         // ═══ Seating-option support (tables / bar seats) ═══
         // Mirrors the logic used by the registration modal on /quarry-events.
@@ -825,6 +980,9 @@
 
         window.onDetailSeatingChange = function () {
             updateDetailUnitCountUI();
+            // Bar seats may only be allowed in one wave, so the list is rebuilt
+            // every time the seating option changes.
+            renderDetailArrivalSlots();
             renderDetailTierSplit();
             updateDetailSummary();
         };
@@ -974,6 +1132,7 @@
 
             detailsDiv.innerHTML = html;
             totalDiv.textContent = '$' + (totalCents / 100).toFixed(2);
+            applyDetailArrivalLock();
         };
 
         // ─── Apply coupon ───
@@ -1108,6 +1267,10 @@
 
             if (seatingOptionId) {
                 payload.seatingOptionId = seatingOptionId;
+            }
+            var arrivalSel = document.getElementById('detailArrivalSlot');
+            if (arrivalSel && arrivalSel.value) {
+                payload.arrivalSlot = arrivalSel.value;
             }
             if (lineItems && lineItems.length) {
                 payload.lineItems = lineItems;
