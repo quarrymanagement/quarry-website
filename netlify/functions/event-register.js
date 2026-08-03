@@ -236,7 +236,17 @@ exports.handler = async function(event) {
 
     // Fetch event data
     const siteUrl = process.env.URL || 'https://thequarrystl.com';
-    const allData = await fetchJSON(siteUrl + '/events.json');
+    // Read events.json from GitHub, NOT from the deployed site.
+    //
+    // netlify.toml skips the build when only data JSON changes (build-ignore.sh),
+    // so the copy Netlify serves at /events.json can be arbitrarily out of date.
+    // That meant an admin edit — a price, a capacity, a table count, an arrival
+    // wave — was invisible to checkout until some unrelated code change happened
+    // to trigger a rebuild. Prices could be charged from a stale file.
+    //
+    // The Contents API is authenticated, so this also keeps working if the repo
+    // is ever made private. Falls back to the site copy if GitHub is unreachable.
+    const allData = await fetchEventsData(siteUrl);
     const events = allData.events || [];
     const evData = events.find(function(e) { return e.id === eventId; });
 
