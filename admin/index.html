@@ -4957,7 +4957,7 @@
                 <label style="font-weight:700;">Table Sizes &amp; Bar Seats <span style="font-weight:400;opacity:.7;">— leave empty to sell individual tickets</span></label>
                 <div id="seatingEditor"></div>
                 <button type="button" class="add-row-btn" id="addSeatingBtn">+ Add table size</button>
-                <div style="font-size:.78rem;opacity:.7;margin-top:6px;">Guests pick one of these, then split its seats across your tiers. "How many" is how many of that size you have; leave blank for unlimited.</div>
+                <div style="font-size:.78rem;opacity:.7;margin-top:6px;">Guests pick one of these. Set $/seat when the price depends on where they sit; leave it blank to price by ticket tier instead. "How many" is how many of that size you have; leave blank for unlimited.</div>
             </div>
             <div class="form-group">
                 <label class="form-label">Use Table Chart</label>
@@ -6831,6 +6831,7 @@
                         <input type="text" value="${esc(s.name)}" placeholder="e.g. 4-Top Table" data-seat-i="${i}" data-seat-k="name" style="flex:2;">
                         <input type="number" value="${s.seats != null ? s.seats : ''}" placeholder="seats" min="1" data-seat-i="${i}" data-seat-k="seats" style="flex:1;">
                         <input type="number" value="${s.available != null ? s.available : ''}" placeholder="how many" min="0" data-seat-i="${i}" data-seat-k="available" style="flex:1;">
+                        <input type="number" value="${s.dollars != null ? s.dollars : ''}" placeholder="$/seat" step="0.01" min="0" data-seat-i="${i}" data-seat-k="dollars" style="flex:1;">
                         <button type="button" class="remove-row-btn" data-seat-del="${i}">&times;</button>
                     </div>`).join('');
             }
@@ -6856,6 +6857,7 @@
                     const t = e.target; if (t.dataset.seatI == null) return;
                     const i = +t.dataset.seatI;
                     if (t.dataset.seatK === 'name') seating[i].name = t.value;
+                    else if (t.dataset.seatK === 'dollars') seating[i].dollars = t.value === '' ? null : parseFloat(t.value);
                     else seating[i][t.dataset.seatK] = t.value === '' ? null : parseInt(t.value, 10);
                 }, (e) => {
                     const t = e.target.closest('[data-seat-del]'); if (!t) return;
@@ -6864,7 +6866,7 @@
                 const at = document.getElementById('addTierBtn');
                 if (at) at.addEventListener('click', (e) => { e.preventDefault(); tiers.push({ name: '', dollars: null }); renderTiers(); });
                 const as = document.getElementById('addSeatingBtn');
-                if (as) as.addEventListener('click', (e) => { e.preventDefault(); seating.push({ name: '', seats: null, available: null }); renderSeating(); });
+                if (as) as.addEventListener('click', (e) => { e.preventDefault(); seating.push({ name: '', seats: null, available: null, dollars: null }); renderSeating(); });
             }
 
             return {
@@ -6877,7 +6879,8 @@
                     seating = ((ev && ev.seatingOptions) || []).map(s => ({
                         id: s.id || '', name: s.name || '',
                         seats: s.seats != null ? s.seats : null,
-                        available: s.available != null ? s.available : null
+                        available: s.available != null ? s.available : null,
+                        dollars: s.pricePerSeat != null ? (s.pricePerSeat / 100) : null
                     }));
                     renderTiers(); renderSeating();
                 },
@@ -6894,6 +6897,11 @@
                     const outSeating = seating.filter(s => (s.name || '').trim() !== '').map(s => {
                         const o = { id: s.id || slug(s.name), name: s.name.trim(), seats: parseInt(s.seats, 10) || 1 };
                         if (s.available != null && s.available !== '') o.available = parseInt(s.available, 10);
+                        // Only send pricePerSeat when a price was actually typed, so
+                        // tier-priced events keep pricing by ticket tier.
+                        if (s.dollars != null && s.dollars !== '' && !isNaN(parseFloat(s.dollars))) {
+                            o.pricePerSeat = Math.round(parseFloat(s.dollars) * 100);
+                        }
                         return o;
                     });
                     return { tiers: outTiers, seatingOptions: outSeating };
