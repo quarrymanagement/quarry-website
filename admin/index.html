@@ -5501,8 +5501,8 @@
             const errorEl = document.getElementById('loginError');
             if (errorEl) errorEl.textContent = '';
 
-            // Server-side verification (with safe fallback to legacy plaintext if the
-            // function is unreachable — keeps you locked-in even on transient errors).
+            // Server-side verification is the ONLY way in. There is no client-side
+            // password check and no offline fallback.
             (async () => {
                 if (errorEl) errorEl.textContent = 'Verifying…';
                 try {
