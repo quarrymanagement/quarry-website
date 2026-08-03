@@ -383,8 +383,8 @@ exports.handler = async function(event) {
       'seatingOptionId',    // per-size inventory depends on this
       'partySize',
       'seatType',
+      'customerPhone',   // wanted for follow-up marketing - keep above ticketTier
       'ticketTier',
-      'customerPhone',
       'guestName',
       'couponCode',
       'tableId',
