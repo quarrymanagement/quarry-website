@@ -370,14 +370,44 @@ exports.handler = async function(event) {
       ticketTier: String(tierSummary).slice(0, 255),
       couponCode: String(couponCode).slice(0, 60)
     };
-    // Square rejects empty-string metadata values with MISSING_REQUIRED_PARAMETER.
-    const safeMeta = {};
+    // Square rejects empty-string metadata values with MISSING_REQUIRED_PARAMETER,
+    // AND caps an order at 10 metadata entries (ARRAY_LENGTH_TOO_LONG). Strip the
+    // empties first, then, if we are still over the cap, drop the least important
+    // keys until we fit. Order matters: everything the Square webhook needs to
+    // record a registration must survive.
+    const META_PRIORITY = [
+      'bookingType',        // how the webhook classifies the payment
+      'eventId',            // exact event match
+      'customerName',
+      'customerEmail',
+      'seatingOptionId',    // per-size inventory depends on this
+      'partySize',
+      'seatType',
+      'ticketTier',
+      'customerPhone',
+      'guestName',
+      'couponCode',
+      'tableId',
+      'seatingOptionName',  // cosmetic - derivable from seatingOptionId
+      'eventName'           // derivable from eventId
+    ];
+    const SQUARE_META_MAX = 10;
+
+    const present = {};
     Object.keys(rawMeta).forEach(function(k) {
       const v = rawMeta[k];
       if (v !== undefined && v !== null && String(v).trim() !== '') {
-        safeMeta[k] = String(v);
+        present[k] = String(v);
       }
     });
+
+    const ordered = Object.keys(present).sort(function(a, b) {
+      const ia = META_PRIORITY.indexOf(a); const ib = META_PRIORITY.indexOf(b);
+      return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+    });
+
+    const safeMeta = {};
+    ordered.slice(0, SQUARE_META_MAX).forEach(function(k) { safeMeta[k] = present[k]; });
 
     const linkRequest = {
       idempotency_key: crypto.randomUUID(),
