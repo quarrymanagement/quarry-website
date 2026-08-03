@@ -1,5 +1,94 @@
 const https = require('https');
 const crypto = require('crypto');
+const { readBlob, writeBlob } = require('./_blobs');
+
+// Failed staff-login brute-force limits (sliding 15-minute window). These apply
+// ONLY to the 'login' action below — not to change-password or first-time
+// registration.
+const RL_SCOPE = 'employee-login';
+const RL_EMAIL_LIMIT = 10;  // failed logins per email per 15 min
+const RL_IP_LIMIT = 50;     // failed logins per source IP per 15 min
+const RL_TOO_MANY_MESSAGE = 'Too many failed sign-in attempts. Please wait a few minutes and try again.';
+
+// ---- RL-BEGIN: failed-attempt limiter (sliding window, Netlify Blobs) -------
+// Same storage + hashing style as request-code.js: counters live in Netlify
+// Blobs and identifiers are hashed with rlSha256short() so raw emails and IPs
+// never appear in a blob key. The difference is what is counted (failed auth
+// attempts, not requests) and the failure mode.
+//
+// THIS LIMITER FAILS CLOSED. If the counter store is unavailable we reject the
+// request (503) instead of letting it through. request-code.js deliberately
+// fails OPEN because the worst case there is a few extra emails; here the
+// counter is the only thing standing between an attacker and an account
+// takeover, so an uncounted attempt is a free guess.
+const RL_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+const RL_STORE_DOWN_MESSAGE = 'We could not verify that right now. Please try again shortly.';
+
+function rlSha256short(s) {
+  return crypto.createHash('sha256').update(String(s)).digest('hex').slice(0, 16);
+}
+// Read the source IP exactly the way request-code.js does.
+function rlClientIp(event) {
+  const h = (event && event.headers) || {};
+  return String(h['x-nf-client-connection-ip'] || h['x-forwarded-for'] || '').split(',')[0].trim();
+}
+function rlEmailKey(scope, email) {
+  return 'rate-limit/' + scope + '-fail-email-' + rlSha256short(String(email || '').toLowerCase());
+}
+function rlIpKey(scope, ip) {
+  return 'rate-limit/' + scope + '-fail-ip-' + rlSha256short(ip || 'unknown');
+}
+// readBlob() swallows transport errors and returns null, so a null read means
+// "no attempts recorded". The dependable store-health signal is the write path
+// (writeBlob returns false on failure), which runs on every counted failure —
+// so a broken store surfaces on the first bad guess and becomes a 503 rather
+// than an unmetered retry.
+async function rlLoad(key, now, windowMs) {
+  const rec = await readBlob(key); // may throw -> caller fails closed
+  const list = (rec && Array.isArray(rec.ts)) ? rec.ts : [];
+  return list.filter((t) => typeof t === 'number' && (now - t) < windowMs);
+}
+async function rlSave(key, ts) {
+  const ok = await writeBlob(key, { ts: ts });
+  if (ok === false) throw new Error('rate-limit store write failed: ' + key);
+  return true;
+}
+// Is this email/IP already over budget? Throws if the store is unreachable.
+async function rlCheckFailures(o) {
+  const now = typeof o.now === 'number' ? o.now : Date.now();
+  const windowMs = o.windowMs || RL_WINDOW_MS;
+  const emailTs = await rlLoad(rlEmailKey(o.scope, o.email), now, windowMs);
+  if (emailTs.length >= o.emailLimit) return { allowed: false, reason: o.reason, scopeHit: 'email' };
+  const ipTs = await rlLoad(rlIpKey(o.scope, o.ip), now, windowMs);
+  if (ipTs.length >= o.ipLimit) return { allowed: false, reason: o.reason, scopeHit: 'ip' };
+  return { allowed: true };
+}
+// Record ONE failed attempt against both counters. Throws if the store is
+// unreachable — callers must turn that into a 503, never into a pass.
+async function rlRecordFailure(o) {
+  const now = typeof o.now === 'number' ? o.now : Date.now();
+  const windowMs = o.windowMs || RL_WINDOW_MS;
+  const ek = rlEmailKey(o.scope, o.email);
+  const ik = rlIpKey(o.scope, o.ip);
+  const emailTs = await rlLoad(ek, now, windowMs);
+  const ipTs = await rlLoad(ik, now, windowMs);
+  emailTs.push(now);
+  ipTs.push(now);
+  await rlSave(ek, emailTs);
+  await rlSave(ik, ipTs);
+  return true;
+}
+// Clear the email counter after a success. Never throws: a store hiccup must
+// not turn a valid sign-in into an error (stale counters expire on their own).
+async function rlClearFailures(o) {
+  try {
+    await writeBlob(rlEmailKey(o.scope, o.email), { ts: [] });
+  } catch (e) {
+    console.warn('rate-limit clear failed:', e && e.message);
+  }
+  return true;
+}
+// ---- RL-END ----------------------------------------------------------------
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -71,11 +160,37 @@ const generateToken = () => {
 };
 
 // Handle login action
-const handleLogin = async (body, token) => {
+const handleLogin = async (body, token, clientIp) => {
   const { email, password } = body;
   if (!email || !password) {
     return response(400, { error: 'Email and password required' });
   }
+
+  // Brute-force guard (login path only) — fails closed.
+  const rlArgs = {
+    scope: RL_SCOPE, email: String(email).toLowerCase(), ip: clientIp,
+    emailLimit: RL_EMAIL_LIMIT, ipLimit: RL_IP_LIMIT,
+    reason: RL_TOO_MANY_MESSAGE,
+  };
+  let rlGate;
+  try {
+    rlGate = await rlCheckFailures(rlArgs);
+  } catch (e) {
+    console.error('employee-auth: rate-limit store unavailable:', e && e.message);
+    return response(503, { error: RL_STORE_DOWN_MESSAGE });
+  }
+  if (!rlGate.allowed) {
+    return response(429, { error: rlGate.reason, rateLimit: true });
+  }
+  const rlFailedLogin = async () => {
+    try {
+      await rlRecordFailure(rlArgs);
+    } catch (e) {
+      console.error('employee-auth: could not record failed attempt:', e && e.message);
+      return response(503, { error: RL_STORE_DOWN_MESSAGE });
+    }
+    return response(401, { error: 'Invalid email or password' });
+  };
 
   try {
     // Fetch schedule.json to get employees list
@@ -92,13 +207,16 @@ const handleLogin = async (body, token) => {
     // Find employee by email
     const employee = employees.find(emp => emp.email && emp.email.toLowerCase() === email.toLowerCase());
     if (!employee) {
-      return response(401, { error: 'Invalid email or password' });
+      return rlFailedLogin();
     }
 
     // Verify password
     if (!employee.passwordHash || !verifyPassword(password, employee.passwordHash)) {
-      return response(401, { error: 'Invalid email or password' });
+      return rlFailedLogin();
     }
+
+    // Correct password — wipe this email's failed-attempt counter.
+    await rlClearFailures(rlArgs);
 
     // Generate session token
     const sessionToken = generateToken();
@@ -251,13 +369,16 @@ exports.handler = async (event) => {
     return response(500, { error: 'GitHub token not configured on server' });
   }
 
+  // Read the source IP the same way request-code.js does.
+  const clientIp = rlClientIp(event);
+
   try {
     const body = JSON.parse(event.body);
     const action = body.action;
 
     switch (action) {
       case 'login':
-        return await handleLogin(body, token);
+        return await handleLogin(body, token, clientIp);
       case 'change-password':
         return await handleChangePassword(body, token);
       case 'register-first-time':
