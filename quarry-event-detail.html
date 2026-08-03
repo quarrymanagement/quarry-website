@@ -1034,12 +1034,39 @@
             errorDiv.style.display = 'none';
 
             var tierSelect = document.getElementById('detailTicketTier');
-            var ticketTier = tierSelect.value;
-            var partySize = parseInt(document.getElementById('detailPartySize').value) || 1;
+            var ticketTier = tierSelect ? tierSelect.value : '';
+            var hasSeating = Array.isArray(eventData.seatingOptions) && eventData.seatingOptions.length > 0;
+            var partySizeEl = document.getElementById('detailPartySize');
+            var partySize = (partySizeEl && parseInt(partySizeEl.value, 10)) || 1;
+            var units = 1;
+            var seatingOptionId = '';
+            var lineItems = null;
 
-            // Determine seatType from the selected tier
+            // Determine seatType from the seating option (table events) or tier
             var seatType = 'individual';
-            if (eventData.pricingType === 'table') {
+            if (hasSeating) {
+                var seatSel = document.getElementById('detailSeatingOption');
+                var seatOptEl = (seatSel && seatSel.selectedIndex >= 0) ? seatSel.options[seatSel.selectedIndex] : null;
+                var seatsPerUnit = (seatOptEl && parseInt(seatOptEl.dataset.seats, 10)) || 1;
+                units = getDetailUnits();
+                partySize = seatsPerUnit * units;
+                seatingOptionId = seatSel ? seatSel.value : '';
+                // Backend requires a non-empty seatType; use the same id.
+                seatType = seatingOptionId;
+                var optObj = getDetailSeatingOption();
+                var perSeat = (optObj && parseInt(optObj.pricePerSeat, 10)) || 0;
+                if (perSeat > 0) {
+                    // The option prices itself — no tier split to send.
+                    lineItems = null;
+                } else {
+                    var evTiers = eventData.tiers || [];
+                    if (evTiers.length > 1) {
+                        lineItems = collectDetailTierQuantities();
+                    } else if (evTiers.length === 1) {
+                        lineItems = [{ tierName: evTiers[0].name, qty: partySize }];
+                    }
+                }
+            } else if (eventData.pricingType === 'table') {
                 seatType = 'table';
             } else if (eventData.pricingType === 'both') {
                 // Check if the selected tier is the table tier
@@ -1055,6 +1082,7 @@
                 email: document.getElementById('detailEmail').value,
                 phone: document.getElementById('detailPhone').value || '',
                 seatType: seatType,
+                units: units,
                 partySize: partySize,
                 ticketTier: ticketTier,
                 couponCode: detailCoupon ? detailCoupon.code : '',
@@ -1063,6 +1091,13 @@
                 successUrl: window.location.origin + '/quarry-events',
                 cancelUrl: window.location.href
             };
+
+            if (seatingOptionId) {
+                payload.seatingOptionId = seatingOptionId;
+            }
+            if (lineItems && lineItems.length) {
+                payload.lineItems = lineItems;
+            }
 
             fetch('/.netlify/functions/event-register', {
                 method: 'POST',
