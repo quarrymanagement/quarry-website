@@ -5533,18 +5533,8 @@
                     if (errorEl) errorEl.textContent = 'Invalid password. Try again.';
                 } catch (err) {
                     console.error('[admin login] verify failed:', err);
-                    // Network/function error — fall back to legacy local check so admin remains usable
-                    if (password === 'quarry2026') {
-                        sessionStorage.setItem('quarryAuth', 'true');
-                        app.authenticated = true;
-                        const overlay = document.getElementById('loginOverlay');
-                        if (overlay) { overlay.classList.add('hidden'); overlay.style.display = 'none'; }
-                        const mainEl = document.getElementById('mainApp');
-                        if (mainEl) { mainEl.classList.remove('hidden'); mainEl.style.display = ''; }
-                        try { if (typeof showApp === 'function') showApp(); } catch (_) {}
-                        return;
-                    }
-                    if (errorEl) errorEl.textContent = 'Login error — using offline check; please reload.';
+                    // Network/function error — do NOT grant access. Surface the failure.
+                    if (errorEl) errorEl.textContent = 'Could not reach the login service. Please try again.';
                 }
             })();
             return; // skip the legacy plaintext branch below
