@@ -4914,6 +4914,7 @@
                     </div>
                     <img id="imagePreview" class="image-preview hidden" alt="Preview">
                 </div>
+                <div id="imageUploadStatus" style="font-size:.78rem;margin-top:6px;min-height:1em;"></div>
             </div>
             <div class="form-group">
                 <label class="form-label">Pricing Type</label>
@@ -4959,6 +4960,12 @@
                 <button type="button" class="add-row-btn" id="addSeatingBtn">+ Add table size</button>
                 <div style="font-size:.78rem;opacity:.7;margin-top:6px;">Guests pick one of these. Set $/seat when the price depends on where they sit; leave it blank to price by ticket tier instead. "How many" is how many of that size you have; leave blank for unlimited.</div>
             </div>
+                <div class="form-group">
+                    <label style="font-weight:700;">Arrival Waves <span style="font-weight:400;opacity:.7;">— leave empty for a single arrival time</span></label>
+                    <div id="wavesEditor"></div>
+                    <button type="button" class="add-row-btn" id="addWaveBtn">+ Add arrival wave</button>
+                    <div style="font-size:.78rem;opacity:.7;margin-top:6px;">Stagger arrivals so the kitchen and bar aren't swamped. "How many" is how many tables/seats may arrive in that wave. Tick which table sizes can choose it.</div>
+                </div>
             <div class="form-group">
                 <label class="form-label">Use Table Chart</label>
                 <div class="pricing-type-group">
@@ -6620,7 +6627,11 @@
             const registrationsSection = document.getElementById('registrationsSection');
 
             form.reset();
-            document.getElementById('imagePreview').classList.add('hidden');
+            const previewEl = document.getElementById('imagePreview');
+            previewEl.classList.add('hidden');
+            delete previewEl.dataset.uploadedPath;
+            const statusEl = document.getElementById('imageUploadStatus');
+            if (statusEl) statusEl.textContent = '';
             document.getElementById('highlightsPreview').innerHTML = '';
 
             if (eventId) {
@@ -6644,6 +6655,9 @@
                         const img = document.getElementById('imagePreview');
                         img.src = event.image;
                         img.classList.remove('hidden');
+                        // An image already stored as a repo path stays a path — reading
+                        // img.src back would give an absolute URL.
+                        if (!/^data:/i.test(event.image)) img.dataset.uploadedPath = event.image;
                     }
 
                     const pricingType = event.pricingType || 'individual';
@@ -6740,18 +6754,53 @@
             `).join('');
         }
 
-        // Image upload handlers
+        // Image upload handlers.
+        //
+        // The preview still shows the base64 data URL immediately so the picture
+        // appears the moment you choose a file, but the file itself is uploaded to
+        // assets/img/events/ and only the PATH is stored on the event. events.json
+        // used to swallow whole images and grew to 6 MB, which silently broke saving.
+        function handleEventImageFile(file) {
+            if (!file) return;
+            const img = document.getElementById('imagePreview');
+            const status = document.getElementById('imageUploadStatus');
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const dataUrl = ev.target.result;
+                img.src = dataUrl;
+                img.classList.remove('hidden');
+                delete img.dataset.uploadedPath;
+                if (status) { status.style.color = '#858d9e'; status.textContent = 'Uploading image...'; }
+                fetch('/.netlify/functions/upload-event-image', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-admin-token': (localStorage.getItem('quarryAdminToken') || '')
+                    },
+                    body: JSON.stringify({ filename: file.name || 'event-image', dataUrl: dataUrl })
+                })
+                .then(r => r.json().catch(() => ({})).then(b => ({ ok: r.ok, body: b || {} })))
+                .then(res => {
+                    if (!res.ok || !res.body.path) throw new Error(res.body.error || 'Upload failed');
+                    img.dataset.uploadedPath = res.body.path;
+                    if (status) { status.style.color = '#2e9e5b'; status.textContent = 'Image uploaded \u2014 saved as ' + res.body.path; }
+                })
+                .catch(err => {
+                    // Never block the user: fall back to the old embed-the-base64
+                    // behaviour, but say so loudly because it bloats events.json.
+                    delete img.dataset.uploadedPath;
+                    if (status) {
+                        status.style.color = '#c0392b';
+                        status.textContent = 'Image upload failed: ' + (err && err.message ? err.message : err) +
+                            '. The image will be embedded in events.json instead \u2014 use a smaller file if saving fails.';
+                    }
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+
         document.getElementById('imageInput').addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    const img = document.getElementById('imagePreview');
-                    img.src = event.target.result;
-                    img.classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
-            }
+            handleEventImageFile(e.target.files[0]);
         });
 
         document.getElementById('imageUploadArea').addEventListener('dragover', (e) => {
@@ -6767,13 +6816,7 @@
             const file = e.dataTransfer.files[0];
             if (file && file.type.startsWith('image/')) {
                 document.getElementById('imageInput').files = e.dataTransfer.files;
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    const img = document.getElementById('imagePreview');
-                    img.src = event.target.result;
-                    img.classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
+                handleEventImageFile(file);
             }
         });
 
@@ -6792,6 +6835,7 @@
         const seatingUI = (function () {
             let tiers = [];
             let seating = [];
+            let waves = [];
             const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
             const slug = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || ('opt-' + Date.now().toString(36).slice(-4));
 
@@ -6815,6 +6859,29 @@
                         <input type="number" value="${s.available != null ? s.available : ''}" placeholder="how many" min="0" data-seat-i="${i}" data-seat-k="available" style="flex:1;">
                         <input type="number" value="${s.dollars != null ? s.dollars : ''}" placeholder="$/seat" step="0.01" min="0" data-seat-i="${i}" data-seat-k="dollars" style="flex:1;">
                         <button type="button" class="remove-row-btn" data-seat-del="${i}">&times;</button>
+                    </div>`).join('');
+            }
+            // Arrival waves. The seating-option checkboxes are rendered from the LIVE
+            // `seating` array, so they reflect whatever table sizes the user has just
+            // typed in above — renderWaves() is called again whenever seating changes.
+            function renderWaves() {
+                const el = document.getElementById('wavesEditor');
+                if (!el) return;
+                const opts = seating.filter(s => (s.name || '').trim() !== '');
+                el.innerHTML = waves.map((w, i) => `
+                    <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;flex-wrap:wrap;">
+                        <input type="text" value="${esc(w.label)}" placeholder="e.g. 8:30 AM" data-wave-i="${i}" data-wave-k="label" style="flex:2;min-width:110px;">
+                        <input type="number" value="${w.capacity != null ? w.capacity : ''}" placeholder="how many" min="0" data-wave-i="${i}" data-wave-k="capacity" style="flex:1;min-width:90px;">
+                        <div style="flex:3;min-width:170px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:.8rem;opacity:.85;">
+                            ${opts.length
+                                ? opts.map(s => {
+                                    const oid = s.id || slug(s.name);
+                                    const on = (w.appliesTo || []).indexOf(oid) !== -1 ? ' checked' : '';
+                                    return `<label style="display:flex;align-items:center;gap:4px;font-weight:400;margin:0;"><input type="checkbox" data-wave-i="${i}" data-wave-opt="${esc(oid)}"${on}> ${esc(s.name)}</label>`;
+                                  }).join('')
+                                : '<span>Everyone \u2014 add table sizes above to limit a wave</span>'}
+                        </div>
+                        <button type="button" class="remove-row-btn" data-wave-del="${i}">&times;</button>
                     </div>`).join('');
             }
 
@@ -6841,14 +6908,42 @@
                     if (t.dataset.seatK === 'name') seating[i].name = t.value;
                     else if (t.dataset.seatK === 'dollars') seating[i].dollars = t.value === '' ? null : parseFloat(t.value);
                     else seating[i][t.dataset.seatK] = t.value === '' ? null : parseInt(t.value, 10);
+                    renderWaves();
                 }, (e) => {
                     const t = e.target.closest('[data-seat-del]'); if (!t) return;
-                    e.preventDefault(); seating.splice(+t.dataset.seatDel, 1); renderSeating();
+                    e.preventDefault(); seating.splice(+t.dataset.seatDel, 1); renderSeating(); renderWaves();
                 });
                 const at = document.getElementById('addTierBtn');
                 if (at) at.addEventListener('click', (e) => { e.preventDefault(); tiers.push({ name: '', dollars: null }); renderTiers(); });
                 const as = document.getElementById('addSeatingBtn');
-                if (as) as.addEventListener('click', (e) => { e.preventDefault(); seating.push({ name: '', seats: null, available: null, dollars: null }); renderSeating(); });
+                if (as) as.addEventListener('click', (e) => { e.preventDefault(); seating.push({ name: '', seats: null, available: null, dollars: null }); renderSeating(); renderWaves(); });
+
+                // Arrival waves. Checkbox state is applied idempotently, so it is safe
+                // for both the input and the change listener to see the same event.
+                const onWaveInput = (e) => {
+                    const t = e.target; if (t.dataset.waveI == null) return;
+                    const i = +t.dataset.waveI;
+                    if (!waves[i]) return;
+                    if (t.dataset.waveOpt != null) {
+                        const oid = t.dataset.waveOpt;
+                        const list = Array.isArray(waves[i].appliesTo) ? waves[i].appliesTo.slice() : [];
+                        const at = list.indexOf(oid);
+                        if (t.checked && at === -1) list.push(oid);
+                        if (!t.checked && at !== -1) list.splice(at, 1);
+                        waves[i].appliesTo = list;
+                        return;
+                    }
+                    if (t.dataset.waveK === 'capacity') waves[i].capacity = t.value === '' ? null : parseInt(t.value, 10);
+                    else waves[i][t.dataset.waveK] = t.value;
+                };
+                bind('wavesEditor', onWaveInput, (e) => {
+                    const t = e.target.closest('[data-wave-del]'); if (!t) return;
+                    e.preventDefault(); waves.splice(+t.dataset.waveDel, 1); renderWaves();
+                });
+                const wv = document.getElementById('wavesEditor');
+                if (wv) wv.addEventListener('change', onWaveInput);
+                const aw = document.getElementById('addWaveBtn');
+                if (aw) aw.addEventListener('click', (e) => { e.preventDefault(); waves.push({ label: '', capacity: null, appliesTo: [] }); renderWaves(); });
             }
 
             return {
@@ -6864,7 +6959,12 @@
                         available: s.available != null ? s.available : null,
                         dollars: s.pricePerSeat != null ? (s.pricePerSeat / 100) : null
                     }));
-                    renderTiers(); renderSeating();
+                    waves = ((ev && ev.arrivalSlots) || []).map(w => ({
+                        id: w.id || '', label: w.label || '',
+                        capacity: w.capacity != null ? w.capacity : null,
+                        appliesTo: Array.isArray(w.appliesTo) ? w.appliesTo.slice() : []
+                    }));
+                    renderTiers(); renderSeating(); renderWaves();
                 },
                 collect() {
                     const outTiers = tiers.filter(t => (t.name || '').trim() !== '').map(t => {
@@ -6886,7 +6986,21 @@
                         }
                         return o;
                     });
-                    return { tiers: outTiers, seatingOptions: outSeating };
+                    const outWaves = waves.filter(w => (w.label || '').trim() !== '').map(w => {
+                        // "8:30 AM" -> "830-am". Drop the punctuation inside times first so
+                        // slug() does not turn the colon into a stray dash.
+                        const label = String(w.label).trim();
+                        const o = { id: w.id || slug(label.replace(/[:.]/g, '')), label: label };
+                        // Blank capacity means unlimited, so omit the key entirely.
+                        const cap = parseInt(w.capacity, 10);
+                        if (w.capacity != null && w.capacity !== '' && !isNaN(cap)) o.capacity = cap;
+                        // appliesTo only when the user actually restricted the wave;
+                        // absent/empty already means "all seating options may pick it".
+                        const picks = (Array.isArray(w.appliesTo) ? w.appliesTo : []).filter(Boolean);
+                        if (picks.length) o.appliesTo = picks;
+                        return o;
+                    });
+                    return { tiers: outTiers, seatingOptions: outSeating, arrivalSlots: outWaves };
                 }
             };
         })();
@@ -6923,12 +7037,18 @@
             }
 
             const imagePreview = document.getElementById('imagePreview');
-            if (imagePreview.src && !imagePreview.classList.contains('hidden')) {
+            if (imagePreview.dataset.uploadedPath) {
+                // Preferred: the image lives in the repo as a file and events.json only
+                // carries its path. Embedding base64 here is what bloated events.json to
+                // 6 MB and broke saving.
+                eventData.image = imagePreview.dataset.uploadedPath;
+            } else if (imagePreview.src && !imagePreview.classList.contains('hidden')) {
                 eventData.image = imagePreview.src;
             }
             const seatingCfg = seatingUI.collect();
             eventData.tiers = seatingCfg.tiers;
             eventData.seatingOptions = seatingCfg.seatingOptions;
+            eventData.arrivalSlots = seatingCfg.arrivalSlots;
             eventData.totalCapacity = parseInt(document.getElementById('eventCapacity').value, 10) || 0;
 
 
