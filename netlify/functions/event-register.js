@@ -582,11 +582,26 @@ exports.handler = async function(event) {
       },
       // NOTE: the Square webhook parses this string. It matches /x(\d+)\s*$/ to
       // read the quantity, so the "xN" MUST stay at the very end.
-      // The arrival label is inserted BEFORE the trailing " xN" so the
-      // quantity stays at the very end of the string, where the regex expects.
-      payment_note: 'Event - ' + (evData.name || '')
-        + ((chosenArrivalSlot && chosenArrivalSlot.label) ? ' - ' + chosenArrivalSlot.label + ' arrival' : '')
-        + ' x' + qty
+      // Square DISCARDS order metadata once the customer pays, so this note is the
+      // only place the webhook can learn which seating option was booked - that is
+      // why the option name is baked into the string. The option name and arrival
+      // label are inserted BEFORE the trailing " xN" so the quantity stays at the
+      // very end of the string, where the regex expects it.
+      // Square caps payment_note at 500 chars, so if the assembled note would run
+      // long we truncate the EVENT NAME only - option, arrival and "xN" always survive.
+      payment_note: (function () {
+        var MAX_NOTE = 480;
+        var prefix = 'Event - ';
+        var tail = ((chosenOption && chosenOption.name) ? ' - ' + chosenOption.name : '')
+          + ((chosenArrivalSlot && chosenArrivalSlot.label) ? ' - ' + chosenArrivalSlot.label + ' arrival' : '')
+          + ' x' + qty;
+        var namePart = String(evData.name || '');
+        var budget = MAX_NOTE - prefix.length - tail.length;
+        if (namePart.length > budget) {
+          namePart = budget > 1 ? namePart.slice(0, budget - 1).trim() + '…' : '';
+        }
+        return prefix + namePart + tail;
+      })()
     };
 
     let result;
