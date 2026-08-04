@@ -387,6 +387,30 @@
             // Update page title
             document.title = evt.name + ' - The Quarry | New Melle, Missouri';
 
+            // Someone may still be holding a direct link to an event the owner has
+            // cancelled, or to one that is still a draft. Show a plain message and
+            // do NOT render the registration card in either case.
+            var hiddenStatus = String(evt.status || '').toLowerCase();
+            if (hiddenStatus === 'inactive' || hiddenStatus === 'cancelled' || hiddenStatus === 'draft') {
+                var isDraft = hiddenStatus === 'draft';
+                var heading = isDraft ? "This event isn't available yet." : 'This event has been cancelled';
+                var body = isDraft
+                    ? "We haven't opened bookings for this one yet - check back soon."
+                    : "If you had booked a spot, we've been in touch about your refund.";
+                var ecHidden = document.getElementById('eventContent');
+                if (ecHidden) {
+                    ecHidden.style.display = 'block';
+                    ecHidden.innerHTML = '<div style="padding:60px 20px;text-align:center;color:#ccc;font-family:Arial;max-width:640px;margin:0 auto;">' +
+                        '<h1 style="color:#d4af37;font-size:28px;margin-bottom:16px;">' + heading + '</h1>' +
+                        '<p style="margin-bottom:12px;">' + body + '</p>' +
+                        '<p style="margin-bottom:28px;">Questions? Give us a call at ' +
+                        '<a href="tel:+16362248257" style="color:#d4af37;">(636) 224-8257</a>.</p>' +
+                        '<p><a href="/quarry-events" style="color:#d4af37;font-weight:bold;">&larr; Back to all events</a></p>' +
+                        '</div>';
+                }
+                return;
+            }
+
             // Hero
             if (evt.image) {
                 var img = document.createElement('img');
