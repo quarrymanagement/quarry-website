@@ -1679,6 +1679,8 @@
         // Dynamic Events Data — loaded from events.json on GitHub
         const GITHUB_REPO = 'quarrymanagement/quarry-website';
         const DATA_FILE = 'events.json';
+        // Statuses that must never show on the public events page.
+        const HIDDEN_EVENT_STATUSES = ['inactive', 'cancelled', 'draft'];
         let allEvents = [];
 
         /**
@@ -1692,13 +1694,20 @@
                 if (!resp.ok) throw new Error('Failed to fetch events data');
                 const data = await resp.json();
                 allEvents = (data.events || []).map(evt => {
+                    // Preserve an owner-set hidden status (inactive/cancelled/draft).
+                    // The auto-status logic below used to overwrite these with
+                    // 'available'/'sold-out', so hiding an event never stuck.
+                    const rawStatus = String(evt.status || '').toLowerCase();
+                    const isHiddenStatus = HIDDEN_EVENT_STATUSES.indexOf(rawStatus) !== -1;
                     // Skip auto-capacity for any event NOT using on-site Square registration
                     // (free walk-ups, external email registration, or external landing pages)
                     const isFreeWalkup = evt.noRegistration || evt.registrationType === 'none' || evt.eventType === 'free';
                     const isEmailReg   = evt.registrationType === 'email';
                     const isExternalReg = evt.registrationType === 'external';
-                    if (isFreeWalkup || isEmailReg || isExternalReg) {
-                        evt.status = evt.status === 'inactive' ? 'inactive' : 'available';
+                    if (isHiddenStatus) {
+                        evt.status = rawStatus;
+                    } else if (isFreeWalkup || isEmailReg || isExternalReg) {
+                        evt.status = 'available';
                     } else {
                         // Auto-calculate status from capacity
                         const remaining = evt.totalCapacity - evt.registeredCount;
@@ -1718,7 +1727,11 @@
                 // AND drop events whose date has passed (compare in local time, midnight cutoff).
                 const today = new Date(); today.setHours(0,0,0,0);
                 allEvents = allEvents.filter(evt => {
-                    if (evt.status === 'inactive' || evt.adminStatus === 'Inactive') return false;
+                    // Hidden from the public site: cancelled/inactive events, and drafts.
+                    // "Draft" previously did NOT hide anything, which surprised the owner.
+                    const hiddenStatuses = HIDDEN_EVENT_STATUSES;
+                    if (hiddenStatuses.indexOf(String(evt.status || '').toLowerCase()) !== -1) return false;
+                    if (evt.adminStatus === 'Inactive') return false;
                     const dateStr = evt.date || evt.eventDate || evt.startDate;
                     if (!dateStr) return true; // keep events with no date set
                     const evtDate = new Date(dateStr + 'T23:59:59'); // event "passes" only after the day ends
