@@ -31,9 +31,12 @@
 # CDT = UTC-5, CST = UTC-6 — pick a UTC time that's reasonable in both.
 # ----------------------------------------------------------------------------
 
-# Daily marketing draft generator — 12:00 UTC = 7am CDT / 6am CST.
-[functions."marketing-generate-daily"]
-  schedule = "0 12 * * *"
+# Daily marketing draft generator — DISABLED 2026-08-05 at the owner's request.
+# It had produced 47 drafts for events that had already passed; none were ever
+# approved, and they sat one click away from being emailed to the whole list.
+# Re-enable by uncommenting the two lines below.
+# [functions."marketing-generate-daily"]
+#   schedule = "0 12 * * *"
 
 # Send-queue poller — every 10 min. Drains 'approved' drafts at scheduledFor.
 [functions."marketing-send"]
