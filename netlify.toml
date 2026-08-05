@@ -55,8 +55,10 @@
 
 # ─── SOCIAL ──────────────────────────────────────────────────────────────────
 # Daily social drafts generator — 13:00 UTC = 8am CDT / 7am CST.
-[functions."social-generate-daily"]
-  schedule = "0 13 * * *"
+# DISABLED 2026-08-05 at the owner's request - was generating drafts nobody approved.
+# Re-enable by uncommenting the two lines below.
+# [functions."social-generate-daily"]
+#   schedule = "0 13 * * *"
 
 # Social send-queue poller — every 10 min. Drains 'approved' drafts at scheduledFor.
 [functions."social-post"]
@@ -71,18 +73,24 @@
 # Cadence engine — every 4 hours. Picks up newly added events/bands and
 # rebuilds skeleton drafts; re-prioritizes when new high-priority items appear.
 # Light operation (no AI calls), idempotent.
-[functions."social-cadence-engine"]
-  schedule = "0 */4 * * *"
+# DISABLED 2026-08-05 at the owner's request - was generating drafts nobody approved.
+# Re-enable by uncommenting the two lines below.
+# [functions."social-cadence-engine"]
+#   schedule = "0 */4 * * *"
 
 # Nightly social learning optimizer — 8:00 UTC = 3am CT.
 # Mines engagement patterns into social_learnings.json so future captions improve.
-[functions."social-optimize"]
-  schedule = "0 8 * * *"
+# DISABLED 2026-08-05 at the owner's request - was generating drafts nobody approved.
+# Re-enable by uncommenting the two lines below.
+# [functions."social-optimize"]
+#   schedule = "0 8 * * *"
 
 # Weather-aware atmosphere posts — 11:00 UTC = 6am CT. Reads forecast and
 # creates patio-perfect or cozy-fireside skeleton drafts for today/tomorrow.
-[functions."social-weather-trigger"]
-  schedule = "0 11 * * *"
+# DISABLED 2026-08-05 at the owner's request - was generating drafts nobody approved.
+# Re-enable by uncommenting the two lines below.
+# [functions."social-weather-trigger"]
+#   schedule = "0 11 * * *"
 
 # ─── REWARDS ────────────────────────────────────────────────────────────────
 # Tier-decay daily check — 14:00 UTC = 9am CDT / 8am CST. Sends a "visit by
