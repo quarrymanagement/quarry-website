@@ -528,6 +528,7 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.65re
       <div class="step"><div class="sn">2</div><h2>Choose Date &amp; Time</h2></div>
       <div class="fl"><label>Date *</label><input type="date" id="bookingDate" class="di" onchange="onDateChange()"/></div>
       <label style="font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;display:block;margin-bottom:0.4rem;">Available Times *</label>
+      <div id="golfBlockedMsg" style="display:none;background:#3a2a12;border-left:3px solid #B8933A;color:#f0e6d2;padding:0.75rem 1rem;margin-bottom:0.75rem;font-size:0.8rem;line-height:1.5;border-radius:3px;">The Quarry is closed to the public that day for a private event, so the golf bays are unavailable. Please choose another date.</div>
       <div class="tg" id="timeGrid"></div>
       <p style="font-size:0.62rem;color:#aaa;margin-top:0.5rem;font-style:italic;">* Crossed-out = already booked. Grayed = time has passed.</p>
     </div>
@@ -612,6 +613,10 @@ var S={bay:null,date:null,time:null,extraPrice:0};
 var HOURS=['11:00 AM','12:00 PM','1:00 PM','2:00 PM','3:00 PM','4:00 PM','5:00 PM','6:00 PM','7:00 PM','8:00 PM','9:00 PM'];
 var booked=[];
 
+// Dates the bays are unavailable (private events, closures). Format 'YYYY-MM-DD'.
+var BLOCKED_DATES=['2026-08-15','2026-08-21'];
+function isBlockedDate(d){return !!d&&BLOCKED_DATES.indexOf(d)!==-1;}
+
 document.addEventListener('DOMContentLoaded',function(){
   var min=getTodayStrCentral();
   document.getElementById('bookingDate').min=min;
@@ -648,6 +653,7 @@ function renderSlots(){
   var centralNow=getCentralNow();
   var todayStr=getTodayStrCentral();
   var isToday=S.date===todayStr;
+  var dateBlocked=isBlockedDate(S.date);
   grid.innerHTML='';
   HOURS.forEach(function(t){
     var btn=document.createElement('button');
@@ -659,12 +665,15 @@ function renderSlots(){
       isPast=slotHour<=centralNow.getHours();
     }
     var isTaken=booked.some(function(bk){return bk.time===t&&(!S.bay||bk.bay===S.bay);});
-    if(isPast){btn.classList.add('past');btn.disabled=true;btn.title='Time has passed';}
+    if(dateBlocked){btn.classList.add('taken');btn.disabled=true;btn.title='Closed for a private event';}
+    else if(isPast){btn.classList.add('past');btn.disabled=true;btn.title='Time has passed';}
     else if(isTaken){btn.classList.add('taken');btn.disabled=true;btn.title='Already booked';}
     else{btn.onclick=function(){selectTime(t,btn);};}
-    if(S.time===t&&!isPast&&!isTaken)btn.classList.add('sel');
+    if(S.time===t&&!isPast&&!isTaken&&!dateBlocked)btn.classList.add('sel');
     grid.appendChild(btn);
   });
+  var note=document.getElementById('golfBlockedMsg');
+  if(note)note.style.display=dateBlocked?'block':'none';
 }
 
 function parseHr(t){if(!t||typeof t!=='string')return 99;var m=t.match(/(\d+):(\d+) ([AP]M)/);if(!m)return 99;var h=parseInt(m[1]);if(m[3]==='PM'&&h!==12)h+=12;if(m[3]==='AM'&&h===12)h=0;return h;}
@@ -676,7 +685,7 @@ function onDateChange(){
   document.getElementById('sumDate').textContent=v?fmtDate(v):'Not selected';
   document.getElementById('sumTime').textContent='Not selected';
   booked=[];renderSlots();
-  if(v)fetchBooked(v);
+  if(v&&!isBlockedDate(v))fetchBooked(v);
 }
 
 function fmtDate(v){var p=v.split('-');var mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return mo[parseInt(p[1])-1]+' '+parseInt(p[2])+', '+p[0];}
@@ -728,6 +737,7 @@ async function submitBooking(){
   var waiver=document.getElementById('waiverCheck').checked;
   if(!bay){alert('Please select a bay.');return;}
   if(!date){alert('Please select a date.');return;}
+  if(isBlockedDate(date)){alert('The Quarry is closed to the public that day for a private event, so the golf bays are unavailable. Please choose another date.');return;}
   if(!time){alert('Please select a time slot.');return;}
   if(!first||!last){alert('Please enter your full name.');return;}
   if(!email||!email.includes('@')){alert('Please enter a valid email address.');return;}

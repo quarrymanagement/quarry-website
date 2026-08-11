@@ -20,14 +20,20 @@
    — and no banner shows at all.
    ========================================================================== */
 
-var TITLE = "Hours Update";
+var TITLE = "Upcoming Closures";
 
 var NOTICES = [
   {
-    day:  "Sat Aug 1",
-    text: "Opening at <b>12 PM</b> due to a private event.",
-    from: "2026-07-31",
-    to:   "2026-08-01"
+    day:  "Sat Aug 15",
+    text: "<b>Closed to the public</b> for a private event. No reservations or golf bays that day.",
+    from: "2026-08-11",
+    to:   "2026-08-15"
+  },
+  {
+    day:  "Fri Aug 21",
+    text: "<b>Closed to the public</b> for a private event. No reservations or golf bays that day.",
+    from: "2026-08-11",
+    to:   "2026-08-21"
   }
 ];
 
