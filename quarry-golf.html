@@ -501,6 +501,12 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.65re
   <p style="font-size:0.82rem;line-height:1.75;color:#F5F0E8;font-weight:300;margin:0;">Our Hole-In-One jackpot is a <b style="font-weight:500;color:#D4AF6A;">progressive</b>. Each time it is won it resets to <b style="font-weight:500;color:#D4AF6A;">$1,000</b>, and <b style="font-weight:500;color:#D4AF6A;">$5 from every golf bucket purchased</b> is added to the pot as it grows. Sink a qualifying, verified hole-in-one and you win the current jackpot &mdash; then it resets to $1,000 and starts climbing again. See our <a href="terms.html" style="color:#D4AF6A;text-decoration:underline;">Terms of Service</a> for full rules.</p>
 </div>
 
+<div id="hioClub" class="prog-rules" style="display:none;max-width:900px;margin:1.25rem auto 0;padding:1.75rem 2rem;background:#2C1A0E;border:1px solid rgba(188,149,106,0.5);text-align:center;font-family:'Montserrat',sans-serif;">
+  <div style="font-family:'Playfair Display',serif;font-size:1rem;letter-spacing:0.18em;text-transform:uppercase;color:#D4AF6A;margin-bottom:0.5rem;">Hole-In-One Club</div>
+  <p style="font-size:0.78rem;line-height:1.6;color:rgba(245,240,232,0.75);font-weight:300;margin:0 0 1.15rem;">They sank it. Your name could be next.</p>
+  <div id="hioList" style="display:flex;flex-wrap:wrap;gap:0.7rem;justify-content:center;"></div>
+</div>
+
 <input type="hidden" id="selectedBay" value=""/>
 <input type="hidden" id="selectedTime" value=""/>
 <input type="hidden" id="extraBallsPrice" value="0"/>
@@ -616,6 +622,33 @@ var booked=[];
 // Dates the bays are unavailable (private events, closures). Format 'YYYY-MM-DD'.
 var BLOCKED_DATES=['2026-08-15','2026-08-21'];
 function isBlockedDate(d){return !!d&&BLOCKED_DATES.indexOf(d)!==-1;}
+
+/* Hole-In-One Club — names and month only. The view deliberately exposes no
+   payout amounts; the underlying table is not readable from the browser. */
+(function(){
+  var URL='https://nkulhtalltbieicvmmad.supabase.co/rest/v1/golf_hole_in_one_public?select=winner_name,won_label';
+  var KEY='sb_publishable_FQK59Bn8P2jV8yGL0nPi7w_jVHFMBSl';
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function render(rows){
+    if(!rows||!rows.length)return;
+    var list=document.getElementById('hioList');
+    var box=document.getElementById('hioClub');
+    if(!list||!box)return;
+    list.innerHTML=rows.map(function(r){
+      return '<div style="background:#241609;border:1px solid rgba(212,175,106,0.45);border-radius:8px;padding:0.6rem 1.1rem;min-width:150px;">'
+        +'<div style="font-family:\'Playfair Display\',Georgia,serif;font-size:1.05rem;color:#D4AF6A;line-height:1.25;">'+esc(r.winner_name)+'</div>'
+        +'<div style="font-size:0.58rem;letter-spacing:0.14em;text-transform:uppercase;color:rgba(245,240,232,0.5);margin-top:3px;">'+esc(r.won_label)+'</div>'
+        +'</div>';
+    }).join('');
+    box.style.display='block';
+  }
+  try{
+    fetch(URL,{headers:{apikey:KEY,Authorization:'Bearer '+KEY}})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(render)
+      .catch(function(){});
+  }catch(e){}
+})();
 
 document.addEventListener('DOMContentLoaded',function(){
   var min=getTodayStrCentral();
