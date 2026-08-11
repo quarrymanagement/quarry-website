@@ -130,7 +130,7 @@ export const siteSettings = defineType({
     }),
     defineField({name: 'golfBayPrice', title: 'Golf Bay Price', type: 'string', initialValue: '$60'}),
     defineField({name: 'golfBallsIncluded', title: 'Golf Balls Included per Bay', type: 'number', initialValue: 75}),
-    defineField({name: 'golfJackpot', title: 'Hole-in-One Jackpot', type: 'string', initialValue: '$3,000'}),
+    defineField({name: 'golfJackpot', title: 'Hole-in-One Jackpot', type: 'string', initialValue: 'Progressive'}),
   ],
   preview: {prepare() { return {title: 'Site Settings'} }},
 })
