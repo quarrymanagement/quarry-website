@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google Analytics 4 -->
+  <script>(function(){var id='G-9B3TR15T62';if(!id||id.indexOf('__')===0)return;var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id='+id;document.head.appendChild(s);window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments)};gtag('js',new Date());gtag('config',id,{anonymize_ip:true});})();</script>
+  <script defer src="/assets/js/ga4-events.js"></script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What's On — Full Event Calendar | The Quarry, New Melle MO</title>
+    <meta name="description" content="Every event at The Quarry in New Melle, Missouri — Boots line dancing, music bingo, wine club, craft nights, holiday pop-ups and ticketed parties. See the full August through December schedule.">
+    <meta property="og:title" content="What's On at The Quarry — Full Event Calendar">
+    <meta property="og:description" content="Boots line dancing, music bingo, wine club, craft nights, holiday pop-ups and more. See everything happening at The Quarry.">
+    <meta property="og:type" content="website">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --cream: #F5F0E8;
+            --brown-dark: #2C1A0E;
+            --brown-mid: #5C3D2E;
+            --brown-warm: #8B5E3C;
+            --brown-light: #C4956A;
+            --gold: #B8933A;
+            --gold-light: #D4AF6A;
+            --charcoal: #1A1A1A;
+            --white: #FFFFFF;
+            --green: #4CAF50;
+            --orange: #FF9800;
+            --red: #F44336;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html { scroll-behavior:smooth; }
+        body { font-family:'Montserrat',sans-serif; color:var(--charcoal); background:var(--white); line-height:1.6; }
+        a { color:inherit; text-decoration:none; }
+        button, input, select { font-family:'Montserrat',sans-serif; }
+
+        /* ---------- Header (matches site) ---------- */
+        header { background:rgba(26,26,26,0.97); backdrop-filter:blur(8px); border-bottom:1px solid rgba(188,149,106,0.25); position:sticky; top:0; z-index:1000; }
+        .header-inner { max-width:1400px; margin:0 auto; padding:0 2rem; display:flex; align-items:center; justify-content:space-between; height:80px; }
+        .logo { font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700; color:#fff; display:flex; flex-direction:column; line-height:1.1; text-transform:uppercase; letter-spacing:0.12em; transition:var(--transition); }
+        .logo span { font-family:'Montserrat',sans-serif; font-size:0.5rem; font-weight:400; letter-spacing:0.3em; color:rgba(255,255,255,0.6); margin-top:2px; display:block; }
+        .logo:hover { color:var(--gold-light); }
+        nav#mainNav { display:flex; gap:2rem; align-items:center; flex:1; justify-content:center; }
+        .nav-item { position:relative; }
+        .nav-link { font-size:0.62rem; font-weight:500; color:var(--cream); padding:0.6rem 0.75rem; display:block; transition:var(--transition); text-transform:uppercase; letter-spacing:0.14em; white-space:nowrap; }
+        .nav-link:hover { color:var(--gold-light); }
+        .nav-item .dropdown { position:absolute; top:100%; left:0; background:var(--brown-dark); min-width:200px; padding:12px 0; border-radius:4px; border:1px solid rgba(188,149,106,0.5); box-shadow:0 8px 24px rgba(0,0,0,0.15); opacity:0; visibility:hidden; transform:translateY(-8px); transition:var(--transition); margin-top:8px; }
+        .nav-item:hover .dropdown { opacity:1; visibility:visible; transform:translateY(0); }
+        .dropdown a { display:block; padding:10px 20px; font-size:13px; color:var(--cream); border-bottom:1px solid rgba(188,149,106,0.25); transition:var(--transition); }
+        .dropdown a:hover { background:var(--brown-mid); color:var(--gold-light); }
+        .cs-badge { display:inline-block; background:var(--gold); color:var(--brown-dark); font-size:10px; font-weight:700; padding:2px 6px; border-radius:2px; margin-left:6px; }
+        .hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; width:28px; height:24px; justify-content:center; }
+        .hamburger span { display:block; width:100%; height:2px; background:var(--cream); transition:var(--transition); }
+
+        /* ---------- Hero ---------- */
+        .hero { background:linear-gradient(rgba(26,16,10,0.82),rgba(26,16,10,0.9)), url('/assets/img/quarry-hero.jpg') center/cover no-repeat, var(--brown-dark); color:var(--white); padding:5.5rem 2rem 4.5rem; text-align:center; }
+        .hero-eyebrow { font-size:0.6rem; letter-spacing:0.32em; text-transform:uppercase; color:var(--gold-light); margin-bottom:1rem; }
+        .hero h1 { font-family:'Playfair Display',serif; font-size:clamp(2.2rem,6vw,3.6rem); letter-spacing:0.04em; text-transform:uppercase; line-height:1.1; }
+        .hero-subtitle { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:clamp(1.05rem,2.4vw,1.5rem); color:rgba(255,255,255,0.8); margin-top:1rem; }
+        .hero-note { font-size:0.72rem; letter-spacing:0.14em; text-transform:uppercase; color:var(--brown-light); margin-top:1.6rem; }
+
+        /* ---------- Filter bar ---------- */
+        .filter-bar { position:sticky; top:80px; z-index:900; background:var(--cream); border-bottom:1px solid rgba(188,149,106,0.35); padding:1rem 1rem; }
+        .filter-container { max-width:1200px; margin:0 auto; display:flex; flex-wrap:wrap; gap:0.6rem; justify-content:center; }
+        .filter-pill { background:transparent; border:1px solid rgba(92,61,46,0.35); color:var(--brown-mid); padding:0.5rem 1.1rem; border-radius:999px; font-size:0.62rem; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; transition:var(--transition); }
+        .filter-pill:hover { border-color:var(--gold); color:var(--gold); }
+        .filter-pill.active { background:var(--brown-dark); border-color:var(--brown-dark); color:var(--cream); }
+
+        /* ---------- Month jump ---------- */
+        .month-jump { max-width:1200px; margin:2rem auto 0; padding:0 1.5rem; display:flex; flex-wrap:wrap; gap:0.5rem; justify-content:center; }
+        .month-jump a { font-size:0.6rem; letter-spacing:0.18em; text-transform:uppercase; font-weight:600; color:var(--brown-warm); border-bottom:1px solid transparent; padding:0.3rem 0.5rem; }
+        .month-jump a:hover { color:var(--gold); border-color:var(--gold); }
+
+        /* ---------- Layout ---------- */
+        .wrap { max-width:1200px; margin:0 auto; padding:2.5rem 1.5rem 4rem; }
+        .month-block { margin-bottom:3.5rem; }
+        .month-head { display:flex; align-items:baseline; gap:1rem; border-bottom:2px solid var(--gold); padding-bottom:0.6rem; margin-bottom:1.6rem; flex-wrap:wrap; }
+        .month-head h2 { font-family:'Playfair Display',serif; font-size:clamp(1.5rem,4vw,2.1rem); text-transform:uppercase; letter-spacing:0.06em; color:var(--brown-dark); }
+        .month-count { font-size:0.62rem; letter-spacing:0.18em; text-transform:uppercase; color:var(--brown-warm); }
+
+        /* ---------- Calendar grid ---------- */
+        .cal { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-bottom:2rem; }
+        .cal-dow { font-size:0.55rem; letter-spacing:0.18em; text-transform:uppercase; font-weight:700; color:var(--brown-warm); text-align:center; padding:0.4rem 0; }
+        .cal-cell { min-height:92px; border:1px solid #e8e0d5; padding:5px 6px; background:#fdfcfa; font-size:11px; }
+        .cal-cell.empty { background:transparent; border:none; }
+        .cal-daynum { font-weight:700; color:var(--brown-mid); font-size:11px; margin-bottom:3px; }
+        .cal-chip { display:block; width:100%; text-align:left; border:none; background:var(--cream); border-left:3px solid var(--gold); color:var(--brown-dark); font-size:10px; line-height:1.25; padding:3px 4px; margin-bottom:3px; cursor:pointer; border-radius:2px; transition:var(--transition); font-weight:600; }
+        .cal-chip:hover { background:var(--gold-light); }
+        .cal-chip.t-ticketed { border-left-color:#8B2E2E; }
+        .cal-chip.t-closed { border-left-color:#9a9a9a; background:#f1f1f1; color:#777; }
+        .cal-chip.t-family { border-left-color:var(--green); }
+
+        /* ---------- Event list ---------- */
+        .ev-list { display:grid; gap:0.75rem; }
+        .ev { display:grid; grid-template-columns:86px 1fr auto; gap:1.2rem; align-items:center; border:1px solid #e8e0d5; border-left:4px solid var(--gold); padding:1rem 1.2rem; background:#fdfcfa; transition:var(--transition); }
+        .ev:hover { box-shadow:0 6px 18px rgba(44,26,14,0.08); transform:translateY(-1px); }
+        .ev.t-ticketed { border-left-color:#8B2E2E; }
+        .ev.t-closed { border-left-color:#9a9a9a; background:#f6f5f3; opacity:0.85; }
+        .ev.t-family { border-left-color:var(--green); }
+        .ev-date { text-align:center; border-right:1px solid #e8e0d5; padding-right:0.8rem; }
+        .ev-dow { font-size:0.52rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--brown-warm); font-weight:700; }
+        .ev-num { font-family:'Playfair Display',serif; font-size:1.7rem; color:var(--brown-dark); line-height:1; }
+        .ev-mon { font-size:0.52rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--brown-warm); }
+        .ev-name { font-family:'Cormorant Garamond',serif; font-size:1.35rem; font-weight:700; color:var(--brown-dark); line-height:1.25; }
+        .ev-desc { font-size:0.82rem; color:#5f5f5f; margin-top:0.15rem; }
+        .ev-meta { display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.45rem; }
+        .tag { font-size:0.52rem; letter-spacing:0.15em; text-transform:uppercase; font-weight:700; padding:3px 8px; border-radius:2px; }
+        .tag-ticketed { background:#8B2E2E; color:#fff; }
+        .tag-free { background:#e8f3e9; color:#2f6b34; }
+        .tag-recurring { background:var(--cream); color:var(--brown-mid); border:1px solid rgba(188,149,106,0.6); }
+        .tag-family { background:var(--green); color:#fff; }
+        .tag-closed { background:#e2e2e2; color:#666; }
+        .tag-time { background:transparent; color:var(--brown-warm); border:1px solid rgba(188,149,106,0.6); }
+        .tag-tbd { background:#fff4e0; color:#8a5a00; border:1px solid #e6c98a; }
+        .ev-cta a, .ev-cta span { display:inline-block; font-size:0.58rem; letter-spacing:0.16em; text-transform:uppercase; font-weight:700; padding:0.6rem 1.1rem; border:1px solid var(--brown-dark); color:var(--brown-dark); white-space:nowrap; transition:var(--transition); }
+        .ev-cta a:hover { background:var(--brown-dark); color:var(--cream); }
+        .ev-cta span { border-color:#d5d0c8; color:#9b968e; }
+
+        /* ---------- Recurring explainer ---------- */
+        .recurring { background:var(--cream); padding:3rem 1.5rem; border-top:1px solid rgba(188,149,106,0.35); border-bottom:1px solid rgba(188,149,106,0.35); }
+        .recurring-inner { max-width:1200px; margin:0 auto; }
+        .recurring h2 { font-family:'Playfair Display',serif; font-size:1.6rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--brown-dark); text-align:center; margin-bottom:0.4rem; }
+        .recurring .sub { text-align:center; font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1.05rem; color:var(--brown-mid); margin-bottom:2rem; }
+        .rec-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:1.2rem; }
+        .rec-card { background:#fff; border:1px solid rgba(188,149,106,0.4); padding:1.4rem; }
+        .rec-card h3 { font-family:'Cormorant Garamond',serif; font-size:1.3rem; font-weight:700; color:var(--brown-dark); }
+        .rec-card .when { font-size:0.55rem; letter-spacing:0.18em; text-transform:uppercase; color:var(--gold); font-weight:700; margin:0.3rem 0 0.6rem; }
+        .rec-card p { font-size:0.82rem; color:#5f5f5f; }
+
+        /* ---------- CTA ---------- */
+        .cta { background:var(--brown-dark); color:var(--cream); padding:4rem 1.5rem; text-align:center; }
+        .cta h2 { font-family:'Playfair Display',serif; font-size:1.8rem; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.6rem; }
+        .cta p { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1.1rem; color:rgba(255,255,255,0.75); margin-bottom:1.8rem; }
+        .cta-btns { display:flex; gap:0.8rem; justify-content:center; flex-wrap:wrap; }
+        .cta-btns a { font-size:0.58rem; letter-spacing:0.18em; text-transform:uppercase; font-weight:700; padding:0.9rem 1.6rem; border:1px solid var(--gold-light); color:var(--gold-light); transition:var(--transition); }
+        .cta-btns a:hover { background:var(--gold-light); color:var(--brown-dark); }
+
+        /* ---------- Footer ---------- */
+        footer { background:#0F0A07; color:rgba(255,255,255,0.65); padding:4.5rem 2rem 2rem; border-top:1px solid rgba(188,149,106,0.25); }
+        .footer-content { max-width:1400px; margin:0 auto 3rem; display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:3rem; }
+        .footer-section h3 { font-size:0.58rem; font-weight:600; letter-spacing:0.28em; text-transform:uppercase; margin-bottom:16px; color:var(--gold); }
+        .footer-section a { display:block; font-size:14px; color:rgba(255,255,255,0.65); transition:var(--transition); margin-bottom:8px; }
+        .footer-section a:hover { color:var(--white); }
+        .footer-logo { font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--white); margin-bottom:8px; }
+        .footer-tagline { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:13px; color:rgba(255,255,255,0.7); margin-bottom:16px; }
+        .footer-info { display:flex; flex-direction:column; gap:8px; font-size:14px; }
+        .footer-divider { border-top:1px solid rgba(255,255,255,0.1); padding-top:2rem; margin-top:2rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; }
+        .footer-copyright { font-size:0.55rem; color:rgba(255,255,255,0.3); }
+        .footer-socials { display:flex; gap:16px; }
+        .footer-socials a { display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; color:rgba(255,255,255,0.65); border:1px solid rgba(188,149,106,0.5); border-radius:50%; transition:var(--transition); font-size:16px; margin:0; }
+        .footer-socials a:hover { color:var(--gold-light); border-color:var(--gold-light); }
+
+        /* ---------- Modal ---------- */
+        .ov { position:fixed; inset:0; background:rgba(26,16,10,0.72); display:none; align-items:center; justify-content:center; z-index:2000; padding:1.5rem; }
+        .ov.open { display:flex; }
+        .ov-card { background:#fff; max-width:460px; width:100%; border-top:4px solid var(--gold); padding:2rem; position:relative; }
+        .ov-card h3 { font-family:'Cormorant Garamond',serif; font-size:1.7rem; font-weight:700; color:var(--brown-dark); padding-right:1.5rem; }
+        .ov-card .d { font-size:0.6rem; letter-spacing:0.18em; text-transform:uppercase; color:var(--gold); font-weight:700; margin:0.4rem 0 1rem; }
+        .ov-card p { font-size:0.9rem; color:#5f5f5f; }
+        .ov-close { position:absolute; top:0.8rem; right:1rem; background:none; border:none; font-size:1.6rem; color:#999; cursor:pointer; line-height:1; }
+
+        @media (max-width:900px) {
+            .cal { display:none; }
+        }
+        @media (max-width:768px) {
+            .hamburger { display:flex; }
+            nav#mainNav { position:absolute; top:80px; left:0; right:0; flex-direction:column; background:#1a1a1a; max-height:0; overflow:hidden; transition:var(--transition); padding:0; gap:0; border-bottom:1px solid rgba(188,149,106,0.25); }
+            nav#mainNav.active { max-height:700px; padding:1rem 0; }
+            .nav-item { width:100%; padding:0 2rem; }
+            .nav-link { padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.06); }
+            .nav-item .dropdown { position:static; max-height:0; overflow:hidden; opacity:1; visibility:visible; transform:none; box-shadow:none; background:rgba(0,0,0,0.3); margin-top:0; transition:var(--transition); padding:0; }
+            .nav-item.open .dropdown { max-height:400px; padding:12px 0; }
+            .filter-bar { top:80px; }
+            .ev { grid-template-columns:66px 1fr; }
+            .ev-cta { grid-column:1 / -1; }
+            .ev-cta a, .ev-cta span { display:block; text-align:center; }
+        }
+        @media print {
+            header, .filter-bar, .month-jump, .cta, footer, .ev-cta, .hero-note { display:none !important; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-inner">
+            <a href="/" class="logo">The Quarry<span>New Melle, Missouri</span></a>
+            <nav id="mainNav">
+                <div class="nav-item">
+                    <a href="#" class="nav-link">Menu ▾</a>
+                    <div class="dropdown">
+                        <a href="/quarry-menu">Food Menu</a>
+                        <a href="/quarry-drinks">Drink Menu</a>
+                        <a href="/quarry-catering">Catering Menu</a>
+                        <a href="/quarry-brunch">Brunch Menu</a>
+                    </div>
+                </div>
+                <div class="nav-item"><a href="/quarry-golf" class="nav-link">Hole-In-One Golf</a></div>
+                <div class="nav-item">
+                    <a href="#" class="nav-link">Entertainment ▾</a>
+                    <div class="dropdown">
+                        <a href="/quarry-calendar">What's On <span class="cs-badge">New</span></a>
+                        <a href="/quarry-events">Tickets &amp; Registration</a>
+                        <a href="/quarry-bands">Live Bands</a>
+                        <a href="/quarry-wineclub">Rock &amp; Vine Wine Club</a>
+                        <a href="/quarry-beergarden">Beer Garden <span class="cs-badge">Coming 2026</span></a>
+                    </div>
+                </div>
+                <div class="nav-item">
+                    <a href="#" class="nav-link">Reservations ▾</a>
+                    <div class="dropdown">
+                        <a href="/quarry-reservations">Book a Reservation</a>
+                        <a href="/quarry-private-events">Private Events</a>
+                    </div>
+                </div>
+                <div class="nav-item"><a href="/weddings/" class="nav-link">Weddings</a></div>
+                <div class="nav-item"><a href="/quarry-app-customized" class="nav-link" style="color:var(--gold-light);">Rewards</a></div>
+                <div class="nav-item"><a href="/quarry-giftcards" class="nav-link">Gift Cards</a></div>
+                <div class="nav-item">
+                    <a href="#" class="nav-link">Connect ▾</a>
+                    <div class="dropdown">
+                        <a href="/quarry-ourstory">Our Story</a>
+                        <a href="/quarry-press">Press &amp; Media</a>
+                        <a href="/quarry-careers">Careers</a>
+                        <a href="/quarry-contact">Contact Us</a>
+                    </div>
+                </div>
+            </nav>
+            <div class="hamburger" id="hamburger" onclick="toggleNav()"><span></span><span></span><span></span></div>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-eyebrow">The Quarry · New Melle</div>
+        <h1>What's On</h1>
+        <p class="hero-subtitle">Every night worth driving out for — August through New Year's Eve</p>
+        <div class="hero-note">Boots Thursdays · Music Bingo · Wine Club · Craft Nights · Holiday Pop-Ups</div>
+    </section>
+
+    <!-- Filters -->
+    <div class="filter-bar">
+        <div class="filter-container" id="filters">
+            <button class="filter-pill active" data-f="all">Everything</button>
+            <button class="filter-pill" data-f="ticketed">Ticketed</button>
+            <button class="filter-pill" data-f="recurring">Weekly &amp; Monthly</button>
+            <button class="filter-pill" data-f="family">Family Friendly</button>
+            <button class="filter-pill" data-f="holiday">Holiday</button>
+            <button class="filter-pill" data-f="closed">Closed / Private</button>
+        </div>
+    </div>
+
+    <div class="month-jump" id="monthJump"></div>
+
+    <div class="wrap" id="calendarRoot"></div>
+
+    <!-- Recurring explainer -->
+    <section class="recurring">
+        <div class="recurring-inner">
+            <h2>Your Regulars</h2>
+            <p class="sub">The nights you can count on, every month</p>
+            <div class="rec-grid">
+                <div class="rec-card">
+                    <h3>Boots</h3>
+                    <div class="when">Select Thursdays</div>
+                    <p>Country night at The Quarry. Details and times to be confirmed.</p>
+                </div>
+                <div class="rec-card">
+                    <h3>Craft Night</h3>
+                    <div class="when">Select Wednesdays</div>
+                    <p>Make-and-take craft night. Project and pricing announced each month.</p>
+                </div>
+                <div class="rec-card">
+                    <h3>Rock &amp; Vine Wine Club</h3>
+                    <div class="when">Third Thursday</div>
+                    <p>Monthly members' tasting. <a href="/quarry-wineclub" style="color:var(--gold);font-weight:600;">Join the club →</a></p>
+                </div>
+                <div class="rec-card">
+                    <h3>Bingo &amp; Trivia</h3>
+                    <div class="when">Rotating dates</div>
+                    <p>Music bingo, Singo, themed bingo and Twisted Trivia — see the calendar above.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta">
+        <h2>Never Miss A Night</h2>
+        <p>New events drop every month — be the first to know</p>
+        <div class="cta-btns">
+            <a href="/quarry-events">Buy Tickets</a>
+            <a href="/quarry-reservations">Book A Table</a>
+            <a href="https://www.facebook.com/profile.php?id=61581374159536" target="_blank" rel="noopener">Follow On Facebook</a>
+            <a href="https://www.instagram.com/thequarrystl" target="_blank" rel="noopener">Follow On Instagram</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <div class="footer-logo">The Quarry</div>
+                <div class="footer-tagline">Wine • Bites • Live Music • Golf</div>
+                <div class="footer-info">
+                    <div>3960 Highway Z</div>
+                    <div>New Melle, MO 63385</div>
+                    <a href="tel:6362248257">(636) 224-8257</a>
+                    <a href="mailto:management@thequarrystl.com">management@thequarrystl.com</a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h3>Menus</h3>
+                <a href="/quarry-menu">Food Menu</a>
+                <a href="/quarry-drinks">Drink Menu</a>
+                <a href="/quarry-catering">Catering Menu</a>
+                <a href="/quarry-brunch">Brunch Menu</a>
+            </div>
+            <div class="footer-section">
+                <h3>Entertainment</h3>
+                <a href="/quarry-calendar">What's On</a>
+                <a href="/quarry-events">Tickets &amp; Registration</a>
+                <a href="/quarry-bands">Live Bands</a>
+                <a href="/quarry-wineclub">Rock &amp; Vine Wine Club</a>
+            </div>
+            <div class="footer-section">
+                <h3>Visit Us</h3>
+                <a href="/quarry-reservations">Book a Reservation</a>
+                <a href="/quarry-private-events">Private Events</a>
+                <a href="/weddings/">Weddings</a>
+                <a href="/quarry-contact">Contact Us</a>
+            </div>
+        </div>
+        <div class="footer-divider">
+            <div>
+                <div class="footer-copyright">&copy; 2026 The Quarry. All rights reserved.</div>
+                <div style="font-size:12px;color:var(--brown-light);margin-top:4px;">Wed–Thu 11AM–9PM • Fri–Sat 11AM–11PM • Sun 10AM–5PM • Mon–Tue Closed</div>
+            </div>
+            <div class="footer-socials">
+                <a href="https://www.instagram.com/thequarrystl" target="_blank" title="Instagram">📷</a>
+                <a href="https://www.facebook.com/profile.php?id=61581374159536" target="_blank" title="Facebook">f</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Detail modal -->
+    <div class="ov" id="ov" onclick="if(event.target===this)closeOv()">
+        <div class="ov-card">
+            <button class="ov-close" onclick="closeOv()">&times;</button>
+            <h3 id="ovName"></h3>
+            <div class="d" id="ovDate"></div>
+            <p id="ovDesc"></p>
+            <div style="margin-top:1.4rem;" id="ovCta"></div>
+        </div>
+    </div>
+
+<script>
+/* =====================================================================
+   THE QUARRY — MASTER EVENT CALENDAR
+   ---------------------------------------------------------------------
+   To add / edit an event, edit the EVENTS array below. Nothing else.
+     date : "YYYY-MM-DD"
+     name : display name
+     type : "ticketed" | "recurring" | "family" | "holiday" | "free" | "closed"
+            (an event can have several — use `tags` for extras)
+     time : optional, e.g. "7:00 PM"
+     price: optional, e.g. "$20 per person"
+     desc : optional short line
+     tbd  : true  -> shows an "Details Coming Soon" flag
+     link : optional URL for the ticket/info button
+   ===================================================================== */
+const EVENTS = [
+  /* ------------------------------ AUGUST ------------------------------ */
+  { date:"2026-08-06", name:"Boots", type:["recurring"], tbd:true, desc:"Country night at The Quarry." },
+  { date:"2026-08-07", name:"Back to School 80s Music Bingo", type:["ticketed"], price:"$20 per person", desc:"Totally rad 80s music bingo to kick off the school year." },
+  { date:"2026-08-08", name:"Closed — Private Wedding", type:["closed"], desc:"The Quarry is closed to the public for a private wedding." },
+  { date:"2026-08-15", name:"Closed — Private Wedding", type:["closed"], desc:"The Quarry is closed to the public for a private wedding." },
+  { date:"2026-08-20", name:"Rock & Vine Wine Club", type:["recurring"], desc:"Monthly members' tasting.", link:"/quarry-wineclub" },
+  { date:"2026-08-21", name:"Closed — Private Wedding", type:["closed"], desc:"The Quarry is closed to the public for a private wedding." },
+  { date:"2026-08-23", name:"Moms' Back to School Singo Bingo", type:["ticketed"], tbd:true, desc:"Date not final — may move to Sunday Aug 16. Music bingo for the moms who survived summer." },
+  { date:"2026-08-26", name:"Craft Night", type:["recurring"], tbd:true, desc:"Make-and-take craft night." },
+  { date:"2026-08-27", name:"Boots", type:["recurring"], tbd:true, desc:"Country night at The Quarry." },
+  { date:"2026-08-29", name:"Grand Opening", type:["family","free"], tbd:true, desc:"Our grand opening celebration. Full lineup announced soon." },
+
+  /* ----------------------------- SEPTEMBER ---------------------------- */
+  { date:"2026-09-03", name:"Boots", type:["recurring"], tbd:true, desc:"Country night at The Quarry." },
+  { date:"2026-09-10", name:"Trivia Night", type:["free"], tbd:true, desc:"Team trivia at The Quarry." },
+  { date:"2026-09-13", name:"Back to School BBQ", type:["family","free"], tbd:true, desc:"Bubble bus, face painting and a petting zoo. A full day out for the kids." },
+  { date:"2026-09-17", name:"Augusta Wine Club", type:["recurring"], tbd:true, desc:"Monthly wine club tasting.", link:"/quarry-wineclub" },
+  { date:"2026-09-19", name:"Closed — Private Wedding", type:["closed"], desc:"The Quarry is closed to the public for a private wedding." },
+  { date:"2026-09-22", name:"Private Event", type:["closed"], desc:"Private booking — not open to the public." },
+  { date:"2026-09-24", name:"Boots", type:["recurring"], tbd:true, desc:"Country night at The Quarry." },
+  { date:"2026-09-25", name:"PRL", type:["ticketed"], tbd:true, desc:"Details coming soon." },
+  { date:"2026-09-26", name:"QFest — Flea Market & Vendor Fair", type:["family","free"], tbd:true, desc:"Outdoor flea market and vendor market at The Quarry. Vendor applications opening soon." },
+
+  /* ------------------------------ OCTOBER ----------------------------- */
+  { date:"2026-10-01", name:"Boots", type:["recurring"], tbd:true, desc:"Country night at The Quarry." },
+  { date:"2026-10-02", name:"Costume Themed Bingo", type:["ticketed","holiday"], tbd:true, desc:"Come in costume, play bingo. Ticketed event." },
+  { date:"2026-10-03", name:"Morning Bingo", type:["free"], time:"10:30 AM", tbd:true, desc:"Saturday morning bingo." },
+  { date:"2026-10-08", name:"Twisted Trivia", type:["free"], tbd:true, desc:"Trivia night in the Twisted Barrel." },
+  { date:"2026-10-10", name:"Closed During the Day — Private Wedding", type:["closed"], desc:"Closed to the public during the day for a private wedding." },
+  { date:"2026-10-10", name:"Adult Halloween Costume Party", type:["ticketed","holiday"], tbd:true, desc:"21+ costume party with a live DJ. Ticketed event." },
+  { date:"2026-10-11", name:"Book Signing", type:["free"], tbd:true, desc:"Author book signing at The Quarry." },
+  { date:"2026-10-15", name:"Rock & Vine Wine Club", type:["recurring"], desc:"Monthly members' tasting.", link:"/quarry-wineclub" },
+  { date:"2026-10-16", name:"Witches at The Quarry", type:["ticketed","holiday"], tbd:true, desc:"Women-only witches night. Ticketed event." },
+  { date:"2026-10-17", name:"Timberland Bingo in the Twisted Barrel", type:["free"], tbd:true, desc:"Bingo in the Twisted Barrel." },
+  { date:"2026-10-17", name:"Beer, Bourbon & Boots", type:["ticketed"], tbd:true, desc:"Country-themed beer and bourbon tasting. Tasting tickets required." },
+  { date:"2026-10-21", name:"Craft Night", type:["recurring"], tbd:true, desc:"Make-and-take craft night." },
+  { date:"2026-10-22", name:"Boots", type:["recurring"], tbd:true, desc:"Country night at The Quarry." },
+  { date:"2026-10-23", name:"Pop-Up Bar", type:["free"], tbd:true, desc:"Themed pop-up bar. Theme announced soon." },
+  { date:"2026-10-24", name:"Pop-Up Bar", type:["free"], tbd:true, desc:"Themed pop-up bar. Theme announced soon." },
+  { date:"2026-10-24", name:"Last Day of the Field", type:["family","free"], tbd:true, desc:"Final day of the season for the field." },
+  { date:"2026-10-25", name:"Singo Bingo", type:["free"], tbd:true, desc:"Music bingo — name that tune." },
+
+  /* ----------------------------- NOVEMBER ----------------------------- */
+  { date:"2026-11-05", name:"Boots", type:["recurring"], tbd:true, desc:"Country night at The Quarry." },
+  { date:"2026-11-07", name:"Fall Festival", type:["family","free"], time:"10:00 AM – 4:00 PM", desc:"A full day of fall fun at The Quarry." },
+  { date:"2026-11-18", name:"Craft Night", type:["recurring"], tbd:true, desc:"Make-and-take craft night." },
+  { date:"2026-11-19", name:"Wine Club — Trademark", type:["recurring"], tbd:true, desc:"Monthly wine club tasting featuring Trademark.", link:"/quarry-wineclub" },
+  { date:"2026-11-25", name:"Thanksgiving Eve DJ Party", type:["ticketed","holiday"], tbd:true, desc:"The biggest night of the year, back home for the holiday. Live DJ. Ticketed event." },
+  { date:"2026-11-26", name:"Closed — Thanksgiving", type:["closed","holiday"], desc:"Closed for the Thanksgiving holiday." },
+  { date:"2026-11-27", name:"Closed — Thanksgiving Holiday", type:["closed","holiday"], desc:"Closed for the Thanksgiving holiday." },
+
+  /* ----------------------------- DECEMBER ----------------------------- */
+  { date:"2026-12-02", name:"Craft Night", type:["recurring","holiday"], tbd:true, desc:"Holiday make-and-take craft night." },
+  { date:"2026-12-03", name:"Boots", type:["recurring"], tbd:true, desc:"Country night at The Quarry." },
+  { date:"2026-12-04", name:"Holiday Pop-Up Bar", type:["holiday","free"], tbd:true, desc:"Christmas pop-up bar." },
+  { date:"2026-12-05", name:"Holiday Pop-Up Bar", type:["holiday","free"], tbd:true, desc:"Christmas pop-up bar." },
+  { date:"2026-12-09", name:"Craft Night", type:["recurring","holiday"], tbd:true, desc:"Holiday make-and-take craft night." },
+  { date:"2026-12-11", name:"Holiday Pop-Up Bar", type:["holiday","free"], time:"Seatings 5–7 PM & 8–11 PM", desc:"Christmas pop-up bar, two seatings." },
+  { date:"2026-12-12", name:"Holiday Pop-Up Bar", type:["holiday","free"], time:"Seatings 5–7 PM & 8–11 PM", desc:"Christmas pop-up bar, two seatings." },
+  { date:"2026-12-13", name:"Lunch With Santa", type:["ticketed","family","holiday"], time:"12:00 – 4:00 PM", desc:"Lunch, pictures with Santa, games and more. Ticketed event." },
+  { date:"2026-12-16", name:"Craft Night", type:["recurring","holiday"], tbd:true, desc:"Holiday make-and-take craft night." },
+  { date:"2026-12-17", name:"Rock & Vine Wine Club", type:["recurring","holiday"], desc:"Holiday members' tasting.", link:"/quarry-wineclub" },
+  { date:"2026-12-18", name:"Holiday Pop-Up Bar", type:["holiday","free"], tbd:true, desc:"Christmas pop-up bar." },
+  { date:"2026-12-19", name:"Holiday Pop-Up Bar", type:["holiday","free"], tbd:true, desc:"Christmas pop-up bar." },
+  { date:"2026-12-20", name:"Breakfast With Santa", type:["ticketed","family","holiday"], time:"9:00 AM – 2:00 PM", desc:"Breakfast and pictures with Santa. Ticketed event." },
+  { date:"2026-12-31", name:"New Year's Eve with DJ Earl", type:["ticketed","holiday"], desc:"Ring in 2027 at The Quarry with DJ Earl. Ticketed event." }
+];
+
+/* ------------------------------ RENDER ------------------------------ */
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const MON3   = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const DOW    = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+let activeFilter = "all";
+
+function parse(d){ const p = d.split("-").map(Number); return new Date(p[0], p[1]-1, p[2]); }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function has(ev,t){ return (ev.type||[]).indexOf(t) !== -1; }
+function cls(ev){
+    if (has(ev,"closed")) return "t-closed";
+    if (has(ev,"ticketed")) return "t-ticketed";
+    if (has(ev,"family")) return "t-family";
+    return "";
+}
+function matches(ev){
+    if (activeFilter === "all") return true;
+    return has(ev, activeFilter);
+}
+
+function tagsFor(ev){
+    let h = "";
+    if (has(ev,"ticketed")) h += '<span class="tag tag-ticketed">Ticketed</span>';
+    if (has(ev,"closed"))   h += '<span class="tag tag-closed">Closed to Public</span>';
+    if (has(ev,"family"))   h += '<span class="tag tag-family">Family Friendly</span>';
+    if (has(ev,"free") && !has(ev,"ticketed") && !has(ev,"closed")) h += '<span class="tag tag-free">Free / Walk-In</span>';
+    if (has(ev,"recurring"))h += '<span class="tag tag-recurring">Monthly Regular</span>';
+    if (ev.time)  h += '<span class="tag tag-time">'+esc(ev.time)+'</span>';
+    if (ev.price) h += '<span class="tag tag-time">'+esc(ev.price)+'</span>';
+    if (ev.tbd)   h += '<span class="tag tag-tbd">Details Coming Soon</span>';
+    return h;
+}
+
+function ctaFor(ev, i){
+    if (has(ev,"closed")) return '<span>Not Open to the Public</span>';
+    if (ev.link) return '<a href="'+esc(ev.link)+'">More Info</a>';
+    if (has(ev,"ticketed")) return '<a href="/quarry-events">Tickets</a>';
+    return '<a href="/quarry-reservations">Book a Table</a>';
+}
+
+function buildCalendar(year, month, evs){
+    const first = new Date(year, month, 1).getDay();
+    const days  = new Date(year, month+1, 0).getDate();
+    let h = '<div class="cal">';
+    DOW.forEach(d => h += '<div class="cal-dow">'+d+'</div>');
+    for (let i=0;i<first;i++) h += '<div class="cal-cell empty"></div>';
+    for (let d=1; d<=days; d++){
+        const todays = evs.filter(e => parse(e.date).getDate() === d);
+        h += '<div class="cal-cell"><div class="cal-daynum">'+d+'</div>';
+        todays.forEach(e => {
+            h += '<button class="cal-chip '+cls(e)+'" data-id="'+e._id+'">'+esc(e.name)+'</button>';
+        });
+        h += '</div>';
+    }
+    return h + '</div>';
+}
+
+function render(){
+    const root = document.getElementById("calendarRoot");
+    const jump = document.getElementById("monthJump");
+    const visible = EVENTS.filter(matches);
+
+    // group by year-month
+    const groups = {};
+    visible.forEach(e => {
+        const dt = parse(e.date);
+        const k = dt.getFullYear()+"-"+dt.getMonth();
+        (groups[k] = groups[k] || []).push(e);
+    });
+    const keys = Object.keys(groups).sort((a,b)=>{
+        const [ay,am]=a.split("-").map(Number), [by,bm]=b.split("-").map(Number);
+        return ay-by || am-bm;
+    });
+
+    if (!keys.length){ root.innerHTML = '<p style="text-align:center;color:#777;padding:3rem 0;">Nothing in this category yet — check back soon.</p>'; jump.innerHTML=''; return; }
+
+    jump.innerHTML = keys.map(k=>{
+        const [y,m]=k.split("-").map(Number);
+        return '<a href="#m'+k+'">'+MONTHS[m]+'</a>';
+    }).join('');
+
+    root.innerHTML = keys.map(k=>{
+        const [y,m] = k.split("-").map(Number);
+        const evs = groups[k].slice().sort((a,b)=> a.date.localeCompare(b.date));
+        let h = '<section class="month-block" id="m'+k+'">';
+        h += '<div class="month-head"><h2>'+MONTHS[m]+' '+y+'</h2><span class="month-count">'+evs.length+' '+(evs.length===1?'event':'events')+'</span></div>';
+        h += buildCalendar(y, m, evs);
+        h += '<div class="ev-list">';
+        evs.forEach(e=>{
+            const dt = parse(e.date);
+            h += '<article class="ev '+cls(e)+'">'
+              +   '<div class="ev-date"><div class="ev-dow">'+DOW[dt.getDay()]+'</div><div class="ev-num">'+dt.getDate()+'</div><div class="ev-mon">'+MON3[dt.getMonth()]+'</div></div>'
+              +   '<div><div class="ev-name">'+esc(e.name)+'</div>'
+              +     (e.desc ? '<div class="ev-desc">'+esc(e.desc)+'</div>' : '')
+              +     '<div class="ev-meta">'+tagsFor(e)+'</div></div>'
+              +   '<div class="ev-cta">'+ctaFor(e)+'</div>'
+              + '</article>';
+        });
+        h += '</div></section>';
+        return h;
+    }).join('');
+
+    // wire calendar chips
+    root.querySelectorAll('.cal-chip').forEach(btn=>{
+        btn.addEventListener('click', ()=> openOv(Number(btn.dataset.id)));
+    });
+}
+
+function openOv(id){
+    const e = EVENTS[id]; if (!e) return;
+    const dt = parse(e.date);
+    document.getElementById("ovName").textContent = e.name;
+    document.getElementById("ovDate").textContent = DOW[dt.getDay()]+", "+MONTHS[dt.getMonth()]+" "+dt.getDate()+", "+dt.getFullYear()+(e.time?" · "+e.time:"");
+    document.getElementById("ovDesc").textContent = e.desc || "";
+    document.getElementById("ovCta").innerHTML = '<div class="ev-meta" style="margin-bottom:1rem;">'+tagsFor(e)+'</div><div class="ev-cta">'+ctaFor(e)+'</div>';
+    document.getElementById("ov").classList.add("open");
+}
+function closeOv(){ document.getElementById("ov").classList.remove("open"); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeOv(); });
+
+document.getElementById("filters").addEventListener("click", e=>{
+    const b = e.target.closest(".filter-pill"); if (!b) return;
+    document.querySelectorAll(".filter-pill").forEach(p=>p.classList.remove("active"));
+    b.classList.add("active");
+    activeFilter = b.dataset.f;
+    render();
+});
+
+function toggleNav(){ document.getElementById("mainNav").classList.toggle("active"); }
+document.querySelectorAll('.nav-item > .nav-link[href="#"]').forEach(l=>{
+    l.addEventListener('click', ev=>{
+        if (window.innerWidth <= 768){ ev.preventDefault(); l.parentElement.classList.toggle('open'); }
+    });
+});
+
+// give each event a stable index id, then render
+EVENTS.forEach((e,i)=> e._id = i);
+render();
+</script>
+<script defer src="/notice.js"></script>
+</body>
+</html>
