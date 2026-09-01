@@ -106,3 +106,6 @@
 [functions."welcome-series"]
   schedule = "0 15 * * *"
 # trigger redeploy 2026-05-27T20:21:04Z - pick up new SQUARE_WEBHOOK_SIGNATURE_KEY
+# trigger redeploy 2026-09-01T00:00:00Z - build-ignore.sh only diffs HEAD^..HEAD, so the
+# quarry-calendar.html + events.json push landed on GitHub but the build was skipped
+# because the tip commit looked data-only. Forcing a real build here to pick both up.
