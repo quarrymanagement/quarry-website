@@ -6565,7 +6565,17 @@
                 return;
             }
 
-            grid.innerHTML = app.events.map(event => {
+            const sortedEvents = [...app.events].sort((a, b) => {
+                const da = a.date || '';
+                const db = b.date || '';
+                if (!da && !db) return 0;
+                if (!da) return 1;
+                if (!db) return -1;
+                if (da !== db) return da < db ? -1 : 1;
+                return String(a.time || '').localeCompare(String(b.time || ''));
+            });
+
+            grid.innerHTML = sortedEvents.map(event => {
                 const regs = getEventRegistrations(event.id);
                 const regCount = regs.reduce((sum, r) => sum + (r.tickets || 1), 0);
                 const eventRevenue = regs.reduce((sum, r) => sum + parseFloat(r.amount || r.amountPaid || 0), 0);
