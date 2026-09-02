@@ -1662,7 +1662,14 @@
       "useTableChart": false,
       "floorPlanId": "",
       "pricePerPerson": 5000,
-      "tiers": [],
+      "tiers": [
+        {
+          "name": "General Admission",
+          "description": "Event entry",
+          "pricePerPerson": 5000,
+          "priceLabel": "$50"
+        }
+      ],
       "seatingOptions": null,
       "category": "Ticketed",
       "tags": [
@@ -1674,7 +1681,9 @@
       "imageAlt": "Halloween Day of the Dead at The Quarry, October 10, 2026",
       "registered": 0,
       "registeredCount": 0,
-      "endTime": "22:00"
+      "endTime": "22:00",
+      "pricePerSeat": 5000,
+      "price": 5000
     },
     {
       "id": "event_1788301739553",
@@ -1683,10 +1692,10 @@
       "time": "19:00",
       "location": "The Quarry — 3960 Highway Z, New Melle, MO",
       "description": "The Quarry's 1st Annual Witches at The Quarry — an exclusive women's-only party, 18+. $40 per person, with music bingo, a fire performance, costume contests, a DJ dance party, and more.",
-      "detailDescription": "Grab your broom and your best coven for the 1st Annual Witches at The Quarry — an exclusive women's-only party, 18+. Doors open at 6:30 PM, event starts at 7:00 PM. $40 per person includes music bingo, a fire performance, costume/hat/cackle contests with prizes, a DJ dance party, photo op areas, and a 2026 Quarry shot glass. Book a table of 4 and receive a free bucket of beer/cider or a bottle of wine. Specialty drinks, appetizers, and desserts available — including blood bags. 10% of proceeds benefit Five Acres Animal Shelter.",
+      "detailDescription": "Grab your broom and your best coven for the 1st Annual Witches at The Quarry — an exclusive women's-only party, 18+. Doors open at 6:30 PM, event starts at 7:00 PM. $40 per person includes music bingo, a fire performance, costume/hat/cackle contests with prizes, a DJ dance party, photo op areas, and a 2026 Quarry shot glass. Book a table for 4, or 4 bar stools together, and receive a free bucket of beer/cider or a bottle of wine. Specialty drinks, appetizers, and desserts available — including blood bags. 10% of proceeds benefit Five Acres Animal Shelter.",
       "additionalInfo": "Doors open 6:30 PM · Event starts 7:00 PM. Pre-order your Witch Kit — T-shirt $20, Witch Hat Headband $5, Both $22 — by October 6, 2026 (ask staff to add it to your order). 10% of proceeds donated to Five Acres Animal Shelter.",
-      "capacity": 160,
-      "totalCapacity": 160,
+      "capacity": 144,
+      "totalCapacity": 144,
       "status": "available",
       "pricingType": "individual",
       "highlights": [
@@ -1698,7 +1707,7 @@
         "DJ Dance Party",
         "Photo Op Areas",
         "2026 Quarry Shot Glass Included",
-        "Book a Table of 4 for a Free Beer/Cider Bucket or Wine Bottle",
+        "Book a Table for 4, or 4 Bar Stools Together, for a Free Beer/Cider Bucket or Wine Bottle",
         "10% Donated to Five Acres Animal Shelter"
       ],
       "slug": "witches-at-the-quarry",
@@ -1706,7 +1715,22 @@
       "floorPlanId": "",
       "pricePerPerson": 4000,
       "tiers": [],
-      "seatingOptions": null,
+      "seatingOptions": [
+        {
+          "id": "table-4",
+          "name": "Table for 4",
+          "seats": 4,
+          "available": 33,
+          "pricePerSeat": 4000
+        },
+        {
+          "id": "bar-stool",
+          "name": "Bar Stool",
+          "seats": 1,
+          "available": 12,
+          "pricePerSeat": 4000
+        }
+      ],
       "category": "Ticketed",
       "tags": [
         "witches",
@@ -1743,7 +1767,14 @@
       "useTableChart": false,
       "floorPlanId": "",
       "pricePerPerson": 2000,
-      "tiers": [],
+      "tiers": [
+        {
+          "name": "General Admission",
+          "description": "Event entry",
+          "pricePerPerson": 2000,
+          "priceLabel": "$20"
+        }
+      ],
       "seatingOptions": null,
       "category": "Ticketed",
       "tags": [
@@ -1755,7 +1786,9 @@
       ],
       "imageAlt": "Beer Bourbon & Boots at The Quarry, October 17, 2026",
       "registered": 0,
-      "registeredCount": 0
+      "registeredCount": 0,
+      "pricePerSeat": 2000,
+      "price": 2000
     },
     {
       "id": "event_1788301739555",
@@ -1779,7 +1812,14 @@
       "useTableChart": false,
       "floorPlanId": "",
       "pricePerPerson": 2500,
-      "tiers": [],
+      "tiers": [
+        {
+          "name": "General Admission",
+          "description": "Event entry",
+          "pricePerPerson": 2500,
+          "priceLabel": "$25"
+        }
+      ],
       "seatingOptions": null,
       "category": "Ticketed",
       "tags": [
@@ -1789,7 +1829,9 @@
       "imageAlt": "Pop-Up Bar at The Quarry, October 23, 2026",
       "registered": 0,
       "registeredCount": 0,
-      "endTime": "23:00"
+      "endTime": "23:00",
+      "pricePerSeat": 2500,
+      "price": 2500
     },
     {
       "id": "event_1788301739556",
@@ -1813,7 +1855,14 @@
       "useTableChart": false,
       "floorPlanId": "",
       "pricePerPerson": 2500,
-      "tiers": [],
+      "tiers": [
+        {
+          "name": "General Admission",
+          "description": "Event entry",
+          "pricePerPerson": 2500,
+          "priceLabel": "$25"
+        }
+      ],
       "seatingOptions": null,
       "category": "Ticketed",
       "tags": [
@@ -1823,7 +1872,9 @@
       "imageAlt": "Pop-Up Bar at The Quarry, October 24, 2026",
       "registered": 0,
       "registeredCount": 0,
-      "endTime": "23:00"
+      "endTime": "23:00",
+      "pricePerSeat": 2500,
+      "price": 2500
     },
     {
       "id": "event_1788301739557",
@@ -1847,7 +1898,14 @@
       "useTableChart": false,
       "floorPlanId": "",
       "pricePerPerson": 1000,
-      "tiers": [],
+      "tiers": [
+        {
+          "name": "General Admission",
+          "description": "Event entry",
+          "pricePerPerson": 1000,
+          "priceLabel": "$10"
+        }
+      ],
       "seatingOptions": null,
       "category": "Ticketed",
       "tags": [
@@ -1858,7 +1916,9 @@
       ],
       "imageAlt": "Thanksgiving Eve DJ Party at The Quarry, November 25, 2026",
       "registered": 0,
-      "registeredCount": 0
+      "registeredCount": 0,
+      "pricePerSeat": 1000,
+      "price": 1000
     },
     {
       "id": "event_1788301739558",
@@ -1882,7 +1942,14 @@
       "useTableChart": false,
       "floorPlanId": "",
       "pricePerPerson": 2500,
-      "tiers": [],
+      "tiers": [
+        {
+          "name": "General Admission",
+          "description": "Event entry",
+          "pricePerPerson": 2500,
+          "priceLabel": "$25"
+        }
+      ],
       "seatingOptions": null,
       "category": "Ticketed",
       "tags": [
@@ -1893,7 +1960,9 @@
       "imageAlt": "Holiday Pop-Up Bar at The Quarry, 2026-12-04",
       "registered": 0,
       "registeredCount": 0,
-      "endTime": "23:00"
+      "endTime": "23:00",
+      "pricePerSeat": 2500,
+      "price": 2500
     },
     {
       "id": "event_1788301739559",
@@ -1917,7 +1986,14 @@
       "useTableChart": false,
       "floorPlanId": "",
       "pricePerPerson": 2500,
-      "tiers": [],
+      "tiers": [
+        {
+          "name": "General Admission",
+          "description": "Event entry",
+          "pricePerPerson": 2500,
+          "priceLabel": "$25"
+        }
+      ],
       "seatingOptions": null,
       "category": "Ticketed",
       "tags": [
@@ -1928,7 +2004,9 @@
       "imageAlt": "Holiday Pop-Up Bar at The Quarry, 2026-12-05",
       "registered": 0,
       "registeredCount": 0,
-      "endTime": "23:00"
+      "endTime": "23:00",
+      "pricePerSeat": 2500,
+      "price": 2500
     },
     {
       "id": "event_1788301739560",
@@ -1952,7 +2030,14 @@
       "useTableChart": false,
       "floorPlanId": "",
       "pricePerPerson": 2500,
-      "tiers": [],
+      "tiers": [
+        {
+          "name": "General Admission",
+          "description": "Event entry",
+          "pricePerPerson": 2500,
+          "priceLabel": "$25"
+        }
+      ],
       "seatingOptions": null,
       "category": "Ticketed",
       "tags": [
@@ -1963,7 +2048,9 @@
       "imageAlt": "Holiday Pop-Up Bar at The Quarry, 2026-12-11",
       "registered": 0,
       "registeredCount": 0,
-      "endTime": "23:00"
+      "endTime": "23:00",
+      "pricePerSeat": 2500,
+      "price": 2500
     },
     {
       "id": "event_1788301739561",
@@ -1987,7 +2074,14 @@
       "useTableChart": false,
       "floorPlanId": "",
       "pricePerPerson": 2500,
-      "tiers": [],
+      "tiers": [
+        {
+          "name": "General Admission",
+          "description": "Event entry",
+          "pricePerPerson": 2500,
+          "priceLabel": "$25"
+        }
+      ],
       "seatingOptions": null,
       "category": "Ticketed",
       "tags": [
@@ -1998,7 +2092,9 @@
       "imageAlt": "Holiday Pop-Up Bar at The Quarry, 2026-12-12",
       "registered": 0,
       "registeredCount": 0,
-      "endTime": "23:00"
+      "endTime": "23:00",
+      "pricePerSeat": 2500,
+      "price": 2500
     },
     {
       "id": "event_1788301739562",
@@ -2023,7 +2119,14 @@
       "useTableChart": false,
       "floorPlanId": "",
       "pricePerPerson": 2500,
-      "tiers": [],
+      "tiers": [
+        {
+          "name": "General Admission",
+          "description": "Event entry",
+          "pricePerPerson": 2500,
+          "priceLabel": "$25"
+        }
+      ],
       "seatingOptions": null,
       "category": "Ticketed",
       "tags": [
@@ -2035,7 +2138,9 @@
       "imageAlt": "Lunch With Santa at The Quarry, December 13, 2026",
       "registered": 0,
       "registeredCount": 0,
-      "endTime": "16:00"
+      "endTime": "16:00",
+      "pricePerSeat": 2500,
+      "price": 2500
     },
     {
       "id": "event_1788301739563",
@@ -2059,7 +2164,14 @@
       "useTableChart": false,
       "floorPlanId": "",
       "pricePerPerson": 2500,
-      "tiers": [],
+      "tiers": [
+        {
+          "name": "General Admission",
+          "description": "Event entry",
+          "pricePerPerson": 2500,
+          "priceLabel": "$25"
+        }
+      ],
       "seatingOptions": null,
       "category": "Ticketed",
       "tags": [
@@ -2070,7 +2182,9 @@
       "imageAlt": "Holiday Pop-Up Bar at The Quarry, 2026-12-18",
       "registered": 0,
       "registeredCount": 0,
-      "endTime": "23:00"
+      "endTime": "23:00",
+      "pricePerSeat": 2500,
+      "price": 2500
     },
     {
       "id": "event_1788301739564",
@@ -2094,7 +2208,14 @@
       "useTableChart": false,
       "floorPlanId": "",
       "pricePerPerson": 2500,
-      "tiers": [],
+      "tiers": [
+        {
+          "name": "General Admission",
+          "description": "Event entry",
+          "pricePerPerson": 2500,
+          "priceLabel": "$25"
+        }
+      ],
       "seatingOptions": null,
       "category": "Ticketed",
       "tags": [
@@ -2105,7 +2226,9 @@
       "imageAlt": "Holiday Pop-Up Bar at The Quarry, 2026-12-19",
       "registered": 0,
       "registeredCount": 0,
-      "endTime": "23:00"
+      "endTime": "23:00",
+      "pricePerSeat": 2500,
+      "price": 2500
     },
     {
       "id": "event_1788301739565",
@@ -2129,7 +2252,14 @@
       "useTableChart": false,
       "floorPlanId": "",
       "pricePerPerson": 2500,
-      "tiers": [],
+      "tiers": [
+        {
+          "name": "General Admission",
+          "description": "Event entry",
+          "pricePerPerson": 2500,
+          "priceLabel": "$25"
+        }
+      ],
       "seatingOptions": null,
       "category": "Ticketed",
       "tags": [
@@ -2141,7 +2271,9 @@
       "imageAlt": "Breakfast With Santa at The Quarry, December 20, 2026",
       "registered": 0,
       "registeredCount": 0,
-      "endTime": "14:00"
+      "endTime": "14:00",
+      "pricePerSeat": 2500,
+      "price": 2500
     },
     {
       "id": "event_1788301739566",
@@ -2165,7 +2297,14 @@
       "useTableChart": false,
       "floorPlanId": "",
       "pricePerPerson": 2500,
-      "tiers": [],
+      "tiers": [
+        {
+          "name": "General Admission",
+          "description": "Event entry",
+          "pricePerPerson": 2500,
+          "priceLabel": "$25"
+        }
+      ],
       "seatingOptions": null,
       "category": "Ticketed",
       "tags": [
@@ -2176,7 +2315,9 @@
       ],
       "imageAlt": "New Year's Eve with DJ Earl at The Quarry, December 31, 2026",
       "registered": 0,
-      "registeredCount": 0
+      "registeredCount": 0,
+      "pricePerSeat": 2500,
+      "price": 2500
     }
   ],
   "bands": [
