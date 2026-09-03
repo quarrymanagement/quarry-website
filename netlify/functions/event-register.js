@@ -513,9 +513,25 @@ exports.handler = async function(event) {
         const addOnPrice = parseInt(addOnDef.price, 10) || 0;
         if (addOnPrice <= 0) continue;
         const addOnQty = Math.max(1, Math.min(20, parseInt(reqAddOn.qty, 10) || 1));
+
+        // Size-tracked add-ons (e.g. a shirt) carry one size per unit in the
+        // Square line item's note, so staff fulfilling the order can see them.
+        // Not security/capacity-relevant, so this validates loosely (unknown
+        // or missing sizes are just dropped) rather than failing the order.
+        let addOnNote = (evData.date || '') + ' at The Quarry';
+        if (addOnDef.sizes) {
+          const allowedSizes = (Array.isArray(evData.addOnSizeOptions) && evData.addOnSizeOptions.length
+            ? evData.addOnSizeOptions : ['S', 'M', 'L', 'XL', '2XL']).map(function(s) { return String(s).toUpperCase(); });
+          const cleanSizes = (Array.isArray(reqAddOn.sizes) ? reqAddOn.sizes : [])
+            .map(function(s) { return String(s || '').trim().toUpperCase(); })
+            .filter(function(s) { return allowedSizes.indexOf(s) !== -1; })
+            .slice(0, addOnQty);
+          if (cleanSizes.length) addOnNote = 'Sizes: ' + cleanSizes.join(', ');
+        }
+
         squareLineItems.push({
           name: String(addOnDef.name || 'Add-On').slice(0, 255),
-          note: (evData.date || '') + ' at The Quarry',
+          note: addOnNote,
           quantity: String(addOnQty),
           base_price_money: { amount: addOnPrice, currency: 'USD' }
         });

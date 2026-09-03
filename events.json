@@ -1750,7 +1750,8 @@
         {
           "id": "tshirt",
           "name": "Witch Kit - T-Shirt",
-          "price": 2000
+          "price": 2000,
+          "sizes": true
         },
         {
           "id": "headband",
@@ -1760,8 +1761,16 @@
         {
           "id": "both",
           "name": "Witch Kit - T-Shirt & Headband (Bundle)",
-          "price": 2200
+          "price": 2200,
+          "sizes": true
         }
+      ],
+      "addOnSizeOptions": [
+        "S",
+        "M",
+        "L",
+        "XL",
+        "2XL"
       ]
     },
     {

@@ -666,13 +666,14 @@
                 for (var aoi = 0; aoi < evt.addOns.length; aoi++) {
                     var aoDef = evt.addOns[aoi];
                     var aoPrice = parseInt(aoDef.price, 10) || 0;
-                    html += '<option value="' + (aoDef.id || '') + '" data-price="' + aoPrice + '">' + (aoDef.name || 'Add-On') + ' — $' + (aoPrice / 100).toFixed(2) + '</option>';
+                    html += '<option value="' + (aoDef.id || '') + '" data-price="' + aoPrice + '" data-sizes="' + (aoDef.sizes ? '1' : '0') + '">' + (aoDef.name || 'Add-On') + ' — $' + (aoPrice / 100).toFixed(2) + '</option>';
                 }
                 html += '</select>';
                 html += '<div id="detailAddOnQtyGroup" style="display:none;margin-top:10px;">';
                 html += '<label for="detailAddOnQty" style="font-size:13px;">Quantity</label>';
-                html += '<input type="number" id="detailAddOnQty" min="1" max="20" value="1" onchange="updateDetailSummary()">';
+                html += '<input type="number" id="detailAddOnQty" min="1" max="20" value="1" onchange="onDetailAddOnQtyChange()">';
                 html += '</div>';
+                html += '<div id="detailAddOnSizesGroup" style="display:none;margin-top:10px;"></div>';
                 if (evt.addOnNote) {
                     html += '<div style="font-size:12px;color:#888;margin-top:6px;">' + evt.addOnNote + '</div>';
                 }
@@ -1118,8 +1119,53 @@
             var sel = document.getElementById('detailAddOnSelect');
             var qtyGroup = document.getElementById('detailAddOnQtyGroup');
             if (qtyGroup) qtyGroup.style.display = (sel && sel.value) ? 'block' : 'none';
+            renderDetailAddOnSizes();
             updateDetailSummary();
         };
+
+        window.onDetailAddOnQtyChange = function() {
+            renderDetailAddOnSizes();
+            updateDetailSummary();
+        };
+
+        // Builds one size <select> per unit of a size-tracked add-on (e.g. a
+        // shirt), so a guest buying 3 shirts can pick a different size for
+        // each. Sizes come from eventData.addOnSizeOptions, or a sane
+        // default when the event doesn't specify one.
+        function renderDetailAddOnSizes() {
+            var sel = document.getElementById('detailAddOnSelect');
+            var wrap = document.getElementById('detailAddOnSizesGroup');
+            if (!wrap) return;
+            var opt = (sel && sel.selectedIndex >= 0) ? sel.options[sel.selectedIndex] : null;
+            var needsSizes = !!(opt && opt.value && opt.dataset.sizes === '1');
+            if (!needsSizes) {
+                wrap.style.display = 'none';
+                wrap.innerHTML = '';
+                return;
+            }
+            var qtyEl = document.getElementById('detailAddOnQty');
+            var qty = Math.max(1, parseInt(qtyEl && qtyEl.value, 10) || 1);
+            var sizeOptions = (eventData && Array.isArray(eventData.addOnSizeOptions) && eventData.addOnSizeOptions.length)
+                ? eventData.addOnSizeOptions
+                : ['S', 'M', 'L', 'XL', '2XL'];
+            var prevSizes = [];
+            var prevSelects = wrap.querySelectorAll('select[data-sizeindex]');
+            for (var p = 0; p < prevSelects.length; p++) {
+                prevSizes[parseInt(prevSelects[p].dataset.sizeindex, 10)] = prevSelects[p].value;
+            }
+            var html = '<label style="font-size:13px;">Shirt Size' + (qty > 1 ? 's' : '') + ' *</label>';
+            for (var i = 0; i < qty; i++) {
+                html += '<select data-sizeindex="' + i + '" style="margin-top:6px;" required>';
+                for (var j = 0; j < sizeOptions.length; j++) {
+                    var sz = sizeOptions[j];
+                    var isSelected = (prevSizes[i] === sz) ? ' selected' : '';
+                    html += '<option value="' + sz + '"' + isSelected + '>' + (qty > 1 ? ('Shirt ' + (i + 1) + ': ') : '') + sz + '</option>';
+                }
+                html += '</select>';
+            }
+            wrap.innerHTML = html;
+            wrap.style.display = 'block';
+        }
 
         window.onDetailTierChange = function() {
             var tierSelect = document.getElementById('detailTicketTier');
@@ -1418,7 +1464,14 @@
             var addOnSelFinal = document.getElementById('detailAddOnSelect');
             if (addOnSelFinal && addOnSelFinal.value) {
                 var addOnQtyFinal = document.getElementById('detailAddOnQty');
-                payload.addOns = [{ id: addOnSelFinal.value, qty: Math.max(1, parseInt(addOnQtyFinal && addOnQtyFinal.value, 10) || 1) }];
+                var addOnEntry = { id: addOnSelFinal.value, qty: Math.max(1, parseInt(addOnQtyFinal && addOnQtyFinal.value, 10) || 1) };
+                var sizeSelects = document.querySelectorAll('#detailAddOnSizesGroup select[data-sizeindex]');
+                if (sizeSelects.length) {
+                    var sizesArr = [];
+                    for (var si = 0; si < sizeSelects.length; si++) sizesArr[parseInt(sizeSelects[si].dataset.sizeindex, 10)] = sizeSelects[si].value;
+                    addOnEntry.sizes = sizesArr;
+                }
+                payload.addOns = [addOnEntry];
             }
 
             fetch('/.netlify/functions/event-register', {
