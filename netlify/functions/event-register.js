@@ -490,6 +490,38 @@ exports.handler = async function(event) {
       });
     }
 
+    // ---- OPTIONAL ADD-ONS (e.g. merch) -----------------------------------
+    // Purely additive: only ever touches the order when the event defines
+    // evData.addOns AND the client actually requests one. Deliberately kept
+    // out of `qty` (capacity), the payment_note (the webhook's regex parses
+    // that for seating/arrival info only) and Square metadata (already at
+    // its 10-entry cap) — add-ons are just extra Square line items on the
+    // same order, visible to staff on the order itself.
+    const bodyAddOns = Array.isArray(body.addOns) ? body.addOns : [];
+    if (bodyAddOns.length) {
+      if (!Array.isArray(evData.addOns) || !evData.addOns.length) {
+        return { statusCode: 400, headers, body: JSON.stringify({ error: 'This event has no add-ons available.' }) };
+      }
+      const addOnMap = {};
+      evData.addOns.forEach(function(a) { addOnMap[String(a.id || '').trim().toLowerCase()] = a; });
+      for (let i = 0; i < bodyAddOns.length; i++) {
+        const reqAddOn = bodyAddOns[i] || {};
+        const addOnDef = addOnMap[String(reqAddOn.id || '').trim().toLowerCase()];
+        if (!addOnDef) {
+          return { statusCode: 400, headers, body: JSON.stringify({ error: 'Unknown add-on: ' + reqAddOn.id }) };
+        }
+        const addOnPrice = parseInt(addOnDef.price, 10) || 0;
+        if (addOnPrice <= 0) continue;
+        const addOnQty = Math.max(1, Math.min(20, parseInt(reqAddOn.qty, 10) || 1));
+        squareLineItems.push({
+          name: String(addOnDef.name || 'Add-On').slice(0, 255),
+          note: (evData.date || '') + ' at The Quarry',
+          quantity: String(addOnQty),
+          base_price_money: { amount: addOnPrice, currency: 'USD' }
+        });
+      }
+    }
+
     // Build Square Payment Link
     const tierSummary = (chosenOption && chosenOption.pricePerSeat)
       ? (units + 'x ' + (chosenOption.name || ''))

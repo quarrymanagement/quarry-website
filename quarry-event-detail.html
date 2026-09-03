@@ -656,6 +656,29 @@
                 html += '</div>';
             }
 
+            // ─── Optional add-ons (e.g. merch) ───
+            var hasAddOns = Array.isArray(evt.addOns) && evt.addOns.length > 0;
+            if (hasAddOns) {
+                html += '<div id="detailAddOnGroup" style="margin-top:16px;">';
+                html += '<label>' + (evt.addOnLabel || 'Add-On') + ' (optional)</label>';
+                html += '<select id="detailAddOnSelect" onchange="onDetailAddOnChange()">';
+                html += '<option value="">None</option>';
+                for (var aoi = 0; aoi < evt.addOns.length; aoi++) {
+                    var aoDef = evt.addOns[aoi];
+                    var aoPrice = parseInt(aoDef.price, 10) || 0;
+                    html += '<option value="' + (aoDef.id || '') + '" data-price="' + aoPrice + '">' + (aoDef.name || 'Add-On') + ' — $' + (aoPrice / 100).toFixed(2) + '</option>';
+                }
+                html += '</select>';
+                html += '<div id="detailAddOnQtyGroup" style="display:none;margin-top:10px;">';
+                html += '<label for="detailAddOnQty" style="font-size:13px;">Quantity</label>';
+                html += '<input type="number" id="detailAddOnQty" min="1" max="20" value="1" onchange="updateDetailSummary()">';
+                html += '</div>';
+                if (evt.addOnNote) {
+                    html += '<div style="font-size:12px;color:#888;margin-top:6px;">' + evt.addOnNote + '</div>';
+                }
+                html += '</div>';
+            }
+
             // Coupon Code
             html += '<div style="margin-top:16px;">';
             html += '<label>Coupon Code</label>';
@@ -1091,6 +1114,13 @@
         };
 
         // ─── Tier change handler for detail page ───
+        window.onDetailAddOnChange = function() {
+            var sel = document.getElementById('detailAddOnSelect');
+            var qtyGroup = document.getElementById('detailAddOnQtyGroup');
+            if (qtyGroup) qtyGroup.style.display = (sel && sel.value) ? 'block' : 'none';
+            updateDetailSummary();
+        };
+
         window.onDetailTierChange = function() {
             var tierSelect = document.getElementById('detailTicketTier');
             if (!tierSelect) return;
@@ -1222,11 +1252,23 @@
                 }
             }
 
-            var totalCents = Math.max(0, subtotalCents - discountCents);
-
             if (discountCents > 0) {
                 html += '<div style="display:flex;justify-content:space-between;color:#3cb464;margin-top:4px;"><span>' + discountLabel + '</span><span>-$' + (discountCents / 100).toFixed(2) + '</span></div>';
             }
+
+            // Optional add-on (e.g. merch) — priced separately, not subject to the ticket coupon.
+            var addOnCents = 0;
+            var addOnSel = document.getElementById('detailAddOnSelect');
+            if (addOnSel && addOnSel.value) {
+                var addOnOpt = addOnSel.options[addOnSel.selectedIndex];
+                var addOnUnitPrice = parseInt(addOnOpt.dataset.price, 10) || 0;
+                var addOnQtyEl = document.getElementById('detailAddOnQty');
+                var addOnQty = Math.max(1, parseInt(addOnQtyEl && addOnQtyEl.value, 10) || 1);
+                addOnCents = addOnUnitPrice * addOnQty;
+                html += '<div style="display:flex;justify-content:space-between;margin-top:4px;"><span>' + addOnOpt.textContent.split(' — ')[0] + ' &times; ' + addOnQty + '</span><span>$' + (addOnCents / 100).toFixed(2) + '</span></div>';
+            }
+
+            var totalCents = Math.max(0, subtotalCents - discountCents) + addOnCents;
 
             detailsDiv.innerHTML = html;
             totalDiv.textContent = '$' + (totalCents / 100).toFixed(2);
@@ -1372,6 +1414,11 @@
             }
             if (lineItems && lineItems.length) {
                 payload.lineItems = lineItems;
+            }
+            var addOnSelFinal = document.getElementById('detailAddOnSelect');
+            if (addOnSelFinal && addOnSelFinal.value) {
+                var addOnQtyFinal = document.getElementById('detailAddOnQty');
+                payload.addOns = [{ id: addOnSelFinal.value, qty: Math.max(1, parseInt(addOnQtyFinal && addOnQtyFinal.value, 10) || 1) }];
             }
 
             fetch('/.netlify/functions/event-register', {
