@@ -3266,8 +3266,59 @@
       "sgEventId": "PxN3uUu2QTKdxj948TeeGA",
       "userAgent": "Mozilla/5.0",
       "category": "quarry-marketing"
+    },
+    {
+      "ts": "2026-09-04T16:00:42.969Z",
+      "type": "poll",
+      "draftId": "b77443f3-be7f-4362-b64c-70fe1ecf5da6",
+      "sendId": "888265ec-a86e-11f1-9452-ca237448ef6d",
+      "summary": {
+        "opens": 214,
+        "clicks": 29,
+        "bounces": 19,
+        "unsubs": 0
+      }
+    },
+    {
+      "ts": "2026-09-04T16:00:43.373Z",
+      "type": "poll",
+      "draftId": "249ddf3b-2fac-4d34-b3fe-c73fe1566ada",
+      "sendId": "ecac3c0c-a86f-11f1-9def-fa6afed9638b",
+      "summary": {
+        "opens": 226,
+        "clicks": 27,
+        "bounces": 10,
+        "unsubs": 0
+      }
     }
   ],
-  "aggregates": {},
-  "updatedAt": "2026-09-04T15:59:59.832Z"
+  "aggregates": {
+    "b77443f3-be7f-4362-b64c-70fe1ecf5da6": {
+      "requests": 1374,
+      "delivered": 1337,
+      "open": 250,
+      "uniqueOpen": 214,
+      "click": 224,
+      "uniqueClick": 29,
+      "bounce": 19,
+      "unsubscribe": 0,
+      "spamreport": 0,
+      "block": 0,
+      "lastPolledAt": "2026-09-04T16:00:42.968Z"
+    },
+    "249ddf3b-2fac-4d34-b3fe-c73fe1566ada": {
+      "requests": 1374,
+      "delivered": 1336,
+      "open": 264,
+      "uniqueOpen": 226,
+      "click": 205,
+      "uniqueClick": 27,
+      "bounce": 10,
+      "unsubscribe": 0,
+      "spamreport": 0,
+      "block": 0,
+      "lastPolledAt": "2026-09-04T16:00:43.373Z"
+    }
+  },
+  "updatedAt": "2026-09-04T16:00:43.373Z"
 }
