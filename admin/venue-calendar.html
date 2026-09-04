@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Quarry — Venue Day View</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #f4f5f7;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --bg-elevated: #f0f1f3;
+            --bg-hover: #eef0f4;
+            --border-subtle: #e0e3e8;
+            --border-medium: #cdd1d8;
+            --text-primary: #1c1f26;
+            --text-secondary: #4b5263;
+            --text-muted: #858d9e;
+            --gold: #9a7b2a;
+            --gold-light: #b08e30;
+            --gold-dim: rgba(154, 123, 42, 0.07);
+            --green: #16a34a;
+            --green-dim: rgba(22, 163, 74, 0.08);
+            --red: #dc2626;
+            --red-dim: rgba(220, 38, 38, 0.06);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04), 0 1px 4px rgba(0,0,0,0.03);
+            --shadow-md: 0 2px 8px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+            --shadow-lg: 0 4px 12px rgba(0,0,0,0.06), 0 12px 40px rgba(0,0,0,0.08);
+            --font-sans: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-serif: 'Playfair Display', Georgia, serif;
+        }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; min-height: 100%; background: var(--bg-primary); color: var(--text-primary); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+        .hidden { display: none !important; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 3px; }
+
+        /* ---- Login overlay (same pattern/token as admin/index.html) ---- */
+        #loginOverlay { position: fixed; inset: 0; background: var(--bg-primary); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+        .login-container { background: var(--bg-card); border: 1px solid var(--border-subtle); padding: 2.5rem 2rem; border-radius: var(--radius-lg); width: 100%; max-width: 380px; box-shadow: var(--shadow-lg); }
+        .login-header { font-family: var(--font-serif); font-size: 2rem; color: var(--gold); margin-bottom: 0.5rem; text-align: center; font-weight: 700; letter-spacing: 3px; }
+        .login-subtitle { text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 2rem; letter-spacing: 1px; }
+        .login-form { display: flex; flex-direction: column; gap: 1.25rem; }
+        .login-form input { background: var(--bg-primary); border: 1px solid var(--border-subtle); color: var(--text-primary); padding: 0.8rem 1rem; border-radius: var(--radius-sm); font-size: 0.95rem; font-family: var(--font-sans); }
+        .login-form input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-dim); }
+        .login-button { background: var(--gold); color: #fff; border: none; padding: 0.8rem; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; font-size: 0.95rem; font-family: var(--font-sans); letter-spacing: 0.5px; }
+        .login-button:hover { background: var(--gold-light); }
+        .login-error { color: var(--red); text-align: center; font-size: 0.85rem; min-height: 1.1em; }
+
+        /* ---- App shell ---- */
+        #mainApp { max-width: 1180px; margin: 0 auto; padding: 28px 24px 80px; }
+        .topbar { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 22px; }
+        .topbar h1 { font-family: var(--font-serif); font-size: 1.7rem; color: var(--text-primary); }
+        .topbar h1 span { color: var(--gold); }
+        .topbar a.back { font-size: 0.8rem; color: var(--text-muted); text-decoration: none; }
+        .topbar a.back:hover { color: var(--gold); }
+
+        .controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 12px 16px; margin-bottom: 20px; box-shadow: var(--shadow-sm); }
+        .controls .navbtn { background: var(--bg-elevated); border: 1px solid var(--border-subtle); color: var(--text-primary); width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; }
+        .controls .navbtn:hover { background: var(--gold-dim); border-color: var(--gold); }
+        .controls input[type=date] { border: 1px solid var(--border-subtle); border-radius: 8px; padding: 6px 10px; font-family: var(--font-sans); font-size: 0.85rem; background: var(--bg-primary); color: var(--text-primary); }
+        .controls select { border: 1px solid var(--border-subtle); border-radius: 8px; padding: 6px 10px; font-family: var(--font-sans); font-size: 0.85rem; background: var(--bg-primary); color: var(--text-primary); }
+        .controls .today-btn { border: 1px solid var(--gold); color: var(--gold); background: transparent; border-radius: 8px; padding: 6px 12px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+        .controls .today-btn:hover { background: var(--gold-dim); }
+        .controls .spacer { flex: 1; }
+        .controls .refresh { font-size: 0.75rem; color: var(--text-muted); }
+
+        .alertbar { background: var(--red-dim); border: 1px solid rgba(220,38,38,0.3); color: var(--red); border-radius: var(--radius-md); padding: 12px 16px; margin-bottom: 18px; font-size: 0.85rem; }
+        .alertbar strong { display:block; margin-bottom:4px; }
+
+        .daygroup { margin-bottom: 30px; }
+        .daygroup-header { font-family: var(--font-serif); font-size: 1.15rem; color: var(--text-primary); border-bottom: 2px solid var(--gold-dim); padding-bottom: 8px; margin-bottom: 14px; display:flex; align-items:baseline; gap:10px; }
+        .daygroup-header .count { font-family: var(--font-sans); font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
+        .empty-day { color: var(--text-muted); font-size: 0.85rem; font-style: italic; padding: 6px 0 0; }
+
+        .space-block { margin-bottom: 14px; }
+        .space-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 600; margin-bottom: 6px; display:flex; align-items:center; gap:6px; }
+        .space-title .dot { width:8px; height:8px; border-radius:50%; display:inline-block; }
+
+        .bcard { background: var(--bg-card); border: 1px solid var(--border-subtle); border-left: 4px solid var(--gold); border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 8px; box-shadow: var(--shadow-sm); cursor: pointer; }
+        .bcard:hover { box-shadow: var(--shadow-md); }
+        .bcard .row1 { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+        .bcard .title { font-weight: 600; font-size: 0.92rem; }
+        .bcard .time { font-size: 0.8rem; color: var(--text-secondary); white-space: nowrap; }
+        .bcard .meta { font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; }
+        .badge { display: inline-block; font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 999px; margin-left: 6px; }
+        .badge.status-confirmed { background: var(--green-dim); color: var(--green); }
+        .badge.status-tentative { background: rgba(180,83,9,0.09); color: #b45309; }
+        .badge.status-inquiry { background: rgba(37,99,235,0.08); color: #2563eb; }
+        .badge.status-completed { background: var(--bg-elevated); color: var(--text-muted); }
+        .badge.needs-space { background: var(--red-dim); color: var(--red); }
+
+        .details { display:none; margin-top:10px; padding-top:10px; border-top: 1px dashed var(--border-subtle); font-size: 0.82rem; color: var(--text-secondary); }
+        .details.open { display:block; }
+        .details div { margin-bottom: 4px; }
+        .details b { color: var(--text-primary); }
+
+        .legend { display: flex; flex-wrap: wrap; gap: 10px 16px; margin: 18px 0 26px; font-size: 0.72rem; color: var(--text-muted); }
+        .legend .item { display: flex; align-items: center; gap: 5px; }
+        .legend .dot { width: 9px; height: 9px; border-radius: 50%; }
+
+        .loading, .err { text-align: center; padding: 60px 20px; color: var(--text-muted); font-size: 0.9rem; }
+        .err { color: var(--red); }
+    </style>
+</head>
+<body>
+
+    <div id="loginOverlay">
+        <div class="login-container">
+            <div class="login-header">THE QUARRY</div>
+            <div class="login-subtitle">Venue Day View — Staff Only</div>
+            <form class="login-form" id="loginForm">
+                <input type="password" id="passwordInput" placeholder="Enter admin password" required autocomplete="current-password">
+                <button type="submit" class="login-button">Sign In</button>
+                <div class="login-error" id="loginError"></div>
+            </form>
+        </div>
+    </div>
+
+    <div id="mainApp" class="hidden">
+        <div class="topbar">
+            <h1>Venue <span>Day View</span></h1>
+            <a class="back" href="/admin/">&larr; Back to Admin</a>
+        </div>
+
+        <div class="controls">
+            <button class="navbtn" id="prevBtn" title="Previous">&larr;</button>
+            <input type="date" id="dateInput">
+            <button class="navbtn" id="nextBtn" title="Next">&rarr;</button>
+            <button class="today-btn" id="todayBtn">Today</button>
+            <select id="spanSelect">
+                <option value="1">1 day</option>
+                <option value="3">3 days</option>
+                <option value="7" selected>7 days</option>
+                <option value="14">14 days</option>
+                <option value="30">30 days</option>
+            </select>
+            <div class="spacer"></div>
+            <span class="refresh" id="refreshNote"></span>
+        </div>
+
+        <div id="alertZone"></div>
+        <div id="legendZone" class="legend hidden"></div>
+        <div id="resultZone"><div class="loading">Loading…</div></div>
+    </div>
+
+<script>
+(function () {
+    var API_LOGIN = '/.netlify/functions/verify-admin-password';
+    var API_DATA = '/.netlify/functions/venue-day-view';
+
+    var EVENT_COLORS = {
+        wedding: '#9a7b2a', rehearsal_dinner: '#2563eb', birthday: '#d6336c',
+        private_event: '#6b7280', bridal_shower: '#8b5cf6', wine_club: '#16a34a',
+        baby_shower: '#0d9488', corporate: '#1e3a8a', engagement_party: '#e11d48',
+        anniversary: '#ea580c', reunion: '#78350f', bachelorette: '#c026d3',
+        bingo: '#0891b2', market_event: '#65a30d', fundraiser: '#dc2626',
+        retirement_party: '#475569', holiday_party: '#b91c1c', pop_up_bar: '#d97706',
+        celebration_of_life: '#4b5563', golf: '#2f6b4f'
+    };
+    function colorFor(type) { return EVENT_COLORS[type] || '#9a7b2a'; }
+    function labelize(s) { return String(s || '').replace(/_/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); }); }
+
+    var SPACE_ORDER = ['whole-venue', 'building', 'golf', 'bay-1', 'bay-2', 'bay-3', 'bay-4', 'upper-patio', 'lower-patio', 'back-patio', 'turf'];
+
+    // ---------------- AUTH ----------------
+    function showApp() {
+        document.getElementById('loginOverlay').classList.add('hidden');
+        document.getElementById('mainApp').classList.remove('hidden');
+        init();
+    }
+
+    (function restoreSession() {
+        var tok = localStorage.getItem('quarryAdminToken');
+        if (!tok) return;
+        fetch(API_LOGIN, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'verify', token: tok }) })
+            .then(function (r) { return r.json(); })
+            .then(function (body) { if (body.ok) showApp(); })
+            .catch(function () {});
+    })();
+
+    document.getElementById('loginForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var password = (document.getElementById('passwordInput').value || '').trim();
+        var errorEl = document.getElementById('loginError');
+        errorEl.textContent = 'Verifying…';
+        fetch(API_LOGIN, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: password }) })
+            .then(function (r) { return r.json(); })
+            .then(function (body) {
+                if (body.ok) {
+                    if (body.token) localStorage.setItem('quarryAdminToken', body.token);
+                    showApp();
+                } else {
+                    errorEl.textContent = 'Incorrect password.';
+                }
+            })
+            .catch(function () { errorEl.textContent = 'Could not reach the server.'; });
+    });
+
+    // ---------------- APP STATE ----------------
+    var state = { start: todayStr(), days: 7, spacesById: {} };
+
+    function todayStr() {
+        var d = new Date();
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+    function addDays(ymd, n) {
+        var parts = ymd.split('-').map(Number);
+        var d = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+        d.setUTCDate(d.getUTCDate() + n);
+        return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0') + '-' + String(d.getUTCDate()).padStart(2, '0');
+    }
+    function fmtDayHeader(ymd) {
+        var parts = ymd.split('-').map(Number);
+        var d = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+        return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+    }
+    function fmtTime(iso) {
+        return new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Chicago' });
+    }
+
+    function init() {
+        document.getElementById('dateInput').value = state.start;
+        document.getElementById('spanSelect').value = String(state.days);
+        document.getElementById('prevBtn').addEventListener('click', function () { navigate(-1); });
+        document.getElementById('nextBtn').addEventListener('click', function () { navigate(1); });
+        document.getElementById('todayBtn').addEventListener('click', function () { state.start = todayStr(); document.getElementById('dateInput').value = state.start; load(); });
+        document.getElementById('dateInput').addEventListener('change', function (e) { state.start = e.target.value; load(); });
+        document.getElementById('spanSelect').addEventListener('change', function (e) { state.days = parseInt(e.target.value, 10); load(); });
+        load();
+    }
+
+    function navigate(dir) {
+        var step = state.days > 1 ? state.days : 1;
+        state.start = addDays(state.start, dir * step);
+        document.getElementById('dateInput').value = state.start;
+        load();
+    }
+
+    function load() {
+        var resultZone = document.getElementById('resultZone');
+        resultZone.innerHTML = '<div class="loading">Loading…</div>';
+        var tok = localStorage.getItem('quarryAdminToken') || '';
+        var url = API_DATA + '?token=' + encodeURIComponent(tok) + '&start=' + encodeURIComponent(state.start) + '&days=' + state.days;
+        fetch(url).then(function (r) { return r.json().then(function (b) { return { status: r.status, body: b }; }); })
+            .then(function (res) {
+                if (res.status !== 200) {
+                    resultZone.innerHTML = '<div class="err">Could not load bookings: ' + (res.body.error || res.status) + '</div>';
+                    return;
+                }
+                render(res.body);
+            })
+            .catch(function (e) { resultZone.innerHTML = '<div class="err">Network error: ' + e.message + '</div>'; });
+    }
+
+    function render(data) {
+        (data.spaces || []).forEach(function (s) { state.spacesById[s.id] = s; });
+        document.getElementById('refreshNote').textContent = 'Loaded ' + (data.bookings || []).length + ' booking(s) · updated ' + new Date().toLocaleTimeString();
+
+        renderAlerts(data.alerts || []);
+        renderLegend(data.bookings || []);
+
+        var byDay = {};
+        for (var i = 0; i < state.days; i++) byDay[addDays(state.start, i)] = [];
+
+        (data.bookings || []).forEach(function (b) {
+            var s = new Date(b.starts_at), e = new Date(b.ends_at);
+            Object.keys(byDay).forEach(function (ymd) {
+                var parts = ymd.split('-').map(Number);
+                var dayStart = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+                var dayEnd = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2] + 1));
+                if (s < dayEnd && e > dayStart) byDay[ymd].push(b);
+            });
+        });
+
+        var html = '';
+        Object.keys(byDay).sort().forEach(function (ymd) {
+            var bookings = byDay[ymd].slice().sort(function (a, b) { return new Date(a.starts_at) - new Date(b.starts_at); });
+            html += '<div class="daygroup"><div class="daygroup-header">' + fmtDayHeader(ymd) + ' <span class="count">' + bookings.length + ' booking' + (bookings.length === 1 ? '' : 's') + '</span></div>';
+            if (!bookings.length) {
+                html += '<div class="empty-day">Nothing on the books.</div>';
+            } else {
+                var groups = {};
+                bookings.forEach(function (b) {
+                    var key = (b.direct_spaces && b.direct_spaces.length) ? b.direct_spaces.slice().sort().join('+') : '__unassigned';
+                    (groups[key] = groups[key] || []).push(b);
+                });
+                var keys = Object.keys(groups).sort(function (a, b) {
+                    if (a === '__unassigned') return 1;
+                    if (b === '__unassigned') return -1;
+                    return SPACE_ORDER.indexOf(a.split('+')[0]) - SPACE_ORDER.indexOf(b.split('+')[0]);
+                });
+                keys.forEach(function (key) {
+                    var label = key === '__unassigned' ? 'Needs space assignment' :
+                        key.split('+').map(function (id) { return (state.spacesById[id] || {}).name || id; }).join(' + ');
+                    var dotColor = key === '__unassigned' ? '#dc2626' : (state.spacesById[key.split('+')[0]] || {}).color || '#9a7b2a';
+                    html += '<div class="space-block"><div class="space-title"><span class="dot" style="background:' + dotColor + '"></span>' + label + '</div>';
+                    groups[key].forEach(function (b) { html += bookingCard(b); });
+                    html += '</div>';
+                });
+            }
+            html += '</div>';
+        });
+        document.getElementById('resultZone').innerHTML = html || '<div class="empty-day">Nothing on the books.</div>';
+
+        Array.prototype.forEach.call(document.querySelectorAll('.bcard'), function (el) {
+            el.addEventListener('click', function () {
+                var d = el.querySelector('.details');
+                if (d) d.classList.toggle('open');
+            });
+        });
+    }
+
+    function renderAlerts(alerts) {
+        var zone = document.getElementById('alertZone');
+        var unresolved = alerts.filter(function (a) { return !a.resolved_at; });
+        if (!unresolved.length) { zone.innerHTML = ''; return; }
+        var seen = {}, lines = [];
+        unresolved.forEach(function (a) {
+            var k = a.message + '|' + a.booking_id + '|' + a.wedding_id;
+            if (seen[k]) return; seen[k] = true;
+            lines.push(a.message);
+        });
+        zone.innerHTML = '<div class="alertbar"><strong>' + lines.length + ' unresolved conflict alert' + (lines.length === 1 ? '' : 's') + '</strong>' + lines.map(function (l) { return '&bull; ' + l; }).join('<br>') + '</div>';
+    }
+
+    function renderLegend(bookings) {
+        var types = {};
+        bookings.forEach(function (b) { types[b.event_type] = true; });
+        var keys = Object.keys(types).sort();
+        var zone = document.getElementById('legendZone');
+        if (!keys.length) { zone.classList.add('hidden'); return; }
+        zone.classList.remove('hidden');
+        zone.innerHTML = keys.map(function (t) {
+            return '<span class="item"><span class="dot" style="background:' + colorFor(t) + '"></span>' + labelize(t) + '</span>';
+        }).join('');
+    }
+
+    function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+    function bookingCard(b) {
+        var needsSpace = !b.direct_spaces || !b.direct_spaces.length;
+        var statusBadge = '<span class="badge status-' + esc(b.status) + '">' + esc(b.status) + '</span>';
+        var typeBadge = '<span class="badge" style="background:' + colorFor(b.event_type) + '22;color:' + colorFor(b.event_type) + '">' + esc(labelize(b.event_type)) + '</span>';
+        var needsBadge = needsSpace ? '<span class="badge needs-space">Needs space</span>' : '';
+        var timeStr = fmtTime(b.starts_at) + ' – ' + fmtTime(b.ends_at);
+        var meta = [];
+        if (b.guest_count) meta.push(b.guest_count + ' guests');
+        if (b.exclusive) meta.push('Exclusive');
+        if (b.catering_required) meta.push('Catering');
+        if (b.ref) meta.push(b.ref);
+
+        var details = '<div class="details">';
+        details += '<div><b>Contact:</b> ' + esc(b.contact_name || '—') +
+            (b.contact_phone ? ' &middot; ' + esc(b.contact_phone) : '') +
+            (b.contact_email ? ' &middot; ' + esc(b.contact_email) : '') + '</div>';
+        if (b.occasion) details += '<div><b>Occasion:</b> ' + esc(b.occasion) + '</div>';
+        if (b.notes) details += '<div><b>Notes:</b> ' + esc(b.notes) + '</div>';
+        details += '<div><b>Source:</b> ' + esc(b.source || '—') + '</div>';
+        details += '</div>';
+
+        return '<div class="bcard" style="border-left-color:' + colorFor(b.event_type) + '">' +
+            '<div class="row1"><span class="title">' + esc(b.title) + statusBadge + typeBadge + needsBadge + '</span><span class="time">' + timeStr + '</span></div>' +
+            (meta.length ? '<div class="meta">' + meta.map(esc).join(' &middot; ') + '</div>' : '') +
+            details +
+            '</div>';
+    }
+})();
+</script>
+</body>
+</html>
