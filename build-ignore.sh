@@ -32,8 +32,19 @@ set -e
 # files (schedule.json, form submissions, etc.).
 DATA_FILES_REGEX='^(events|bands|members|rewards|menu|credited-orders|scanned-flagged|pending-scans|marketing_drafts|marketing_calendar|marketing_events|marketing_learnings|marketing_crm|marketing_optimization|subscribers|social_drafts|social_calendar|social_events|social_learnings|social_assets|social_optimization|social_event_ideas|reservations|reservations_status|form_submissions|backup_form_submissions|crm_contacts|send_events|email_history|aggregates|inbox|schedule|ai_learnings|toast-discount-map)\.json$'
 
-# What changed in this commit?
-CHANGED=$(git diff --name-only HEAD^ HEAD 2>/dev/null || echo '')
+# What changed since the last commit Netlify actually published?
+#
+# CACHED_COMMIT_REF (set by Netlify) is the commit of the last successful
+# deploy. Diffing against that — not just HEAD^ — is what makes this correct
+# under a flood of rapid data-only commits (e.g. marketing engagement
+# tracking firing one commit per email open/click): each individual commit's
+# own HEAD^..HEAD diff looks data-only in isolation, so a real code commit
+# sitting a few commits back never gets its own turn to be evaluated once
+# more data-only commits land on top of it before Netlify gets to it. Diffing
+# against the last published commit accumulates the whole gap instead, so a
+# code change anywhere in that range still triggers a build.
+BASE_REF="${CACHED_COMMIT_REF:-HEAD^}"
+CHANGED=$(git diff --name-only "$BASE_REF" HEAD 2>/dev/null || echo '')
 
 if [ -z "$CHANGED" ]; then
     # Initial commit, force-push, or detached HEAD — we can't tell, so build.
