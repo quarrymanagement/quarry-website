@@ -109,3 +109,7 @@
 # trigger redeploy 2026-09-01T00:00:00Z - build-ignore.sh only diffs HEAD^..HEAD, so the
 # quarry-calendar.html + events.json push landed on GitHub but the build was skipped
 # because the tip commit looked data-only. Forcing a real build here to pick both up.
+# trigger redeploy 2026-09-04T15:00:00Z - published deploy was stuck on 2026-09-03 22:22 UTC
+# for 16+ hours (dozens of data-only webhook commits since then all got skipped by
+# build-ignore.sh's HEAD^..HEAD diff). Forcing a real build to pick up everything,
+# including the Boots & Bourbon Sept 4 time fix and the venue day-view admin page.
