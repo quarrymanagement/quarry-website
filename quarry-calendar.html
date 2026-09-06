@@ -454,7 +454,10 @@ function cls(ev){
     if (has(ev,"family")) return "t-family";
     return "";
 }
+const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+function isPast(ev){ return parse(ev.date) < TODAY; }
 function matches(ev){
+    if (isPast(ev)) return false;
     if (activeFilter === "all") return true;
     return has(ev, activeFilter);
 }
