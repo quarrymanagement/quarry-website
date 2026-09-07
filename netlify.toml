@@ -113,3 +113,8 @@
 # for 16+ hours (dozens of data-only webhook commits since then all got skipped by
 # build-ignore.sh's HEAD^..HEAD diff). Forcing a real build to pick up everything,
 # including the Boots & Bourbon Sept 4 time fix and the venue day-view admin page.
+# trigger redeploy 2026-09-07T01:10:00Z - APNS_KEY_ID/APNS_TEAM_ID/APNS_AUTH_KEY were just
+# set in Netlify env vars, but manual createSiteDeploy calls (with and without clear_cache)
+# aren't entering the build queue at all right now (account build status shows 0
+# active/enqueued minutes after each attempt). Pushing a real commit instead, since the
+# git-triggered pipeline has been reliable all night.
