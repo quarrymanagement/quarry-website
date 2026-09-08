@@ -107,6 +107,32 @@
 
         .loading, .err { text-align: center; padding: 60px 20px; color: var(--text-muted); font-size: 0.9rem; }
         .err { color: var(--red); }
+
+        /* ---- New Booking form ---- */
+        .new-booking-btn { background: var(--gold); color: #fff; border: none; border-radius: 8px; padding: 6px 14px; font-size: 0.8rem; font-weight: 600; cursor: pointer; font-family: var(--font-sans); }
+        .new-booking-btn:hover { background: var(--gold-light); }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(20,20,24,0.55); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+        .modal-overlay.hidden { display: none; }
+        .modal-box { background: var(--bg-card); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); width: 100%; max-width: 640px; max-height: 90vh; overflow-y: auto; padding: 26px 28px 28px; }
+        .modal-box h2 { font-family: var(--font-serif); font-size: 1.3rem; margin-bottom: 18px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; }
+        .form-grid .full { grid-column: 1 / -1; }
+        .form-grid label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.03em; }
+        .form-grid input, .form-grid select, .form-grid textarea { width: 100%; border: 1px solid var(--border-subtle); border-radius: 8px; padding: 7px 10px; font-family: var(--font-sans); font-size: 0.85rem; background: var(--bg-primary); color: var(--text-primary); }
+        .form-grid textarea { resize: vertical; min-height: 54px; }
+        .space-checks { display: flex; flex-wrap: wrap; gap: 8px 14px; }
+        .space-checks label { display: flex; align-items: center; gap: 5px; font-size: 0.8rem; font-weight: 500; text-transform: none; color: var(--text-primary); }
+        .form-checkbox { display: flex; align-items: center; gap: 6px; }
+        .form-checkbox label { text-transform: none; font-size: 0.82rem; font-weight: 500; margin: 0; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+        .modal-actions button { padding: 8px 18px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; font-family: var(--font-sans); }
+        .modal-cancel { background: transparent; border: 1px solid var(--border-subtle); color: var(--text-secondary); }
+        .modal-cancel:hover { background: var(--bg-elevated); }
+        .modal-submit { background: var(--gold); border: none; color: #fff; }
+        .modal-submit:hover { background: var(--gold-light); }
+        .modal-submit:disabled { opacity: 0.6; cursor: default; }
+        .form-error { color: var(--red); font-size: 0.82rem; margin-top: 10px; min-height: 1.1em; }
+        .form-conflict { background: var(--red-dim); border: 1px solid rgba(220,38,38,0.3); color: var(--red); border-radius: 8px; padding: 10px 12px; margin-top: 10px; font-size: 0.8rem; }
     </style>
 </head>
 <body>
@@ -143,6 +169,7 @@
             </select>
             <div class="spacer"></div>
             <span class="refresh" id="refreshNote"></span>
+            <button class="new-booking-btn" id="newBookingBtn">+ New Booking</button>
         </div>
 
         <div id="alertZone"></div>
@@ -150,10 +177,110 @@
         <div id="resultZone"><div class="loading">Loading…</div></div>
     </div>
 
+    <div id="bookingModal" class="modal-overlay hidden">
+        <div class="modal-box">
+            <h2>New Booking</h2>
+            <form id="bookingForm">
+                <div class="form-grid">
+                    <div class="full">
+                        <label for="bTitle">Event name</label>
+                        <input type="text" id="bTitle" required placeholder="e.g. Smith Birthday Party">
+                    </div>
+                    <div>
+                        <label for="bEventType">Event type</label>
+                        <select id="bEventType"></select>
+                    </div>
+                    <div>
+                        <label for="bStatus">Status</label>
+                        <select id="bStatus">
+                            <option value="confirmed" selected>Confirmed</option>
+                            <option value="tentative">Tentative</option>
+                            <option value="inquiry">Inquiry</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="bStart">Starts</label>
+                        <input type="datetime-local" id="bStart" required>
+                    </div>
+                    <div>
+                        <label for="bEnd">Ends</label>
+                        <input type="datetime-local" id="bEnd" required>
+                    </div>
+                    <div class="full">
+                        <label>Spaces</label>
+                        <div class="space-checks" id="spaceChecks"></div>
+                    </div>
+                    <div class="full form-checkbox">
+                        <input type="checkbox" id="bExclusive">
+                        <label for="bExclusive">Exclusive (whole-venue buyout — blocks other bookings)</label>
+                    </div>
+                    <div>
+                        <label for="bGuestCount">Guest count</label>
+                        <input type="number" id="bGuestCount" min="0">
+                    </div>
+                    <div>
+                        <label for="bOccasion">Occasion</label>
+                        <input type="text" id="bOccasion">
+                    </div>
+                    <div>
+                        <label for="bContactName">Name</label>
+                        <input type="text" id="bContactName" required>
+                    </div>
+                    <div>
+                        <label for="bCompany">Company (optional)</label>
+                        <input type="text" id="bCompany">
+                    </div>
+                    <div>
+                        <label for="bContactPhone">Phone</label>
+                        <input type="tel" id="bContactPhone">
+                    </div>
+                    <div>
+                        <label for="bContactEmail">Email</label>
+                        <input type="email" id="bContactEmail">
+                    </div>
+                    <div class="full" style="margin-top:-6px;">
+                        <span style="font-size:0.72rem;color:var(--text-muted);">Phone or email — at least one is required.</span>
+                    </div>
+                    <div class="full form-checkbox">
+                        <input type="checkbox" id="bCateringRequired">
+                        <label for="bCateringRequired">Catering</label>
+                    </div>
+                    <div class="full">
+                        <label for="bCateringPackage">Catering details</label>
+                        <input type="text" id="bCateringPackage" placeholder="e.g. Plated dinner for 80, bar package B">
+                    </div>
+                    <div>
+                        <label for="bDepositPaid">Deposit paid ($)</label>
+                        <input type="number" id="bDepositPaid" min="0" step="0.01">
+                    </div>
+                    <div>
+                        <label for="bBalanceDue">Money owed ($)</label>
+                        <input type="number" id="bBalanceDue" min="0" step="0.01">
+                    </div>
+                    <div>
+                        <label for="bBookedBy">Booked by</label>
+                        <input type="text" id="bBookedBy" placeholder="Your name">
+                    </div>
+                    <div class="full">
+                        <label for="bNotes">Additional notes</label>
+                        <textarea id="bNotes"></textarea>
+                    </div>
+                </div>
+                <div class="form-error" id="bFormError"></div>
+                <div id="bConflictZone"></div>
+                <div class="modal-actions">
+                    <button type="button" class="modal-cancel" id="bCancelBtn">Cancel</button>
+                    <button type="submit" class="modal-submit" id="bSubmitBtn">Save Booking</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 <script>
 (function () {
     var API_LOGIN = '/.netlify/functions/verify-admin-password';
     var API_DATA = '/.netlify/functions/venue-day-view';
+    var API_BOOKING_WRITE = '/.netlify/functions/venue-booking-write';
 
     var EVENT_COLORS = {
         wedding: '#9a7b2a', rehearsal_dinner: '#2563eb', birthday: '#d6336c',
@@ -168,6 +295,12 @@
     function labelize(s) { return String(s || '').replace(/_/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); }); }
 
     var SPACE_ORDER = ['whole-venue', 'building', 'golf', 'bay-1', 'bay-2', 'bay-3', 'bay-4', 'upper-patio', 'lower-patio', 'back-patio', 'turf'];
+    var SPACE_NAMES = {
+        'whole-venue': 'Whole Venue (Buyout)', 'building': 'Building (Indoor Dining & Bar)',
+        'golf': 'Golf Simulator Area', 'bay-1': 'Golf Bay 1', 'bay-2': 'Golf Bay 2',
+        'bay-3': 'Golf Bay 3', 'bay-4': 'Golf Bay 4', 'upper-patio': 'Upper Patio',
+        'lower-patio': 'Lower Patio', 'back-patio': 'Back Patio', 'turf': 'Turf / Lawn'
+    };
 
     // ---------------- AUTH ----------------
     function showApp() {
@@ -233,7 +366,116 @@
         document.getElementById('todayBtn').addEventListener('click', function () { state.start = todayStr(); document.getElementById('dateInput').value = state.start; load(); });
         document.getElementById('dateInput').addEventListener('change', function (e) { state.start = e.target.value; load(); });
         document.getElementById('spanSelect').addEventListener('change', function (e) { state.days = parseInt(e.target.value, 10); load(); });
+        initBookingForm();
         load();
+    }
+
+    // ---------------- NEW BOOKING FORM ----------------
+    function initBookingForm() {
+        var typeSelect = document.getElementById('bEventType');
+        typeSelect.innerHTML = Object.keys(EVENT_COLORS).map(function (t) {
+            return '<option value="' + t + '">' + labelize(t) + '</option>';
+        }).join('');
+
+        var spaceZone = document.getElementById('spaceChecks');
+        spaceZone.innerHTML = SPACE_ORDER.map(function (id) {
+            return '<label><input type="checkbox" value="' + id + '" class="space-check"> ' + (SPACE_NAMES[id] || id) + '</label>';
+        }).join('');
+
+        var overlay = document.getElementById('bookingModal');
+        var form = document.getElementById('bookingForm');
+
+        function openModal() {
+            form.reset();
+            document.getElementById('bFormError').textContent = '';
+            document.getElementById('bConflictZone').innerHTML = '';
+            var defaultStart = state.start + 'T18:00';
+            var defaultEnd = state.start + 'T22:00';
+            document.getElementById('bStart').value = defaultStart;
+            document.getElementById('bEnd').value = defaultEnd;
+            overlay.classList.remove('hidden');
+        }
+        function closeModal() { overlay.classList.add('hidden'); }
+
+        document.getElementById('newBookingBtn').addEventListener('click', openModal);
+        document.getElementById('bCancelBtn').addEventListener('click', closeModal);
+        overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var errorEl = document.getElementById('bFormError');
+            var conflictZone = document.getElementById('bConflictZone');
+            var submitBtn = document.getElementById('bSubmitBtn');
+            errorEl.textContent = '';
+            conflictZone.innerHTML = '';
+
+            var startVal = document.getElementById('bStart').value;
+            var endVal = document.getElementById('bEnd').value;
+            if (!startVal || !endVal) { errorEl.textContent = 'Start and end times are required.'; return; }
+
+            var spaceIds = Array.prototype.slice.call(document.querySelectorAll('.space-check:checked')).map(function (el) { return el.value; });
+
+            var phoneVal = document.getElementById('bContactPhone').value.trim();
+            var emailVal = document.getElementById('bContactEmail').value.trim();
+            if (!phoneVal && !emailVal) { errorEl.textContent = 'Enter a phone number or an email — at least one is required.'; return; }
+
+            var payload = {
+                token: localStorage.getItem('quarryAdminToken') || '',
+                title: document.getElementById('bTitle').value.trim(),
+                event_type: typeSelect.value,
+                status: document.getElementById('bStatus').value,
+                exclusive: document.getElementById('bExclusive').checked,
+                starts_at: new Date(startVal).toISOString(),
+                ends_at: new Date(endVal).toISOString(),
+                guest_count: document.getElementById('bGuestCount').value ? parseInt(document.getElementById('bGuestCount').value, 10) : null,
+                occasion: document.getElementById('bOccasion').value.trim() || null,
+                contact_name: document.getElementById('bContactName').value.trim() || null,
+                contact_phone: phoneVal || null,
+                contact_email: emailVal || null,
+                company: document.getElementById('bCompany').value.trim() || null,
+                catering_required: document.getElementById('bCateringRequired').checked,
+                catering_package: document.getElementById('bCateringPackage').value.trim() || null,
+                deposit_paid: document.getElementById('bDepositPaid').value ? parseFloat(document.getElementById('bDepositPaid').value) : null,
+                balance_due: document.getElementById('bBalanceDue').value ? parseFloat(document.getElementById('bBalanceDue').value) : null,
+                booked_by: document.getElementById('bBookedBy').value.trim() || null,
+                notes: document.getElementById('bNotes').value.trim() || null,
+                space_ids: spaceIds,
+            };
+
+            if (!payload.title) { errorEl.textContent = 'Event name is required.'; return; }
+            if (!payload.contact_name) { errorEl.textContent = 'Name is required.'; return; }
+            if (new Date(payload.ends_at) <= new Date(payload.starts_at)) { errorEl.textContent = 'End time must be after start time.'; return; }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Saving…';
+
+            fetch(API_BOOKING_WRITE, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+                .then(function (r) { return r.json().then(function (b) { return { status: r.status, body: b }; }); })
+                .then(function (res) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Save Booking';
+                    if (res.status !== 201) {
+                        errorEl.textContent = 'Could not save: ' + (res.body.error || res.status);
+                        return;
+                    }
+                    if (res.body.conflicts && res.body.conflicts.length) {
+                        conflictZone.innerHTML = res.body.conflicts.map(function (c) {
+                            return '<div class="form-conflict">⚠ ' + (c.message || 'Possible double-booking.') + '</div>';
+                        }).join('');
+                        // Leave the modal open so staff can see the conflict before deciding
+                        // whether to adjust — the booking itself is already saved either way.
+                        load();
+                        return;
+                    }
+                    closeModal();
+                    load();
+                })
+                .catch(function (e) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Save Booking';
+                    errorEl.textContent = 'Network error: ' + e.message;
+                });
+        });
     }
 
     function navigate(dir) {
@@ -269,13 +511,14 @@
         var byDay = {};
         for (var i = 0; i < state.days; i++) byDay[addDays(state.start, i)] = [];
 
+        // Bucket by the venue's local calendar day, not the UTC day — a booking
+        // starting at 8pm Central is already after midnight UTC, so comparing
+        // raw UTC day windows was pushing evening bookings onto the next day.
         (data.bookings || []).forEach(function (b) {
-            var s = new Date(b.starts_at), e = new Date(b.ends_at);
+            var startYmd = new Date(b.starts_at).toLocaleDateString('en-CA', { timeZone: 'America/Chicago' });
+            var endYmd = new Date(b.ends_at).toLocaleDateString('en-CA', { timeZone: 'America/Chicago' });
             Object.keys(byDay).forEach(function (ymd) {
-                var parts = ymd.split('-').map(Number);
-                var dayStart = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
-                var dayEnd = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2] + 1));
-                if (s < dayEnd && e > dayStart) byDay[ymd].push(b);
+                if (ymd >= startYmd && ymd <= endYmd) byDay[ymd].push(b);
             });
         });
 
@@ -363,6 +606,18 @@
         if (b.occasion) details += '<div><b>Occasion:</b> ' + esc(b.occasion) + '</div>';
         if (b.notes) details += '<div><b>Notes:</b> ' + esc(b.notes) + '</div>';
         details += '<div><b>Source:</b> ' + esc(b.source || '—') + '</div>';
+        // Per-space windows: a wedding's ceremony space usually frees up earlier
+        // than its reception spaces, so only show this breakdown when the spaces
+        // don't all share the booking's own start/end (nothing to add otherwise).
+        var windows = (b.space_windows || []).filter(function (w) { return w.starts_at && w.ends_at; });
+        var varies = windows.some(function (w) { return w.starts_at !== b.starts_at || w.ends_at !== b.ends_at; });
+        if (windows.length && varies) {
+            details += '<div><b>Space availability:</b></div>';
+            windows.forEach(function (w) {
+                var label = (state.spacesById[w.space_id] || {}).name || w.space_id;
+                details += '<div style="padding-left:10px;">' + esc(label) + ': ' + fmtTime(w.starts_at) + ' – ' + fmtTime(w.ends_at) + '</div>';
+            });
+        }
         details += '</div>';
 
         return '<div class="bcard" style="border-left-color:' + colorFor(b.event_type) + '">' +
