@@ -118,10 +118,11 @@
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; }
         .form-grid .full { grid-column: 1 / -1; }
         .form-grid label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.03em; }
-        .form-grid input, .form-grid select, .form-grid textarea { width: 100%; border: 1px solid var(--border-subtle); border-radius: 8px; padding: 7px 10px; font-family: var(--font-sans); font-size: 0.85rem; background: var(--bg-primary); color: var(--text-primary); }
+        .form-grid input:not([type="checkbox"]), .form-grid select, .form-grid textarea { width: 100%; border: 1px solid var(--border-subtle); border-radius: 8px; padding: 7px 10px; font-family: var(--font-sans); font-size: 0.85rem; background: var(--bg-primary); color: var(--text-primary); box-sizing: border-box; }
         .form-grid textarea { resize: vertical; min-height: 54px; }
-        .space-checks { display: flex; flex-wrap: wrap; gap: 8px 14px; }
-        .space-checks label { display: flex; align-items: center; gap: 5px; font-size: 0.8rem; font-weight: 500; text-transform: none; color: var(--text-primary); }
+        .form-grid input[type="checkbox"] { width: 16px; height: 16px; flex-shrink: 0; margin: 0; accent-color: var(--gold); }
+        .space-checks { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px 14px; }
+        .space-checks label { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 500; text-transform: none; color: var(--text-primary); white-space: nowrap; }
         .form-checkbox { display: flex; align-items: center; gap: 6px; }
         .form-checkbox label { text-transform: none; font-size: 0.82rem; font-weight: 500; margin: 0; }
         .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
@@ -258,8 +259,8 @@
                         <input type="number" id="bBalanceDue" min="0" step="0.01">
                     </div>
                     <div>
-                        <label for="bBookedBy">Booked by</label>
-                        <input type="text" id="bBookedBy" placeholder="Your name">
+                        <label for="bBookedBy">Employee name</label>
+                        <input type="text" id="bBookedBy" placeholder="Who's entering this booking?">
                     </div>
                     <div class="full">
                         <label for="bNotes">Additional notes</label>
@@ -514,9 +515,13 @@
         // Bucket by the venue's local calendar day, not the UTC day — a booking
         // starting at 8pm Central is already after midnight UTC, so comparing
         // raw UTC day windows was pushing evening bookings onto the next day.
+        // ends_at is an exclusive boundary — a wedding block that runs midnight
+        // to midnight ends exactly AT the next calendar date, so subtract a
+        // moment before reading its local day, or it double-counts onto that
+        // next day too.
         (data.bookings || []).forEach(function (b) {
             var startYmd = new Date(b.starts_at).toLocaleDateString('en-CA', { timeZone: 'America/Chicago' });
-            var endYmd = new Date(b.ends_at).toLocaleDateString('en-CA', { timeZone: 'America/Chicago' });
+            var endYmd = new Date(new Date(b.ends_at).getTime() - 1).toLocaleDateString('en-CA', { timeZone: 'America/Chicago' });
             Object.keys(byDay).forEach(function (ymd) {
                 if (ymd >= startYmd && ymd <= endYmd) byDay[ymd].push(b);
             });
@@ -592,7 +597,11 @@
         var statusBadge = '<span class="badge status-' + esc(b.status) + '">' + esc(b.status) + '</span>';
         var typeBadge = '<span class="badge" style="background:' + colorFor(b.event_type) + '22;color:' + colorFor(b.event_type) + '">' + esc(labelize(b.event_type)) + '</span>';
         var needsBadge = needsSpace ? '<span class="badge needs-space">Needs space</span>' : '';
-        var timeStr = fmtTime(b.starts_at) + ' – ' + fmtTime(b.ends_at);
+        var startLabel = fmtTime(b.starts_at), endLabel = fmtTime(b.ends_at);
+        // A booking blocked start-of-day to start-of-day is a full-day hold (the
+        // default for a wedding with no per-space windows narrowed yet) — "12:00
+        // AM – 12:00 AM" reads like a data error, not "all day".
+        var timeStr = (startLabel === '12:00 AM' && endLabel === '12:00 AM') ? 'All day' : (startLabel + ' – ' + endLabel);
         var meta = [];
         if (b.guest_count) meta.push(b.guest_count + ' guests');
         if (b.exclusive) meta.push('Exclusive');
