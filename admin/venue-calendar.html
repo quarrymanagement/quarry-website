@@ -294,8 +294,8 @@
                         <input type="number" id="bDepositPaid" min="0" step="0.01">
                     </div>
                     <div>
-                        <label for="bBalanceDue">Money owed ($)</label>
-                        <input type="number" id="bBalanceDue" min="0" step="0.01">
+                        <label for="bQuotedTotal">Quoted total ($)</label>
+                        <input type="number" id="bQuotedTotal" min="0" step="0.01" placeholder="Money owed = this minus deposit paid">
                     </div>
                     <div>
                         <label for="bBookedBy">Employee name</label>
@@ -501,7 +501,7 @@
                 document.getElementById('bCateringRequired').checked = !!booking.catering_required;
                 document.getElementById('bCateringPackage').value = booking.catering_package || '';
                 document.getElementById('bDepositPaid').value = booking.deposit_paid != null ? booking.deposit_paid : '';
-                document.getElementById('bBalanceDue').value = booking.balance_due != null ? booking.balance_due : '';
+                document.getElementById('bQuotedTotal').value = booking.quoted_total != null ? booking.quoted_total : '';
                 document.getElementById('bBookedBy').value = booking.booked_by || '';
                 document.getElementById('bNotes').value = booking.notes || '';
                 var selectedSpaces = booking.direct_spaces || [];
@@ -570,7 +570,7 @@
                 catering_required: document.getElementById('bCateringRequired').checked,
                 catering_package: document.getElementById('bCateringPackage').value.trim() || null,
                 deposit_paid: document.getElementById('bDepositPaid').value ? parseFloat(document.getElementById('bDepositPaid').value) : null,
-                balance_due: document.getElementById('bBalanceDue').value ? parseFloat(document.getElementById('bBalanceDue').value) : null,
+                quoted_total: document.getElementById('bQuotedTotal').value ? parseFloat(document.getElementById('bQuotedTotal').value) : null,
                 booked_by: document.getElementById('bBookedBy').value.trim() || null,
                 notes: document.getElementById('bNotes').value.trim() || null,
                 space_ids: spaceIds,
