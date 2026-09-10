@@ -230,6 +230,10 @@
                         <label for="bEventType">Event type</label>
                         <select id="bEventType"></select>
                     </div>
+                    <div id="bEventTypeOtherWrap" class="hidden">
+                        <label for="bEventTypeOther">What kind of event?</label>
+                        <input type="text" id="bEventTypeOther" placeholder="e.g. Trivia Night">
+                    </div>
                     <div>
                         <label for="bStatus">Status</label>
                         <select id="bStatus">
@@ -459,13 +463,50 @@
         return map.year + '-' + map.month + '-' + map.day + 'T' + hour + ':' + map.minute;
     }
 
-    var openModal, closeModal;
+    // The calendar always shows and expects Central time (see toLocalInputValue
+    // above), but a plain `new Date(datetimeLocalValue)` interprets that string
+    // in the BROWSER'S OWN device timezone, not Central — on any device that
+    // isn't itself set to Central time, this silently shifts every booking's
+    // saved time (and sometimes its calendar day) away from what was picked.
+    // This does the reverse of toLocalInputValue: given a "YYYY-MM-DDTHH:MM"
+    // wall-clock value meant as Central time, find the real UTC instant it
+    // corresponds to, correctly across the DST boundary.
+    function centralInputToUTCISO(inputValue) {
+        var m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(inputValue || '');
+        if (!m) return null;
+        // First, a naive guess: treat the wall-clock value as if it were UTC.
+        var guess = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]));
+        // Then ask what that instant actually reads as in Chicago — the gap
+        // between the two is exactly Chicago's UTC offset on that date (correct
+        // across CST/CDT since we're asking about this specific date).
+        var parts = new Intl.DateTimeFormat('en-US', {
+            timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit',
+            hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+        }).formatToParts(guess);
+        var map = {};
+        parts.forEach(function (p) { map[p.type] = p.value; });
+        var hour = map.hour === '24' ? 0 : +map.hour;
+        var asIfChicago = Date.UTC(+map.year, +map.month - 1, +map.day, hour, +map.minute, +map.second);
+        return new Date(guess.getTime() + (guess.getTime() - asIfChicago)).toISOString();
+    }
+
+    function slugifyEventType(text) {
+        return String(text || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+    }
 
     function initBookingForm() {
         var typeSelect = document.getElementById('bEventType');
+        var otherWrap = document.getElementById('bEventTypeOtherWrap');
+        var otherInput = document.getElementById('bEventTypeOther');
         typeSelect.innerHTML = Object.keys(EVENT_COLORS).map(function (t) {
             return '<option value="' + t + '">' + labelize(t) + '</option>';
-        }).join('');
+        }).join('') + '<option value="__other__">Other…</option>';
+
+        typeSelect.addEventListener('change', function () {
+            var isOther = typeSelect.value === '__other__';
+            otherWrap.classList.toggle('hidden', !isOther);
+            if (isOther) otherInput.focus();
+        });
 
         var spaceZone = document.getElementById('spaceChecks');
         spaceZone.innerHTML = SPACE_ORDER.map(function (id) {
@@ -485,9 +526,19 @@
             titleEl.textContent = booking ? 'Edit Booking' : 'New Booking';
             submitBtn.textContent = booking ? 'Save Changes' : 'Save Booking';
 
+            otherWrap.classList.add('hidden');
+            otherInput.value = '';
+
             if (booking) {
                 document.getElementById('bTitle').value = booking.title || '';
-                typeSelect.value = booking.event_type || '';
+                var knownType = EVENT_COLORS.hasOwnProperty(booking.event_type || '');
+                if (booking.event_type && !knownType) {
+                    typeSelect.value = '__other__';
+                    otherWrap.classList.remove('hidden');
+                    otherInput.value = labelize(booking.event_type);
+                } else {
+                    typeSelect.value = booking.event_type || '';
+                }
                 document.getElementById('bStatus').value = booking.status || 'confirmed';
                 document.getElementById('bStart').value = toLocalInputValue(booking.starts_at);
                 document.getElementById('bEnd').value = toLocalInputValue(booking.ends_at);
@@ -551,16 +602,21 @@
             var emailVal = document.getElementById('bContactEmail').value.trim();
             if (!phoneVal && !emailVal) { errorEl.textContent = 'Enter a phone number or an email — at least one is required.'; return; }
 
+            var isOtherType = typeSelect.value === '__other__';
+            var otherTypeText = document.getElementById('bEventTypeOther').value.trim();
+            if (isOtherType && !otherTypeText) { errorEl.textContent = 'Enter what kind of event this is.'; return; }
+            var eventTypeValue = isOtherType ? slugifyEventType(otherTypeText) : typeSelect.value;
+
             var isEditing = !!state.editingId;
             var payload = {
                 token: localStorage.getItem('quarryAdminToken') || '',
                 id: isEditing ? state.editingId : undefined,
                 title: document.getElementById('bTitle').value.trim(),
-                event_type: typeSelect.value,
+                event_type: eventTypeValue,
                 status: document.getElementById('bStatus').value,
                 exclusive: document.getElementById('bExclusive').checked,
-                starts_at: new Date(startVal).toISOString(),
-                ends_at: new Date(endVal).toISOString(),
+                starts_at: centralInputToUTCISO(startVal),
+                ends_at: centralInputToUTCISO(endVal),
                 guest_count: document.getElementById('bGuestCount').value ? parseInt(document.getElementById('bGuestCount').value, 10) : null,
                 occasion: document.getElementById('bOccasion').value.trim() || null,
                 contact_name: document.getElementById('bContactName').value.trim() || null,
