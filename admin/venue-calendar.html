@@ -99,6 +99,8 @@
         .badge.status-inquiry { background: rgba(37,99,235,0.08); color: #2563eb; }
         .badge.status-completed { background: var(--bg-elevated); color: var(--text-muted); }
         .badge.needs-space { background: var(--red-dim); color: var(--red); }
+        .badge.money-owed { background: var(--red-dim); color: var(--red); }
+        .badge.money-paid { background: var(--green-dim); color: var(--green); }
 
         .details { display:none; margin-top:10px; padding-top:10px; border-top: 1px dashed var(--border-subtle); font-size: 0.82rem; color: var(--text-secondary); }
         .details.open { display:block; }
@@ -139,6 +141,38 @@
         .modal-submit:disabled { opacity: 0.6; cursor: default; }
         .form-error { color: var(--red); font-size: 0.82rem; margin-top: 10px; min-height: 1.1em; }
         .form-conflict { background: var(--red-dim); border: 1px solid rgba(220,38,38,0.3); color: var(--red); border-radius: 8px; padding: 10px 12px; margin-top: 10px; font-size: 0.8rem; }
+
+        /* ---- Billing / invoicing (edit mode only) ---- */
+        .billing-section { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--border-subtle); }
+        .billing-section h3 { font-family: var(--font-serif); font-size: 1.02rem; margin-bottom: 12px; }
+        .li-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+        .li-table th { text-align: left; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); font-weight: 600; padding: 0 6px 6px; }
+        .li-table td { padding: 3px 6px; vertical-align: middle; }
+        .li-table input { width: 100%; border: 1px solid var(--border-subtle); border-radius: 6px; padding: 5px 7px; font-family: var(--font-sans); font-size: 0.8rem; background: var(--bg-primary); color: var(--text-primary); box-sizing: border-box; }
+        .li-table .li-qty, .li-table .li-price { width: 70px; }
+        .li-table .li-remove { background: transparent; border: none; color: var(--red); cursor: pointer; font-size: 1rem; padding: 2px 6px; }
+        .li-add-btn { background: transparent; border: 1px dashed var(--border-medium); color: var(--text-secondary); border-radius: 8px; padding: 6px 12px; font-size: 0.78rem; cursor: pointer; font-family: var(--font-sans); }
+        .li-add-btn:hover { border-color: var(--gold); color: var(--gold); }
+        .li-total { text-align: right; font-size: 0.85rem; margin: 8px 0 4px; color: var(--text-secondary); }
+        .li-total strong { color: var(--text-primary); }
+        .invoice-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; margin-top: 14px; }
+        .invoice-row .field { flex: 1; min-width: 120px; }
+        .invoice-row label { display: block; font-size: 0.72rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.03em; }
+        .invoice-row input { width: 100%; border: 1px solid var(--border-subtle); border-radius: 8px; padding: 7px 10px; font-family: var(--font-sans); font-size: 0.85rem; background: var(--bg-primary); color: var(--text-primary); box-sizing: border-box; }
+        .send-invoice-btn { background: var(--gold); border: none; color: #fff; border-radius: 8px; padding: 8px 16px; font-size: 0.82rem; font-weight: 600; cursor: pointer; font-family: var(--font-sans); white-space: nowrap; }
+        .send-invoice-btn:hover { background: var(--gold-light); }
+        .send-invoice-btn:disabled { opacity: 0.6; cursor: default; }
+        .invoice-msg { font-size: 0.8rem; margin-top: 8px; }
+        .invoice-msg.err { color: var(--red); }
+        .invoice-msg.ok { color: var(--green); }
+        .payment-history { margin-top: 14px; font-size: 0.8rem; }
+        .payment-history .ph-row { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--border-subtle); }
+        .payment-history .ph-row:last-child { border-bottom: none; }
+        .payment-history a { color: var(--gold); text-decoration: none; }
+        .payment-history a:hover { text-decoration: underline; }
+        .ph-status { font-size: 0.68rem; text-transform: uppercase; font-weight: 600; padding: 1px 7px; border-radius: 999px; }
+        .ph-status.paid { background: var(--green-dim); color: var(--green); }
+        .ph-status.unpaid { background: var(--red-dim); color: var(--red); }
     </style>
 </head>
 <body>
@@ -279,6 +313,37 @@
                     <button type="submit" class="modal-submit" id="bSubmitBtn">Save Booking</button>
                 </div>
             </form>
+
+            <div class="billing-section hidden" id="billingSection">
+                <h3>Catering &amp; Invoicing</h3>
+                <table class="li-table">
+                    <thead>
+                        <tr><th style="width:110px;">Category</th><th>Item</th><th class="li-qty">Qty</th><th class="li-price">Unit $</th><th></th></tr>
+                    </thead>
+                    <tbody id="liRows"></tbody>
+                </table>
+                <button type="button" class="li-add-btn" id="liAddBtn">+ Add line item</button>
+                <div class="li-total" id="liTotal"></div>
+
+                <div class="invoice-row">
+                    <div class="field">
+                        <label for="invLabel">Invoice label</label>
+                        <input type="text" id="invLabel" placeholder="e.g. Deposit">
+                    </div>
+                    <div class="field">
+                        <label for="invAmount">Amount ($, if no items)</label>
+                        <input type="number" id="invAmount" min="0" step="0.01">
+                    </div>
+                    <div class="field">
+                        <label for="invDueDate">Due date</label>
+                        <input type="date" id="invDueDate">
+                    </div>
+                    <button type="button" class="send-invoice-btn" id="sendInvoiceBtn">Send Invoice</button>
+                </div>
+                <div class="invoice-msg" id="invoiceMsg"></div>
+
+                <div class="payment-history" id="paymentHistory"></div>
+            </div>
         </div>
     </div>
 
@@ -287,6 +352,8 @@
     var API_LOGIN = '/.netlify/functions/verify-admin-password';
     var API_DATA = '/.netlify/functions/venue-day-view';
     var API_BOOKING_WRITE = '/.netlify/functions/venue-booking-write';
+    var API_LINE_ITEMS = '/.netlify/functions/venue-booking-line-items';
+    var API_INVOICE_CREATE = '/.netlify/functions/venue-booking-invoice-create';
 
     var EVENT_COLORS = {
         wedding: '#9a7b2a', rehearsal_dinner: '#2563eb', birthday: '#d6336c',
@@ -343,7 +410,7 @@
     });
 
     // ---------------- APP STATE ----------------
-    var state = { start: todayStr(), days: 7, spacesById: {}, bookingsById: {}, editingId: null };
+    var state = { start: todayStr(), days: 7, spacesById: {}, bookingsById: {}, editingId: null, lineItems: [], payments: [] };
 
     function todayStr() {
         var d = new Date();
@@ -373,6 +440,7 @@
         document.getElementById('dateInput').addEventListener('change', function (e) { state.start = e.target.value; load(); });
         document.getElementById('spanSelect').addEventListener('change', function (e) { state.days = parseInt(e.target.value, 10); load(); });
         initBookingForm();
+        initBillingSection();
         load();
     }
 
@@ -444,6 +512,20 @@
                 document.getElementById('bStart').value = state.start + 'T18:00';
                 document.getElementById('bEnd').value = state.start + 'T22:00';
             }
+
+            var billingSection = document.getElementById('billingSection');
+            var editable = booking && booking.source !== 'wedding portal';
+            if (editable) {
+                billingSection.classList.remove('hidden');
+                document.getElementById('invDueDate').value = addDays(todayStr(), 7);
+                document.getElementById('invLabel').value = '';
+                document.getElementById('invAmount').value = '';
+                loadBilling(booking.id);
+            } else {
+                billingSection.classList.add('hidden');
+                state.lineItems = []; state.payments = [];
+            }
+
             overlay.classList.remove('hidden');
         };
         closeModal = function () { overlay.classList.add('hidden'); state.editingId = null; };
@@ -527,6 +609,136 @@
                     submitBtn.disabled = false;
                     submitBtn.textContent = isEditing ? 'Save Changes' : 'Save Booking';
                     errorEl.textContent = 'Network error: ' + e.message;
+                });
+        });
+    }
+
+    // ---------------- BILLING / INVOICING (edit mode only) ----------------
+    function fmtMoney(n) { return '$' + (Number(n) || 0).toFixed(2); }
+
+    function renderLineItems() {
+        var rowsEl = document.getElementById('liRows');
+        rowsEl.innerHTML = state.lineItems.map(function (it, i) {
+            return '<tr data-idx="' + i + '">' +
+                '<td><input type="text" class="li-category" value="' + esc(it.category || 'Catering') + '"></td>' +
+                '<td><input type="text" class="li-label" value="' + esc(it.label || '') + '" placeholder="e.g. Plated dinner"></td>' +
+                '<td><input type="number" class="li-qty" min="0" step="1" value="' + esc(it.quantity != null ? it.quantity : 1) + '"></td>' +
+                '<td><input type="number" class="li-price" min="0" step="0.01" value="' + esc(it.unit_price != null ? it.unit_price : 0) + '"></td>' +
+                '<td><button type="button" class="li-remove" data-idx="' + i + '" title="Remove">&times;</button></td>' +
+                '</tr>';
+        }).join('');
+
+        Array.prototype.forEach.call(rowsEl.querySelectorAll('tr'), function (tr) {
+            var idx = parseInt(tr.dataset.idx, 10);
+            tr.querySelector('.li-category').addEventListener('input', function (e) { state.lineItems[idx].category = e.target.value; });
+            tr.querySelector('.li-label').addEventListener('input', function (e) { state.lineItems[idx].label = e.target.value; });
+            tr.querySelector('.li-qty').addEventListener('input', function (e) { state.lineItems[idx].quantity = parseFloat(e.target.value) || 0; renderLiTotal(); });
+            tr.querySelector('.li-price').addEventListener('input', function (e) { state.lineItems[idx].unit_price = parseFloat(e.target.value) || 0; renderLiTotal(); });
+        });
+        Array.prototype.forEach.call(rowsEl.querySelectorAll('.li-remove'), function (btn) {
+            btn.addEventListener('click', function () {
+                state.lineItems.splice(parseInt(btn.dataset.idx, 10), 1);
+                renderLineItems();
+                renderLiTotal();
+            });
+        });
+        renderLiTotal();
+    }
+
+    function renderLiTotal() {
+        var total = state.lineItems.reduce(function (s, it) { return s + (Number(it.quantity) || 0) * (Number(it.unit_price) || 0); }, 0);
+        document.getElementById('liTotal').innerHTML = state.lineItems.length ? ('Total: <strong>' + fmtMoney(total) + '</strong>') : '';
+    }
+
+    function renderPaymentHistory() {
+        var zone = document.getElementById('paymentHistory');
+        if (!state.payments.length) { zone.innerHTML = ''; return; }
+        zone.innerHTML = state.payments.map(function (p) {
+            var statusClass = p.paid ? 'paid' : 'unpaid';
+            var statusLabel = p.paid ? 'Paid' : (p.square_invoice_status || 'Sent');
+            var link = p.square_public_url ? ' &middot; <a href="' + esc(p.square_public_url) + '" target="_blank" rel="noopener">View invoice</a>' : '';
+            return '<div class="ph-row"><span>' + esc(p.label) + ' — ' + fmtMoney(p.amount) + link + '</span><span class="ph-status ' + statusClass + '">' + esc(statusLabel) + '</span></div>';
+        }).join('');
+    }
+
+    function loadBilling(bookingId) {
+        document.getElementById('liRows').innerHTML = '';
+        document.getElementById('liTotal').textContent = '';
+        document.getElementById('paymentHistory').innerHTML = '';
+        document.getElementById('invoiceMsg').textContent = '';
+        var tok = localStorage.getItem('quarryAdminToken') || '';
+        fetch(API_LINE_ITEMS + '?token=' + encodeURIComponent(tok) + '&booking_id=' + encodeURIComponent(bookingId))
+            .then(function (r) { return r.json(); })
+            .then(function (body) {
+                state.lineItems = (body.line_items || []).map(function (it) { return { category: it.category, label: it.label, quantity: it.quantity, unit_price: it.unit_price }; });
+                state.payments = body.payments || [];
+                renderLineItems();
+                renderPaymentHistory();
+            })
+            .catch(function () { document.getElementById('invoiceMsg').textContent = 'Could not load billing info.'; });
+    }
+
+    function initBillingSection() {
+        document.getElementById('liAddBtn').addEventListener('click', function () {
+            state.lineItems.push({ category: 'Catering', label: '', quantity: 1, unit_price: 0 });
+            renderLineItems();
+        });
+
+        document.getElementById('sendInvoiceBtn').addEventListener('click', function () {
+            var msgEl = document.getElementById('invoiceMsg');
+            msgEl.className = 'invoice-msg';
+            msgEl.textContent = '';
+            if (!state.editingId) return;
+
+            var hasItems = state.lineItems.some(function (it) { return (it.label || '').trim(); });
+            var manualAmount = parseFloat(document.getElementById('invAmount').value);
+            if (!hasItems && !(manualAmount > 0)) {
+                msgEl.className = 'invoice-msg err';
+                msgEl.textContent = 'Add at least one line item, or enter a manual amount.';
+                return;
+            }
+
+            var tok = localStorage.getItem('quarryAdminToken') || '';
+            var btn = document.getElementById('sendInvoiceBtn');
+            btn.disabled = true;
+            btn.textContent = 'Sending…';
+
+            fetch(API_LINE_ITEMS, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: tok, booking_id: state.editingId, line_items: hasItems ? state.lineItems : [] }),
+            })
+                .then(function (r) { return r.json(); })
+                .then(function () {
+                    return fetch(API_INVOICE_CREATE, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            token: tok,
+                            booking_id: state.editingId,
+                            label: document.getElementById('invLabel').value.trim() || undefined,
+                            amount: hasItems ? undefined : manualAmount,
+                            due_date: document.getElementById('invDueDate').value || undefined,
+                        }),
+                    });
+                })
+                .then(function (r) { return r.json().then(function (b) { return { status: r.status, body: b }; }); })
+                .then(function (res) {
+                    btn.disabled = false;
+                    btn.textContent = 'Send Invoice';
+                    if (res.status !== 201) {
+                        msgEl.className = 'invoice-msg err';
+                        msgEl.textContent = 'Could not send invoice: ' + (res.body.message || res.body.error || res.status);
+                        return;
+                    }
+                    msgEl.className = 'invoice-msg ok';
+                    msgEl.textContent = 'Invoice sent to ' + res.body.sent_to + '.';
+                    document.getElementById('invAmount').value = '';
+                    loadBilling(state.editingId);
+                })
+                .catch(function (e) {
+                    btn.disabled = false;
+                    btn.textContent = 'Send Invoice';
+                    msgEl.className = 'invoice-msg err';
+                    msgEl.textContent = 'Network error: ' + e.message;
                 });
         });
     }
@@ -670,6 +882,12 @@
         var timeStr = (startLabel === '12:00 AM' && endLabel === '12:00 AM') ? 'All day' : (startLabel + ' – ' + endLabel);
         // Who booked it, right on the card face — no click needed to see this.
         var bookedByLabel = b.contact_name ? esc(b.contact_name) : '';
+        // Paid/owed, right on the card face too — deposit_paid/balance_due update
+        // automatically once a Square invoice sent from this calendar gets paid.
+        var owed = Number(b.balance_due) || 0;
+        var paidAmt = Number(b.deposit_paid) || 0;
+        var moneyBadge = owed > 0 ? '<span class="badge money-owed">Owes ' + fmtMoney(owed) + '</span>'
+            : (paidAmt > 0 ? '<span class="badge money-paid">Paid ' + fmtMoney(paidAmt) + '</span>' : '');
         var meta = [];
         if (b.guest_count) meta.push(b.guest_count + ' guests');
         if (b.exclusive) meta.push('Exclusive');
@@ -703,7 +921,7 @@
         details += '</div>';
 
         return '<div class="bcard" data-booking-id="' + esc(b.id) + '" style="border-left-color:' + colorFor(b.event_type) + '">' +
-            '<div class="row1"><span class="title">' + esc(b.title) + statusBadge + typeBadge + needsBadge + '</span>' +
+            '<div class="row1"><span class="title">' + esc(b.title) + statusBadge + typeBadge + needsBadge + moneyBadge + '</span>' +
             '<span class="card-actions"><span class="time">' + timeStr + '</span>' + editBtn + '</span></div>' +
             (bookedByLabel ? '<div class="booked-by">Booked by ' + bookedByLabel + '</div>' : '') +
             (meta.length ? '<div class="meta">' + meta.map(esc).join(' &middot; ') + '</div>' : '') +
