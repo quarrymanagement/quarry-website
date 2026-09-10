@@ -88,6 +88,10 @@
         .bcard .row1 { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
         .bcard .title { font-weight: 600; font-size: 0.92rem; }
         .bcard .time { font-size: 0.8rem; color: var(--text-secondary); white-space: nowrap; }
+        .bcard .card-actions { display: flex; align-items: center; gap: 10px; }
+        .bcard .edit-btn { background: transparent; border: 1px solid var(--border-subtle); color: var(--text-secondary); font-size: 0.72rem; font-weight: 600; padding: 3px 9px; border-radius: 6px; cursor: pointer; font-family: var(--font-sans); }
+        .bcard .edit-btn:hover { background: var(--gold-dim); border-color: var(--gold); color: var(--text-primary); }
+        .bcard .booked-by { font-size: 0.78rem; color: var(--text-secondary); margin-top: 3px; }
         .bcard .meta { font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; }
         .badge { display: inline-block; font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 999px; margin-left: 6px; }
         .badge.status-confirmed { background: var(--green-dim); color: var(--green); }
@@ -181,7 +185,7 @@
 
     <div id="bookingModal" class="modal-overlay hidden">
         <div class="modal-box">
-            <h2>New Booking</h2>
+            <h2 id="bModalTitle">New Booking</h2>
             <form id="bookingForm">
                 <div class="form-grid">
                     <div class="full">
@@ -339,7 +343,7 @@
     });
 
     // ---------------- APP STATE ----------------
-    var state = { start: todayStr(), days: 7, spacesById: {} };
+    var state = { start: todayStr(), days: 7, spacesById: {}, bookingsById: {}, editingId: null };
 
     function todayStr() {
         var d = new Date();
@@ -372,7 +376,23 @@
         load();
     }
 
-    // ---------------- NEW BOOKING FORM ----------------
+    // ---------------- NEW / EDIT BOOKING FORM ----------------
+    // datetime-local inputs need the venue's local (Central) wall-clock time,
+    // not the UTC instant the API returns — build it the same way fmtTime
+    // parses for display, just formatted for an <input> instead of a label.
+    function toLocalInputValue(iso) {
+        var parts = new Intl.DateTimeFormat('en-US', {
+            timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit',
+            hour: '2-digit', minute: '2-digit', hour12: false
+        }).formatToParts(new Date(iso));
+        var map = {};
+        parts.forEach(function (p) { map[p.type] = p.value; });
+        var hour = map.hour === '24' ? '00' : map.hour;
+        return map.year + '-' + map.month + '-' + map.day + 'T' + hour + ':' + map.minute;
+    }
+
+    var openModal, closeModal;
+
     function initBookingForm() {
         var typeSelect = document.getElementById('bEventType');
         typeSelect.innerHTML = Object.keys(EVENT_COLORS).map(function (t) {
@@ -386,20 +406,49 @@
 
         var overlay = document.getElementById('bookingModal');
         var form = document.getElementById('bookingForm');
+        var titleEl = document.getElementById('bModalTitle');
+        var submitBtn = document.getElementById('bSubmitBtn');
 
-        function openModal() {
+        openModal = function (booking) {
             form.reset();
             document.getElementById('bFormError').textContent = '';
             document.getElementById('bConflictZone').innerHTML = '';
-            var defaultStart = state.start + 'T18:00';
-            var defaultEnd = state.start + 'T22:00';
-            document.getElementById('bStart').value = defaultStart;
-            document.getElementById('bEnd').value = defaultEnd;
-            overlay.classList.remove('hidden');
-        }
-        function closeModal() { overlay.classList.add('hidden'); }
+            state.editingId = booking ? booking.id : null;
+            titleEl.textContent = booking ? 'Edit Booking' : 'New Booking';
+            submitBtn.textContent = booking ? 'Save Changes' : 'Save Booking';
 
-        document.getElementById('newBookingBtn').addEventListener('click', openModal);
+            if (booking) {
+                document.getElementById('bTitle').value = booking.title || '';
+                typeSelect.value = booking.event_type || '';
+                document.getElementById('bStatus').value = booking.status || 'confirmed';
+                document.getElementById('bStart').value = toLocalInputValue(booking.starts_at);
+                document.getElementById('bEnd').value = toLocalInputValue(booking.ends_at);
+                document.getElementById('bExclusive').checked = !!booking.exclusive;
+                document.getElementById('bGuestCount').value = booking.guest_count || '';
+                document.getElementById('bOccasion').value = booking.occasion || '';
+                document.getElementById('bContactName').value = booking.contact_name || '';
+                document.getElementById('bCompany').value = booking.company || '';
+                document.getElementById('bContactPhone').value = booking.contact_phone || '';
+                document.getElementById('bContactEmail').value = booking.contact_email || '';
+                document.getElementById('bCateringRequired').checked = !!booking.catering_required;
+                document.getElementById('bCateringPackage').value = booking.catering_package || '';
+                document.getElementById('bDepositPaid').value = booking.deposit_paid != null ? booking.deposit_paid : '';
+                document.getElementById('bBalanceDue').value = booking.balance_due != null ? booking.balance_due : '';
+                document.getElementById('bBookedBy').value = booking.booked_by || '';
+                document.getElementById('bNotes').value = booking.notes || '';
+                var selectedSpaces = booking.direct_spaces || [];
+                Array.prototype.forEach.call(document.querySelectorAll('.space-check'), function (cb) {
+                    cb.checked = selectedSpaces.indexOf(cb.value) !== -1;
+                });
+            } else {
+                document.getElementById('bStart').value = state.start + 'T18:00';
+                document.getElementById('bEnd').value = state.start + 'T22:00';
+            }
+            overlay.classList.remove('hidden');
+        };
+        closeModal = function () { overlay.classList.add('hidden'); state.editingId = null; };
+
+        document.getElementById('newBookingBtn').addEventListener('click', function () { openModal(); });
         document.getElementById('bCancelBtn').addEventListener('click', closeModal);
         overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
 
@@ -407,7 +456,6 @@
             e.preventDefault();
             var errorEl = document.getElementById('bFormError');
             var conflictZone = document.getElementById('bConflictZone');
-            var submitBtn = document.getElementById('bSubmitBtn');
             errorEl.textContent = '';
             conflictZone.innerHTML = '';
 
@@ -421,8 +469,10 @@
             var emailVal = document.getElementById('bContactEmail').value.trim();
             if (!phoneVal && !emailVal) { errorEl.textContent = 'Enter a phone number or an email — at least one is required.'; return; }
 
+            var isEditing = !!state.editingId;
             var payload = {
                 token: localStorage.getItem('quarryAdminToken') || '',
+                id: isEditing ? state.editingId : undefined,
                 title: document.getElementById('bTitle').value.trim(),
                 event_type: typeSelect.value,
                 status: document.getElementById('bStatus').value,
@@ -455,8 +505,9 @@
                 .then(function (r) { return r.json().then(function (b) { return { status: r.status, body: b }; }); })
                 .then(function (res) {
                     submitBtn.disabled = false;
-                    submitBtn.textContent = 'Save Booking';
-                    if (res.status !== 201) {
+                    submitBtn.textContent = isEditing ? 'Save Changes' : 'Save Booking';
+                    var expectedStatus = isEditing ? 200 : 201;
+                    if (res.status !== expectedStatus) {
                         errorEl.textContent = 'Could not save: ' + (res.body.error || res.status);
                         return;
                     }
@@ -474,10 +525,14 @@
                 })
                 .catch(function (e) {
                     submitBtn.disabled = false;
-                    submitBtn.textContent = 'Save Booking';
+                    submitBtn.textContent = isEditing ? 'Save Changes' : 'Save Booking';
                     errorEl.textContent = 'Network error: ' + e.message;
                 });
         });
+    }
+
+    function openEditBooking(booking) {
+        if (openModal) openModal(booking);
     }
 
     function navigate(dir) {
@@ -505,6 +560,8 @@
 
     function render(data) {
         (data.spaces || []).forEach(function (s) { state.spacesById[s.id] = s; });
+        state.bookingsById = {};
+        (data.bookings || []).forEach(function (b) { state.bookingsById[b.id] = b; });
         document.getElementById('refreshNote').textContent = 'Loaded ' + (data.bookings || []).length + ' booking(s) · updated ' + new Date().toLocaleTimeString();
 
         renderAlerts(data.alerts || []);
@@ -559,9 +616,17 @@
         document.getElementById('resultZone').innerHTML = html || '<div class="empty-day">Nothing on the books.</div>';
 
         Array.prototype.forEach.call(document.querySelectorAll('.bcard'), function (el) {
-            el.addEventListener('click', function () {
+            el.addEventListener('click', function (e) {
+                if (e.target.closest('.edit-btn')) return; // handled below, don't also toggle details
                 var d = el.querySelector('.details');
                 if (d) d.classList.toggle('open');
+            });
+        });
+        Array.prototype.forEach.call(document.querySelectorAll('.edit-btn'), function (el) {
+            el.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var booking = state.bookingsById[el.dataset.editId];
+                if (booking) openEditBooking(booking);
             });
         });
     }
@@ -603,11 +668,18 @@
         // default for a wedding with no per-space windows narrowed yet) — "12:00
         // AM – 12:00 AM" reads like a data error, not "all day".
         var timeStr = (startLabel === '12:00 AM' && endLabel === '12:00 AM') ? 'All day' : (startLabel + ' – ' + endLabel);
+        // Who booked it, right on the card face — no click needed to see this.
+        var bookedByLabel = b.contact_name ? esc(b.contact_name) : '';
         var meta = [];
         if (b.guest_count) meta.push(b.guest_count + ' guests');
         if (b.exclusive) meta.push('Exclusive');
         if (b.catering_required) meta.push('Catering');
         if (b.ref) meta.push(b.ref);
+        // Weddings are owned by the wedding_sync_booking trigger and get
+        // clobbered on the wedding's next save, so editing them here would
+        // silently revert — only offer Edit for bookings made in this form.
+        var editable = b.source !== 'wedding portal';
+        var editBtn = editable ? '<button type="button" class="edit-btn" data-edit-id="' + esc(b.id) + '" title="Edit booking">✎ Edit</button>' : '';
 
         var details = '<div class="details">';
         details += '<div><b>Contact:</b> ' + esc(b.contact_name || '—') +
@@ -630,8 +702,10 @@
         }
         details += '</div>';
 
-        return '<div class="bcard" style="border-left-color:' + colorFor(b.event_type) + '">' +
-            '<div class="row1"><span class="title">' + esc(b.title) + statusBadge + typeBadge + needsBadge + '</span><span class="time">' + timeStr + '</span></div>' +
+        return '<div class="bcard" data-booking-id="' + esc(b.id) + '" style="border-left-color:' + colorFor(b.event_type) + '">' +
+            '<div class="row1"><span class="title">' + esc(b.title) + statusBadge + typeBadge + needsBadge + '</span>' +
+            '<span class="card-actions"><span class="time">' + timeStr + '</span>' + editBtn + '</span></div>' +
+            (bookedByLabel ? '<div class="booked-by">Booked by ' + bookedByLabel + '</div>' : '') +
             (meta.length ? '<div class="meta">' + meta.map(esc).join(' &middot; ') + '</div>' : '') +
             details +
             '</div>';
