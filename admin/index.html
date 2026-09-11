@@ -5627,7 +5627,15 @@
         }
 
         document.getElementById('logoutBtn').addEventListener('click', () => {
+            // Sign Out previously only cleared sessionStorage, leaving the
+            // long-lived (7-day) token sitting in localStorage — so the
+            // page-load restore flow silently logged the same account right
+            // back in on the next visit, making "Sign Out" a no-op in
+            // practice. Clear the actual credentials too so a sign-out is a
+            // real sign-out, and so a different account can log in right after.
             sessionStorage.removeItem('quarryAuth');
+            localStorage.removeItem('quarryAdminToken');
+            localStorage.removeItem('quarryAdminRole');
             location.reload();
         });
 
