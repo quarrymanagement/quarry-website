@@ -23,6 +23,7 @@ const TOAST_SECRET = process.env.TOAST_CLIENT_SECRET || '';
 const TOAST_REST_GUID = process.env.TOAST_RESTAURANT_GUID || '';
 const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH || '';
 const SENDGRID_KEY = process.env.SENDGRID_API_KEY || '';
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || '';
 
 const PENDING_TTL_HOURS = 6;
 const SCAN_WINDOW_HOURS = 12;
@@ -180,6 +181,30 @@ function tierMult(tier) {
   return ({ standard: 1.0, silver: 1.1, gold: 1.25, elite: 1.5, platinum: 1.5 }[tier]) || 1.0;
 }
 
+// Same Square fallback as scan-receipt.js's live path — see the longer
+// comment there. Items that landed in this queue because Toast never had
+// them (the dining-room POS moved to Square 2026-08+) can only ever resolve
+// here, since Toast retrying itself will never find them.
+async function verifySquareReceipt(preTipUsd, visitDateIso, checkNumber) {
+  if (!SUPABASE_ANON_KEY || !preTipUsd) return null;
+  try {
+    const r = await httpsRequest({
+      hostname: 'nkulhtalltbieicvmmad.supabase.co',
+      path: '/functions/v1/verify-square-receipt',
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+    }, { amountUsd: preTipUsd, visitDate: visitDateIso, checkNumber: checkNumber || null });
+    if (r.status !== 200 || !r.data) return null;
+    return r.data;
+  } catch (_) { return null; }
+}
+
+function itemPreTipTotal(it) {
+  if (it.ocrSubtotal != null && it.ocrTax != null) return it.ocrSubtotal + it.ocrTax;
+  if (it.ocrTotal != null) return it.ocrTotal - (it.ocrTip || 0);
+  return null;
+}
+
 async function notifyExpiry(toEmail, checkNumber) {
   if (!SENDGRID_KEY) return;
   try {
@@ -238,6 +263,86 @@ async function processAllPending() {
     catch (_) { continue; }
 
     if (!match) {
+      // Toast still doesn't have it -- try Square before giving up for this
+      // pass. Anything queued here because the dining-room POS moved to
+      // Square will only ever resolve through this path.
+      const preTip = itemPreTipTotal(it);
+      const bd = it.businessDate; // "20260910"
+      const visitDateIso = bd && bd.length === 8 ? `${bd.slice(0, 4)}-${bd.slice(4, 6)}-${bd.slice(6, 8)}` : null;
+      const sq = await verifySquareReceipt(preTip, visitDateIso, it.checkNumber);
+
+      if (sq && sq.verified) {
+        const squarePreTip = sq.actual_pre_tip;
+        if (squarePreTip < MIN_TAB_USD) {
+          it.status = 'below-minimum';
+          it.decidedAt = new Date().toISOString();
+          dirty = true;
+          continue;
+        }
+        const squareOrderId = 'square:' + it.businessDate + ':' + (it.checkNumber || 'nocheck') + ':' + squarePreTip.toFixed(2);
+
+        if (!creditedFile) {
+          creditedFile = await loadJson('credited-orders.json');
+          creditedJson = creditedFile.json || { orders: [] };
+        }
+        if (creditedJson.orders.some((o) => o.orderId === squareOrderId)) {
+          it.status = 'duplicate';
+          it.decidedAt = new Date().toISOString();
+          dirty = true;
+          continue;
+        }
+        if (!membersFile) {
+          membersFile = await loadJson('members.json');
+          membersJson = membersFile.json;
+        }
+        const sqMember = (membersJson.members || []).find((x) => (x.email || '').toLowerCase() === (it.memberEmail || '').toLowerCase());
+        if (!sqMember) continue;
+
+        const sqTier = sqMember.tier || 'standard';
+        const sqMult = tierMult(sqTier);
+        const sqEarnBasis = squarePreTip;
+        const sqBasePts = Math.round(sqEarnBasis * 10);
+        const sqVisitBonus = sqEarnBasis >= MIN_TAB_USD ? 10 : 0;
+        const sqTotalPts = Math.round((sqBasePts + sqVisitBonus) * sqMult);
+
+        sqMember.currentPoints = (sqMember.currentPoints || 0) + sqTotalPts;
+        sqMember.lifetimePoints = (sqMember.lifetimePoints || 0) + sqTotalPts;
+        sqMember.lastVisitAt = new Date().toISOString();
+        sqMember.history = sqMember.history || [];
+        sqMember.history.push({
+          at: new Date().toISOString(),
+          action: 'earn',
+          source: 'receipt-scan-square-cron',
+          delta: sqTotalPts,
+          orderId: squareOrderId,
+          checkNumber: it.checkNumber,
+          spendUsd: sqEarnBasis,
+          finalTotalUsd: it.ocrTotal || sqEarnBasis,
+          subtotalUsd: it.ocrSubtotal || sqEarnBasis,
+          tier: sqTier, multiplier: sqMult,
+          note: 'Receipt scan (Square, cron retry, ' + (it.tryCount || 1) + ' attempts)',
+        });
+
+        creditedJson.orders.push({
+          orderId: squareOrderId,
+          checkNumber: it.checkNumber,
+          memberEmail: sqMember.email,
+          subtotal: it.ocrSubtotal || null,
+          preTipTotal: sqEarnBasis,
+          finalTotal: it.ocrTotal || sqEarnBasis,
+          points: sqTotalPts,
+          creditedAt: new Date().toISOString(),
+          fromQueue: true,
+          source: 'square',
+        });
+
+        it.status = 'credited';
+        it.decidedAt = new Date().toISOString();
+        it.creditedPoints = sqTotalPts;
+        dirty = true; credited++;
+        continue;
+      }
+
       it.tryCount = (it.tryCount || 1) + 1;
       it.lastTriedAt = new Date().toISOString();
       dirty = true;

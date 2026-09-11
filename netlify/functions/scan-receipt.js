@@ -1,7 +1,15 @@
 // ============================================================================
-// scan-receipt.js — credit a member by scanning a Toast receipt (v1.3)
+// scan-receipt.js — credit a member by scanning a receipt (v1.4)
 //
 // POST { token, image }
+//
+// v1.4: Square fallback. The dining-room POS moved from Toast to Square —
+//   Toast has had zero closed checks since 2026-08-20, so every scan since
+//   then was silently queuing and expiring unpaid. When Toast has no match
+//   for a check, this now also asks Supabase (which square-ops-sync already
+//   keeps in sync with real Square POS orders) before falling back to the
+//   Toast-retry queue. See verifySquareReceipt() below. Toast is checked
+//   first and unchanged for any straggler Toast-era receipts.
 //
 // v1.3: pending-queue when Toast hasn't synced yet.
 //   - Self-heal: every scan first retries this user's pending queue
@@ -23,6 +31,8 @@ const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY || '';
 const TOAST_CLIENT_ID   = process.env.TOAST_CLIENT_ID || '';
 const TOAST_SECRET      = process.env.TOAST_CLIENT_SECRET || '';
 const TOAST_REST_GUID   = process.env.TOAST_RESTAURANT_GUID || '';
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || '';
+const SUPABASE_URL      = 'https://nkulhtalltbieicvmmad.supabase.co';
 
 const SESSION_TTL_DAYS  = 30;
 const MAX_SCANS_PER_DAY = 2;
@@ -247,6 +257,47 @@ function tierMult(tier) {
   return ({ standard: 1.0, silver: 1.1, gold: 1.25, elite: 1.5, platinum: 1.5 }[tier]) || 1.0;
 }
 
+// ─── Square lookup (v1.4) ───────────────────────────────────────────────────
+// The dining-room POS moved to Square; Toast will never have data for a
+// checkout dated after 2026-08-20. Rather than re-implement Square's Orders
+// API here, this asks a small Supabase edge function to check the same
+// square_sync.order_header data square-ops-sync already keeps synced, via
+// the exact verify_square_check_amount() rule already built and tested for
+// the Supabase-native rewards path — one verification rule, two front doors.
+// Amount-and-date matching only (no per-order id), same as Toast's own
+// check here never actually keys off the check number either — see
+// findToastOrder, which matches by displayNumber, not an opaque order id,
+// so this isn't a new class of imprecision.
+// Returns { verified, actual_pre_tip, ... } on a real answer, or null if the
+// lookup itself failed (network/config) — callers should treat null exactly
+// like "Toast doesn't have it either" and fall through to the retry queue,
+// never as a hard failure.
+async function verifySquareReceipt(preTipUsd, visitDateIso, checkNumber) {
+  if (!SUPABASE_ANON_KEY || !preTipUsd) return null;
+  try {
+    const r = await httpsRequest({
+      hostname: 'nkulhtalltbieicvmmad.supabase.co',
+      path: '/functions/v1/verify-square-receipt',
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json',
+      },
+    }, { amountUsd: preTipUsd, visitDate: visitDateIso, checkNumber: checkNumber || null });
+    if (r.status !== 200 || !r.data) return null;
+    return r.data;
+  } catch (_) { return null; }
+}
+
+// OCR gives subtotal/tax/tip/total separately; this is the same "pre-tip
+// total" concept checkPreTipTotal() computes from Toast's own check object,
+// derived from OCR fields instead so both paths compare like for like.
+function ocrPreTipTotal(ocr) {
+  if (ocr.subtotal_amount != null && ocr.tax_amount != null) return ocr.subtotal_amount + ocr.tax_amount;
+  if (ocr.total_amount != null) return ocr.total_amount - (ocr.tip_amount || 0);
+  return null;
+}
+
 // ─── Self-heal: process this member's pending queue first ──────────────────
 async function processMemberPending(memberEmail, toastToken) {
   const pendingFile = await loadJson('pending-scans.json');
@@ -280,6 +331,86 @@ async function processMemberPending(memberEmail, toastToken) {
     catch (_) { continue; } // Toast failure → leave for next retry
 
     if (!match) {
+      // Toast still doesn't have it -- try Square before leaving it queued
+      // for the hourly cron. See verifySquareReceipt() above.
+      const preTip = itemPreTipTotal(it);
+      const bd = it.businessDate;
+      const visitDateIso = bd && bd.length === 8 ? `${bd.slice(0, 4)}-${bd.slice(4, 6)}-${bd.slice(6, 8)}` : null;
+      const sq = await verifySquareReceipt(preTip, visitDateIso, it.checkNumber);
+
+      if (sq && sq.verified) {
+        const squarePreTip = sq.actual_pre_tip;
+        if (squarePreTip < MIN_TAB_USD) {
+          it.status = 'below-minimum';
+          it.decidedAt = new Date().toISOString();
+          pendingDirty = true;
+          continue;
+        }
+        const squareOrderId = 'square:' + it.businessDate + ':' + (it.checkNumber || 'nocheck') + ':' + squarePreTip.toFixed(2);
+
+        if (!creditedFile) {
+          creditedFile = await loadJson('credited-orders.json');
+          creditedJson = creditedFile.json || { orders: [] };
+        }
+        if (creditedJson.orders.some((o) => o.orderId === squareOrderId)) {
+          it.status = 'duplicate';
+          it.decidedAt = new Date().toISOString();
+          pendingDirty = true;
+          continue;
+        }
+        if (!membersFile) {
+          membersFile = await loadJson('members.json');
+          membersJson = membersFile.json;
+        }
+        const sqMember = (membersJson.members || []).find((x) => (x.email || '').toLowerCase() === memberEmail.toLowerCase());
+        if (!sqMember) continue;
+
+        const sqTier = sqMember.tier || 'standard';
+        const sqMult = tierMult(sqTier);
+        const sqEarnBasis = squarePreTip;
+        const sqBasePts = Math.round(sqEarnBasis * 10);
+        const sqVisitBonus = sqEarnBasis >= MIN_TAB_USD ? 10 : 0;
+        const sqTotalPts = Math.round((sqBasePts + sqVisitBonus) * sqMult);
+
+        sqMember.currentPoints = (sqMember.currentPoints || 0) + sqTotalPts;
+        sqMember.lifetimePoints = (sqMember.lifetimePoints || 0) + sqTotalPts;
+        sqMember.lastVisitAt = new Date().toISOString();
+        sqMember.history = sqMember.history || [];
+        sqMember.history.push({
+          at: new Date().toISOString(),
+          action: 'earn',
+          source: 'receipt-scan-square-retry',
+          delta: sqTotalPts,
+          orderId: squareOrderId,
+          checkNumber: it.checkNumber,
+          spendUsd: sqEarnBasis,
+          finalTotalUsd: it.ocrTotal || sqEarnBasis,
+          subtotalUsd: it.ocrSubtotal || sqEarnBasis,
+          tier: sqTier, multiplier: sqMult,
+          note: 'Receipt scan (Square, queued ' + (it.tryCount || 1) + ' retries)',
+        });
+
+        creditedJson.orders.push({
+          orderId: squareOrderId,
+          checkNumber: it.checkNumber,
+          memberEmail: sqMember.email,
+          subtotal: it.ocrSubtotal || null,
+          preTipTotal: sqEarnBasis,
+          finalTotal: it.ocrTotal || sqEarnBasis,
+          points: sqTotalPts,
+          creditedAt: new Date().toISOString(),
+          fromQueue: true,
+          source: 'square',
+        });
+
+        it.status = 'credited';
+        it.decidedAt = new Date().toISOString();
+        it.creditedPoints = sqTotalPts;
+        pendingDirty = true;
+        credited++;
+        continue;
+      }
+
       it.tryCount = (it.tryCount || 1) + 1;
       it.lastTriedAt = new Date().toISOString();
       pendingDirty = true;
@@ -536,7 +667,106 @@ exports.handler = wrap('scan-receipt', async (event) => {
   try { toastMatch = await findToastOrder(ocr.check_number, businessDate); }
   catch (e) { toastDown = true; toastMatch = null; }
 
-  // ── 4a. If Toast doesn't have it yet, queue for retry ──
+  // ── 4a. Toast doesn't have it -- try Square before falling back to the
+  // retry queue. The dining-room POS has moved to Square, so this is the
+  // common path for any recent visit; Toast is still checked first so any
+  // straggler Toast-era receipt is unaffected.
+  let squareMatch = null;
+  if (!toastMatch) {
+    const preTip = ocrPreTipTotal(ocr);
+    const sq = await verifySquareReceipt(preTip, dateIso, ocr.check_number);
+    if (sq && sq.verified) squareMatch = sq;
+  }
+
+  // ── 4b. Square found it -- credit immediately. Same rules as the Toast
+  // path below, except: no real per-order id (Square is matched by
+  // amount+date, not a specific order, so a synthetic dedupe key is used
+  // instead of an order guid) and no cardholder soft-check (that data isn't
+  // present in the synced Square order data).
+  if (squareMatch) {
+    const preTip = squareMatch.actual_pre_tip;
+    if (preTip < MIN_TAB_USD) {
+      return reply(400, { ok: false, error: `Pre-tip total under $${MIN_TAB_USD} — not eligible for points.` });
+    }
+    const squareOrderId = 'square:' + businessDate + ':' + (ocr.check_number || 'nocheck') + ':' + preTip.toFixed(2);
+
+    let creditedFile = await loadJson('credited-orders.json');
+    let credited = creditedFile.json || { orders: [] };
+    if (credited.orders.some((o) => o.orderId === squareOrderId)) {
+      return reply(400, { ok: false, error: 'This receipt has already been credited.' });
+    }
+
+    const membersFile = await loadJson('members.json');
+    if (!membersFile.json) return reply(500, { ok: false, error: 'Members file missing' });
+    const member = (membersFile.json.members || []).find((x) => (x.email || '').toLowerCase() === email);
+    if (!member) return reply(404, { ok: false, error: 'Member record not found.' });
+
+    const todayIsoSq = new Date().toISOString().split('T')[0];
+    const todayScansSq = (member.history || []).filter(
+      (h) => h.action === 'earn' && /receipt-scan/.test(h.source) && h.at && h.at.startsWith(todayIsoSq)
+    ).length;
+    if (todayScansSq >= MAX_SCANS_PER_DAY) {
+      return reply(429, { ok: false, error: `You've reached today's limit of ${MAX_SCANS_PER_DAY} receipt scans. Try again tomorrow.` });
+    }
+
+    const tier = member.tier || 'standard';
+    const mult = tierMult(tier);
+    const earnBasis = preTip;
+    const basePts = Math.round(earnBasis * 10);
+    const visitBonus = earnBasis >= MIN_TAB_USD ? 10 : 0;
+    const totalPts = Math.round((basePts + visitBonus) * mult);
+
+    member.currentPoints = (member.currentPoints || 0) + totalPts;
+    member.lifetimePoints = (member.lifetimePoints || 0) + totalPts;
+    member.lastVisitAt = new Date().toISOString();
+    member.history = member.history || [];
+    member.history.push({
+      at: new Date().toISOString(),
+      action: 'earn',
+      source: 'receipt-scan-square',
+      delta: totalPts,
+      orderId: squareOrderId,
+      checkNumber: ocr.check_number,
+      spendUsd: earnBasis,
+      finalTotalUsd: ocr.total_amount || earnBasis,
+      subtotalUsd: ocr.subtotal_amount || earnBasis,
+      tier, multiplier: mult,
+      note: 'Receipt scan (Square)',
+    });
+
+    await saveJson('members.json', membersFile.json, membersFile.sha,
+      `+${totalPts} pts (receipt scan, Square) — ${member.email}`);
+
+    credited.orders.push({
+      orderId: squareOrderId,
+      checkNumber: ocr.check_number,
+      memberEmail: member.email,
+      subtotal: ocr.subtotal_amount || null,
+      preTipTotal: earnBasis,
+      finalTotal: ocr.total_amount || earnBasis,
+      points: totalPts,
+      creditedAt: new Date().toISOString(),
+      source: 'square',
+    });
+    await saveJson('credited-orders.json', credited, creditedFile.sha,
+      `credit ${ocr.check_number || squareOrderId} → ${member.email} (Square)`);
+
+    return reply(200, {
+      ok: true,
+      points: totalPts,
+      basePoints: basePts,
+      visitBonus,
+      multiplier: mult,
+      newBalance: member.currentPoints,
+      spendUsd: earnBasis,
+      finalTotal: ocr.total_amount || earnBasis,
+      subtotal: ocr.subtotal_amount || earnBasis,
+      checkNumber: ocr.check_number,
+      queueProcessed: pendingResult.credited > 0 ? pendingResult : undefined,
+    });
+  }
+
+  // ── 4c. Neither Toast nor Square has it yet -- queue for retry ──
   if (!toastMatch) {
     // Check daily scan cap before queuing (so abusers can't fill the queue)
     const membersCheck = await loadJson('members.json');
