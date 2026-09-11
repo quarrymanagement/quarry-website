@@ -6467,7 +6467,21 @@
         // DASHBOARD
         // ================================================================
         function updateDashboard() {
-            document.getElementById('totalEvents').textContent = app.events.length;
+            // "Active Events" means what its tooltip says — ticketed events with at
+            // least one open seat — not literally every event ever created. Without
+            // this filter the count includes events that already happened months ago.
+            const activeTodayKey = new Date().toLocaleDateString('en-CA');
+            const activeEventsCount = (app.events || []).filter((e) => {
+                if (e.date && e.date < activeTodayKey) return false;
+                if (e.status === 'inactive' || e.status === 'sold-out') return false;
+                const capacity = Number(e.capacity || e.totalCapacity) || 0;
+                if (capacity > 0) {
+                    const sold = Number(e.registeredCount || e.registered || 0);
+                    if (sold >= capacity) return false;
+                }
+                return true;
+            }).length;
+            document.getElementById('totalEvents').textContent = activeEventsCount;
             document.getElementById('totalSubscribers').textContent = app.subscribers.length;
 
             const subscribed = app.subscribers.filter(s => s.emailStatus === 'Subscribed').length;
