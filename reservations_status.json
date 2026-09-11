@@ -84,8 +84,8 @@
     "6aa1abf6714102333b6ffcd0": {
       "status": "lost",
       "note": "Contacted Katherine but decided to go to another location 9/11",
-      "updatedAt": "2026-09-11T17:23:37.026Z",
-      "updatedBy": "admin",
+      "updatedAt": "2026-09-11T20:04:57.890Z",
+      "updatedBy": "admin-test",
       "history": [
         {
           "from": "not_contacted",
@@ -93,8 +93,16 @@
           "by": "admin",
           "note": "Contacted Katherine but decided to go to another location 9/11",
           "at": "2026-09-11T17:23:37.026Z"
+        },
+        {
+          "from": "visible",
+          "to": "hidden",
+          "by": "admin-test",
+          "note": "",
+          "at": "2026-09-11T20:04:57.890Z"
         }
-      ]
+      ],
+      "hidden": true
     },
     "6aa181263e67920f9ce254f3": {
       "status": "confirmed",
@@ -4888,5 +4896,5 @@
       ]
     }
   },
-  "updatedAt": "2026-09-11T19:24:49.432534Z"
+  "updatedAt": "2026-09-11T20:04:57.890Z"
 }
