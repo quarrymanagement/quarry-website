@@ -3666,6 +3666,7 @@
                         <p class="mkt-sub">Every form submission across reservations, private events, and wedding tours — live from the website. Click any row to email the customer or change their status.</p>
                     </div>
                     <div class="mkt-header-actions">
+                        <input type="text" id="resInqSearch" placeholder="🔍 Search by name or email…" style="padding:0.5rem 0.75rem;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:6px;color:var(--text-primary);font-size:0.85rem;min-width:220px;">
                         <select id="resInqFilter" style="padding:0.5rem 0.75rem;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:6px;color:var(--text-primary);font-size:0.85rem;">
                             <option value="needs_attention">Needs my attention</option>
                             <option value="all">All inquiries</option>
@@ -13127,10 +13128,18 @@ function hashCode(str) {
                 $('resInqConfirmedCount').textContent = confirmed;
                 updateBadge();
 
-                // Filter
+                // Filter — a name/email search overrides the status dropdown
+                // entirely, so it's one box that searches everything instead of
+                // having to flip through each status tab to find someone.
+                const search = ($('resInqSearch')?.value || '').trim().toLowerCase();
                 const filter = $('resInqFilter')?.value || 'needs_attention';
                 let list = state.inquiries.slice();
-                if (filter === 'needs_attention') {
+                if (search) {
+                    list = list.filter((i) =>
+                        (i.name || '').toLowerCase().includes(search) ||
+                        (i.email || '').toLowerCase().includes(search)
+                    );
+                } else if (filter === 'needs_attention') {
                     list = list.filter((i) => ['not_contacted', 'needs_followup', 'responded'].includes(i.status));
                 } else if (filter !== 'all') {
                     list = list.filter((i) => i.status === filter);
@@ -13138,7 +13147,10 @@ function hashCode(str) {
 
                 const tbody = $('resInqTableBody');
                 if (list.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:2rem;">No inquiries in this view. ${filter === 'needs_attention' ? "🎉 You're all caught up." : ''}</td></tr>`;
+                    const emptyMsg = search
+                        ? `No inquiries match "${escHtml($('resInqSearch').value.trim())}".`
+                        : `No inquiries in this view. ${filter === 'needs_attention' ? "🎉 You're all caught up." : ''}`;
+                    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:2rem;">${emptyMsg}</td></tr>`;
                     return;
                 }
                 tbody.innerHTML = list.map((i) => `
@@ -13318,6 +13330,7 @@ function hashCode(str) {
             function init() {
                 $('resInqRefresh')?.addEventListener('click', loadAll);
                 $('resInqFilter')?.addEventListener('change', render);
+                $('resInqSearch')?.addEventListener('input', render);
                 $('resInqModalClose')?.addEventListener('click', closeModal);
                 $('resInqModal')?.addEventListener('click', (e) => { if (e.target.id === 'resInqModal') closeModal(); });
                 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('resInqModal')?.classList.contains('open')) closeModal(); });
