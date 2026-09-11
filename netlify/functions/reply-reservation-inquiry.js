@@ -80,14 +80,19 @@ function escapeHtml(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
-async function sendReplyEmail(to, subject, plainBody) {
+async function sendReplyEmail(to, subject, plainBody, cc) {
     if (!SENDGRID_API_KEY) throw new Error('SENDGRID_API_KEY not configured on the server');
     const html = `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:#222;white-space:pre-wrap;">${escapeHtml(plainBody)}</div>`;
+    const personalization = { to: [{ email: to }] };
+    // cc: optional single address or array — e.g. looping in Jacqueline on a
+    // wedding-inquiry handoff email so she's visible to the customer from the
+    // first message, not just forwarded after the fact.
+    if (cc) personalization.cc = (Array.isArray(cc) ? cc : [cc]).map((email) => ({ email }));
     const res = await fetch('https://api.sendgrid.com/v3/mail/send', {
         method: 'POST',
         headers: { 'Authorization': 'Bearer ' + SENDGRID_API_KEY, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            personalizations: [{ to: [{ email: to }] }],
+            personalizations: [personalization],
             from: { email: FROM_EMAIL, name: FROM_NAME },
             subject,
             content: [
@@ -137,12 +142,12 @@ exports.handler = async (event) => {
     const auth = verifyAnyToken(body.token);
     if (!auth.ok || !ALLOWED_ROLES.includes(auth.role)) return respond(401, { ok: false, error: 'unauthorized' });
 
-    const { submissionId, to, subject, body: messageBody } = body;
+    const { submissionId, to, subject, body: messageBody, cc } = body;
     if (!submissionId) return respond(400, { ok: false, error: 'submissionId required' });
     if (!to || !subject || !messageBody) return respond(400, { ok: false, error: 'to, subject, and body are required' });
 
     try {
-        await sendReplyEmail(to, subject, messageBody);
+        await sendReplyEmail(to, subject, messageBody, cc);
     } catch (err) {
         return respond(502, { ok: false, error: 'Could not send email: ' + err.message });
     }
