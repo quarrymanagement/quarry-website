@@ -434,13 +434,14 @@
         }
         .events-strip-empty { color: var(--text-muted); font-size: 0.88rem; font-style: italic; padding: 0.5rem 0; }
         .es-chip {
-            flex: 0 0 210px; background: var(--bg-card); border: 1px solid var(--border-subtle);
+            flex: 0 0 230px; background: var(--bg-card); border: 1px solid var(--border-subtle);
             border-radius: 10px; padding: 0.9rem 1rem; cursor: pointer; transition: var(--transition);
         }
         .es-chip:hover { border-color: var(--gold); box-shadow: var(--shadow-md); transform: translateY(-2px); }
         .es-chip-name {
             font-weight: 600; color: var(--text-primary); font-size: 0.92rem; margin-bottom: 0.15rem;
-            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+            overflow: hidden; line-height: 1.25; min-height: 2.5em;
         }
         .es-chip-date { color: var(--text-muted); font-size: 0.76rem; margin-bottom: 0.65rem; }
         .es-chip-bar-track { background: var(--border-subtle); border-radius: 99px; height: 6px; overflow: hidden; margin-bottom: 0.4rem; }
@@ -2825,7 +2826,7 @@
                 </div>
 
                 <!-- EVENTS AT A GLANCE -->
-                <h2 class="dash-section-h" style="margin-top:1.75rem;">Events at a Glance</h2>
+                <h2 class="dash-section-h" style="margin-top:1.75rem;">Events at a Glance <span style="color:var(--text-muted);font-weight:400;font-size:0.85rem;">(next 30 days)</span></h2>
                 <div class="events-strip" id="dashEventsStrip">
                     <div class="events-strip-empty">Loading events…</div>
                 </div>
@@ -6508,12 +6509,13 @@
             if (!strip) return;
 
             const todayKey = new Date().toLocaleDateString('en-CA');
+            const windowEndKey = new Date(Date.now() + 30 * 86400000).toLocaleDateString('en-CA');
             const upcoming = (app.events || [])
-                .filter((e) => !e.date || e.date >= todayKey)
+                .filter((e) => e.date && e.date >= todayKey && e.date <= windowEndKey)
                 .sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')));
 
             if (upcoming.length === 0) {
-                strip.innerHTML = '<div class="events-strip-empty">No upcoming events.</div>';
+                strip.innerHTML = '<div class="events-strip-empty">No events in the next 30 days.</div>';
                 return;
             }
 
