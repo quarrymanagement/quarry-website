@@ -80,7 +80,12 @@ async function saveFile(json, sha, message) {
         method: 'PUT', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ json, sha, message })
     });
-    if (!r.ok) throw new Error(`save reservations_status.json: ${r.status} ${(await r.text()).slice(0, 200)}`);
+    if (!r.ok) {
+        const text = await r.text().catch(() => '');
+        const err = new Error(`save reservations_status.json: ${r.status} ${text.slice(0, 200)}`);
+        err.status = r.status;
+        throw err;
+    }
     return r.json();
 }
 
@@ -108,33 +113,52 @@ exports.handler = async (event) => {
         return respond(400, { ok: false, error: 'status or hidden required' });
     }
 
-    try {
-        const { data, sha } = await loadFile();
-        data.overrides = data.overrides || {};
-        const existing = data.overrides[submissionId] || {};
-        const now = new Date().toISOString();
-        const prevStatus = existing.status || 'not_contacted';
-        const nextStatus = status !== undefined ? status : prevStatus;
-        const history = Array.isArray(existing.history) ? existing.history : [];
-        if (status !== undefined && prevStatus !== nextStatus) {
-            history.push({ from: prevStatus, to: nextStatus, by: by || 'admin', note: note || '', at: now });
+    // reservations_status.json is a single shared file protected by an
+    // optimistic-concurrency check (data-store.js rejects a PUT whose sha
+    // doesn't match the file's current one). With a background "did they
+    // reply?" checker, bulk operations, and normal multi-admin use all
+    // writing to it, two changes landing close together is routine, not
+    // exceptional — so a stale-sha conflict here re-reads the now-current
+    // file and reapplies this same status/hidden change on top of it,
+    // rather than surfacing a raw "does not match <sha>" error for what the
+    // admin experiences as an ordinary status click.
+    const MAX_ATTEMPTS = 5;
+    let lastErr;
+    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+        try {
+            const { data, sha } = await loadFile();
+            data.overrides = data.overrides || {};
+            const existing = data.overrides[submissionId] || {};
+            const now = new Date().toISOString();
+            const prevStatus = existing.status || 'not_contacted';
+            const nextStatus = status !== undefined ? status : prevStatus;
+            const history = Array.isArray(existing.history) ? existing.history : [];
+            if (status !== undefined && prevStatus !== nextStatus) {
+                history.push({ from: prevStatus, to: nextStatus, by: by || 'admin', note: note || '', at: now });
+            }
+            if (hidden !== undefined) {
+                history.push({ from: existing.hidden ? 'hidden' : 'visible', to: hidden ? 'hidden' : 'visible', by: by || 'admin', note: note || '', at: now });
+            }
+            data.overrides[submissionId] = {
+                status: nextStatus,
+                note: note !== undefined ? note : (existing.note || ''),
+                updatedAt: now,
+                updatedBy: by || 'admin',
+                history,
+                hidden: hidden !== undefined ? !!hidden : !!existing.hidden,
+            };
+            data.updatedAt = now;
+            const summary = hidden !== undefined ? (hidden ? 'hidden' : 'unhidden') : nextStatus;
+            await saveFile(data, sha, `reservations: ${submissionId.slice(0, 8)} → ${summary}`);
+            return respond(200, { ok: true, submissionId, status: nextStatus, override: data.overrides[submissionId] });
+        } catch (err) {
+            lastErr = err;
+            if (err.status === 409 && attempt < MAX_ATTEMPTS - 1) {
+                await new Promise((res) => setTimeout(res, 200 + attempt * 300));
+                continue;
+            }
+            break;
         }
-        if (hidden !== undefined) {
-            history.push({ from: existing.hidden ? 'hidden' : 'visible', to: hidden ? 'hidden' : 'visible', by: by || 'admin', note: note || '', at: now });
-        }
-        data.overrides[submissionId] = {
-            status: nextStatus,
-            note: note !== undefined ? note : (existing.note || ''),
-            updatedAt: now,
-            updatedBy: by || 'admin',
-            history,
-            hidden: hidden !== undefined ? !!hidden : !!existing.hidden,
-        };
-        data.updatedAt = now;
-        const summary = hidden !== undefined ? (hidden ? 'hidden' : 'unhidden') : nextStatus;
-        await saveFile(data, sha, `reservations: ${submissionId.slice(0, 8)} → ${summary}`);
-        return respond(200, { ok: true, submissionId, status: nextStatus, override: data.overrides[submissionId] });
-    } catch (err) {
-        return respond(500, { ok: false, error: err.message });
     }
+    return respond(500, { ok: false, error: lastErr.message });
 };
