@@ -95,10 +95,17 @@ exports.handler = async (event) => {
     const auth = verifyAnyToken(body.token);
     if (!auth.ok || !ALLOWED_ROLES.includes(auth.role)) return respond(401, { ok: false, error: 'unauthorized' });
 
-    const { submissionId, status, note, by } = body;
+    // hidden: true/false is a separate axis from status — it's how a duplicate
+    // or junk inquiry gets removed from the admin's list without touching
+    // (or destroying the record of) its actual contact status. Either field
+    // can be sent alone; at least one is required.
+    const { submissionId, status, note, by, hidden } = body;
     if (!submissionId) return respond(400, { ok: false, error: 'submissionId required' });
-    if (!status || !VALID_STATUSES.has(status)) {
+    if (status !== undefined && !VALID_STATUSES.has(status)) {
         return respond(400, { ok: false, error: `status must be one of: ${[...VALID_STATUSES].join(', ')}` });
+    }
+    if (status === undefined && hidden === undefined) {
+        return respond(400, { ok: false, error: 'status or hidden required' });
     }
 
     try {
@@ -107,20 +114,26 @@ exports.handler = async (event) => {
         const existing = data.overrides[submissionId] || {};
         const now = new Date().toISOString();
         const prevStatus = existing.status || 'not_contacted';
+        const nextStatus = status !== undefined ? status : prevStatus;
         const history = Array.isArray(existing.history) ? existing.history : [];
-        if (prevStatus !== status) {
-            history.push({ from: prevStatus, to: status, by: by || 'admin', note: note || '', at: now });
+        if (status !== undefined && prevStatus !== nextStatus) {
+            history.push({ from: prevStatus, to: nextStatus, by: by || 'admin', note: note || '', at: now });
+        }
+        if (hidden !== undefined) {
+            history.push({ from: existing.hidden ? 'hidden' : 'visible', to: hidden ? 'hidden' : 'visible', by: by || 'admin', note: note || '', at: now });
         }
         data.overrides[submissionId] = {
-            status,
-            note: note || existing.note || '',
+            status: nextStatus,
+            note: note !== undefined ? note : (existing.note || ''),
             updatedAt: now,
             updatedBy: by || 'admin',
-            history
+            history,
+            hidden: hidden !== undefined ? !!hidden : !!existing.hidden,
         };
         data.updatedAt = now;
-        await saveFile(data, sha, `reservations: ${submissionId.slice(0, 8)} → ${status}`);
-        return respond(200, { ok: true, submissionId, status, override: data.overrides[submissionId] });
+        const summary = hidden !== undefined ? (hidden ? 'hidden' : 'unhidden') : nextStatus;
+        await saveFile(data, sha, `reservations: ${submissionId.slice(0, 8)} → ${summary}`);
+        return respond(200, { ok: true, submissionId, status: nextStatus, override: data.overrides[submissionId] });
     } catch (err) {
         return respond(500, { ok: false, error: err.message });
     }

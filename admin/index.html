@@ -3677,6 +3677,7 @@
                             <option value="responded">Responded</option>
                             <option value="confirmed">Confirmed</option>
                             <option value="lost">Lost</option>
+                            <option value="deleted">Deleted</option>
                         </select>
                         <button class="btn-secondary" id="resInqRefresh" title="Reload from Netlify">↻ Refresh</button>
                     </div>
@@ -3783,6 +3784,8 @@
                         </div>
                     </div>
                     <div class="mkt-modal-foot">
+                        <button type="button" id="resInqDeleteBtn" class="btn-secondary" style="border-color:#dc2626;color:#dc2626;">🗑 Delete</button>
+                        <button type="button" id="resInqRestoreBtn" class="btn-secondary hidden">↩ Restore</button>
                         <button type="button" id="resInqReplyToggle" class="btn-primary">✉️ Reply</button>
                         <div style="flex:1;"></div>
                         <a id="resInqNetlifyLink" href="#" target="_blank" class="btn-secondary" style="text-decoration:none;font-size:0.78rem;">View in Netlify</a>
@@ -13058,7 +13061,7 @@ function hashCode(str) {
             let checkingResponses = false;
             async function checkForResponses() {
                 if (checkingResponses) return;
-                const candidates = state.inquiries.filter((i) => i.email && AWAITING_REPLY_STATUSES.includes(i.status));
+                const candidates = state.inquiries.filter((i) => !i.hidden && i.email && AWAITING_REPLY_STATUSES.includes(i.status));
                 if (!candidates.length) return;
                 checkingResponses = true;
                 let foundAny = false;
@@ -13107,19 +13110,25 @@ function hashCode(str) {
             function updateBadge() {
                 const badge = $('resInqBadge');
                 if (!badge) return;
-                const n = state.inquiries.filter((i) => ['not_contacted', 'needs_followup', 'responded'].includes(i.status)).length;
+                const n = state.inquiries.filter((i) => !i.hidden && ['not_contacted', 'needs_followup', 'responded'].includes(i.status)).length;
                 if (n > 0) { badge.textContent = String(n); badge.style.display = ''; }
                 else { badge.style.display = 'none'; }
             }
 
             function render() {
+                // Deleted (hidden) inquiries — duplicates/junk removed via the
+                // modal's Delete button — are excluded from every count and every
+                // filter except the dedicated "Deleted" view, where they can be
+                // restored.
+                const visible = state.inquiries.filter((i) => !i.hidden);
+
                 // Stats
-                const total = state.inquiries.length;
-                const notContacted = state.inquiries.filter((i) => i.status === 'not_contacted').length;
-                const contacted = state.inquiries.filter((i) => CONTACTED_STATUSES.includes(i.status)).length;
-                const followup = state.inquiries.filter((i) => i.status === 'needs_followup').length;
-                const responded = state.inquiries.filter((i) => i.status === 'responded').length;
-                const confirmed = state.inquiries.filter((i) => i.status === 'confirmed').length;
+                const total = visible.length;
+                const notContacted = visible.filter((i) => i.status === 'not_contacted').length;
+                const contacted = visible.filter((i) => CONTACTED_STATUSES.includes(i.status)).length;
+                const followup = visible.filter((i) => i.status === 'needs_followup').length;
+                const responded = visible.filter((i) => i.status === 'responded').length;
+                const confirmed = visible.filter((i) => i.status === 'confirmed').length;
                 $('resInqTotalCount').textContent = total;
                 $('resInqNotContactedCount').textContent = notContacted;
                 $('resInqContactedCount').textContent = contacted;
@@ -13133,16 +13142,20 @@ function hashCode(str) {
                 // having to flip through each status tab to find someone.
                 const search = ($('resInqSearch')?.value || '').trim().toLowerCase();
                 const filter = $('resInqFilter')?.value || 'needs_attention';
-                let list = state.inquiries.slice();
-                if (search) {
-                    list = list.filter((i) =>
+                let list;
+                if (filter === 'deleted') {
+                    list = state.inquiries.filter((i) => i.hidden);
+                } else if (search) {
+                    list = visible.filter((i) =>
                         (i.name || '').toLowerCase().includes(search) ||
                         (i.email || '').toLowerCase().includes(search)
                     );
                 } else if (filter === 'needs_attention') {
-                    list = list.filter((i) => ['not_contacted', 'needs_followup', 'responded'].includes(i.status));
-                } else if (filter !== 'all') {
-                    list = list.filter((i) => i.status === filter);
+                    list = visible.filter((i) => ['not_contacted', 'needs_followup', 'responded'].includes(i.status));
+                } else if (filter === 'all') {
+                    list = visible;
+                } else {
+                    list = visible.filter((i) => i.status === filter);
                 }
 
                 const tbody = $('resInqTableBody');
@@ -13223,6 +13236,8 @@ function hashCode(str) {
                     $('resInqReplyBody').value = '';
                 }
                 $('resInqNetlifyLink').href = inq.netlifyUrl || '#';
+                $('resInqDeleteBtn').classList.toggle('hidden', !!inq.hidden);
+                $('resInqRestoreBtn').classList.toggle('hidden', !inq.hidden);
 
                 loadEmailHistory(inq.email);
             }
@@ -13327,6 +13342,34 @@ function hashCode(str) {
                 }
             }
 
+            // Delete/restore is a separate axis from status (see
+            // update-reservation-status.js) — a duplicate or junk inquiry gets
+            // hidden from every view without losing its status/history, and can
+            // always be brought back via the "Deleted" filter + Restore.
+            async function setHidden(hiddenVal) {
+                if (!state.current) return;
+                const id = state.current.id;
+                if (hiddenVal && !confirm(`Delete this inquiry from ${state.current.name}? It'll be hidden from every view, but you can restore it from the "Deleted" filter.`)) return;
+                try {
+                    const r = await fetch(`${FN}/update-reservation-status`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token: localStorage.getItem('quarryAdminToken') || '', submissionId: id, hidden: hiddenVal, by: 'admin' })
+                    });
+                    const body = await r.json();
+                    if (!r.ok || !body.ok) throw new Error(body.error || 'update failed');
+                    const inq = state.inquiries.find((x) => x.id === id);
+                    if (inq) {
+                        inq.hidden = hiddenVal;
+                        inq.statusHistory = body.override.history;
+                    }
+                    if (hiddenVal) closeModal(); else openModal(id);
+                    render();
+                    if (typeof showToast === 'function') showToast(hiddenVal ? 'Inquiry deleted' : 'Inquiry restored');
+                } catch (err) {
+                    alert(`Could not ${hiddenVal ? 'delete' : 'restore'} inquiry: ` + err.message);
+                }
+            }
+
             function init() {
                 $('resInqRefresh')?.addEventListener('click', loadAll);
                 $('resInqFilter')?.addEventListener('change', render);
@@ -13338,6 +13381,8 @@ function hashCode(str) {
                 $('resInqReplyToggle')?.addEventListener('click', () => { $('resInqReplyBox').classList.toggle('hidden'); });
                 $('resInqCancelReply')?.addEventListener('click', () => { $('resInqReplyBox').classList.add('hidden'); });
                 $('resInqSendReply')?.addEventListener('click', sendReply);
+                $('resInqDeleteBtn')?.addEventListener('click', () => setHidden(true));
+                $('resInqRestoreBtn')?.addEventListener('click', () => setHidden(false));
             }
 
             function onTabSwitch(tab) {

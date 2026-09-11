@@ -139,6 +139,9 @@
         .modal-submit { background: var(--gold); border: none; color: #fff; }
         .modal-submit:hover { background: var(--gold-light); }
         .modal-submit:disabled { opacity: 0.6; cursor: default; }
+        .modal-delete { background: transparent; border: 1px solid #dc2626; color: #dc2626; margin-right: auto; }
+        .modal-delete:hover { background: #dc2626; color: #fff; }
+        .modal-delete:disabled { opacity: 0.5; cursor: default; }
         .form-error { color: var(--red); font-size: 0.82rem; margin-top: 10px; min-height: 1.1em; }
         .form-conflict { background: var(--red-dim); border: 1px solid rgba(220,38,38,0.3); color: var(--red); border-radius: 8px; padding: 10px 12px; margin-top: 10px; font-size: 0.8rem; }
 
@@ -313,6 +316,7 @@
                 <div class="form-error" id="bFormError"></div>
                 <div id="bConflictZone"></div>
                 <div class="modal-actions">
+                    <button type="button" class="modal-delete hidden" id="bDeleteBtn">Delete Booking</button>
                     <button type="button" class="modal-cancel" id="bCancelBtn">Cancel</button>
                     <button type="submit" class="modal-submit" id="bSubmitBtn">Save Booking</button>
                 </div>
@@ -576,6 +580,10 @@
                 billingSection.classList.add('hidden');
                 state.lineItems = []; state.payments = [];
             }
+            // Only an existing, non-wedding-portal booking can be deleted here —
+            // same restriction as editing (wedding-owned rows get recreated by
+            // the wedding_sync_booking trigger on its next save regardless).
+            document.getElementById('bDeleteBtn').classList.toggle('hidden', !editable);
 
             overlay.classList.remove('hidden');
         };
@@ -584,6 +592,34 @@
         document.getElementById('newBookingBtn').addEventListener('click', function () { openModal(); });
         document.getElementById('bCancelBtn').addEventListener('click', closeModal);
         overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
+
+        document.getElementById('bDeleteBtn').addEventListener('click', function () {
+            if (!state.editingId) return;
+            var titleVal = document.getElementById('bTitle').value || 'this booking';
+            if (!confirm('Delete "' + titleVal + '"? This permanently removes the booking, its space assignment, and any catering/invoice line items. This cannot be undone.')) return;
+
+            var btn = this;
+            btn.disabled = true;
+            btn.textContent = 'Deleting…';
+            var tok = localStorage.getItem('quarryAdminToken') || '';
+            fetch(API_BOOKING_WRITE + '?token=' + encodeURIComponent(tok) + '&id=' + encodeURIComponent(state.editingId), { method: 'DELETE' })
+                .then(function (r) { return r.json().then(function (b) { return { status: r.status, body: b }; }); })
+                .then(function (res) {
+                    btn.disabled = false;
+                    btn.textContent = 'Delete Booking';
+                    if (res.status !== 200) {
+                        document.getElementById('bFormError').textContent = 'Could not delete: ' + (res.body.error || res.status);
+                        return;
+                    }
+                    closeModal();
+                    load();
+                })
+                .catch(function (e) {
+                    btn.disabled = false;
+                    btn.textContent = 'Delete Booking';
+                    document.getElementById('bFormError').textContent = 'Network error: ' + e.message;
+                });
+        });
 
         form.addEventListener('submit', function (e) {
             e.preventDefault();

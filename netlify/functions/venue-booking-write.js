@@ -1,13 +1,18 @@
 // ============================================================================
 // venue-booking-write.js
 //
-// Server-side proxy for creating a new internal venue booking from
-// admin/venue-calendar.html's "+ New Booking" form. Mirrors venue-day-view.js's
-// auth pattern exactly (admin OR restricted-staff session token, same shared
-// Supabase secret) but for POST/create instead of GET/read.
+// Server-side proxy for creating, editing, or deleting an internal venue
+// booking from admin/venue-calendar.html. Mirrors venue-day-view.js's auth
+// pattern exactly (admin OR restricted-staff session token, same shared
+// Supabase secret).
 //
 // POST /.netlify/functions/venue-booking-write
 // Body: { token, ...booking fields (see supabase venue-booking-write function) }
+//
+// DELETE /.netlify/functions/venue-booking-write?token=<token>&id=<booking id>
+// Permanently removes a booking (and its spaces/line items/payments, via
+// cascade on the Supabase side). Refused for wedding-portal bookings, same
+// as editing one here — see the Supabase function for why.
 //
 // On a successful NEW booking (not an edit), best-effort matches the
 // contact_email/contact_phone against open reservation inquiries
@@ -30,7 +35,7 @@ const SITE_URL = process.env.URL || 'https://thequarrystl.com';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Methods': 'POST, DELETE, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
   'Content-Type': 'application/json',
 };
@@ -106,8 +111,26 @@ async function matchAndConfirmInquiry(token, booking) {
 
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: CORS, body: '' };
-  if (event.httpMethod !== 'POST') return reply(405, { error: 'POST only' });
   if (!VENUE_AVAILABILITY_KEY) return reply(503, { error: 'Venue booking write is not configured on the server.' });
+
+  if (event.httpMethod === 'DELETE') {
+    const q = event.queryStringParameters || {};
+    const auth = verifyAnyToken(q.token);
+    if (!auth.ok || !ALLOWED_ROLES.includes(auth.role)) return reply(401, { error: 'unauthorized' });
+    if (!q.id) return reply(400, { error: 'missing_id' });
+    try {
+      const r = await fetch(`${SUPABASE_FN_URL}?id=${encodeURIComponent(q.id)}`, {
+        method: 'DELETE',
+        headers: { 'x-access-key': VENUE_AVAILABILITY_KEY },
+      });
+      const body = await r.json();
+      return reply(r.status, body);
+    } catch (e) {
+      return reply(500, { error: 'exception', message: e.message });
+    }
+  }
+
+  if (event.httpMethod !== 'POST') return reply(405, { error: 'POST or DELETE only' });
 
   let payload;
   try {

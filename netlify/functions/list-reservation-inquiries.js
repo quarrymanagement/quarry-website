@@ -171,6 +171,7 @@ exports.handler = async (event) => {
                 inq.statusUpdatedAt = ov.updatedAt || inq.submittedAt;
                 inq.statusNote = ov.note || '';
                 inq.statusHistory = ov.history || [];
+                inq.hidden = !!ov.hidden;
                 inquiries.push(inq);
             }
         }
