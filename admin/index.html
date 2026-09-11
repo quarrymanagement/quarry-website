@@ -3729,9 +3729,9 @@
                                 <th>Name</th>
                                 <th>Type</th>
                                 <th>Occasion</th>
-                                <th>Event Date</th>
+                                <th class="sortable-th" data-sort="eventDate" style="cursor:pointer;" title="Sort by event date">Event Date <span class="sort-ind" data-sort-ind="eventDate"></span></th>
                                 <th>Guests</th>
-                                <th>Received</th>
+                                <th class="sortable-th" data-sort="submittedAt" style="cursor:pointer;" title="Sort by when it came in">Received <span class="sort-ind" data-sort-ind="submittedAt"></span></th>
                                 <th>Status</th>
                                 <th>Actions</th>
                             </tr>
@@ -13022,7 +13022,18 @@ function hashCode(str) {
         // ====================================================================
         window.ResInqUI = (() => {
             const FN = '/.netlify/functions';
-            const state = { inquiries: [], current: null, loaded: false, loading: false };
+            // sort.field null = server order (newest submitted first). Set by
+            // clicking a sortable column header — 'eventDate' lets the list be
+            // ranked by how soon the event is, so the most urgent
+            // not-yet-contacted inquiries surface to the top.
+            const state = { inquiries: [], current: null, loaded: false, loading: false, sort: { field: null, dir: 'asc' } };
+
+            function sortValueFor(inq, field) {
+                const raw = field === 'eventDate' ? inq.eventDate : inq.submittedAt;
+                if (!raw) return null;
+                const t = new Date(raw.length === 10 ? raw + 'T12:00:00' : raw).getTime();
+                return isNaN(t) ? null : t;
+            }
             const $ = (id) => document.getElementById(id);
             const escHtml = (s) => (s == null ? '' : String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])));
             const fmtDate = (iso) => { if (!iso) return '—'; const d = new Date(iso); return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); };
@@ -13172,6 +13183,20 @@ function hashCode(str) {
                 } else {
                     list = visible.filter((i) => i.status === filter);
                 }
+
+                if (state.sort.field) {
+                    const field = state.sort.field, dir = state.sort.dir;
+                    list = list.slice().sort((a, b) => {
+                        const av = sortValueFor(a, field), bv = sortValueFor(b, field);
+                        if (av == null && bv == null) return 0;
+                        if (av == null) return 1;  // no usable date — always sinks to the bottom
+                        if (bv == null) return -1;
+                        return dir === 'asc' ? av - bv : bv - av;
+                    });
+                }
+                document.querySelectorAll('#resInqTable .sort-ind').forEach((el) => {
+                    el.textContent = el.dataset.sortInd === state.sort.field ? (state.sort.dir === 'asc' ? '▲' : '▼') : '';
+                });
 
                 const tbody = $('resInqTableBody');
                 if (list.length === 0) {
@@ -13421,6 +13446,23 @@ function hashCode(str) {
                         if (filterEl) filterEl.value = filterVal;
                         render();
                         $('resInqTable')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    });
+                });
+
+                // Sortable column headers. First click on a column sorts
+                // ascending (soonest event / oldest submission first); clicking
+                // the same column again flips direction; clicking the other
+                // column switches to it, starting ascending again.
+                document.querySelectorAll('#resInqTable .sortable-th').forEach((th) => {
+                    th.addEventListener('click', () => {
+                        const field = th.dataset.sort;
+                        if (state.sort.field === field) {
+                            state.sort.dir = state.sort.dir === 'asc' ? 'desc' : 'asc';
+                        } else {
+                            state.sort.field = field;
+                            state.sort.dir = 'asc';
+                        }
+                        render();
                     });
                 });
             }
