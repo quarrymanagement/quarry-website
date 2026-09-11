@@ -6582,12 +6582,12 @@
                 const event = app.events.find(e => e.id === eventId);
                 const eventName = event ? event.name : eventId;
                 (regs[eventId] || []).forEach(reg => {
-                    if (reg.created) {
+                    if (reg.registeredAt) {
                         activities.push({
                             type: 'registration',
                             name: eventName,
                             user: reg.name || 'Unknown',
-                            date: new Date(reg.created),
+                            date: new Date(reg.registeredAt),
                             amount: reg.amount || '0',
                         });
                     }
