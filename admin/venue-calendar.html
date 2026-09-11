@@ -648,6 +648,8 @@
                     if (res.status !== expectedStatus) {
                         if (res.body.error === 'space_double_booked') {
                             errorEl.textContent = 'That space is already booked by a confirmed event during this time. Pick a different space/time, or leave this one as Tentative until the conflict is resolved.';
+                        } else if (res.body.error === 'building_capacity_exceeded' || res.body.error === 'building_already_exclusively_booked' || res.body.error === 'cannot_exclusively_book_building') {
+                            errorEl.textContent = res.body.message || 'The building is unavailable during this time.';
                         } else {
                             errorEl.textContent = 'Could not save: ' + (res.body.error || res.status);
                         }
