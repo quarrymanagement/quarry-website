@@ -6690,10 +6690,28 @@
             }
         }
 
+        // Source values from subscribers.json worth surfacing as "new lead" activity,
+        // mapped to a human label. Deliberately excludes sources that just mirror an
+        // event registration (event-registration, wine-club-registration, Event RSVP)
+        // or bulk/administrative imports (Wix Stores, Site Members, Manual Creation) —
+        // those would either duplicate the registration entries above or aren't really
+        // "activity" anyone needs to see.
+        const ACTIVITY_CONTACT_SOURCE_LABELS = {
+            'reservations': 'Reservation Inquiry',
+            'private-events': 'Private Event Inquiry',
+            'contact': 'Contact Form',
+            'careers': 'Career Application',
+            'mailing-list': 'Mailing List Signup',
+            'wedding-tour': 'Wedding Tour Request',
+            'Chat Form Submission': 'Chat Message',
+            'Form Submission': 'Website Form',
+        };
+
         function updateActivityFeed() {
             const feed = document.getElementById('activityFeed');
             const activities = [];
             const regs = app.registrations || {};
+            const escActivity = (s) => (s == null ? '' : String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])));
 
             for (const eventId in regs) {
                 const event = app.events.find(e => e.id === eventId);
@@ -6706,15 +6724,26 @@
                     const when = reg.registeredAt || reg.created;
                     if (when) {
                         activities.push({
-                            type: 'registration',
-                            name: eventName,
-                            user: reg.name || reg.email || 'Unknown',
+                            title: eventName,
+                            detail: `${reg.name || reg.email || 'Unknown'} · $${parseFloat(reg.amount != null ? reg.amount : 0).toFixed(2)}`,
                             date: new Date(when),
-                            amount: reg.amount != null ? reg.amount : 0,
                         });
                     }
                 });
             }
+
+            // Ticket sales are only a handful of events a week — without this the feed
+            // looked frozen for days at a time even while the site was actively
+            // generating reservation inquiries, private-event leads, and contact form
+            // submissions every day. Same data already loaded for the CRM tab.
+            (app.subscribers || []).forEach((s) => {
+                const label = ACTIVITY_CONTACT_SOURCE_LABELS[s.source];
+                if (!label || !s.created) return;
+                const date = new Date(s.created);
+                if (isNaN(date.getTime())) return;
+                const name = `${s.firstName || ''} ${s.lastName || ''}`.trim() || s.email || 'Unknown';
+                activities.push({ title: label, detail: name, date });
+            });
 
             activities.sort((a, b) => b.date - a.date);
 
@@ -6723,11 +6752,11 @@
                 return;
             }
 
-            feed.innerHTML = activities.slice(0, 15).map(activity => `
+            feed.innerHTML = activities.slice(0, 20).map(activity => `
                 <div class="activity-item">
                     <div>
-                        <span class="activity-event">${activity.name}</span><br>
-                        <span style="color: #858d9e; font-size: 0.85rem;">${activity.user} - $${parseFloat(activity.amount).toFixed(2)}</span>
+                        <span class="activity-event">${escActivity(activity.title)}</span><br>
+                        <span style="color: #858d9e; font-size: 0.85rem;">${escActivity(activity.detail)}</span>
                     </div>
                     <span class="activity-time">${formatTimeAgo(activity.date)}</span>
                 </div>
