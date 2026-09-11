@@ -77,11 +77,22 @@ const CORS = {
 };
 const respond = (s, b) => ({ statusCode: s, headers: CORS, body: JSON.stringify(b) });
 
-async function fetchSubmissions(formId, perPage) {
-    const url = `https://api.netlify.com/api/v1/forms/${formId}/submissions?per_page=${perPage || 100}`;
-    const r = await fetch(url, { headers: { 'Authorization': `Bearer ${NETLIFY_TOKEN}` } });
-    if (!r.ok) throw new Error(`Netlify API ${r.status}: ${(await r.text()).slice(0, 200)}`);
-    return r.json();
+// Netlify's submissions API caps at 100 per page regardless of the per_page
+// value requested, and gives no total count up front — so a single
+// unbounded request silently truncates to the newest 100 submissions and
+// drops everything older. Paginates until a short page confirms the end.
+async function fetchSubmissions(formId) {
+    const all = [];
+    for (let page = 1; ; page++) {
+        const url = `https://api.netlify.com/api/v1/forms/${formId}/submissions?per_page=100&page=${page}`;
+        const r = await fetch(url, { headers: { 'Authorization': `Bearer ${NETLIFY_TOKEN}` } });
+        if (!r.ok) throw new Error(`Netlify API ${r.status}: ${(await r.text()).slice(0, 200)}`);
+        const batch = await r.json();
+        if (!Array.isArray(batch) || batch.length === 0) break;
+        all.push(...batch);
+        if (batch.length < 100) break;
+    }
+    return all;
 }
 
 async function loadStatusOverrides() {
@@ -145,7 +156,7 @@ exports.handler = async (event) => {
         const [overrides, ...formResults] = await Promise.all([
             loadStatusOverrides(),
             ...Object.entries(FORM_IDS).map(([formName, formId]) =>
-                fetchSubmissions(formId, 100).then((subs) => ({ formName, subs })).catch((err) => ({ formName, subs: [], error: err.message }))
+                fetchSubmissions(formId).then((subs) => ({ formName, subs })).catch((err) => ({ formName, subs: [], error: err.message }))
             )
         ]);
 
