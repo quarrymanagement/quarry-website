@@ -2798,11 +2798,6 @@
                         <div class="dash-stat-num" id="totalEvents">0</div>
                         <div class="dash-stat-lbl">Active Events</div>
                     </div>
-                    <div class="dash-stat" data-jump="events" title="Total seats sold across all upcoming events">
-                        <div class="dash-stat-ic">🎟️</div>
-                        <div class="dash-stat-num" id="totalRegistrations">0</div>
-                        <div class="dash-stat-lbl">Tickets Sold</div>
-                    </div>
                     <div class="dash-stat" data-jump="events" title="Estimated revenue from sold tickets">
                         <div class="dash-stat-ic">💰</div>
                         <div class="dash-stat-num" id="totalRevenue">$0</div>
@@ -6517,18 +6512,15 @@
             const subscribed = app.subscribers.filter(s => s.emailStatus === 'Subscribed').length;
             document.getElementById('emailSubscribed').textContent = subscribed;
 
-            // Calculate total registrations and revenue from registrations data
-            let totalRegs = 0;
+            // Calculate revenue from registrations data
             let revenue = 0;
             const regs = app.registrations || {};
             for (const eventId in regs) {
                 const eventRegs = regs[eventId] || [];
-                totalRegs += eventRegs.length;
                 eventRegs.forEach(r => {
                     revenue += parseFloat(r.amount || r.amountPaid || 0);
                 });
             }
-            document.getElementById('totalRegistrations').textContent = totalRegs;
             document.getElementById('totalRevenue').textContent = '$' + revenue.toLocaleString('en-US', { minimumFractionDigits: 2 });
 
             // Upcoming bands — use LOCAL date so we don't mark today's bands
