@@ -428,6 +428,27 @@
         .activity-event { color: var(--gold); font-weight: 600; }
         .activity-time { color: var(--text-muted); font-size: 0.8rem; }
 
+        .events-strip {
+            display: flex; gap: 0.85rem; overflow-x: auto; padding: 0.25rem 0.1rem 0.75rem;
+            margin-top: 0.5rem; scrollbar-width: thin;
+        }
+        .events-strip-empty { color: var(--text-muted); font-size: 0.88rem; font-style: italic; padding: 0.5rem 0; }
+        .es-chip {
+            flex: 0 0 210px; background: var(--bg-card); border: 1px solid var(--border-subtle);
+            border-radius: 10px; padding: 0.9rem 1rem; cursor: pointer; transition: var(--transition);
+        }
+        .es-chip:hover { border-color: var(--gold); box-shadow: var(--shadow-md); transform: translateY(-2px); }
+        .es-chip-name {
+            font-weight: 600; color: var(--text-primary); font-size: 0.92rem; margin-bottom: 0.15rem;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .es-chip-date { color: var(--text-muted); font-size: 0.76rem; margin-bottom: 0.65rem; }
+        .es-chip-bar-track { background: var(--border-subtle); border-radius: 99px; height: 6px; overflow: hidden; margin-bottom: 0.4rem; }
+        .es-chip-bar-fill { height: 100%; border-radius: 99px; background: var(--gold); }
+        .es-chip-bar-fill.is-full { background: #dc2626; }
+        .es-chip-count { font-size: 0.78rem; color: var(--text-secondary); display: flex; justify-content: space-between; }
+        .es-chip-count b { color: var(--text-primary); }
+
         /* ================================================================
            EVENTS TAB
            ================================================================ */
@@ -2801,6 +2822,12 @@
                         <div class="dash-stat-num" id="emailSubscribed">0</div>
                         <div class="dash-stat-lbl">Email Subscribers</div>
                     </div>
+                </div>
+
+                <!-- EVENTS AT A GLANCE -->
+                <h2 class="dash-section-h" style="margin-top:1.75rem;">Events at a Glance</h2>
+                <div class="events-strip" id="dashEventsStrip">
+                    <div class="events-strip-empty">Loading events…</div>
                 </div>
 
                 <!-- RECENT ACTIVITY -->
@@ -6425,8 +6452,8 @@
                             phone: reg.phone || '',
                             source: 'Event Registration',
                             emailStatus: 'Never Subscribed',
-                            created: reg.created || new Date().toISOString(),
-                            lastActivityDate: reg.created || new Date().toISOString(),
+                            created: reg.registeredAt || new Date().toISOString(),
+                            lastActivityDate: reg.registeredAt || new Date().toISOString(),
                         });
                         added++;
                     }
@@ -6469,6 +6496,50 @@
             renderDashboardHero();
             renderDashboardAttention();
             renderDashboardToday();
+            renderDashEventsStrip();
+        }
+
+        // Horizontal "Events at a Glance" strip: every upcoming/active event as a
+        // compact chip showing how full it is, so a quick scan across the row
+        // answers "which events need attention" without opening each one. Click
+        // a chip to jump straight to that event's full registration list.
+        function renderDashEventsStrip() {
+            const strip = document.getElementById('dashEventsStrip');
+            if (!strip) return;
+
+            const todayKey = new Date().toLocaleDateString('en-CA');
+            const upcoming = (app.events || [])
+                .filter((e) => !e.date || e.date >= todayKey)
+                .sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')));
+
+            if (upcoming.length === 0) {
+                strip.innerHTML = '<div class="events-strip-empty">No upcoming events.</div>';
+                return;
+            }
+
+            const escAttr = (s) => (s == null ? '' : String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])));
+
+            strip.innerHTML = upcoming.map((event) => {
+                const regs = getEventRegistrations(event.id);
+                const sold = regs.reduce((sum, r) => sum + (r.tickets || r.qty || 1), 0);
+                const capacity = Number(event.capacity || event.totalCapacity) || 0;
+                const pct = capacity > 0 ? Math.min(100, Math.round((sold / capacity) * 100)) : 0;
+                const isFull = capacity > 0 && sold >= capacity;
+                return `
+                <div class="es-chip" data-event-id="${event.id}" title="${escAttr(event.name)} — click for full registration list">
+                    <div class="es-chip-name">${escAttr(event.name)}</div>
+                    <div class="es-chip-date">${formatEventDate(event.date)}</div>
+                    <div class="es-chip-bar-track"><div class="es-chip-bar-fill${isFull ? ' is-full' : ''}" style="width:${capacity > 0 ? pct : 0}%;"></div></div>
+                    <div class="es-chip-count"><span><b>${sold}</b>${capacity ? ' / ' + capacity : ''} sold</span>${capacity ? `<span>${pct}%</span>` : ''}</div>
+                </div>`;
+            }).join('');
+
+            strip.querySelectorAll('.es-chip').forEach((chip) => {
+                chip.addEventListener('click', () => {
+                    switchTab('events');
+                    openEventEditor(chip.dataset.eventId);
+                });
+            });
         }
 
         function renderDashboardHero() {
