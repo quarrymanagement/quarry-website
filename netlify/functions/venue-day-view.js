@@ -4,8 +4,9 @@
 // Server-side proxy for the venue day-view calendar prototype (admin/venue-calendar.html).
 // Guest contact details and booking data must never reach the public site
 // unauthenticated (see BOOKINGS-SYSTEM.md's security note), so this function:
-//   1. Requires the same admin session token used by admin/index.html
-//      (verified with the identical HMAC scheme as verify-admin-password.js)
+//   1. Requires an admin OR restricted-staff session token (same dual scheme
+//      as verify-admin-password.js — see verifyAnyToken below). Venue Calendar
+//      is one of the sections restricted staff (e.g. Penny) are allowed.
 //   2. Holds the Supabase venue-availability shared secret (VENUE_AVAILABILITY_KEY)
 //      server-side only — it is never sent to the browser.
 //
@@ -13,9 +14,12 @@
 // ============================================================================
 const crypto = require('crypto');
 
-const SECRET = process.env.ADMIN_SESSION_SECRET
+const ADMIN_SECRET = process.env.ADMIN_SESSION_SECRET
   || ('qrr-session-' + (process.env.GITHUB_TOKEN || '').slice(-24));
+const STAFF_SECRET = process.env.STAFF_SESSION_SECRET || '';
 const SESSION_TTL_HOURS = 168;
+// Which staff roles (beyond the owner) may use this endpoint.
+const ALLOWED_ROLES = ['owner', 'events_staff'];
 const VENUE_AVAILABILITY_KEY = process.env.VENUE_AVAILABILITY_KEY || '';
 const SUPABASE_FN_URL = 'https://nkulhtalltbieicvmmad.supabase.co/functions/v1/venue-availability';
 
@@ -29,13 +33,31 @@ const reply = (s, b) => ({ statusCode: s, headers: CORS, body: JSON.stringify(b)
 
 function hmac(s, secret) { return crypto.createHmac('sha256', secret).update(s, 'utf8').digest('hex'); }
 
-function verifyToken(token) {
-  if (!SECRET || !token) return false;
-  const [issued, sig] = String(token).split('.');
-  if (!issued || !sig) return false;
-  if (hmac(issued, SECRET) !== sig) return false;
-  const ageHours = (Date.now() - parseInt(issued, 10)) / (1000 * 3600);
-  return ageHours < SESSION_TTL_HOURS;
+// Verifies either an owner token ("<issued>.<sig>") or a staff token
+// ("<issued>.<role>.<sig>") — see verify-admin-password.js for the scheme.
+function verifyAnyToken(token) {
+  if (!token) return { ok: false };
+  const parts = String(token).split('.');
+
+  if (parts.length === 2) {
+    const [issued, sig] = parts;
+    if (!ADMIN_SECRET || !issued || !sig) return { ok: false };
+    if (hmac(issued, ADMIN_SECRET) !== sig) return { ok: false };
+    const ageHours = (Date.now() - parseInt(issued, 10)) / (1000 * 3600);
+    if (!(ageHours < SESSION_TTL_HOURS)) return { ok: false };
+    return { ok: true, role: 'owner' };
+  }
+
+  if (parts.length === 3) {
+    const [issued, role, sig] = parts;
+    if (!STAFF_SECRET || !issued || !role || !sig) return { ok: false };
+    if (hmac(`${issued}.${role}`, STAFF_SECRET) !== sig) return { ok: false };
+    const ageHours = (Date.now() - parseInt(issued, 10)) / (1000 * 3600);
+    if (!(ageHours < SESSION_TTL_HOURS)) return { ok: false };
+    return { ok: true, role };
+  }
+
+  return { ok: false };
 }
 
 exports.handler = async (event) => {
@@ -43,7 +65,8 @@ exports.handler = async (event) => {
   if (event.httpMethod !== 'GET') return reply(405, { error: 'GET only' });
 
   const q = event.queryStringParameters || {};
-  if (!verifyToken(q.token)) return reply(401, { error: 'unauthorized' });
+  const auth = verifyAnyToken(q.token);
+  if (!auth.ok || !ALLOWED_ROLES.includes(auth.role)) return reply(401, { error: 'unauthorized' });
   if (!VENUE_AVAILABILITY_KEY) return reply(503, { error: 'Venue availability is not configured on the server.' });
 
   const start = (q.start || '').trim();

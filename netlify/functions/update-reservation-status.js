@@ -2,17 +2,56 @@
 // update-reservation-status.js
 //
 // POST /.netlify/functions/update-reservation-status
-// body: { submissionId, status, note?, by? }
+// body: { token, submissionId, status, note?, by? }
 //
 // Persists a manual status change for a reservation inquiry to
 // reservations_status.json. The list endpoint merges these overrides on read.
+//
+// AUTH: requires an admin OR restricted-staff session token (same dual scheme
+// as verify-admin-password.js) — previously this endpoint had no auth at all.
 //
 // Status values: not_contacted | contacted | needs_followup | contacted_2 | confirmed | lost
 // ============================================================================
 
 const fetch = require('node-fetch');
+const crypto = require('crypto');
 
 const SITE_URL = process.env.URL || 'https://thequarrystl.com';
+
+const ADMIN_SECRET = process.env.ADMIN_SESSION_SECRET
+    || ('qrr-session-' + (process.env.GITHUB_TOKEN || '').slice(-24));
+const STAFF_SECRET = process.env.STAFF_SESSION_SECRET || '';
+const SESSION_TTL_HOURS = 168;
+const ALLOWED_ROLES = ['owner', 'events_staff'];
+
+function hmac(s, secret) { return crypto.createHmac('sha256', secret).update(s, 'utf8').digest('hex'); }
+
+// Verifies either an owner token ("<issued>.<sig>") or a staff token
+// ("<issued>.<role>.<sig>") — see verify-admin-password.js for the scheme.
+function verifyAnyToken(token) {
+    if (!token) return { ok: false };
+    const parts = String(token).split('.');
+
+    if (parts.length === 2) {
+        const [issued, sig] = parts;
+        if (!ADMIN_SECRET || !issued || !sig) return { ok: false };
+        if (hmac(issued, ADMIN_SECRET) !== sig) return { ok: false };
+        const ageHours = (Date.now() - parseInt(issued, 10)) / (1000 * 3600);
+        if (!(ageHours < SESSION_TTL_HOURS)) return { ok: false };
+        return { ok: true, role: 'owner' };
+    }
+
+    if (parts.length === 3) {
+        const [issued, role, sig] = parts;
+        if (!STAFF_SECRET || !issued || !role || !sig) return { ok: false };
+        if (hmac(`${issued}.${role}`, STAFF_SECRET) !== sig) return { ok: false };
+        const ageHours = (Date.now() - parseInt(issued, 10)) / (1000 * 3600);
+        if (!(ageHours < SESSION_TTL_HOURS)) return { ok: false };
+        return { ok: true, role };
+    }
+
+    return { ok: false };
+}
 
 const VALID_STATUSES = new Set([
     'not_contacted', 'contacted', 'needs_followup',
@@ -52,6 +91,9 @@ exports.handler = async (event) => {
     let body;
     try { body = JSON.parse(event.body || '{}'); }
     catch (_) { return respond(400, { ok: false, error: 'Invalid JSON' }); }
+
+    const auth = verifyAnyToken(body.token);
+    if (!auth.ok || !ALLOWED_ROLES.includes(auth.role)) return respond(401, { ok: false, error: 'unauthorized' });
 
     const { submissionId, status, note, by } = body;
     if (!submissionId) return respond(400, { ok: false, error: 'submissionId required' });

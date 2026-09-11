@@ -10,17 +10,57 @@
 // labeling Gmail threads, which means real form submissions never appear
 // until staff happens to find and tag them. This bypasses that entirely.
 //
-// GET /.netlify/functions/list-reservation-inquiries
+// AUTH: this returns real customer names/emails/phone numbers, so it now
+// requires an admin OR restricted-staff session token (same dual scheme as
+// verify-admin-password.js) — previously this endpoint had no auth at all.
+//
+// GET /.netlify/functions/list-reservation-inquiries?token=...
 // Returns: { ok: true, inquiries: [...], totalCount: N }
 // ============================================================================
 
 const fetch = require('node-fetch');
+const crypto = require('crypto');
 
 // Use the existing NETLIFY_AUTH_TOKEN env var (set in Netlify console).
 // Fall back to NETLIFY_API_TOKEN if someone sets that name instead.
 const NETLIFY_TOKEN = process.env.NETLIFY_AUTH_TOKEN || process.env.NETLIFY_API_TOKEN;
 const SITE_ID = process.env.NETLIFY_SITE_ID || 'd9496ae2-2b01-4229-b6d2-9203c3be7acb';
 const SITE_URL = process.env.URL || 'https://thequarrystl.com';
+
+const ADMIN_SECRET = process.env.ADMIN_SESSION_SECRET
+    || ('qrr-session-' + (process.env.GITHUB_TOKEN || '').slice(-24));
+const STAFF_SECRET = process.env.STAFF_SESSION_SECRET || '';
+const SESSION_TTL_HOURS = 168;
+const ALLOWED_ROLES = ['owner', 'events_staff'];
+
+function hmac(s, secret) { return crypto.createHmac('sha256', secret).update(s, 'utf8').digest('hex'); }
+
+// Verifies either an owner token ("<issued>.<sig>") or a staff token
+// ("<issued>.<role>.<sig>") — see verify-admin-password.js for the scheme.
+function verifyAnyToken(token) {
+    if (!token) return { ok: false };
+    const parts = String(token).split('.');
+
+    if (parts.length === 2) {
+        const [issued, sig] = parts;
+        if (!ADMIN_SECRET || !issued || !sig) return { ok: false };
+        if (hmac(issued, ADMIN_SECRET) !== sig) return { ok: false };
+        const ageHours = (Date.now() - parseInt(issued, 10)) / (1000 * 3600);
+        if (!(ageHours < SESSION_TTL_HOURS)) return { ok: false };
+        return { ok: true, role: 'owner' };
+    }
+
+    if (parts.length === 3) {
+        const [issued, role, sig] = parts;
+        if (!STAFF_SECRET || !issued || !role || !sig) return { ok: false };
+        if (hmac(`${issued}.${role}`, STAFF_SECRET) !== sig) return { ok: false };
+        const ageHours = (Date.now() - parseInt(issued, 10)) / (1000 * 3600);
+        if (!(ageHours < SESSION_TTL_HOURS)) return { ok: false };
+        return { ok: true, role };
+    }
+
+    return { ok: false };
+}
 
 // Form IDs we care about (all three reservation-style forms)
 const FORM_IDS = {
@@ -96,6 +136,9 @@ function normalize(submission, formName) {
 
 exports.handler = async (event) => {
     if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: CORS, body: '' };
+    const q = event.queryStringParameters || {};
+    const auth = verifyAnyToken(q.token);
+    if (!auth.ok || !ALLOWED_ROLES.includes(auth.role)) return respond(401, { ok: false, error: 'unauthorized' });
     if (!NETLIFY_TOKEN) return respond(500, { ok: false, error: 'NETLIFY_AUTH_TOKEN env var not configured' });
 
     try {

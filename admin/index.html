@@ -5496,6 +5496,7 @@
                 const body = await r.json();
                 if (body.ok) {
                     sessionStorage.setItem('quarryAuth', 'true');
+                    if (body.role) localStorage.setItem('quarryAdminRole', body.role);
                     app.authenticated = true;
                     const overlay = document.getElementById('loginOverlay');
                     if (overlay) overlay.classList.add('hidden');
@@ -5523,6 +5524,8 @@
                     console.log('[admin login] status=' + r.status + ' ok=' + body.ok + ' legacy=' + !!body.legacy);
                     if (body.ok) {
                         if (body.token) localStorage.setItem('quarryAdminToken', body.token);
+                        if (body.role) localStorage.setItem('quarryAdminRole', body.role);
+                        else localStorage.removeItem('quarryAdminRole');
                         sessionStorage.setItem('quarryAuth', 'true');
                         app.authenticated = true;
                         // Force-reveal app so even if showApp/initializeApp throws, user lands on dashboard
@@ -5548,8 +5551,53 @@
             })();
         });
 
+        // Restricted staff logins (e.g. Penny — events only, to start). 'owner'
+        // is the full-access account and is never restricted here. Add a tab id
+        // to a role's list to grant it access; the corresponding backend
+        // function also needs to accept that role (see verify-admin-password.js
+        // and the ALLOWED_ROLES lists in the venue-*/save-events/reservation
+        // Netlify functions) — hiding a sidebar item alone is not a security
+        // boundary, it just matches what the account can actually do server-side.
+        const ROLE_ALLOWED_TABS = {
+            events_staff: ['events', 'bands', 'potential'],
+        };
+        const ROLE_ALLOWED_LINKS = {
+            events_staff: ['/admin/venue-calendar.html'],
+        };
+
+        function applyRolePermissions() {
+            const role = localStorage.getItem('quarryAdminRole') || 'owner';
+            if (role === 'owner' || !ROLE_ALLOWED_TABS[role]) return; // full access, nothing to hide
+
+            const allowedTabs = ROLE_ALLOWED_TABS[role] || [];
+            const allowedLinks = ROLE_ALLOWED_LINKS[role] || [];
+
+            document.querySelectorAll('.sb-nav-item').forEach((item) => {
+                const tab = item.dataset ? item.dataset.tab : null;
+                const href = item.getAttribute('href');
+                const isAllowed = (tab && allowedTabs.includes(tab)) || (href && allowedLinks.includes(href));
+                item.style.display = isAllowed ? '' : 'none';
+            });
+
+            // A section header with every item in its group now hidden would
+            // just be an empty label — hide the header too.
+            document.querySelectorAll('.sb-nav-section').forEach((section) => {
+                const group = section.nextElementSibling;
+                if (!group || !group.classList.contains('sb-nav-group')) return;
+                const anyVisible = Array.from(group.children).some((child) => child.style.display !== 'none');
+                section.style.display = anyVisible ? '' : 'none';
+            });
+
+            // Restricted roles don't have Dashboard — land on the first tab
+            // they're actually allowed to see instead.
+            if (allowedTabs.length && typeof switchTab === 'function') {
+                switchTab(allowedTabs[0]);
+            }
+        }
+
         function showApp() {
             document.getElementById('mainApp').classList.remove('hidden');
+            applyRolePermissions();
             initializeApp();
         }
 
@@ -12765,7 +12813,7 @@ function hashCode(str) {
                 if (state.loading) return;
                 state.loading = true;
                 try {
-                    const r = await fetch(`${FN}/list-reservation-inquiries`, { cache: 'no-store' });
+                    const r = await fetch(`${FN}/list-reservation-inquiries?token=${encodeURIComponent(localStorage.getItem('quarryAdminToken') || '')}`, { cache: 'no-store' });
                     const body = await r.json();
                     if (!body.ok) throw new Error(body.error || 'load failed');
                     state.inquiries = body.inquiries || [];
@@ -12880,7 +12928,7 @@ function hashCode(str) {
                 try {
                     const r = await fetch(`${FN}/update-reservation-status`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ submissionId: id, status: newStatus, note, by: 'admin' })
+                        body: JSON.stringify({ token: localStorage.getItem('quarryAdminToken') || '', submissionId: id, status: newStatus, note, by: 'admin' })
                     });
                     const body = await r.json();
                     if (!r.ok || !body.ok) throw new Error(body.error || 'update failed');

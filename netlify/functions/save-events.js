@@ -53,26 +53,49 @@ const handleOptions = () => response(200, { message: 'OK' });
 // token minted at login verifies here. Keep the two in sync.
 const SESSION_SECRET = process.env.ADMIN_SESSION_SECRET
   || ('qrr-session-' + (process.env.GITHUB_TOKEN || '').slice(-24));
+// Restricted-staff token secret (e.g. Penny's events-only login) — see
+// verify-admin-password.js for the two-shape token scheme.
+const STAFF_SECRET = process.env.STAFF_SESSION_SECRET || '';
 const SESSION_TTL_HOURS = 168;
+// Which staff roles (beyond the owner) may save Events/Bands.
+const ALLOWED_STAFF_ROLES = ['events_staff'];
 
 function hmac(s, secret) { return crypto.createHmac('sha256', secret).update(s, 'utf8').digest('hex'); }
 
+function constantTimeEq(a, b) {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
+// Accepts either an owner token ("<issued>.<sig>", signed with SESSION_SECRET)
+// or a restricted-staff token ("<issued>.<role>.<sig>", signed with
+// STAFF_SECRET) whose role is in ALLOWED_STAFF_ROLES.
 function isAuthorized(event, body) {
   const supplied =
     (event.headers && (event.headers['x-admin-token'] || event.headers['X-Admin-Token'])) ||
     (body && body.adminToken) || '';
-  if (!supplied || !SESSION_SECRET) return false;
+  if (!supplied) return false;
   const parts = String(supplied).split('.');
-  if (parts.length !== 2) return false;
-  const [issued, sig] = parts;
-  if (!/^\d+$/.test(issued)) return false;
-  const expected = hmac(issued, SESSION_SECRET);
-  if (expected.length !== sig.length) return false;
-  let diff = 0;
-  for (let i = 0; i < expected.length; i++) diff |= expected.charCodeAt(i) ^ sig.charCodeAt(i);
-  if (diff !== 0) return false;
-  const ageHours = (Date.now() - parseInt(issued, 10)) / (1000 * 3600);
-  return ageHours < SESSION_TTL_HOURS;
+
+  if (parts.length === 2) {
+    const [issued, sig] = parts;
+    if (!SESSION_SECRET || !/^\d+$/.test(issued)) return false;
+    if (!constantTimeEq(hmac(issued, SESSION_SECRET), sig)) return false;
+    const ageHours = (Date.now() - parseInt(issued, 10)) / (1000 * 3600);
+    return ageHours < SESSION_TTL_HOURS;
+  }
+
+  if (parts.length === 3) {
+    const [issued, role, sig] = parts;
+    if (!STAFF_SECRET || !/^\d+$/.test(issued) || !ALLOWED_STAFF_ROLES.includes(role)) return false;
+    if (!constantTimeEq(hmac(`${issued}.${role}`, STAFF_SECRET), sig)) return false;
+    const ageHours = (Date.now() - parseInt(issued, 10)) / (1000 * 3600);
+    return ageHours < SESSION_TTL_HOURS;
+  }
+
+  return false;
 }
 
 // GitHub API helper
