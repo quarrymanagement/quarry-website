@@ -13154,6 +13154,12 @@ function hashCode(str) {
                     list = visible.filter((i) => ['not_contacted', 'needs_followup', 'responded'].includes(i.status));
                 } else if (filter === 'all') {
                     list = visible;
+                } else if (filter === 'contacted') {
+                    // Matches the Contacted STAT CARD's definition above (anyone
+                    // actually reached out to, at any stage) rather than the
+                    // single literal "contacted" status — picking this from the
+                    // dropdown used to show only 4 people when the card said 322.
+                    list = visible.filter((i) => CONTACTED_STATUSES.includes(i.status));
                 } else {
                     list = visible.filter((i) => i.status === filter);
                 }
@@ -13383,6 +13389,30 @@ function hashCode(str) {
                 $('resInqSendReply')?.addEventListener('click', sendReply);
                 $('resInqDeleteBtn')?.addEventListener('click', () => setHidden(true));
                 $('resInqRestoreBtn')?.addEventListener('click', () => setHidden(false));
+
+                // Stat cards already render with a pointer cursor (shared
+                // .dash-stat styling) but did nothing when clicked — wire each
+                // one to actually jump to the matching filter, clearing any
+                // leftover search text first so the filter isn't silently
+                // overridden by it.
+                const STAT_CARD_FILTERS = {
+                    resInqStatTotal: 'all',
+                    resInqStatNotContacted: 'not_contacted',
+                    resInqStatContacted: 'contacted',
+                    resInqStatFollowup: 'needs_followup',
+                    resInqStatResponded: 'responded',
+                    resInqStatConfirmed: 'confirmed',
+                };
+                Object.entries(STAT_CARD_FILTERS).forEach(([elId, filterVal]) => {
+                    $(elId)?.addEventListener('click', () => {
+                        const searchEl = $('resInqSearch');
+                        if (searchEl) searchEl.value = '';
+                        const filterEl = $('resInqFilter');
+                        if (filterEl) filterEl.value = filterVal;
+                        render();
+                        $('resInqTable')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    });
+                });
             }
 
             function onTabSwitch(tab) {
