@@ -5565,13 +5565,16 @@
             events_staff: ['/admin/venue-calendar', '/admin/venue-calendar.html', '/admin/venue-calendar/'],
         };
 
-        function applyRolePermissions() {
-            const role = localStorage.getItem('quarryAdminRole') || 'owner';
-            if (role === 'owner' || !ROLE_ALLOWED_TABS[role]) return; // full access, nothing to hide
+        let _navObserverStarted = false;
 
-            const allowedTabs = ROLE_ALLOWED_TABS[role] || [];
-            const allowedLinks = ROLE_ALLOWED_LINKS[role] || [];
-
+        // Hides every .sb-nav-item not on the current role's allowlist. Several
+        // sidebar items (Contracts, Golf Jackpot, Notices, etc.) are inserted
+        // into the DOM later by their own script files (admin-esign.js,
+        // golf-progressive-admin.js, notices-admin.js...), well after this
+        // function's first pass at login — so this needs to re-run whenever the
+        // nav changes, not just once. See the MutationObserver in
+        // applyRolePermissions() below.
+        function sweepNav(allowedTabs, allowedLinks) {
             document.querySelectorAll('.sb-nav-item').forEach((item) => {
                 const tab = item.dataset ? item.dataset.tab : null;
                 const href = item.getAttribute('href');
@@ -5587,11 +5590,33 @@
                 const anyVisible = Array.from(group.children).some((child) => child.style.display !== 'none');
                 section.style.display = anyVisible ? '' : 'none';
             });
+        }
+
+        function applyRolePermissions() {
+            const role = localStorage.getItem('quarryAdminRole') || 'owner';
+            if (role === 'owner' || !ROLE_ALLOWED_TABS[role]) return; // full access, nothing to hide
+
+            const allowedTabs = ROLE_ALLOWED_TABS[role] || [];
+            const allowedLinks = ROLE_ALLOWED_LINKS[role] || [];
+
+            sweepNav(allowedTabs, allowedLinks);
 
             // Restricted roles don't have Dashboard — land on the first tab
             // they're actually allowed to see instead.
             if (allowedTabs.length && typeof switchTab === 'function') {
                 switchTab(allowedTabs[0]);
+            }
+
+            // Re-sweep whenever the sidebar's contents change, so a nav item
+            // added after login (by a plugin script loaded later) can never
+            // stay visible to a restricted account.
+            if (!_navObserverStarted) {
+                _navObserverStarted = true;
+                const nav = document.querySelector('.sb-nav');
+                if (nav && typeof MutationObserver !== 'undefined') {
+                    const observer = new MutationObserver(() => sweepNav(allowedTabs, allowedLinks));
+                    observer.observe(nav, { childList: true, subtree: true });
+                }
             }
         }
 
