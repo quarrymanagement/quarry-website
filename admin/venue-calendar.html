@@ -371,12 +371,12 @@
     function colorFor(type) { return EVENT_COLORS[type] || '#9a7b2a'; }
     function labelize(s) { return String(s || '').replace(/_/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); }); }
 
-    var SPACE_ORDER = ['whole-venue', 'building', 'golf', 'bay-1', 'bay-2', 'bay-3', 'bay-4', 'upper-patio', 'lower-patio', 'back-patio', 'turf'];
+    var SPACE_ORDER = ['whole-venue', 'building', 'golf', 'bay-1', 'bay-2', 'bay-3', 'bay-4', 'upper-patio', 'lower-patio', 'back-patio', 'step-down', 'turf'];
     var SPACE_NAMES = {
         'whole-venue': 'Whole Venue (Buyout)', 'building': 'Building (Indoor Dining & Bar)',
         'golf': 'Golf Simulator Area', 'bay-1': 'Golf Bay 1', 'bay-2': 'Golf Bay 2',
         'bay-3': 'Golf Bay 3', 'bay-4': 'Golf Bay 4', 'upper-patio': 'Upper Patio',
-        'lower-patio': 'Lower Patio', 'back-patio': 'Back Patio', 'turf': 'Turf / Lawn'
+        'lower-patio': 'Lower Patio', 'back-patio': 'Back Patio', 'step-down': 'Step Down Patio', 'turf': 'Turf / Lawn'
     };
 
     // ---------------- AUTH ----------------
