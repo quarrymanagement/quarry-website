@@ -2693,7 +2693,7 @@
                     <div class="sb-nav-item" data-tab="members"><span class="sb-ic">⭐</span><span class="sb-lbl">Rewards Members</span></div>
                     <div class="sb-nav-item" data-tab="wineclub"><span class="sb-ic">🍷</span><span class="sb-lbl">Wine Club</span><span id="wineclubBadge" class="sb-badge" style="display:none;">0</span></div>
                     <div class="sb-nav-item" data-tab="crm"><span class="sb-ic">👥</span><span class="sb-lbl">Contacts</span></div>
-                    <div class="sb-nav-item" data-tab="potential"><span class="sb-ic">📥</span><span class="sb-lbl">Reservation Inquiries</span></div>
+                    <div class="sb-nav-item" data-tab="potential"><span class="sb-ic">📥</span><span class="sb-lbl">Reservation Inquiries</span><span id="resInqBadge" class="sb-badge" style="display:none;">0</span></div>
                     <div class="sb-nav-item" data-tab="confirmed"><span class="sb-ic">✓</span><span class="sb-lbl">Confirmed Bookings</span></div>
                     <div class="sb-nav-item" data-tab="payments"><span class="sb-ic">💳</span><span class="sb-lbl">Payments</span></div>
                     <div class="sb-nav-item" data-tab="invoices"><span class="sb-ic">🧾</span><span class="sb-lbl">Send Invoice</span></div>
@@ -3722,9 +3722,26 @@
                             <input type="text" id="resInqStatusNote" placeholder='e.g. "Replied with availability for May 10"' style="width:100%;padding:0.5rem;border:1px solid var(--border-subtle);border-radius:6px;background:var(--bg-card);color:var(--text-primary);margin-top:0.25rem;">
                         </div>
                         <div id="resInqHistory" style="margin-top:1rem;font-size:0.8rem;color:var(--text-muted);"></div>
+
+                        <hr style="border:none;border-top:1px solid var(--border-subtle);margin:1rem 0;">
+                        <div style="font-weight:600;margin-bottom:0.5rem;">Email history:</div>
+                        <div id="resInqEmailHistory" style="font-size:0.82rem;color:var(--text-muted);">Loading…</div>
+
+                        <div id="resInqReplyBox" class="hidden" style="margin-top:1rem;padding:0.75rem;background:var(--bg-elevated);border-radius:8px;">
+                            <label style="font-size:0.78rem;color:var(--text-muted);">Subject:</label>
+                            <input type="text" id="resInqReplySubject" style="width:100%;padding:0.5rem;border:1px solid var(--border-subtle);border-radius:6px;background:var(--bg-card);color:var(--text-primary);margin:0.25rem 0 0.6rem;">
+                            <label style="font-size:0.78rem;color:var(--text-muted);">Message:</label>
+                            <textarea id="resInqReplyBody" rows="6" style="width:100%;padding:0.5rem;border:1px solid var(--border-subtle);border-radius:6px;background:var(--bg-card);color:var(--text-primary);margin:0.25rem 0 0.6rem;resize:vertical;"></textarea>
+                            <div style="display:flex;align-items:center;gap:0.6rem;">
+                                <button class="btn-primary" id="resInqSendReply">Send Reply</button>
+                                <button class="btn-secondary" id="resInqCancelReply">Cancel</button>
+                                <span id="resInqReplyStatus" style="font-size:0.8rem;"></span>
+                            </div>
+                            <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.4rem;">Sending a reply automatically marks this inquiry Contacted / Followed Up.</div>
+                        </div>
                     </div>
                     <div class="mkt-modal-foot">
-                        <a id="resInqMailLink" href="#" target="_blank" class="btn-primary" style="text-decoration:none;">✉️ Email Customer</a>
+                        <button type="button" id="resInqReplyToggle" class="btn-primary">✉️ Reply</button>
                         <div style="flex:1;"></div>
                         <a id="resInqNetlifyLink" href="#" target="_blank" class="btn-secondary" style="text-decoration:none;font-size:0.78rem;">View in Netlify</a>
                     </div>
@@ -12857,6 +12874,17 @@ function hashCode(str) {
                 } finally { state.loading = false; }
             }
 
+            // Sidebar badge — same pattern as mktInboxBadge/wineclubBadge: a plain
+            // count computed from whatever's already loaded, refreshed on loadAll().
+            // Not a push notification — only updates while the admin has this open.
+            function updateBadge() {
+                const badge = $('resInqBadge');
+                if (!badge) return;
+                const n = state.inquiries.filter((i) => ['not_contacted', 'needs_followup'].includes(i.status)).length;
+                if (n > 0) { badge.textContent = String(n); badge.style.display = ''; }
+                else { badge.style.display = 'none'; }
+            }
+
             function render() {
                 // Stats
                 const total = state.inquiries.length;
@@ -12867,6 +12895,7 @@ function hashCode(str) {
                 $('resInqNotContactedCount').textContent = notContacted;
                 $('resInqFollowupCount').textContent = followup;
                 $('resInqConfirmedCount').textContent = confirmed;
+                updateBadge();
 
                 // Filter
                 const filter = $('resInqFilter')?.value || 'needs_attention';
@@ -12892,11 +12921,18 @@ function hashCode(str) {
                         <td style="font-size:0.78rem;color:var(--text-muted);">${escHtml(fmtDate(i.submittedAt))}</td>
                         <td>${statusPill(i.status)}</td>
                         <td onclick="event.stopPropagation()">
-                            ${i.email ? `<a href="mailto:${encodeURIComponent(i.email)}?subject=${encodeURIComponent('Your inquiry at The Quarry')}" style="color:var(--gold);text-decoration:none;font-size:0.8rem;">✉ Email</a>` : ''}
+                            ${i.email ? `<a href="#" data-reply-id="${escHtml(i.id)}" style="color:var(--gold);text-decoration:none;font-size:0.8rem;">✉ Reply</a>` : ''}
                         </td>
                     </tr>
                 `).join('');
                 tbody.querySelectorAll('[data-inq-id]').forEach((row) => row.addEventListener('click', () => openModal(row.dataset.inqId)));
+                // Routed through the tracked reply box, not a mailto: link, so a
+                // reply sent this way still auto-advances the inquiry's status.
+                tbody.querySelectorAll('[data-reply-id]').forEach((a) => a.addEventListener('click', (e) => {
+                    e.preventDefault(); e.stopPropagation();
+                    openModal(a.dataset.replyId);
+                    $('resInqReplyBox').classList.remove('hidden');
+                }));
             }
 
             function openModal(id) {
@@ -12937,14 +12973,82 @@ function hashCode(str) {
                 }
 
                 $('resInqStatusNote').value = '';
+                $('resInqReplyBox').classList.add('hidden');
+                $('resInqReplyStatus').textContent = '';
+                $('resInqReplyToggle').style.display = inq.email ? '' : 'none';
                 if (inq.email) {
-                    const subject = encodeURIComponent(`Your ${inq.formLabel.toLowerCase()} at The Quarry`);
-                    $('resInqMailLink').href = `mailto:${encodeURIComponent(inq.email)}?subject=${subject}`;
-                    $('resInqMailLink').style.display = '';
-                } else {
-                    $('resInqMailLink').style.display = 'none';
+                    $('resInqReplySubject').value = `Re: Your ${inq.formLabel.toLowerCase()} at The Quarry`;
+                    $('resInqReplyBody').value = '';
                 }
                 $('resInqNetlifyLink').href = inq.netlifyUrl || '#';
+
+                loadEmailHistory(inq.email);
+            }
+
+            // Same live Gmail-search-by-email pattern the Contacts tab uses
+            // (gmail-threads.js) — a fresh lookup each time, not a stored sync.
+            async function loadEmailHistory(email) {
+                const zone = $('resInqEmailHistory');
+                if (!email) { zone.innerHTML = '—'; return; }
+                zone.innerHTML = 'Loading…';
+                try {
+                    const r = await fetch(`${FN}/gmail-threads?email=${encodeURIComponent(email)}`);
+                    const body = await r.json();
+                    if (!body.success) throw new Error(body.error || 'lookup failed');
+                    const threads = body.threads || [];
+                    if (!threads.length) { zone.innerHTML = 'No email history found for this address.'; return; }
+                    zone.innerHTML = threads.map((t) => `
+                        <div style="padding:0.4rem 0;border-bottom:1px solid var(--border-subtle);">
+                            <a href="${escHtml(t.link)}" target="_blank" style="color:var(--gold);text-decoration:none;font-weight:500;">${escHtml(t.subject)}</a>
+                            <span style="color:var(--text-muted);"> · ${t.direction === 'sent' ? 'You → them' : 'Them → you'} · ${escHtml(fmtDate(t.date))}${t.messageCount > 1 ? ` · ${t.messageCount} messages` : ''}</span>
+                            <div style="color:var(--text-muted);">${escHtml(t.snippet)}</div>
+                        </div>
+                    `).join('');
+                } catch (err) {
+                    zone.innerHTML = `Couldn't load email history — ${escHtml(err.message)}`;
+                }
+            }
+
+            // Sends a real, tracked reply through the admin's own send path
+            // (unlike the old mailto: link, this one the server can see) —
+            // which is what lets a reply automatically advance the inquiry's
+            // status server-side (see reply-reservation-inquiry.js).
+            async function sendReply() {
+                if (!state.current || !state.current.email) return;
+                const id = state.current.id;
+                const subject = $('resInqReplySubject').value.trim();
+                const bodyText = $('resInqReplyBody').value.trim();
+                const statusEl = $('resInqReplyStatus');
+                if (!subject || !bodyText) { statusEl.textContent = 'Subject and message are required.'; statusEl.style.color = '#dc2626'; return; }
+                const btn = $('resInqSendReply');
+                btn.disabled = true;
+                statusEl.style.color = 'var(--text-muted)';
+                statusEl.textContent = 'Sending…';
+                try {
+                    const r = await fetch(`${FN}/reply-reservation-inquiry`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            token: localStorage.getItem('quarryAdminToken') || '',
+                            submissionId: id, to: state.current.email, subject, body: bodyText,
+                        })
+                    });
+                    const respBody = await r.json();
+                    if (!r.ok || !respBody.ok) throw new Error(respBody.error || 'send failed');
+                    const inq = state.inquiries.find((x) => x.id === id);
+                    if (inq && respBody.override) {
+                        inq.status = respBody.override.status;
+                        inq.statusUpdatedAt = respBody.override.updatedAt;
+                        inq.statusNote = respBody.override.note;
+                        inq.statusHistory = respBody.override.history;
+                    }
+                    render();
+                    openModal(id);
+                    if (typeof showToast === 'function') showToast('Reply sent' + (respBody.override ? ' — status updated to ' + (STATUS_LABELS[respBody.override.status] || respBody.override.status) : ''));
+                } catch (err) {
+                    statusEl.style.color = '#dc2626';
+                    statusEl.textContent = "Couldn't send: " + err.message;
+                    btn.disabled = false;
+                }
             }
 
             function closeModal() {
@@ -12988,6 +13092,9 @@ function hashCode(str) {
                 $('resInqModal')?.addEventListener('click', (e) => { if (e.target.id === 'resInqModal') closeModal(); });
                 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('resInqModal')?.classList.contains('open')) closeModal(); });
                 document.querySelectorAll('#resInqModal [data-status]').forEach((btn) => btn.addEventListener('click', () => setStatus(btn.dataset.status)));
+                $('resInqReplyToggle')?.addEventListener('click', () => { $('resInqReplyBox').classList.toggle('hidden'); });
+                $('resInqCancelReply')?.addEventListener('click', () => { $('resInqReplyBox').classList.add('hidden'); });
+                $('resInqSendReply')?.addEventListener('click', sendReply);
             }
 
             function onTabSwitch(tab) {

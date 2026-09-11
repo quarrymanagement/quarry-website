@@ -8,6 +8,14 @@
 //
 // POST /.netlify/functions/venue-booking-write
 // Body: { token, ...booking fields (see supabase venue-booking-write function) }
+//
+// On a successful NEW booking (not an edit), best-effort matches the
+// contact_email/contact_phone against open reservation inquiries
+// (list-reservation-inquiries.js) and auto-advances any match to "confirmed"
+// via update-reservation-status.js — so adding someone to the Venue Calendar
+// is enough to mark their original inquiry booked, without a manual step.
+// This never blocks or fails the booking itself; matching runs after the
+// booking response is already determined, wrapped in its own try/catch.
 // ============================================================================
 const crypto = require('crypto');
 
@@ -18,6 +26,7 @@ const SESSION_TTL_HOURS = 168;
 const ALLOWED_ROLES = ['owner', 'events_staff'];
 const VENUE_AVAILABILITY_KEY = process.env.VENUE_AVAILABILITY_KEY || '';
 const SUPABASE_FN_URL = 'https://nkulhtalltbieicvmmad.supabase.co/functions/v1/venue-booking-write';
+const SITE_URL = process.env.URL || 'https://thequarrystl.com';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -56,6 +65,45 @@ function verifyAnyToken(token) {
   return { ok: false };
 }
 
+function normalizePhone(p) {
+  if (!p) return null;
+  const digits = String(p).replace(/\D/g, '');
+  return digits.length >= 10 ? digits.slice(-10) : null;
+}
+
+// Best-effort: find any OPEN (not already confirmed/lost) reservation inquiry
+// matching this booking's contact email/phone, and advance it to "confirmed".
+// Never throws past its own boundary — a matching failure must never turn
+// into a booking-creation failure.
+async function matchAndConfirmInquiry(token, booking) {
+  const email = (booking.contact_email || '').trim().toLowerCase();
+  const phone = normalizePhone(booking.contact_phone);
+  if (!email && !phone) return;
+
+  const listRes = await fetch(`${SITE_URL}/.netlify/functions/list-reservation-inquiries?token=${encodeURIComponent(token)}`, { cache: 'no-store' });
+  if (!listRes.ok) return;
+  const listBody = await listRes.json();
+  if (!listBody.ok) return;
+
+  const matches = (listBody.inquiries || []).filter((inq) => {
+    if (['confirmed', 'lost'].includes(inq.status)) return false; // already settled
+    const inqEmail = (inq.email || '').trim().toLowerCase();
+    const inqPhone = normalizePhone(inq.phone);
+    return (email && inqEmail && inqEmail === email) || (phone && inqPhone && inqPhone === phone);
+  });
+
+  for (const inq of matches) {
+    await fetch(`${SITE_URL}/.netlify/functions/update-reservation-status`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        token, submissionId: inq.id, status: 'confirmed',
+        note: `Booked in Venue Calendar: "${booking.title || 'untitled event'}"`, by: 'admin',
+      }),
+    }).catch(() => {});
+  }
+}
+
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: CORS, body: '' };
   if (event.httpMethod !== 'POST') return reply(405, { error: 'POST only' });
@@ -79,6 +127,12 @@ exports.handler = async (event) => {
       body: JSON.stringify(booking),
     });
     const body = await r.json();
+
+    // Only for a brand-new booking (not an edit) that actually succeeded.
+    if (r.status === 201 && !booking.id) {
+      try { await matchAndConfirmInquiry(token, booking); } catch (_) { /* best-effort */ }
+    }
+
     return reply(r.status, body);
   } catch (e) {
     return reply(500, { error: 'exception', message: e.message });
