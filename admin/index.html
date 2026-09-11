@@ -6351,6 +6351,36 @@
             }
         }
 
+        // A registration's per-unit price, in cents. Table/seating-option events
+        // price per option (each option carries its own pricePerSeat); everything
+        // else is flat per-person. pricePerPerson is the current field name — older
+        // events sometimes also carry legacy pricePerSeat/price mirrors, which are
+        // kept as a last-resort fallback rather than the primary source.
+        function resolveEventUnitPriceCents(ev, reg) {
+            if (reg && reg.seatingOptionId && Array.isArray(ev.seatingOptions)) {
+                const opt = ev.seatingOptions.find(o => o && String(o.id) === String(reg.seatingOptionId));
+                if (opt && opt.pricePerSeat) return Number(opt.pricePerSeat) || 0;
+            }
+            return Number(ev.pricePerPerson) || Number(ev.pricePerSeat) || Number(ev.price) || 0;
+        }
+
+        // Dollars actually charged for a registration. Trusts an explicit stored
+        // amount/amountPaid (including "0.00" for a genuine comp/free ticket —
+        // legacy registrations store these as strings); only falls back to
+        // computing qty x unit price when neither field was ever recorded, which
+        // is the normal case for Square-sourced registrations.
+        function resolveRegAmount(reg, ev) {
+            for (const key of ['amount', 'amountPaid']) {
+                const v = reg[key];
+                if (v !== undefined && v !== null && v !== '') {
+                    const n = parseFloat(v);
+                    if (!isNaN(n)) return n;
+                }
+            }
+            const unitCents = resolveEventUnitPriceCents(ev, reg);
+            return unitCents > 0 ? ((reg.qty || reg.tickets || 1) * unitCents) / 100 : 0;
+        }
+
         // ================================================================
         // DATA LOADING
         // ================================================================
@@ -6377,10 +6407,10 @@
                                 app.registrations[ev.id] = perEvent.map(r => ({
                                     ...r,
                                     tickets: r.tickets || r.qty || 1,
-                                    amount: r.amount || r.amountPaid || ((r.qty || 1) * ((ev.pricePerSeat || ev.price || 0) / 100))
+                                    amount: resolveRegAmount(r, ev)
                                 }));
                             } else if (legacyRegs[ev.id]) {
-                                app.registrations[ev.id] = legacyRegs[ev.id].map(r => ({ ...r, tickets: r.tickets || r.qty || 1 }));
+                                app.registrations[ev.id] = legacyRegs[ev.id].map(r => ({ ...r, tickets: r.tickets || r.qty || 1, amount: resolveRegAmount(r, ev) }));
                             }
                         });
                         app.bands = eventsData.bands || [];
@@ -6453,8 +6483,8 @@
                             phone: reg.phone || '',
                             source: 'Event Registration',
                             emailStatus: 'Never Subscribed',
-                            created: reg.registeredAt || new Date().toISOString(),
-                            lastActivityDate: reg.registeredAt || new Date().toISOString(),
+                            created: reg.registeredAt || reg.created || new Date().toISOString(),
+                            lastActivityDate: reg.registeredAt || reg.created || new Date().toISOString(),
                         });
                         added++;
                     }
@@ -6669,13 +6699,18 @@
                 const event = app.events.find(e => e.id === eventId);
                 const eventName = event ? event.name : eventId;
                 (regs[eventId] || []).forEach(reg => {
-                    if (reg.registeredAt) {
+                    // Registrations come from two eras of the booking system: the
+                    // current Square-backed one stamps registeredAt, the older
+                    // Stripe-backed one (still the only record for events booked
+                    // before the switch) stamps created instead.
+                    const when = reg.registeredAt || reg.created;
+                    if (when) {
                         activities.push({
                             type: 'registration',
                             name: eventName,
-                            user: reg.name || 'Unknown',
-                            date: new Date(reg.registeredAt),
-                            amount: reg.amount || '0',
+                            user: reg.name || reg.email || 'Unknown',
+                            date: new Date(when),
+                            amount: reg.amount != null ? reg.amount : 0,
                         });
                     }
                 });
