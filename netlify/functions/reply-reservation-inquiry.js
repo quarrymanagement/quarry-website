@@ -123,6 +123,7 @@ const NEXT_STATUS = {
     not_contacted: 'contacted',
     needs_followup: 'contacted_2',
     contacted: 'contacted_2',
+    responded: 'contacted_2',
 };
 
 exports.handler = async (event) => {

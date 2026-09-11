@@ -10,7 +10,7 @@
 // AUTH: requires an admin OR restricted-staff session token (same dual scheme
 // as verify-admin-password.js) — previously this endpoint had no auth at all.
 //
-// Status values: not_contacted | contacted | needs_followup | contacted_2 | confirmed | lost
+// Status values: not_contacted | contacted | needs_followup | contacted_2 | responded | confirmed | lost
 // ============================================================================
 
 const fetch = require('node-fetch');
@@ -55,7 +55,7 @@ function verifyAnyToken(token) {
 
 const VALID_STATUSES = new Set([
     'not_contacted', 'contacted', 'needs_followup',
-    'contacted_2', 'confirmed', 'lost'
+    'contacted_2', 'responded', 'confirmed', 'lost'
 ]);
 
 const CORS = {

@@ -2602,6 +2602,12 @@
         .mkt-modal-pane { padding: 1.1rem 1.25rem; overflow: auto; min-height: 0; }
         .mkt-modal-pane + .mkt-modal-pane { border-left: 1px solid var(--border-subtle); background: var(--bg-elevated); }
         .mkt-modal-foot { padding: 0.85rem 1.25rem; border-top: 1px solid var(--border-subtle); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; background: var(--bg-card); }
+        /* Reservation Inquiry modal is single-column (body forced to display:block
+           inline), not the two-pane layout .mkt-modal-body was built for — its
+           shared overflow:hidden was hard-clipping the stacked content (details,
+           status buttons, history, email history, reply box) instead of letting
+           it scroll, cutting the bottom of the modal off the screen. */
+        #resInqModal .mkt-modal-body { overflow-y: auto; }
         .mkt-modal-foot .btn-approve, .mkt-modal-foot .btn-reject { padding: 0.7rem 1.2rem; font-size: 0.92rem; }
         .mkt-meta-grid { display: grid; grid-template-columns: 110px 1fr; gap: 0.4rem 0.75rem; font-size: 0.85rem; margin-bottom: 1rem; }
         .mkt-meta-grid .k { color: var(--text-muted); font-weight: 500; }
@@ -3667,6 +3673,7 @@
                             <option value="contacted">Contacted</option>
                             <option value="needs_followup">Needs follow-up</option>
                             <option value="contacted_2">Followed up</option>
+                            <option value="responded">Responded</option>
                             <option value="confirmed">Confirmed</option>
                             <option value="lost">Lost</option>
                         </select>
@@ -3685,10 +3692,20 @@
                         <div class="dash-stat-num" id="resInqNotContactedCount" style="color:#b45309;">0</div>
                         <div class="dash-stat-lbl">Not Contacted</div>
                     </div>
+                    <div class="dash-stat" id="resInqStatContacted">
+                        <div class="dash-stat-ic">✉️</div>
+                        <div class="dash-stat-num" id="resInqContactedCount" style="color:#2563eb;">0</div>
+                        <div class="dash-stat-lbl">Contacted</div>
+                    </div>
                     <div class="dash-stat" id="resInqStatFollowup">
                         <div class="dash-stat-ic">⚠️</div>
                         <div class="dash-stat-num" id="resInqFollowupCount" style="color:#dc2626;">0</div>
                         <div class="dash-stat-lbl">Need Follow-up</div>
+                    </div>
+                    <div class="dash-stat" id="resInqStatResponded">
+                        <div class="dash-stat-ic">💬</div>
+                        <div class="dash-stat-num" id="resInqRespondedCount" style="color:#7c3aed;">0</div>
+                        <div class="dash-stat-lbl">Responded</div>
                     </div>
                     <div class="dash-stat" id="resInqStatConfirmed">
                         <div class="dash-stat-ic">✓</div>
@@ -3737,6 +3754,7 @@
                             <button class="btn-secondary" data-status="contacted">✉️ Contacted</button>
                             <button class="btn-secondary" data-status="needs_followup">⚠️ Needs Follow-up</button>
                             <button class="btn-secondary" data-status="contacted_2">📨 Followed Up Again</button>
+                            <button class="btn-secondary" data-status="responded">💬 Responded</button>
                             <button class="btn-approve" data-status="confirmed">✓ Confirmed (in Calendar)</button>
                             <button class="btn-reject" data-status="lost">✗ Lost</button>
                         </div>
@@ -12998,8 +13016,15 @@ function hashCode(str) {
             const escHtml = (s) => (s == null ? '' : String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])));
             const fmtDate = (iso) => { if (!iso) return '—'; const d = new Date(iso); return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); };
             const fmtDay = (iso) => { if (!iso) return '—'; try { return new Date(iso.length === 10 ? iso + 'T12:00' : iso).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }); } catch (_) { return iso; } };
-            const STATUS_LABELS = { not_contacted: 'Not Contacted', contacted: 'Contacted', needs_followup: 'Needs Follow-up', contacted_2: 'Followed Up', confirmed: 'Confirmed', lost: 'Lost' };
-            const STATUS_COLORS = { not_contacted: '#b45309', contacted: '#2563eb', needs_followup: '#dc2626', contacted_2: '#7c3aed', confirmed: '#16a34a', lost: '#64748b' };
+            const STATUS_LABELS = { not_contacted: 'Not Contacted', contacted: 'Contacted', needs_followup: 'Needs Follow-up', contacted_2: 'Followed Up', responded: 'Responded', confirmed: 'Confirmed', lost: 'Lost' };
+            const STATUS_COLORS = { not_contacted: '#b45309', contacted: '#2563eb', needs_followup: '#dc2626', contacted_2: '#7c3aed', responded: '#7c3aed', confirmed: '#16a34a', lost: '#64748b' };
+            // Statuses that mean "I've actually reached out at least once" —
+            // not_contacted/needs_followup are default/no-action states (see
+            // list-reservation-inquiries.js's defaultStatus), so they don't count.
+            const CONTACTED_STATUSES = ['contacted', 'contacted_2', 'responded', 'confirmed', 'lost'];
+            // Statuses eligible for the "did they reply?" check — only while
+            // we're the one waiting on them.
+            const AWAITING_REPLY_STATUSES = ['contacted', 'contacted_2'];
             function statusPill(s) { const c = STATUS_COLORS[s] || '#64748b'; return `<span style="display:inline-block;padding:0.18rem 0.55rem;border-radius:999px;font-size:0.68rem;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;background:${c}1f;color:${c};">${escHtml(STATUS_LABELS[s] || s)}</span>`; }
 
             async function loadAll() {
@@ -13012,9 +13037,67 @@ function hashCode(str) {
                     state.inquiries = body.inquiries || [];
                     state.loaded = true;
                     render();
+                    // Best-effort, runs after the list is already on screen: check
+                    // whether anyone we're waiting on has actually replied by email.
+                    checkForResponses();
                 } catch (err) {
                     $('resInqTableBody').innerHTML = `<tr><td colspan="8" style="text-align:center;color:#dc2626;padding:2rem;">Couldn't load inquiries — ${escHtml(err.message)}<br><button class="btn-secondary" onclick="ResInqUI.loadAll()" style="margin-top:0.5rem;">Retry</button></td></tr>`;
                 } finally { state.loading = false; }
+            }
+
+            // Checks every inquiry we're currently "waiting on" (contacted /
+            // followed up) against its live Gmail thread — same lookup the modal's
+            // Email History panel already uses. If the latest message in the
+            // thread is FROM the customer and landed after we last touched their
+            // status, they've replied: flip them to "responded" so the badge and
+            // stat card surface it as something needing attention. Sequential and
+            // best-effort (one slow/broken lookup must never block the others or
+            // throw an error onto the page) — the volume here is small (only
+            // inquiries actively being chased), so no batching is needed.
+            let checkingResponses = false;
+            async function checkForResponses() {
+                if (checkingResponses) return;
+                const candidates = state.inquiries.filter((i) => i.email && AWAITING_REPLY_STATUSES.includes(i.status));
+                if (!candidates.length) return;
+                checkingResponses = true;
+                let foundAny = false;
+                try {
+                    for (const inq of candidates) {
+                        try {
+                            const r = await fetch(`${FN}/gmail-threads?email=${encodeURIComponent(inq.email)}`);
+                            const body = await r.json();
+                            if (!body.success) continue;
+                            const latest = (body.threads || [])[0];
+                            if (!latest || latest.direction !== 'received') continue;
+                            const repliedAt = new Date(latest.date).getTime();
+                            const sinceAt = new Date(inq.statusUpdatedAt || inq.submittedAt || 0).getTime();
+                            if (!repliedAt || repliedAt <= sinceAt) continue;
+
+                            const res = await fetch(`${FN}/update-reservation-status`, {
+                                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    token: localStorage.getItem('quarryAdminToken') || '',
+                                    submissionId: inq.id, status: 'responded',
+                                    note: 'Auto-detected reply: "' + (latest.subject || '') + '"', by: 'system',
+                                }),
+                            });
+                            const resBody = await res.json();
+                            if (res.ok && resBody.ok) {
+                                inq.status = 'responded';
+                                inq.statusUpdatedAt = resBody.override.updatedAt;
+                                inq.statusNote = resBody.override.note;
+                                inq.statusHistory = resBody.override.history;
+                                foundAny = true;
+                            }
+                        } catch (_) { /* one inquiry's lookup failing shouldn't stop the rest */ }
+                    }
+                } finally {
+                    checkingResponses = false;
+                }
+                if (foundAny) {
+                    render();
+                    if (typeof showToast === 'function') showToast('New reply received — inquiry marked Responded');
+                }
             }
 
             // Sidebar badge — same pattern as mktInboxBadge/wineclubBadge: a plain
@@ -13023,7 +13106,7 @@ function hashCode(str) {
             function updateBadge() {
                 const badge = $('resInqBadge');
                 if (!badge) return;
-                const n = state.inquiries.filter((i) => ['not_contacted', 'needs_followup'].includes(i.status)).length;
+                const n = state.inquiries.filter((i) => ['not_contacted', 'needs_followup', 'responded'].includes(i.status)).length;
                 if (n > 0) { badge.textContent = String(n); badge.style.display = ''; }
                 else { badge.style.display = 'none'; }
             }
@@ -13032,11 +13115,15 @@ function hashCode(str) {
                 // Stats
                 const total = state.inquiries.length;
                 const notContacted = state.inquiries.filter((i) => i.status === 'not_contacted').length;
+                const contacted = state.inquiries.filter((i) => CONTACTED_STATUSES.includes(i.status)).length;
                 const followup = state.inquiries.filter((i) => i.status === 'needs_followup').length;
+                const responded = state.inquiries.filter((i) => i.status === 'responded').length;
                 const confirmed = state.inquiries.filter((i) => i.status === 'confirmed').length;
                 $('resInqTotalCount').textContent = total;
                 $('resInqNotContactedCount').textContent = notContacted;
+                $('resInqContactedCount').textContent = contacted;
                 $('resInqFollowupCount').textContent = followup;
+                $('resInqRespondedCount').textContent = responded;
                 $('resInqConfirmedCount').textContent = confirmed;
                 updateBadge();
 
@@ -13044,7 +13131,7 @@ function hashCode(str) {
                 const filter = $('resInqFilter')?.value || 'needs_attention';
                 let list = state.inquiries.slice();
                 if (filter === 'needs_attention') {
-                    list = list.filter((i) => ['not_contacted', 'needs_followup'].includes(i.status));
+                    list = list.filter((i) => ['not_contacted', 'needs_followup', 'responded'].includes(i.status));
                 } else if (filter !== 'all') {
                     list = list.filter((i) => i.status === filter);
                 }
