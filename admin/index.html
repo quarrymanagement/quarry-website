@@ -3675,6 +3675,7 @@
                             <option value="needs_followup">Needs follow-up</option>
                             <option value="contacted_2">Followed up</option>
                             <option value="responded">Responded</option>
+                            <option value="sent_to_jacqueline">Sent to Jacqueline</option>
                             <option value="confirmed">Confirmed</option>
                             <option value="lost">Lost</option>
                             <option value="deleted">Deleted</option>
@@ -3708,6 +3709,11 @@
                         <div class="dash-stat-ic">💬</div>
                         <div class="dash-stat-num" id="resInqRespondedCount" style="color:#7c3aed;">0</div>
                         <div class="dash-stat-lbl">Responded</div>
+                    </div>
+                    <div class="dash-stat" id="resInqStatJacqueline">
+                        <div class="dash-stat-ic">💍</div>
+                        <div class="dash-stat-num" id="resInqJacquelineCount" style="color:#be185d;">0</div>
+                        <div class="dash-stat-lbl">Sent to Jacqueline</div>
                     </div>
                     <div class="dash-stat" id="resInqStatConfirmed">
                         <div class="dash-stat-ic">✓</div>
@@ -3757,6 +3763,7 @@
                             <button class="btn-secondary" data-status="needs_followup">⚠️ Needs Follow-up</button>
                             <button class="btn-secondary" data-status="contacted_2">📨 Followed Up Again</button>
                             <button class="btn-secondary" data-status="responded">💬 Responded</button>
+                            <button class="btn-secondary" data-status="sent_to_jacqueline" style="border-color:#be185d;color:#be185d;">💍 Sent to Jacqueline</button>
                             <button class="btn-approve" data-status="confirmed">✓ Confirmed (in Calendar)</button>
                             <button class="btn-reject" data-status="lost">✗ Lost</button>
                         </div>
@@ -13020,12 +13027,12 @@ function hashCode(str) {
             const escHtml = (s) => (s == null ? '' : String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])));
             const fmtDate = (iso) => { if (!iso) return '—'; const d = new Date(iso); return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); };
             const fmtDay = (iso) => { if (!iso) return '—'; try { return new Date(iso.length === 10 ? iso + 'T12:00' : iso).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }); } catch (_) { return iso; } };
-            const STATUS_LABELS = { not_contacted: 'Not Contacted', contacted: 'Contacted', needs_followup: 'Needs Follow-up', contacted_2: 'Followed Up', responded: 'Responded', confirmed: 'Confirmed', lost: 'Lost' };
-            const STATUS_COLORS = { not_contacted: '#b45309', contacted: '#2563eb', needs_followup: '#dc2626', contacted_2: '#7c3aed', responded: '#7c3aed', confirmed: '#16a34a', lost: '#64748b' };
+            const STATUS_LABELS = { not_contacted: 'Not Contacted', contacted: 'Contacted', needs_followup: 'Needs Follow-up', contacted_2: 'Followed Up', responded: 'Responded', sent_to_jacqueline: 'Sent to Jacqueline', confirmed: 'Confirmed', lost: 'Lost' };
+            const STATUS_COLORS = { not_contacted: '#b45309', contacted: '#2563eb', needs_followup: '#dc2626', contacted_2: '#7c3aed', responded: '#7c3aed', sent_to_jacqueline: '#be185d', confirmed: '#16a34a', lost: '#64748b' };
             // Statuses that mean "I've actually reached out at least once" —
             // not_contacted/needs_followup are default/no-action states (see
             // list-reservation-inquiries.js's defaultStatus), so they don't count.
-            const CONTACTED_STATUSES = ['contacted', 'contacted_2', 'responded', 'confirmed', 'lost'];
+            const CONTACTED_STATUSES = ['contacted', 'contacted_2', 'responded', 'sent_to_jacqueline', 'confirmed', 'lost'];
             // Statuses eligible for the "did they reply?" check — only while
             // we're the one waiting on them.
             const AWAITING_REPLY_STATUSES = ['contacted', 'contacted_2'];
@@ -13128,12 +13135,14 @@ function hashCode(str) {
                 const contacted = visible.filter((i) => CONTACTED_STATUSES.includes(i.status)).length;
                 const followup = visible.filter((i) => i.status === 'needs_followup').length;
                 const responded = visible.filter((i) => i.status === 'responded').length;
+                const sentToJacqueline = visible.filter((i) => i.status === 'sent_to_jacqueline').length;
                 const confirmed = visible.filter((i) => i.status === 'confirmed').length;
                 $('resInqTotalCount').textContent = total;
                 $('resInqNotContactedCount').textContent = notContacted;
                 $('resInqContactedCount').textContent = contacted;
                 $('resInqFollowupCount').textContent = followup;
                 $('resInqRespondedCount').textContent = responded;
+                $('resInqJacquelineCount').textContent = sentToJacqueline;
                 $('resInqConfirmedCount').textContent = confirmed;
                 updateBadge();
 
@@ -13401,6 +13410,7 @@ function hashCode(str) {
                     resInqStatContacted: 'contacted',
                     resInqStatFollowup: 'needs_followup',
                     resInqStatResponded: 'responded',
+                    resInqStatJacqueline: 'sent_to_jacqueline',
                     resInqStatConfirmed: 'confirmed',
                 };
                 Object.entries(STAT_CARD_FILTERS).forEach(([elId, filterVal]) => {
