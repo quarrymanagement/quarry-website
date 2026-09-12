@@ -280,6 +280,8 @@ function card(t){
   const done = t.status==='done', na = t.status==='na', late = t.status==='overdue';
   const bits = [];
   if (t.interval_days > 1) bits.push(CAD[t.cadence] || t.cadence);
+  if (t.week_of_month && t.week_of_month.length && t.week_of_month.length < 4)
+    bits.push('week ' + t.week_of_month.join(' & ') + ' job');
   if (t.area) bits.push(esc(t.area));
   if (t.est_minutes >= 30) bits.push('~' + t.est_minutes + ' min');
   let sub = bits.join(' · ');

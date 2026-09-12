@@ -34,6 +34,8 @@
     { days: 90, cadence: "quarterly", label: "Every 3 months" }
   ];
   var DAYS = [[3,"Wed"],[4,"Thu"],[5,"Fri"],[6,"Sat"],[0,"Sun"]];
+  var WEEKS = [[1,"Week 1"],[2,"Week 2"],[3,"Week 3"],[4,"Week 4"]];
+  var SLOW_DAYS = [0,3,4,5];  // Wed Thu Fri Sun — never Saturday
   var OPEN_DAYS = [0,3,4,5,6];
 
   var TASKS = [], DUE = [], STAFF = [];
@@ -69,6 +71,11 @@
     if (!a || a.length >= OPEN_DAYS.length) return "Any open day";
     return DAYS.filter(function(d){ return a.indexOf(d[0])>-1; })
                .map(function(d){ return d[1]; }).join(", ") + " only";
+  }
+  function weekLabel(w){
+    if (!w || !w.length) return "";
+    if (w.length === 4) return "";
+    return "week " + w.slice().sort().join(" & ") + " of the month";
   }
   function roleLabel(r){ for(var i=0;i<ROLES.length;i++) if(ROLES[i].id===r) return ROLES[i].label; return r; }
   function dueOf(id){ for(var i=0;i<DUE.length;i++) if(DUE[i].task_id===id) return DUE[i]; return {}; }
@@ -182,6 +189,7 @@
 
     var t = editId ? mine.filter(function(x){ return x.id===editId; })[0] : null;
     var days = t && t.days_of_week ? t.days_of_week : OPEN_DAYS;
+    var wks  = t && t.week_of_month ? t.week_of_month : [];
     var hourly = t ? t.recurrence==="hourly" : false;
 
     var form = '<div class="ck-card" style="padding:1.3rem 1.4rem;margin-bottom:1.6rem;">'
@@ -219,6 +227,13 @@
              var on = days.indexOf(d[0])>-1;
              return '<button type="button" class="ck-btn ck-day'+(on?" on":"")+'" data-d="'+d[0]+'" style="margin-right:6px">'+d[1]+'</button>';
            }).join("") + '</div>'
+      +   '<button type="button" class="ck-btn sm" id="ckSlow" style="margin-top:.55rem">Slow days only (Wed Thu Fri Sun)</button>'
+      +   '<div style="margin-top:1.1rem"><span class="ck-lbl">Which week of the month? '
+      +     '<span style="opacity:.6">all four = every week. Pick one to rotate this job by week.</span></span>'
+      +     '<div id="ckWeeks">' + WEEKS.map(function(w){
+               var on = !wks.length || wks.indexOf(w[0])>-1;
+               return '<button type="button" class="ck-btn ck-week'+(on?" on":"")+'" data-w="'+w[0]+'" style="margin-right:6px">'+w[1]+'</button>';
+             }).join("") + '</div></div>'
       + '</div>'
       + '<label style="display:flex;align-items:center;gap:.55rem;margin-top:1rem;font-size:.86rem;cursor:pointer;">'
       +   '<input type="checkbox" id="ckBig"'+(t&&t.is_big_job?" checked":"")+' style="width:16px;height:16px"> '
@@ -258,6 +273,7 @@
       +   (t.detail?'<div style="font-size:.78rem;color:var(--text-secondary,#5b6270);margin-top:.25rem">'+esc(t.detail)+'</div>':'')
       +   '<div class="ck-meta">'+esc(cadenceLabel(t))
       +     (t.recurrence!=="hourly" ? ' · ' + esc(daysLabel(t.days_of_week)) : '')
+      +     (weekLabel(t.week_of_month) ? ' · <b style="color:#B8933A">'+esc(weekLabel(t.week_of_month))+'</b>' : '')
       +     (t.area?' · '+esc(t.area):'') + (t.est_minutes?' · ~'+t.est_minutes+' min':'')
       +     (t.is_big_job?' · big job':'') + '</div>'
       + '</div>'
@@ -403,6 +419,10 @@
     document.querySelectorAll("#ckDays .ck-day.on").forEach(function(b){ picked.push(Number(b.getAttribute("data-d"))); });
     if (!hourly && !picked.length) return msg("Pick at least one day it can be done.", true);
 
+    var weeks = [];
+    document.querySelectorAll("#ckWeeks .ck-week.on").forEach(function(b){ weeks.push(Number(b.getAttribute("data-w"))); });
+    if (!hourly && !weeks.length) return msg("Pick at least one week of the month.", true);
+
     var mins = parseInt(document.getElementById("ckMins").value, 10);
     var body = {
       role: role, title: title,
@@ -417,6 +437,7 @@
     if (hourly){
       body.interval_days = 1; body.cadence = "daily";
       body.days_of_week = OPEN_DAYS;
+      body.week_of_month = null;
       body.hour_start = Number(document.getElementById("ckHs").value);
       body.hour_end   = Number(document.getElementById("ckHe").value);
       if (body.hour_end < body.hour_start) return msg("The last round can't be before the first.", true);
@@ -424,6 +445,8 @@
       body.interval_days = Number(cad);
       body.cadence = cadenceKey(Number(cad));
       body.days_of_week = picked;
+      // all four weeks ticked means 'every week' — store NULL, not a list
+      body.week_of_month = weeks.length === 4 ? null : weeks;
     }
 
     btn.disabled = true; btn.textContent = "Saving…";
@@ -467,6 +490,13 @@
     if ((el = e.target.closest(".ck-view"))){ view = el.getAttribute("data-view"); editId = null; render(); return; }
     if ((el = e.target.closest(".ck-role"))){ role = el.getAttribute("data-role"); editId = null; render(); return; }
     if ((el = e.target.closest(".ck-day"))){ el.classList.toggle("on"); return; }
+    if ((el = e.target.closest(".ck-week"))){ el.classList.toggle("on"); return; }
+    if (e.target.id === "ckSlow"){
+      document.querySelectorAll("#ckDays .ck-day").forEach(function(b){
+        b.classList.toggle("on", SLOW_DAYS.indexOf(Number(b.getAttribute("data-d"))) > -1);
+      });
+      return;
+    }
     if ((el = e.target.closest(".ck-edit"))){
       editId = el.getAttribute("data-id"); renderTasks();
       document.getElementById("checklistsTab").scrollIntoView({ behavior:"smooth", block:"start" }); return;
