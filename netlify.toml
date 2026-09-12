@@ -38,6 +38,14 @@
 # [functions."marketing-generate-daily"]
 #   schedule = "0 12 * * *"
 
+# ─── SHIFT CHECKLISTS ────────────────────────────────────────────────────────
+# Nightly checklist report — 04:45 UTC = 11:45pm CDT / 10:45pm CST, after the
+# latest close (Fri/Sat 11pm). Reports the Chicago business date that is just
+# ending, so the cron day and the report day are the same. Emails what cleared,
+# what didn't, hourly round coverage, and who Square had on the clock.
+[functions."checklist-nightly-report"]
+  schedule = "45 4 * * *"
+
 # Send-queue poller — every 10 min. Drains 'approved' drafts at scheduledFor.
 [functions."marketing-send"]
   schedule = "*/10 * * * *"
