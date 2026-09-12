@@ -8,7 +8,9 @@
    ?key=<VENUE_AVAILABILITY_KEY>&date=YYYY-MM-DD for a re-send.
 
    Env used: SUPABASE_ANON_KEY, SENDGRID_API_KEY, SQUARE_ACCESS_TOKEN,
-             SQUARE_LOCATION_ID, CHECKLIST_REPORT_TO, VENUE_AVAILABILITY_KEY
+             CHECKLIST_REPORT_TO, VENUE_AVAILABILITY_KEY
+   Square location is read live from the API, not from SQUARE_LOCATION_ID
+   (that variable is stale and points at a location that no longer exists).
    ========================================================================== */
 const SB = "https://nkulhtalltbieicvmmad.supabase.co";
 
@@ -42,12 +44,15 @@ async function sb(path, body) {
   return res.json();
 }
 
-/* Who was clocked in that business day, per Square. Best effort — if this
-   fails the report still goes out, just without names. */
-async function squareShifts(date) {
+/* Who was clocked in that business day, per Square.
+   Square renamed the Shifts API to Timecards, so this hits
+   /v2/labor/timecards/search. The location is read live from the API
+   rather than SQUARE_LOCATION_ID, which has gone stale before.
+   Best effort — if any of it fails the report still goes out, just
+   without the crew list. */
+async function squareCrew(date) {
   const token = process.env.SQUARE_ACCESS_TOKEN;
-  const loc = process.env.SQUARE_LOCATION_ID;
-  if (!token || !loc) return { shifts: [], note: "Square not configured" };
+  if (!token) return { crew: [], note: "Square not configured" };
 
   const headers = {
     Authorization: "Bearer " + token,
@@ -56,53 +61,54 @@ async function squareShifts(date) {
   };
 
   try {
-    const r = await fetch("https://connect.squareup.com/v2/labor/shifts/search", {
+    const locRes = await fetch("https://connect.squareup.com/v2/locations", { headers });
+    if (!locRes.ok) return { crew: [], note: "Square locations returned " + locRes.status };
+    const locIds = ((await locRes.json()).locations || [])
+      .filter(l => l.status === "ACTIVE").map(l => l.id);
+    if (!locIds.length) return { crew: [], note: "No active Square locations" };
+
+    const tcRes = await fetch("https://connect.squareup.com/v2/labor/timecards/search", {
       method: "POST", headers,
       body: JSON.stringify({
         query: {
           filter: {
-            location_ids: [loc],
-            start: { start_at: date + "T00:00:00-06:00", end_at: date + "T23:59:59-05:00" }
+            location_ids: locIds,
+            start: { start_at: date + "T00:00:00-05:00", end_at: date + "T23:59:59-05:00" }
           }
         },
         limit: 200
       })
     });
-    if (!r.ok) return { shifts: [], note: "Square returned " + r.status };
-    const data = await r.json();
-    const shifts = data.shifts || [];
-    if (!shifts.length) return { shifts: [], note: "No clock-ins recorded" };
+    if (!tcRes.ok) return { crew: [], note: "Square timecards returned " + tcRes.status };
+    const cards = (await tcRes.json()).timecards || [];
+    if (!cards.length) return { crew: [], note: "Nobody clocked in" };
 
-    // resolve team member ids to names
-    const ids = [...new Set(shifts.map(s => s.team_member_id).filter(Boolean))];
+    // resolve ids to names
     let names = {};
-    if (ids.length) {
-      const tm = await fetch("https://connect.squareup.com/v2/team-members/search", {
-        method: "POST", headers,
-        body: JSON.stringify({ query: { filter: { location_ids: [loc] } }, limit: 200 })
+    const tmRes = await fetch("https://connect.squareup.com/v2/team-members/search", {
+      method: "POST", headers, body: JSON.stringify({ limit: 200 })
+    });
+    if (tmRes.ok) {
+      ((await tmRes.json()).team_members || []).forEach(m => {
+        names[m.id] = [m.given_name, m.family_name].filter(Boolean).join(" ")
+          || m.email_address || m.id;
       });
-      if (tm.ok) {
-        const td = await tm.json();
-        (td.team_members || []).forEach(m => {
-          names[m.id] = [m.given_name, m.family_name].filter(Boolean).join(" ") || m.email_address || m.id;
-        });
-      }
     }
 
     const fmt = t => t ? new Date(t).toLocaleTimeString("en-US",
-      { hour: "numeric", minute: "2-digit", timeZone: "America/Chicago" }) : "—";
+      { hour: "numeric", minute: "2-digit", timeZone: "America/Chicago" }) : null;
 
     return {
-      shifts: shifts.map(s => ({
-        name: names[s.team_member_id] || "Unnamed",
-        role: (s.wage && s.wage.title) || "",
-        in: fmt(s.start_at),
-        out: fmt(s.end_at)
+      crew: cards.map(c => ({
+        name: names[c.team_member_id] || "Unnamed",
+        role: (c.wage && c.wage.title) || "",
+        in: fmt(c.start_at) || "\u2014",
+        out: fmt(c.end_at) || (c.status === "OPEN" ? "still on" : "\u2014")
       })).sort((a, b) => a.name.localeCompare(b.name)),
       note: null
     };
   } catch (e) {
-    return { shifts: [], note: "Square lookup failed: " + e.message };
+    return { crew: [], note: "Square lookup failed: " + e.message };
   }
 }
 
@@ -243,7 +249,7 @@ exports.handler = async (event) => {
       });
     }
 
-    const { shifts, note } = await squareShifts(date);
+    const { crew, note } = await squareCrew(date);
 
     const live = rows.filter(r => r.status !== "upcoming");
     const missed = live.filter(r => r.status === "overdue" || r.status === "due").length;
@@ -251,11 +257,11 @@ exports.handler = async (event) => {
       ? `Quarry checklist ${date} — all clear`
       : `Quarry checklist ${date} — ${missed} not signed off`;
 
-    await send(subject, buildHtml(date, rows, hourly, shifts, note));
+    await send(subject, buildHtml(date, rows, hourly, crew, note));
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ ok: true, date, total: live.length, missed, crew: shifts.length, squareNote: note })
+      body: JSON.stringify({ ok: true, date, total: live.length, missed, crew: crew.length, squareNote: note })
     };
   } catch (e) {
     console.error("nightly report failed:", e);
