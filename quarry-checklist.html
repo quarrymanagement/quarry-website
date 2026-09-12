@@ -153,10 +153,16 @@ summary::-webkit-details-marker{display:none}
   position:fixed; left:0; right:0; bottom:0; z-index:61; background:var(--card);
   border-top:1px solid var(--line); border-radius:20px 20px 0 0; padding:24px 22px;
   padding-bottom:calc(24px + env(safe-area-inset-bottom)); transform:translateY(101%);
-  transition:transform .24s cubic-bezier(.3,.9,.3,1); max-height:88vh; overflow-y:auto;
-  box-shadow:0 -8px 40px rgba(35,32,27,.14);
+  max-height:88vh; overflow-y:auto; box-shadow:0 -8px 40px rgba(35,32,27,.14);
+  /* translateY(101%) only clears its own height — on wide screens the sheet
+     also sits `bottom:28px` up, so a sliver stayed on screen. Hide it. */
+  visibility:hidden;
+  transition:transform .24s cubic-bezier(.3,.9,.3,1), visibility 0s linear .24s;
 }
-.sheet.on{transform:translateY(0)}
+.sheet.on{
+  transform:translateY(0); visibility:visible;
+  transition:transform .24s cubic-bezier(.3,.9,.3,1), visibility 0s linear 0s;
+}
 @media(min-width:780px){.sheet{max-width:560px; margin:0 auto; border-radius:18px; bottom:28px; left:28px; right:28px; border:1px solid var(--line)}}
 .sheet h3{font-size:18px; font-weight:600; line-height:1.35}
 .sheet .note{color:var(--dim); font-size:13px; margin-top:8px; line-height:1.5}
@@ -179,9 +185,13 @@ input[type=text]:focus{outline:none; border-color:var(--gold)}
 .toast{
   position:fixed; left:50%; bottom:28px; z-index:80; transform:translateX(-50%) translateY(140%);
   background:var(--text); color:#FBF8F1; padding:14px 24px; border-radius:999px;
-  font-weight:700; font-size:14px; transition:transform .26s; box-shadow:0 10px 34px rgba(35,32,27,.3);
+  font-weight:700; font-size:14px; box-shadow:0 10px 34px rgba(35,32,27,.3);
+  visibility:hidden; transition:transform .26s, visibility 0s linear .26s;
 }
-.toast.on{transform:translateX(-50%) translateY(0)}
+.toast.on{
+  transform:translateX(-50%) translateY(0); visibility:visible;
+  transition:transform .26s, visibility 0s linear 0s;
+}
 </style>
 </head>
 <body>
