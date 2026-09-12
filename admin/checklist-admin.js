@@ -20,7 +20,8 @@
     { id: "server",    label: "Servers" },
     { id: "support",   label: "Host & Bus" },
     { id: "kitchen",   label: "Kitchen" },
-    { id: "staff",     label: "Staff Board" }
+    { id: "staff",     label: "Staff Board" },
+    { id: "closing",   label: "Closing" }
   ];
   var SEGS = [["open","Opening"],["shift","During Shift"],["close","Closing"]];
   var CADENCES = [
