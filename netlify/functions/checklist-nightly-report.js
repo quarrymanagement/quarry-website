@@ -9,8 +9,9 @@
 
    Env used: SUPABASE_ANON_KEY, SENDGRID_API_KEY, SQUARE_ACCESS_TOKEN,
              CHECKLIST_REPORT_TO, VENUE_AVAILABILITY_KEY
-   Square location is read live from the API, not from SQUARE_LOCATION_ID
-   (that variable is stale and points at a location that no longer exists).
+   Labor lives in a SEPARATE Square account from the website's payments
+   token — see squareCrew() below. SQUARE_LOCATION_ID is correct for
+   payments and is deliberately not used here.
    ========================================================================== */
 const SB = "https://nkulhtalltbieicvmmad.supabase.co";
 
@@ -45,37 +46,54 @@ async function sb(path, body) {
 }
 
 /* Who was clocked in that business day, per Square.
-   Square renamed the Shifts API to Timecards, so this hits
-   /v2/labor/timecards/search. The location is read live from the API
-   rather than SQUARE_LOCATION_ID, which has gone stale before.
-   Best effort — if any of it fails the report still goes out, just
-   without the crew list. */
+
+   IMPORTANT — there are two Square accounts behind The Quarry:
+     MLA1E0P3MZ0KC  the website/online payments account. This is what
+                    SQUARE_ACCESS_TOKEN holds. Locations LSH424Z9E0S98
+                    and LDFSE2ACXVT75. No team, no timecards.
+     MLF3658E76VN9  the POS / payroll account. Location LV81798YKDGPS.
+                    This is where staff and clock-ins actually live.
+
+   The labor endpoints return 200 with an empty list when queried with a
+   token for the wrong account, so a missing crew list looks exactly like
+   "nobody worked". To keep the report honest we check the merchant the
+   token belongs to and say which case we are in.
+
+   Set SQUARE_LABOR_TOKEN to an access token for the POS/payroll account
+   and the crew list starts working. Until then the report says so out
+   loud rather than implying the building was empty. */
+const LABOR_MERCHANT = "MLF3658E76VN9";
+
 async function squareCrew(date) {
-  const token = process.env.SQUARE_ACCESS_TOKEN;
+  const token = process.env.SQUARE_LABOR_TOKEN || process.env.SQUARE_ACCESS_TOKEN;
   if (!token) return { crew: [], note: "Square not configured" };
 
   const headers = {
     Authorization: "Bearer " + token,
-    "Square-Version": "2025-01-23",
+    "Square-Version": "2026-06-18",
     "Content-Type": "application/json"
   };
 
   try {
-    const locRes = await fetch("https://connect.squareup.com/v2/locations", { headers });
-    if (!locRes.ok) return { crew: [], note: "Square locations returned " + locRes.status };
-    const locIds = ((await locRes.json()).locations || [])
-      .filter(l => l.status === "ACTIVE").map(l => l.id);
-    if (!locIds.length) return { crew: [], note: "No active Square locations" };
+    // Which account is this token for? Wrong one = empty results, not an error.
+    const meRes = await fetch("https://connect.squareup.com/v2/merchants/me", { headers });
+    if (!meRes.ok) return { crew: [], note: "Square auth failed (" + meRes.status + ")" };
+    const merchantId = ((await meRes.json()).merchant || {}).id;
+
+    if (merchantId !== LABOR_MERCHANT) {
+      return {
+        crew: [],
+        note: "Clock-in data lives in the POS Square account (" + LABOR_MERCHANT +
+              "), but this site's token is for " + merchantId +
+              ". Add SQUARE_LABOR_TOKEN in Netlify to switch this on."
+      };
+    }
 
     const tcRes = await fetch("https://connect.squareup.com/v2/labor/timecards/search", {
       method: "POST", headers,
       body: JSON.stringify({
-        query: {
-          filter: {
-            location_ids: locIds,
-            start: { start_at: date + "T00:00:00-05:00", end_at: date + "T23:59:59-05:00" }
-          }
-        },
+        query: { filter: { start: { start_at: date + "T00:00:00-05:00",
+                                    end_at:   date + "T23:59:59-05:00" } } },
         limit: 200
       })
     });
@@ -83,7 +101,6 @@ async function squareCrew(date) {
     const cards = (await tcRes.json()).timecards || [];
     if (!cards.length) return { crew: [], note: "Nobody clocked in" };
 
-    // resolve ids to names
     let names = {};
     const tmRes = await fetch("https://connect.squareup.com/v2/team-members/search", {
       method: "POST", headers, body: JSON.stringify({ limit: 200 })
