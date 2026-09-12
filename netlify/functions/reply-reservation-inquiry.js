@@ -16,6 +16,19 @@
 //   - to/subject/body: the reply itself. body is plain text; a simple HTML
 //     version (line breaks -> <br>) is generated for the email.
 //
+// SENDING: goes out through the real management@thequarrystl.com Gmail
+// account via the Gmail API (GMAIL_REFRESH_TOKEN_SEND — a broader-scoped
+// token than the read-only GMAIL_REFRESH_TOKEN used elsewhere for search),
+// not SendGrid. This used to go through SendGrid, which delivered the email
+// fine but never touched Gmail at all — so the reply never showed up in
+// "Email history" (gmail-threads.js searches the real mailbox) and never
+// appeared as part of the same conversation in the recipient's inbox. Gmail
+// send fixes both: the message lands in the account's own Sent mail (so
+// history search finds it), and when an existing thread with this contact
+// is found, the reply is attached to that thread with proper
+// In-Reply-To/References headers so mail clients (Gmail, Outlook, Apple
+// Mail) thread it together with the original conversation.
+//
 // Auto-advance mapping (only ever moves an inquiry FORWARD, never backward):
 //   not_contacted   -> contacted
 //   needs_followup  -> contacted_2   ("Followed Up")
@@ -27,9 +40,9 @@
 
 const fetch = require('node-fetch');
 const crypto = require('crypto');
+const { google } = require('googleapis');
 
 const SITE_URL = process.env.URL || 'https://thequarrystl.com';
-const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY || '';
 const FROM_EMAIL = 'management@thequarrystl.com';
 const FROM_NAME = 'The Quarry';
 
@@ -80,30 +93,96 @@ function escapeHtml(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
-async function sendReplyEmail(to, subject, plainBody, cc) {
-    if (!SENDGRID_API_KEY) throw new Error('SENDGRID_API_KEY not configured on the server');
-    const html = `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:#222;white-space:pre-wrap;">${escapeHtml(plainBody)}</div>`;
-    const personalization = { to: [{ email: to }] };
-    // cc: optional single address or array — e.g. looping in Jacqueline on a
-    // wedding-inquiry handoff email so she's visible to the customer from the
-    // first message, not just forwarded after the fact.
-    if (cc) personalization.cc = (Array.isArray(cc) ? cc : [cc]).map((email) => ({ email }));
-    const res = await fetch('https://api.sendgrid.com/v3/mail/send', {
-        method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + SENDGRID_API_KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            personalizations: [personalization],
-            from: { email: FROM_EMAIL, name: FROM_NAME },
-            subject,
-            content: [
-                { type: 'text/plain', value: plainBody },
-                { type: 'text/html', value: html },
-            ],
-        }),
+function gmailClient() {
+    const oauth2Client = new google.auth.OAuth2(
+        process.env.GMAIL_CLIENT_ID,
+        process.env.GMAIL_CLIENT_SECRET,
+        'https://developers.google.com/oauthplayground'
+    );
+    oauth2Client.setCredentials({ refresh_token: process.env.GMAIL_REFRESH_TOKEN_SEND });
+    return google.gmail({ version: 'v1', auth: oauth2Client });
+}
+
+// Looks up the most recent message with this contact so a reply can be
+// attached to that same Gmail thread (In-Reply-To/References + threadId) —
+// mirrors gmail-threads.js's own search, but only needs the single latest
+// message's headers, not the full multi-thread summary that endpoint builds.
+async function findLatestMessage(gmail, contactEmail) {
+    const list = await gmail.users.messages.list({
+        userId: 'me',
+        q: `from:${contactEmail} OR to:${contactEmail}`,
+        maxResults: 1,
     });
-    if (!res.ok) {
-        const text = await res.text().catch(() => '');
-        throw new Error(`sendgrid_${res.status} ${text.slice(0, 300)}`);
+    const msg = (list.data.messages || [])[0];
+    if (!msg) return null;
+    const detail = await gmail.users.messages.get({
+        userId: 'me', id: msg.id, format: 'metadata',
+        metadataHeaders: ['Message-ID', 'References'],
+    });
+    const headers = detail.data.payload?.headers || [];
+    const getHeader = (name) => (headers.find((h) => h.name.toLowerCase() === name.toLowerCase()) || {}).value || '';
+    return {
+        threadId: detail.data.threadId,
+        messageId: getHeader('Message-ID'),
+        references: getHeader('References'),
+    };
+}
+
+function base64url(str) {
+    return Buffer.from(str, 'utf8').toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+async function sendReplyEmail(to, subject, plainBody, cc) {
+    const gmail = gmailClient();
+    const prior = await findLatestMessage(gmail, to);
+
+    const html = `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:#222;white-space:pre-wrap;">${escapeHtml(plainBody)}</div>`;
+    const boundary = 'quarry_' + crypto.randomBytes(12).toString('hex');
+    const ccList = cc ? (Array.isArray(cc) ? cc : [cc]) : [];
+
+    const headerLines = [
+        `From: ${FROM_NAME} <${FROM_EMAIL}>`,
+        `To: ${to}`,
+        ccList.length ? `Cc: ${ccList.join(', ')}` : null,
+        `Subject: ${subject}`,
+        'MIME-Version: 1.0',
+        `Content-Type: multipart/alternative; boundary="${boundary}"`,
+    ];
+    if (prior?.messageId) {
+        // Threading only works if we can reference the actual prior Message-ID —
+        // a missing/blank header (some senders omit it) means we fall back to
+        // a fresh, unthreaded message rather than send malformed headers.
+        headerLines.push(`In-Reply-To: ${prior.messageId}`);
+        headerLines.push(`References: ${(prior.references ? prior.references + ' ' : '') + prior.messageId}`.trim());
+    }
+
+    const raw = [
+        ...headerLines.filter(Boolean),
+        '',
+        `--${boundary}`,
+        'Content-Type: text/plain; charset="UTF-8"',
+        '',
+        plainBody,
+        '',
+        `--${boundary}`,
+        'Content-Type: text/html; charset="UTF-8"',
+        '',
+        html,
+        '',
+        `--${boundary}--`,
+    ].join('\r\n');
+
+    try {
+        await gmail.users.messages.send({
+            userId: 'me',
+            requestBody: {
+                raw: base64url(raw),
+                threadId: prior?.threadId || undefined,
+            },
+        });
+    } catch (err) {
+        const detail = err?.response?.data?.error?.message || err.message;
+        throw new Error(`gmail_send_failed: ${detail}`);
     }
 }
 
