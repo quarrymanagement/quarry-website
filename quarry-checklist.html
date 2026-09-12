@@ -44,7 +44,7 @@ button{font-family:inherit;color:inherit;border:none;background:none}
 header{
   position:sticky; top:0; z-index:40; background:var(--card);
   border-bottom:1px solid var(--line);
-  padding:calc(16px + env(safe-area-inset-top)) 20px 0;
+  padding:calc(10px + env(safe-area-inset-top)) 18px 0;
 }
 .top{display:flex; align-items:center; gap:14px}
 .mark{
@@ -58,10 +58,10 @@ header{
   font-size:11px; letter-spacing:.1em; text-transform:uppercase; font-weight:600;
   color:var(--dim); cursor:pointer; background:var(--page);
 }
-.tabs{display:flex; gap:4px; overflow-x:auto; margin-top:14px; scrollbar-width:none}
+.tabs{display:flex; gap:2px; overflow-x:auto; margin-top:8px; scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
 .tab{
-  flex:0 0 auto; padding:11px 16px 13px; font-size:14px; font-weight:600;
+  flex:0 0 auto; padding:8px 13px 10px; font-size:14px; font-weight:600;
   color:var(--faint); border-bottom:2px solid transparent; cursor:pointer; white-space:nowrap;
 }
 .tab.on{color:var(--text); border-bottom-color:var(--gold)}
@@ -73,34 +73,39 @@ header{
 .bar i{display:block; height:100%; background:var(--gold); width:0; transition:width .45s ease}
 
 /* ---------------- layout ---------------- */
-main{padding:0 20px; max-width:1120px; margin:0 auto}
-.count{font-size:12px; color:var(--faint); letter-spacing:.08em; text-transform:uppercase; padding:16px 0 4px}
+main{padding:0 18px; max-width:1700px; margin:0 auto}
+.count{font-size:11px; color:var(--faint); letter-spacing:.08em; text-transform:uppercase; padding:10px 0 2px}
 .count b{color:var(--text); font-weight:600}
 h2{
-  font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--gold-ink);
-  font-weight:700; margin:30px 0 12px; display:flex; align-items:center; gap:12px;
+  font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--gold-ink);
+  font-weight:700; margin:14px 0 7px; display:flex; align-items:center; gap:10px;
 }
 h2:after{content:''; flex:1; height:1px; background:var(--line)}
-.grid{display:grid; gap:8px}
-@media(min-width:780px){.grid{grid-template-columns:1fr 1fr}}
-@media(min-width:1120px){.grid{grid-template-columns:1fr 1fr 1fr}}
+/* Fit a whole board on an iPad without scrolling: more columns, shorter
+   cards. The how-to detail moves to the sign-off sheet, where the person
+   who actually needs it is already looking. */
+.grid{display:grid; gap:6px; grid-template-columns:1fr}
+@media(min-width:620px){ .grid{grid-template-columns:repeat(2,1fr)} }
+@media(min-width:840px){ .grid{grid-template-columns:repeat(3,1fr)} }
+@media(min-width:1100px){.grid{grid-template-columns:repeat(4,1fr)} }
+@media(min-width:1450px){.grid{grid-template-columns:repeat(5,1fr)} }
 
 /* ---------------- task ---------------- */
 .task{
-  display:flex; gap:15px; align-items:flex-start; width:100%; text-align:left;
-  background:var(--card); border-radius:12px; padding:16px 17px; cursor:pointer;
-  border:1px solid var(--line); box-shadow:0 1px 2px rgba(35,32,27,.04);
-  transition:background .12s, box-shadow .12s;
+  display:flex; gap:11px; align-items:center; width:100%; text-align:left;
+  background:var(--card); border-radius:10px; padding:11px 13px; cursor:pointer;
+  min-height:56px; border:1px solid var(--line); box-shadow:0 1px 2px rgba(35,32,27,.04);
+  transition:background .12s;
 }
 .task:active{background:var(--card-2)}
 .box{
-  flex:0 0 auto; width:26px; height:26px; border-radius:8px;
-  border:2px solid #D9CFB8; background:var(--page); margin-top:1px;
-  display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:700;
+  flex:0 0 auto; width:24px; height:24px; border-radius:7px;
+  border:2px solid #D9CFB8; background:var(--page);
+  display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700;
 }
-.t{font-size:15px; font-weight:600; line-height:1.35}
+.t{font-size:14px; font-weight:600; line-height:1.28}
 .d{font-size:12.5px; color:var(--dim); margin-top:5px; line-height:1.45}
-.sub{font-size:11px; color:var(--faint); margin-top:8px; letter-spacing:.04em}
+.sub{font-size:10.5px; color:var(--faint); margin-top:3px; letter-spacing:.03em}
 .sub b{color:var(--gold-ink); font-weight:600}
 .task.done{background:var(--green-soft); border-color:var(--green-line)}
 .task.done .box{background:var(--green); border-color:var(--green); color:#fff}
@@ -113,19 +118,19 @@ h2:after{content:''; flex:1; height:1px; background:var(--line)}
 /* ---------------- hourly ---------------- */
 .now{
   background:var(--gold-soft); border:1px solid #E6D3A6; border-radius:14px;
-  padding:18px 19px; margin-top:4px; width:100%; text-align:left; cursor:pointer; display:block;
+  padding:12px 14px; margin-top:2px; width:100%; text-align:left; cursor:pointer; display:block;
   box-shadow:0 1px 2px rgba(35,32,27,.04);
 }
 .now.late{background:var(--red-soft); border-color:var(--red-line)}
 .now.done{background:var(--green-soft); border-color:var(--green-line)}
 .now .hd{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap}
-.now .ttl{font-size:16px; font-weight:600; flex:1; min-width:150px}
+.now .ttl{font-size:15px; font-weight:600; flex:1; min-width:140px}
 .clock{font-size:13px; font-weight:700; letter-spacing:.05em; color:var(--gold-ink); white-space:nowrap}
 .now.late .clock{color:var(--red)}
 .now.done .clock{color:var(--green)}
-.hours{display:flex; gap:4px; margin-top:14px; flex-wrap:wrap}
+.hours{display:flex; gap:3px; margin-top:9px; flex-wrap:wrap}
 .hr{
-  flex:1 1 0; min-width:26px; height:30px; border-radius:6px; display:flex;
+  flex:1 1 0; min-width:24px; height:24px; border-radius:5px; display:flex;
   align-items:center; justify-content:center; font-size:10px; font-weight:700;
   background:#EFE9DB; color:var(--faint);
 }
@@ -135,10 +140,10 @@ h2:after{content:''; flex:1; height:1px; background:var(--line)}
 .hr.future{opacity:.45}
 
 .empty{color:var(--faint); font-size:14px; padding:34px 4px; text-align:center; font-style:italic}
-details{margin-top:28px; border-top:1px solid var(--line); padding-top:16px}
+details{margin-top:16px; border-top:1px solid var(--line); padding-top:10px}
 summary{font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--faint); cursor:pointer; font-weight:600; list-style:none}
 summary::-webkit-details-marker{display:none}
-.lrow{display:flex; justify-content:space-between; gap:14px; padding:12px 2px; border-bottom:1px solid var(--line-2); font-size:13.5px; color:var(--dim)}
+.lrow{display:flex; justify-content:space-between; gap:14px; padding:8px 2px; border-bottom:1px solid var(--line-2); font-size:13.5px; color:var(--dim)}
 .lrow span:last-child{color:var(--faint); font-size:11.5px; white-space:nowrap}
 
 /* ---------------- sheet ---------------- */
@@ -297,20 +302,22 @@ function render(){
 
 function card(t){
   const done = t.status==='done', na = t.status==='na', late = t.status==='overdue';
-  const bits = [];
-  if (t.interval_days > 1) bits.push(CAD[t.cadence] || t.cadence);
-  if (t.week_of_month && t.week_of_month.length && t.week_of_month.length < 4)
-    bits.push('week ' + t.week_of_month.join(' & ') + ' job');
-  if (t.area) bits.push(esc(t.area));
-  if (t.est_minutes >= 30) bits.push('~' + t.est_minutes + ' min');
-  let sub = bits.join(' · ');
-  if (late) sub = `<b>Missed ${t.missed_days} shift${t.missed_days===1?'':'s'}</b>` + (sub?' · '+sub:'');
-  if (done || na) sub = `<b>${na?'N/A':''} ${esc(t.done_by||'')}</b> · ${hhmm(t.done_at)} · tap to undo`;
+  // Only surface what changes a decision. Everything else — how-to, area,
+  // cadence — is one tap away in the sheet and doesn't earn screen height.
+  let sub = '';
+  if (late)               sub = `<b>Missed ${t.missed_days} shift${t.missed_days===1?'':'s'}</b>`;
+  else if (done || na)    sub = `<b>${na?'N/A ':''}${esc(t.done_by||'')}</b> · ${hhmm(t.done_at)}`;
+  else {
+    const bits = [];
+    if (t.week_of_month && t.week_of_month.length && t.week_of_month.length < 4)
+      bits.push('wk ' + t.week_of_month.join('&'));
+    if (t.est_minutes >= 45) bits.push('~' + t.est_minutes + 'm');
+    sub = bits.join(' · ');
+  }
   return `<button class="task${done?' done':''}${na?' na':''}${late?' late':''}" data-id="${t.task_id}">
     <span class="box">${done?'✓':(na?'–':'')}</span>
     <span style="flex:1;min-width:0">
       <span class="t" style="display:block">${esc(t.title)}</span>
-      ${t.detail && !done && !na ? `<span class="d" style="display:block">${esc(t.detail)}</span>` : ''}
       ${sub ? `<span class="sub" style="display:block">${sub}</span>` : ''}
     </span></button>`;
 }
