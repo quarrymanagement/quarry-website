@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Shift Checklist &middot; The Quarry</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --charcoal:#1A1A1A; --brown-dark:#2C1A0E; --cream:#F5F0E8;
+  --gold:#B8933A; --gold-light:#D4AF6A; --brown-mid:#5C3D2E;
+  --green:#4CAF50; --red:#8B2E2E; --gray:#9A9A9A;
+  --panel:#221a13; --panel-2:#2b2019; --line:rgba(212,175,106,.18);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--charcoal); color:var(--cream);
+  font-family:Montserrat,-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
+  font-size:16px; -webkit-font-smoothing:antialiased;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+button{font-family:inherit}
+
+/* ---------- header ---------- */
+header{
+  position:sticky; top:0; z-index:40; background:linear-gradient(180deg,#1A1A1A 70%,rgba(26,26,26,.96));
+  border-bottom:1px solid var(--line); padding:14px 18px 0; padding-top:calc(14px + env(safe-area-inset-top));
+}
+.brand{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap}
+.brand h1{
+  font-family:'Playfair Display',Georgia,serif; font-weight:700; font-size:22px;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--gold-light); margin:0;
+}
+.brand .date{font-size:13px; color:var(--gray); letter-spacing:.06em; text-transform:uppercase}
+.brand .spacer{flex:1}
+.refresh{
+  background:transparent; border:1px solid var(--line); color:var(--gold-light);
+  border-radius:999px; padding:7px 14px; font-size:12px; letter-spacing:.08em;
+  text-transform:uppercase; font-weight:600; cursor:pointer;
+}
+.tabs{display:flex; gap:6px; overflow-x:auto; margin-top:12px; padding-bottom:2px; scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{
+  flex:0 0 auto; background:transparent; border:none; border-bottom:3px solid transparent;
+  color:var(--gray); padding:10px 14px 12px; font-size:14px; font-weight:600;
+  letter-spacing:.04em; cursor:pointer; white-space:nowrap; display:flex; align-items:center; gap:8px;
+}
+.tab.on{color:var(--cream); border-bottom-color:var(--gold)}
+.tab .cnt{
+  font-size:11px; font-weight:700; background:rgba(212,175,106,.14); color:var(--gold-light);
+  border-radius:999px; padding:3px 8px; min-width:34px; text-align:center;
+}
+.tab.on .cnt{background:var(--gold); color:#1A1A1A}
+.tab .cnt.done{background:rgba(76,175,80,.2); color:#8fd694}
+
+/* ---------- progress ---------- */
+.progwrap{padding:14px 18px 0}
+.progbar{height:6px; background:rgba(245,240,232,.08); border-radius:999px; overflow:hidden}
+.progbar i{display:block; height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-light)); width:0; transition:width .4s ease}
+.progtext{font-size:12px; color:var(--gray); margin-top:7px; letter-spacing:.05em; text-transform:uppercase}
+
+/* ---------- sections ---------- */
+main{padding:0 18px 90px; max-width:1100px; margin:0 auto}
+.sect{margin-top:26px}
+.sect h2{
+  font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--gold);
+  margin:0 0 10px; font-weight:700; display:flex; align-items:center; gap:10px;
+}
+.sect h2:after{content:''; flex:1; height:1px; background:var(--line)}
+.grid{display:grid; gap:10px; grid-template-columns:1fr}
+@media(min-width:760px){.grid{grid-template-columns:1fr 1fr}}
+@media(min-width:1100px){.grid{grid-template-columns:1fr 1fr 1fr}}
+
+/* ---------- task card ---------- */
+.task{
+  display:flex; gap:14px; align-items:flex-start; text-align:left; width:100%;
+  background:var(--panel); border:1px solid var(--line); border-radius:14px;
+  padding:15px 16px; cursor:pointer; color:inherit; transition:background .15s,border-color .15s;
+}
+.task:active{background:var(--panel-2)}
+.task .box{
+  flex:0 0 auto; width:30px; height:30px; border-radius:9px; border:2px solid rgba(212,175,106,.45);
+  display:flex; align-items:center; justify-content:center; font-size:17px; font-weight:700; margin-top:1px;
+}
+.task .body{flex:1; min-width:0}
+.task .t{font-size:15px; font-weight:600; line-height:1.32}
+.task .d{font-size:12.5px; color:#b6a894; margin-top:5px; line-height:1.45}
+.task .meta{display:flex; flex-wrap:wrap; gap:6px; margin-top:9px}
+.pill{
+  font-size:10px; font-weight:700; letter-spacing:.09em; text-transform:uppercase;
+  padding:3px 8px; border-radius:999px; background:rgba(245,240,232,.08); color:#c8bba6;
+}
+.pill.cad{background:rgba(184,147,58,.16); color:var(--gold-light)}
+.pill.area{background:rgba(92,61,46,.45); color:#e0cdb4}
+.pill.big{background:rgba(139,46,46,.28); color:#e8a0a0}
+.pill.late{background:var(--red); color:#fff}
+.pill.mins{background:transparent; border:1px solid var(--line); color:var(--gray)}
+
+.task.done{background:rgba(76,175,80,.07); border-color:rgba(76,175,80,.3)}
+.task.done .box{background:var(--green); border-color:var(--green); color:#10240f}
+.task.done .t{color:#cfe8cf}
+.task.na{opacity:.6}
+.task.na .box{background:var(--gray); border-color:var(--gray); color:#1A1A1A}
+.task.late{border-color:rgba(139,46,46,.6)}
+.signed{font-size:11.5px; color:#8fd694; margin-top:8px; font-weight:600; letter-spacing:.03em}
+
+.empty{color:var(--gray); font-size:14px; padding:26px 4px; text-align:center; font-style:italic}
+details.later{margin-top:24px; border-top:1px solid var(--line); padding-top:14px}
+details.later summary{
+  font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--gray);
+  cursor:pointer; font-weight:600; list-style:none;
+}
+details.later summary::-webkit-details-marker{display:none}
+details.later summary:before{content:'+ '; color:var(--gold)}
+details.later[open] summary:before{content:'- '}
+.laterrow{display:flex; justify-content:space-between; gap:12px; padding:11px 2px; border-bottom:1px solid rgba(245,240,232,.05); font-size:13.5px}
+.laterrow span:last-child{color:var(--gray); font-size:12px; white-space:nowrap; flex:0 0 auto}
+
+/* ---------- sheet ---------- */
+.scrim{position:fixed; inset:0; background:rgba(0,0,0,.72); z-index:60; display:none}
+.scrim.on{display:block}
+.sheet{
+  position:fixed; left:0; right:0; bottom:0; z-index:61; background:var(--brown-dark);
+  border-top:1px solid var(--gold); border-radius:22px 22px 0 0; padding:22px 20px;
+  padding-bottom:calc(22px + env(safe-area-inset-bottom)); transform:translateY(100%);
+  transition:transform .22s ease; max-height:88vh; overflow-y:auto;
+}
+.sheet.on{transform:translateY(0)}
+@media(min-width:760px){.sheet{max-width:620px; margin:0 auto; border-radius:22px; bottom:24px; left:24px; right:24px}}
+.sheet h3{margin:0 0 4px; font-size:19px; font-weight:700; line-height:1.3}
+.sheet .sub{color:#b6a894; font-size:13px; margin-bottom:18px; line-height:1.5}
+.lbl{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); font-weight:700; margin:16px 0 9px}
+.chips{display:flex; flex-wrap:wrap; gap:8px}
+.chip{
+  background:rgba(245,240,232,.07); border:1px solid var(--line); color:var(--cream);
+  border-radius:10px; padding:11px 15px; font-size:15px; font-weight:600; cursor:pointer;
+}
+.chip.on{background:var(--gold); color:#1A1A1A; border-color:var(--gold)}
+input[type=text],textarea{
+  width:100%; background:rgba(0,0,0,.3); border:1px solid var(--line); color:var(--cream);
+  border-radius:10px; padding:13px 14px; font-size:16px; font-family:inherit; margin-top:4px;
+}
+input#initials{text-transform:uppercase; letter-spacing:.2em; font-weight:700; font-size:20px; text-align:center}
+.acts{display:flex; gap:10px; margin-top:22px}
+.btn{
+  flex:1; border:none; border-radius:12px; padding:16px; font-size:15px; font-weight:700;
+  letter-spacing:.06em; text-transform:uppercase; cursor:pointer;
+}
+.btn.go{background:var(--gold); color:#1A1A1A}
+.btn.go:disabled{opacity:.4}
+.btn.ghost{background:transparent; border:1px solid var(--line); color:var(--gray); flex:0 0 auto; padding:16px 20px}
+.btn.danger{background:var(--red); color:#fff}
+
+/* ---------- manager ---------- */
+.mgr{margin-top:18px}
+.card{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:12px}
+.card h3{margin:0 0 12px; font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold)}
+table{width:100%; border-collapse:collapse; font-size:13.5px}
+th{text-align:left; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--gray); padding:8px 8px 8px 0; font-weight:700}
+td{padding:10px 8px 10px 0; border-top:1px solid rgba(245,240,232,.06); vertical-align:top}
+td.num{text-align:right; white-space:nowrap; color:var(--gold-light); font-weight:600}
+.toast{
+  position:fixed; left:50%; transform:translateX(-50%) translateY(120%); bottom:26px; z-index:80;
+  background:var(--gold); color:#1A1A1A; padding:13px 22px; border-radius:999px; font-weight:700;
+  font-size:14px; transition:transform .25s ease; box-shadow:0 8px 30px rgba(0,0,0,.5);
+}
+.toast.on{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>The Quarry</h1>
+    <div class="date" id="today"></div>
+    <div class="spacer"></div>
+    <button class="refresh" id="refreshBtn">Refresh</button>
+  </div>
+  <div class="tabs" id="tabs"></div>
+</header>
+
+<div class="progwrap" id="progwrap">
+  <div class="progbar"><i id="progfill"></i></div>
+  <div class="progtext" id="progtext">Loading&hellip;</div>
+</div>
+
+<main id="main"></main>
+
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ==================================================================
+   THE QUARRY - SHIFT CHECKLIST
+   Supabase-backed, role-based, cadence-driven task board for iPads.
+   Open with ?role=bartender|server|support|kitchen|staff to lock an
+   iPad to one board (it still shows the shared Staff board).
+   ================================================================== */
+const SB_URL = 'https://nkulhtalltbieicvmmad.supabase.co';
+const SB_KEY = 'sb_publishable_FQK59Bn8P2jV8yGL0nPi7w_jVHFMBSl';
+const H = { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' };
+
+const ROLES = [
+  { id:'bartender', label:'Bar' },
+  { id:'server',    label:'Servers' },
+  { id:'support',   label:'Host & Bus' },
+  { id:'kitchen',   label:'Kitchen' },
+  { id:'staff',     label:'Staff Board' }
+];
+const SEGMENTS = [
+  { id:'open',  label:'Opening' },
+  { id:'shift', label:'During Shift' },
+  { id:'close', label:'Closing' }
+];
+const CAD = { daily:'Daily', weekly:'Weekly', biweekly:'Every 2 Wks', monthly:'Monthly', interval:'3x / Month', quarterly:'Quarterly' };
+
+let TASKS = [], STAFF = [], SETTINGS = {}, active = 'staff', mgrOK = false, sel = null, selInitials = '';
+
+const $  = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+const bizDate = () => new Date(new Date().toLocaleString('en-US', { timeZone:'America/Chicago' }))
+  .toLocaleDateString('en-CA');
+
+function toast(msg){
+  const t = $('#toast'); t.textContent = msg; t.classList.add('on');
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('on'), 2200);
+}
+function store(k, v){ try { v === undefined ? 0 : localStorage.setItem(k, v); return localStorage.getItem(k); } catch(e){ return null; } }
+
+/* ---------------- data ---------------- */
+async function api(path, opts){
+  const r = await fetch(SB_URL + '/rest/v1/' + path, Object.assign({ headers:H }, opts || {}));
+  if (!r.ok) throw new Error(await r.text());
+  const txt = await r.text();
+  return txt ? JSON.parse(txt) : null;
+}
+async function load(){
+  const [tasks, staff, settings] = await Promise.all([
+    api('rpc/checklist_due', { method:'POST', body: JSON.stringify({ p_date: null }) }),
+    api('checklist_staff?active=eq.true&select=*&order=name'),
+    api('checklist_settings?select=*')
+  ]);
+  TASKS = tasks || [];
+  STAFF = staff || [];
+  SETTINGS = {}; (settings || []).forEach(s => SETTINGS[s.key] = s.value);
+  render();
+}
+
+/* ---------------- render ---------------- */
+function render(){
+  const d = new Date();
+  $('#today').textContent = d.toLocaleDateString('en-US',
+    { weekday:'long', month:'long', day:'numeric', timeZone:'America/Chicago' });
+
+  // tabs
+  $('#tabs').innerHTML = ROLES.map(r => {
+    const list = todayList(r.id);
+    const done = list.filter(t => t.status === 'done' || t.status === 'na').length;
+    const all  = done === list.length && list.length > 0;
+    return '<button class="tab' + (active === r.id ? ' on' : '') + '" data-role="' + r.id + '">' +
+      esc(r.label) + '<span class="cnt' + (all ? ' done' : '') + '">' + done + '/' + list.length + '</span></button>';
+  }).join('') + '<button class="tab' + (active === 'manager' ? ' on' : '') + '" data-role="manager">Manager</button>';
+
+  if (active === 'manager') { $('#progwrap').style.display = 'none'; renderManager(); return; }
+  $('#progwrap').style.display = '';
+
+  const list = todayList(active);
+  const done = list.filter(t => t.status === 'done' || t.status === 'na').length;
+  const pct  = list.length ? Math.round(done / list.length * 100) : 0;
+  $('#progfill').style.width = pct + '%';
+  $('#progtext').textContent = done + ' of ' + list.length + ' complete' +
+    (done === list.length && list.length ? ' — board is clear' : '');
+
+  let html = '';
+  SEGMENTS.forEach(seg => {
+    const items = list.filter(t => t.segment === seg.id);
+    if (!items.length) return;
+    html += '<section class="sect"><h2>' + seg.label + '</h2><div class="grid">' +
+      items.map(card).join('') + '</div></section>';
+  });
+  if (!html) html = '<div class="empty">Nothing on this board today.</div>';
+
+  // not due today
+  const later = TASKS.filter(t => t.role === active && !t.due_today && t.status !== 'done')
+    .sort((a, b) => a.days_until_due - b.days_until_due);
+  if (later.length){
+    html += '<details class="later"><summary>Not due today (' + later.length + ')</summary>' +
+      later.map(t => '<div class="laterrow"><span>' + esc(t.title) + '</span><span>' +
+        (t.days_until_due <= 0 ? 'due next open day' : t.days_until_due >= 999 ? 'not scheduled' :
+          'in ' + t.days_until_due + ' day' + (t.days_until_due === 1 ? '' : 's')) +
+        '</span></div>').join('') + '</details>';
+  }
+  $('#main').innerHTML = html;
+}
+
+function todayList(role){
+  return TASKS.filter(t => t.role === role && (t.due_today || t.status === 'done' || t.status === 'na' || t.status === 'overdue'));
+}
+
+function card(t){
+  const done = t.status === 'done', na = t.status === 'na', late = t.status === 'overdue';
+  const mark = done ? '✓' : (na ? '–' : '');
+  let pills = '';
+  if (t.interval_days > 1) pills += '<span class="pill cad">' + (CAD[t.cadence] || t.cadence) + '</span>';
+  if (t.area)              pills += '<span class="pill area">' + esc(t.area) + '</span>';
+  if (t.is_big_job)        pills += '<span class="pill big">Big Job</span>';
+  if (t.est_minutes)       pills += '<span class="pill mins">~' + t.est_minutes + ' min</span>';
+  if (late)                pills += '<span class="pill late">Missed ' + t.missed_days + ' shift' + (t.missed_days === 1 ? '' : 's') + '</span>';
+  return '<button class="task' + (done ? ' done' : '') + (na ? ' na' : '') + (late ? ' late' : '') +
+    '" data-id="' + t.task_id + '">' +
+    '<span class="box">' + mark + '</span><span class="body">' +
+    '<span class="t">' + esc(t.title) + '</span>' +
+    (t.detail ? '<span class="d">' + esc(t.detail) + '</span>' : '') +
+    (pills ? '<span class="meta">' + pills + '</span>' : '') +
+    (done || na ? '<span class="signed">' + (na ? 'Marked N/A' : 'Signed') + ' ' + esc(t.done_by) + ' · ' +
+      new Date(t.done_at).toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit', timeZone:'America/Chicago' }) +
+      ' · tap to undo</span>' : '') +
+    '</span></button>';
+}
+
+/* ---------------- sign-off sheet ---------------- */
+function openSheet(id){
+  sel = TASKS.find(t => t.task_id === id); if (!sel) return;
+  selInitials = store('quarry_initials') || '';
+  const signed = sel.status === 'done' || sel.status === 'na';
+  let h = '<h3>' + esc(sel.title) + '</h3><div class="sub">' + esc(sel.detail || '') + '</div>';
+  if (signed){
+    h += '<div class="lbl">Already signed off</div><div class="sub">' +
+      (sel.status === 'na' ? 'Marked N/A' : 'Completed') + ' by <b>' + esc(sel.done_by) + '</b> at ' +
+      new Date(sel.done_at).toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit', timeZone:'America/Chicago' }) +
+      '</div><div class="acts"><button class="btn danger" id="undoBtn">Undo Sign-Off</button>' +
+      '<button class="btn ghost" id="closeBtn">Close</button></div>';
+  } else {
+    if (STAFF.length){
+      h += '<div class="lbl">Who did it?</div><div class="chips" id="staffChips">' +
+        STAFF.map(s => '<button class="chip' + (s.initials === selInitials ? ' on' : '') +
+          '" data-i="' + esc(s.initials) + '">' + esc(s.initials) + ' · ' + esc(s.name.split(' ')[0]) + '</button>').join('') +
+        '</div>';
+    }
+    h += '<div class="lbl">Initials</div><input type="text" id="initials" maxlength="4" autocomplete="off" ' +
+      'autocapitalize="characters" value="' + esc(selInitials) + '" placeholder="AB">' +
+      '<div class="lbl">Note (optional)</div><input type="text" id="note" maxlength="200" placeholder="Anything the next shift should know">' +
+      '<div class="acts"><button class="btn go" id="doneBtn">Sign Off Complete</button>' +
+      '<button class="btn ghost" id="naBtn">N/A</button></div>' +
+      '<div class="acts" style="margin-top:8px"><button class="btn ghost" id="closeBtn" style="flex:1">Cancel</button></div>';
+  }
+  $('#sheet').innerHTML = h;
+  $('#scrim').classList.add('on'); $('#sheet').classList.add('on');
+  const ini = $('#initials'); if (ini && !selInitials) setTimeout(() => ini.focus(), 260);
+}
+function closeSheet(){ $('#scrim').classList.remove('on'); $('#sheet').classList.remove('on'); sel = null; }
+
+async function signOff(status){
+  const ini = ($('#initials').value || '').trim().toUpperCase();
+  if (ini.length < 1){ toast('Enter your initials'); return; }
+  const note = ($('#note') && $('#note').value.trim()) || null;
+  const match = STAFF.find(s => s.initials.toUpperCase() === ini);
+  $('#doneBtn').disabled = true;
+  try {
+    await api('checklist_logs', { method:'POST', headers:Object.assign({}, H, { Prefer:'resolution=merge-duplicates' }),
+      body: JSON.stringify({ task_id: sel.task_id, status, initials: ini,
+        staff_name: match ? match.name : null, note, business_date: bizDate() }) });
+    store('quarry_initials', ini);
+    closeSheet(); toast(status === 'na' ? 'Marked N/A' : 'Signed off — ' + ini);
+    await load();
+  } catch(e){ toast('Could not save — check wifi'); $('#doneBtn').disabled = false; }
+}
+async function undo(){
+  try {
+    await api('checklist_logs?task_id=eq.' + sel.task_id + '&business_date=eq.' + bizDate(), { method:'DELETE' });
+    closeSheet(); toast('Sign-off removed'); await load();
+  } catch(e){ toast('Could not undo'); }
+}
+
+/* ---------------- manager ---------------- */
+function renderManager(){
+  if (!mgrOK){
+    $('#main').innerHTML = '<div class="card mgr"><h3>Manager Access</h3>' +
+      '<input type="text" id="pin" inputmode="numeric" maxlength="8" placeholder="PIN" style="text-align:center;letter-spacing:.4em;font-size:22px">' +
+      '<div class="acts"><button class="btn go" id="pinBtn">Unlock</button></div></div>';
+    return;
+  }
+  const big = TASKS.filter(t => t.is_big_job).sort((a, b) => a.days_until_due - b.days_until_due);
+  const buckets = [
+    { label:'Due now / overdue', f: t => t.days_until_due <= 0 },
+    { label:'Next 7 days',       f: t => t.days_until_due > 0 && t.days_until_due <= 7 },
+    { label:'8 - 30 days',       f: t => t.days_until_due > 7 && t.days_until_due <= 30 },
+    { label:'Beyond 30 days',    f: t => t.days_until_due > 30 }
+  ];
+  let h = '<div class="card mgr"><h3>Big-job staffing forecast</h3>';
+  buckets.forEach(b => {
+    const rows = big.filter(b.f); if (!rows.length) return;
+    const hrs = (rows.reduce((s, t) => s + (t.est_minutes || 0), 0) / 60).toFixed(1);
+    h += '<table><thead><tr><th>' + b.label + ' — ' + hrs + ' labor hrs</th><th>Role</th><th>Cadence</th><th style="text-align:right">When</th></tr></thead><tbody>' +
+      rows.map(t => '<tr><td>' + esc(t.title) + (t.area ? '<br><span style="color:#9A9A9A;font-size:11px">' + esc(t.area) + '</span>' : '') +
+        '</td><td>' + esc(roleLabel(t.role)) + '</td><td>' + (CAD[t.cadence] || t.cadence) + '</td><td class="num">' +
+        (t.days_until_due <= 0 ? (t.status === 'overdue' ? 'late' : 'now') : t.days_until_due >= 999 ? '—' : 'in ' + t.days_until_due + 'd') +
+        '</td></tr>').join('') + '</tbody></table><div style="height:18px"></div>';
+  });
+  h += '</div>';
+
+  h += '<div class="card mgr"><h3>Today by board</h3><table><thead><tr><th>Board</th><th style="text-align:right">Done</th><th style="text-align:right">Open</th><th style="text-align:right">Late</th></tr></thead><tbody>';
+  ROLES.forEach(r => {
+    const l = todayList(r.id);
+    h += '<tr><td>' + r.label + '</td><td class="num">' + l.filter(t => t.status === 'done' || t.status === 'na').length +
+      '</td><td class="num">' + l.filter(t => t.status === 'due').length +
+      '</td><td class="num" style="color:#e8a0a0">' + l.filter(t => t.status === 'overdue').length + '</td></tr>';
+  });
+  h += '</tbody></table></div>';
+
+  h += '<div class="card mgr"><h3>Staff roster (' + STAFF.length + ')</h3>' +
+    (STAFF.length ? '<table><tbody>' + STAFF.map(s => '<tr><td><b>' + esc(s.initials) + '</b> · ' + esc(s.name) +
+      '</td><td class="num">' + esc(s.role || '') + '</td></tr>').join('') + '</tbody></table>'
+     : '<div class="empty" style="padding:10px">No roster yet — staff type their own initials.</div>') +
+    '<div class="lbl">Add staff</div>' +
+    '<input type="text" id="sName" placeholder="Full name"><div style="height:8px"></div>' +
+    '<input type="text" id="sInit" placeholder="Initials" maxlength="4"><div style="height:8px"></div>' +
+    '<input type="text" id="sRole" placeholder="bartender / server / support / kitchen / staff">' +
+    '<div class="acts"><button class="btn go" id="addStaff">Add to roster</button></div></div>';
+
+  h += '<div class="card mgr"><h3>Add a task</h3>' +
+    '<input type="text" id="nTitle" placeholder="Task title"><div style="height:8px"></div>' +
+    '<input type="text" id="nDetail" placeholder="How it should be done"><div style="height:8px"></div>' +
+    '<input type="text" id="nRole" placeholder="bartender / server / support / kitchen / staff"><div style="height:8px"></div>' +
+    '<input type="text" id="nSeg" placeholder="open / shift / close"><div style="height:8px"></div>' +
+    '<input type="text" id="nDays" placeholder="Repeat every N open days (1 = every day, 7 = weekly, 30 = monthly)"><div style="height:8px"></div>' +
+    '<input type="text" id="nArea" placeholder="Area (optional)"><div style="height:8px"></div>' +
+    '<input type="text" id="nMins" placeholder="Estimated minutes (optional)">' +
+    '<div class="acts"><button class="btn go" id="addTask">Add task</button></div></div>';
+
+  $('#main').innerHTML = h;
+}
+function roleLabel(r){ const x = ROLES.find(v => v.id === r); return x ? x.label : r; }
+
+/* ---------------- events ---------------- */
+document.addEventListener('click', async e => {
+  const tab = e.target.closest('.tab');
+  if (tab){ active = tab.dataset.role; store('quarry_board', active); render(); return; }
+
+  const task = e.target.closest('.task');
+  if (task){ openSheet(task.dataset.id); return; }
+
+  const chip = e.target.closest('.chip');
+  if (chip){
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+    chip.classList.add('on'); $('#initials').value = chip.dataset.i; return;
+  }
+  if (e.target.id === 'doneBtn')  return signOff('done');
+  if (e.target.id === 'naBtn')    return signOff('na');
+  if (e.target.id === 'undoBtn')  return undo();
+  if (e.target.id === 'closeBtn' || e.target.id === 'scrim') return closeSheet();
+  if (e.target.id === 'refreshBtn'){ $('#progtext').textContent = 'Refreshing…'; return load(); }
+
+  if (e.target.id === 'pinBtn'){
+    if (($('#pin').value || '').trim() === (SETTINGS.manager_pin || '2468')){ mgrOK = true; renderManager(); }
+    else toast('Wrong PIN');
+    return;
+  }
+  if (e.target.id === 'addStaff'){
+    const name = $('#sName').value.trim(), init = $('#sInit').value.trim().toUpperCase(), role = $('#sRole').value.trim().toLowerCase();
+    if (!name || !init) return toast('Name and initials required');
+    try { await api('checklist_staff', { method:'POST', body: JSON.stringify({ name, initials: init, role: role || null }) });
+      toast('Added ' + init); await load(); renderManager(); } catch(err){ toast('Could not add'); }
+    return;
+  }
+  if (e.target.id === 'addTask'){
+    const body = {
+      title:  $('#nTitle').value.trim(),
+      detail: $('#nDetail').value.trim() || null,
+      role:   $('#nRole').value.trim().toLowerCase(),
+      segment:($('#nSeg').value.trim().toLowerCase() || 'shift'),
+      interval_days: parseInt($('#nDays').value, 10) || 1,
+      area:   $('#nArea').value.trim() || null,
+      est_minutes: parseInt($('#nMins').value, 10) || null
+    };
+    body.cadence = body.interval_days === 1 ? 'daily' : body.interval_days <= 7 ? 'weekly'
+      : body.interval_days <= 14 ? 'biweekly' : body.interval_days <= 31 ? 'monthly' : 'quarterly';
+    body.is_big_job = (body.est_minutes || 0) >= 45;
+    if (!body.title || !ROLES.some(r => r.id === body.role)) return toast('Title and a valid role are required');
+    try { await api('checklist_tasks', { method:'POST', body: JSON.stringify(body) });
+      toast('Task added'); await load(); renderManager(); } catch(err){ toast('Could not add task'); }
+  }
+});
+$('#scrim').addEventListener('click', closeSheet);
+
+/* ---------------- boot ---------------- */
+const forced = new URLSearchParams(location.search).get('role');
+active = (forced && ROLES.some(r => r.id === forced)) ? forced : (store('quarry_board') || 'staff');
+load().catch(() => { $('#progtext').textContent = 'Could not load — check the connection'; });
+setInterval(() => { if (!sel && active !== 'manager') load().catch(() => {}); }, 60000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden && !sel) load().catch(() => {}); });
+</script>
+</body>
+</html>
