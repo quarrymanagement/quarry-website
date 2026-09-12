@@ -13047,6 +13047,17 @@ function hashCode(str) {
             // Statuses eligible for the "did they reply?" check — only while
             // we're the one waiting on them.
             const AWAITING_REPLY_STATUSES = ['contacted', 'contacted_2'];
+            // Who's actually typing the reply — the reply box used to start
+            // completely blank, so whoever hit send had to remember to sign
+            // their own name every single time (or, more often, didn't).
+            // quarryAdminRole is set at login (see the login-restore/login-submit
+            // handlers) — 'owner' is Matt, and the only restricted staff role in
+            // use today is Penny's events_staff.
+            const STAFF_SIGNATURES = { owner: 'The Quarry', events_staff: 'Penny Randmann' };
+            function currentSignature() {
+                const role = localStorage.getItem('quarryAdminRole') || 'owner';
+                return STAFF_SIGNATURES[role] || 'The Quarry';
+            }
             function statusPill(s) { const c = STATUS_COLORS[s] || '#64748b'; return `<span style="display:inline-block;padding:0.18rem 0.55rem;border-radius:999px;font-size:0.68rem;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;background:${c}1f;color:${c};">${escHtml(STATUS_LABELS[s] || s)}</span>`; }
 
             async function loadAll() {
@@ -13273,7 +13284,7 @@ function hashCode(str) {
                 $('resInqReplyToggle').style.display = inq.email ? '' : 'none';
                 if (inq.email) {
                     $('resInqReplySubject').value = `Re: Your ${inq.formLabel.toLowerCase()} at The Quarry`;
-                    $('resInqReplyBody').value = '';
+                    $('resInqReplyBody').value = `\n\nWarmly,\n${currentSignature()}\nThe Quarry`;
                 }
                 $('resInqNetlifyLink').href = inq.netlifyUrl || '#';
                 $('resInqDeleteBtn').classList.toggle('hidden', !!inq.hidden);
@@ -13340,6 +13351,14 @@ function hashCode(str) {
                     }
                     render();
                     openModal(id);
+                    // openModal() unconditionally re-hides the reply box and clears
+                    // its status text (it's a full reset for whichever inquiry is
+                    // opened next) but never touches this button's disabled state —
+                    // it was never the one that set it, sendReply() was, a few lines
+                    // up. Left unset, every reply after the first successful one
+                    // would silently do nothing: the button stays disabled forever,
+                    // so a later click never even reaches this function.
+                    $('resInqSendReply').disabled = false;
                     if (typeof showToast === 'function') showToast('Reply sent' + (respBody.override ? ' — status updated to ' + (STATUS_LABELS[respBody.override.status] || respBody.override.status) : ''));
                 } catch (err) {
                     statusEl.style.color = '#dc2626';
