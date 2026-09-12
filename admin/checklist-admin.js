@@ -84,8 +84,33 @@
   }
 
   /* ---------------- inject tab ---------------- */
+  function styles() {
+    if (document.getElementById("ckStyles")) return;
+    var st = document.createElement("style");
+    st.id = "ckStyles";
+    st.textContent = [
+      '#checklistsTab, #checklistsTab * { box-sizing:border-box; }',
+      '#checklistsTab { max-width:100%; overflow-x:hidden; }',
+      /* .nav-btn in this admin is a fixed 36x36 icon button — we need real
+         text buttons, so scope our own and never inherit that width/height. */
+      '#checklistsTab .ck-btn {',
+      '  background:var(--bg-card,#fff); color:var(--text-primary,#1c1f26);',
+      '  border:1px solid var(--border-medium,#cdd1d8); border-radius:var(--radius-sm,6px);',
+      '  width:auto; height:auto; padding:0.5rem 0.85rem; font-size:0.85rem;',
+      '  font-weight:600; font-family:inherit; line-height:1.2; cursor:pointer;',
+      '  white-space:nowrap; display:inline-flex; align-items:center; gap:6px;',
+      '}',
+      '#checklistsTab .ck-btn:hover { border-color:var(--gold,#B8933A); color:var(--gold,#B8933A); }',
+      '#checklistsTab .ck-btn[style*="background"]:hover { color:#1a1a1a; }',
+      '#checklistsTab input, #checklistsTab select { max-width:100%; }',
+      '#checklistsTab label { min-width:0; }'
+    ].join("\n");
+    document.head.appendChild(st);
+  }
+
   function inject() {
     if (document.getElementById("checklistsTab")) return;
+    styles();
 
     var nav = document.createElement("div");
     nav.className = "sb-nav-item";
@@ -126,7 +151,7 @@
       + '<div style="max-width:1100px;">'
       + '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:0.5rem;">'
       +   '<h1 style="font-family:var(--font-serif);font-size:1.6rem;color:var(--text-primary);margin:0;">Shift Checklists</h1>'
-      +   '<button id="ckRefresh" class="nav-btn">Refresh</button>'
+      +   '<button id="ckRefresh" class="ck-btn">Refresh</button>'
       + '</div>'
       + '<p style="color:var(--text-muted);margin:0 0 1.25rem;font-size:0.9rem;line-height:1.5;">'
       +   'Anything added here shows up on the iPad for that position within a minute. '
@@ -146,7 +171,7 @@
     el.innerHTML = ROLES.map(function (r) {
       var n = TASKS.filter(function (t) { return t.role === r.id && t.active; }).length;
       var on = r.id === role;
-      return '<button class="nav-btn ck-role" data-role="' + r.id + '" style="'
+      return '<button class="ck-btn ck-role" data-role="' + r.id + '" style="'
         + (on ? 'background:var(--accent,#B8933A);color:#1a1a1a;font-weight:600;' : '')
         + '">' + esc(r.label) + ' <span style="opacity:0.7;">(' + n + ')</span></button>';
     }).join("");
@@ -158,8 +183,9 @@
       + '<span style="display:block;font-size:0.72rem;color:var(--text-secondary);margin-bottom:0.3rem;">' + label + '</span>'
       + inner + '</label>';
   }
-  var INPUT = 'width:100%;box-sizing:border-box;padding:0.55rem 0.7rem;background:var(--bg-input,#1c1c1c);'
-            + 'border:1px solid var(--border-medium);border-radius:var(--radius-sm,6px);color:var(--text-primary);font-size:0.9rem;';
+  var INPUT = 'width:100%;box-sizing:border-box;padding:0.55rem 0.7rem;background:var(--bg-card,#fff);'
+            + 'border:1px solid var(--border-medium,#cdd1d8);border-radius:var(--radius-sm,6px);'
+            + 'color:var(--text-primary,#1c1f26);font-size:0.9rem;font-family:inherit;';
 
   function renderForm() {
     var wrap = document.getElementById("ckForm");
@@ -195,7 +221,7 @@
       +   '<div id="ckDays" style="display:flex;gap:8px;flex-wrap:wrap;">'
       +     DAYS.map(function (d) {
               var on = days.indexOf(d.n) > -1;
-              return '<button type="button" class="nav-btn ck-day" data-d="' + d.n + '" data-on="' + (on ? 1 : 0) + '" style="'
+              return '<button type="button" class="ck-btn ck-day" data-d="' + d.n + '" data-on="' + (on ? 1 : 0) + '" style="'
                 + (on ? 'background:var(--accent,#B8933A);color:#1a1a1a;font-weight:600;' : '') + '">' + d.label + '</button>';
             }).join("")
       +   '</div>'
@@ -205,9 +231,9 @@
       +   'Big job — show it in the staffing forecast so it can be scheduled'
       + '</label>'
       + '<div style="display:flex;gap:10px;margin-top:1.2rem;">'
-      +   '<button id="ckSave" class="nav-btn" style="background:var(--accent,#B8933A);color:#1a1a1a;font-weight:600;">'
+      +   '<button id="ckSave" class="ck-btn" style="background:var(--accent,#B8933A);color:#1a1a1a;font-weight:600;">'
       +     (t ? "Save changes" : "Add task") + '</button>'
-      +   '<button id="ckCancel" class="nav-btn">' + (t ? "Cancel" : "Clear") + '</button>'
+      +   '<button id="ckCancel" class="ck-btn">' + (t ? "Cancel" : "Clear") + '</button>'
       + '</div>'
       + '</div>';
 
@@ -329,10 +355,10 @@
       +   (when ? '<div style="margin-top:0.35rem;font-size:0.72rem;">' + when + '</div>' : '')
       + '</div>'
       + '<div style="display:flex;gap:6px;flex:0 0 auto;">'
-      +   '<button class="nav-btn ck-up" data-id="' + t.id + '" title="Move up" style="padding:5px 9px;">↑</button>'
-      +   '<button class="nav-btn ck-down" data-id="' + t.id + '" title="Move down" style="padding:5px 9px;">↓</button>'
-      +   '<button class="nav-btn ck-edit" data-id="' + t.id + '">Edit</button>'
-      +   '<button class="nav-btn ck-toggle" data-id="' + t.id + '"' + (off ? '' : ' style="color:var(--red,#c0504d);"') + '>'
+      +   '<button class="ck-btn ck-up" data-id="' + t.id + '" title="Move up" style="padding:5px 9px;">↑</button>'
+      +   '<button class="ck-btn ck-down" data-id="' + t.id + '" title="Move down" style="padding:5px 9px;">↓</button>'
+      +   '<button class="ck-btn ck-edit" data-id="' + t.id + '">Edit</button>'
+      +   '<button class="ck-btn ck-toggle" data-id="' + t.id + '"' + (off ? '' : ' style="color:var(--red,#c0504d);"') + '>'
       +     (off ? "Turn on" : "Turn off") + '</button>'
       + '</div>'
       + '</div>';
