@@ -6405,9 +6405,9 @@
       "hidden": false
     },
     "6a8f1b5b462db025540f2ed3": {
-      "status": "contacted",
+      "status": "needs_followup",
       "note": "",
-      "updatedAt": "2026-09-12T02:47:00.534Z",
+      "updatedAt": "2026-09-12T02:47:56.317Z",
       "updatedBy": "admin",
       "history": [
         {
@@ -6416,9 +6416,17 @@
           "by": "admin",
           "note": "Replied: \"TEST - admin reply diagnostic\"",
           "at": "2026-09-12T02:47:00.534Z"
+        },
+        {
+          "from": "contacted",
+          "to": "needs_followup",
+          "by": "admin",
+          "note": "",
+          "at": "2026-09-12T02:47:56.317Z"
         }
-      ]
+      ],
+      "hidden": false
     }
   },
-  "updatedAt": "2026-09-12T02:47:00.534Z"
+  "updatedAt": "2026-09-12T02:47:56.317Z"
 }
