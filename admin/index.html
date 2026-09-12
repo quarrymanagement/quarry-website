@@ -13053,7 +13053,10 @@ function hashCode(str) {
             // quarryAdminRole is set at login (see the login-restore/login-submit
             // handlers) — 'owner' is Matt, and the only restricted staff role in
             // use today is Penny's events_staff.
-            const STAFF_SIGNATURES = { owner: 'The Quarry', events_staff: 'Penny Randmann' };
+            const STAFF_SIGNATURES = {
+                owner: 'The Quarry',
+                events_staff: 'Penny Randmann\nThe Quarry\nmanagement@thequarrystl.com\nwww.thequarrystl.com',
+            };
             function currentSignature() {
                 const role = localStorage.getItem('quarryAdminRole') || 'owner';
                 return STAFF_SIGNATURES[role] || 'The Quarry';
@@ -13284,7 +13287,7 @@ function hashCode(str) {
                 $('resInqReplyToggle').style.display = inq.email ? '' : 'none';
                 if (inq.email) {
                     $('resInqReplySubject').value = `Re: Your ${inq.formLabel.toLowerCase()} at The Quarry`;
-                    $('resInqReplyBody').value = `\n\nWarmly,\n${currentSignature()}\nThe Quarry`;
+                    $('resInqReplyBody').value = `\n\nWarmly,\n${currentSignature()}`;
                 }
                 $('resInqNetlifyLink').href = inq.netlifyUrl || '#';
                 $('resInqDeleteBtn').classList.toggle('hidden', !!inq.hidden);
