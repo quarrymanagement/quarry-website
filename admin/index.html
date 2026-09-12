@@ -13241,6 +13241,11 @@ function hashCode(str) {
                     e.preventDefault(); e.stopPropagation();
                     openModal(a.dataset.replyId);
                     $('resInqReplyBox').classList.remove('hidden');
+                    // The compose box renders below Email History, which can run
+                    // long (a dozen+ past messages) — without this, clicking Reply
+                    // opened the box off-screen with no visible sign anything
+                    // happened, reading as "the reply button doesn't work."
+                    $('resInqReplyBox').scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }));
             }
 
@@ -13440,7 +13445,11 @@ function hashCode(str) {
                 $('resInqModal')?.addEventListener('click', (e) => { if (e.target.id === 'resInqModal') closeModal(); });
                 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('resInqModal')?.classList.contains('open')) closeModal(); });
                 document.querySelectorAll('#resInqModal [data-status]').forEach((btn) => btn.addEventListener('click', () => setStatus(btn.dataset.status)));
-                $('resInqReplyToggle')?.addEventListener('click', () => { $('resInqReplyBox').classList.toggle('hidden'); });
+                $('resInqReplyToggle')?.addEventListener('click', () => {
+                    const box = $('resInqReplyBox');
+                    box.classList.toggle('hidden');
+                    if (!box.classList.contains('hidden')) box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                });
                 $('resInqCancelReply')?.addEventListener('click', () => { $('resInqReplyBox').classList.add('hidden'); });
                 $('resInqSendReply')?.addEventListener('click', sendReply);
                 $('resInqDeleteBtn')?.addEventListener('click', () => setHidden(true));
