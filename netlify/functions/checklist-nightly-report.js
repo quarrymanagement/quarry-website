@@ -28,8 +28,13 @@ const CSS = {
 const esc = s => String(s == null ? "" : s)
   .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-const chicagoDate = (d = new Date()) =>
-  new Date(d.toLocaleString("en-US", { timeZone: "America/Chicago" })).toLocaleDateString("en-CA");
+/* Business day runs 4am to 4am — a 2:30am run reports the night that is
+   just ending, not the handful of hours of the new calendar date. */
+const chicagoDate = (d = new Date()) => {
+  const chi = new Date(d.toLocaleString("en-US", { timeZone: "America/Chicago" }));
+  chi.setHours(chi.getHours() - 4);
+  return chi.toLocaleDateString("en-CA");
+};
 
 const hourName = h => (h % 12 === 0 ? 12 : h % 12) + (h < 12 ? "a" : "p");
 
@@ -62,6 +67,7 @@ async function sb(path, body) {
    Set SQUARE_LABOR_TOKEN to an access token for the POS/payroll account
    and the crew list starts working. Until then the report says so out
    loud rather than implying the building was empty. */
+const nextDay = d => { const x = new Date(d + 'T12:00:00'); x.setDate(x.getDate()+1); return x.toLocaleDateString('en-CA'); };
 const LABOR_MERCHANT = "MLF3658E76VN9";
 
 async function squareCrew(date) {
@@ -92,8 +98,10 @@ async function squareCrew(date) {
     const tcRes = await fetch("https://connect.squareup.com/v2/labor/timecards/search", {
       method: "POST", headers,
       body: JSON.stringify({
-        query: { filter: { start: { start_at: date + "T00:00:00-05:00",
-                                    end_at:   date + "T23:59:59-05:00" } } },
+        // the crew window must match the 4am-to-4am business day, or a
+        // bartender who clocked out at 1am lands on the wrong night
+        query: { filter: { start: { start_at: date + "T04:00:00-05:00",
+                                    end_at:   nextDay(date) + "T03:59:59-05:00" } } },
         limit: 200
       })
     });

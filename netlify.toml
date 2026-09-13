@@ -39,12 +39,14 @@
 #   schedule = "0 12 * * *"
 
 # ─── SHIFT CHECKLISTS ────────────────────────────────────────────────────────
-# Nightly checklist report — 04:45 UTC = 11:45pm CDT / 10:45pm CST, after the
-# latest close (Fri/Sat 11pm). Reports the Chicago business date that is just
-# ending, so the cron day and the report day are the same. Emails what cleared,
-# what didn't, hourly round coverage, and who Square had on the clock.
+# Nightly checklist report — 07:30 UTC = 2:30am CDT / 1:30am CST.
+#
+# Was 11:45pm, which fired BEFORE closing was finished on Fri/Sat (open till
+# 11pm, lock-up runs past midnight) and reported the whole closing section as
+# missed every weekend. The business day now runs 4am to 4am, so a 2:30am run
+# still falls inside the night that is ending and reports it complete.
 [functions."checklist-nightly-report"]
-  schedule = "45 4 * * *"
+  schedule = "30 7 * * *"
 
 # Send-queue poller — every 10 min. Drains 'approved' drafts at scheduledFor.
 [functions."marketing-send"]

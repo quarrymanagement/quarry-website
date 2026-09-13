@@ -238,7 +238,14 @@ let TASKS = [], STAFF = [], SET = {}, active = 'staff', sel = null;
 
 const $   = s => document.querySelector(s);
 const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const bizDate = () => new Date(new Date().toLocaleString('en-US',{timeZone:'America/Chicago'})).toLocaleDateString('en-CA');
+/* The business day runs 4am to 4am. Sign off the lock-up list at 12:15am
+   and it belongs to the night before, not to the morning you're standing in. */
+const bizDateObj = () => {
+  const chi = new Date(new Date().toLocaleString('en-US',{timeZone:'America/Chicago'}));
+  chi.setHours(chi.getHours() - 4);
+  return chi;
+};
+const bizDate = () => bizDateObj().toLocaleDateString('en-CA');
 const hhmm = d => new Date(d).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZone:'America/Chicago'});
 const hourName = h => (h % 12 === 0 ? 12 : h % 12) + (h < 12 ? 'a' : 'p');
 
@@ -272,8 +279,8 @@ const isDone  = t => t.status === 'done' || t.status === 'na';
 
 /* ---------------- render ---------------- */
 function render(){
-  $('#day').textContent = new Date().toLocaleDateString('en-US',
-    { weekday:'long', month:'long', day:'numeric', timeZone:'America/Chicago' });
+  $('#day').textContent = bizDateObj().toLocaleDateString('en-US',
+    { weekday:'long', month:'long', day:'numeric' });
 
   $('#tabs').innerHTML = ROLES.map(r => {
     const l = listFor(r.id), done = l.filter(isDone).length;
