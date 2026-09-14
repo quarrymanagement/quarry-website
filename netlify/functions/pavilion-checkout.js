@@ -23,9 +23,35 @@
 const https = require('https');
 const crypto = require('crypto');
 const { isDateBookable, isSlotTaken } = require('./_pavilion-shared');
+const { writeBlob, readBlob } = require('./_blobs');
 
 const PRICE_CENTS = 10000; // $100 flat
 const TAX_PERCENT = process.env.SQUARE_TAX_PERCENT || '7.45';
+
+const ADMIN_SECRET = process.env.ADMIN_SESSION_SECRET
+  || ('qrr-session-' + (process.env.GITHUB_TOKEN || '').slice(-24));
+const STAFF_SECRET = process.env.STAFF_SESSION_SECRET || '';
+const SESSION_TTL_HOURS = 168;
+function hmac(s, secret) { return crypto.createHmac('sha256', secret).update(s, 'utf8').digest('hex'); }
+// Verifies either an owner token ("<issued>.<sig>") or a staff token
+// ("<issued>.<role>.<sig>") — see verify-admin-password.js for the scheme.
+function verifyAnyToken(token) {
+  if (!token) return { ok: false };
+  const parts = String(token).split('.');
+  if (parts.length === 2) {
+    const [issued, sig] = parts;
+    if (!ADMIN_SECRET || !issued || !sig || hmac(issued, ADMIN_SECRET) !== sig) return { ok: false };
+    if (!((Date.now() - parseInt(issued, 10)) / 3600000 < SESSION_TTL_HOURS)) return { ok: false };
+    return { ok: true, role: 'owner' };
+  }
+  if (parts.length === 3) {
+    const [issued, role, sig] = parts;
+    if (!STAFF_SECRET || !issued || !role || !sig || hmac(`${issued}.${role}`, STAFF_SECRET) !== sig) return { ok: false };
+    if (!((Date.now() - parseInt(issued, 10)) / 3600000 < SESSION_TTL_HOURS)) return { ok: false };
+    return { ok: true, role };
+  }
+  return { ok: false };
+}
 
 function squareApi(method, path, body) {
   const env = (process.env.SQUARE_ENVIRONMENT || 'production').toLowerCase();
@@ -84,6 +110,29 @@ exports.handler = async function (event) {
 
     const taken = await isSlotTaken(date, pavilion, time);
     if (taken) return { statusCode: 409, headers, body: JSON.stringify({ error: 'That pavilion is already booked for that time. Please pick another.' }) };
+
+    // Admin block/comp: an authenticated staff session can reserve a pavilion
+    // without going through Square at all -- for holding a pavilion for an
+    // internal event, a comp, or blocking it off outright. Same availability
+    // rules apply (won't double-book an already-taken slot); it's the
+    // payment step being skipped, not the conflict checks.
+    const auth = verifyAnyToken(body.token);
+    if (auth.ok && body.adminBlock) {
+      const dateKey = date.replace(/\//g, '-');
+      const path = 'pavilion-bookings/' + dateKey;
+      const existing = await readBlob(path) || { bookings: [] };
+      const bookings = existing.bookings || [];
+      bookings.push({
+        paymentId: 'admin-' + crypto.randomUUID(),
+        pavilion, time, date, dateKey,
+        customerName: m.customerName || 'Blocked', customerEmail: m.customerEmail || '', customerPhone: m.customerPhone || '',
+        amountPaid: 'N/A (admin block)',
+        bookedAt: new Date().toISOString(),
+        source: 'admin',
+      });
+      await writeBlob(path, { bookings });
+      return { statusCode: 200, headers, body: JSON.stringify({ blocked: true }) };
+    }
 
     const origin = event.headers.origin || 'https://thequarrystl.com';
 
