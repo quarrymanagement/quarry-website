@@ -44,6 +44,32 @@ function isOpenDay(dateStr) {
   return d === 0 || d === 3 || d === 4 || d === 5 || d === 6;
 }
 
+// Hourly start times spanning that day's actual hours of operation, stopping
+// at the last hour a 4-hour block still fits before close: Wed/Thu 11 AM-9 PM
+// -> starts 11 AM-5 PM; Fri/Sat 11 AM-11 PM -> starts 11 AM-7 PM; Sun
+// 11 AM-6 PM -> starts 11 AM-2 PM. Shared by pavilion-availability.js (to
+// list them) and pavilion-checkout.js (to reject a request for a time that
+// was never actually offered).
+const OPEN_HOUR = 11;
+const CLOSE_HOUR = { 0: 18, 3: 21, 4: 21, 5: 23, 6: 23 };
+const BLOCK_HOURS = 4;
+
+function fmtHour(h24) {
+  const ap = h24 >= 12 ? 'PM' : 'AM';
+  const h = h24 % 12 === 0 ? 12 : h24 % 12;
+  return h + ':00 ' + ap;
+}
+
+function slotsForDate(dateStr) {
+  const day = new Date(dateStr + 'T12:00:00Z').getUTCDay();
+  const close = CLOSE_HOUR[day];
+  if (close == null) return [];
+  const lastStart = close - BLOCK_HOURS;
+  const slots = [];
+  for (let h = OPEN_HOUR; h <= lastStart; h++) slots.push(fmtHour(h));
+  return slots;
+}
+
 async function isDateBookable(date) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { ok: false, reason: 'Invalid date.' };
   if (!isOpenDay(date)) return { ok: false, reason: 'The Quarry is closed Mondays and Tuesdays.' };
@@ -61,4 +87,4 @@ async function isSlotTaken(date, pavilion, time) {
   }
 }
 
-module.exports = { isDateBookable, isSlotTaken, isOpenDay, hasWeddingOn };
+module.exports = { isDateBookable, isSlotTaken, isOpenDay, hasWeddingOn, slotsForDate };

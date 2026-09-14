@@ -7,20 +7,16 @@
 // directly to whoever's asking -- nothing here reveals more than "is this
 // pavilion free at this time," no customer contact details.
 //
-// Time slots are two 4-hour blocks -- 11 AM-3 PM and 3 PM-7 PM -- except
-// Sunday, which only gets the 11 AM block since The Quarry closes at 6 PM
-// that day and a 3 PM start wouldn't fit.
+// Start times are hourly, spanning the actual hours of operation for that
+// day of week, stopping at the last hour a 4-hour block still fits before
+// close: Wed/Thu 11 AM-9 PM -> starts 11 AM-5 PM; Fri/Sat 11 AM-11 PM ->
+// starts 11 AM-7 PM; Sun 11 AM-6 PM -> starts 11 AM-2 PM.
 // ============================================================================
 
 const { readBlob } = require('./_blobs');
-const { isDateBookable, isOpenDay } = require('./_pavilion-shared');
+const { isDateBookable, slotsForDate } = require('./_pavilion-shared');
 
 const PAVILIONS = ['1', '2', '3', '4', '5', '6'];
-
-function slotsForDate(dateStr) {
-  const day = new Date(dateStr + 'T12:00:00Z').getUTCDay();
-  return day === 0 ? ['11:00 AM'] : ['11:00 AM', '3:00 PM'];
-}
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',

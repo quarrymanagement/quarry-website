@@ -22,7 +22,7 @@
 
 const https = require('https');
 const crypto = require('crypto');
-const { isDateBookable, isSlotTaken } = require('./_pavilion-shared');
+const { isDateBookable, isSlotTaken, slotsForDate } = require('./_pavilion-shared');
 const { writeBlob, readBlob } = require('./_blobs');
 
 const PRICE_CENTS = 10000; // $100 flat
@@ -132,6 +132,13 @@ exports.handler = async function (event) {
       });
       await writeBlob(path, { bookings });
       return { statusCode: 200, headers, body: JSON.stringify({ blocked: true }) };
+    }
+
+    // Real (paying) bookings must land on one of the actual offered start
+    // times -- admin blocks above intentionally skip this so staff aren't
+    // boxed into the public slot list.
+    if (!slotsForDate(date).includes(time)) {
+      return { statusCode: 400, headers, body: JSON.stringify({ error: 'That is not a valid start time for this date.' }) };
     }
 
     const origin = event.headers.origin || 'https://thequarrystl.com';

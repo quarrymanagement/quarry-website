@@ -2701,6 +2701,7 @@
                     <a href="/admin/venue-calendar.html" class="sb-nav-item"><span class="sb-ic">📅</span><span class="sb-lbl">Venue Calendar</span></a>
                     <div class="sb-nav-item" data-tab="events"><span class="sb-ic">🎫</span><span class="sb-lbl">Events</span></div>
                     <div class="sb-nav-item" data-tab="bands"><span class="sb-ic">🎵</span><span class="sb-lbl">Live Bands</span></div>
+                    <div class="sb-nav-item" data-tab="pavilions"><span class="sb-ic">🏕️</span><span class="sb-lbl">Pavilion Bookings</span></div>
                     <div class="sb-nav-item" data-tab="scheduling"><span class="sb-ic">📋</span><span class="sb-lbl">Staff Schedule</span></div>
                     <div class="sb-nav-item" data-tab="employees"><span class="sb-ic">👤</span><span class="sb-lbl">Employees</span></div>
                     <div class="sb-nav-item" data-tab="timeoff"><span class="sb-ic">🌴</span><span class="sb-lbl">Time Off</span></div>
@@ -4819,6 +4820,50 @@
                 </div>
             </div>
 
+            <!-- ========================================================
+                 PAVILION BOOKINGS TAB — flat list, not a day-grid like golf,
+                 since pavilions are a much lower-volume booking. Reads
+                 straight from list-pavilion-bookings.js (Netlify Blobs is
+                 the sole source of truth; nothing to reconcile against a
+                 payment processor's own order list like golf does).
+                 ======================================================== -->
+            <div id="pavilionsTab" class="tab-content">
+                <div class="section">
+                    <div class="section-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+                        <div>
+                            <div class="section-title">Pavilion Bookings</div>
+                            <div style="font-size:0.85rem;color:var(--text-secondary);">Pavilions 1–6 · $100 / 4 hours · booked via the private link at <a href="/quarry-pavilions.html" target="_blank" style="color:var(--gold);">/quarry-pavilions.html</a></div>
+                        </div>
+                        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                            <input type="date" id="pavStartDate" style="padding:8px 10px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-elevated);color:var(--text-primary);font-size:0.9rem;">
+                            <span style="color:var(--text-secondary);">to</span>
+                            <input type="date" id="pavEndDate" style="padding:8px 10px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-elevated);color:var(--text-primary);font-size:0.9rem;">
+                            <button class="btn-secondary" onclick="loadPavilionBookings()">Refresh</button>
+                        </div>
+                    </div>
+                    <div id="pavStats" style="font-size:0.85rem;color:var(--text-secondary);margin:8px 0 16px;"></div>
+                    <div style="overflow-x:auto;border:1px solid var(--border-subtle);border-radius:8px;background:var(--bg-elevated);">
+                        <table style="width:100%;border-collapse:collapse;font-size:0.85rem;">
+                            <thead>
+                                <tr style="background:var(--bg-secondary);">
+                                    <th style="padding:10px;text-align:left;">Date</th>
+                                    <th style="padding:10px;text-align:left;">Time</th>
+                                    <th style="padding:10px;text-align:left;">Pavilion</th>
+                                    <th style="padding:10px;text-align:left;">Customer</th>
+                                    <th style="padding:10px;text-align:left;">Email</th>
+                                    <th style="padding:10px;text-align:left;">Phone</th>
+                                    <th style="padding:10px;text-align:left;">Paid</th>
+                                    <th style="padding:10px;text-align:left;">Source</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pavTableBody">
+                                <tr><td colspan="8" style="text-align:center;color:var(--text-secondary);padding:2rem;">Loading&hellip;</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <!-- Add booking modal (pay-at-venue) -->
             <div id="golfAddBookingModal" class="modal-overlay" onclick="if(event.target===this)closeGolfAddBooking()">
                 <div class="modal-card" style="max-width:600px;width:90%;background:var(--bg-secondary);border-radius:10px;padding:24px;border:1px solid var(--border-subtle);max-height:92vh;overflow-y:auto;">
@@ -5880,6 +5925,10 @@
             // Load payments when switching to payments tab
             if (tabName === 'payments') {
                 loadPaymentsData();
+            }
+            // Load pavilion bookings when switching to that tab
+            if (tabName === 'pavilions') {
+                loadPavilionBookings();
             }
             // Load potential reservations data
             if (tabName === 'potential') {
@@ -14839,7 +14888,71 @@ function hashCode(str) {
             btn.disabled = false; btn.textContent = 'Save Changes';
         };
     })();
-    
+
+        // ================================================================
+        // PAVILION BOOKINGS
+        // Flat list from /.netlify/functions/list-pavilion-bookings --
+        // Netlify Blobs is the sole source of truth (no payment-processor
+        // order list to reconcile against, unlike golf's Stripe check).
+        // ================================================================
+    (function(){
+        function todayCT() {
+            const ct = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' }));
+            return ct.getFullYear() + '-' + String(ct.getMonth()+1).padStart(2,'0') + '-' + String(ct.getDate()).padStart(2,'0');
+        }
+        function addDays(yyyymmdd, days) {
+            const [y,m,d] = yyyymmdd.split('-').map(Number);
+            const dt = new Date(Date.UTC(y, m-1, d));
+            dt.setUTCDate(dt.getUTCDate() + days);
+            return dt.toISOString().slice(0,10);
+        }
+        function escapeHtml(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+        }
+
+        window.loadPavilionBookings = async function() {
+            const startEl = document.getElementById('pavStartDate');
+            const endEl = document.getElementById('pavEndDate');
+            if (!startEl.value) startEl.value = todayCT();
+            if (!endEl.value) endEl.value = addDays(startEl.value, 60);
+            const tbody = document.getElementById('pavTableBody');
+            const stats = document.getElementById('pavStats');
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-secondary);padding:2rem;">Loading&hellip;</td></tr>';
+
+            try {
+                const token = localStorage.getItem('quarryAdminToken') || '';
+                const r = await fetch(`/.netlify/functions/list-pavilion-bookings?token=${encodeURIComponent(token)}&startDate=${startEl.value}&endDate=${endEl.value}`);
+                const body = await r.json();
+                if (!body.ok) throw new Error(body.error || 'Failed to load');
+                const bookings = body.bookings || [];
+
+                if (!bookings.length) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-secondary);padding:2rem;">No pavilion bookings in this range.</td></tr>';
+                    stats.textContent = '0 bookings';
+                    return;
+                }
+
+                const revenue = bookings.filter(b => b.source === 'square').length * 100;
+                stats.innerHTML = `<b>${bookings.length}</b> bookings &nbsp;·&nbsp; <b>${bookings.filter(b=>b.source==='admin').length}</b> admin-blocked &nbsp;·&nbsp; <b>$${revenue.toFixed(2)}</b> paid`;
+
+                tbody.innerHTML = bookings.map(b => `
+                    <tr style="border-top:1px solid var(--border-subtle);">
+                        <td style="padding:8px 10px;">${escapeHtml(b.date)}</td>
+                        <td style="padding:8px 10px;">${escapeHtml(b.time)}</td>
+                        <td style="padding:8px 10px;">Pavilion ${escapeHtml(b.pavilion)}</td>
+                        <td style="padding:8px 10px;">${escapeHtml(b.customerName)}</td>
+                        <td style="padding:8px 10px;">${b.customerEmail ? `<a href="mailto:${encodeURIComponent(b.customerEmail)}" style="color:var(--gold);">${escapeHtml(b.customerEmail)}</a>` : '—'}</td>
+                        <td style="padding:8px 10px;">${escapeHtml(b.customerPhone || '—')}</td>
+                        <td style="padding:8px 10px;">${escapeHtml(b.amountPaid || '—')}</td>
+                        <td style="padding:8px 10px;">${b.source === 'admin' ? '<span style="color:#d97706;">Admin block</span>' : 'Square'}</td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#c33;padding:2rem;">Failed to load: ${escapeHtml(e.message)}<br><button class="btn-secondary" onclick="loadPavilionBookings()" style="margin-top:0.5rem;">Retry</button></td></tr>`;
+            }
+        };
+    })();
+
         // ================================================================
         // WINE CLUB TAB
         // ================================================================
