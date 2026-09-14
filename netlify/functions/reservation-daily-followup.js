@@ -201,12 +201,21 @@ exports.handler = async () => {
         if (ov.hidden) continue;
         visibleTotal++;
         const status = ov.status || defaultStatus(inq.submittedAt);
+        // stageSince: when this inquiry LANDED at its current status -- ov.updatedAt
+        // if it's ever been touched, otherwise the moment it was submitted. This is
+        // what "how long has this person been sitting here" is measured from, so a
+        // stale awaiting_decision or needs_call is visible as a staff response-time
+        // problem, not just a raw count.
+        inq.stageSince = ov.updatedAt || inq.submittedAt;
         if (buckets[status]) buckets[status].push(inq);
 
         const history = Array.isArray(ov.history) ? ov.history : [];
         if (!ov.updatedAt && history.length === 0) untouched++;
         else if (ov.updatedAt && daysSince(ov.updatedAt) <= 1) changed24h++;
     }
+    // Longest-waiting first in every list below -- that's the one most worth
+    // someone's attention, so it shouldn't be buried at the bottom.
+    for (const arr of Object.values(buckets)) arr.sort((a, b) => new Date(a.stageSince) - new Date(b.stageSince));
 
     const needsAttention = Object.values(buckets).reduce((n, arr) => n + arr.length, 0);
 
@@ -215,9 +224,20 @@ exports.handler = async () => {
         `<p style="margin:4px 0"><b>${esc(bucketLabel[key])}:</b> ${arr.length}</p>`
     ).join('');
 
+    // "3.5 days" / "6 hours" -- coarse enough to skim, precise enough to catch
+    // someone sitting untouched since yesterday afternoon.
+    function fmtElapsed(iso) {
+        const d = daysSince(iso);
+        if (!isFinite(d)) return 'unknown';
+        if (d < 1) return Math.round(d * 24) + (Math.round(d * 24) === 1 ? ' hour' : ' hours');
+        return (Math.round(d * 10) / 10) + (Math.round(d * 10) / 10 === 1 ? ' day' : ' days');
+    }
+
     const priorityList = (label, arr) => arr.length
         ? `<p style="margin:16px 0 4px;color:#8a6d1f;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.08em">${esc(label)}</p>` +
-          arr.map((i) => `<p style="margin:2px 0">• ${esc(i.name)}${i.eventDate ? ' — ' + esc(i.eventDate) : ''} (${esc(i.email)})</p>`).join('')
+          arr.map((i) => `<p style="margin:2px 0">• ${esc(i.name)}${i.eventDate ? ' — ' + esc(i.eventDate) : ''} ` +
+              `<span style="color:${daysSince(i.stageSince) >= 2 ? '#dc2626' : '#8a6d1f'};font-weight:600;">(${fmtElapsed(i.stageSince)} in this stage)</span> — ${esc(i.email)}</p>`
+          ).join('')
         : '';
 
     const digestHtml = '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">' +
@@ -229,6 +249,10 @@ exports.handler = async () => {
         '<div style="background:#FAF7F2;border-left:4px solid #B8933A;padding:16px 20px;margin:20px 0">' + bucketRows + '</div>' +
         priorityList('Needs a call today', buckets.needs_call) +
         priorityList('Waiting on your Confirm/Deny', buckets.awaiting_decision) +
+        priorityList('Reminded, still waiting on customer', buckets.awaiting_customer_confirm_followedup) +
+        priorityList('Awaiting customer confirm', buckets.awaiting_customer_confirm) +
+        priorityList('Needs follow-up', buckets.needs_followup) +
+        priorityList('Not contacted yet', buckets.not_contacted) +
         `<p style="margin-top:24px;"><a href="${SITE_URL}/admin/index.html" style="color:#B8933A">Open Reservation Inquiries &rarr;</a></p>` +
         '</div></div>';
 
