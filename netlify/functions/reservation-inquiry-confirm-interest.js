@@ -8,6 +8,11 @@
 // purpose, so staff never spend time chasing a request the customer never
 // confirmed they still wanted.
 //
+// On a real (non-repeat) click this also sends two emails:
+//   - to the customer: confirms the click landed and we're on it
+//   - to management@thequarrystl.com: tells staff a customer confirmed and
+//     spells out exactly what to do next in the admin panel
+//
 // GET /.netlify/functions/reservation-inquiry-confirm-interest?t=<token>
 // token = "<submissionId>.<hmac>" minted by reservation-inquiry-autoreply.js
 // (RESERVATION_CONFIRM_SECRET) -- verified the same way here so a customer
@@ -18,9 +23,22 @@
 // ============================================================================
 
 const crypto = require('crypto');
+const https = require('https');
 
 const CONFIRM_SECRET = process.env.RESERVATION_CONFIRM_SECRET || '';
 const SITE_URL = process.env.URL || 'https://thequarrystl.com';
+const NETLIFY_TOKEN = process.env.NETLIFY_AUTH_TOKEN || process.env.NETLIFY_API_TOKEN;
+
+function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+function fmtDate(d) {
+    if (!d) return '';
+    try {
+        const dt = new Date(d + 'T12:00:00');
+        if (isNaN(dt.getTime())) return d;
+        return dt.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+    } catch (_) { return d; }
+}
 
 function page(title, message, ok) {
     const color = ok ? '#16a34a' : '#dc2626';
@@ -44,6 +62,101 @@ function verifyToken(token) {
     return submissionId;
 }
 
+function sendGridEmail(to, subject, htmlBody) {
+    const payload = JSON.stringify({
+        personalizations: [{ to: [{ email: to }] }],
+        from: { email: 'management@thequarrystl.com', name: 'The Quarry' },
+        reply_to: { email: 'management@thequarrystl.com', name: 'The Quarry' },
+        subject,
+        content: [{ type: 'text/html', value: htmlBody }],
+        categories: ['reservation-inquiry-confirm-interest']
+    });
+    return new Promise((resolve, reject) => {
+        const req = https.request({
+            hostname: 'api.sendgrid.com', path: '/v3/mail/send', method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + process.env.SENDGRID_API_KEY, 'Content-Type': 'application/json' },
+        }, (res) => {
+            let body = '';
+            res.on('data', (c) => { body += c; });
+            res.on('end', () => {
+                if (res.statusCode >= 200 && res.statusCode < 300) resolve({ statusCode: res.statusCode, body });
+                else reject(new Error(`SendGrid ${res.statusCode}: ${body}`));
+            });
+        });
+        req.on('error', reject);
+        req.write(payload);
+        req.end();
+    });
+}
+
+function emailShell(heading, bodyHtml) {
+    return '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">' +
+        '<div style="background:#1A0E08;padding:24px;text-align:center"><h1 style="color:#B8933A;margin:0">The Quarry</h1>' +
+        '<p style="color:#F5F0E8;font-size:0.8rem;letter-spacing:0.15em;margin:4px 0 0">NEW MELLE, MISSOURI</p></div>' +
+        '<div style="padding:32px 24px"><h2 style="color:#2C1A0E">' + esc(heading) + '</h2>' + bodyHtml + '</div>' +
+        '<div style="background:#1A0E08;padding:16px;text-align:center">' +
+        '<p style="color:rgba(255,255,255,0.4);font-size:0.75rem;margin:0">3960 Highway Z, New Melle, MO 63385</p></div></div>';
+}
+
+// Pulls the actual submitted fields for this one inquiry from Netlify's Forms
+// API -- confirm-interest only gets a bare submissionId from the signed link,
+// so this is what turns that into an actual name/email/date to email about.
+async function fetchSubmission(submissionId) {
+    if (!NETLIFY_TOKEN) return null;
+    try {
+        const r = await fetch(`https://api.netlify.com/api/v1/submissions/${submissionId}`, {
+            headers: { 'Authorization': `Bearer ${NETLIFY_TOKEN}` },
+        });
+        if (!r.ok) return null;
+        const sub = await r.json();
+        const d = sub.data || {};
+        return {
+            name: d.name || ((d.first_name || '') + ' ' + (d.last_name || '')).trim() || '',
+            firstName: d.first_name || (d.name ? d.name.split(' ')[0] : ''),
+            email: (d.email || '').toLowerCase(),
+            phone: d.phone || '',
+            occasion: d.occasion || '',
+            eventDate: d.date || '',
+            eventTime: d.time || '',
+            guests: d.guests || d.party_size || '',
+        };
+    } catch (_) { return null; }
+}
+
+function customerEmail(inq) {
+    return emailShell('Got It — We\'re On It!',
+        `<p>Hi ${esc(inq.firstName || inq.name || 'there')}, thanks for confirming! We've received it and are checking our calendar` +
+        (inq.eventDate ? ` for ${esc(fmtDate(inq.eventDate))}` : '') + ` now.</p>` +
+        '<p>We\'ll be in touch soon with an answer. In the meantime, feel free to call us at <a href="tel:6362248257" style="color:#B8933A">636-224-8257</a> with any questions.</p>'
+    );
+}
+
+function managementEmail(inq, submissionId) {
+    const rows = [
+        ['Name', inq.name],
+        ['Email', inq.email],
+        ['Phone', inq.phone],
+        ['Occasion', inq.occasion],
+        ['Date', fmtDate(inq.eventDate)],
+        ['Time', inq.eventTime],
+        ['Guests', inq.guests],
+    ].filter(([, v]) => v).map(([l, v]) => `<p style="margin:4px 0"><b>${esc(l)}:</b> ${esc(v)}</p>`).join('');
+
+    return emailShell('Customer Confirmed — Action Needed',
+        `<p><b>${esc(inq.name || inq.email)}</b> just clicked "Yes, please check availability" and is now waiting on a decision.</p>` +
+        `<div style="background:#FAF7F2;border-left:4px solid #B8933A;padding:16px 20px;margin:20px 0">${rows}</div>` +
+        '<p style="margin:20px 0 8px"><b>What to do:</b></p>' +
+        '<ol style="margin:0;padding-left:20px;line-height:1.8">' +
+        '<li>Open the admin panel and go to <b>Reservation Inquiries</b> (under Reservations)</li>' +
+        `<li>Find this inquiry (filter by <b>Awaiting my decision</b>, or search "${esc(inq.name || inq.email)}")</li>` +
+        '<li>Check the Venue Calendar for that date and time</li>' +
+        '<li>Click <b>🗓️ Confirm & Auto-Book</b> if it\'s open — this creates the booking and emails the customer automatically</li>' +
+        '<li>Or click <b>📅 Date Conflict — Offer Alternate</b> if it\'s not — this emails them asking for another date</li>' +
+        '</ol>' +
+        `<p style="margin-top:24px;"><a href="${SITE_URL}/admin/index.html" style="color:#B8933A">Open Reservation Inquiries &rarr;</a></p>`
+    );
+}
+
 async function markAwaitingDecision(submissionId) {
     const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=reservations_status.json`);
     const existing = r.ok ? await r.json() : null;
@@ -54,8 +167,8 @@ async function markAwaitingDecision(submissionId) {
     const prev = data.overrides[submissionId] || {};
 
     // Idempotent: clicking twice (or a link preview bot fetching it once)
-    // shouldn't re-log history or bump an inquiry that already moved past
-    // this stage back down to awaiting_decision.
+    // shouldn't re-log history, re-send both emails, or bump an inquiry that
+    // already moved past this stage back down to awaiting_decision.
     if (['awaiting_decision', 'confirmed', 'date_conflict', 'lost'].includes(prev.status)) {
         return { already: true, status: prev.status };
     }
@@ -86,7 +199,23 @@ exports.handler = async (event) => {
     if (!submissionId) return page('Link Not Valid', 'This confirmation link looks incomplete or has expired. Please call us at 636-224-8257 and we\'ll take care of it directly.', false);
 
     try {
-        await markAwaitingDecision(submissionId);
+        const result = await markAwaitingDecision(submissionId);
+
+        if (!result.already) {
+            // Best-effort: the click is already recorded even if these emails
+            // fail, so failures here must never turn into an error page for
+            // the customer.
+            try {
+                const inq = await fetchSubmission(submissionId);
+                if (inq && inq.email) {
+                    await sendGridEmail(inq.email, 'Got It — We\'re On It! — The Quarry', customerEmail(inq));
+                    await sendGridEmail('management@thequarrystl.com', `Customer Confirmed: ${inq.name || inq.email}`, managementEmail(inq, submissionId));
+                }
+            } catch (err) {
+                console.error('reservation-inquiry-confirm-interest email error:', err.message);
+            }
+        }
+
         return page('Thanks — We\'re On It!', 'We\'ve got your confirmation and are checking our calendar now. We\'ll follow up shortly with an answer!', true);
     } catch (err) {
         console.error('reservation-inquiry-confirm-interest error:', err.message);
