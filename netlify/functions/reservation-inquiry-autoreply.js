@@ -13,12 +13,15 @@
 //
 // It does NOT check calendar availability or confirm anything itself --
 // that's a deliberate human decision Penny/the owner makes from the
-// Reservation Inquiries admin panel (see reservation-inquiry-decide.js),
-// which is why this only ever promises "we'll get back to you."
+// Reservation Inquiries admin panel (see reservation-inquiry-decide.js).
+// It also doesn't drop the inquiry straight into that admin queue: the email
+// asks "want us to look into that date?" with a confirm link
+// (reservation-inquiry-confirm-interest.js), and only a click on that link
+// moves it into the queue -- staff never spend time chasing a request the
+// customer never actually confirmed they still wanted.
 //
-// After sending, marks the inquiry 'awaiting_decision' via
-// update-reservation-status.js so it surfaces in the admin's queue waiting
-// on a Confirm/Deny click.
+// After sending, marks the inquiry 'awaiting_customer_confirm' via
+// update-reservation-status.js.
 //
 // POST /.netlify/functions/reservation-inquiry-autoreply?wh=<WEBHOOK_SHARED_SECRET>
 // Body: the raw Netlify Forms submission-created payload.
@@ -31,9 +34,20 @@
 // ============================================================================
 
 const https = require('https');
+const crypto = require('crypto');
 
 const WEBHOOK_SECRET = process.env.RESERVATION_WEBHOOK_SECRET || '';
+const CONFIRM_SECRET = process.env.RESERVATION_CONFIRM_SECRET || '';
 const SITE_URL = process.env.URL || 'https://thequarrystl.com';
+
+// The confirm link's token is just "<submissionId>.<hmac>" -- see
+// reservation-inquiry-confirm-interest.js for the matching verification.
+// Signed so a customer can only confirm their OWN inquiry, not guess at
+// someone else's submission id and trigger their queue entry.
+function confirmToken(submissionId) {
+    if (!CONFIRM_SECRET) return '';
+    return submissionId + '.' + crypto.createHmac('sha256', CONFIRM_SECRET).update(submissionId).digest('hex');
+}
 
 const CORS = {
     'Access-Control-Allow-Origin': '*',
@@ -92,7 +106,7 @@ function fmtDate(d) {
 // fields the form actually left blank get asked for -- both forms require
 // date/time/guests/location(or venue)/catering, so in practice this list is
 // usually empty and the email is pure confirmation-of-receipt.
-function buildEmail(inq) {
+function buildEmail(inq, confirmUrl) {
     const haveRows = [];
     const missing = [];
 
@@ -112,7 +126,13 @@ function buildEmail(inq) {
         : '';
 
     const cateringNote = inq.catering === 'Yes'
-        ? '<p>Since you\'d like catering, we\'ll follow up with our Event &amp; Catering menu once your date is confirmed.</p>'
+        ? '<p>Since you\'d like catering, we\'ll send over our Event &amp; Catering menu once your date is secured.</p>'
+        : '';
+
+    const confirmButton = confirmUrl
+        ? '<div style="text-align:center;margin:28px 0">' +
+          `<a href="${esc(confirmUrl)}" style="display:inline-block;background:#B8933A;color:#1A0E08;font-weight:700;text-decoration:none;padding:14px 28px;border-radius:4px;">Yes, please check availability &rarr;</a>` +
+          '</div>'
         : '';
 
     return '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">' +
@@ -127,7 +147,8 @@ function buildEmail(inq) {
         '</div>' +
         missingHtml +
         cateringNote +
-        '<p>We\'re double-checking our calendar for that date now and will follow up shortly to confirm.</p>' +
+        '<p>Would you like us to look into securing that time and date for you? Click below and we\'ll have an answer for you soon!</p>' +
+        confirmButton +
         '<p>Questions in the meantime? Call us at <a href="tel:6362248257" style="color:#B8933A">636-224-8257</a>.</p></div>' +
         '<div style="background:#1A0E08;padding:16px;text-align:center">' +
         '<p style="color:rgba(255,255,255,0.4);font-size:0.75rem;margin:0">3960 Highway Z, New Melle, MO 63385</p></div></div>';
@@ -150,8 +171,8 @@ function normalize(submission, formName) {
     };
 }
 
-async function markAwaitingDecision(submissionId) {
-    // Uses a token-less internal call isn't possible (update-reservation-status.js
+async function markAwaitingCustomerConfirm(submissionId) {
+    // A token-less internal call isn't possible (update-reservation-status.js
     // requires a session token) -- so this writes the override file directly via
     // the same data-store helper, mirroring what update-reservation-status.js does,
     // rather than trying to mint a fake admin session just to call itself.
@@ -164,9 +185,9 @@ async function markAwaitingDecision(submissionId) {
         const now = new Date().toISOString();
         const prev = data.overrides[submissionId] || {};
         const history = Array.isArray(prev.history) ? prev.history : [];
-        history.push({ from: prev.status || 'not_contacted', to: 'awaiting_decision', by: 'auto-reply', note: 'Instant auto-reply sent', at: now });
+        history.push({ from: prev.status || 'not_contacted', to: 'awaiting_customer_confirm', by: 'auto-reply', note: 'Instant auto-reply sent', at: now });
         data.overrides[submissionId] = {
-            status: 'awaiting_decision',
+            status: 'awaiting_customer_confirm',
             note: prev.note || '',
             updatedAt: now,
             updatedBy: 'auto-reply',
@@ -176,7 +197,7 @@ async function markAwaitingDecision(submissionId) {
         data.updatedAt = now;
         await fetch(`${SITE_URL}/.netlify/functions/data-store?file=reservations_status.json`, {
             method: 'PUT', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ json: data, sha, message: `reservations: ${submissionId.slice(0, 8)} → awaiting_decision (auto-reply)` })
+            body: JSON.stringify({ json: data, sha, message: `reservations: ${submissionId.slice(0, 8)} → awaiting_customer_confirm (auto-reply)` })
         });
     } catch (_) { /* best-effort; the email having sent matters more than this flag */ }
 }
@@ -207,8 +228,11 @@ exports.handler = async (event) => {
 
     try {
         const subject = 'Thanks for reaching out to The Quarry!';
-        await sendGridEmail(inq.email, subject, buildEmail(inq));
-        await markAwaitingDecision(inq.id);
+        const confirmUrl = CONFIRM_SECRET
+            ? `${SITE_URL}/.netlify/functions/reservation-inquiry-confirm-interest?t=${encodeURIComponent(confirmToken(inq.id))}`
+            : '';
+        await sendGridEmail(inq.email, subject, buildEmail(inq, confirmUrl));
+        await markAwaitingCustomerConfirm(inq.id);
         return respond(200, { ok: true, emailed: inq.email });
     } catch (err) {
         console.error('reservation-inquiry-autoreply error:', err.message);

@@ -115,6 +115,14 @@
 # One-per-email guard via member.welcomeSeriesSent.
 [functions."welcome-series"]
   schedule = "0 15 * * *"
+
+# ─── RESERVATION INQUIRIES ──────────────────────────────────────────────────
+# Daily follow-up + digest — 14:30 UTC = 9:30am CDT / 8:30am CST. Sends the
+# "still thinking about it?" reminder at 3 days awaiting_customer_confirm,
+# escalates to needs_call at 3 more days with no click, and emails
+# management@ a digest of who needs attention and what moved in the last 24h.
+[functions."reservation-daily-followup"]
+  schedule = "30 14 * * *"
 # trigger redeploy 2026-05-27T20:21:04Z - pick up new SQUARE_WEBHOOK_SIGNATURE_KEY
 # trigger redeploy 2026-09-01T00:00:00Z - build-ignore.sh only diffs HEAD^..HEAD, so the
 # quarry-calendar.html + events.json push landed on GitHub but the build was skipped

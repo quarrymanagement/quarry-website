@@ -11,7 +11,8 @@
 // as verify-admin-password.js) — previously this endpoint had no auth at all.
 //
 // Status values: not_contacted | contacted | needs_followup | contacted_2 | responded |
-// sent_to_jacqueline | confirmed | lost | awaiting_decision | date_conflict
+// sent_to_jacqueline | confirmed | lost | awaiting_customer_confirm | awaiting_decision |
+// date_conflict
 // ============================================================================
 
 const fetch = require('node-fetch');
@@ -57,10 +58,22 @@ function verifyAnyToken(token) {
 const VALID_STATUSES = new Set([
     'not_contacted', 'contacted', 'needs_followup',
     'contacted_2', 'responded', 'sent_to_jacqueline', 'confirmed', 'lost',
-    // awaiting_decision: the instant auto-reply went out (reservation-inquiry-autoreply.js)
-    // and the inquiry is now sitting in the admin's queue waiting on a Confirm/Deny click.
+    // awaiting_customer_confirm: the instant auto-reply went out
+    // (reservation-inquiry-autoreply.js) asking "want us to look into that date?" --
+    // nothing for staff to do yet until the customer clicks the confirm link in it.
+    // awaiting_decision: the customer clicked that link
+    // (reservation-inquiry-confirm-interest.js) and the inquiry is now sitting in
+    // the admin's queue waiting on a Confirm/Deny click.
     // date_conflict: denied because the calendar shows something else that day; the
     // "want another date?" email already went out (reservation-inquiry-decide.js).
+    // awaiting_customer_confirm_followedup: 3 days with no click, so the daily
+    // reservation-daily-followup.js job sent one reminder email -- staying "top of
+    // mind" without spamming; it won't send a second one on its own.
+    // needs_call: a further few days with still no click after the reminder --
+    // escalated to a real phone call. Surfaced to Penny/owners in the daily digest
+    // rather than another automated email, since two unanswered emails already
+    // suggests email isn't reaching this person.
+    'awaiting_customer_confirm', 'awaiting_customer_confirm_followedup', 'needs_call',
     'awaiting_decision', 'date_conflict'
 ]);
 

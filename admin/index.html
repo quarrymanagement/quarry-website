@@ -3686,7 +3686,10 @@
                         <select id="resInqFilter" style="padding:0.5rem 0.75rem;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:6px;color:var(--text-primary);font-size:0.85rem;">
                             <option value="needs_attention">Needs my attention</option>
                             <option value="all">All inquiries</option>
-                            <option value="awaiting_decision">Awaiting decision (auto-replied)</option>
+                            <option value="needs_call">📞 Needs a call</option>
+                            <option value="awaiting_decision">Awaiting my decision</option>
+                            <option value="awaiting_customer_confirm">Awaiting customer</option>
+                            <option value="awaiting_customer_confirm_followedup">Reminded (still waiting)</option>
                             <option value="not_contacted">Not contacted</option>
                             <option value="contacted">Contacted</option>
                             <option value="needs_followup">Needs follow-up</option>
@@ -13090,8 +13093,8 @@ function hashCode(str) {
             const escHtml = (s) => (s == null ? '' : String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])));
             const fmtDate = (iso) => { if (!iso) return '—'; const d = new Date(iso); return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); };
             const fmtDay = (iso) => { if (!iso) return '—'; try { return new Date(iso.length === 10 ? iso + 'T12:00' : iso).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }); } catch (_) { return iso; } };
-            const STATUS_LABELS = { not_contacted: 'Not Contacted', contacted: 'Contacted', needs_followup: 'Needs Follow-up', contacted_2: 'Followed Up', responded: 'Responded', sent_to_jacqueline: 'Sent to Jacqueline', confirmed: 'Confirmed', lost: 'Lost', awaiting_decision: 'Awaiting Decision', date_conflict: 'Date Conflict' };
-            const STATUS_COLORS = { not_contacted: '#b45309', contacted: '#2563eb', needs_followup: '#dc2626', contacted_2: '#7c3aed', responded: '#7c3aed', sent_to_jacqueline: '#be185d', confirmed: '#16a34a', lost: '#64748b', awaiting_decision: '#d97706', date_conflict: '#dc2626' };
+            const STATUS_LABELS = { not_contacted: 'Not Contacted', contacted: 'Contacted', needs_followup: 'Needs Follow-up', contacted_2: 'Followed Up', responded: 'Responded', sent_to_jacqueline: 'Sent to Jacqueline', confirmed: 'Confirmed', lost: 'Lost', awaiting_customer_confirm: 'Awaiting Customer', awaiting_customer_confirm_followedup: 'Reminded (Waiting)', needs_call: '📞 Needs a Call', awaiting_decision: 'Awaiting Decision', date_conflict: 'Date Conflict' };
+            const STATUS_COLORS = { not_contacted: '#b45309', contacted: '#2563eb', needs_followup: '#dc2626', contacted_2: '#7c3aed', responded: '#7c3aed', sent_to_jacqueline: '#be185d', confirmed: '#16a34a', lost: '#64748b', awaiting_customer_confirm: '#0891b2', awaiting_customer_confirm_followedup: '#0e7490', needs_call: '#dc2626', awaiting_decision: '#d97706', date_conflict: '#dc2626' };
             // Statuses that mean "I've actually reached out at least once" —
             // not_contacted/needs_followup are default/no-action states (see
             // list-reservation-inquiries.js's defaultStatus), so they don't count.
@@ -13194,7 +13197,7 @@ function hashCode(str) {
             function updateBadge() {
                 const badge = $('resInqBadge');
                 if (!badge) return;
-                const n = state.inquiries.filter((i) => !i.hidden && ['not_contacted', 'needs_followup', 'responded', 'awaiting_decision'].includes(i.status)).length;
+                const n = state.inquiries.filter((i) => !i.hidden && ['not_contacted', 'needs_followup', 'responded', 'awaiting_decision', 'needs_call'].includes(i.status)).length;
                 if (n > 0) { badge.textContent = String(n); badge.style.display = ''; }
                 else { badge.style.display = 'none'; }
             }
@@ -13237,7 +13240,7 @@ function hashCode(str) {
                         (i.email || '').toLowerCase().includes(search)
                     );
                 } else if (filter === 'needs_attention') {
-                    list = visible.filter((i) => ['not_contacted', 'needs_followup', 'responded', 'awaiting_decision'].includes(i.status));
+                    list = visible.filter((i) => ['not_contacted', 'needs_followup', 'responded', 'awaiting_decision', 'needs_call'].includes(i.status));
                 } else if (filter === 'all') {
                     list = visible;
                 } else if (filter === 'contacted') {
