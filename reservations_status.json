@@ -6680,10 +6680,10 @@
       "hidden": false
     },
     "6aa85a8e4b04de703682a80a": {
-      "status": "awaiting_decision",
-      "note": "",
-      "updatedAt": "2026-09-14T20:36:20.340Z",
-      "updatedBy": "customer",
+      "status": "needs_followup",
+      "note": "Date not available; asked for an alternate — awaiting a second date from the customer.",
+      "updatedAt": "2026-09-14T20:39:17.494Z",
+      "updatedBy": "owner",
       "history": [
         {
           "from": "not_contacted",
@@ -6698,10 +6698,17 @@
           "by": "customer",
           "note": "Customer clicked \"check availability\"",
           "at": "2026-09-14T20:36:20.340Z"
+        },
+        {
+          "from": "awaiting_decision",
+          "to": "needs_followup",
+          "by": "owner",
+          "note": "Date not available; asked for an alternate — awaiting a second date from the customer.",
+          "at": "2026-09-14T20:39:17.494Z"
         }
       ],
       "hidden": false
     }
   },
-  "updatedAt": "2026-09-14T20:36:20.340Z"
+  "updatedAt": "2026-09-14T20:39:17.494Z"
 }
