@@ -51,9 +51,12 @@
     nav.className = "sb-nav-item";
     nav.setAttribute("data-tab", "notices");
     nav.innerHTML = '<span class="sb-ic">📣</span><span class="sb-lbl">Notices</span>';
-    var anchor = document.querySelector('.sb-nav-item[data-tab="golfProgressive"]') ||
-                 document.querySelector('.sb-nav-item[data-tab="golf"]');
-    if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(nav, anchor.nextSibling);
+    // Anchors in the System section (next to Website Forms) -- it used to
+    // anchor after the golf items, which put a site-wide notice banner
+    // setting inside what is now a dedicated Golf section, with nothing to
+    // do with golf.
+    var anchor = document.querySelector('.sb-nav-item[data-tab="forms"]');
+    if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(nav, anchor);
     else {
       var anyNav = document.querySelector(".sb-nav-item");
       if (anyNav && anyNav.parentNode) anyNav.parentNode.appendChild(nav);

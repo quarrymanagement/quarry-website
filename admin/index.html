@@ -2701,15 +2701,29 @@
                     <a href="/admin/venue-calendar.html" class="sb-nav-item"><span class="sb-ic">📅</span><span class="sb-lbl">Venue Calendar</span></a>
                     <div class="sb-nav-item" data-tab="events"><span class="sb-ic">🎫</span><span class="sb-lbl">Events</span></div>
                     <div class="sb-nav-item" data-tab="bands"><span class="sb-ic">🎵</span><span class="sb-lbl">Live Bands</span></div>
-                    <div class="sb-nav-item" data-tab="golf"><span class="sb-ic">⛳</span><span class="sb-lbl">Golf Bookings</span></div>
                     <div class="sb-nav-item" data-tab="scheduling"><span class="sb-ic">📋</span><span class="sb-lbl">Staff Schedule</span></div>
                     <div class="sb-nav-item" data-tab="employees"><span class="sb-ic">👤</span><span class="sb-lbl">Employees</span></div>
                     <div class="sb-nav-item" data-tab="timeoff"><span class="sb-ic">🌴</span><span class="sb-lbl">Time Off</span></div>
                 </div>
 
+                <div class="sb-nav-section">Golf</div>
+                <div class="sb-nav-group">
+                    <!-- golf-progressive-admin.js self-injects "Golf Jackpot" right after
+                         this item (it anchors on data-tab="golf"), and notices-admin.js
+                         anchors after that -- both land in this section automatically. -->
+                    <div class="sb-nav-item" data-tab="golf"><span class="sb-ic">⛳</span><span class="sb-lbl">Golf Bookings</span></div>
+                </div>
+
+                <div class="sb-nav-section">Reservations</div>
+                <div class="sb-nav-group">
+                    <div class="sb-nav-item" data-tab="potential"><span class="sb-ic">📥</span><span class="sb-lbl">Reservation Inquiries</span><span id="resInqBadge" class="sb-badge" style="display:none;">0</span></div>
+                    <div class="sb-nav-item" data-tab="confirmed"><span class="sb-ic">✓</span><span class="sb-lbl">Confirmed Bookings</span></div>
+                </div>
+
                 <div class="sb-nav-section">Member App</div>
                 <div class="sb-nav-group">
                     <div class="sb-nav-item" data-tab="appOverview"><span class="sb-ic">📱</span><span class="sb-lbl">App Overview</span></div>
+                    <div class="sb-nav-item" data-tab="members"><span class="sb-ic">⭐</span><span class="sb-lbl">Rewards Members</span></div>
                     <div class="sb-nav-item" data-tab="appMenu"><span class="sb-ic">🍽️</span><span class="sb-lbl">Menu</span></div>
                     <div class="sb-nav-item" data-tab="appRewards"><span class="sb-ic">⭐</span><span class="sb-lbl">Rewards Setup</span></div>
                     <div class="sb-nav-item" data-tab="appContent"><span class="sb-ic">🎯</span><span class="sb-lbl">Home Content</span></div>
@@ -2718,11 +2732,8 @@
 
                 <div class="sb-nav-section">Customers</div>
                 <div class="sb-nav-group">
-                    <div class="sb-nav-item" data-tab="members"><span class="sb-ic">⭐</span><span class="sb-lbl">Rewards Members</span></div>
                     <div class="sb-nav-item" data-tab="wineclub"><span class="sb-ic">🍷</span><span class="sb-lbl">Wine Club</span><span id="wineclubBadge" class="sb-badge" style="display:none;">0</span></div>
                     <div class="sb-nav-item" data-tab="crm"><span class="sb-ic">👥</span><span class="sb-lbl">Contacts</span></div>
-                    <div class="sb-nav-item" data-tab="potential"><span class="sb-ic">📥</span><span class="sb-lbl">Reservation Inquiries</span><span id="resInqBadge" class="sb-badge" style="display:none;">0</span></div>
-                    <div class="sb-nav-item" data-tab="confirmed"><span class="sb-ic">✓</span><span class="sb-lbl">Confirmed Bookings</span></div>
                     <div class="sb-nav-item" data-tab="payments"><span class="sb-ic">💳</span><span class="sb-lbl">Payments</span></div>
                     <div class="sb-nav-item" data-tab="invoices"><span class="sb-ic">🧾</span><span class="sb-lbl">Send Invoice</span></div>
                 </div>
@@ -2735,6 +2746,9 @@
                     <div class="sb-nav-item" data-tab="mktPerformance"><span class="sb-ic">📊</span><span class="sb-lbl">Email Performance</span></div>
                     <div class="sb-nav-item" data-tab="mktInsights"><span class="sb-ic">🧠</span><span class="sb-lbl">Email Insights</span></div>
                     <div class="sb-nav-item" data-tab="mktSettings"><span class="sb-ic">⚙️</span><span class="sb-lbl">Email Settings</span></div>
+                    <!-- Same tab as Member App's Push Notifications -- added here too
+                         since push is also very much a marketing channel. -->
+                    <div class="sb-nav-item" data-tab="appPush"><span class="sb-ic">🔔</span><span class="sb-lbl">Push Notifications</span></div>
                 </div>
 
                 <div class="sb-nav-section">Social Media</div>
@@ -5783,14 +5797,17 @@
 
             // Clear active state on sidebar items
             document.querySelectorAll('.sb-nav-item').forEach(t => t.classList.remove('active'));
-            const sbItem = document.querySelector(`.sb-nav-item[data-tab="${tabName}"]`);
-            if (sbItem) {
+            // querySelectorAll, not querySelector -- a couple of tabs (e.g. Push
+            // Notifications) now have two nav links pointing at the same
+            // data-tab, one per section they're relevant to, and both should
+            // highlight together regardless of which one was clicked.
+            document.querySelectorAll(`.sb-nav-item[data-tab="${tabName}"]`).forEach((sbItem) => {
                 sbItem.classList.add('active');
                 // Auto-expand the parent section if collapsed (e.g. when reached via dashboard quick-jump)
                 const group = sbItem.closest('.sb-nav-group');
                 const header = group ? group.previousElementSibling : null;
                 if (header && header.classList.contains('sb-nav-section')) header.classList.remove('collapsed');
-            }
+            });
 
             // Switch tab content
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
