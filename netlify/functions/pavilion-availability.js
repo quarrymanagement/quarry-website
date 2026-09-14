@@ -14,7 +14,7 @@
 // ============================================================================
 
 const { readBlob } = require('./_blobs');
-const { isDateBookable, slotsForDate } = require('./_pavilion-shared');
+const { isDateBookable, slotsForDate, conflictsWithExisting } = require('./_pavilion-shared');
 
 const PAVILIONS = ['1', '2', '3', '4', '5', '6'];
 
@@ -46,7 +46,7 @@ exports.handler = async (event) => {
   const slots = slotsForDate(date).map((time) => {
     const pavilions = {};
     for (const p of PAVILIONS) {
-      pavilions[p] = !existing.some((b) => String(b.pavilion) === p && b.time === time);
+      pavilions[p] = !conflictsWithExisting(existing, p, time);
     }
     return { time, pavilions };
   });

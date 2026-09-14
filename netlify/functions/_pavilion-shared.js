@@ -77,14 +77,43 @@ async function isDateBookable(date) {
   return { ok: true };
 }
 
+// "11:00 AM" -> 11, "3:00 PM" -> 15. Every pavilion slot is a fixed 4-hour
+// block, so two bookings for the same pavilion conflict whenever their
+// blocks overlap AT ALL -- not just when they happen to share the exact
+// same start time. An 11 AM booking runs through 3 PM, so a 1 PM request
+// for the same pavilion has to be rejected too, even though "1:00 PM" !==
+// "11:00 AM" as strings.
+function parseStartHour(timeStr) {
+  const m = String(timeStr || '').match(/(\d+):00\s*([AP]M)/i);
+  if (!m) return null;
+  let h = parseInt(m[1], 10);
+  const ap = m[2].toUpperCase();
+  if (ap === 'PM' && h !== 12) h += 12;
+  if (ap === 'AM' && h === 12) h = 0;
+  return h;
+}
+
+// Pure check against an already-fetched bookings array -- pavilion-availability.js
+// needs this for every pavilion x slot combination on one date and would
+// otherwise re-fetch the same blob dozens of times per request.
+function conflictsWithExisting(bookings, pavilion, time) {
+  const startHour = parseStartHour(time);
+  if (startHour == null) return true; // unparseable time -- refuse rather than risk a false "available"
+  return bookings.some((b) => {
+    if (String(b.pavilion) !== String(pavilion)) return false;
+    const bStart = parseStartHour(b.time);
+    if (bStart == null) return true; // an unparseable existing booking -- don't silently ignore it
+    return startHour < bStart + BLOCK_HOURS && bStart < startHour + BLOCK_HOURS;
+  });
+}
+
 async function isSlotTaken(date, pavilion, time) {
   try {
     const data = await readBlob('pavilion-bookings/' + date);
-    const bookings = (data && data.bookings) || [];
-    return bookings.some((b) => String(b.pavilion) === String(pavilion) && b.time === time);
+    return conflictsWithExisting((data && data.bookings) || [], pavilion, time);
   } catch (_) {
     return false;
   }
 }
 
-module.exports = { isDateBookable, isSlotTaken, isOpenDay, hasWeddingOn, slotsForDate };
+module.exports = { isDateBookable, isSlotTaken, isOpenDay, hasWeddingOn, slotsForDate, conflictsWithExisting };
