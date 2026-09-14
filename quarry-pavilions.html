@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<title>Pavilion Rentals | The Quarry</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --cream: #F5F0E8;
+  --brown-dark: #2C1A0E;
+  --gold: #B8933A;
+  --gold-light: #D4AF6A;
+  --charcoal: #1A1A1A;
+  --border-light: rgba(188,149,106,0.25);
+  --border-mid: rgba(188,149,106,0.5);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Montserrat',sans-serif; background:var(--cream); color:var(--brown-dark); }
+header { background:var(--charcoal); padding:1.5rem; text-align:center; }
+header h1 { font-family:'Playfair Display',serif; color:var(--gold-light); font-size:1.5rem; }
+header p { color:rgba(245,240,232,0.6); font-size:0.7rem; letter-spacing:0.15em; text-transform:uppercase; margin-top:0.25rem; }
+.wrap { max-width:640px; margin:0 auto; padding:2rem 1.25rem 4rem; }
+.intro { text-align:center; margin-bottom:2rem; }
+.intro h2 { font-family:'Playfair Display',serif; font-size:1.6rem; margin-bottom:0.5rem; }
+.intro p { color:#5C3D2E; line-height:1.6; }
+.price-badge { display:inline-block; background:var(--gold); color:var(--charcoal); font-weight:700; padding:0.4rem 1rem; border-radius:999px; font-size:0.85rem; margin-top:0.75rem; }
+.card { background:#fff; border:1px solid var(--border-light); border-radius:10px; padding:1.5rem; margin-bottom:1.25rem; }
+label { display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.4rem; }
+input[type=date], input[type=text], input[type=email], input[type=tel] {
+  width:100%; padding:0.65rem 0.75rem; border:1px solid var(--border-mid); border-radius:6px; font-size:0.95rem; font-family:inherit; margin-bottom:1rem;
+}
+.msg { padding:0.85rem 1rem; border-radius:6px; font-size:0.85rem; margin-bottom:1rem; display:none; }
+.msg.show { display:block; }
+.msg.warn { background:#3a2a12; color:#f0e6d2; border-left:3px solid var(--gold); }
+.slot-block { margin-bottom:1.25rem; }
+.slot-block h4 { font-size:0.8rem; text-transform:uppercase; letter-spacing:0.08em; color:#8B5E3C; margin-bottom:0.5rem; }
+.pav-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:0.5rem; }
+.pav-btn {
+  border:1px solid var(--border-mid); border-radius:6px; padding:0.7rem 0.5rem; background:#fff;
+  cursor:pointer; font-family:inherit; font-size:0.85rem; font-weight:600; text-align:center; transition:0.15s;
+}
+.pav-btn:hover:not(:disabled) { border-color:var(--gold); background:#FAF7F2; }
+.pav-btn.sel { background:var(--gold); border-color:var(--gold); color:var(--charcoal); }
+.pav-btn:disabled { opacity:0.4; cursor:not-allowed; text-decoration:line-through; }
+.summary { background:#FAF7F2; border-left:4px solid var(--gold); padding:1rem 1.25rem; border-radius:4px; margin-bottom:1.25rem; font-size:0.9rem; }
+.summary div { margin:0.2rem 0; }
+#submitBtn { width:100%; background:var(--gold); color:var(--charcoal); border:none; padding:0.9rem; border-radius:6px; font-weight:700; font-size:1rem; cursor:pointer; font-family:inherit; }
+#submitBtn:disabled { opacity:0.5; cursor:not-allowed; }
+#submitBtn:hover:not(:disabled) { background:var(--gold-light); }
+footer { text-align:center; padding:2rem 1rem; color:#8B5E3C; font-size:0.8rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>The Quarry</h1>
+  <p>New Melle, Missouri</p>
+</header>
+
+<div class="wrap">
+  <div class="intro">
+    <h2>Pavilion Rentals</h2>
+    <p>Six private pavilions available Wednesday through Sunday. Each rental includes a server for your event.</p>
+    <div class="price-badge">$100 for 4 hours</div>
+  </div>
+
+  <div class="card">
+    <label for="bookingDate">Select a Date</label>
+    <input type="date" id="bookingDate">
+    <div class="msg warn" id="dateMsg"></div>
+
+    <div id="slotsArea"></div>
+  </div>
+
+  <div class="card" id="detailsCard" style="display:none;">
+    <div class="summary" id="summaryBox"></div>
+    <label for="custName">Full Name</label>
+    <input type="text" id="custName" required>
+    <label for="custEmail">Email</label>
+    <input type="email" id="custEmail" required>
+    <label for="custPhone">Phone</label>
+    <input type="tel" id="custPhone">
+    <button id="submitBtn" onclick="submitBooking()">Reserve &amp; Pay $100 &rarr;</button>
+  </div>
+</div>
+
+<footer>
+  The Quarry &middot; 3960 Highway Z, New Melle, MO 63385 &middot; 636-224-8257
+</footer>
+
+<script>
+var S = { date: null, time: null, pavilion: null };
+
+function pad(n) { return String(n).padStart(2, '0'); }
+function getCentralNow() {
+  var now = new Date();
+  return new Date(now.toLocaleString('en-US', { timeZone: 'America/Chicago' }));
+}
+function getTodayStrCentral() {
+  var c = getCentralNow();
+  return c.getFullYear() + '-' + pad(c.getMonth() + 1) + '-' + pad(c.getDate());
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  var todayStr = getTodayStrCentral();
+  var dateInput = document.getElementById('bookingDate');
+  dateInput.min = todayStr;
+  dateInput.addEventListener('change', function () { loadAvailability(dateInput.value); });
+
+  var p = new URLSearchParams(window.location.search);
+  if (p.get('success')) {
+    document.querySelector('.intro').innerHTML = '<h2>Thank You!</h2><p>Your pavilion is reserved. A confirmation email is on its way — we look forward to seeing you!</p>';
+    document.querySelector('.card').style.display = 'none';
+    history.replaceState({}, '', '/quarry-pavilions.html');
+  } else if (p.get('canceled')) {
+    history.replaceState({}, '', '/quarry-pavilions.html');
+  }
+});
+
+function loadAvailability(date) {
+  S.date = date; S.time = null; S.pavilion = null;
+  document.getElementById('detailsCard').style.display = 'none';
+  var msgEl = document.getElementById('dateMsg');
+  var slotsArea = document.getElementById('slotsArea');
+  msgEl.classList.remove('show');
+  slotsArea.innerHTML = '<p style="color:#8B5E3C;font-size:0.9rem;">Checking availability&hellip;</p>';
+
+  fetch('/.netlify/functions/pavilion-availability?date=' + encodeURIComponent(date))
+    .then(function (r) { return r.json(); })
+    .then(function (body) {
+      if (!body.ok) throw new Error(body.error || 'Could not check availability');
+      if (!body.bookable) {
+        slotsArea.innerHTML = '';
+        msgEl.textContent = body.reason || 'That date is not available.';
+        msgEl.classList.add('show');
+        return;
+      }
+      renderSlots(body.slots);
+    })
+    .catch(function (err) {
+      slotsArea.innerHTML = '';
+      msgEl.textContent = 'Could not load availability — please call (636) 224-8257.';
+      msgEl.classList.add('show');
+    });
+}
+
+function renderSlots(slots) {
+  var slotsArea = document.getElementById('slotsArea');
+  slotsArea.innerHTML = '';
+  slots.forEach(function (slot) {
+    var block = document.createElement('div');
+    block.className = 'slot-block';
+    var h = document.createElement('h4');
+    h.textContent = slot.time + ' – ' + addHours(slot.time, 4);
+    block.appendChild(h);
+    var grid = document.createElement('div');
+    grid.className = 'pav-grid';
+    for (var i = 1; i <= 6; i++) {
+      (function (num) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'pav-btn';
+        btn.textContent = 'Pavilion ' + num;
+        var available = slot.pavilions[String(num)];
+        if (!available) {
+          btn.disabled = true;
+        } else {
+          btn.onclick = function () { selectSlot(slot.time, String(num), btn); };
+        }
+        grid.appendChild(btn);
+      })(i);
+    }
+    block.appendChild(grid);
+    slotsArea.appendChild(block);
+  });
+}
+
+function addHours(timeStr, hours) {
+  var m = timeStr.match(/(\d+):(\d+)\s*([AP]M)/i);
+  if (!m) return '';
+  var h = parseInt(m[1], 10), min = parseInt(m[2], 10), ap = m[3].toUpperCase();
+  if (ap === 'PM' && h !== 12) h += 12;
+  if (ap === 'AM' && h === 12) h = 0;
+  h = (h + hours) % 24;
+  var outAp = h >= 12 ? 'PM' : 'AM';
+  var outH = h % 12 === 0 ? 12 : h % 12;
+  return outH + ':' + pad(min) + ' ' + outAp;
+}
+
+function selectSlot(time, pavilion, btn) {
+  document.querySelectorAll('.pav-btn.sel').forEach(function (b) { b.classList.remove('sel'); });
+  btn.classList.add('sel');
+  S.time = time; S.pavilion = pavilion;
+  document.getElementById('summaryBox').innerHTML =
+    '<div><b>Date:</b> ' + S.date + '</div>' +
+    '<div><b>Time:</b> ' + S.time + ' – ' + addHours(S.time, 4) + '</div>' +
+    '<div><b>Pavilion:</b> ' + S.pavilion + '</div>' +
+    '<div><b>Includes:</b> A server for your event</div>' +
+    '<div style="margin-top:0.5rem;color:#B8933A;font-weight:700;">Total: $100.00</div>';
+  document.getElementById('detailsCard').style.display = 'block';
+  document.getElementById('detailsCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function submitBooking() {
+  var name = document.getElementById('custName').value.trim();
+  var email = document.getElementById('custEmail').value.trim();
+  var phone = document.getElementById('custPhone').value.trim();
+  if (!name) { alert('Please enter your name.'); return; }
+  if (!email || !email.includes('@')) { alert('Please enter a valid email address.'); return; }
+  if (!S.date || !S.time || !S.pavilion) { alert('Please select a date, time, and pavilion.'); return; }
+
+  var btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = 'Redirecting to payment…';
+
+  fetch('/.netlify/functions/pavilion-checkout', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      metadata: {
+        pavilion: S.pavilion, date: S.date, time: S.time,
+        customerName: name, customerEmail: email, customerPhone: phone,
+      }
+    })
+  })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      if (data.error) { alert('Error: ' + data.error); btn.disabled = false; btn.textContent = 'Reserve & Pay $100 →'; return; }
+      window.location.href = data.url;
+    })
+    .catch(function () {
+      alert('Something went wrong. Please call (636) 224-8257.');
+      btn.disabled = false; btn.textContent = 'Reserve & Pay $100 →';
+    });
+}
+</script>
+</body>
+</html>

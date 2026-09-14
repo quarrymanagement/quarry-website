@@ -271,6 +271,103 @@ async function handleGolfBooking(meta, amountStr, paymentId) {
   } catch (e) { console.error('golf store booking:', e.message); }
 }
 
+// Pavilion rentals -- $100 flat, 4 hours, includes a server. Not linked
+// anywhere public; staff hand out quarry-pavilions.html's URL directly.
+// See _pavilion-shared.js for the Wed-Sun + no-wedding-day rules, enforced
+// again here (not just at checkout time) since a webhook can in principle
+// retry or arrive out of order.
+async function handlePavilionBooking(meta, amountStr, paymentId) {
+  const m = meta || {};
+  m.date = m.date || m.eventDate || '';
+  m.time = m.time || m.eventTime || '';
+
+  if (m.customerEmail) {
+    try {
+      await sendGridEmail(
+        m.customerEmail,
+        'Your Pavilion Rental is Confirmed - The Quarry',
+        buildPavilionCustomerHtml(m, amountStr),
+        'bookings@thequarrystl.com', 'The Quarry STL', 'quarry-pavilion-booking'
+      );
+    } catch (e) { console.error('pavilion customer email:', e.message); }
+  }
+
+  try {
+    await sendGridEmail(
+      'management@thequarrystl.com',
+      'New Pavilion Rental - Pavilion ' + (m.pavilion || '?') + ' on ' + (m.date || '?') + ' at ' + (m.time || '?'),
+      buildPavilionOwnerHtml(m, amountStr, paymentId),
+      'bookings@thequarrystl.com', 'The Quarry STL', 'quarry-pavilion-booking'
+    );
+  } catch (e) { console.error('pavilion owner email:', e.message); }
+
+  try {
+    const start = parseHourFromAmPm(m.time);
+    if (start && m.date) {
+      const startIso = buildIsoForCentral(m.date, start.hour, start.minute);
+      let endHour = start.hour + 4, endMin = start.minute;
+      const endIso = buildIsoForCentral(m.date, endHour % 24, endMin);
+      const summary = 'Pavilion ' + (m.pavilion || '?') + ' - ' + (m.customerName || 'Customer');
+      const lines = [];
+      lines.push('Customer: ' + (m.customerName || '-'));
+      lines.push('Email: ' + (m.customerEmail || '-'));
+      if (m.customerPhone) lines.push('Phone: ' + m.customerPhone);
+      lines.push('Pavilion: ' + (m.pavilion || '-'));
+      lines.push('Includes a server');
+      lines.push('Total Paid: ' + amountStr);
+      if (paymentId) lines.push('Square Payment: ' + paymentId);
+      await createCalendarEvent(summary, lines.join('\n'), 'The Quarry, 3960 Highway Z, New Melle, MO 63385', startIso, endIso, m.customerEmail);
+    }
+  } catch (e) { console.error('pavilion calendar:', e.message); }
+
+  try {
+    const dateKey = (m.date || 'unknown').replace(/\//g, '-');
+    const path = 'pavilion-bookings/' + dateKey;
+    const existing = await readBlob(path) || { bookings: [] };
+    let bookings = existing.bookings || [];
+    if (paymentId) bookings = bookings.filter(function (b) { return (b.paymentId || '') !== paymentId; });
+    bookings.push({
+      paymentId: paymentId || '',
+      pavilion: m.pavilion, time: m.time, date: m.date, dateKey: dateKey,
+      customerName: m.customerName, customerEmail: m.customerEmail, customerPhone: m.customerPhone,
+      amountPaid: amountStr,
+      bookedAt: new Date().toISOString(),
+      source: 'square'
+    });
+    await writeBlob(path, { bookings: bookings });
+    console.log('Pavilion booking stored at', path, ':', m.pavilion, m.time);
+  } catch (e) { console.error('pavilion store booking:', e.message); }
+}
+
+function buildPavilionCustomerHtml(m, amount) {
+  return '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">' +
+    '<div style="background:#1A0E08;padding:24px;text-align:center"><h1 style="color:#B8933A;margin:0">The Quarry</h1>' +
+    '<p style="color:#F5F0E8;font-size:0.8rem;letter-spacing:0.15em;margin:4px 0 0">NEW MELLE, MISSOURI</p></div>' +
+    '<div style="padding:32px 24px"><h2 style="color:#2C1A0E">Pavilion Reserved!</h2>' +
+    '<p>Hi ' + (m.customerName || 'there') + ', your pavilion is booked.</p>' +
+    '<div style="background:#FAF7F2;border-left:4px solid #B8933A;padding:16px 20px;margin:20px 0">' +
+    '<p style="margin:4px 0"><b>Pavilion:</b> ' + (m.pavilion || '-') + '</p>' +
+    '<p style="margin:4px 0"><b>Date:</b> ' + (m.date || '-') + '</p>' +
+    '<p style="margin:4px 0"><b>Time:</b> ' + (m.time || '-') + ' (4 hours)</p>' +
+    '<p style="margin:4px 0"><b>Includes:</b> A server for your event</p>' +
+    '<p style="margin:8px 0 4px;color:#B8933A"><b>Total: ' + amount + '</b></p></div>' +
+    '<p>Questions? <a href="tel:6362248257" style="color:#B8933A">636-224-8257</a></p></div>' +
+    '<div style="background:#1A0E08;padding:16px;text-align:center">' +
+    '<p style="color:rgba(255,255,255,0.4);font-size:0.75rem;margin:0">3960 Highway Z, New Melle, MO 63385</p></div></div>';
+}
+
+function buildPavilionOwnerHtml(m, amount, paymentId) {
+  return '<h2 style="color:#B8933A">New Pavilion Rental</h2>' +
+    '<p><b>Name:</b> ' + (m.customerName || '-') + '</p>' +
+    '<p><b>Email:</b> ' + (m.customerEmail || '-') + '</p>' +
+    '<p><b>Phone:</b> ' + (m.customerPhone || '-') + '</p>' +
+    '<p><b>Pavilion:</b> ' + (m.pavilion || '-') + '</p>' +
+    '<p><b>Date:</b> ' + (m.date || '-') + '</p>' +
+    '<p><b>Time:</b> ' + (m.time || '-') + '</p>' +
+    '<p><b>Total:</b> ' + amount + '</p>' +
+    (paymentId ? '<p><b>Square Payment:</b> ' + paymentId + '</p>' : '');
+}
+
 // ============================================================================
 // Event-ticket flow (paid events)
 // ============================================================================
@@ -575,6 +672,8 @@ exports.handler = wrap('square-webhook', async function(event) {
 
         if (meta.bookingType === 'golf') {
           await handleGolfBooking(meta, amountStr, payment.id);
+        } else if (meta.bookingType === 'pavilion') {
+          await handlePavilionBooking(meta, amountStr, payment.id);
         } else if (meta.bookingType === 'event' || meta.eventId) {
           await handleEventTicket(meta, amountStr, payment.id);
         } else {
