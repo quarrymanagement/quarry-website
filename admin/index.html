@@ -2747,7 +2747,9 @@
 
                 <div class="sb-nav-section">System</div>
                 <div class="sb-nav-group">
-                    <div class="sb-nav-item" data-tab="floorplan"><span class="sb-ic">🪑</span><span class="sb-lbl">Floor Plan</span></div>
+                    <!-- Hidden from the sidebar per request -- feature/data untouched, just not
+                         linked to from nav. Remove the "display:none" to bring it back. -->
+                    <div class="sb-nav-item" data-tab="floorplan" style="display:none;"><span class="sb-ic">🪑</span><span class="sb-lbl">Floor Plan</span></div>
                     <div class="sb-nav-item" data-tab="forms"><span class="sb-ic">📝</span><span class="sb-lbl">Website Forms</span></div>
                 </div>
             </nav>
@@ -5716,6 +5718,13 @@
             setupEventListeners();
             setupSchedulingTabs();
             loadData();
+            // The Reservation Inquiries sidebar badge is computed from
+            // ResInqUI's own state, which previously only loaded once the
+            // admin actually clicked into that tab (ResInqUI.onTabSwitch) --
+            // so the badge sat empty/stale on every fresh login until they
+            // visited the tab and hit Refresh. Load it here too, right when
+            // the dashboard itself loads, so the badge is correct immediately.
+            if (window.ResInqUI && typeof ResInqUI.loadAll === 'function') ResInqUI.loadAll();
         }
 
         function setupNavigation() {
