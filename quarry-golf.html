@@ -624,6 +624,11 @@ var booked=[];
 var BLOCKED_DATES=['2026-08-15','2026-08-21','2026-09-18'];
 function isBlockedDate(d){return !!d&&BLOCKED_DATES.indexOf(d)!==-1;}
 
+// Dates open, but later than the normal 11 AM start. Format 'YYYY-MM-DD': 'H:MM AM/PM'
+// (must match a HOURS entry exactly). Slots before this time are disabled that day.
+var LATE_OPEN_DATES={'2026-09-19':'1:00 PM'};
+function lateOpenTime(d){return LATE_OPEN_DATES[d]||null;}
+
 /* Hole-In-One Club — names and month only. The view deliberately exposes no
    payout amounts; the underlying table is not readable from the browser. */
 (function(){
@@ -688,6 +693,7 @@ function renderSlots(){
   var todayStr=getTodayStrCentral();
   var isToday=S.date===todayStr;
   var dateBlocked=isBlockedDate(S.date);
+  var lateOpen=lateOpenTime(S.date);
   grid.innerHTML='';
   HOURS.forEach(function(t){
     var btn=document.createElement('button');
@@ -698,12 +704,14 @@ function renderSlots(){
       // Block current hour and all past hours (e.g. if it's 4:50pm, block 4pm and earlier)
       isPast=slotHour<=centralNow.getHours();
     }
+    var isBeforeLateOpen=lateOpen&&parseHr(t)<parseHr(lateOpen);
     var isTaken=booked.some(function(bk){return bk.time===t&&(!S.bay||bk.bay===S.bay);});
     if(dateBlocked){btn.classList.add('taken');btn.disabled=true;btn.title='Closed for a private event';}
+    else if(isBeforeLateOpen){btn.classList.add('taken');btn.disabled=true;btn.title='Opening at '+lateOpen+' that day';}
     else if(isPast){btn.classList.add('past');btn.disabled=true;btn.title='Time has passed';}
     else if(isTaken){btn.classList.add('taken');btn.disabled=true;btn.title='Already booked';}
     else{btn.onclick=function(){selectTime(t,btn);};}
-    if(S.time===t&&!isPast&&!isTaken&&!dateBlocked)btn.classList.add('sel');
+    if(S.time===t&&!isPast&&!isTaken&&!dateBlocked&&!isBeforeLateOpen)btn.classList.add('sel');
     grid.appendChild(btn);
   });
   var note=document.getElementById('golfBlockedMsg');
@@ -773,6 +781,8 @@ async function submitBooking(){
   if(!date){alert('Please select a date.');return;}
   if(isBlockedDate(date)){alert('The Quarry is closed to the public that day for a private event, so the golf bays are unavailable. Please choose another date.');return;}
   if(!time){alert('Please select a time slot.');return;}
+  var dateLateOpen=lateOpenTime(date);
+  if(dateLateOpen&&parseHr(time)<parseHr(dateLateOpen)){alert('The Quarry isn\'t open yet at that time on '+date+' (opening at '+dateLateOpen+'). Please choose a later time.');return;}
   if(!first||!last){alert('Please enter your full name.');return;}
   if(!email||!email.includes('@')){alert('Please enter a valid email address.');return;}
   if(!players){alert('Please select number of players.');return;}
