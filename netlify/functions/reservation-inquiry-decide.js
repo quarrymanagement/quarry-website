@@ -213,8 +213,15 @@ async function writeVenueBooking(inq) {
     let endHour = t.hour + durationHours, endMinute = t.minute;
     const endsAt = buildIsoForCentral(inq.date, endHour % 24, endMinute);
 
+    // The reservations form's seating options are Back Patio / Turf / Inside --
+    // each maps to a real venue_spaces id now that the form asks for a specific
+    // space rather than a vague "outside". Anything else (an older submission
+    // still saying "Outside"/"No Preference", or the private-events form's
+    // separate venue field) is left unassigned rather than guessed at, so a
+    // wrong guess never creates a false double-booking.
+    const LOCATION_SPACE_MAP = { 'inside': 'building', 'back patio': 'back-patio', 'turf': 'turf' };
     const locKey = String(inq.location || '').trim().toLowerCase();
-    const spaceIds = locKey === 'inside' ? ['building'] : [];
+    const spaceIds = LOCATION_SPACE_MAP[locKey] ? [LOCATION_SPACE_MAP[locKey]] : [];
 
     const row = {
         title: `${inq.occasion || 'Reservation'} — ${inq.name || inq.email}`,

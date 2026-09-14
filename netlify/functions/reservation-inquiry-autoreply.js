@@ -113,7 +113,7 @@ function buildEmail(inq, confirmUrl) {
     if (inq.eventDate) haveRows.push(['Date', fmtDate(inq.eventDate)]); else missing.push('your preferred date');
     if (inq.eventTime) haveRows.push(['Time', inq.eventTime]); else missing.push('a preferred time');
     if (inq.guests) haveRows.push(['Guests', inq.guests]); else missing.push('how many guests');
-    if (inq.location) haveRows.push(['Seating', inq.location]); else missing.push('whether you\'d like to be seated inside or outside');
+    if (inq.location) haveRows.push(['Seating', inq.location]); else missing.push('your seating preference (Back Patio, Turf, or Inside)');
     if (inq.catering) haveRows.push(['Catering', inq.catering === 'Yes' ? 'Requested' : 'Not needed']); else missing.push('whether you\'d like catering');
     if (inq.occasion) haveRows.push(['Occasion', inq.occasion]);
 
