@@ -550,6 +550,9 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
     <a href="#member-form" class="btn-g" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})">Get Started — $29.99/mo</a>
     <a href="#tastings" class="btn-o" onclick="event.preventDefault();document.getElementById('tastings').scrollIntoView({behavior:'smooth'})">Already a Member? RSVP Here</a>
   </div>
+  <p style="margin-top:1.25rem;font-size:0.9rem;">
+    Not a member? <a href="/augusta-wineclub" style="color:var(--gold);font-weight:700;text-decoration:underline;">Buy a single admission to the Sept 17 Augusta tasting — $39.99 for two →</a>
+  </p>
 </div>
 
 <!-- INFO BAR -->
@@ -595,6 +598,23 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
     <div class="slabel">Upcoming Events</div>
     <h2 class="stitle">Wine Tasting Schedule</h2>
     <p class="ssub">Members get priority RSVP access to all tastings. Click any event below to sign up for membership and secure your spot.</p>
+
+    <!-- NON-MEMBER TICKET CTA -->
+    <div style="max-width:760px;margin:2rem auto 0;padding:1.5rem 1.75rem;border:2px solid var(--gold);border-radius:10px;background:rgba(255,255,255,0.6);text-align:center;">
+      <div style="font-size:0.7rem;letter-spacing:0.18em;text-transform:uppercase;font-weight:700;margin-bottom:0.6rem;">Not a Member Yet?</div>
+      <h3 style="margin:0 0 0.6rem;font-size:1.35rem;">You can still join us for the next tasting.</h3>
+      <p style="margin:0 0 1.25rem;font-size:0.95rem;line-height:1.7;">
+        <strong>Thursday, September 17 &middot; 6:00 PM &middot; Augusta Winery.</strong><br>
+        A single <strong>$39.99 admission covers two people</strong> — five to six wines, a food pairing with each,
+        and bottles available to buy at the end of the night. No membership required.
+      </p>
+      <a href="/augusta-wineclub" class="btn-g">Get Tickets — $39.99 for Two</a>
+      <p style="margin:1rem 0 0;font-size:0.8rem;opacity:0.75;">
+        Want priority RSVP and member pricing every month?
+        <a href="#member-form" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})" style="font-weight:700;">Join Rock &amp; Vine for $29.99/mo</a>.
+      </p>
+    </div>
+
     <div class="tastings-grid">
       <a class="tasting-card" href="#" onclick="event.preventDefault();openRsvp('','','')">
         <div class="tasting-card-body">
@@ -670,13 +690,13 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
           <div class="tasting-date-row">
             <div>
               <div style="display:flex;align-items:baseline;gap:0.35rem;">
-                <span class="tasting-day">24</span>
+                <span class="tasting-day">17</span>
                 <span class="tasting-month" style="font-size:0.55rem;padding:0.15rem 0.5rem;">SEP</span>
               </div>
               <div class="tasting-year">2026</div>
             </div>
           </div>
-          <div class="tasting-winery">Chateau Winery</div>
+          <div class="tasting-winery">Augusta Winery</div>
           <div class="tasting-time">&#128341; 6:00 PM &nbsp;&middot;&nbsp; Wine Club Building</div>
           <div class="tasting-cta">Reserve Your Spot</div>
         </div>
@@ -961,17 +981,24 @@ async function submitRsvp() {
       }
       document.getElementById('rsvpSuccess').style.display = 'block';
     } else {
+      var guestTicketCta =
+        '<span style=\"display:block;margin-top:0.9rem;padding-top:0.9rem;border-top:1px solid rgba(0,0,0,0.15);\">' +
+        'You don\'t need a membership to come to this one &mdash; ' +
+        '<a href=\"/augusta-wineclub\" style=\"font-weight:700;text-decoration:underline;\">grab a single admission for $39.99 (covers two people) &rarr;</a>' +
+        '</span>';
       if (data.reason === 'no_account') {
         document.getElementById('rsvpErrorTitle').textContent = 'Email Not Found';
         document.getElementById('rsvpErrorMsg').innerHTML =
           'We couldn\'t find a Rock &amp; Vine membership for <strong>' + email + '</strong>. ' +
           'Make sure you\'re using the same email you subscribed with, or ' +
-          '<a href=\"#member-form\" onclick=\"closeRsvp();document.getElementById(\'member-form\').scrollIntoView({behavior:\'smooth\'})\">join the wine club</a> to get access.';
+          '<a href=\"#member-form\" onclick=\"closeRsvp();document.getElementById(\'member-form\').scrollIntoView({behavior:\'smooth\'})\">join the wine club</a> to get access.' +
+          guestTicketCta;
       } else {
         document.getElementById('rsvpErrorTitle').textContent = 'No Active Membership';
         document.getElementById('rsvpErrorMsg').innerHTML =
           'Your membership may have expired or been cancelled. ' +
-          '<a href=\"#member-form\" onclick=\"closeRsvp();document.getElementById(\'member-form\').scrollIntoView({behavior:\'smooth\'})\">Reactivate here</a>.';
+          '<a href=\"#member-form\" onclick=\"closeRsvp();document.getElementById(\'member-form\').scrollIntoView({behavior:\'smooth\'})\">Reactivate here</a>.' +
+          guestTicketCta;
       }
       document.getElementById('rsvpError').style.display = 'block';
     }
