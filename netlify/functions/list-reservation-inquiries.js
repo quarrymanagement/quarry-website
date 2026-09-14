@@ -135,6 +135,7 @@ function normalize(submission, formName) {
         eventTime: d.time || '',
         guests: d.guests || d.party_size || '',
         location: d.location || d.venue || '',
+        catering: d.catering || '',
         notes: d.notes || d.message || '',
         marketingOptIn: d.marketing_opt_in === 'yes' || d.marketing_opt_in === 'on' || d.marketing_opt_in === true,
         // Netlify dashboard URL for this submission (deep link)

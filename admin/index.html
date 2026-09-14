@@ -3686,6 +3686,7 @@
                         <select id="resInqFilter" style="padding:0.5rem 0.75rem;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:6px;color:var(--text-primary);font-size:0.85rem;">
                             <option value="needs_attention">Needs my attention</option>
                             <option value="all">All inquiries</option>
+                            <option value="awaiting_decision">Awaiting decision (auto-replied)</option>
                             <option value="not_contacted">Not contacted</option>
                             <option value="contacted">Contacted</option>
                             <option value="needs_followup">Needs follow-up</option>
@@ -3693,6 +3694,7 @@
                             <option value="responded">Responded</option>
                             <option value="sent_to_jacqueline">Sent to Jacqueline</option>
                             <option value="confirmed">Confirmed</option>
+                            <option value="date_conflict">Date conflict</option>
                             <option value="lost">Lost</option>
                             <option value="deleted">Deleted</option>
                         </select>
@@ -3787,6 +3789,19 @@
                             <label style="font-size:0.78rem;color:var(--text-muted);">Optional note:</label>
                             <input type="text" id="resInqStatusNote" placeholder='e.g. "Replied with availability for May 10"' style="width:100%;padding:0.5rem;border:1px solid var(--border-subtle);border-radius:6px;background:var(--bg-card);color:var(--text-primary);margin-top:0.25rem;">
                         </div>
+
+                        <hr style="border:none;border-top:1px solid var(--border-subtle);margin:1rem 0;">
+                        <div style="font-weight:600;margin-bottom:0.25rem;">After checking the calendar:</div>
+                        <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.5rem;">
+                            These create the Venue Calendar booking and email the customer automatically
+                            — use "✓ Confirmed" above instead if you already added this one yourself.
+                        </div>
+                        <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+                            <button class="btn-approve" id="resInqAutoConfirm">🗓️ Confirm &amp; Auto-Book</button>
+                            <button class="btn-reject" id="resInqAutoDeny">📅 Date Conflict — Offer Alternate</button>
+                        </div>
+                        <div id="resInqAutoStatus" style="margin-top:0.5rem;font-size:0.82rem;"></div>
+
                         <div id="resInqHistory" style="margin-top:1rem;font-size:0.8rem;color:var(--text-muted);"></div>
 
                         <hr style="border:none;border-top:1px solid var(--border-subtle);margin:1rem 0;">
@@ -13075,8 +13090,8 @@ function hashCode(str) {
             const escHtml = (s) => (s == null ? '' : String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])));
             const fmtDate = (iso) => { if (!iso) return '—'; const d = new Date(iso); return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); };
             const fmtDay = (iso) => { if (!iso) return '—'; try { return new Date(iso.length === 10 ? iso + 'T12:00' : iso).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }); } catch (_) { return iso; } };
-            const STATUS_LABELS = { not_contacted: 'Not Contacted', contacted: 'Contacted', needs_followup: 'Needs Follow-up', contacted_2: 'Followed Up', responded: 'Responded', sent_to_jacqueline: 'Sent to Jacqueline', confirmed: 'Confirmed', lost: 'Lost' };
-            const STATUS_COLORS = { not_contacted: '#b45309', contacted: '#2563eb', needs_followup: '#dc2626', contacted_2: '#7c3aed', responded: '#7c3aed', sent_to_jacqueline: '#be185d', confirmed: '#16a34a', lost: '#64748b' };
+            const STATUS_LABELS = { not_contacted: 'Not Contacted', contacted: 'Contacted', needs_followup: 'Needs Follow-up', contacted_2: 'Followed Up', responded: 'Responded', sent_to_jacqueline: 'Sent to Jacqueline', confirmed: 'Confirmed', lost: 'Lost', awaiting_decision: 'Awaiting Decision', date_conflict: 'Date Conflict' };
+            const STATUS_COLORS = { not_contacted: '#b45309', contacted: '#2563eb', needs_followup: '#dc2626', contacted_2: '#7c3aed', responded: '#7c3aed', sent_to_jacqueline: '#be185d', confirmed: '#16a34a', lost: '#64748b', awaiting_decision: '#d97706', date_conflict: '#dc2626' };
             // Statuses that mean "I've actually reached out at least once" —
             // not_contacted/needs_followup are default/no-action states (see
             // list-reservation-inquiries.js's defaultStatus), so they don't count.
@@ -13179,7 +13194,7 @@ function hashCode(str) {
             function updateBadge() {
                 const badge = $('resInqBadge');
                 if (!badge) return;
-                const n = state.inquiries.filter((i) => !i.hidden && ['not_contacted', 'needs_followup', 'responded'].includes(i.status)).length;
+                const n = state.inquiries.filter((i) => !i.hidden && ['not_contacted', 'needs_followup', 'responded', 'awaiting_decision'].includes(i.status)).length;
                 if (n > 0) { badge.textContent = String(n); badge.style.display = ''; }
                 else { badge.style.display = 'none'; }
             }
@@ -13222,7 +13237,7 @@ function hashCode(str) {
                         (i.email || '').toLowerCase().includes(search)
                     );
                 } else if (filter === 'needs_attention') {
-                    list = visible.filter((i) => ['not_contacted', 'needs_followup', 'responded'].includes(i.status));
+                    list = visible.filter((i) => ['not_contacted', 'needs_followup', 'responded', 'awaiting_decision'].includes(i.status));
                 } else if (filter === 'all') {
                     list = visible;
                 } else if (filter === 'contacted') {
@@ -13292,6 +13307,8 @@ function hashCode(str) {
                 state.current = inq;
                 const modal = $('resInqModal');
                 modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false');
+                const autoStatusEl = $('resInqAutoStatus');
+                if (autoStatusEl) autoStatusEl.textContent = '';
 
                 $('resInqModalTitle').textContent = inq.name;
                 $('resInqModalSub').innerHTML = `${statusPill(inq.status)}<span style="color:var(--text-muted);">${escHtml(inq.formLabel)} · received ${escHtml(fmtDate(inq.submittedAt))}</span>`;
@@ -13305,6 +13322,7 @@ function hashCode(str) {
                     inq.eventTime ? ['Event Time', escHtml(inq.eventTime)] : null,
                     ['Party Size', escHtml(inq.guests || '—')],
                     inq.location ? ['Location', escHtml(inq.location)] : null,
+                    inq.catering ? ['Catering', inq.catering === 'Yes' ? '✓ Requested' : 'Not requested'] : null,
                     ['Marketing Opt-In', inq.marketingOptIn ? '✓ Yes' : '✗ No'],
                     inq.notes ? ['Notes', `<div style="margin-top:0.25rem;padding:0.5rem;background:var(--bg-elevated);border-radius:4px;white-space:pre-wrap;">${escHtml(inq.notes)}</div>`] : null,
                 ].filter(Boolean);
@@ -13446,6 +13464,50 @@ function hashCode(str) {
                 }
             }
 
+            // "Confirm & Auto-Book" / "Date Conflict" — the other half of the
+            // automated inquiry flow (reservation-inquiry-autoreply.js sends the
+            // instant "let me check" email; this is what actually happens once a
+            // human has looked at the calendar and made the call).
+            // Confirm creates the real Venue Calendar booking from the inquiry's
+            // captured fields and emails the customer they're booked. Deny emails
+            // asking for an alternate date. Neither of these guesses availability
+            // on its own — that's the point of the button existing at all.
+            async function decideAuto(decision) {
+                if (!state.current) return;
+                const inq = state.current;
+                if (!inq.email) { alert('This inquiry has no email address to send to.'); return; }
+                const label = decision === 'confirm' ? 'Confirm & Auto-Book' : 'Date Conflict';
+                if (!confirm(`${label} for ${inq.name}${inq.eventDate ? ' — ' + inq.eventDate : ''}? This emails them right away.`)) return;
+
+                const statusEl = $('resInqAutoStatus');
+                if (statusEl) { statusEl.textContent = 'Working…'; statusEl.style.color = 'var(--text-muted)'; }
+                try {
+                    const r = await fetch(`${FN}/reservation-inquiry-decide`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            token: localStorage.getItem('quarryAdminToken') || '',
+                            submissionId: inq.id, decision,
+                            name: inq.name, firstName: inq.firstName, email: inq.email, phone: inq.phone,
+                            occasion: inq.occasion, formName: inq.formName,
+                            date: inq.eventDate, time: inq.eventTime, guests: inq.guests,
+                            location: inq.location, catering: inq.catering, notes: inq.notes,
+                            by: (localStorage.getItem('quarryAdminRole') || 'admin'),
+                        }),
+                    });
+                    const body = await r.json();
+                    if (!r.ok || !body.ok) throw new Error(body.error || 'request failed');
+                    const newStatus = decision === 'confirm' ? 'confirmed' : 'date_conflict';
+                    inq.status = newStatus;
+                    render();
+                    openModal(inq.id);
+                    if (statusEl) { statusEl.textContent = decision === 'confirm' ? '✓ Booked and customer emailed.' : 'Customer emailed asking for another date.'; statusEl.style.color = '#16a34a'; }
+                    if (typeof showToast === 'function') showToast(decision === 'confirm' ? 'Booking created and customer notified' : 'Customer notified of date conflict');
+                } catch (err) {
+                    if (statusEl) { statusEl.textContent = 'Failed: ' + err.message; statusEl.style.color = '#dc2626'; }
+                    alert('Could not complete this: ' + err.message);
+                }
+            }
+
             // Delete/restore is a separate axis from status (see
             // update-reservation-status.js) — a duplicate or junk inquiry gets
             // hidden from every view without losing its status/history, and can
@@ -13482,6 +13544,8 @@ function hashCode(str) {
                 $('resInqModal')?.addEventListener('click', (e) => { if (e.target.id === 'resInqModal') closeModal(); });
                 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('resInqModal')?.classList.contains('open')) closeModal(); });
                 document.querySelectorAll('#resInqModal [data-status]').forEach((btn) => btn.addEventListener('click', () => setStatus(btn.dataset.status)));
+                $('resInqAutoConfirm')?.addEventListener('click', () => decideAuto('confirm'));
+                $('resInqAutoDeny')?.addEventListener('click', () => decideAuto('deny'));
                 $('resInqReplyToggle')?.addEventListener('click', () => {
                     const box = $('resInqReplyBox');
                     box.classList.toggle('hidden');

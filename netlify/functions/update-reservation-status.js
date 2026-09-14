@@ -10,7 +10,8 @@
 // AUTH: requires an admin OR restricted-staff session token (same dual scheme
 // as verify-admin-password.js) — previously this endpoint had no auth at all.
 //
-// Status values: not_contacted | contacted | needs_followup | contacted_2 | responded | sent_to_jacqueline | confirmed | lost
+// Status values: not_contacted | contacted | needs_followup | contacted_2 | responded |
+// sent_to_jacqueline | confirmed | lost | awaiting_decision | date_conflict
 // ============================================================================
 
 const fetch = require('node-fetch');
@@ -55,7 +56,12 @@ function verifyAnyToken(token) {
 
 const VALID_STATUSES = new Set([
     'not_contacted', 'contacted', 'needs_followup',
-    'contacted_2', 'responded', 'sent_to_jacqueline', 'confirmed', 'lost'
+    'contacted_2', 'responded', 'sent_to_jacqueline', 'confirmed', 'lost',
+    // awaiting_decision: the instant auto-reply went out (reservation-inquiry-autoreply.js)
+    // and the inquiry is now sitting in the admin's queue waiting on a Confirm/Deny click.
+    // date_conflict: denied because the calendar shows something else that day; the
+    // "want another date?" email already went out (reservation-inquiry-decide.js).
+    'awaiting_decision', 'date_conflict'
 ]);
 
 const CORS = {
