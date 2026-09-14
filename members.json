@@ -1388,7 +1388,7 @@
       "email": "tandrawilson69@gmail.com",
       "phone": "15572186890",
       "birthday": "1979-05-17",
-      "passwordHash": "4acc873a038c861be115c778e6170ed4:857071a72417b29fbb4c221d3601b922d45d9ab613f427dd31645d7444e781c0355047a3f5e9d5e5e96b50f0ff4c6b20e7b6ee0d2dbe6bbe7760fc5208009d05",
+      "passwordHash": "967cfbf7846ff464a686b4a45e34c17a:dc8d3fbb8c0ae3eeb30c3eaed237fcbf248f1afb3736c64189b0173180f8f15976feae8f4b7cbc16dee75c7bb1c79ca1f39b75e3e11af6201e78b2b6c5df737e",
       "joinedAt": "2026-07-19T18:28:52.152Z",
       "lastVisitAt": null,
       "tier": "standard",
@@ -1407,6 +1407,12 @@
           "source": "signup",
           "delta": 260,
           "note": "Welcome bonus 250 + email opt-in +10 + sms opt-in +0"
+        },
+        {
+          "at": "2026-09-14T13:17:41.573Z",
+          "action": "password-reset",
+          "by": "self",
+          "note": "Password reset via 6-digit email code"
         }
       ],
       "__source": "legacy"
@@ -2391,7 +2397,7 @@
       ]
     }
   ],
-  "lastUpdated": "2026-09-13",
+  "lastUpdated": "2026-09-14",
   "schemaVersion": 1,
   "fields": {
     "id": "Internal stable id (e.g. m_1730468400_3a2)",
