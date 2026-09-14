@@ -76,7 +76,19 @@ exports.handler = async (event) => {
     // hit Stripe). Walk each day in the range and read the blob via the SDK
     // helper (the prior direct REST call was silently returning empty data).
     {
-        const seenSessions = new Set(all.map(b => b.sessionId));
+        // Identity here has to be paymentId-or-sessionId, not sessionId alone.
+        // The site switched golf-bay checkout from Stripe to Square back on
+        // 2026-08-10 (square-checkout.js replaced create-checkout.js), and
+        // square-webhook.js writes real, paid Square bookings into this same
+        // golf-bookings/{date} blob with a `paymentId` field -- it never had
+        // a `sessionId` at all. The old filter here only kept blob rows whose
+        // `sessionId` started with "admin-" or had paymentMethod
+        // "pay-at-venue", on the assumption Stripe's own list already had
+        // everything else. Every real Square-paid booking has neither of
+        // those, so `!b.sessionId` was true first and the row was dropped
+        // before the admin/pay-at-venue check even ran -- every paid golf
+        // booking since the Square switch has been invisible on this page.
+        const seenIds = new Set(all.map(b => b.sessionId));
         let cursor = startDate;
         let dayCount = 0;
         while (cursor <= endDate && dayCount < 365) {
@@ -84,15 +96,14 @@ exports.handler = async (event) => {
                 const data = await readBlob('golf-bookings/' + cursor);
                 if (data) {
                     for (const b of (data.bookings || [])) {
-                        if (!b.sessionId || seenSessions.has(b.sessionId)) continue;
-                        // Only include blob-only records (e.g. pay-at-venue / admin-added).
-                        // Stripe-paid records were already added above.
-                        if (!(String(b.sessionId).startsWith('admin-') || String(b.paymentMethod) === 'pay-at-venue')) continue;
-                        seenSessions.add(b.sessionId);
+                        const id = b.paymentId || b.sessionId || '';
+                        if (!id || seenIds.has(id)) continue;
+                        seenIds.add(id);
+                        const isSquare = b.source === 'square' || !!b.paymentId;
                         all.push({
-                            sessionId:       b.sessionId,
+                            sessionId:       id,
                             amountTotal:     0,
-                            amountPaid:      b.amountPaid || 'Pay at venue',
+                            amountPaid:      b.amountPaid || (isSquare ? '' : 'Pay at venue'),
                             currency:        'usd',
                             createdAt:       b.bookedAt || new Date().toISOString(),
                             customerName:    b.customerName    || '',
@@ -106,8 +117,8 @@ exports.handler = async (event) => {
                             extraBalls:      parseInt(b.extraBalls || '0', 10),
                             extraBallsPrice: parseInt(b.extraBallsPrice || '0', 10),
                             coupon:          '',
-                            paymentMethod:   b.paymentMethod || 'pay-at-venue',
-                            addedBy:         b.addedBy || 'admin',
+                            paymentMethod:   b.paymentMethod || (isSquare ? 'square' : 'pay-at-venue'),
+                            addedBy:         b.addedBy || (isSquare ? '' : 'admin'),
                             notes:           b.notes || ''
                         });
                     }
