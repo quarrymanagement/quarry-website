@@ -470,6 +470,18 @@
                 hlContainer.appendChild(span);
             }
 
+            // Wine Club upsell — only on wine-tasting events, pointing anyone buying a
+            // one-off ticket at membership instead, where tastings are already included.
+            if (Array.isArray(evt.tags) && evt.tags.indexOf('Wine Club') !== -1) {
+                var wcBox = document.createElement('div');
+                wcBox.className = 'event-additional';
+                wcBox.style.cssText = 'margin-top:20px;border:1px solid #d4af37;border-radius:8px;padding:16px 20px;background:rgba(212,175,55,0.06);';
+                wcBox.innerHTML = '<p style="margin:0;font-size:0.95rem;line-height:1.6;">' +
+                    '<strong>Come to these every month?</strong> <a href="/quarry-wineclub.html" style="color:#9a7b2a;font-weight:700;text-decoration:underline;">Join the Rock &amp; Vine Wine Club and save</a> — ' +
+                    'members get priority RSVP and tastings included for $29.99/mo instead of paying per event.</p>';
+                hlContainer.insertAdjacentElement('afterend', wcBox);
+            }
+
             // Flyer image
             if (evt.image) {
                 var flyer = document.getElementById('eventFlyer');
