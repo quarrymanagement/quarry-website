@@ -27147,8 +27147,8 @@
     "emailStatus": "Subscribed",
     "smsStatus": "",
     "source": "Site Members",
-    "lastActivity": "",
-    "lastActivityDate": "",
+    "lastActivity": "Form: reservations",
+    "lastActivityDate": "2026-09-14T18:28:27.486Z",
     "address": {
       "street": "",
       "city": "",
@@ -27156,8 +27156,27 @@
       "zip": "",
       "country": ""
     },
-    "events": [],
-    "tags": []
+    "events": [
+      {
+        "type": "reservations",
+        "timestamp": "2026-09-14T18:28:27.486Z",
+        "marketingOptIn": false,
+        "details": {
+          "occasion": "Birthday",
+          "date": "2026-10-10",
+          "time": "7:00 PM",
+          "guests": "8",
+          "location": "Outside",
+          "catering": "No",
+          "notes": "THIS IS A TEST SUBMISSION to verify the automated reservation flow end to end. Safe to ignore/delete.",
+          "ip": "129.228.8.61",
+          "user_agent": "curl/8.7.1"
+        }
+      }
+    ],
+    "tags": [
+      "Subscribed"
+    ]
   },
   {
     "firstName": "",
