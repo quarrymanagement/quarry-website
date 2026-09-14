@@ -121,23 +121,34 @@ exports.handler = async (event) => {
     try { body = JSON.parse(event.body || '{}'); }
     catch (_) { return respond(400, { ok: false, error: 'Invalid JSON' }); }
 
+    // A handful of admin panels (Golf Jackpot, Notices, Manage Rewards, the
+    // Supabase-backed Members list) gate on a completely separate shared
+    // secret (x-admin-secret / ADMIN_PUSH_SECRET) that nothing ever actually
+    // set for the browser -- each one shipped with its own one-time prompt()
+    // asking the admin to type in a value nobody had, so those panels just
+    // failed silently (or, for the two with a visible error, kept re-nagging
+    // every visit). Riding it along on a real login/session-restore means
+    // any authenticated admin or staff session already has it, with nothing
+    // to type in and nothing left to forget.
+    const pushSecret = process.env.ADMIN_PUSH_SECRET || null;
+
     // Allow {action:'verify', token} for session restoration
     if (body.action === 'verify' && body.token) {
         const result = verifyAnyToken(body.token);
-        return respond(200, { ok: result.ok, role: result.role || null });
+        return respond(200, { ok: result.ok, role: result.role || null, pushSecret: result.ok ? pushSecret : null });
     }
 
     const password = body.password || '';
 
     if (sha256(password) === HASH) {
-        return respond(200, { ok: true, token: makeOwnerToken(), role: 'owner' });
+        return respond(200, { ok: true, token: makeOwnerToken(), role: 'owner', pushSecret });
     }
 
     for (const acct of STAFF_ACCOUNTS) {
         if (acct.passwordHash && sha256(password) === acct.passwordHash) {
             const token = makeStaffToken(acct.role);
             if (!token) break; // STAFF_SESSION_SECRET not configured
-            return respond(200, { ok: true, token, role: acct.role });
+            return respond(200, { ok: true, token, role: acct.role, pushSecret });
         }
     }
 

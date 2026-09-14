@@ -5582,6 +5582,9 @@
                 if (body.ok) {
                     sessionStorage.setItem('quarryAuth', 'true');
                     if (body.role) localStorage.setItem('quarryAdminRole', body.role);
+                    // See the login-submit handler below for why this rides
+                    // along here too, not just on a fresh password entry.
+                    if (body.pushSecret) localStorage.setItem('quarryAdminPushSecret', body.pushSecret);
                     app.authenticated = true;
                     const overlay = document.getElementById('loginOverlay');
                     if (overlay) overlay.classList.add('hidden');
@@ -5611,6 +5614,14 @@
                         if (body.token) localStorage.setItem('quarryAdminToken', body.token);
                         if (body.role) localStorage.setItem('quarryAdminRole', body.role);
                         else localStorage.removeItem('quarryAdminRole');
+                        // Golf Jackpot / Notices / Manage Rewards / the Members list all
+                        // gate on this separate shared secret via their own x-admin-secret
+                        // header. It used to be nothing more than a browser prompt() asking
+                        // the admin to type in a value nobody had, so those panels either
+                        // failed silently or kept re-nagging on every visit. The server now
+                        // hands it back on a real login, so any authenticated session just
+                        // has it -- nothing to type in, nothing to forget.
+                        if (body.pushSecret) localStorage.setItem('quarryAdminPushSecret', body.pushSecret);
                         sessionStorage.setItem('quarryAuth', 'true');
                         app.authenticated = true;
                         // Force-reveal app so even if showApp/initializeApp throws, user lands on dashboard
