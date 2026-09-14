@@ -13499,6 +13499,14 @@ function hashCode(str) {
                     });
                     const body = await r.json();
                     if (!r.ok || !body.ok) throw new Error(body.error || 'request failed');
+                    if (body.warning) {
+                        // Booking/email side succeeded but the status write didn't stick --
+                        // don't lie about it locally; leave inq.status alone so the list still
+                        // shows its real (stale) status until it's fixed manually.
+                        if (statusEl) { statusEl.textContent = '⚠️ ' + body.warning; statusEl.style.color = '#d97706'; }
+                        alert(body.warning);
+                        return;
+                    }
                     const newStatus = decision === 'confirm' ? 'confirmed' : 'date_conflict';
                     inq.status = newStatus;
                     render();

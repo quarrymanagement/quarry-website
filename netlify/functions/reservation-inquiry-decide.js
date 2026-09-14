@@ -139,13 +139,13 @@ function confirmedEmail(inq) {
     const catering = inq.catering === 'Yes'
         ? '<p>Since you requested catering, here\'s our Event &amp; Catering menu: ' +
           '<a href="https://thequarrystl.com/quarry-catering.html" style="color:#B8933A">View Catering Menu &rarr;</a></p>'
-        : '';
+        : '<p>If you\'d like to add catering, just let us know and we\'ll send over our Event &amp; Catering menu.</p>';
 
     return emailShell('You\'re Confirmed!',
         `<p>Hi ${esc(inq.firstName || inq.name || 'there')}, thank you for confirming! After checking, we have your reservation booked.</p>` +
         `<div style="background:#FAF7F2;border-left:4px solid #B8933A;padding:16px 20px;margin:20px 0">${rows}</div>` +
         catering +
-        '<p>Please let us know if there\'s anything else you need or any special requests!</p>' +
+        '<p>Is there any other detail or anything else you need from us? Just reply to this email and let us know — we\'re happy to help with any special requests.</p>' +
         '<p>Questions? Call us at <a href="tel:6362248257" style="color:#B8933A">636-224-8257</a>.</p>'
     );
 }
@@ -244,11 +244,29 @@ async function writeVenueBooking(inq) {
     return body;
 }
 
+// This used to fire-and-forget: it never checked the response, so if it
+// failed (a 409 from a concurrent writer to reservations_status.json,
+// a network blip, anything) the booking would already be created and the
+// customer already emailed "you're confirmed", but the inquiry itself would
+// silently stay stuck at its old status forever -- exactly the "booking
+// exists but Reservation Inquiries never shows it as confirmed" symptom.
+// Now retries once, and the caller gets back whether it actually stuck.
 async function setStatus(token, submissionId, status, note, by) {
-    await fetch(`${SITE_URL}/.netlify/functions/update-reservation-status`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, submissionId, status, note, by }),
-    });
+    for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+            const r = await fetch(`${SITE_URL}/.netlify/functions/update-reservation-status`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token, submissionId, status, note, by }),
+            });
+            const respBody = await r.json().catch(() => ({}));
+            if (r.ok && respBody.ok) return { ok: true };
+            if (attempt === 0) { await new Promise((res) => setTimeout(res, 400)); continue; }
+            return { ok: false, error: respBody.error || `HTTP ${r.status}` };
+        } catch (err) {
+            if (attempt === 0) { await new Promise((res) => setTimeout(res, 400)); continue; }
+            return { ok: false, error: err.message };
+        }
+    }
 }
 
 exports.handler = async (event) => {
@@ -271,14 +289,26 @@ exports.handler = async (event) => {
     try {
         if (decision === 'deny') {
             await sendGridEmail(body.email, 'About Your Requested Date — The Quarry', deniedEmail(body));
-            await setStatus(body.token, submissionId, 'date_conflict', 'Date not available; asked for an alternate.', body.by);
+            const statusResult = await setStatus(body.token, submissionId, 'date_conflict', 'Date not available; asked for an alternate.', body.by);
+            if (!statusResult.ok) {
+                return respond(200, {
+                    ok: true, decision: 'deny',
+                    warning: `The customer was emailed, but the inquiry's status didn't save (${statusResult.error}). Set it to "Date conflict" manually.`,
+                });
+            }
             return respond(200, { ok: true, decision: 'deny' });
         }
 
         // confirm
         const booking = await writeVenueBooking(body);
         await sendGridEmail(body.email, 'You\'re Confirmed! — The Quarry', confirmedEmail(body));
-        await setStatus(body.token, submissionId, 'confirmed', `Booked in Venue Calendar (auto): "${booking.booking && booking.booking.title}"`, body.by);
+        const statusResult = await setStatus(body.token, submissionId, 'confirmed', `Booked in Venue Calendar (auto): "${booking.booking && booking.booking.title}"`, body.by);
+        if (!statusResult.ok) {
+            return respond(200, {
+                ok: true, decision: 'confirm', booking: booking.booking,
+                warning: `The booking was created and the customer was emailed, but the inquiry's status didn't save (${statusResult.error}). Set it to "Confirmed" manually.`,
+            });
+        }
         return respond(200, { ok: true, decision: 'confirm', booking: booking.booking });
     } catch (err) {
         console.error('reservation-inquiry-decide error:', err.message, err.details || '');
