@@ -30,7 +30,11 @@
 //   - Emails the customer that they're booked.
 //
 // decision: 'deny'
-//   - Marks the inquiry 'date_conflict'.
+//   - Marks the inquiry 'needs_followup' -- it lands right back in the main
+//     Reservation Inquiries queue (not a dead-end status of its own) so staff
+//     know they're waiting on the customer to name a second date. The
+//     "Select Another Date & Confirm" button in the admin panel re-runs the
+//     confirm flow above with the new date once the customer replies.
 //   - Emails the customer that the date's not available and asks for an
 //     alternate.
 // ============================================================================
@@ -289,11 +293,11 @@ exports.handler = async (event) => {
     try {
         if (decision === 'deny') {
             await sendGridEmail(body.email, 'About Your Requested Date — The Quarry', deniedEmail(body));
-            const statusResult = await setStatus(body.token, submissionId, 'date_conflict', 'Date not available; asked for an alternate.', body.by);
+            const statusResult = await setStatus(body.token, submissionId, 'needs_followup', 'Date not available; asked for an alternate — awaiting a second date from the customer.', body.by);
             if (!statusResult.ok) {
                 return respond(200, {
                     ok: true, decision: 'deny',
-                    warning: `The customer was emailed, but the inquiry's status didn't save (${statusResult.error}). Set it to "Date conflict" manually.`,
+                    warning: `The customer was emailed, but the inquiry's status didn't save (${statusResult.error}). Set it to "Needs Follow-up" manually.`,
                 });
             }
             return respond(200, { ok: true, decision: 'deny' });

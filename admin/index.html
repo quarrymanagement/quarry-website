@@ -2717,6 +2717,7 @@
                 <div class="sb-nav-section">Reservations</div>
                 <div class="sb-nav-group">
                     <div class="sb-nav-item" data-tab="potential"><span class="sb-ic">📥</span><span class="sb-lbl">Reservation Inquiries</span><span id="resInqBadge" class="sb-badge" style="display:none;">0</span></div>
+                    <div class="sb-nav-item" data-tab="resInqPending"><span class="sb-ic">🗓️</span><span class="sb-lbl">Pending Approvals</span><span id="resInqPendingBadge" class="sb-badge" style="display:none;">0</span></div>
                     <div class="sb-nav-item" data-tab="confirmed"><span class="sb-ic">✓</span><span class="sb-lbl">Confirmed Bookings</span></div>
                 </div>
 
@@ -3805,6 +3806,15 @@
                         </div>
                         <div id="resInqAutoStatus" style="margin-top:0.5rem;font-size:0.82rem;"></div>
 
+                        <!-- Only shown when this inquiry is sitting at needs_followup because a
+                             date conflict was already declined once (see openModal's toggle) --
+                             once the customer replies with a new date, this re-runs the same
+                             Confirm & Auto-Book flow with the corrected date instead of the
+                             original one. -->
+                        <div id="resInqSelectDateBox" class="hidden" style="margin-top:0.75rem;">
+                            <button class="btn-secondary" id="resInqSelectDateBtn" style="border-color:#B8933A;color:#8a6d1f;">📅 Select Another Date &amp; Confirm</button>
+                        </div>
+
                         <div id="resInqHistory" style="margin-top:1rem;font-size:0.8rem;color:var(--text-muted);"></div>
 
                         <hr style="border:none;border-top:1px solid var(--border-subtle);margin:1rem 0;">
@@ -3832,6 +3842,25 @@
                         <a id="resInqNetlifyLink" href="#" target="_blank" class="btn-secondary" style="text-decoration:none;font-size:0.78rem;">View in Netlify</a>
                     </div>
                 </div>
+            </div>
+
+            <!-- ========================================================
+                 PENDING APPROVALS TAB — inquiries the customer has
+                 confirmed interest in (clicked "check availability" in the
+                 auto-reply email) and that now need a Confirm/Deny decision.
+                 Populated by ResInqUI's renderPending(), kept in sync with
+                 the same state.inquiries the Reservation Inquiries tab uses.
+                 ======================================================== -->
+            <div id="resInqPendingTab" class="tab-content">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.5rem;">
+                    <div>
+                        <h2 style="margin:0;">Pending Approvals</h2>
+                        <p style="margin:0.25rem 0 0;color:var(--text-muted);font-size:0.85rem;">
+                            Customers who confirmed they still want their date — check the calendar and Confirm or Deny each one.
+                        </p>
+                    </div>
+                </div>
+                <div id="resInqPendingList" style="margin-top:1rem;display:flex;flex-direction:column;gap:0.75rem;"></div>
             </div>
 
             <!-- ========================================================
@@ -6103,7 +6132,57 @@
                 }
                 if (!data.success) throw new Error(data.error || 'Unknown error');
 
-                app.confirmedEvents = data.events || [];
+                let events = data.events || [];
+
+                // ALSO pull from the newer Venue Calendar system (venue_bookings,
+                // Supabase) -- this is where reservation-inquiry-decide.js's
+                // "Confirm & Auto-Book" and the Venue Calendar's own "Add Booking"
+                // actually write to, and it's a completely separate system from
+                // the Google Sheet / Calendar / Gmail chain above, which nothing
+                // in the newer booking flow ever touches. Without this merge, a
+                // reservation confirmed through the new automated flow (or added
+                // directly on the Venue Calendar) never showed up here at all.
+                // 31 days is venue-day-view's own max per call.
+                try {
+                    const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Chicago' });
+                    const vr = await fetch(`/.netlify/functions/venue-day-view?token=${encodeURIComponent(localStorage.getItem('quarryAdminToken') || '')}&start=${todayStr}&days=31`);
+                    if (vr.ok) {
+                        const vd = await vr.json();
+                        const seenIds = new Set(events.map((e) => e.id));
+                        for (const b of (vd.bookings || [])) {
+                            if (b.status === 'cancelled' || seenIds.has(b.id)) continue;
+                            events.push({
+                                id: b.id,
+                                summary: b.title || '(No title)',
+                                start: b.starts_at,
+                                end: b.ends_at,
+                                location: (b.direct_spaces || []).join(', '),
+                                status: b.status,
+                                contact: {
+                                    name: b.contact_name || '',
+                                    email: b.contact_email || '',
+                                    phone: b.contact_phone || '',
+                                    guests: b.guest_count || '',
+                                    occasion: b.occasion || '',
+                                },
+                                attendees: [],
+                                htmlLink: '',
+                                eventType: b.event_type || '',
+                                catering: b.catering_required ? 'Yes' : '',
+                                notes: b.notes || '',
+                                _venueBooking: true,
+                            });
+                        }
+                    }
+                } catch (venueErr) {
+                    console.error('Venue Calendar merge failed:', venueErr.message);
+                }
+
+                // Chronological, oldest first -- "bouncing around" was every source
+                // landing in whatever order it happened to return, not by date.
+                events.sort((a, b) => new Date(a.start || 0) - new Date(b.start || 0));
+
+                app.confirmedEvents = events;
                 app.confirmedSource = source;
 
                 // Auto-move past confirmed events into CRM as customers
@@ -13202,12 +13281,73 @@ function hashCode(str) {
                 else { badge.style.display = 'none'; }
             }
 
+            // Pending Approvals — a focused view of exactly the inquiries a
+            // customer has confirmed interest in (clicked "check availability")
+            // and that now need a Confirm/Deny click. Kept in sync automatically
+            // since render() calls this every time state.inquiries changes.
+            function renderPending(visible) {
+                const list = $('resInqPendingList');
+                const badge = $('resInqPendingBadge');
+                if (!list) return; // panel not on this page load yet
+
+                const pending = (visible || state.inquiries.filter((i) => !i.hidden))
+                    .filter((i) => i.status === 'awaiting_decision');
+
+                if (badge) {
+                    if (pending.length > 0) { badge.textContent = String(pending.length); badge.style.display = ''; }
+                    else badge.style.display = 'none';
+                }
+
+                if (!pending.length) {
+                    list.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--text-muted);">🎉 Nothing waiting on a decision right now.</div>';
+                    return;
+                }
+
+                list.innerHTML = pending.map((inq) => {
+                    const details = [
+                        inq.occasion,
+                        inq.eventDate ? fmtDay(inq.eventDate) : null,
+                        inq.eventTime,
+                        inq.guests ? `${inq.guests} guests` : null,
+                        inq.location,
+                        inq.catering === 'Yes' ? 'Catering requested' : null,
+                    ].filter(Boolean).map(escHtml).join(' · ');
+                    return `
+                        <div style="border:1px solid var(--border-subtle);border-radius:8px;padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;background:var(--bg-card);">
+                            <div>
+                                <div style="font-weight:600;">${escHtml(inq.name)}</div>
+                                <div style="font-size:0.82rem;color:var(--text-muted);margin-top:0.15rem;">${details}</div>
+                                <div style="font-size:0.78rem;color:var(--text-muted);margin-top:0.15rem;">${escHtml(inq.email)}</div>
+                            </div>
+                            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                                <button class="btn-secondary" onclick="ResInqUI.openModal('${inq.id}')">View Details</button>
+                                <button class="btn-approve" data-pending-confirm="${escHtml(inq.id)}">🗓️ Confirm &amp; Auto-Book</button>
+                                <button class="btn-reject" data-pending-deny="${escHtml(inq.id)}">📅 Date Conflict</button>
+                            </div>
+                        </div>`;
+                }).join('');
+
+                list.querySelectorAll('[data-pending-confirm]').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        const inq = state.inquiries.find((x) => x.id === btn.dataset.pendingConfirm);
+                        if (inq) decideAuto('confirm', inq);
+                    });
+                });
+                list.querySelectorAll('[data-pending-deny]').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        const inq = state.inquiries.find((x) => x.id === btn.dataset.pendingDeny);
+                        if (inq) decideAuto('deny', inq);
+                    });
+                });
+            }
+
             function render() {
                 // Deleted (hidden) inquiries — duplicates/junk removed via the
                 // modal's Delete button — are excluded from every count and every
                 // filter except the dedicated "Deleted" view, where they can be
                 // restored.
                 const visible = state.inquiries.filter((i) => !i.hidden);
+                renderPending(visible);
 
                 // Stats
                 const total = visible.length;
@@ -13355,6 +13495,7 @@ function hashCode(str) {
                 $('resInqNetlifyLink').href = inq.netlifyUrl || '#';
                 $('resInqDeleteBtn').classList.toggle('hidden', !!inq.hidden);
                 $('resInqRestoreBtn').classList.toggle('hidden', !inq.hidden);
+                $('resInqSelectDateBox')?.classList.toggle('hidden', inq.status !== 'needs_followup');
 
                 loadEmailHistory(inq.email);
             }
@@ -13475,14 +13616,23 @@ function hashCode(str) {
             // captured fields and emails the customer they're booked. Deny emails
             // asking for an alternate date. Neither of these guesses availability
             // on its own — that's the point of the button existing at all.
-            async function decideAuto(decision) {
-                if (!state.current) return;
-                const inq = state.current;
+            // inqParam/opts let this be called from the Pending Approvals list
+            // (one inline row, no modal open) as well as the modal's own buttons
+            // (state.current, no explicit inq passed). opts.dateOverride/
+            // timeOverride are how "Select Another Date" reuses this same confirm
+            // flow with a corrected date instead of the original one.
+            async function decideAuto(decision, inqParam, opts) {
+                const inq = inqParam || state.current;
+                if (!inq) return;
+                opts = opts || {};
                 if (!inq.email) { alert('This inquiry has no email address to send to.'); return; }
+                const useDate = opts.dateOverride || inq.eventDate;
+                const useTime = opts.timeOverride || inq.eventTime;
                 const label = decision === 'confirm' ? 'Confirm & Auto-Book' : 'Date Conflict';
-                if (!confirm(`${label} for ${inq.name}${inq.eventDate ? ' — ' + inq.eventDate : ''}? This emails them right away.`)) return;
+                if (!confirm(`${label} for ${inq.name}${useDate ? ' — ' + useDate : ''}? This emails them right away.`)) return;
 
-                const statusEl = $('resInqAutoStatus');
+                const inModal = !!(inqParam == null || inqParam === state.current);
+                const statusEl = inModal ? $('resInqAutoStatus') : null;
                 if (statusEl) { statusEl.textContent = 'Working…'; statusEl.style.color = 'var(--text-muted)'; }
                 try {
                     const r = await fetch(`${FN}/reservation-inquiry-decide`, {
@@ -13492,7 +13642,7 @@ function hashCode(str) {
                             submissionId: inq.id, decision,
                             name: inq.name, firstName: inq.firstName, email: inq.email, phone: inq.phone,
                             occasion: inq.occasion, formName: inq.formName,
-                            date: inq.eventDate, time: inq.eventTime, guests: inq.guests,
+                            date: useDate, time: useTime, guests: inq.guests,
                             location: inq.location, catering: inq.catering, notes: inq.notes,
                             by: (localStorage.getItem('quarryAdminRole') || 'admin'),
                         }),
@@ -13507,12 +13657,14 @@ function hashCode(str) {
                         alert(body.warning);
                         return;
                     }
-                    const newStatus = decision === 'confirm' ? 'confirmed' : 'date_conflict';
+                    const newStatus = decision === 'confirm' ? 'confirmed' : 'needs_followup';
                     inq.status = newStatus;
                     render();
-                    openModal(inq.id);
-                    if (statusEl) { statusEl.textContent = decision === 'confirm' ? '✓ Booked and customer emailed.' : 'Customer emailed asking for another date.'; statusEl.style.color = '#16a34a'; }
-                    if (typeof showToast === 'function') showToast(decision === 'confirm' ? 'Booking created and customer notified' : 'Customer notified of date conflict');
+                    if (inModal) {
+                        openModal(inq.id);
+                        if (statusEl) { statusEl.textContent = decision === 'confirm' ? '✓ Booked and customer emailed.' : 'Customer emailed asking for another date.'; statusEl.style.color = '#16a34a'; }
+                    }
+                    if (typeof showToast === 'function') showToast(decision === 'confirm' ? 'Booking created and customer notified' : 'Customer notified — moved to Needs Follow-up');
                 } catch (err) {
                     if (statusEl) { statusEl.textContent = 'Failed: ' + err.message; statusEl.style.color = '#dc2626'; }
                     alert('Could not complete this: ' + err.message);
@@ -13557,6 +13709,14 @@ function hashCode(str) {
                 document.querySelectorAll('#resInqModal [data-status]').forEach((btn) => btn.addEventListener('click', () => setStatus(btn.dataset.status)));
                 $('resInqAutoConfirm')?.addEventListener('click', () => decideAuto('confirm'));
                 $('resInqAutoDeny')?.addEventListener('click', () => decideAuto('deny'));
+                $('resInqSelectDateBtn')?.addEventListener('click', () => {
+                    if (!state.current) return;
+                    const newDate = prompt('New date for this reservation (YYYY-MM-DD):', state.current.eventDate || '');
+                    if (!newDate) return;
+                    const newTime = prompt('New time (e.g. "7:00 PM"):', state.current.eventTime || '');
+                    if (!newTime) return;
+                    decideAuto('confirm', state.current, { dateOverride: newDate, timeOverride: newTime });
+                });
                 $('resInqReplyToggle')?.addEventListener('click', () => {
                     const box = $('resInqReplyBox');
                     box.classList.toggle('hidden');
