@@ -171,35 +171,70 @@ function normalize(submission, formName) {
     };
 }
 
+// reservations_status.json is a single shared file protected by an
+// optimistic-concurrency check (data-store.js rejects a PUT whose sha
+// doesn't match the file's current one). Mirrors the retry loop in
+// update-reservation-status.js -- without it, a write that loses a race
+// (routine with a background follow-up checker, digests, and admin clicks
+// all touching this same file) fails completely silently: no exception,
+// no logged error, and the confirm-interest/auto-reply emails still go out
+// as if the status change had actually landed.
+async function saveReservationOverride(submissionId, status, historyEntry) {
+    const MAX_ATTEMPTS = 5;
+    let lastErr;
+    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+        try {
+            const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=reservations_status.json`);
+            const existing = r.ok ? await r.json() : null;
+            const data = (existing && existing.decoded) || { overrides: {} };
+            const sha = existing ? existing.sha : null;
+            data.overrides = data.overrides || {};
+            const now = new Date().toISOString();
+            const prev = data.overrides[submissionId] || {};
+            const history = Array.isArray(prev.history) ? prev.history : [];
+            history.push({ ...historyEntry, from: prev.status || historyEntry.from, at: now });
+            data.overrides[submissionId] = {
+                status,
+                note: prev.note || '',
+                updatedAt: now,
+                updatedBy: historyEntry.by,
+                history,
+                hidden: !!prev.hidden,
+            };
+            data.updatedAt = now;
+            const putRes = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=reservations_status.json`, {
+                method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ json: data, sha, message: `reservations: ${submissionId.slice(0, 8)} → ${status} (${historyEntry.by})` })
+            });
+            if (!putRes.ok) {
+                const err = new Error(`save reservations_status.json: ${putRes.status}`);
+                err.status = putRes.status;
+                throw err;
+            }
+            return { ok: true };
+        } catch (err) {
+            lastErr = err;
+            if (err.status === 409 && attempt < MAX_ATTEMPTS - 1) {
+                await new Promise((res) => setTimeout(res, 200 + attempt * 300));
+                continue;
+            }
+            break;
+        }
+    }
+    return { ok: false, error: lastErr && lastErr.message };
+}
+
 async function markAwaitingCustomerConfirm(submissionId) {
     // A token-less internal call isn't possible (update-reservation-status.js
-    // requires a session token) -- so this writes the override file directly via
-    // the same data-store helper, mirroring what update-reservation-status.js does,
-    // rather than trying to mint a fake admin session just to call itself.
-    try {
-        const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=reservations_status.json`);
-        const existing = r.ok ? await r.json() : null;
-        const data = (existing && existing.decoded) || { overrides: {} };
-        const sha = existing ? existing.sha : null;
-        data.overrides = data.overrides || {};
-        const now = new Date().toISOString();
-        const prev = data.overrides[submissionId] || {};
-        const history = Array.isArray(prev.history) ? prev.history : [];
-        history.push({ from: prev.status || 'not_contacted', to: 'awaiting_customer_confirm', by: 'auto-reply', note: 'Instant auto-reply sent', at: now });
-        data.overrides[submissionId] = {
-            status: 'awaiting_customer_confirm',
-            note: prev.note || '',
-            updatedAt: now,
-            updatedBy: 'auto-reply',
-            history,
-            hidden: !!prev.hidden,
-        };
-        data.updatedAt = now;
-        await fetch(`${SITE_URL}/.netlify/functions/data-store?file=reservations_status.json`, {
-            method: 'PUT', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ json: data, sha, message: `reservations: ${submissionId.slice(0, 8)} → awaiting_customer_confirm (auto-reply)` })
-        });
-    } catch (_) { /* best-effort; the email having sent matters more than this flag */ }
+    // requires a session token) -- so this writes the override file directly,
+    // same data-store helper update-reservation-status.js uses, rather than
+    // trying to mint a fake admin session just to call itself.
+    const result = await saveReservationOverride(submissionId, 'awaiting_customer_confirm', {
+        from: 'not_contacted', to: 'awaiting_customer_confirm', by: 'auto-reply', note: 'Instant auto-reply sent',
+    });
+    if (!result.ok) {
+        console.error('markAwaitingCustomerConfirm failed for', submissionId, ':', result.error);
+    }
 }
 
 exports.handler = async (event) => {

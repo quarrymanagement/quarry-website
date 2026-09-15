@@ -157,38 +157,67 @@ function managementEmail(inq, submissionId) {
     );
 }
 
+// reservations_status.json is a single shared file protected by an
+// optimistic-concurrency check (data-store.js rejects a PUT whose sha
+// doesn't match the file's current one). Mirrors the retry loop in
+// update-reservation-status.js -- without it, a write that loses a race
+// (routine with a background follow-up checker, digests, and admin clicks
+// all touching this same file) fails completely silently: no exception,
+// no logged error, and the two confirmation emails below still go out as
+// if the status change had actually landed, even though it never did.
 async function markAwaitingDecision(submissionId) {
-    const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=reservations_status.json`);
-    const existing = r.ok ? await r.json() : null;
-    const data = (existing && existing.decoded) || { overrides: {} };
-    const sha = existing ? existing.sha : null;
-    data.overrides = data.overrides || {};
-    const now = new Date().toISOString();
-    const prev = data.overrides[submissionId] || {};
+    const MAX_ATTEMPTS = 5;
+    let lastErr;
+    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+        try {
+            const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=reservations_status.json`);
+            const existing = r.ok ? await r.json() : null;
+            const data = (existing && existing.decoded) || { overrides: {} };
+            const sha = existing ? existing.sha : null;
+            data.overrides = data.overrides || {};
+            const now = new Date().toISOString();
+            const prev = data.overrides[submissionId] || {};
 
-    // Idempotent: clicking twice (or a link preview bot fetching it once)
-    // shouldn't re-log history, re-send both emails, or bump an inquiry that
-    // already moved past this stage back down to awaiting_decision.
-    if (['awaiting_decision', 'confirmed', 'date_conflict', 'lost'].includes(prev.status)) {
-        return { already: true, status: prev.status };
+            // Idempotent: clicking twice (or a link preview bot fetching it once)
+            // shouldn't re-log history, re-send both emails, or bump an inquiry
+            // that already moved past this stage back down to awaiting_decision.
+            // Re-checked fresh on every attempt, since a retry means someone
+            // else's write just landed and may have moved this past this stage.
+            if (['awaiting_decision', 'confirmed', 'date_conflict', 'lost'].includes(prev.status)) {
+                return { already: true, status: prev.status };
+            }
+
+            const history = Array.isArray(prev.history) ? prev.history : [];
+            history.push({ from: prev.status || 'awaiting_customer_confirm', to: 'awaiting_decision', by: 'customer', note: 'Customer clicked "check availability"', at: now });
+            data.overrides[submissionId] = {
+                status: 'awaiting_decision',
+                note: prev.note || '',
+                updatedAt: now,
+                updatedBy: 'customer',
+                history,
+                hidden: !!prev.hidden,
+            };
+            data.updatedAt = now;
+            const putRes = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=reservations_status.json`, {
+                method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ json: data, sha, message: `reservations: ${submissionId.slice(0, 8)} → awaiting_decision (customer confirmed)` })
+            });
+            if (!putRes.ok) {
+                const err = new Error(`save reservations_status.json: ${putRes.status}`);
+                err.status = putRes.status;
+                throw err;
+            }
+            return { already: false, status: 'awaiting_decision' };
+        } catch (err) {
+            lastErr = err;
+            if (err.status === 409 && attempt < MAX_ATTEMPTS - 1) {
+                await new Promise((res) => setTimeout(res, 200 + attempt * 300));
+                continue;
+            }
+            break;
+        }
     }
-
-    const history = Array.isArray(prev.history) ? prev.history : [];
-    history.push({ from: prev.status || 'awaiting_customer_confirm', to: 'awaiting_decision', by: 'customer', note: 'Customer clicked "check availability"', at: now });
-    data.overrides[submissionId] = {
-        status: 'awaiting_decision',
-        note: prev.note || '',
-        updatedAt: now,
-        updatedBy: 'customer',
-        history,
-        hidden: !!prev.hidden,
-    };
-    data.updatedAt = now;
-    await fetch(`${SITE_URL}/.netlify/functions/data-store?file=reservations_status.json`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ json: data, sha, message: `reservations: ${submissionId.slice(0, 8)} → awaiting_decision (customer confirmed)` })
-    });
-    return { already: false, status: 'awaiting_decision' };
+    throw lastErr || new Error('markAwaitingDecision failed');
 }
 
 exports.handler = async (event) => {
