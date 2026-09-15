@@ -172,7 +172,6 @@ exports.handler = async (event) => {
     }
 
     const bookingId = crypto.randomUUID();
-    const origin = event.headers.origin || 'https://thequarrystl.com';
 
     const linkRequest = {
       idempotency_key: crypto.randomUUID(),
@@ -196,8 +195,11 @@ exports.handler = async (event) => {
           time: time.slice(0, 255),
         },
       },
+      // No redirect_url -- food trucks have no public-facing page to send them
+      // to (unlike pavilions' quarry-pavilions.html), and a vendor should
+      // never land on the admin console. Omitting this lets Square show its
+      // own built-in post-payment confirmation screen instead.
       checkout_options: {
-        redirect_url: origin + '/admin/?foodtruck=paid',
         ask_for_shipping_address: false,
         allow_tipping: false,
       },
