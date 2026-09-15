@@ -41,6 +41,7 @@ const ALLOWED_FILES = new Set([
   'schedule.json',
   'members.json',     // rewards-members tab edits
   'subscribers.json', // newsletter signups
+  'food-truck-leads.json', // food truck lead directory
 ]);
 
 function githubRequest(method, path, token, body) {

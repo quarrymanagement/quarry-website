@@ -2702,6 +2702,8 @@
                     <div class="sb-nav-item" data-tab="events"><span class="sb-ic">🎫</span><span class="sb-lbl">Events</span></div>
                     <div class="sb-nav-item" data-tab="bands"><span class="sb-ic">🎵</span><span class="sb-lbl">Live Bands</span></div>
                     <div class="sb-nav-item" data-tab="pavilions"><span class="sb-ic">🏕️</span><span class="sb-lbl">Pavilion Bookings</span></div>
+                    <div class="sb-nav-item" data-tab="foodTruckLeads"><span class="sb-ic">🚚</span><span class="sb-lbl">Food Truck Leads</span></div>
+                    <div class="sb-nav-item" data-tab="foodTruckBookings"><span class="sb-ic">📆</span><span class="sb-lbl">Food Truck Bookings</span></div>
                     <div class="sb-nav-item" data-tab="scheduling"><span class="sb-ic">📋</span><span class="sb-lbl">Staff Schedule</span></div>
                     <div class="sb-nav-item" data-tab="employees"><span class="sb-ic">👤</span><span class="sb-lbl">Employees</span></div>
                     <div class="sb-nav-item" data-tab="timeoff"><span class="sb-ic">🌴</span><span class="sb-lbl">Time Off</span></div>
@@ -3969,6 +3971,7 @@
                                     <option value="all">All Subscribers</option>
                                     <option value="subscribed">Subscribed Only</option>
                                     <option value="event">Event Attendees</option>
+                                    <option value="foodtrucks">Food Truck Leads</option>
                                     <option value="custom">Custom Selection</option>
                                 </select>
                             </div>
@@ -4870,6 +4873,143 @@
                 </div>
             </div>
 
+            <div id="foodTruckLeadsTab" class="tab-content">
+                <div class="section">
+                    <div class="section-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+                        <div>
+                            <div class="section-title">Food Truck Leads</div>
+                            <div style="font-size:0.85rem;color:var(--text-secondary);" id="ftLeadsSubtitle">Loading&hellip;</div>
+                        </div>
+                        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                            <input type="text" id="ftLeadSearch" placeholder="Search name, category, email…" style="padding:8px 10px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-elevated);color:var(--text-primary);font-size:0.9rem;min-width:220px;" oninput="renderFoodTruckLeads()">
+                            <button class="btn-secondary" id="saveFoodTruckLeadsBtn" style="opacity:0.5;pointer-events:none;" onclick="saveFoodTruckLeads()">Save Changes</button>
+                            <button class="btn-primary" onclick="openFoodTruckLeadModal(null)">+ Add Lead</button>
+                        </div>
+                    </div>
+                    <div style="overflow-x:auto;border:1px solid var(--border-subtle);border-radius:8px;background:var(--bg-elevated);">
+                        <table style="width:100%;border-collapse:collapse;font-size:0.85rem;">
+                            <thead>
+                                <tr style="background:var(--bg-secondary);">
+                                    <th style="padding:10px;text-align:left;">Name</th>
+                                    <th style="padding:10px;text-align:left;">Category</th>
+                                    <th style="padding:10px;text-align:left;" title="Dessert / junk food">🍦</th>
+                                    <th style="padding:10px;text-align:left;">Email</th>
+                                    <th style="padding:10px;text-align:left;">Phone</th>
+                                    <th style="padding:10px;text-align:left;">Status</th>
+                                    <th style="padding:10px;text-align:left;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ftLeadsTableBody">
+                                <tr><td colspan="7" style="text-align:center;color:var(--text-secondary);padding:2rem;">Loading&hellip;</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="foodTruckBookingsTab" class="tab-content">
+                <div class="section">
+                    <div class="section-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+                        <div>
+                            <div class="section-title">Food Truck Bookings</div>
+                            <div style="font-size:0.85rem;color:var(--text-secondary);">Fridays, Saturdays &amp; Sundays &middot; up to 4 trucks/day &middot; aim for at least 1 dessert/junk-food truck per day</div>
+                        </div>
+                        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                            <input type="date" id="ftStartDate" style="padding:8px 10px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-elevated);color:var(--text-primary);font-size:0.9rem;">
+                            <span style="color:var(--text-secondary);">to</span>
+                            <input type="date" id="ftEndDate" style="padding:8px 10px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-elevated);color:var(--text-primary);font-size:0.9rem;">
+                            <button class="btn-secondary" onclick="loadFoodTruckBookings()">Refresh</button>
+                        </div>
+                    </div>
+                    <div id="ftBookingsDays"></div>
+                </div>
+            </div>
+
+            <div id="ftLeadModal" class="modal-overlay" onclick="if(event.target===this)closeFoodTruckLeadModal()">
+                <div class="modal-card" style="max-width:520px;width:90%;background:var(--bg-secondary);border-radius:10px;padding:24px;border:1px solid var(--border-subtle);max-height:92vh;overflow-y:auto;">
+                    <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px;">
+                        <h3 id="ftLeadModalTitle" style="margin:0;color:var(--gold);font-size:1.15rem;">Add Food Truck Lead</h3>
+                        <button class="btn-close" style="background:none;border:none;font-size:1.5rem;color:var(--text-secondary);cursor:pointer;" onclick="closeFoodTruckLeadModal()">&times;</button>
+                    </div>
+                    <input type="hidden" id="ftLeadId">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;">
+                        <div style="grid-column:1/-1;">
+                            <label class="form-label">Name <span style="color:#c33">*</span></label>
+                            <input type="text" class="form-input" id="ftLeadName">
+                        </div>
+                        <div>
+                            <label class="form-label">Category / Cuisine</label>
+                            <input type="text" class="form-input" id="ftLeadCategory" placeholder="e.g. BBQ, Tacos, Desserts">
+                        </div>
+                        <div>
+                            <label class="form-label">Dessert / Junk Food?</label>
+                            <select class="form-select" id="ftLeadDessert"><option value="false">No</option><option value="true">Yes</option></select>
+                        </div>
+                        <div>
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-input" id="ftLeadEmail">
+                        </div>
+                        <div>
+                            <label class="form-label">Phone</label>
+                            <input type="tel" class="form-input" id="ftLeadPhone">
+                        </div>
+                        <div style="grid-column:1/-1;">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" id="ftLeadStatus">
+                                <option value="new">New</option>
+                                <option value="contacted">Contacted</option>
+                                <option value="invited">Invited</option>
+                                <option value="booked">Booked</option>
+                                <option value="declined">Declined</option>
+                            </select>
+                        </div>
+                        <div style="grid-column:1/-1;">
+                            <label class="form-label">Notes</label>
+                            <textarea class="form-textarea" id="ftLeadNotes" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;margin-top:20px;">
+                        <button class="btn-secondary" id="ftLeadDeleteBtn" style="border-color:#c33;color:#c33;display:none;" onclick="deleteFoodTruckLead()">Delete Lead</button>
+                        <div style="display:flex;gap:8px;margin-left:auto;">
+                            <button class="btn-secondary" onclick="closeFoodTruckLeadModal()">Cancel</button>
+                            <button class="btn-primary" onclick="submitFoodTruckLead()">Save Lead</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="ftInviteModal" class="modal-overlay" onclick="if(event.target===this)closeFoodTruckInvite()">
+                <div class="modal-card" style="max-width:480px;width:90%;background:var(--bg-secondary);border-radius:10px;padding:24px;border:1px solid var(--border-subtle);max-height:92vh;overflow-y:auto;">
+                    <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px;">
+                        <div>
+                            <h3 style="margin:0 0 4px;color:var(--gold);font-size:1.15rem;">Invite Food Truck</h3>
+                            <div style="font-size:0.8rem;color:var(--text-secondary);" id="ftInviteSubtitle"></div>
+                        </div>
+                        <button class="btn-close" style="background:none;border:none;font-size:1.5rem;color:var(--text-secondary);cursor:pointer;" onclick="closeFoodTruckInvite()">&times;</button>
+                    </div>
+                    <input type="hidden" id="ftInviteDate">
+                    <div style="margin-top:14px;">
+                        <label class="form-label">Food Truck <span style="color:#c33">*</span></label>
+                        <select class="form-select" id="ftInviteLead"></select>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
+                        <div>
+                            <label class="form-label">Time <span style="color:#c33">*</span></label>
+                            <input type="text" class="form-input" id="ftInviteTime" placeholder="e.g. 5:00 PM - 9:00 PM">
+                        </div>
+                        <div>
+                            <label class="form-label">Price ($) <span style="color:#c33">*</span></label>
+                            <input type="number" class="form-input" id="ftInvitePrice" value="100" min="1" step="1">
+                        </div>
+                    </div>
+                    <div id="ftInviteStatus" style="font-size:0.82rem;margin-top:10px;min-height:1.2em;"></div>
+                    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px;">
+                        <button class="btn-secondary" onclick="closeFoodTruckInvite()">Cancel</button>
+                        <button class="btn-primary" id="ftInviteSendBtn" onclick="submitFoodTruckInvite()">Send Invite &amp; Payment Link</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Add booking modal (pay-at-venue) -->
             <div id="golfAddBookingModal" class="modal-overlay" onclick="if(event.target===this)closeGolfAddBooking()">
                 <div class="modal-card" style="max-width:600px;width:90%;background:var(--bg-secondary);border-radius:10px;padding:24px;border:1px solid var(--border-subtle);max-height:92vh;overflow-y:auto;">
@@ -5616,6 +5756,7 @@
             currentTab: 'dashboard',
             eventsView: 'upcoming',
             events: [],
+            foodTruckLeads: [],
             bands: [],
             floorPlan: { tables: [], labels: [], barSeats: [] },
             floorPlans: [],
@@ -5940,6 +6081,13 @@
             // Load pavilion bookings when switching to that tab
             if (tabName === 'pavilions') {
                 loadPavilionBookings();
+            }
+            // Food truck tabs
+            if (tabName === 'foodTruckLeads') {
+                renderFoodTruckLeads();
+            }
+            if (tabName === 'foodTruckBookings') {
+                loadFoodTruckBookings();
             }
             // Load potential reservations data
             if (tabName === 'potential') {
@@ -6604,10 +6752,11 @@
         // ================================================================
         async function loadData() {
             try {
-                const [eventsRes, subscribersRes, formsRes] = await Promise.all([
+                const [eventsRes, subscribersRes, formsRes, foodTruckLeadsRes] = await Promise.all([
                     fetch('https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/events.json?t=' + Date.now()),
                     fetch('https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/subscribers.json?t=' + Date.now()),
-                    fetch('https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/forms.json?t=' + Date.now()).catch(() => null)
+                    fetch('https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/forms.json?t=' + Date.now()).catch(() => null),
+                    fetch('https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/food-truck-leads.json?t=' + Date.now()).catch(() => null)
                 ]);
 
                 if (eventsRes.ok) {
@@ -6655,6 +6804,10 @@
                         app.forms = formsData.forms || [];
                         app.formSubmissions = formsData.submissions || {};
                     }
+                    if (foodTruckLeadsRes && foodTruckLeadsRes.ok) {
+                        const ftData = await foodTruckLeadsRes.json();
+                        app.foodTruckLeads = ftData.leads || [];
+                    }
                 } catch(e) { app.forms = []; app.formSubmissions = {}; }
 
                 // Auto-merge registrations into CRM
@@ -6668,6 +6821,7 @@
                 updateBands();
                 updateCRM();
                 updateEmailRecipients();
+                renderFoodTruckLeads();
                 drawFloorPlan();
                 renderSavedFloorPlans();
 
@@ -8584,6 +8738,13 @@
                         lastName: (r.name || '').split(' ').slice(1).join(' ') || '',
                     }));
                 }
+            } else if (type === 'foodtrucks') {
+                // Never the ones already flagged bounced -- no point mailing a dead address.
+                recipients = (app.foodTruckLeads || []).filter(l => l.email && !l.emailBounced).map(l => ({
+                    email: l.email,
+                    firstName: (l.name || '').split(' ')[0] || '',
+                    lastName: (l.name || '').split(' ').slice(1).join(' ') || '',
+                }));
             }
             return recipients;
         }
@@ -15012,6 +15173,272 @@ function hashCode(str) {
             }
         };
     })();
+
+        // ================================================================
+        // FOOD TRUCK LEADS + BOOKINGS
+        //
+        // Leads live in food-truck-leads.json (edited here, saved via
+        // save-github-file.js like menu.json/schedule.json). Bookings live
+        // in Netlify Blobs (food-truck-bookings/{date}), written by
+        // food-truck-invite.js and square-webhook.js -- same split as
+        // events (repo file) vs pavilion bookings (blobs).
+        // ================================================================
+        (function() {
+            function escapeHtmlFt(s) {
+                return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+            }
+            function todayFtCT() {
+                const ct = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' }));
+                return ct.getFullYear() + '-' + String(ct.getMonth()+1).padStart(2,'0') + '-' + String(ct.getDate()).padStart(2,'0');
+            }
+            function addFtDays(yyyymmdd, days) {
+                const [y,m,d] = yyyymmdd.split('-').map(Number);
+                const dt = new Date(Date.UTC(y, m-1, d));
+                dt.setUTCDate(dt.getUTCDate() + days);
+                return dt.toISOString().slice(0,10);
+            }
+            // day: 0=Sun, 5=Fri, 6=Sat -- matches _foodtruck-shared.js
+            function isFtDay(yyyymmdd) {
+                const day = new Date(yyyymmdd + 'T12:00:00Z').getUTCDay();
+                return day === 0 || day === 5 || day === 6;
+            }
+            function ftDayLabel(yyyymmdd) {
+                const dt = new Date(yyyymmdd + 'T12:00:00');
+                return dt.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+            }
+            function ftStatusBadge(status) {
+                const map = { new: ['#858d9e','New'], contacted: ['#2563eb','Contacted'], invited: ['#d97706','Invited'], booked: ['#16a34a','Booked'], declined: ['#c33','Declined'] };
+                const pair = map[status] || map.new;
+                return `<span style="color:${pair[0]};font-weight:600;">${pair[1]}</span>`;
+            }
+
+            // ---------- Leads ----------
+            window.renderFoodTruckLeads = function() {
+                const tbody = document.getElementById('ftLeadsTableBody');
+                if (!tbody) return;
+                const subtitle = document.getElementById('ftLeadsSubtitle');
+                const search = (document.getElementById('ftLeadSearch') && document.getElementById('ftLeadSearch').value || '').toLowerCase();
+                const leads = app.foodTruckLeads || [];
+                const filtered = leads.filter(l => {
+                    if (!search) return true;
+                    return [l.name, l.category, l.email].some(v => (v || '').toLowerCase().includes(search));
+                });
+                if (subtitle) {
+                    subtitle.textContent = `${leads.length} leads · ${leads.filter(l => l.isDessertOrJunkFood).length} dessert/junk food · ${leads.filter(l => l.emailBounced).length} bounced email`;
+                }
+                if (filtered.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-secondary);padding:2rem;">No leads match.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = filtered.map(l => `
+                    <tr style="border-top:1px solid var(--border-subtle);">
+                        <td style="padding:8px 10px;">${escapeHtmlFt(l.name)}</td>
+                        <td style="padding:8px 10px;">${escapeHtmlFt(l.category)}</td>
+                        <td style="padding:8px 10px;text-align:center;">${l.isDessertOrJunkFood ? '🍦' : ''}</td>
+                        <td style="padding:8px 10px;">${l.email ? `<a href="mailto:${encodeURIComponent(l.email)}" style="color:var(--gold);">${escapeHtmlFt(l.email)}</a>${l.emailBounced ? ' <span style="color:#c33;font-size:0.75rem;">(bounced)</span>' : ''}` : '—'}</td>
+                        <td style="padding:8px 10px;">${escapeHtmlFt(l.phone || '—')}</td>
+                        <td style="padding:8px 10px;">${ftStatusBadge(l.status)}</td>
+                        <td style="padding:8px 10px;"><button class="btn-small" onclick="openFoodTruckLeadModal('${l.id}')">Edit</button></td>
+                    </tr>
+                `).join('');
+            };
+
+            window.openFoodTruckLeadModal = function(id) {
+                const lead = id ? (app.foodTruckLeads || []).find(l => l.id === id) : null;
+                document.getElementById('ftLeadModalTitle').textContent = lead ? 'Edit Food Truck Lead' : 'Add Food Truck Lead';
+                document.getElementById('ftLeadId').value = lead ? lead.id : '';
+                document.getElementById('ftLeadName').value = lead ? lead.name : '';
+                document.getElementById('ftLeadCategory').value = lead ? (lead.category || '') : '';
+                document.getElementById('ftLeadDessert').value = lead && lead.isDessertOrJunkFood ? 'true' : 'false';
+                document.getElementById('ftLeadEmail').value = lead ? (lead.email || '') : '';
+                document.getElementById('ftLeadPhone').value = lead ? (lead.phone || '') : '';
+                document.getElementById('ftLeadStatus').value = lead ? (lead.status || 'new') : 'new';
+                document.getElementById('ftLeadNotes').value = lead ? (lead.notes || '') : '';
+                document.getElementById('ftLeadDeleteBtn').style.display = lead ? 'inline-block' : 'none';
+                document.getElementById('ftLeadModal').classList.add('active');
+            };
+            window.closeFoodTruckLeadModal = function() {
+                document.getElementById('ftLeadModal').classList.remove('active');
+            };
+            function markFoodTruckLeadsDirty() {
+                const btn = document.getElementById('saveFoodTruckLeadsBtn');
+                if (btn) { btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; }
+            }
+            window.submitFoodTruckLead = function() {
+                const id = document.getElementById('ftLeadId').value;
+                const name = document.getElementById('ftLeadName').value.trim();
+                if (!name) { alert('Name is required'); return; }
+                app.foodTruckLeads = app.foodTruckLeads || [];
+                const prior = id ? app.foodTruckLeads.find(l => l.id === id) : null;
+                const leadData = {
+                    id: id || ('ft_' + name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '_' + Date.now().toString(36)),
+                    name,
+                    category: document.getElementById('ftLeadCategory').value.trim(),
+                    isDessertOrJunkFood: document.getElementById('ftLeadDessert').value === 'true',
+                    email: document.getElementById('ftLeadEmail').value.trim(),
+                    phone: document.getElementById('ftLeadPhone').value.trim(),
+                    status: document.getElementById('ftLeadStatus').value,
+                    notes: document.getElementById('ftLeadNotes').value.trim(),
+                    emailBounced: prior ? !!prior.emailBounced : false,
+                    createdAt: prior ? (prior.createdAt || new Date().toISOString()) : new Date().toISOString(),
+                };
+                if (prior) {
+                    const idx = app.foodTruckLeads.findIndex(l => l.id === id);
+                    app.foodTruckLeads[idx] = leadData;
+                } else {
+                    app.foodTruckLeads.push(leadData);
+                }
+                closeFoodTruckLeadModal();
+                renderFoodTruckLeads();
+                markFoodTruckLeadsDirty();
+            };
+            window.deleteFoodTruckLead = function() {
+                const id = document.getElementById('ftLeadId').value;
+                if (!id) return;
+                if (!confirm('Delete this lead? This cannot be undone.')) return;
+                app.foodTruckLeads = (app.foodTruckLeads || []).filter(l => l.id !== id);
+                closeFoodTruckLeadModal();
+                renderFoodTruckLeads();
+                markFoodTruckLeadsDirty();
+            };
+            window.saveFoodTruckLeads = async function() {
+                const btn = document.getElementById('saveFoodTruckLeadsBtn');
+                if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+                try {
+                    const content = JSON.stringify({ leads: app.foodTruckLeads || [] }, null, 2);
+                    const r = await fetch('/.netlify/functions/save-github-file', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ filePath: 'food-truck-leads.json', content, message: 'food truck leads: update via admin', adminToken: localStorage.getItem('quarryAdminToken') }),
+                    });
+                    const body = await r.json();
+                    if (!r.ok || body.error) throw new Error(body.error || 'HTTP ' + r.status);
+                    showSuccess('Saved! Live in ~60 seconds.');
+                    if (btn) { btn.style.opacity = '0.5'; btn.style.pointerEvents = 'none'; }
+                } catch (e) {
+                    alert('Save failed: ' + e.message);
+                } finally {
+                    if (btn) { btn.disabled = false; btn.textContent = 'Save Changes'; }
+                }
+            };
+
+            // ---------- Bookings ----------
+            window.loadFoodTruckBookings = async function() {
+                const startEl = document.getElementById('ftStartDate');
+                const endEl = document.getElementById('ftEndDate');
+                if (!startEl || !endEl) return;
+                if (!startEl.value) startEl.value = todayFtCT();
+                if (!endEl.value) endEl.value = addFtDays(startEl.value, 45);
+                const container = document.getElementById('ftBookingsDays');
+                container.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:2rem;">Loading…</div>';
+
+                try {
+                    const token = localStorage.getItem('quarryAdminToken') || '';
+                    const r = await fetch(`/.netlify/functions/list-food-truck-bookings?token=${encodeURIComponent(token)}&startDate=${startEl.value}&endDate=${endEl.value}`);
+                    const body = await r.json();
+                    if (!body.ok) throw new Error(body.error || 'Failed to load');
+                    const byDate = {};
+                    (body.bookings || []).forEach(b => { (byDate[b.date] = byDate[b.date] || []).push(b); });
+
+                    const days = [];
+                    let cursor = startEl.value;
+                    let guard = 0;
+                    while (cursor <= endEl.value && guard < 400) {
+                        if (isFtDay(cursor)) days.push(cursor);
+                        cursor = addFtDays(cursor, 1);
+                        guard++;
+                    }
+
+                    if (days.length === 0) {
+                        container.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:2rem;">No Friday/Saturday/Sunday dates in this range.</div>';
+                        return;
+                    }
+
+                    container.innerHTML = days.map(date => {
+                        const bookings = (byDate[date] || []).filter(b => b.status === 'pending_payment' || b.status === 'booked');
+                        const hasDessert = bookings.some(b => b.isDessertOrJunkFood);
+                        const slots = [];
+                        for (let i = 0; i < 4; i++) slots.push(bookings[i] || null);
+                        const slotsHtml = slots.map(b => {
+                            if (!b) {
+                                return `<div style="border:1px dashed var(--border-subtle);border-radius:6px;padding:14px 10px;display:flex;align-items:center;justify-content:center;min-height:64px;">
+                                    <button class="btn-small" onclick="openFoodTruckInvite('${date}')">+ Invite</button>
+                                </div>`;
+                            }
+                            const statusColor = b.status === 'booked' ? '#16a34a' : '#d97706';
+                            const statusLabel = b.status === 'booked' ? 'Booked' : 'Pending payment';
+                            return `<div style="border:1px solid var(--border-subtle);border-radius:6px;padding:10px;background:var(--bg-elevated);">
+                                <div style="font-weight:600;">${escapeHtmlFt(b.leadName)}${b.isDessertOrJunkFood ? ' 🍦' : ''}</div>
+                                <div style="font-size:0.8rem;color:var(--text-secondary);">${escapeHtmlFt(b.time)} · $${(b.priceCents / 100).toFixed(2)}</div>
+                                <div style="font-size:0.78rem;color:${statusColor};font-weight:600;margin-top:4px;">${statusLabel}</div>
+                            </div>`;
+                        }).join('');
+                        return `<div style="margin-top:16px;border:1px solid var(--border-subtle);border-radius:8px;padding:16px;background:var(--bg-secondary);">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+                                <div style="font-weight:700;">${ftDayLabel(date)}</div>
+                                <div style="font-size:0.8rem;font-weight:600;color:${hasDessert ? '#16a34a' : '#d97706'};">${hasDessert ? '✅ Dessert truck booked' : '⚠️ No dessert truck yet'}</div>
+                            </div>
+                            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;">${slotsHtml}</div>
+                        </div>`;
+                    }).join('');
+                } catch (e) {
+                    container.innerHTML = `<div style="text-align:center;color:#c33;padding:2rem;">Failed to load: ${escapeHtmlFt(e.message)}<br><button class="btn-secondary" onclick="loadFoodTruckBookings()" style="margin-top:0.5rem;">Retry</button></div>`;
+                }
+            };
+
+            window.openFoodTruckInvite = function(date) {
+                document.getElementById('ftInviteDate').value = date;
+                document.getElementById('ftInviteSubtitle').textContent = ftDayLabel(date);
+                const select = document.getElementById('ftInviteLead');
+                const leads = (app.foodTruckLeads || []).filter(l => l.email && !l.emailBounced && l.status !== 'declined');
+                select.innerHTML = leads.length
+                    ? leads.map(l => `<option value="${l.id}">${escapeHtmlFt(l.name)}${l.isDessertOrJunkFood ? ' 🍦' : ''} — ${escapeHtmlFt(l.category || '')}</option>`).join('')
+                    : '<option value="">No leads with an email on file</option>';
+                document.getElementById('ftInviteTime').value = '';
+                document.getElementById('ftInvitePrice').value = '100';
+                document.getElementById('ftInviteStatus').textContent = '';
+                document.getElementById('ftInviteModal').classList.add('active');
+            };
+            window.closeFoodTruckInvite = function() {
+                document.getElementById('ftInviteModal').classList.remove('active');
+            };
+            window.submitFoodTruckInvite = async function() {
+                const date = document.getElementById('ftInviteDate').value;
+                const leadId = document.getElementById('ftInviteLead').value;
+                const lead = (app.foodTruckLeads || []).find(l => l.id === leadId);
+                const time = document.getElementById('ftInviteTime').value.trim();
+                const price = parseFloat(document.getElementById('ftInvitePrice').value);
+                const statusEl = document.getElementById('ftInviteStatus');
+
+                if (!lead) { statusEl.style.color = '#c33'; statusEl.textContent = 'Pick a food truck.'; return; }
+                if (!time) { statusEl.style.color = '#c33'; statusEl.textContent = 'Enter a time.'; return; }
+                if (!Number.isFinite(price) || price <= 0) { statusEl.style.color = '#c33'; statusEl.textContent = 'Enter a valid price.'; return; }
+
+                const btn = document.getElementById('ftInviteSendBtn');
+                btn.disabled = true; btn.textContent = 'Sending…';
+                statusEl.style.color = 'var(--text-secondary)'; statusEl.textContent = '';
+                try {
+                    const r = await fetch('/.netlify/functions/food-truck-invite', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            token: localStorage.getItem('quarryAdminToken') || '',
+                            leadId: lead.id, leadName: lead.name, leadEmail: lead.email,
+                            date, time, priceCents: Math.round(price * 100),
+                            isDessertOrJunkFood: !!lead.isDessertOrJunkFood,
+                        }),
+                    });
+                    const body = await r.json();
+                    if (!r.ok || !body.ok) throw new Error(body.error || 'HTTP ' + r.status);
+                    showSuccess('Invite sent to ' + lead.name + '!');
+                    closeFoodTruckInvite();
+                    loadFoodTruckBookings();
+                } catch (e) {
+                    statusEl.style.color = '#c33';
+                    statusEl.textContent = 'Failed: ' + e.message;
+                } finally {
+                    btn.disabled = false; btn.textContent = 'Send Invite & Payment Link';
+                }
+            };
+        })();
 
         // ================================================================
         // WINE CLUB TAB

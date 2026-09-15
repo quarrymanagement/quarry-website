@@ -152,6 +152,7 @@ exports.handler = async (event) => {
     const time = String(body.time || '').trim();
     const priceCents = parseInt(body.priceCents, 10);
     const notes = String(body.notes || '').trim();
+    const isDessertOrJunkFood = !!body.isDessertOrJunkFood;
 
     if (!leadId || !leadName || !leadEmail) return { statusCode: 400, headers: CORS, body: JSON.stringify({ ok: false, error: 'leadId, leadName, and leadEmail are required' }) };
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { statusCode: 400, headers: CORS, body: JSON.stringify({ ok: false, error: 'date must be YYYY-MM-DD' }) };
@@ -224,7 +225,7 @@ exports.handler = async (event) => {
 
     bookings.push({
       bookingId, leadId, leadName, leadEmail, date, time,
-      priceCents, notes,
+      priceCents, notes, isDessertOrJunkFood,
       status: 'pending_payment',
       invitedAt: new Date().toISOString(),
       checkoutUrl: pl.url,
