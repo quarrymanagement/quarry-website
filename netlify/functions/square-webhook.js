@@ -390,6 +390,83 @@ function buildPavilionOwnerHtml(m, amount, paymentId) {
 }
 
 // ============================================================================
+// Food truck bookings -- staff invites one lead to one Fri/Sat/Sun date+time
+// at a price set per invite (see food-truck-invite.js, which creates the
+// Square checkout link and writes the "pending_payment" record this webhook
+// flips to "booked"). Confirmation asks the truck to reply with their logo
+// for marketing -- sendGridEmail's reply_to is always management@, so that
+// reply lands with staff automatically, no separate upload flow needed.
+// ============================================================================
+async function handleFoodTruckBooking(meta, amountStr, paymentId) {
+  const m = meta || {};
+  const dateKey = (m.date || 'unknown').replace(/\//g, '-');
+  const path = 'food-truck-bookings/' + dateKey;
+
+  try {
+    const existing = await readBlob(path) || { bookings: [] };
+    const bookings = existing.bookings || [];
+    const idx = bookings.findIndex(function (b) { return b.bookingId === m.bookingId; });
+    if (idx === -1) {
+      console.error('food truck booking not found for bookingId', m.bookingId, 'on', dateKey);
+    } else {
+      bookings[idx].status = 'booked';
+      bookings[idx].paidAt = new Date().toISOString();
+      bookings[idx].paymentId = paymentId || '';
+      bookings[idx].amountPaid = amountStr;
+      await writeBlob(path, { bookings: bookings });
+    }
+  } catch (e) { console.error('food truck store booking:', e.message); }
+
+  if (m.leadEmail) {
+    try {
+      await sendGridEmail(
+        m.leadEmail,
+        "You're Booked! Food Truck at The Quarry - " + (m.date || ''),
+        buildFoodTruckCustomerHtml(m, amountStr),
+        'bookings@thequarrystl.com', 'The Quarry STL', 'quarry-food-truck-booking'
+      );
+    } catch (e) { console.error('food truck customer email:', e.message); }
+  }
+
+  try {
+    await sendGridEmail(
+      'management@thequarrystl.com',
+      'Food Truck Booked - ' + (m.leadName || '?') + ' on ' + (m.date || '?') + ' at ' + (m.time || '?'),
+      buildFoodTruckOwnerHtml(m, amountStr, paymentId),
+      'bookings@thequarrystl.com', 'The Quarry STL', 'quarry-food-truck-booking'
+    );
+  } catch (e) { console.error('food truck owner email:', e.message); }
+}
+
+function buildFoodTruckCustomerHtml(m, amount) {
+  return '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">' +
+    '<div style="background:#1A0E08;padding:24px;text-align:center"><h1 style="color:#B8933A;margin:0">The Quarry</h1>' +
+    '<p style="color:#F5F0E8;font-size:0.8rem;letter-spacing:0.15em;margin:4px 0 0">NEW MELLE, MISSOURI</p></div>' +
+    '<div style="padding:32px 24px"><h2 style="color:#2C1A0E">You\'re Booked!</h2>' +
+    '<p>Hi ' + (m.leadName || 'there') + ', you\'re confirmed as a food truck vendor at The Quarry.</p>' +
+    '<div style="background:#FAF7F2;border-left:4px solid #B8933A;padding:16px 20px;margin:20px 0">' +
+    '<p style="margin:4px 0"><b>Date:</b> ' + (m.date || '-') + '</p>' +
+    '<p style="margin:4px 0"><b>Time:</b> ' + (m.time || '-') + '</p>' +
+    '<p style="margin:8px 0 4px;color:#B8933A"><b>Total Paid: ' + amount + '</b></p></div>' +
+    '<p>We\'d love to promote you ahead of time on our social media and website &mdash; ' +
+    '<b>just reply to this email with your logo</b> (and any photos you\'d like us to use) and we\'ll get you featured.</p>' +
+    '<p>Questions? <a href="tel:6362248257" style="color:#B8933A">636-224-8257</a></p></div>' +
+    '<div style="background:#1A0E08;padding:16px;text-align:center">' +
+    '<p style="color:rgba(255,255,255,0.4);font-size:0.75rem;margin:0">3960 Highway Z, New Melle, MO 63385</p></div></div>';
+}
+
+function buildFoodTruckOwnerHtml(m, amount, paymentId) {
+  return '<h2 style="color:#B8933A">Food Truck Booked</h2>' +
+    '<p><b>Truck:</b> ' + (m.leadName || '-') + '</p>' +
+    '<p><b>Email:</b> ' + (m.leadEmail || '-') + '</p>' +
+    '<p><b>Date:</b> ' + (m.date || '-') + '</p>' +
+    '<p><b>Time:</b> ' + (m.time || '-') + '</p>' +
+    '<p><b>Total:</b> ' + amount + '</p>' +
+    (paymentId ? '<p><b>Square Payment:</b> ' + paymentId + '</p>' : '') +
+    '<p>Waiting on their logo/photos via reply-to-email for marketing.</p>';
+}
+
+// ============================================================================
 // Event-ticket flow (paid events)
 // ============================================================================
 async function handleEventTicket(meta, amountStr, paymentId) {
@@ -695,6 +772,8 @@ exports.handler = wrap('square-webhook', async function(event) {
           await handleGolfBooking(meta, amountStr, payment.id);
         } else if (meta.bookingType === 'pavilion') {
           await handlePavilionBooking(meta, amountStr, payment.id);
+        } else if (meta.bookingType === 'foodtruck') {
+          await handleFoodTruckBooking(meta, amountStr, payment.id);
         } else if (meta.bookingType === 'event' || meta.eventId) {
           await handleEventTicket(meta, amountStr, payment.id);
         } else {
