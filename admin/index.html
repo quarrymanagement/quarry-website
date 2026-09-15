@@ -15370,10 +15370,15 @@ function hashCode(str) {
                             }
                             const statusColor = b.status === 'booked' ? '#16a34a' : '#d97706';
                             const statusLabel = b.status === 'booked' ? 'Booked' : 'Pending payment';
+                            const compBtn = b.status === 'pending_payment'
+                                ? `<button class="btn-small" style="margin-top:6px;" onclick="markFoodTruckPaid('${b.bookingId}','${date}')" title="Mark paid without a Square charge -- comp, cash, or check">Mark Paid (comp)</button>`
+                                : '';
+                            const removeBtn = `<button class="btn-small" style="margin-top:6px;margin-left:6px;border-color:#c33;color:#c33;" onclick="removeFoodTruckBooking('${b.bookingId}','${date}','${escapeHtmlFt(b.leadName)}')" title="Remove this vendor from this date">Remove</button>`;
                             return `<div style="border:1px solid var(--border-subtle);border-radius:6px;padding:10px;background:var(--bg-elevated);">
                                 <div style="font-weight:600;">${escapeHtmlFt(b.leadName)}${b.isDessertOrJunkFood ? ' 🍦' : ''}</div>
                                 <div style="font-size:0.8rem;color:var(--text-secondary);">${escapeHtmlFt(b.time)} · $${(b.priceCents / 100).toFixed(2)}</div>
                                 <div style="font-size:0.78rem;color:${statusColor};font-weight:600;margin-top:4px;">${statusLabel}</div>
+                                ${compBtn}${removeBtn}
                             </div>`;
                         }).join('');
                         return `<div style="margin-top:16px;border:1px solid var(--border-subtle);border-radius:8px;padding:16px;background:var(--bg-secondary);">
@@ -15440,6 +15445,38 @@ function hashCode(str) {
                     statusEl.textContent = 'Failed: ' + e.message;
                 } finally {
                     btn.disabled = false; btn.textContent = 'Send Invite & Payment Link';
+                }
+            };
+
+            window.markFoodTruckPaid = async function(bookingId, date) {
+                if (!confirm('Mark this booking paid without a Square charge? Use this for comps, cash, or check -- not for a normal online payment.')) return;
+                try {
+                    const r = await fetch('/.netlify/functions/food-truck-mark-paid', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token: localStorage.getItem('quarryAdminToken') || '', bookingId, date }),
+                    });
+                    const body = await r.json();
+                    if (!r.ok || !body.ok) throw new Error(body.error || 'HTTP ' + r.status);
+                    showSuccess('Marked paid — confirmation emails sent.');
+                    loadFoodTruckBookings();
+                } catch (e) {
+                    alert('Failed: ' + e.message);
+                }
+            };
+
+            window.removeFoodTruckBooking = async function(bookingId, date, leadName) {
+                if (!confirm(`Remove ${leadName} from ${date}? This frees the slot back up. If they already paid, you'll need to refund them separately in Square.`)) return;
+                try {
+                    const r = await fetch('/.netlify/functions/food-truck-cancel-booking', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token: localStorage.getItem('quarryAdminToken') || '', bookingId, date }),
+                    });
+                    const body = await r.json();
+                    if (!r.ok || !body.ok) throw new Error(body.error || 'HTTP ' + r.status);
+                    showSuccess('Removed.');
+                    loadFoodTruckBookings();
+                } catch (e) {
+                    alert('Failed: ' + e.message);
                 }
             };
         })();
