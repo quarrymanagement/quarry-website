@@ -7,8 +7,9 @@
 // off the public-facing site so people can't just discover and book a
 // pavilion on their own.
 //
-// Flat $100 for a 4-hour block, includes a server. Open Wednesday-Sunday
-// only (matches the venue's own open days), and refuses any date with a
+// Flat $100 per booking, includes a server. Two slots: 11 AM-4 PM (5 hours)
+// or 5 PM until close. Open Wednesday-Sunday only (matches the venue's own
+// open days), and refuses any date with a
 // wedding already booked (checked here again, not just client-side, so a
 // direct API call can't book around the UI's own check) --
 // pavilion-availability.js is the shared source of truth for both.
@@ -22,7 +23,7 @@
 
 const https = require('https');
 const crypto = require('crypto');
-const { isDateBookable, isSlotTaken, slotsForDate } = require('./_pavilion-shared');
+const { isDateBookable, isSlotTaken, slotsForDate, slotEndLabel } = require('./_pavilion-shared');
 const { writeBlob, readBlob } = require('./_blobs');
 
 const PRICE_CENTS = 10000; // $100 flat
@@ -169,7 +170,7 @@ exports.handler = async function (event) {
         line_items: [{
           uid: 'pavilion-line',
           name: 'Pavilion ' + pavilion + ' Rental',
-          note: date + ' at ' + time + ' | 4 hours | includes a server',
+          note: date + ' from ' + time + ' to ' + slotEndLabel(time) + ' | includes a server',
           quantity: '1',
           base_price_money: { amount: PRICE_CENTS, currency: 'USD' },
           applied_taxes: [{ tax_uid: taxUid }],

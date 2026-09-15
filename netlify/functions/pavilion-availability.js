@@ -7,10 +7,7 @@
 // directly to whoever's asking -- nothing here reveals more than "is this
 // pavilion free at this time," no customer contact details.
 //
-// Start times are hourly, spanning the actual hours of operation for that
-// day of week, stopping at the last hour a 4-hour block still fits before
-// close: Wed/Thu 11 AM-9 PM -> starts 11 AM-5 PM; Fri/Sat 11 AM-11 PM ->
-// starts 11 AM-7 PM; Sun 11 AM-6 PM -> starts 11 AM-2 PM.
+// Two fixed slots per open day: 11 AM-4 PM (5 hours) and 5 PM until close.
 // ============================================================================
 
 const { readBlob } = require('./_blobs');

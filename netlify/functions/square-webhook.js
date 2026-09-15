@@ -121,6 +121,27 @@ function buildIsoForCentral(dateStr, hour, minute) {
   const mm = String(minute).padStart(2, '0');
   return dateStr + 'T' + hh + ':' + mm + ':00' + offset;
 }
+// Mirrors _pavilion-shared.js's two fixed slots (11 AM-4 PM, 5 PM-close) --
+// duplicated here rather than imported since this webhook's pavilion handler
+// is a separate, self-contained function from pavilion-checkout.js (matches
+// this file's existing per-booking-type helper convention). 24-hour close
+// times by day of week, 0=Sun...6=Sat.
+const PAVILION_CLOSE_HOUR = { 0: 18, 3: 21, 4: 21, 5: 23, 6: 23 };
+function pavilionSlotEndHour(dateStr, startHour) {
+  if (startHour === 11) return 16; // the 11 AM slot always ends at 4 PM
+  const day = new Date(dateStr + 'T12:00:00Z').getUTCDay();
+  return PAVILION_CLOSE_HOUR[day] != null ? PAVILION_CLOSE_HOUR[day] : startHour + 5;
+}
+function fmtHour12(h24) {
+  const ap = h24 >= 12 ? 'PM' : 'AM';
+  const h = h24 % 12 === 0 ? 12 : h24 % 12;
+  return h + ':00 ' + ap;
+}
+function pavilionSlotEndLabel(dateStr, time) {
+  const start = parseHourFromAmPm(time);
+  if (!start) return 'Close';
+  return fmtHour12(pavilionSlotEndHour(dateStr, start.hour));
+}
 async function createCalendarEvent(summary, description, location, startIso, endIso, attendeeEmail) {
   const refreshToken = process.env.GOOGLE_CALENDAR_REFRESH_TOKEN || process.env.GMAIL_REFRESH_TOKEN;
   if (!process.env.GMAIL_CLIENT_ID || !process.env.GMAIL_CLIENT_SECRET || !refreshToken) {
@@ -271,8 +292,9 @@ async function handleGolfBooking(meta, amountStr, paymentId) {
   } catch (e) { console.error('golf store booking:', e.message); }
 }
 
-// Pavilion rentals -- $100 flat, 4 hours, includes a server. Not linked
-// anywhere public; staff hand out quarry-pavilions.html's URL directly.
+// Pavilion rentals -- $100 flat, includes a server. Two slots: 11 AM-4 PM
+// (5 hours) or 5 PM until close. Not linked anywhere public; staff hand out
+// quarry-pavilions.html's URL directly.
 // See _pavilion-shared.js for the Wed-Sun + no-wedding-day rules, enforced
 // again here (not just at checkout time) since a webhook can in principle
 // retry or arrive out of order.
@@ -305,8 +327,7 @@ async function handlePavilionBooking(meta, amountStr, paymentId) {
     const start = parseHourFromAmPm(m.time);
     if (start && m.date) {
       const startIso = buildIsoForCentral(m.date, start.hour, start.minute);
-      let endHour = start.hour + 4, endMin = start.minute;
-      const endIso = buildIsoForCentral(m.date, endHour % 24, endMin);
+      const endIso = buildIsoForCentral(m.date, pavilionSlotEndHour(m.date, start.hour), 0);
       const summary = 'Pavilion ' + (m.pavilion || '?') + ' - ' + (m.customerName || 'Customer');
       const lines = [];
       lines.push('Customer: ' + (m.customerName || '-'));
@@ -348,7 +369,7 @@ function buildPavilionCustomerHtml(m, amount) {
     '<div style="background:#FAF7F2;border-left:4px solid #B8933A;padding:16px 20px;margin:20px 0">' +
     '<p style="margin:4px 0"><b>Pavilion:</b> ' + (m.pavilion || '-') + '</p>' +
     '<p style="margin:4px 0"><b>Date:</b> ' + (m.date || '-') + '</p>' +
-    '<p style="margin:4px 0"><b>Time:</b> ' + (m.time || '-') + ' (4 hours)</p>' +
+    '<p style="margin:4px 0"><b>Time:</b> ' + (m.time || '-') + ' &ndash; ' + pavilionSlotEndLabel(m.date, m.time) + '</p>' +
     '<p style="margin:4px 0"><b>Includes:</b> A server for your event</p>' +
     '<p style="margin:8px 0 4px;color:#B8933A"><b>Total: ' + amount + '</b></p></div>' +
     '<p>Questions? <a href="tel:6362248257" style="color:#B8933A">636-224-8257</a></p></div>' +

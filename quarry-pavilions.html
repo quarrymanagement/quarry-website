@@ -66,7 +66,7 @@ footer { text-align:center; padding:2rem 1rem; color:#8B5E3C; font-size:0.8rem; 
   <div class="intro">
     <h2>Pavilion Rentals</h2>
     <p>Six private pavilions available Wednesday through Sunday. Each rental includes a server for your event.</p>
-    <div class="price-badge">$100 for 4 hours</div>
+    <div class="price-badge">$100 per booking</div>
   </div>
 
   <div class="card">
@@ -156,7 +156,7 @@ function renderSlots(slots) {
     var block = document.createElement('div');
     block.className = 'slot-block';
     var h = document.createElement('h4');
-    h.textContent = slot.time + ' – ' + addHours(slot.time, 4);
+    h.textContent = slot.time + ' – ' + slotEnd(slot.time);
     block.appendChild(h);
     var grid = document.createElement('div');
     grid.className = 'pav-grid';
@@ -180,16 +180,12 @@ function renderSlots(slots) {
   });
 }
 
-function addHours(timeStr, hours) {
-  var m = timeStr.match(/(\d+):(\d+)\s*([AP]M)/i);
-  if (!m) return '';
-  var h = parseInt(m[1], 10), min = parseInt(m[2], 10), ap = m[3].toUpperCase();
-  if (ap === 'PM' && h !== 12) h += 12;
-  if (ap === 'AM' && h === 12) h = 0;
-  h = (h + hours) % 24;
-  var outAp = h >= 12 ? 'PM' : 'AM';
-  var outH = h % 12 === 0 ? 12 : h % 12;
-  return outH + ':' + pad(min) + ' ' + outAp;
+// Two fixed slots only: 11 AM always ends at 4 PM; the 5 PM slot just runs
+// until close, which varies by day of week, so there's no single clock time
+// to show for it here (see pavilion-checkout.js's confirmation email for the
+// exact close time once a specific date is known).
+function slotEnd(timeStr) {
+  return timeStr === '11:00 AM' ? '4:00 PM' : 'Close';
 }
 
 function selectSlot(time, pavilion, btn) {
@@ -198,7 +194,7 @@ function selectSlot(time, pavilion, btn) {
   S.time = time; S.pavilion = pavilion;
   document.getElementById('summaryBox').innerHTML =
     '<div><b>Date:</b> ' + S.date + '</div>' +
-    '<div><b>Time:</b> ' + S.time + ' – ' + addHours(S.time, 4) + '</div>' +
+    '<div><b>Time:</b> ' + S.time + ' – ' + slotEnd(S.time) + '</div>' +
     '<div><b>Pavilion:</b> ' + S.pavilion + '</div>' +
     '<div><b>Includes:</b> A server for your event</div>' +
     '<div style="margin-top:0.5rem;color:#B8933A;font-weight:700;">Total: $100.00</div>';
