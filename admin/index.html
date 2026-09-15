@@ -428,6 +428,28 @@
         .activity-event { color: var(--gold); font-weight: 600; }
         .activity-time { color: var(--text-muted); font-size: 0.8rem; }
 
+        .events-strip {
+            display: flex; gap: 0.85rem; overflow-x: auto; padding: 0.25rem 0.1rem 0.75rem;
+            margin-top: 0.5rem; scrollbar-width: thin;
+        }
+        .events-strip-empty { color: var(--text-muted); font-size: 0.88rem; font-style: italic; padding: 0.5rem 0; }
+        .es-chip {
+            flex: 0 0 230px; background: var(--bg-card); border: 1px solid var(--border-subtle);
+            border-radius: 10px; padding: 0.9rem 1rem; cursor: pointer; transition: var(--transition);
+        }
+        .es-chip:hover { border-color: var(--gold); box-shadow: var(--shadow-md); transform: translateY(-2px); }
+        .es-chip-name {
+            font-weight: 600; color: var(--text-primary); font-size: 0.92rem; margin-bottom: 0.15rem;
+            display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+            overflow: hidden; line-height: 1.25; min-height: 2.5em;
+        }
+        .es-chip-date { color: var(--text-muted); font-size: 0.76rem; margin-bottom: 0.65rem; }
+        .es-chip-bar-track { background: var(--border-subtle); border-radius: 99px; height: 6px; overflow: hidden; margin-bottom: 0.4rem; }
+        .es-chip-bar-fill { height: 100%; border-radius: 99px; background: var(--gold); }
+        .es-chip-bar-fill.is-full { background: #dc2626; }
+        .es-chip-count { font-size: 0.78rem; color: var(--text-secondary); display: flex; justify-content: space-between; }
+        .es-chip-count b { color: var(--text-primary); }
+
         /* ================================================================
            EVENTS TAB
            ================================================================ */
@@ -2580,6 +2602,12 @@
         .mkt-modal-pane { padding: 1.1rem 1.25rem; overflow: auto; min-height: 0; }
         .mkt-modal-pane + .mkt-modal-pane { border-left: 1px solid var(--border-subtle); background: var(--bg-elevated); }
         .mkt-modal-foot { padding: 0.85rem 1.25rem; border-top: 1px solid var(--border-subtle); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; background: var(--bg-card); }
+        /* Reservation Inquiry modal is single-column (body forced to display:block
+           inline), not the two-pane layout .mkt-modal-body was built for — its
+           shared overflow:hidden was hard-clipping the stacked content (details,
+           status buttons, history, email history, reply box) instead of letting
+           it scroll, cutting the bottom of the modal off the screen. */
+        #resInqModal .mkt-modal-body { overflow-y: auto; }
         .mkt-modal-foot .btn-approve, .mkt-modal-foot .btn-reject { padding: 0.7rem 1.2rem; font-size: 0.92rem; }
         .mkt-meta-grid { display: grid; grid-template-columns: 110px 1fr; gap: 0.4rem 0.75rem; font-size: 0.85rem; margin-bottom: 1rem; }
         .mkt-meta-grid .k { color: var(--text-muted); font-weight: 500; }
@@ -2673,15 +2701,31 @@
                     <a href="/admin/venue-calendar.html" class="sb-nav-item"><span class="sb-ic">📅</span><span class="sb-lbl">Venue Calendar</span></a>
                     <div class="sb-nav-item" data-tab="events"><span class="sb-ic">🎫</span><span class="sb-lbl">Events</span></div>
                     <div class="sb-nav-item" data-tab="bands"><span class="sb-ic">🎵</span><span class="sb-lbl">Live Bands</span></div>
-                    <div class="sb-nav-item" data-tab="golf"><span class="sb-ic">⛳</span><span class="sb-lbl">Golf Bookings</span></div>
+                    <div class="sb-nav-item" data-tab="pavilions"><span class="sb-ic">🏕️</span><span class="sb-lbl">Pavilion Bookings</span></div>
                     <div class="sb-nav-item" data-tab="scheduling"><span class="sb-ic">📋</span><span class="sb-lbl">Staff Schedule</span></div>
                     <div class="sb-nav-item" data-tab="employees"><span class="sb-ic">👤</span><span class="sb-lbl">Employees</span></div>
                     <div class="sb-nav-item" data-tab="timeoff"><span class="sb-ic">🌴</span><span class="sb-lbl">Time Off</span></div>
                 </div>
 
+                <div class="sb-nav-section">Golf</div>
+                <div class="sb-nav-group">
+                    <!-- golf-progressive-admin.js self-injects "Golf Jackpot" right after
+                         this item (it anchors on data-tab="golf"), and notices-admin.js
+                         anchors after that -- both land in this section automatically. -->
+                    <div class="sb-nav-item" data-tab="golf"><span class="sb-ic">⛳</span><span class="sb-lbl">Golf Bookings</span></div>
+                </div>
+
+                <div class="sb-nav-section">Reservations</div>
+                <div class="sb-nav-group">
+                    <div class="sb-nav-item" data-tab="potential"><span class="sb-ic">📥</span><span class="sb-lbl">Reservation Inquiries</span><span id="resInqBadge" class="sb-badge" style="display:none;">0</span></div>
+                    <div class="sb-nav-item" data-tab="resInqPending"><span class="sb-ic">🗓️</span><span class="sb-lbl">Pending Approvals</span><span id="resInqPendingBadge" class="sb-badge" style="display:none;">0</span></div>
+                    <div class="sb-nav-item" data-tab="confirmed"><span class="sb-ic">✓</span><span class="sb-lbl">Confirmed Bookings</span></div>
+                </div>
+
                 <div class="sb-nav-section">Member App</div>
                 <div class="sb-nav-group">
                     <div class="sb-nav-item" data-tab="appOverview"><span class="sb-ic">📱</span><span class="sb-lbl">App Overview</span></div>
+                    <div class="sb-nav-item" data-tab="members"><span class="sb-ic">⭐</span><span class="sb-lbl">Rewards Members</span></div>
                     <div class="sb-nav-item" data-tab="appMenu"><span class="sb-ic">🍽️</span><span class="sb-lbl">Menu</span></div>
                     <div class="sb-nav-item" data-tab="appRewards"><span class="sb-ic">⭐</span><span class="sb-lbl">Rewards Setup</span></div>
                     <div class="sb-nav-item" data-tab="appContent"><span class="sb-ic">🎯</span><span class="sb-lbl">Home Content</span></div>
@@ -2690,11 +2734,8 @@
 
                 <div class="sb-nav-section">Customers</div>
                 <div class="sb-nav-group">
-                    <div class="sb-nav-item" data-tab="members"><span class="sb-ic">⭐</span><span class="sb-lbl">Rewards Members</span></div>
                     <div class="sb-nav-item" data-tab="wineclub"><span class="sb-ic">🍷</span><span class="sb-lbl">Wine Club</span><span id="wineclubBadge" class="sb-badge" style="display:none;">0</span></div>
                     <div class="sb-nav-item" data-tab="crm"><span class="sb-ic">👥</span><span class="sb-lbl">Contacts</span></div>
-                    <div class="sb-nav-item" data-tab="potential"><span class="sb-ic">📥</span><span class="sb-lbl">Reservation Inquiries</span></div>
-                    <div class="sb-nav-item" data-tab="confirmed"><span class="sb-ic">✓</span><span class="sb-lbl">Confirmed Bookings</span></div>
                     <div class="sb-nav-item" data-tab="payments"><span class="sb-ic">💳</span><span class="sb-lbl">Payments</span></div>
                     <div class="sb-nav-item" data-tab="invoices"><span class="sb-ic">🧾</span><span class="sb-lbl">Send Invoice</span></div>
                 </div>
@@ -2707,6 +2748,9 @@
                     <div class="sb-nav-item" data-tab="mktPerformance"><span class="sb-ic">📊</span><span class="sb-lbl">Email Performance</span></div>
                     <div class="sb-nav-item" data-tab="mktInsights"><span class="sb-ic">🧠</span><span class="sb-lbl">Email Insights</span></div>
                     <div class="sb-nav-item" data-tab="mktSettings"><span class="sb-ic">⚙️</span><span class="sb-lbl">Email Settings</span></div>
+                    <!-- Same tab as Member App's Push Notifications -- added here too
+                         since push is also very much a marketing channel. -->
+                    <div class="sb-nav-item" data-tab="appPush"><span class="sb-ic">🔔</span><span class="sb-lbl">Push Notifications</span></div>
                 </div>
 
                 <div class="sb-nav-section">Social Media</div>
@@ -2719,7 +2763,9 @@
 
                 <div class="sb-nav-section">System</div>
                 <div class="sb-nav-group">
-                    <div class="sb-nav-item" data-tab="floorplan"><span class="sb-ic">🪑</span><span class="sb-lbl">Floor Plan</span></div>
+                    <!-- Hidden from the sidebar per request -- feature/data untouched, just not
+                         linked to from nav. Remove the "display:none" to bring it back. -->
+                    <div class="sb-nav-item" data-tab="floorplan" style="display:none;"><span class="sb-ic">🪑</span><span class="sb-lbl">Floor Plan</span></div>
                     <div class="sb-nav-item" data-tab="forms"><span class="sb-ic">📝</span><span class="sb-lbl">Website Forms</span></div>
                 </div>
             </nav>
@@ -2776,11 +2822,6 @@
                         <div class="dash-stat-num" id="totalEvents">0</div>
                         <div class="dash-stat-lbl">Active Events</div>
                     </div>
-                    <div class="dash-stat" data-jump="events" title="Total seats sold across all upcoming events">
-                        <div class="dash-stat-ic">🎟️</div>
-                        <div class="dash-stat-num" id="totalRegistrations">0</div>
-                        <div class="dash-stat-lbl">Tickets Sold</div>
-                    </div>
                     <div class="dash-stat" data-jump="events" title="Estimated revenue from sold tickets">
                         <div class="dash-stat-ic">💰</div>
                         <div class="dash-stat-num" id="totalRevenue">$0</div>
@@ -2801,6 +2842,12 @@
                         <div class="dash-stat-num" id="emailSubscribed">0</div>
                         <div class="dash-stat-lbl">Email Subscribers</div>
                     </div>
+                </div>
+
+                <!-- EVENTS AT A GLANCE -->
+                <h2 class="dash-section-h" style="margin-top:1.75rem;">Events at a Glance <span style="color:var(--text-muted);font-weight:400;font-size:0.85rem;">(next 30 days)</span></h2>
+                <div class="events-strip" id="dashEventsStrip">
+                    <div class="events-strip-empty">Loading events…</div>
                 </div>
 
                 <!-- RECENT ACTIVITY -->
@@ -3643,15 +3690,24 @@
                         <p class="mkt-sub">Every form submission across reservations, private events, and wedding tours — live from the website. Click any row to email the customer or change their status.</p>
                     </div>
                     <div class="mkt-header-actions">
+                        <input type="text" id="resInqSearch" placeholder="🔍 Search by name or email…" style="padding:0.5rem 0.75rem;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:6px;color:var(--text-primary);font-size:0.85rem;min-width:220px;">
                         <select id="resInqFilter" style="padding:0.5rem 0.75rem;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:6px;color:var(--text-primary);font-size:0.85rem;">
                             <option value="needs_attention">Needs my attention</option>
                             <option value="all">All inquiries</option>
+                            <option value="needs_call">📞 Needs a call</option>
+                            <option value="awaiting_decision">Awaiting my decision</option>
+                            <option value="awaiting_customer_confirm">Awaiting customer</option>
+                            <option value="awaiting_customer_confirm_followedup">Reminded (still waiting)</option>
                             <option value="not_contacted">Not contacted</option>
                             <option value="contacted">Contacted</option>
                             <option value="needs_followup">Needs follow-up</option>
                             <option value="contacted_2">Followed up</option>
+                            <option value="responded">Responded</option>
+                            <option value="sent_to_jacqueline">Sent to Jacqueline</option>
                             <option value="confirmed">Confirmed</option>
+                            <option value="date_conflict">Date conflict</option>
                             <option value="lost">Lost</option>
+                            <option value="deleted">Deleted</option>
                         </select>
                         <button class="btn-secondary" id="resInqRefresh" title="Reload from Netlify">↻ Refresh</button>
                     </div>
@@ -3668,10 +3724,25 @@
                         <div class="dash-stat-num" id="resInqNotContactedCount" style="color:#b45309;">0</div>
                         <div class="dash-stat-lbl">Not Contacted</div>
                     </div>
+                    <div class="dash-stat" id="resInqStatContacted">
+                        <div class="dash-stat-ic">✉️</div>
+                        <div class="dash-stat-num" id="resInqContactedCount" style="color:#2563eb;">0</div>
+                        <div class="dash-stat-lbl">Contacted</div>
+                    </div>
                     <div class="dash-stat" id="resInqStatFollowup">
                         <div class="dash-stat-ic">⚠️</div>
                         <div class="dash-stat-num" id="resInqFollowupCount" style="color:#dc2626;">0</div>
                         <div class="dash-stat-lbl">Need Follow-up</div>
+                    </div>
+                    <div class="dash-stat" id="resInqStatResponded">
+                        <div class="dash-stat-ic">💬</div>
+                        <div class="dash-stat-num" id="resInqRespondedCount" style="color:#7c3aed;">0</div>
+                        <div class="dash-stat-lbl">Responded</div>
+                    </div>
+                    <div class="dash-stat" id="resInqStatJacqueline">
+                        <div class="dash-stat-ic">💍</div>
+                        <div class="dash-stat-num" id="resInqJacquelineCount" style="color:#be185d;">0</div>
+                        <div class="dash-stat-lbl">Sent to Jacqueline</div>
                     </div>
                     <div class="dash-stat" id="resInqStatConfirmed">
                         <div class="dash-stat-ic">✓</div>
@@ -3687,9 +3758,9 @@
                                 <th>Name</th>
                                 <th>Type</th>
                                 <th>Occasion</th>
-                                <th>Event Date</th>
+                                <th class="sortable-th" data-sort="eventDate" style="cursor:pointer;" title="Sort by event date">Event Date <span class="sort-ind" data-sort-ind="eventDate"></span></th>
                                 <th>Guests</th>
-                                <th>Received</th>
+                                <th class="sortable-th" data-sort="submittedAt" style="cursor:pointer;" title="Sort by when it came in">Received <span class="sort-ind" data-sort-ind="submittedAt"></span></th>
                                 <th>Status</th>
                                 <th>Actions</th>
                             </tr>
@@ -3720,6 +3791,8 @@
                             <button class="btn-secondary" data-status="contacted">✉️ Contacted</button>
                             <button class="btn-secondary" data-status="needs_followup">⚠️ Needs Follow-up</button>
                             <button class="btn-secondary" data-status="contacted_2">📨 Followed Up Again</button>
+                            <button class="btn-secondary" data-status="responded">💬 Responded</button>
+                            <button class="btn-secondary" data-status="sent_to_jacqueline" style="border-color:#be185d;color:#be185d;">💍 Sent to Jacqueline</button>
                             <button class="btn-approve" data-status="confirmed">✓ Confirmed (in Calendar)</button>
                             <button class="btn-reject" data-status="lost">✗ Lost</button>
                         </div>
@@ -3727,14 +3800,74 @@
                             <label style="font-size:0.78rem;color:var(--text-muted);">Optional note:</label>
                             <input type="text" id="resInqStatusNote" placeholder='e.g. "Replied with availability for May 10"' style="width:100%;padding:0.5rem;border:1px solid var(--border-subtle);border-radius:6px;background:var(--bg-card);color:var(--text-primary);margin-top:0.25rem;">
                         </div>
+
+                        <hr style="border:none;border-top:1px solid var(--border-subtle);margin:1rem 0;">
+                        <div style="font-weight:600;margin-bottom:0.25rem;">After checking the calendar:</div>
+                        <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.5rem;">
+                            These create the Venue Calendar booking and email the customer automatically
+                            — use "✓ Confirmed" above instead if you already added this one yourself.
+                        </div>
+                        <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+                            <button class="btn-approve" id="resInqAutoConfirm">🗓️ Confirm &amp; Auto-Book</button>
+                            <button class="btn-reject" id="resInqAutoDeny">📅 Date Conflict — Offer Alternate</button>
+                        </div>
+                        <div id="resInqAutoStatus" style="margin-top:0.5rem;font-size:0.82rem;"></div>
+
+                        <!-- Only shown when this inquiry is sitting at needs_followup because a
+                             date conflict was already declined once (see openModal's toggle) --
+                             once the customer replies with a new date, this re-runs the same
+                             Confirm & Auto-Book flow with the corrected date instead of the
+                             original one. -->
+                        <div id="resInqSelectDateBox" class="hidden" style="margin-top:0.75rem;">
+                            <button class="btn-secondary" id="resInqSelectDateBtn" style="border-color:#B8933A;color:#8a6d1f;">📅 Select Another Date &amp; Confirm</button>
+                        </div>
+
                         <div id="resInqHistory" style="margin-top:1rem;font-size:0.8rem;color:var(--text-muted);"></div>
+
+                        <hr style="border:none;border-top:1px solid var(--border-subtle);margin:1rem 0;">
+                        <div style="font-weight:600;margin-bottom:0.5rem;">Email history:</div>
+                        <div id="resInqEmailHistory" style="font-size:0.82rem;color:var(--text-muted);">Loading…</div>
+
+                        <div id="resInqReplyBox" class="hidden" style="margin-top:1rem;padding:0.75rem;background:var(--bg-elevated);border-radius:8px;">
+                            <label style="font-size:0.78rem;color:var(--text-muted);">Subject:</label>
+                            <input type="text" id="resInqReplySubject" style="width:100%;padding:0.5rem;border:1px solid var(--border-subtle);border-radius:6px;background:var(--bg-card);color:var(--text-primary);margin:0.25rem 0 0.6rem;">
+                            <label style="font-size:0.78rem;color:var(--text-muted);">Message:</label>
+                            <textarea id="resInqReplyBody" rows="6" style="width:100%;padding:0.5rem;border:1px solid var(--border-subtle);border-radius:6px;background:var(--bg-card);color:var(--text-primary);margin:0.25rem 0 0.6rem;resize:vertical;"></textarea>
+                            <div style="display:flex;align-items:center;gap:0.6rem;">
+                                <button class="btn-primary" id="resInqSendReply">Send Reply</button>
+                                <button class="btn-secondary" id="resInqCancelReply">Cancel</button>
+                                <span id="resInqReplyStatus" style="font-size:0.8rem;"></span>
+                            </div>
+                            <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.4rem;">Sending a reply automatically marks this inquiry Contacted / Followed Up.</div>
+                        </div>
                     </div>
                     <div class="mkt-modal-foot">
-                        <a id="resInqMailLink" href="#" target="_blank" class="btn-primary" style="text-decoration:none;">✉️ Email Customer</a>
+                        <button type="button" id="resInqDeleteBtn" class="btn-secondary" style="border-color:#dc2626;color:#dc2626;">🗑 Delete</button>
+                        <button type="button" id="resInqRestoreBtn" class="btn-secondary hidden">↩ Restore</button>
+                        <button type="button" id="resInqReplyToggle" class="btn-primary">✉️ Reply</button>
                         <div style="flex:1;"></div>
                         <a id="resInqNetlifyLink" href="#" target="_blank" class="btn-secondary" style="text-decoration:none;font-size:0.78rem;">View in Netlify</a>
                     </div>
                 </div>
+            </div>
+
+            <!-- ========================================================
+                 PENDING APPROVALS TAB — inquiries the customer has
+                 confirmed interest in (clicked "check availability" in the
+                 auto-reply email) and that now need a Confirm/Deny decision.
+                 Populated by ResInqUI's renderPending(), kept in sync with
+                 the same state.inquiries the Reservation Inquiries tab uses.
+                 ======================================================== -->
+            <div id="resInqPendingTab" class="tab-content">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.5rem;">
+                    <div>
+                        <h2 style="margin:0;">Pending Approvals</h2>
+                        <p style="margin:0.25rem 0 0;color:var(--text-muted);font-size:0.85rem;">
+                            Customers who confirmed they still want their date — check the calendar and Confirm or Deny each one.
+                        </p>
+                    </div>
+                </div>
+                <div id="resInqPendingList" style="margin-top:1rem;display:flex;flex-direction:column;gap:0.75rem;"></div>
             </div>
 
             <!-- ========================================================
@@ -4693,6 +4826,50 @@
                 </div>
             </div>
 
+            <!-- ========================================================
+                 PAVILION BOOKINGS TAB — flat list, not a day-grid like golf,
+                 since pavilions are a much lower-volume booking. Reads
+                 straight from list-pavilion-bookings.js (Netlify Blobs is
+                 the sole source of truth; nothing to reconcile against a
+                 payment processor's own order list like golf does).
+                 ======================================================== -->
+            <div id="pavilionsTab" class="tab-content">
+                <div class="section">
+                    <div class="section-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+                        <div>
+                            <div class="section-title">Pavilion Bookings</div>
+                            <div style="font-size:0.85rem;color:var(--text-secondary);">Pavilions 1–6 · $100 / 4 hours · booked via the private link at <a href="/quarry-pavilions.html" target="_blank" style="color:var(--gold);">/quarry-pavilions.html</a></div>
+                        </div>
+                        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                            <input type="date" id="pavStartDate" style="padding:8px 10px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-elevated);color:var(--text-primary);font-size:0.9rem;">
+                            <span style="color:var(--text-secondary);">to</span>
+                            <input type="date" id="pavEndDate" style="padding:8px 10px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-elevated);color:var(--text-primary);font-size:0.9rem;">
+                            <button class="btn-secondary" onclick="loadPavilionBookings()">Refresh</button>
+                        </div>
+                    </div>
+                    <div id="pavStats" style="font-size:0.85rem;color:var(--text-secondary);margin:8px 0 16px;"></div>
+                    <div style="overflow-x:auto;border:1px solid var(--border-subtle);border-radius:8px;background:var(--bg-elevated);">
+                        <table style="width:100%;border-collapse:collapse;font-size:0.85rem;">
+                            <thead>
+                                <tr style="background:var(--bg-secondary);">
+                                    <th style="padding:10px;text-align:left;">Date</th>
+                                    <th style="padding:10px;text-align:left;">Time</th>
+                                    <th style="padding:10px;text-align:left;">Pavilion</th>
+                                    <th style="padding:10px;text-align:left;">Customer</th>
+                                    <th style="padding:10px;text-align:left;">Email</th>
+                                    <th style="padding:10px;text-align:left;">Phone</th>
+                                    <th style="padding:10px;text-align:left;">Paid</th>
+                                    <th style="padding:10px;text-align:left;">Source</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pavTableBody">
+                                <tr><td colspan="8" style="text-align:center;color:var(--text-secondary);padding:2rem;">Loading&hellip;</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <!-- Add booking modal (pay-at-venue) -->
             <div id="golfAddBookingModal" class="modal-overlay" onclick="if(event.target===this)closeGolfAddBooking()">
                 <div class="modal-card" style="max-width:600px;width:90%;background:var(--bg-secondary);border-radius:10px;padding:24px;border:1px solid var(--border-subtle);max-height:92vh;overflow-y:auto;">
@@ -5507,6 +5684,10 @@
                 const body = await r.json();
                 if (body.ok) {
                     sessionStorage.setItem('quarryAuth', 'true');
+                    if (body.role) localStorage.setItem('quarryAdminRole', body.role);
+                    // See the login-submit handler below for why this rides
+                    // along here too, not just on a fresh password entry.
+                    if (body.pushSecret) localStorage.setItem('quarryAdminPushSecret', body.pushSecret);
                     app.authenticated = true;
                     const overlay = document.getElementById('loginOverlay');
                     if (overlay) overlay.classList.add('hidden');
@@ -5534,6 +5715,16 @@
                     console.log('[admin login] status=' + r.status + ' ok=' + body.ok + ' legacy=' + !!body.legacy);
                     if (body.ok) {
                         if (body.token) localStorage.setItem('quarryAdminToken', body.token);
+                        if (body.role) localStorage.setItem('quarryAdminRole', body.role);
+                        else localStorage.removeItem('quarryAdminRole');
+                        // Golf Jackpot / Notices / Manage Rewards / the Members list all
+                        // gate on this separate shared secret via their own x-admin-secret
+                        // header. It used to be nothing more than a browser prompt() asking
+                        // the admin to type in a value nobody had, so those panels either
+                        // failed silently or kept re-nagging on every visit. The server now
+                        // hands it back on a real login, so any authenticated session just
+                        // has it -- nothing to type in, nothing to forget.
+                        if (body.pushSecret) localStorage.setItem('quarryAdminPushSecret', body.pushSecret);
                         sessionStorage.setItem('quarryAuth', 'true');
                         app.authenticated = true;
                         // Force-reveal app so even if showApp/initializeApp throws, user lands on dashboard
@@ -5559,13 +5750,91 @@
             })();
         });
 
+        // Restricted staff logins (e.g. Penny — events only, to start). 'owner'
+        // is the full-access account and is never restricted here. Add a tab id
+        // to a role's list to grant it access; the corresponding backend
+        // function also needs to accept that role (see verify-admin-password.js
+        // and the ALLOWED_ROLES lists in the venue-*/save-events/reservation
+        // Netlify functions) — hiding a sidebar item alone is not a security
+        // boundary, it just matches what the account can actually do server-side.
+        const ROLE_ALLOWED_TABS = {
+            events_staff: ['dashboard', 'events', 'bands', 'potential', 'resInqPending'],
+        };
+        const ROLE_ALLOWED_LINKS = {
+            events_staff: ['/admin/venue-calendar', '/admin/venue-calendar.html', '/admin/venue-calendar/'],
+        };
+
+        let _navObserverStarted = false;
+
+        // Hides every .sb-nav-item not on the current role's allowlist. Several
+        // sidebar items (Contracts, Golf Jackpot, Notices, etc.) are inserted
+        // into the DOM later by their own script files (admin-esign.js,
+        // golf-progressive-admin.js, notices-admin.js...), well after this
+        // function's first pass at login — so this needs to re-run whenever the
+        // nav changes, not just once. See the MutationObserver in
+        // applyRolePermissions() below.
+        function sweepNav(allowedTabs, allowedLinks) {
+            document.querySelectorAll('.sb-nav-item').forEach((item) => {
+                const tab = item.dataset ? item.dataset.tab : null;
+                const href = item.getAttribute('href');
+                const isAllowed = (tab && allowedTabs.includes(tab)) || (href && allowedLinks.includes(href));
+                item.style.display = isAllowed ? '' : 'none';
+            });
+
+            // A section header with every item in its group now hidden would
+            // just be an empty label — hide the header too.
+            document.querySelectorAll('.sb-nav-section').forEach((section) => {
+                const group = section.nextElementSibling;
+                if (!group || !group.classList.contains('sb-nav-group')) return;
+                const anyVisible = Array.from(group.children).some((child) => child.style.display !== 'none');
+                section.style.display = anyVisible ? '' : 'none';
+            });
+        }
+
+        function applyRolePermissions() {
+            const role = localStorage.getItem('quarryAdminRole') || 'owner';
+            if (role === 'owner' || !ROLE_ALLOWED_TABS[role]) return; // full access, nothing to hide
+
+            const allowedTabs = ROLE_ALLOWED_TABS[role] || [];
+            const allowedLinks = ROLE_ALLOWED_LINKS[role] || [];
+
+            sweepNav(allowedTabs, allowedLinks);
+
+            // Restricted roles don't have Dashboard — land on the first tab
+            // they're actually allowed to see instead.
+            if (allowedTabs.length && typeof switchTab === 'function') {
+                switchTab(allowedTabs[0]);
+            }
+
+            // Re-sweep whenever the sidebar's contents change, so a nav item
+            // added after login (by a plugin script loaded later) can never
+            // stay visible to a restricted account.
+            if (!_navObserverStarted) {
+                _navObserverStarted = true;
+                const nav = document.querySelector('.sb-nav');
+                if (nav && typeof MutationObserver !== 'undefined') {
+                    const observer = new MutationObserver(() => sweepNav(allowedTabs, allowedLinks));
+                    observer.observe(nav, { childList: true, subtree: true });
+                }
+            }
+        }
+
         function showApp() {
             document.getElementById('mainApp').classList.remove('hidden');
+            applyRolePermissions();
             initializeApp();
         }
 
         document.getElementById('logoutBtn').addEventListener('click', () => {
+            // Sign Out previously only cleared sessionStorage, leaving the
+            // long-lived (7-day) token sitting in localStorage — so the
+            // page-load restore flow silently logged the same account right
+            // back in on the next visit, making "Sign Out" a no-op in
+            // practice. Clear the actual credentials too so a sign-out is a
+            // real sign-out, and so a different account can log in right after.
             sessionStorage.removeItem('quarryAuth');
+            localStorage.removeItem('quarryAdminToken');
+            localStorage.removeItem('quarryAdminRole');
             location.reload();
         });
 
@@ -5577,6 +5846,13 @@
             setupEventListeners();
             setupSchedulingTabs();
             loadData();
+            // The Reservation Inquiries sidebar badge is computed from
+            // ResInqUI's own state, which previously only loaded once the
+            // admin actually clicked into that tab (ResInqUI.onTabSwitch) --
+            // so the badge sat empty/stale on every fresh login until they
+            // visited the tab and hit Refresh. Load it here too, right when
+            // the dashboard itself loads, so the badge is correct immediately.
+            if (window.ResInqUI && typeof ResInqUI.loadAll === 'function') ResInqUI.loadAll();
         }
 
         function setupNavigation() {
@@ -5635,14 +5911,17 @@
 
             // Clear active state on sidebar items
             document.querySelectorAll('.sb-nav-item').forEach(t => t.classList.remove('active'));
-            const sbItem = document.querySelector(`.sb-nav-item[data-tab="${tabName}"]`);
-            if (sbItem) {
+            // querySelectorAll, not querySelector -- a couple of tabs (e.g. Push
+            // Notifications) now have two nav links pointing at the same
+            // data-tab, one per section they're relevant to, and both should
+            // highlight together regardless of which one was clicked.
+            document.querySelectorAll(`.sb-nav-item[data-tab="${tabName}"]`).forEach((sbItem) => {
                 sbItem.classList.add('active');
                 // Auto-expand the parent section if collapsed (e.g. when reached via dashboard quick-jump)
                 const group = sbItem.closest('.sb-nav-group');
                 const header = group ? group.previousElementSibling : null;
                 if (header && header.classList.contains('sb-nav-section')) header.classList.remove('collapsed');
-            }
+            });
 
             // Switch tab content
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -5657,6 +5936,10 @@
             // Load payments when switching to payments tab
             if (tabName === 'payments') {
                 loadPaymentsData();
+            }
+            // Load pavilion bookings when switching to that tab
+            if (tabName === 'pavilions') {
+                loadPavilionBookings();
             }
             // Load potential reservations data
             if (tabName === 'potential') {
@@ -5909,7 +6192,57 @@
                 }
                 if (!data.success) throw new Error(data.error || 'Unknown error');
 
-                app.confirmedEvents = data.events || [];
+                let events = data.events || [];
+
+                // ALSO pull from the newer Venue Calendar system (venue_bookings,
+                // Supabase) -- this is where reservation-inquiry-decide.js's
+                // "Confirm & Auto-Book" and the Venue Calendar's own "Add Booking"
+                // actually write to, and it's a completely separate system from
+                // the Google Sheet / Calendar / Gmail chain above, which nothing
+                // in the newer booking flow ever touches. Without this merge, a
+                // reservation confirmed through the new automated flow (or added
+                // directly on the Venue Calendar) never showed up here at all.
+                // 31 days is venue-day-view's own max per call.
+                try {
+                    const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Chicago' });
+                    const vr = await fetch(`/.netlify/functions/venue-day-view?token=${encodeURIComponent(localStorage.getItem('quarryAdminToken') || '')}&start=${todayStr}&days=31`);
+                    if (vr.ok) {
+                        const vd = await vr.json();
+                        const seenIds = new Set(events.map((e) => e.id));
+                        for (const b of (vd.bookings || [])) {
+                            if (b.status === 'cancelled' || seenIds.has(b.id)) continue;
+                            events.push({
+                                id: b.id,
+                                summary: b.title || '(No title)',
+                                start: b.starts_at,
+                                end: b.ends_at,
+                                location: (b.direct_spaces || []).join(', '),
+                                status: b.status,
+                                contact: {
+                                    name: b.contact_name || '',
+                                    email: b.contact_email || '',
+                                    phone: b.contact_phone || '',
+                                    guests: b.guest_count || '',
+                                    occasion: b.occasion || '',
+                                },
+                                attendees: [],
+                                htmlLink: '',
+                                eventType: b.event_type || '',
+                                catering: b.catering_required ? 'Yes' : '',
+                                notes: b.notes || '',
+                                _venueBooking: true,
+                            });
+                        }
+                    }
+                } catch (venueErr) {
+                    console.error('Venue Calendar merge failed:', venueErr.message);
+                }
+
+                // Chronological, oldest first -- "bouncing around" was every source
+                // landing in whatever order it happened to return, not by date.
+                events.sort((a, b) => new Date(a.start || 0) - new Date(b.start || 0));
+
+                app.confirmedEvents = events;
                 app.confirmedSource = source;
 
                 // Auto-move past confirmed events into CRM as customers
@@ -6236,6 +6569,36 @@
             }
         }
 
+        // A registration's per-unit price, in cents. Table/seating-option events
+        // price per option (each option carries its own pricePerSeat); everything
+        // else is flat per-person. pricePerPerson is the current field name — older
+        // events sometimes also carry legacy pricePerSeat/price mirrors, which are
+        // kept as a last-resort fallback rather than the primary source.
+        function resolveEventUnitPriceCents(ev, reg) {
+            if (reg && reg.seatingOptionId && Array.isArray(ev.seatingOptions)) {
+                const opt = ev.seatingOptions.find(o => o && String(o.id) === String(reg.seatingOptionId));
+                if (opt && opt.pricePerSeat) return Number(opt.pricePerSeat) || 0;
+            }
+            return Number(ev.pricePerPerson) || Number(ev.pricePerSeat) || Number(ev.price) || 0;
+        }
+
+        // Dollars actually charged for a registration. Trusts an explicit stored
+        // amount/amountPaid (including "0.00" for a genuine comp/free ticket —
+        // legacy registrations store these as strings); only falls back to
+        // computing qty x unit price when neither field was ever recorded, which
+        // is the normal case for Square-sourced registrations.
+        function resolveRegAmount(reg, ev) {
+            for (const key of ['amount', 'amountPaid']) {
+                const v = reg[key];
+                if (v !== undefined && v !== null && v !== '') {
+                    const n = parseFloat(v);
+                    if (!isNaN(n)) return n;
+                }
+            }
+            const unitCents = resolveEventUnitPriceCents(ev, reg);
+            return unitCents > 0 ? ((reg.qty || reg.tickets || 1) * unitCents) / 100 : 0;
+        }
+
         // ================================================================
         // DATA LOADING
         // ================================================================
@@ -6262,10 +6625,10 @@
                                 app.registrations[ev.id] = perEvent.map(r => ({
                                     ...r,
                                     tickets: r.tickets || r.qty || 1,
-                                    amount: r.amount || r.amountPaid || ((r.qty || 1) * ((ev.pricePerSeat || ev.price || 0) / 100))
+                                    amount: resolveRegAmount(r, ev)
                                 }));
                             } else if (legacyRegs[ev.id]) {
-                                app.registrations[ev.id] = legacyRegs[ev.id].map(r => ({ ...r, tickets: r.tickets || r.qty || 1 }));
+                                app.registrations[ev.id] = legacyRegs[ev.id].map(r => ({ ...r, tickets: r.tickets || r.qty || 1, amount: resolveRegAmount(r, ev) }));
                             }
                         });
                         app.bands = eventsData.bands || [];
@@ -6338,8 +6701,8 @@
                             phone: reg.phone || '',
                             source: 'Event Registration',
                             emailStatus: 'Never Subscribed',
-                            created: reg.created || new Date().toISOString(),
-                            lastActivityDate: reg.created || new Date().toISOString(),
+                            created: reg.registeredAt || reg.created || new Date().toISOString(),
+                            lastActivityDate: reg.registeredAt || reg.created || new Date().toISOString(),
                         });
                         added++;
                     }
@@ -6352,24 +6715,35 @@
         // DASHBOARD
         // ================================================================
         function updateDashboard() {
-            document.getElementById('totalEvents').textContent = app.events.length;
+            // "Active Events" means what its tooltip says — ticketed events with at
+            // least one open seat — not literally every event ever created. Without
+            // this filter the count includes events that already happened months ago.
+            const activeTodayKey = new Date().toLocaleDateString('en-CA');
+            const activeEventsCount = (app.events || []).filter((e) => {
+                if (e.date && e.date < activeTodayKey) return false;
+                if (e.status === 'inactive' || e.status === 'sold-out') return false;
+                const capacity = Number(e.capacity || e.totalCapacity) || 0;
+                if (capacity > 0) {
+                    const sold = Number(e.registeredCount || e.registered || 0);
+                    if (sold >= capacity) return false;
+                }
+                return true;
+            }).length;
+            document.getElementById('totalEvents').textContent = activeEventsCount;
             document.getElementById('totalSubscribers').textContent = app.subscribers.length;
 
             const subscribed = app.subscribers.filter(s => s.emailStatus === 'Subscribed').length;
             document.getElementById('emailSubscribed').textContent = subscribed;
 
-            // Calculate total registrations and revenue from registrations data
-            let totalRegs = 0;
+            // Calculate revenue from registrations data
             let revenue = 0;
             const regs = app.registrations || {};
             for (const eventId in regs) {
                 const eventRegs = regs[eventId] || [];
-                totalRegs += eventRegs.length;
                 eventRegs.forEach(r => {
                     revenue += parseFloat(r.amount || r.amountPaid || 0);
                 });
             }
-            document.getElementById('totalRegistrations').textContent = totalRegs;
             document.getElementById('totalRevenue').textContent = '$' + revenue.toLocaleString('en-US', { minimumFractionDigits: 2 });
 
             // Upcoming bands — use LOCAL date so we don't mark today's bands
@@ -6382,6 +6756,51 @@
             renderDashboardHero();
             renderDashboardAttention();
             renderDashboardToday();
+            renderDashEventsStrip();
+        }
+
+        // Horizontal "Events at a Glance" strip: every upcoming/active event as a
+        // compact chip showing how full it is, so a quick scan across the row
+        // answers "which events need attention" without opening each one. Click
+        // a chip to jump straight to that event's full registration list.
+        function renderDashEventsStrip() {
+            const strip = document.getElementById('dashEventsStrip');
+            if (!strip) return;
+
+            const todayKey = new Date().toLocaleDateString('en-CA');
+            const windowEndKey = new Date(Date.now() + 30 * 86400000).toLocaleDateString('en-CA');
+            const upcoming = (app.events || [])
+                .filter((e) => e.date && e.date >= todayKey && e.date <= windowEndKey)
+                .sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')));
+
+            if (upcoming.length === 0) {
+                strip.innerHTML = '<div class="events-strip-empty">No events in the next 30 days.</div>';
+                return;
+            }
+
+            const escAttr = (s) => (s == null ? '' : String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])));
+
+            strip.innerHTML = upcoming.map((event) => {
+                const regs = getEventRegistrations(event.id);
+                const sold = regs.reduce((sum, r) => sum + (r.tickets || r.qty || 1), 0);
+                const capacity = Number(event.capacity || event.totalCapacity) || 0;
+                const pct = capacity > 0 ? Math.min(100, Math.round((sold / capacity) * 100)) : 0;
+                const isFull = capacity > 0 && sold >= capacity;
+                return `
+                <div class="es-chip" data-event-id="${event.id}" title="${escAttr(event.name)} — click for full registration list">
+                    <div class="es-chip-name">${escAttr(event.name)}</div>
+                    <div class="es-chip-date">${formatEventDate(event.date)}</div>
+                    <div class="es-chip-bar-track"><div class="es-chip-bar-fill${isFull ? ' is-full' : ''}" style="width:${capacity > 0 ? pct : 0}%;"></div></div>
+                    <div class="es-chip-count"><span><b>${sold}</b>${capacity ? ' / ' + capacity : ''} sold</span>${capacity ? `<span>${pct}%</span>` : ''}</div>
+                </div>`;
+            }).join('');
+
+            strip.querySelectorAll('.es-chip').forEach((chip) => {
+                chip.addEventListener('click', () => {
+                    switchTab('events');
+                    openEventEditor(chip.dataset.eventId);
+                });
+            });
         }
 
         function renderDashboardHero() {
@@ -6486,26 +6905,60 @@
             }
         }
 
+        // Source values from subscribers.json worth surfacing as "new lead" activity,
+        // mapped to a human label. Deliberately excludes sources that just mirror an
+        // event registration (event-registration, wine-club-registration, Event RSVP)
+        // or bulk/administrative imports (Wix Stores, Site Members, Manual Creation) —
+        // those would either duplicate the registration entries above or aren't really
+        // "activity" anyone needs to see.
+        const ACTIVITY_CONTACT_SOURCE_LABELS = {
+            'reservations': 'Reservation Inquiry',
+            'private-events': 'Private Event Inquiry',
+            'contact': 'Contact Form',
+            'careers': 'Career Application',
+            'mailing-list': 'Mailing List Signup',
+            'wedding-tour': 'Wedding Tour Request',
+            'Chat Form Submission': 'Chat Message',
+            'Form Submission': 'Website Form',
+        };
+
         function updateActivityFeed() {
             const feed = document.getElementById('activityFeed');
             const activities = [];
             const regs = app.registrations || {};
+            const escActivity = (s) => (s == null ? '' : String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])));
 
             for (const eventId in regs) {
                 const event = app.events.find(e => e.id === eventId);
                 const eventName = event ? event.name : eventId;
                 (regs[eventId] || []).forEach(reg => {
-                    if (reg.created) {
+                    // Registrations come from two eras of the booking system: the
+                    // current Square-backed one stamps registeredAt, the older
+                    // Stripe-backed one (still the only record for events booked
+                    // before the switch) stamps created instead.
+                    const when = reg.registeredAt || reg.created;
+                    if (when) {
                         activities.push({
-                            type: 'registration',
-                            name: eventName,
-                            user: reg.name || 'Unknown',
-                            date: new Date(reg.created),
-                            amount: reg.amount || '0',
+                            title: eventName,
+                            detail: `${reg.name || reg.email || 'Unknown'} · $${parseFloat(reg.amount != null ? reg.amount : 0).toFixed(2)}`,
+                            date: new Date(when),
                         });
                     }
                 });
             }
+
+            // Ticket sales are only a handful of events a week — without this the feed
+            // looked frozen for days at a time even while the site was actively
+            // generating reservation inquiries, private-event leads, and contact form
+            // submissions every day. Same data already loaded for the CRM tab.
+            (app.subscribers || []).forEach((s) => {
+                const label = ACTIVITY_CONTACT_SOURCE_LABELS[s.source];
+                if (!label || !s.created) return;
+                const date = new Date(s.created);
+                if (isNaN(date.getTime())) return;
+                const name = `${s.firstName || ''} ${s.lastName || ''}`.trim() || s.email || 'Unknown';
+                activities.push({ title: label, detail: name, date });
+            });
 
             activities.sort((a, b) => b.date - a.date);
 
@@ -6514,11 +6967,11 @@
                 return;
             }
 
-            feed.innerHTML = activities.slice(0, 15).map(activity => `
+            feed.innerHTML = activities.slice(0, 20).map(activity => `
                 <div class="activity-item">
                     <div>
-                        <span class="activity-event">${activity.name}</span><br>
-                        <span style="color: #858d9e; font-size: 0.85rem;">${activity.user} - $${parseFloat(activity.amount).toFixed(2)}</span>
+                        <span class="activity-event">${escActivity(activity.title)}</span><br>
+                        <span style="color: #858d9e; font-size: 0.85rem;">${escActivity(activity.detail)}</span>
                     </div>
                     <span class="activity-time">${formatTimeAgo(activity.date)}</span>
                 </div>
@@ -12812,53 +13265,263 @@ function hashCode(str) {
         // ====================================================================
         window.ResInqUI = (() => {
             const FN = '/.netlify/functions';
-            const state = { inquiries: [], current: null, loaded: false, loading: false };
+            // sort.field null = server order (newest submitted first). Set by
+            // clicking a sortable column header — 'eventDate' lets the list be
+            // ranked by how soon the event is, so the most urgent
+            // not-yet-contacted inquiries surface to the top.
+            const state = { inquiries: [], current: null, loaded: false, loading: false, sort: { field: null, dir: 'asc' } };
+
+            function sortValueFor(inq, field) {
+                const raw = field === 'eventDate' ? inq.eventDate : inq.submittedAt;
+                if (!raw) return null;
+                const t = new Date(raw.length === 10 ? raw + 'T12:00:00' : raw).getTime();
+                return isNaN(t) ? null : t;
+            }
             const $ = (id) => document.getElementById(id);
             const escHtml = (s) => (s == null ? '' : String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])));
             const fmtDate = (iso) => { if (!iso) return '—'; const d = new Date(iso); return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); };
             const fmtDay = (iso) => { if (!iso) return '—'; try { return new Date(iso.length === 10 ? iso + 'T12:00' : iso).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }); } catch (_) { return iso; } };
-            const STATUS_LABELS = { not_contacted: 'Not Contacted', contacted: 'Contacted', needs_followup: 'Needs Follow-up', contacted_2: 'Followed Up', confirmed: 'Confirmed', lost: 'Lost' };
-            const STATUS_COLORS = { not_contacted: '#b45309', contacted: '#2563eb', needs_followup: '#dc2626', contacted_2: '#7c3aed', confirmed: '#16a34a', lost: '#64748b' };
+            const STATUS_LABELS = { not_contacted: 'Not Contacted', contacted: 'Contacted', needs_followup: 'Needs Follow-up', contacted_2: 'Followed Up', responded: 'Responded', sent_to_jacqueline: 'Sent to Jacqueline', confirmed: 'Confirmed', lost: 'Lost', awaiting_customer_confirm: 'Awaiting Customer', awaiting_customer_confirm_followedup: 'Reminded (Waiting)', needs_call: '📞 Needs a Call', awaiting_decision: 'Awaiting Decision', date_conflict: 'Date Conflict' };
+            const STATUS_COLORS = { not_contacted: '#b45309', contacted: '#2563eb', needs_followup: '#dc2626', contacted_2: '#7c3aed', responded: '#7c3aed', sent_to_jacqueline: '#be185d', confirmed: '#16a34a', lost: '#64748b', awaiting_customer_confirm: '#0891b2', awaiting_customer_confirm_followedup: '#0e7490', needs_call: '#dc2626', awaiting_decision: '#d97706', date_conflict: '#dc2626' };
+            // Statuses that mean "I've actually reached out at least once" —
+            // not_contacted/needs_followup are default/no-action states (see
+            // list-reservation-inquiries.js's defaultStatus), so they don't count.
+            const CONTACTED_STATUSES = ['contacted', 'contacted_2', 'responded', 'sent_to_jacqueline', 'confirmed', 'lost'];
+            // Statuses eligible for the "did they reply?" check — only while
+            // we're the one waiting on them.
+            const AWAITING_REPLY_STATUSES = ['contacted', 'contacted_2'];
+            // Who's actually typing the reply — the reply box used to start
+            // completely blank, so whoever hit send had to remember to sign
+            // their own name every single time (or, more often, didn't).
+            // quarryAdminRole is set at login (see the login-restore/login-submit
+            // handlers) — 'owner' is Matt, and the only restricted staff role in
+            // use today is Penny's events_staff.
+            const STAFF_SIGNATURES = {
+                owner: 'The Quarry',
+                events_staff: 'Penny Randmann\nThe Quarry\nmanagement@thequarrystl.com\nwww.thequarrystl.com',
+            };
+            function currentSignature() {
+                const role = localStorage.getItem('quarryAdminRole') || 'owner';
+                return STAFF_SIGNATURES[role] || 'The Quarry';
+            }
             function statusPill(s) { const c = STATUS_COLORS[s] || '#64748b'; return `<span style="display:inline-block;padding:0.18rem 0.55rem;border-radius:999px;font-size:0.68rem;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;background:${c}1f;color:${c};">${escHtml(STATUS_LABELS[s] || s)}</span>`; }
 
             async function loadAll() {
                 if (state.loading) return;
                 state.loading = true;
                 try {
-                    const r = await fetch(`${FN}/list-reservation-inquiries`, { cache: 'no-store' });
+                    const r = await fetch(`${FN}/list-reservation-inquiries?token=${encodeURIComponent(localStorage.getItem('quarryAdminToken') || '')}`, { cache: 'no-store' });
                     const body = await r.json();
                     if (!body.ok) throw new Error(body.error || 'load failed');
                     state.inquiries = body.inquiries || [];
                     state.loaded = true;
                     render();
+                    // Best-effort, runs after the list is already on screen: check
+                    // whether anyone we're waiting on has actually replied by email.
+                    checkForResponses();
                 } catch (err) {
                     $('resInqTableBody').innerHTML = `<tr><td colspan="8" style="text-align:center;color:#dc2626;padding:2rem;">Couldn't load inquiries — ${escHtml(err.message)}<br><button class="btn-secondary" onclick="ResInqUI.loadAll()" style="margin-top:0.5rem;">Retry</button></td></tr>`;
                 } finally { state.loading = false; }
             }
 
+            // Checks every inquiry we're currently "waiting on" (contacted /
+            // followed up) against its live Gmail thread — same lookup the modal's
+            // Email History panel already uses. If the latest message in the
+            // thread is FROM the customer and landed after we last touched their
+            // status, they've replied: flip them to "responded" so the badge and
+            // stat card surface it as something needing attention. Sequential and
+            // best-effort (one slow/broken lookup must never block the others or
+            // throw an error onto the page) — the volume here is small (only
+            // inquiries actively being chased), so no batching is needed.
+            let checkingResponses = false;
+            async function checkForResponses() {
+                if (checkingResponses) return;
+                const candidates = state.inquiries.filter((i) => !i.hidden && i.email && AWAITING_REPLY_STATUSES.includes(i.status));
+                if (!candidates.length) return;
+                checkingResponses = true;
+                let foundAny = false;
+                try {
+                    for (const inq of candidates) {
+                        try {
+                            const r = await fetch(`${FN}/gmail-threads?email=${encodeURIComponent(inq.email)}`);
+                            const body = await r.json();
+                            if (!body.success) continue;
+                            const latest = (body.threads || [])[0];
+                            if (!latest || latest.direction !== 'received') continue;
+                            const repliedAt = new Date(latest.date).getTime();
+                            const sinceAt = new Date(inq.statusUpdatedAt || inq.submittedAt || 0).getTime();
+                            if (!repliedAt || repliedAt <= sinceAt) continue;
+
+                            const res = await fetch(`${FN}/update-reservation-status`, {
+                                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    token: localStorage.getItem('quarryAdminToken') || '',
+                                    submissionId: inq.id, status: 'responded',
+                                    note: 'Auto-detected reply: "' + (latest.subject || '') + '"', by: 'system',
+                                }),
+                            });
+                            const resBody = await res.json();
+                            if (res.ok && resBody.ok) {
+                                inq.status = 'responded';
+                                inq.statusUpdatedAt = resBody.override.updatedAt;
+                                inq.statusNote = resBody.override.note;
+                                inq.statusHistory = resBody.override.history;
+                                foundAny = true;
+                            }
+                        } catch (_) { /* one inquiry's lookup failing shouldn't stop the rest */ }
+                    }
+                } finally {
+                    checkingResponses = false;
+                }
+                if (foundAny) {
+                    render();
+                    if (typeof showToast === 'function') showToast('New reply received — inquiry marked Responded');
+                }
+            }
+
+            // Sidebar badge — same pattern as mktInboxBadge/wineclubBadge: a plain
+            // count computed from whatever's already loaded, refreshed on loadAll().
+            // Not a push notification — only updates while the admin has this open.
+            function updateBadge() {
+                const badge = $('resInqBadge');
+                if (!badge) return;
+                const n = state.inquiries.filter((i) => !i.hidden && ['not_contacted', 'needs_followup', 'responded', 'awaiting_decision', 'needs_call'].includes(i.status)).length;
+                if (n > 0) { badge.textContent = String(n); badge.style.display = ''; }
+                else { badge.style.display = 'none'; }
+            }
+
+            // Pending Approvals — a focused view of exactly the inquiries a
+            // customer has confirmed interest in (clicked "check availability")
+            // and that now need a Confirm/Deny click. Kept in sync automatically
+            // since render() calls this every time state.inquiries changes.
+            function renderPending(visible) {
+                const list = $('resInqPendingList');
+                const badge = $('resInqPendingBadge');
+                if (!list) return; // panel not on this page load yet
+
+                const pending = (visible || state.inquiries.filter((i) => !i.hidden))
+                    .filter((i) => i.status === 'awaiting_decision');
+
+                if (badge) {
+                    if (pending.length > 0) { badge.textContent = String(pending.length); badge.style.display = ''; }
+                    else badge.style.display = 'none';
+                }
+
+                if (!pending.length) {
+                    list.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--text-muted);">🎉 Nothing waiting on a decision right now.</div>';
+                    return;
+                }
+
+                list.innerHTML = pending.map((inq) => {
+                    const details = [
+                        inq.occasion,
+                        inq.eventDate ? fmtDay(inq.eventDate) : null,
+                        inq.eventTime,
+                        inq.guests ? `${inq.guests} guests` : null,
+                        inq.location,
+                        inq.catering === 'Yes' ? 'Catering requested' : null,
+                    ].filter(Boolean).map(escHtml).join(' · ');
+                    return `
+                        <div style="border:1px solid var(--border-subtle);border-radius:8px;padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;background:var(--bg-card);">
+                            <div>
+                                <div style="font-weight:600;">${escHtml(inq.name)}</div>
+                                <div style="font-size:0.82rem;color:var(--text-muted);margin-top:0.15rem;">${details}</div>
+                                <div style="font-size:0.78rem;color:var(--text-muted);margin-top:0.15rem;">${escHtml(inq.email)}</div>
+                            </div>
+                            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                                <button class="btn-secondary" onclick="ResInqUI.openModal('${inq.id}')">View Details</button>
+                                <button class="btn-approve" data-pending-confirm="${escHtml(inq.id)}">🗓️ Confirm &amp; Auto-Book</button>
+                                <button class="btn-reject" data-pending-deny="${escHtml(inq.id)}">📅 Date Conflict</button>
+                            </div>
+                        </div>`;
+                }).join('');
+
+                list.querySelectorAll('[data-pending-confirm]').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        const inq = state.inquiries.find((x) => x.id === btn.dataset.pendingConfirm);
+                        if (inq) decideAuto('confirm', inq);
+                    });
+                });
+                list.querySelectorAll('[data-pending-deny]').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        const inq = state.inquiries.find((x) => x.id === btn.dataset.pendingDeny);
+                        if (inq) decideAuto('deny', inq);
+                    });
+                });
+            }
+
             function render() {
+                // Deleted (hidden) inquiries — duplicates/junk removed via the
+                // modal's Delete button — are excluded from every count and every
+                // filter except the dedicated "Deleted" view, where they can be
+                // restored.
+                const visible = state.inquiries.filter((i) => !i.hidden);
+                renderPending(visible);
+
                 // Stats
-                const total = state.inquiries.length;
-                const notContacted = state.inquiries.filter((i) => i.status === 'not_contacted').length;
-                const followup = state.inquiries.filter((i) => i.status === 'needs_followup').length;
-                const confirmed = state.inquiries.filter((i) => i.status === 'confirmed').length;
+                const total = visible.length;
+                const notContacted = visible.filter((i) => i.status === 'not_contacted').length;
+                const contacted = visible.filter((i) => CONTACTED_STATUSES.includes(i.status)).length;
+                const followup = visible.filter((i) => i.status === 'needs_followup').length;
+                const responded = visible.filter((i) => i.status === 'responded').length;
+                const sentToJacqueline = visible.filter((i) => i.status === 'sent_to_jacqueline').length;
+                const confirmed = visible.filter((i) => i.status === 'confirmed').length;
                 $('resInqTotalCount').textContent = total;
                 $('resInqNotContactedCount').textContent = notContacted;
+                $('resInqContactedCount').textContent = contacted;
                 $('resInqFollowupCount').textContent = followup;
+                $('resInqRespondedCount').textContent = responded;
+                $('resInqJacquelineCount').textContent = sentToJacqueline;
                 $('resInqConfirmedCount').textContent = confirmed;
+                updateBadge();
 
-                // Filter
+                // Filter — a name/email search overrides the status dropdown
+                // entirely, so it's one box that searches everything instead of
+                // having to flip through each status tab to find someone.
+                const search = ($('resInqSearch')?.value || '').trim().toLowerCase();
                 const filter = $('resInqFilter')?.value || 'needs_attention';
-                let list = state.inquiries.slice();
-                if (filter === 'needs_attention') {
-                    list = list.filter((i) => ['not_contacted', 'needs_followup'].includes(i.status));
-                } else if (filter !== 'all') {
-                    list = list.filter((i) => i.status === filter);
+                let list;
+                if (filter === 'deleted') {
+                    list = state.inquiries.filter((i) => i.hidden);
+                } else if (search) {
+                    list = visible.filter((i) =>
+                        (i.name || '').toLowerCase().includes(search) ||
+                        (i.email || '').toLowerCase().includes(search)
+                    );
+                } else if (filter === 'needs_attention') {
+                    list = visible.filter((i) => ['not_contacted', 'needs_followup', 'responded', 'awaiting_decision', 'needs_call'].includes(i.status));
+                } else if (filter === 'all') {
+                    list = visible;
+                } else if (filter === 'contacted') {
+                    // Matches the Contacted STAT CARD's definition above (anyone
+                    // actually reached out to, at any stage) rather than the
+                    // single literal "contacted" status — picking this from the
+                    // dropdown used to show only 4 people when the card said 322.
+                    list = visible.filter((i) => CONTACTED_STATUSES.includes(i.status));
+                } else {
+                    list = visible.filter((i) => i.status === filter);
                 }
+
+                if (state.sort.field) {
+                    const field = state.sort.field, dir = state.sort.dir;
+                    list = list.slice().sort((a, b) => {
+                        const av = sortValueFor(a, field), bv = sortValueFor(b, field);
+                        if (av == null && bv == null) return 0;
+                        if (av == null) return 1;  // no usable date — always sinks to the bottom
+                        if (bv == null) return -1;
+                        return dir === 'asc' ? av - bv : bv - av;
+                    });
+                }
+                document.querySelectorAll('#resInqTable .sort-ind').forEach((el) => {
+                    el.textContent = el.dataset.sortInd === state.sort.field ? (state.sort.dir === 'asc' ? '▲' : '▼') : '';
+                });
 
                 const tbody = $('resInqTableBody');
                 if (list.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:2rem;">No inquiries in this view. ${filter === 'needs_attention' ? "🎉 You're all caught up." : ''}</td></tr>`;
+                    const emptyMsg = search
+                        ? `No inquiries match "${escHtml($('resInqSearch').value.trim())}".`
+                        : `No inquiries in this view. ${filter === 'needs_attention' ? "🎉 You're all caught up." : ''}`;
+                    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:2rem;">${emptyMsg}</td></tr>`;
                     return;
                 }
                 tbody.innerHTML = list.map((i) => `
@@ -12871,11 +13534,23 @@ function hashCode(str) {
                         <td style="font-size:0.78rem;color:var(--text-muted);">${escHtml(fmtDate(i.submittedAt))}</td>
                         <td>${statusPill(i.status)}</td>
                         <td onclick="event.stopPropagation()">
-                            ${i.email ? `<a href="mailto:${encodeURIComponent(i.email)}?subject=${encodeURIComponent('Your inquiry at The Quarry')}" style="color:var(--gold);text-decoration:none;font-size:0.8rem;">✉ Email</a>` : ''}
+                            ${i.email ? `<a href="#" data-reply-id="${escHtml(i.id)}" style="color:var(--gold);text-decoration:none;font-size:0.8rem;">✉ Reply</a>` : ''}
                         </td>
                     </tr>
                 `).join('');
                 tbody.querySelectorAll('[data-inq-id]').forEach((row) => row.addEventListener('click', () => openModal(row.dataset.inqId)));
+                // Routed through the tracked reply box, not a mailto: link, so a
+                // reply sent this way still auto-advances the inquiry's status.
+                tbody.querySelectorAll('[data-reply-id]').forEach((a) => a.addEventListener('click', (e) => {
+                    e.preventDefault(); e.stopPropagation();
+                    openModal(a.dataset.replyId);
+                    $('resInqReplyBox').classList.remove('hidden');
+                    // The compose box renders below Email History, which can run
+                    // long (a dozen+ past messages) — without this, clicking Reply
+                    // opened the box off-screen with no visible sign anything
+                    // happened, reading as "the reply button doesn't work."
+                    $('resInqReplyBox').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }));
             }
 
             function openModal(id) {
@@ -12884,6 +13559,8 @@ function hashCode(str) {
                 state.current = inq;
                 const modal = $('resInqModal');
                 modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false');
+                const autoStatusEl = $('resInqAutoStatus');
+                if (autoStatusEl) autoStatusEl.textContent = '';
 
                 $('resInqModalTitle').textContent = inq.name;
                 $('resInqModalSub').innerHTML = `${statusPill(inq.status)}<span style="color:var(--text-muted);">${escHtml(inq.formLabel)} · received ${escHtml(fmtDate(inq.submittedAt))}</span>`;
@@ -12897,6 +13574,7 @@ function hashCode(str) {
                     inq.eventTime ? ['Event Time', escHtml(inq.eventTime)] : null,
                     ['Party Size', escHtml(inq.guests || '—')],
                     inq.location ? ['Location', escHtml(inq.location)] : null,
+                    inq.catering ? ['Catering', inq.catering === 'Yes' ? '✓ Requested' : 'Not requested'] : null,
                     ['Marketing Opt-In', inq.marketingOptIn ? '✓ Yes' : '✗ No'],
                     inq.notes ? ['Notes', `<div style="margin-top:0.25rem;padding:0.5rem;background:var(--bg-elevated);border-radius:4px;white-space:pre-wrap;">${escHtml(inq.notes)}</div>`] : null,
                 ].filter(Boolean);
@@ -12916,14 +13594,93 @@ function hashCode(str) {
                 }
 
                 $('resInqStatusNote').value = '';
+                $('resInqReplyBox').classList.add('hidden');
+                $('resInqReplyStatus').textContent = '';
+                $('resInqReplyToggle').style.display = inq.email ? '' : 'none';
                 if (inq.email) {
-                    const subject = encodeURIComponent(`Your ${inq.formLabel.toLowerCase()} at The Quarry`);
-                    $('resInqMailLink').href = `mailto:${encodeURIComponent(inq.email)}?subject=${subject}`;
-                    $('resInqMailLink').style.display = '';
-                } else {
-                    $('resInqMailLink').style.display = 'none';
+                    $('resInqReplySubject').value = `Re: Your ${inq.formLabel.toLowerCase()} at The Quarry`;
+                    $('resInqReplyBody').value = `\n\nWarmly,\n${currentSignature()}`;
                 }
                 $('resInqNetlifyLink').href = inq.netlifyUrl || '#';
+                $('resInqDeleteBtn').classList.toggle('hidden', !!inq.hidden);
+                $('resInqRestoreBtn').classList.toggle('hidden', !inq.hidden);
+                $('resInqSelectDateBox')?.classList.toggle('hidden', inq.status !== 'needs_followup');
+
+                loadEmailHistory(inq.email);
+            }
+
+            // Same live Gmail-search-by-email pattern the Contacts tab uses
+            // (gmail-threads.js) — a fresh lookup each time, not a stored sync.
+            async function loadEmailHistory(email) {
+                const zone = $('resInqEmailHistory');
+                if (!email) { zone.innerHTML = '—'; return; }
+                zone.innerHTML = 'Loading…';
+                try {
+                    const r = await fetch(`${FN}/gmail-threads?email=${encodeURIComponent(email)}`);
+                    const body = await r.json();
+                    if (!body.success) throw new Error(body.error || 'lookup failed');
+                    const threads = body.threads || [];
+                    if (!threads.length) { zone.innerHTML = 'No email history found for this address.'; return; }
+                    zone.innerHTML = threads.map((t) => `
+                        <div style="padding:0.4rem 0;border-bottom:1px solid var(--border-subtle);">
+                            <a href="${escHtml(t.link)}" target="_blank" style="color:var(--gold);text-decoration:none;font-weight:500;">${escHtml(t.subject)}</a>
+                            <span style="color:var(--text-muted);"> · ${t.direction === 'sent' ? 'You → them' : 'Them → you'} · ${escHtml(fmtDate(t.date))}${t.messageCount > 1 ? ` · ${t.messageCount} messages` : ''}</span>
+                            <div style="color:var(--text-muted);">${escHtml(t.snippet)}</div>
+                        </div>
+                    `).join('');
+                } catch (err) {
+                    zone.innerHTML = `Couldn't load email history — ${escHtml(err.message)}`;
+                }
+            }
+
+            // Sends a real, tracked reply through the admin's own send path
+            // (unlike the old mailto: link, this one the server can see) —
+            // which is what lets a reply automatically advance the inquiry's
+            // status server-side (see reply-reservation-inquiry.js).
+            async function sendReply() {
+                if (!state.current || !state.current.email) return;
+                const id = state.current.id;
+                const subject = $('resInqReplySubject').value.trim();
+                const bodyText = $('resInqReplyBody').value.trim();
+                const statusEl = $('resInqReplyStatus');
+                if (!subject || !bodyText) { statusEl.textContent = 'Subject and message are required.'; statusEl.style.color = '#dc2626'; return; }
+                const btn = $('resInqSendReply');
+                btn.disabled = true;
+                statusEl.style.color = 'var(--text-muted)';
+                statusEl.textContent = 'Sending…';
+                try {
+                    const r = await fetch(`${FN}/reply-reservation-inquiry`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            token: localStorage.getItem('quarryAdminToken') || '',
+                            submissionId: id, to: state.current.email, subject, body: bodyText,
+                        })
+                    });
+                    const respBody = await r.json();
+                    if (!r.ok || !respBody.ok) throw new Error(respBody.error || 'send failed');
+                    const inq = state.inquiries.find((x) => x.id === id);
+                    if (inq && respBody.override) {
+                        inq.status = respBody.override.status;
+                        inq.statusUpdatedAt = respBody.override.updatedAt;
+                        inq.statusNote = respBody.override.note;
+                        inq.statusHistory = respBody.override.history;
+                    }
+                    render();
+                    openModal(id);
+                    // openModal() unconditionally re-hides the reply box and clears
+                    // its status text (it's a full reset for whichever inquiry is
+                    // opened next) but never touches this button's disabled state —
+                    // it was never the one that set it, sendReply() was, a few lines
+                    // up. Left unset, every reply after the first successful one
+                    // would silently do nothing: the button stays disabled forever,
+                    // so a later click never even reaches this function.
+                    $('resInqSendReply').disabled = false;
+                    if (typeof showToast === 'function') showToast('Reply sent' + (respBody.override ? ' — status updated to ' + (STATUS_LABELS[respBody.override.status] || respBody.override.status) : ''));
+                } catch (err) {
+                    statusEl.style.color = '#dc2626';
+                    statusEl.textContent = "Couldn't send: " + err.message;
+                    btn.disabled = false;
+                }
             }
 
             function closeModal() {
@@ -12940,7 +13697,7 @@ function hashCode(str) {
                 try {
                     const r = await fetch(`${FN}/update-reservation-status`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ submissionId: id, status: newStatus, note, by: 'admin' })
+                        body: JSON.stringify({ token: localStorage.getItem('quarryAdminToken') || '', submissionId: id, status: newStatus, note, by: 'admin' })
                     });
                     const body = await r.json();
                     if (!r.ok || !body.ok) throw new Error(body.error || 'update failed');
@@ -12960,13 +13717,166 @@ function hashCode(str) {
                 }
             }
 
+            // "Confirm & Auto-Book" / "Date Conflict" — the other half of the
+            // automated inquiry flow (reservation-inquiry-autoreply.js sends the
+            // instant "let me check" email; this is what actually happens once a
+            // human has looked at the calendar and made the call).
+            // Confirm creates the real Venue Calendar booking from the inquiry's
+            // captured fields and emails the customer they're booked. Deny emails
+            // asking for an alternate date. Neither of these guesses availability
+            // on its own — that's the point of the button existing at all.
+            // inqParam/opts let this be called from the Pending Approvals list
+            // (one inline row, no modal open) as well as the modal's own buttons
+            // (state.current, no explicit inq passed). opts.dateOverride/
+            // timeOverride are how "Select Another Date" reuses this same confirm
+            // flow with a corrected date instead of the original one.
+            async function decideAuto(decision, inqParam, opts) {
+                const inq = inqParam || state.current;
+                if (!inq) return;
+                opts = opts || {};
+                if (!inq.email) { alert('This inquiry has no email address to send to.'); return; }
+                const useDate = opts.dateOverride || inq.eventDate;
+                const useTime = opts.timeOverride || inq.eventTime;
+                const label = decision === 'confirm' ? 'Confirm & Auto-Book' : 'Date Conflict';
+                if (!confirm(`${label} for ${inq.name}${useDate ? ' — ' + useDate : ''}? This emails them right away.`)) return;
+
+                const inModal = !!(inqParam == null || inqParam === state.current);
+                const statusEl = inModal ? $('resInqAutoStatus') : null;
+                if (statusEl) { statusEl.textContent = 'Working…'; statusEl.style.color = 'var(--text-muted)'; }
+                try {
+                    const r = await fetch(`${FN}/reservation-inquiry-decide`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            token: localStorage.getItem('quarryAdminToken') || '',
+                            submissionId: inq.id, decision,
+                            name: inq.name, firstName: inq.firstName, email: inq.email, phone: inq.phone,
+                            occasion: inq.occasion, formName: inq.formName,
+                            date: useDate, time: useTime, guests: inq.guests,
+                            location: inq.location, catering: inq.catering, notes: inq.notes,
+                            by: (localStorage.getItem('quarryAdminRole') || 'admin'),
+                        }),
+                    });
+                    const body = await r.json();
+                    if (!r.ok || !body.ok) throw new Error(body.error || 'request failed');
+                    if (body.warning) {
+                        // Booking/email side succeeded but the status write didn't stick --
+                        // don't lie about it locally; leave inq.status alone so the list still
+                        // shows its real (stale) status until it's fixed manually.
+                        if (statusEl) { statusEl.textContent = '⚠️ ' + body.warning; statusEl.style.color = '#d97706'; }
+                        alert(body.warning);
+                        return;
+                    }
+                    const newStatus = decision === 'confirm' ? 'confirmed' : 'needs_followup';
+                    inq.status = newStatus;
+                    render();
+                    if (inModal) {
+                        openModal(inq.id);
+                        if (statusEl) { statusEl.textContent = decision === 'confirm' ? '✓ Booked and customer emailed.' : 'Customer emailed asking for another date.'; statusEl.style.color = '#16a34a'; }
+                    }
+                    if (typeof showToast === 'function') showToast(decision === 'confirm' ? 'Booking created and customer notified' : 'Customer notified — moved to Needs Follow-up');
+                } catch (err) {
+                    if (statusEl) { statusEl.textContent = 'Failed: ' + err.message; statusEl.style.color = '#dc2626'; }
+                    alert('Could not complete this: ' + err.message);
+                }
+            }
+
+            // Delete/restore is a separate axis from status (see
+            // update-reservation-status.js) — a duplicate or junk inquiry gets
+            // hidden from every view without losing its status/history, and can
+            // always be brought back via the "Deleted" filter + Restore.
+            async function setHidden(hiddenVal) {
+                if (!state.current) return;
+                const id = state.current.id;
+                if (hiddenVal && !confirm(`Delete this inquiry from ${state.current.name}? It'll be hidden from every view, but you can restore it from the "Deleted" filter.`)) return;
+                try {
+                    const r = await fetch(`${FN}/update-reservation-status`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token: localStorage.getItem('quarryAdminToken') || '', submissionId: id, hidden: hiddenVal, by: 'admin' })
+                    });
+                    const body = await r.json();
+                    if (!r.ok || !body.ok) throw new Error(body.error || 'update failed');
+                    const inq = state.inquiries.find((x) => x.id === id);
+                    if (inq) {
+                        inq.hidden = hiddenVal;
+                        inq.statusHistory = body.override.history;
+                    }
+                    if (hiddenVal) closeModal(); else openModal(id);
+                    render();
+                    if (typeof showToast === 'function') showToast(hiddenVal ? 'Inquiry deleted' : 'Inquiry restored');
+                } catch (err) {
+                    alert(`Could not ${hiddenVal ? 'delete' : 'restore'} inquiry: ` + err.message);
+                }
+            }
+
             function init() {
                 $('resInqRefresh')?.addEventListener('click', loadAll);
                 $('resInqFilter')?.addEventListener('change', render);
+                $('resInqSearch')?.addEventListener('input', render);
                 $('resInqModalClose')?.addEventListener('click', closeModal);
                 $('resInqModal')?.addEventListener('click', (e) => { if (e.target.id === 'resInqModal') closeModal(); });
                 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('resInqModal')?.classList.contains('open')) closeModal(); });
                 document.querySelectorAll('#resInqModal [data-status]').forEach((btn) => btn.addEventListener('click', () => setStatus(btn.dataset.status)));
+                $('resInqAutoConfirm')?.addEventListener('click', () => decideAuto('confirm'));
+                $('resInqAutoDeny')?.addEventListener('click', () => decideAuto('deny'));
+                $('resInqSelectDateBtn')?.addEventListener('click', () => {
+                    if (!state.current) return;
+                    const newDate = prompt('New date for this reservation (YYYY-MM-DD):', state.current.eventDate || '');
+                    if (!newDate) return;
+                    const newTime = prompt('New time (e.g. "7:00 PM"):', state.current.eventTime || '');
+                    if (!newTime) return;
+                    decideAuto('confirm', state.current, { dateOverride: newDate, timeOverride: newTime });
+                });
+                $('resInqReplyToggle')?.addEventListener('click', () => {
+                    const box = $('resInqReplyBox');
+                    box.classList.toggle('hidden');
+                    if (!box.classList.contains('hidden')) box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                });
+                $('resInqCancelReply')?.addEventListener('click', () => { $('resInqReplyBox').classList.add('hidden'); });
+                $('resInqSendReply')?.addEventListener('click', sendReply);
+                $('resInqDeleteBtn')?.addEventListener('click', () => setHidden(true));
+                $('resInqRestoreBtn')?.addEventListener('click', () => setHidden(false));
+
+                // Stat cards already render with a pointer cursor (shared
+                // .dash-stat styling) but did nothing when clicked — wire each
+                // one to actually jump to the matching filter, clearing any
+                // leftover search text first so the filter isn't silently
+                // overridden by it.
+                const STAT_CARD_FILTERS = {
+                    resInqStatTotal: 'all',
+                    resInqStatNotContacted: 'not_contacted',
+                    resInqStatContacted: 'contacted',
+                    resInqStatFollowup: 'needs_followup',
+                    resInqStatResponded: 'responded',
+                    resInqStatJacqueline: 'sent_to_jacqueline',
+                    resInqStatConfirmed: 'confirmed',
+                };
+                Object.entries(STAT_CARD_FILTERS).forEach(([elId, filterVal]) => {
+                    $(elId)?.addEventListener('click', () => {
+                        const searchEl = $('resInqSearch');
+                        if (searchEl) searchEl.value = '';
+                        const filterEl = $('resInqFilter');
+                        if (filterEl) filterEl.value = filterVal;
+                        render();
+                        $('resInqTable')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    });
+                });
+
+                // Sortable column headers. First click on a column sorts
+                // ascending (soonest event / oldest submission first); clicking
+                // the same column again flips direction; clicking the other
+                // column switches to it, starting ascending again.
+                document.querySelectorAll('#resInqTable .sortable-th').forEach((th) => {
+                    th.addEventListener('click', () => {
+                        const field = th.dataset.sort;
+                        if (state.sort.field === field) {
+                            state.sort.dir = state.sort.dir === 'asc' ? 'desc' : 'asc';
+                        } else {
+                            state.sort.field = field;
+                            state.sort.dir = 'asc';
+                        }
+                        render();
+                    });
+                });
             }
 
             function onTabSwitch(tab) {
@@ -14038,7 +14948,71 @@ function hashCode(str) {
             btn.disabled = false; btn.textContent = 'Save Changes';
         };
     })();
-    
+
+        // ================================================================
+        // PAVILION BOOKINGS
+        // Flat list from /.netlify/functions/list-pavilion-bookings --
+        // Netlify Blobs is the sole source of truth (no payment-processor
+        // order list to reconcile against, unlike golf's Stripe check).
+        // ================================================================
+    (function(){
+        function todayCT() {
+            const ct = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' }));
+            return ct.getFullYear() + '-' + String(ct.getMonth()+1).padStart(2,'0') + '-' + String(ct.getDate()).padStart(2,'0');
+        }
+        function addDays(yyyymmdd, days) {
+            const [y,m,d] = yyyymmdd.split('-').map(Number);
+            const dt = new Date(Date.UTC(y, m-1, d));
+            dt.setUTCDate(dt.getUTCDate() + days);
+            return dt.toISOString().slice(0,10);
+        }
+        function escapeHtml(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+        }
+
+        window.loadPavilionBookings = async function() {
+            const startEl = document.getElementById('pavStartDate');
+            const endEl = document.getElementById('pavEndDate');
+            if (!startEl.value) startEl.value = todayCT();
+            if (!endEl.value) endEl.value = addDays(startEl.value, 60);
+            const tbody = document.getElementById('pavTableBody');
+            const stats = document.getElementById('pavStats');
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-secondary);padding:2rem;">Loading&hellip;</td></tr>';
+
+            try {
+                const token = localStorage.getItem('quarryAdminToken') || '';
+                const r = await fetch(`/.netlify/functions/list-pavilion-bookings?token=${encodeURIComponent(token)}&startDate=${startEl.value}&endDate=${endEl.value}`);
+                const body = await r.json();
+                if (!body.ok) throw new Error(body.error || 'Failed to load');
+                const bookings = body.bookings || [];
+
+                if (!bookings.length) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-secondary);padding:2rem;">No pavilion bookings in this range.</td></tr>';
+                    stats.textContent = '0 bookings';
+                    return;
+                }
+
+                const revenue = bookings.filter(b => b.source === 'square').length * 100;
+                stats.innerHTML = `<b>${bookings.length}</b> bookings &nbsp;·&nbsp; <b>${bookings.filter(b=>b.source==='admin').length}</b> admin-blocked &nbsp;·&nbsp; <b>$${revenue.toFixed(2)}</b> paid`;
+
+                tbody.innerHTML = bookings.map(b => `
+                    <tr style="border-top:1px solid var(--border-subtle);">
+                        <td style="padding:8px 10px;">${escapeHtml(b.date)}</td>
+                        <td style="padding:8px 10px;">${escapeHtml(b.time)}</td>
+                        <td style="padding:8px 10px;">Pavilion ${escapeHtml(b.pavilion)}</td>
+                        <td style="padding:8px 10px;">${escapeHtml(b.customerName)}</td>
+                        <td style="padding:8px 10px;">${b.customerEmail ? `<a href="mailto:${encodeURIComponent(b.customerEmail)}" style="color:var(--gold);">${escapeHtml(b.customerEmail)}</a>` : '—'}</td>
+                        <td style="padding:8px 10px;">${escapeHtml(b.customerPhone || '—')}</td>
+                        <td style="padding:8px 10px;">${escapeHtml(b.amountPaid || '—')}</td>
+                        <td style="padding:8px 10px;">${b.source === 'admin' ? '<span style="color:#d97706;">Admin block</span>' : 'Square'}</td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#c33;padding:2rem;">Failed to load: ${escapeHtml(e.message)}<br><button class="btn-secondary" onclick="loadPavilionBookings()" style="margin-top:0.5rem;">Retry</button></td></tr>`;
+            }
+        };
+    })();
+
         // ================================================================
         // WINE CLUB TAB
         // ================================================================
@@ -14568,5 +15542,6 @@ function hashCode(str) {
     <script src="./admin-esign.js"></script>
     <script src="./golf-progressive-admin.js"></script>
 <script src="./notices-admin.js"></script>
+<script src="./checklist-admin.js"></script>
 </body>
 </html>
