@@ -2647,7 +2647,7 @@
     "6a0b8bd1a91b9408e68a5dee": {
       "status": "lost",
       "note": "",
-      "updatedAt": "2026-09-11T19:24:49.432534Z",
+      "updatedAt": "2026-09-16T14:20:15.498Z",
       "updatedBy": "admin",
       "history": [
         {
@@ -2656,8 +2656,16 @@
           "by": "admin",
           "note": "Backfill: event already occurred, no matching booking found",
           "at": "2026-09-11T19:24:49.432534Z"
+        },
+        {
+          "from": "visible",
+          "to": "hidden",
+          "by": "admin",
+          "note": "",
+          "at": "2026-09-16T14:20:15.498Z"
         }
-      ]
+      ],
+      "hidden": true
     },
     "6a09cf158264d3a46fbffa26": {
       "status": "lost",
@@ -6887,5 +6895,5 @@
       "hidden": false
     }
   },
-  "updatedAt": "2026-09-16T14:19:10.600Z"
+  "updatedAt": "2026-09-16T14:20:15.498Z"
 }
