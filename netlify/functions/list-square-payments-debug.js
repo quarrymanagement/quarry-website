@@ -95,6 +95,8 @@ exports.handler = async (event) => {
       orderId: p.order_id,
       note: p.note,
       receiptUrl: p.receipt_url,
+      buyerEmail: p.buyer_email_address,
+      cardholderName: p.card_details && p.card_details.card && p.card_details.card.cardholder_name,
     }));
 
     return { statusCode: 200, headers: CORS, body: JSON.stringify({ ok: true, count: summarized.length, payments: summarized }) };
