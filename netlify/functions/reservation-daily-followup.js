@@ -124,7 +124,7 @@ function followupEmail(inq) {
         '<div style="background:#1A0E08;padding:24px;text-align:center"><h1 style="color:#B8933A;margin:0">The Quarry</h1>' +
         '<p style="color:#F5F0E8;font-size:0.8rem;letter-spacing:0.15em;margin:4px 0 0">NEW MELLE, MISSOURI</p></div>' +
         '<div style="padding:32px 24px"><h2 style="color:#2C1A0E">Just Following Up!</h2>' +
-        `<p>Hi ${esc(inq.firstName || inq.name || 'there')}, thank you again for thinking of us for your` +
+        `<p>Hi ${esc(inq.firstName || (inq.name || '').trim().split(/\s+/)[0] || 'there')}, thank you again for thinking of us for your` +
         (inq.occasion ? ` ${esc(inq.occasion.toLowerCase())}` : ' event') + `! We just wanted to follow back up and see if you needed anything from us.</p>` +
         '<p>We\'d be delighted to host your party at The Quarry and look forward to hearing back from you soon!</p>' +
         '<p>Questions in the meantime? Call us at <a href="tel:6362248257" style="color:#B8933A">636-224-8257</a>.</p></div>' +

@@ -146,7 +146,7 @@ function confirmedEmail(inq) {
         : '<p>If you\'d like to add catering, just let us know and we\'ll send over our Event &amp; Catering menu.</p>';
 
     return emailShell('You\'re Confirmed!',
-        `<p>Hi ${esc(inq.firstName || inq.name || 'there')}, thank you for confirming! After checking, we have your reservation booked.</p>` +
+        `<p>Hi ${esc(inq.firstName || (inq.name || '').trim().split(/\s+/)[0] || 'there')}, thank you for confirming! After checking, we have your reservation booked.</p>` +
         `<div style="background:#FAF7F2;border-left:4px solid #B8933A;padding:16px 20px;margin:20px 0">${rows}</div>` +
         catering +
         '<p>Is there any other detail or anything else you need from us? Just reply to this email and let us know — we\'re happy to help with any special requests.</p>' +
@@ -156,7 +156,7 @@ function confirmedEmail(inq) {
 
 function deniedEmail(inq) {
     return emailShell('About Your Requested Date',
-        `<p>Hi ${esc(inq.firstName || inq.name || 'there')}, thanks for your patience while we checked our calendar.</p>` +
+        `<p>Hi ${esc(inq.firstName || (inq.name || '').trim().split(/\s+/)[0] || 'there')}, thanks for your patience while we checked our calendar.</p>` +
         `<p>After checking, it looks like we already have something on ${esc(fmtDate(inq.date) || 'that date')}. Is there another date that would work for you?</p>` +
         '<p>Just reply to this email with a couple of alternate dates and we\'ll check those right away.</p>'
     );

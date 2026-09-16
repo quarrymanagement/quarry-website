@@ -139,7 +139,7 @@ function buildEmail(inq, confirmUrl) {
         '<div style="background:#1A0E08;padding:24px;text-align:center"><h1 style="color:#B8933A;margin:0">The Quarry</h1>' +
         '<p style="color:#F5F0E8;font-size:0.8rem;letter-spacing:0.15em;margin:4px 0 0">NEW MELLE, MISSOURI</p></div>' +
         '<div style="padding:32px 24px"><h2 style="color:#2C1A0E">Thanks for reaching out!</h2>' +
-        `<p>Hi ${esc(inq.firstName || inq.name || 'there')}, thank you for your interest in The Quarry` +
+        `<p>Hi ${esc(inq.firstName || (inq.name || '').trim().split(/\s+/)[0] || 'there')}, thank you for your interest in The Quarry` +
         (inq.occasion ? ` for your ${esc(inq.occasion.toLowerCase())}` : '') + `!</p>` +
         '<div style="background:#FAF7F2;border-left:4px solid #B8933A;padding:16px 20px;margin:20px 0">' +
         '<p style="margin:0 0 8px;color:#8a6d1f;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.08em">What we have so far</p>' +

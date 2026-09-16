@@ -125,7 +125,7 @@ async function fetchSubmission(submissionId) {
 
 function customerEmail(inq) {
     return emailShell('Got It — We\'re On It!',
-        `<p>Hi ${esc(inq.firstName || inq.name || 'there')}, thanks for confirming! We've received it and are checking our calendar` +
+        `<p>Hi ${esc(inq.firstName || (inq.name || '').trim().split(/\s+/)[0] || 'there')}, thanks for confirming! We've received it and are checking our calendar` +
         (inq.eventDate ? ` for ${esc(fmtDate(inq.eventDate))}` : '') + ` now.</p>` +
         '<p>We\'ll be in touch soon with an answer. In the meantime, feel free to call us at <a href="tel:6362248257" style="color:#B8933A">636-224-8257</a> with any questions.</p>'
     );
