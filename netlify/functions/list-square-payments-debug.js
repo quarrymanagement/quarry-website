@@ -72,6 +72,11 @@ exports.handler = async (event) => {
   if (!auth.ok || !ALLOWED_ROLES.includes(auth.role)) return { statusCode: 401, headers: CORS, body: JSON.stringify({ ok: false, error: 'unauthorized' }) };
 
   try {
+    if (q.orderId) {
+      const orderRes = await squareApi('GET', '/v2/orders/' + q.orderId);
+      return { statusCode: orderRes.status, headers: CORS, body: JSON.stringify({ ok: orderRes.status === 200, order: orderRes.body.order || orderRes.body }) };
+    }
+
     const beginTime = q.beginTime || new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString();
     const endTime = q.endTime || new Date().toISOString();
 
