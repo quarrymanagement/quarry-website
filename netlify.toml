@@ -136,3 +136,9 @@
 # aren't entering the build queue at all right now (account build status shows 0
 # active/enqueued minutes after each attempt). Pushing a real commit instead, since the
 # git-triggered pipeline has been reliable all night.
+# trigger redeploy 2026-09-18T00:00:00Z - events.json had 851 double-encoded UTF-8
+# sequences (em dashes, emoji, curly quotes showing as "Ã¢ÂÂ" etc) fixed in a data-only
+# commit that build-ignore.sh correctly skipped, but the deployed static /events.json
+# copy the public events-calendar page reads is now stale. Forcing a real build to
+# pick up the corrected text (also picks up the missing Sept 17 wine tasting event
+# added earlier today).
