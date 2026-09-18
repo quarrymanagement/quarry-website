@@ -39652,8 +39652,8 @@
     "emailStatus": "Subscribed",
     "smsStatus": "Never subscribed",
     "source": "Form Submission",
-    "lastActivity": "",
-    "lastActivityDate": "",
+    "lastActivity": "Form: mailing-list",
+    "lastActivityDate": "2026-09-18T20:36:22.402Z",
     "address": {
       "street": "",
       "city": "Saint Charles",
@@ -39661,9 +39661,21 @@
       "zip": "63304",
       "country": "United States"
     },
-    "events": [],
+    "events": [
+      {
+        "type": "mailing-list",
+        "timestamp": "2026-09-18T20:36:22.402Z",
+        "marketingOptIn": false,
+        "details": {
+          "ip": "172.59.168.232",
+          "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+          "referrer": "https://thequarrystl.com/"
+        }
+      }
+    ],
     "tags": [
-      "Subscriptions"
+      "Subscriptions",
+      "Subscribed"
     ]
   },
   {
