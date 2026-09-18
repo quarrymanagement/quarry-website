@@ -142,3 +142,6 @@
 # copy the public events-calendar page reads is now stale. Forcing a real build to
 # pick up the corrected text (also picks up the missing Sept 17 wine tasting event
 # added earlier today).
+# trigger redeploy 2026-09-18T00:15:00Z - Halloween Day of the Dead date fix (Oct 10 ->
+# Oct 30) was another data-only commit skipped by build-ignore.sh; forcing a real build
+# so the public events page actually reflects it this time.
