@@ -236,7 +236,7 @@
         <div class="hero-eyebrow">The Quarry · New Melle</div>
         <h1>What's On</h1>
         <p class="hero-subtitle">Every night worth driving out for — August through New Year's Eve</p>
-        <div class="hero-note">Boots Thursdays · Music Bingo · Wine Club · Craft Nights · Holiday Pop-Ups</div>
+        <div class="hero-note">Boots Nights · Music Bingo · Wine Club · Craft Nights · Holiday Pop-Ups</div>
     </section>
 
     <!-- Filters -->
@@ -263,7 +263,7 @@
             <div class="rec-grid">
                 <div class="rec-card">
                     <h3>Boots</h3>
-                    <div class="when">Select Thursdays</div>
+                    <div class="when">Monthly · Fridays</div>
                     <p>Country night at The Quarry. Details and times to be confirmed.</p>
                 </div>
                 <div class="rec-card">
@@ -372,7 +372,6 @@
    ===================================================================== */
 const EVENTS = [
   /* ------------------------------ AUGUST ------------------------------ */
-  { date:"2026-08-06", name:"Boots", type:["recurring"], tbd:true, desc:"Country night at The Quarry." },
   { date:"2026-08-07", name:"Back to School 80s Music Bingo", type:["ticketed"], price:"$20 per person", desc:"Totally rad 80s music bingo to kick off the school year." },
   { date:"2026-08-08", name:"Closed — Private Wedding", type:["closed"], desc:"The Quarry is closed to the public for a private wedding." },
   { date:"2026-08-15", name:"Closed — Private Wedding", type:["closed"], desc:"The Quarry is closed to the public for a private wedding." },
@@ -380,22 +379,18 @@ const EVENTS = [
   { date:"2026-08-21", name:"Closed — Private Wedding", type:["closed"], desc:"The Quarry is closed to the public for a private wedding." },
   { date:"2026-08-23", name:"Moms' Back to School Singo Bingo", type:["ticketed"], tbd:true, desc:"Date not final — may move to Sunday Aug 16. Music bingo for the moms who survived summer." },
   { date:"2026-08-26", name:"Craft Night", type:["recurring"], tbd:true, desc:"Make-and-take craft night." },
-  { date:"2026-08-27", name:"Boots", type:["recurring"], tbd:true, desc:"Country night at The Quarry." },
   { date:"2026-08-29", name:"Grand Opening", type:["family","free"], tbd:true, desc:"Our grand opening celebration. Full lineup announced soon." },
 
   /* ----------------------------- SEPTEMBER ---------------------------- */
-  { date:"2026-09-03", name:"Boots", type:["recurring"], tbd:true, desc:"Country night at The Quarry." },
   { date:"2026-09-10", name:"Trivia Night", type:["free"], tbd:true, desc:"Team trivia at The Quarry." },
   { date:"2026-09-13", name:"Back to School BBQ", type:["family","free"], tbd:true, desc:"Bubble bus, face painting and a petting zoo. A full day out for the kids." },
   { date:"2026-09-17", name:"Augusta Wine Club", type:["recurring"], tbd:true, desc:"Monthly wine club tasting.", link:"/quarry-wineclub" },
   { date:"2026-09-19", name:"Closed — Private Wedding", type:["closed"], desc:"The Quarry is closed to the public for a private wedding." },
   { date:"2026-09-22", name:"Private Event", type:["closed"], desc:"Private booking — not open to the public." },
-  { date:"2026-09-24", name:"Boots", type:["recurring"], tbd:true, desc:"Country night at The Quarry." },
   { date:"2026-09-25", name:"PRL", type:["free"], tbd:true, desc:"Details coming soon." },
   { date:"2026-09-26", name:"QFest — Flea Market & Vendor Fair", type:["family","free"], tbd:true, desc:"Outdoor flea market and vendor market at The Quarry. Vendor applications opening soon." },
 
   /* ------------------------------ OCTOBER ----------------------------- */
-  { date:"2026-10-01", name:"Boots", type:["recurring"], tbd:true, desc:"Country night at The Quarry." },
   { date:"2026-10-03", name:"Francis Howell 2029 Seniors Bingo Fundraiser", type:["ticketed"], time:"Doors 5:30 PM · Bingo 7 PM", price:"$30 per person", desc:"Five rounds of Bingo with prizes, sponsored rounds and intermission games. 10% of ticket sales benefit the Francis Howell Class of 2029.", link:"/francis-howell-bingo" },
   { date:"2026-10-08", name:"Twisted Trivia", type:["free"], tbd:true, desc:"Trivia night in the Twisted Barrel." },
   { date:"2026-10-10", name:"Closed During the Day — Private Wedding", type:["closed"], desc:"Closed to the public during the day for a private wedding." },
@@ -406,14 +401,12 @@ const EVENTS = [
   { date:"2026-10-17", name:"Timberland Bingo in the Twisted Barrel", type:["free"], tbd:true, desc:"Bingo in the Twisted Barrel." },
   { date:"2026-10-17", name:"Beer, Bourbon & Boots", type:["ticketed"], tbd:true, desc:"Liquor vendor tastings, live band, and yard games on the new turf. Bourbon tastings $25/$40 for two." , link:"/quarry-event-detail.html?id=beer-bourbon-and-boots" },
   { date:"2026-10-21", name:"Craft Night", type:["recurring"], tbd:true, desc:"Make-and-take craft night." },
-  { date:"2026-10-22", name:"Boots", type:["recurring"], tbd:true, desc:"Country night at The Quarry." },
   { date:"2026-10-23", name:"Pop-Up Bar", type:["ticketed"], price:"$25 per person", desc:"Themed pop-up bar. Theme announced soon. Ticketed event.", link:"/quarry-event-detail.html?id=pop-up-bar" },
   { date:"2026-10-24", name:"Pop-Up Bar", type:["ticketed"], price:"$25 per person", desc:"Themed pop-up bar. Theme announced soon. Ticketed event.", link:"/quarry-event-detail.html?id=pop-up-bar-2" },
   { date:"2026-10-24", name:"Last Day of the Field", type:["family","free"], tbd:true, desc:"Final day of the season for the field." },
   { date:"2026-10-25", name:"Singo Bingo", type:["free"], tbd:true, desc:"Music bingo — name that tune." },
 
   /* ----------------------------- NOVEMBER ----------------------------- */
-  { date:"2026-11-05", name:"Boots", type:["recurring"], tbd:true, desc:"Country night at The Quarry." },
   { date:"2026-11-07", name:"Fall Festival", type:["family","free"], time:"10:00 AM – 4:00 PM", desc:"A full day of fall fun at The Quarry." },
   { date:"2026-11-18", name:"Craft Night", type:["recurring"], tbd:true, desc:"Make-and-take craft night." },
   { date:"2026-11-19", name:"Wine Club — Trademark", type:["recurring"], tbd:true, desc:"Monthly wine club tasting featuring Trademark.", link:"/quarry-wineclub" },
@@ -423,7 +416,6 @@ const EVENTS = [
 
   /* ----------------------------- DECEMBER ----------------------------- */
   { date:"2026-12-02", name:"Craft Night", type:["recurring","holiday"], tbd:true, desc:"Holiday make-and-take craft night." },
-  { date:"2026-12-03", name:"Boots", type:["recurring"], tbd:true, desc:"Country night at The Quarry." },
   { date:"2026-12-04", name:"Holiday Pop-Up Bar", type:["ticketed","holiday"], price:"$25 per person", desc:"Christmas pop-up bar. Ticketed event.", link:"/quarry-event-detail.html?id=holiday-pop-up-bar" },
   { date:"2026-12-05", name:"Holiday Pop-Up Bar", type:["ticketed","holiday"], price:"$25 per person", desc:"Christmas pop-up bar. Ticketed event.", link:"/quarry-event-detail.html?id=holiday-pop-up-bar-2" },
   { date:"2026-12-09", name:"Craft Night", type:["recurring","holiday"], tbd:true, desc:"Holiday make-and-take craft night." },
