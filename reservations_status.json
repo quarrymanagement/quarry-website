@@ -7191,10 +7191,10 @@
       "hidden": false
     },
     "6aaefa8897f61e45712f9364": {
-      "status": "awaiting_customer_confirm",
+      "status": "awaiting_decision",
       "note": "",
-      "updatedAt": "2026-09-19T21:11:38.633Z",
-      "updatedBy": "auto-reply",
+      "updatedAt": "2026-09-19T21:51:19.441Z",
+      "updatedBy": "customer",
       "history": [
         {
           "from": "not_contacted",
@@ -7202,10 +7202,17 @@
           "by": "auto-reply",
           "note": "Instant auto-reply sent",
           "at": "2026-09-19T21:11:38.633Z"
+        },
+        {
+          "from": "awaiting_customer_confirm",
+          "to": "awaiting_decision",
+          "by": "customer",
+          "note": "Customer clicked \"check availability\"",
+          "at": "2026-09-19T21:51:19.441Z"
         }
       ],
       "hidden": false
     }
   },
-  "updatedAt": "2026-09-19T21:11:38.633Z"
+  "updatedAt": "2026-09-19T21:51:19.441Z"
 }
