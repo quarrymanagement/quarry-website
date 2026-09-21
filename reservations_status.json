@@ -6713,9 +6713,9 @@
       "hidden": false
     },
     "6aa6f6115a2524ab7fe37c18": {
-      "status": "awaiting_customer_confirm_followedup",
+      "status": "needs_call",
       "note": "",
-      "updatedAt": "2026-09-18T14:30:28.080Z",
+      "updatedAt": "2026-09-21T14:30:32.310Z",
       "updatedBy": "daily-followup",
       "history": [
         {
@@ -6731,6 +6731,13 @@
           "by": "daily-followup",
           "note": "3-day reminder sent",
           "at": "2026-09-18T14:30:28.080Z"
+        },
+        {
+          "from": "awaiting_customer_confirm_followedup",
+          "to": "needs_call",
+          "by": "daily-followup",
+          "note": "No response after reminder — needs a phone call",
+          "at": "2026-09-21T14:30:32.310Z"
         }
       ],
       "hidden": false
@@ -6780,9 +6787,9 @@
       "hidden": false
     },
     "6aa5b71eb2bc020c2aa4a61c": {
-      "status": "awaiting_customer_confirm_followedup",
+      "status": "needs_call",
       "note": "",
-      "updatedAt": "2026-09-18T14:30:28.080Z",
+      "updatedAt": "2026-09-21T14:30:32.310Z",
       "updatedBy": "daily-followup",
       "history": [
         {
@@ -6798,6 +6805,13 @@
           "by": "daily-followup",
           "note": "3-day reminder sent",
           "at": "2026-09-18T14:30:28.080Z"
+        },
+        {
+          "from": "awaiting_customer_confirm_followedup",
+          "to": "needs_call",
+          "by": "daily-followup",
+          "note": "No response after reminder — needs a phone call",
+          "at": "2026-09-21T14:30:32.310Z"
         }
       ],
       "hidden": false
@@ -7127,10 +7141,10 @@
       "hidden": false
     },
     "6aac10c9ba8aa000dbd428a1": {
-      "status": "awaiting_customer_confirm",
+      "status": "awaiting_customer_confirm_followedup",
       "note": "",
-      "updatedAt": "2026-09-17T16:09:47.188Z",
-      "updatedBy": "auto-reply",
+      "updatedAt": "2026-09-21T14:30:32.310Z",
+      "updatedBy": "daily-followup",
       "history": [
         {
           "from": "not_contacted",
@@ -7138,6 +7152,13 @@
           "by": "auto-reply",
           "note": "Instant auto-reply sent",
           "at": "2026-09-17T16:09:47.188Z"
+        },
+        {
+          "from": "awaiting_customer_confirm",
+          "to": "awaiting_customer_confirm_followedup",
+          "by": "daily-followup",
+          "note": "3-day reminder sent",
+          "at": "2026-09-21T14:30:32.310Z"
         }
       ],
       "hidden": false
@@ -7274,5 +7295,5 @@
       "hidden": false
     }
   },
-  "updatedAt": "2026-09-21T01:16:14.634Z"
+  "updatedAt": "2026-09-21T14:30:32.310Z"
 }
