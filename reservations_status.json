@@ -7238,9 +7238,9 @@
       "hidden": false
     },
     "6aad735297f61e4cd22f9364": {
-      "status": "awaiting_customer_confirm_followedup",
+      "status": "needs_call",
       "note": "",
-      "updatedAt": "2026-09-23T14:30:32.707Z",
+      "updatedAt": "2026-09-27T14:30:21.335Z",
       "updatedBy": "daily-followup",
       "history": [
         {
@@ -7256,14 +7256,21 @@
           "by": "daily-followup",
           "note": "3-day reminder sent",
           "at": "2026-09-23T14:30:32.707Z"
+        },
+        {
+          "from": "awaiting_customer_confirm_followedup",
+          "to": "needs_call",
+          "by": "daily-followup",
+          "note": "No response after reminder — needs a phone call",
+          "at": "2026-09-27T14:30:21.335Z"
         }
       ],
       "hidden": false
     },
     "6aad86c297f61e68e42f9360": {
-      "status": "awaiting_customer_confirm_followedup",
+      "status": "needs_call",
       "note": "",
-      "updatedAt": "2026-09-23T14:30:32.707Z",
+      "updatedAt": "2026-09-27T14:30:21.335Z",
       "updatedBy": "daily-followup",
       "history": [
         {
@@ -7279,6 +7286,13 @@
           "by": "daily-followup",
           "note": "3-day reminder sent",
           "at": "2026-09-23T14:30:32.707Z"
+        },
+        {
+          "from": "awaiting_customer_confirm_followedup",
+          "to": "needs_call",
+          "by": "daily-followup",
+          "note": "No response after reminder — needs a phone call",
+          "at": "2026-09-27T14:30:21.335Z"
         }
       ],
       "hidden": false
@@ -7657,5 +7671,5 @@
       "hidden": false
     }
   },
-  "updatedAt": "2026-09-27T13:10:11.990Z"
+  "updatedAt": "2026-09-27T14:30:21.335Z"
 }
