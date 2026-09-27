@@ -7593,8 +7593,8 @@
     "6ab6836d22d9a633fa307e67": {
       "status": "awaiting_decision",
       "note": "",
-      "updatedAt": "2026-09-25T15:04:42.318Z",
-      "updatedBy": "customer",
+      "updatedAt": "2026-09-27T22:40:44.475Z",
+      "updatedBy": "admin",
       "history": [
         {
           "from": "not_contacted",
@@ -7609,9 +7609,16 @@
           "by": "customer",
           "note": "Customer clicked \"check availability\"",
           "at": "2026-09-25T15:04:42.318Z"
+        },
+        {
+          "from": "visible",
+          "to": "hidden",
+          "by": "admin",
+          "note": "",
+          "at": "2026-09-27T22:40:44.475Z"
         }
       ],
-      "hidden": false
+      "hidden": true
     },
     "6ab8001172f35ee287df1889": {
       "status": "awaiting_customer_confirm",
@@ -7724,5 +7731,5 @@
       "hidden": false
     }
   },
-  "updatedAt": "2026-09-27T22:40:05.586Z"
+  "updatedAt": "2026-09-27T22:40:44.475Z"
 }
