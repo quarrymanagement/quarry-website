@@ -2138,8 +2138,8 @@
                         <div class="event-tiers">
                             ${isFreeWalkup ? `
                                 <div class="tier" style="background:#faf7f2;border-color:#d4c79b">
-                                    <div class="tier-name" style="color:#9a7b2a">FREE EVENT</div>
-                                    <div class="tier-price">No registration required</div>
+                                    <div class="tier-name" style="color:#9a7b2a">${event.eventType === "cover" ? "$" + ((event.coverCharge || 0) / 100) + " COVER" : "FREE EVENT"}</div>
+                                    <div class="tier-price">${event.eventType === "cover" ? "Pay at the door" : "No registration required"}</div>
                                 </div>
                             ` : (event.tiers || []).map(tier => `
                                 <div class="tier">
