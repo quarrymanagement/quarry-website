@@ -123,6 +123,14 @@
 # management@ a digest of who needs attention and what moved in the last 24h.
 [functions."reservation-daily-followup"]
   schedule = "30 14 * * *"
+
+# ─── WINE CLUB GROWTH CAMPAIGN ──────────────────────────────────────────────
+# Daily check — 15:00 UTC = 10am CDT / 9am CST. Reads the next tasting from
+# wine_tastings.json and fires whichever of invite (21 days out) / last-call
+# (Monday of tasting week) / thank-you (day after) is due today. Idempotent
+# per (tasting, milestone) via the wine-growth-sent-log blob.
+[functions."wine-growth-campaign"]
+  schedule = "0 15 * * *"
 # trigger redeploy 2026-05-27T20:21:04Z - pick up new SQUARE_WEBHOOK_SIGNATURE_KEY
 # trigger redeploy 2026-09-01T00:00:00Z - build-ignore.sh only diffs HEAD^..HEAD, so the
 # quarry-calendar.html + events.json push landed on GitHub but the build was skipped
