@@ -228,36 +228,48 @@ exports.handler = async (event) => {
     ]);
 
     const today = todayCT();
-    const upcoming = (tastingsData.tastings || [])
-      .filter((t) => t.date >= today)
-      .sort((a, b) => a.date.localeCompare(b.date));
-    if (upcoming.length === 0) {
-      return json({ ok: true, message: 'no upcoming tasting in wine_tastings.json', today });
+    const allTastings = tastingsData.tastings || [];
+    if (allTastings.length === 0) {
+      return json({ ok: true, message: 'no tastings in wine_tastings.json', today });
     }
-    const t = upcoming[0];
 
-    const milestones = {
-      invite: addDays(t.date, -21),
-      lastcall: mondayOfWeek(t.date),
-      thankyou: addDays(t.date, 1),
-    };
+    // Compute every tasting's 3 milestone dates. Deliberately NOT filtered to
+    // "date >= today" here -- thank-you fires the day AFTER the tasting, so
+    // by the time that milestone is due, the tasting's own date has already
+    // passed. Filtering it out here would mean thank-you could never fire.
+    // This also lets several tastings be queued up in advance: each one's
+    // milestones are checked independently every day, so nothing needs the
+    // others to finish first.
+    const withMilestones = allTastings.map((t) => ({
+      t,
+      milestones: {
+        invite: addDays(t.date, -21),
+        lastcall: mondayOfWeek(t.date),
+        thankyou: addDays(t.date, 1),
+      },
+    }));
 
-    const force = url.searchParams.get('force'); // 'invite' | 'lastcall' | 'thankyou' -- manual override to send a specific milestone today regardless of its computed date. Idempotency below still applies.
-    let dueMilestone = null;
-    if (force && milestones[force]) {
-      dueMilestone = force;
+    const force = url.searchParams.get('force'); // 'invite' | 'lastcall' | 'thankyou' -- manual override, applies to the single soonest upcoming tasting. Idempotency below still applies.
+    const testMode = url.searchParams.get('test') === '1';
+
+    let dueList;
+    if (force) {
+      const upcoming = withMilestones
+        .filter((x) => x.t.date >= today)
+        .sort((a, b) => a.t.date.localeCompare(b.t.date));
+      if (upcoming.length === 0) return json({ ok: true, message: 'no upcoming tasting to force', today });
+      dueList = [{ t: upcoming[0].t, milestone: force }];
     } else {
-      for (const [name, date] of Object.entries(milestones)) {
-        if (date === today) { dueMilestone = name; break; }
+      dueList = [];
+      for (const x of withMilestones) {
+        for (const [name, date] of Object.entries(x.milestones)) {
+          if (date === today) dueList.push({ t: x.t, milestone: name });
+        }
       }
     }
-    if (!dueMilestone) {
-      return json({ ok: true, message: 'nothing due today', today, nextTasting: t, milestones });
-    }
 
-    const sentKey = t.id + ':' + dueMilestone;
-    if (log.sent.some((s) => s.key === sentKey)) {
-      return json({ ok: true, message: 'already sent', sentKey });
+    if (dueList.length === 0) {
+      return json({ ok: true, message: 'nothing due today', today, milestonesByTasting: withMilestones.map((x) => ({ id: x.t.id, ...x.milestones })) });
     }
 
     const activeMemberEmails = new Set(
@@ -265,36 +277,45 @@ exports.handler = async (event) => {
         .filter((m) => (m.status || '').toLowerCase() === 'active')
         .map((m) => (m.email || '').toLowerCase())
     );
-
     const subscribedContacts = (subscribers || [])
       .filter((s) => s.email && s.emailStatus === 'Subscribed')
       .map((s) => ({ email: s.email, firstName: s.firstName || '' }));
 
-    let recipients;
-    let builder;
-    if (dueMilestone === 'invite') { builder = inviteEmail; recipients = subscribedContacts.filter((r) => !activeMemberEmails.has(r.email.toLowerCase())); }
-    else if (dueMilestone === 'lastcall') { builder = lastCallEmail; recipients = subscribedContacts.filter((r) => !activeMemberEmails.has(r.email.toLowerCase())); }
-    else { builder = thankYouEmail; recipients = subscribedContacts; }
+    const results = [];
+    for (const { t, milestone } of dueList) {
+      const sentKey = t.id + ':' + milestone;
+      if (!testMode && log.sent.some((s) => s.key === sentKey)) {
+        results.push({ tasting: t.id, milestone, skipped: 'already sent' });
+        continue;
+      }
 
-    const { subject, html } = builder(t);
+      let recipients, builder;
+      if (milestone === 'invite') { builder = inviteEmail; recipients = subscribedContacts.filter((r) => !activeMemberEmails.has(r.email.toLowerCase())); }
+      else if (milestone === 'lastcall') { builder = lastCallEmail; recipients = subscribedContacts.filter((r) => !activeMemberEmails.has(r.email.toLowerCase())); }
+      else { builder = thankYouEmail; recipients = subscribedContacts; }
 
-    if (dryRun) {
-      return json({ ok: true, dryRun: true, dueMilestone, tasting: t, recipientCount: recipients.length, subject });
+      const { subject, html } = builder(t);
+
+      if (dryRun) {
+        results.push({ tasting: t.id, milestone, dryRun: true, recipientCount: recipients.length, subject });
+        continue;
+      }
+
+      // ?test=1 -- exercises the REAL SendGrid call end-to-end, but only to
+      // management@thequarrystl.com, and does NOT mark the milestone as
+      // sent (so the real campaign send afterward still goes out normally).
+      if (testMode) {
+        const result = await sendBulkEmail([{ email: 'management@thequarrystl.com', firstName: 'Matthew' }], '[TEST] ' + subject, html);
+        results.push({ tasting: t.id, milestone, testMode: true, subject, ...result });
+        continue;
+      }
+
+      const result = await sendBulkEmail(recipients, subject, html);
+      await markSent(log, sentKey);
+      results.push({ tasting: t.id, milestone, recipientCount: recipients.length, ...result });
     }
 
-    // ?test=1 -- exercises the REAL SendGrid call end-to-end, but only to
-    // management@thequarrystl.com, and does NOT mark the milestone as sent
-    // (so the real campaign send afterward still goes out normally).
-    const testMode = url.searchParams.get('test') === '1';
-    if (testMode) {
-      const result = await sendBulkEmail([{ email: 'management@thequarrystl.com', firstName: 'Matthew' }], '[TEST] ' + subject, html);
-      return json({ ok: true, testMode: true, dueMilestone, tasting: t, subject, ...result });
-    }
-
-    const result = await sendBulkEmail(recipients, subject, html);
-    await markSent(log, sentKey);
-
-    return json({ ok: true, dueMilestone, tasting: t, recipientCount: recipients.length, ...result });
+    return json({ ok: true, today, results });
   } catch (e) {
     console.error('wine-growth-campaign error:', e);
     return json({ ok: false, error: String(e.message || e) }, 500);
