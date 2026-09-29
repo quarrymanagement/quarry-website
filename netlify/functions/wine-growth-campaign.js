@@ -272,6 +272,15 @@ exports.handler = async (event) => {
       return json({ ok: true, dryRun: true, dueMilestone, tasting: t, recipientCount: recipients.length, subject });
     }
 
+    // ?test=1 -- exercises the REAL SendGrid call end-to-end, but only to
+    // management@thequarrystl.com, and does NOT mark the milestone as sent
+    // (so the real campaign send afterward still goes out normally).
+    const testMode = url.searchParams.get('test') === '1';
+    if (testMode) {
+      const result = await sendBulkEmail([{ email: 'management@thequarrystl.com', firstName: 'Matthew' }], '[TEST] ' + subject, html);
+      return json({ ok: true, testMode: true, dueMilestone, tasting: t, subject, ...result });
+    }
+
     const result = await sendBulkEmail(recipients, subject, html);
     await markSent(log, sentKey);
 
