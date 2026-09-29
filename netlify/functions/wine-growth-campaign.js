@@ -156,9 +156,9 @@ function inviteEmail(t) {
 👥 One guest included at every tasting, on us<br>
 🏡 A community of regulars who show up for the same reason you do &mdash; good wine, good people</p>
 </div>
-<p style="text-align:center;margin:22px 0;"><a href="https://thequarrystl.com/quarry-wineclub" style="${BTN_GOLD}">Join Rock &amp; Vine &mdash; $29.99/mo →</a></p>
+<p style="text-align:center;margin:22px 0;"><a href="https://thequarrystl.com/quarry-wineclub#member-form" style="${BTN_GOLD}">Join Rock &amp; Vine &mdash; $29.99/mo →</a></p>
 <p style="${P}">Not ready to commit? No pressure &mdash; come try it first. Our next tasting features <strong>${t.winery}, ${dateStr} at ${timeStr}</strong>. One $44.99 admission covers you and a guest &mdash; wine tasting, food pairings, and bottles available to buy at the end of the night.</p>
-<p style="text-align:center;margin:18px 0;"><a href="https://thequarrystl.com/quarry-wineclub" style="${BTN_OUTLINE}">Grab a Ticket for Two &mdash; $44.99 →</a></p>
+<p style="text-align:center;margin:18px 0;"><a href="${t.ticketUrl}" style="${BTN_OUTLINE}">Grab a Ticket for Two &mdash; $44.99 →</a></p>
 <p style="${P}">Cheers to the season,<br>The Quarry Wine Team</p>`);
   return { subject, html };
 }
@@ -175,9 +175,9 @@ function lastCallEmail(t) {
 <p style="margin:0;line-height:1.7;">🍇 <strong>Join now &mdash; $29.99/mo:</strong> priority seating, a wine discount, and a guest included every month.<br>
 🎟️ <strong>Just trying us out &mdash; $44.99:</strong> covers you and a guest for this tasting only.</p>
 </div>
-<p style="text-align:center;margin:24px 0 14px;"><a href="https://thequarrystl.com/quarry-wineclub" style="${BTN_GOLD}">Join Rock &amp; Vine &mdash; $29.99/mo →</a></p>
+<p style="text-align:center;margin:24px 0 14px;"><a href="https://thequarrystl.com/quarry-wineclub#member-form" style="${BTN_GOLD}">Join Rock &amp; Vine &mdash; $29.99/mo →</a></p>
 <p style="text-align:center;margin:0 0 14px;font-family:Georgia,serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#9A8B7A;">or</p>
-<p style="text-align:center;margin:0 0 24px;"><a href="https://thequarrystl.com/quarry-wineclub" style="${BTN_OUTLINE}">Just Trying Us Out &mdash; $44.99 →</a></p>
+<p style="text-align:center;margin:0 0 24px;"><a href="${t.ticketUrl}" style="${BTN_OUTLINE}">Just Trying Us Out &mdash; $44.99 →</a></p>
 <p style="${P}">See you soon,<br>The Quarry Wine Team</p>`);
   return { subject, html };
 }
@@ -189,7 +189,7 @@ function thankYouEmail(t) {
 <p style="${P}">Hi {firstName},</p>
 <p style="${P}">Last night's tasting was another great one in the books &mdash; thank you to everyone who came out, and a huge thank you to <strong>${t.winery}</strong> for putting on such a great night of wine.</p>
 <p style="${P}">If you were there, we hope you had as much fun as we did. And if you missed this one, don't worry &mdash; there's always next month.</p>
-<p style="text-align:center;margin:22px 0;"><a href="https://thequarrystl.com/quarry-wineclub" style="${BTN_GOLD}">Join Rock &amp; Vine &mdash; $29.99/mo →</a></p>
+<p style="text-align:center;margin:22px 0;"><a href="https://thequarrystl.com/quarry-wineclub#member-form" style="${BTN_GOLD}">Join Rock &amp; Vine &mdash; $29.99/mo →</a></p>
 <p style="${P}">Members get priority seating, a discount on wine, and a guest included at every tasting &mdash; so you're never on the outside looking in again.</p>
 <p style="${P}">Cheers,<br>The Quarry Wine Team</p>`);
   return { subject, html };
