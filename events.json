@@ -1492,8 +1492,8 @@
       "date": "2026-10-30",
       "time": "18:00",
       "location": "The Quarry — 3960 Highway Z, New Melle, MO",
-      "description": "A Day of the Dead-themed Halloween night at The Quarry — $50 per person, includes 2 drink tickets.",
-      "detailDescription": "Celebrate Halloween Day of the Dead style at The Quarry. Ticket includes admission and 2 drink tickets. Costumes welcome — come celebrate in style.",
+      "description": "A 21+ Day of the Dead Halloween party with DJ Earl Draper, featured Espolòn Tequila, a costume contest with prizes and Halloween mini games. $50 per person, includes 2 drink tickets.",
+      "detailDescription": "Celebrate Halloween Day of the Dead style at The Quarry, 6 to 11 PM. DJ Earl Draper is on the decks all night, Espolòn Tequila is our featured spirit, and there's a costume contest with prizes plus Halloween-themed mini games. Your $50 ticket includes admission and 2 drink tickets. 21+ only — come dressed up and bring your crew.",
       "additionalInfo": "",
       "capacity": 154,
       "totalCapacity": 154,
@@ -1501,8 +1501,13 @@
       "pricingType": "individual",
       "highlights": [
         "Day of the Dead theme",
+        "DJ Earl Draper",
+        "Featured Espolòn Tequila",
+        "Costume contest with prizes",
+        "Halloween-themed mini games",
         "Includes 2 drink tickets",
-        "21+ event"
+        "21+ event",
+        "6–11 PM"
       ],
       "slug": "halloween-day-of-the-dead",
       "useTableChart": false,
@@ -1511,12 +1516,12 @@
       "tiers": [
         {
           "name": "General Admission",
-          "description": "Event entry",
           "pricePerPerson": 5000,
-          "priceLabel": "$50"
+          "priceLabel": "$50",
+          "priceUnit": "person"
         }
       ],
-      "seatingOptions": null,
+      "seatingOptions": [],
       "category": "Ticketed",
       "tags": [
         "halloween",
@@ -1529,7 +1534,9 @@
       "registeredCount": 0,
       "endTime": "22:00",
       "pricePerSeat": 5000,
-      "price": 5000
+      "price": 5000,
+      "bookedBy": "",
+      "arrivalSlots": []
     },
     {
       "id": "event_1788301739553",
@@ -5439,6 +5446,39 @@
         ],
         "tickets": 4,
         "amount": 160
+      },
+      {
+        "name": "Tlckaraoke152@gmail.com",
+        "email": "Tlckaraoke152@gmail.com",
+        "qty": 1,
+        "paymentId": "fzEBibpLhgpN4ro6PYT6bWojZA6YY",
+        "registeredAt": "2026-09-28T01:11:58.916Z",
+        "source": "square",
+        "seatingOptionId": "bar-stool",
+        "seatingOptionName": "Bar Stool",
+        "addOns": [
+          {
+            "name": "Witch Kit - T-Shirt & Headband (Bundle)",
+            "qty": 1,
+            "sizes": [
+              "2XL"
+            ]
+          }
+        ],
+        "tickets": 1,
+        "amount": 40
+      },
+      {
+        "name": "dkbauer54@gmail.com",
+        "email": "dkbauer54@gmail.com",
+        "qty": 4,
+        "paymentId": "L1YmrcXa0RECY0CHT3n7lw8Uft6YY",
+        "registeredAt": "2026-09-28T18:40:10.310Z",
+        "source": "square",
+        "seatingOptionId": "table-4",
+        "seatingOptionName": "Table for 4",
+        "tickets": 4,
+        "amount": 160
       }
     ],
     "event_1788726751302": [
@@ -5460,6 +5500,30 @@
         "qty": 4,
         "paymentId": "BCxaDTpRxzzsluRngl7nkoi99Y9YY",
         "registeredAt": "2026-09-21T23:27:44.999Z",
+        "source": "square",
+        "seatingOptionId": "table-4",
+        "seatingOptionName": "Table for 4",
+        "tickets": 4,
+        "amount": 120
+      },
+      {
+        "name": "tayler.cockrell@outlook.com",
+        "email": "tayler.cockrell@outlook.com",
+        "qty": 4,
+        "paymentId": "ZG1QQ3UyBwE7ot6O0ypzmmPAuCXZY",
+        "registeredAt": "2026-09-27T20:49:54.947Z",
+        "source": "square",
+        "seatingOptionId": "table-4",
+        "seatingOptionName": "Table for 4",
+        "tickets": 4,
+        "amount": 120
+      },
+      {
+        "name": "josephedmunds23@gmail.com",
+        "email": "josephedmunds23@gmail.com",
+        "qty": 4,
+        "paymentId": "9cPIQaRAgBenEpXfzcQ900KU5iUZY",
+        "registeredAt": "2026-09-29T12:52:45.861Z",
         "source": "square",
         "seatingOptionId": "table-4",
         "seatingOptionName": "Table for 4",
