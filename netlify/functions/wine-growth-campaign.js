@@ -78,6 +78,135 @@ async function fetchJson(url) {
   });
 }
 
+// ---------------------------------------------------------------------------
+// GitHub read/write -- same GITHUB_TOKEN + Contents API pattern already used
+// by save-github-file.js, used here so the automation can commit a new
+// ticketed event page itself instead of needing one hand-built per tasting.
+// ---------------------------------------------------------------------------
+const REPO = 'quarrymanagement/quarry-website';
+
+function githubRequest(method, path, body) {
+  const token = process.env.GITHUB_TOKEN;
+  if (!token) return Promise.reject(new Error('GITHUB_TOKEN not configured'));
+  const payload = body ? JSON.stringify(body) : null;
+  return new Promise((resolve, reject) => {
+    const req = https.request({
+      hostname: 'api.github.com',
+      path,
+      method,
+      headers: {
+        Authorization: 'token ' + token,
+        'User-Agent': 'Quarry-Wine-Growth-Automation',
+        Accept: 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json',
+      },
+    }, (res) => {
+      let data = '';
+      res.on('data', (c) => (data += c));
+      res.on('end', () => {
+        try { resolve({ status: res.statusCode, data: JSON.parse(data) }); }
+        catch (e) { resolve({ status: res.statusCode, data }); }
+      });
+    });
+    req.on('error', reject);
+    if (payload) req.write(payload);
+    req.end();
+  });
+}
+
+async function githubGetFile(path) {
+  const res = await githubRequest('GET', `/repos/${REPO}/contents/${path}`);
+  if (res.status !== 200) throw new Error(`GitHub GET ${path} -> ${res.status}: ${JSON.stringify(res.data).slice(0, 200)}`);
+  const content = Buffer.from(res.data.content, 'base64').toString('utf-8');
+  return { content: JSON.parse(content), sha: res.data.sha };
+}
+
+async function githubPutFile(path, dataObj, sha, message) {
+  const encoded = Buffer.from(JSON.stringify(dataObj, null, 2), 'utf-8').toString('base64');
+  const res = await githubRequest('PUT', `/repos/${REPO}/contents/${path}`, { message, content: encoded, sha });
+  if (res.status !== 200 && res.status !== 201) throw new Error(`GitHub PUT ${path} -> ${res.status}: ${JSON.stringify(res.data).slice(0, 200)}`);
+  return res.data;
+}
+
+// Builds the same shape of ticketed event used for the Oct 15 Trademark
+// Winery tasting -- $44.99 admission-for-two, no flyer image (so nothing
+// needs to be created by hand per cycle), 15 admissions / 30 people.
+function buildTicketedEvent(t) {
+  const dateStr = fmtLongDate(t.date), timeStr = fmtTime(t.time);
+  return {
+    id: t.id + '-ticket',
+    name: 'Rock & Vine Wine Club - ' + t.winery,
+    date: t.date,
+    time: t.time,
+    location: 'The Quarry, New Melle MO',
+    description: `Rock & Vine Wine Club presents ${t.winery}. $44.99 admission covers two people -- a guided wine tasting, food pairings, and bottles available to purchase at the end of the night.`,
+    detailDescription: `Rock & Vine Wine Club at The Quarry\n\nFeatured Winery: ${t.winery}\n\n${dateStr}\n${timeStr}\n$44.99 per admission\nThe Quarry, 3960 Highway Z, New Melle, MO\n\nJoin us for an evening with ${t.winery} -- five to six wines, a food pairing with each, and bottles available to buy at the end of the night.\n\nEach $44.99 admission includes:\n\nWine tasting for 2 people\nFood pairings with each tasting\nA guided tasting experience overlooking The Quarry\n\nBring a partner, a friend, or a date -- your admission covers both of you. Reserve your spot below; we'll have your names on the list at the door.\n\nLimited to 15 admissions (30 people).\n\nAlready a Rock & Vine member? Your $29.99/mo membership already includes priority RSVP and a guest at every tasting -- RSVP through the member portal instead of buying a ticket here.`,
+    additionalInfo: 'Limited to 15 admissions (30 people). One ticket = two people. Please enter your partner / +1 name when registering.',
+    capacity: 15,
+    totalCapacity: 15,
+    status: 'available',
+    pricingType: 'individual',
+    collectGuestName: true,
+    registeredCount: 0,
+    registered: 0,
+    eventType: 'ticketed',
+    registrationType: 'paid',
+    category: 'Ticketed',
+    tags: ['Ticketed', 'Wine Tasting', 'Wine Club'],
+    imageGradient: 'wine',
+    imageText: 'Wine',
+    imageAlt: t.winery + ' Wine Tasting at The Quarry, ' + dateStr,
+    title: t.winery + ' Wine Tasting',
+    pricePerPerson: 4499,
+    tiers: [{ name: 'Admission for Two', pricePerPerson: 4499, priceLabel: '$44.99', priceUnit: '', description: 'One $44.99 ticket - includes wine tasting + food pairings for two people.' }],
+    seatingOptions: [],
+    arrivalSlots: [],
+    highlights: [
+      'Featured: ' + t.winery,
+      'Wine tasting for two - $44.99 admission',
+      'Food pairings with each wine',
+      'Guided experience overlooking The Quarry',
+      'Members: priority RSVP + 1 guest included, no extra charge',
+    ],
+    slug: t.id + '-ticket',
+  };
+}
+
+// Creates a dedicated ticketed event (and points the tasting's ticketUrl at
+// it) for any upcoming tasting that doesn't have one yet. Runs on every
+// invocation, independent of whether any email milestone is due today, so a
+// tasting gets its checkout page as soon as it's added to the schedule
+// rather than waiting until its invite is about to fire.
+async function ensureTicketEvents(tastingsData, today) {
+  const needsOne = tastingsData.tastings.filter((t) => !t.eventId && t.date >= today);
+  if (needsOne.length === 0) return { created: [] };
+
+  const created = [];
+  let eventsFile = await githubGetFile('events.json');
+  let tastingsFile = await githubGetFile('wine_tastings.json');
+
+  for (const t of needsOne) {
+    const newEvent = buildTicketedEvent(t);
+    if (eventsFile.content.events.some((e) => e.id === newEvent.id)) continue; // already exists, just wasn't linked back yet
+    eventsFile.content.events.push(newEvent);
+    const match = tastingsFile.content.tastings.find((x) => x.id === t.id);
+    if (match) {
+      match.eventId = newEvent.id;
+      match.ticketUrl = 'https://thequarrystl.com/quarry-event-detail.html?id=' + newEvent.id;
+    }
+    created.push({ tastingId: t.id, eventId: newEvent.id });
+  }
+
+  if (created.length > 0) {
+    const putEvents = await githubPutFile('events.json', eventsFile.content, eventsFile.sha,
+      'Auto-create ticketed event(s) for upcoming wine tasting(s)\n\n' + created.map((c) => c.tastingId + ' -> ' + c.eventId).join('\n') + '\n\nCo-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>');
+    // events.json sha changed; re-fetch tastings sha is still valid since we haven't written it yet
+    await githubPutFile('wine_tastings.json', tastingsFile.content, tastingsFile.sha,
+      'Link auto-created ticket event(s) back to wine_tastings.json\n\nCo-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>');
+  }
+  return { created };
+}
+
 function sendGridBulk(personalizations, subject, htmlBody) {
   const payload = JSON.stringify({
     personalizations,
@@ -210,7 +339,7 @@ exports.handler = async (event) => {
     const url = new URL(event.rawUrl || ('https://x' + event.path + '?' + (event.rawQuery || '')));
     const dryRun = url.searchParams.get('dry_run') === '1';
 
-    const [tastingsData, subscribers, wineClub, log] = await Promise.all([
+    let [tastingsData, subscribers, wineClub, log] = await Promise.all([
       fetchJson(REPO_RAW + '/wine_tastings.json?t=' + Date.now()),
       fetchJson(REPO_RAW + '/subscribers.json?t=' + Date.now()),
       readBlob('wine-club-members'),
@@ -218,6 +347,21 @@ exports.handler = async (event) => {
     ]);
 
     const today = todayCT();
+
+    // Auto-create a ticketed checkout page for any upcoming tasting that
+    // doesn't have one yet (skipped in dry-run, which must stay read-only).
+    let provisioned = { created: [] };
+    if (!dryRun) {
+      try {
+        provisioned = await ensureTicketEvents(tastingsData, today);
+        if (provisioned.created.length > 0) {
+          // Our in-memory copy is now stale (ticketUrl/eventId just changed on GitHub) -- re-fetch.
+          tastingsData = await fetchJson(REPO_RAW + '/wine_tastings.json?t=' + Date.now());
+        }
+      } catch (e) {
+        console.error('ensureTicketEvents failed (continuing with email sends anyway):', e.message);
+      }
+    }
     const allTastings = tastingsData.tastings || [];
     if (allTastings.length === 0) {
       return json({ ok: true, message: 'no tastings in wine_tastings.json', today });
@@ -259,7 +403,7 @@ exports.handler = async (event) => {
     }
 
     if (dueList.length === 0) {
-      return json({ ok: true, message: 'nothing due today', today, milestonesByTasting: withMilestones.map((x) => ({ id: x.t.id, ...x.milestones })) });
+      return json({ ok: true, message: 'nothing due today', today, provisioned, milestonesByTasting: withMilestones.map((x) => ({ id: x.t.id, ...x.milestones })) });
     }
 
     const activeMemberEmails = new Set(
@@ -305,7 +449,7 @@ exports.handler = async (event) => {
       results.push({ tasting: t.id, milestone, recipientCount: recipients.length, ...result });
     }
 
-    return json({ ok: true, today, results });
+    return json({ ok: true, today, provisioned, results });
   } catch (e) {
     console.error('wine-growth-campaign error:', e);
     return json({ ok: false, error: String(e.message || e) }, 500);
