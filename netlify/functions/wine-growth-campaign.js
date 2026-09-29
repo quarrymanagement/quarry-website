@@ -468,8 +468,12 @@ function memberHalfwayEmail(t, next) {
 <p style="${P}">We're partway to <strong>${next.winery}</strong>, and we're already looking forward to it. Now's the perfect time to start planning who you're bringing.</p>
 <div style="${CALLOUT}">Your membership includes one guest at no extra charge &mdash; the earlier you invite them, the better the odds they can make it.</div>
 <p style="${P}">Know a few people who'd love a night like this? Copy the link below and send it their way &mdash; it takes them straight to a ticket for this tasting, no membership required.</p>
-<div style="background:#FFFFFF;border:1px solid #E4DACB;border-radius:6px;padding:12px 14px;margin:0 0 18px;">
+<div style="background:#FFFFFF;border:1px solid #E4DACB;border-radius:6px;padding:12px 14px;margin:0 0 14px;">
 <p style="margin:0;font-family:'Courier New',Courier,monospace;font-size:13px;line-height:1.5;color:#5C3A17;word-break:break-all;">${shareUrl}</p>
+</div>
+<p style="${P}">Or if they're ready to skip straight to membership &mdash; priority RSVP, a wine discount, and their own guest included every month &mdash; send them here instead:</p>
+<div style="background:#FFFFFF;border:1px solid #E4DACB;border-radius:6px;padding:12px 14px;margin:0 0 18px;">
+<p style="margin:0;font-family:'Courier New',Courier,monospace;font-size:13px;line-height:1.5;color:#5C3A17;word-break:break-all;">https://thequarrystl.com/quarry-wineclub#member-form</p>
 </div>
 <p style="${P}">Can't wait,<br>The Quarry Wine Team</p>`);
   return { subject, html };
