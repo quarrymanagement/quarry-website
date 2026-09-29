@@ -615,76 +615,66 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
       </p>
     </div>
 
-    <div class="tastings-grid">
-      <a class="tasting-card" href="#" onclick="event.preventDefault();openRsvp('','','')">
-        <div class="tasting-card-body">
-          <span class="tasting-type">Wine Tasting</span>
-          <div class="tasting-date-row">
-            <div>
-              <div style="display:flex;align-items:baseline;gap:0.35rem;">
-                <span class="tasting-day">17</span>
-                <span class="tasting-month" style="font-size:0.55rem;padding:0.15rem 0.5rem;">SEP</span>
-              </div>
-              <div class="tasting-year">2026</div>
-            </div>
-          </div>
-          <div class="tasting-winery">Chateau Sainte Genevieve</div>
-          <div class="tasting-time">&#128341; 6:00 PM &nbsp;&middot;&nbsp; Wine Club Building</div>
-          <div class="tasting-cta">Reserve Your Spot</div>
-        </div>
-      </a>
-      <a class="tasting-card" href="#" onclick="event.preventDefault();openRsvp('','','')">
-        <div class="tasting-card-body">
-          <span class="tasting-type">Wine Tasting</span>
-          <div class="tasting-date-row">
-            <div>
-              <div style="display:flex;align-items:baseline;gap:0.35rem;">
-                <span class="tasting-day">15</span>
-                <span class="tasting-month" style="font-size:0.55rem;padding:0.15rem 0.5rem;">OCT</span>
-              </div>
-              <div class="tasting-year">2026</div>
-            </div>
-          </div>
-          <div class="tasting-winery">Trademark Winery</div>
-          <div class="tasting-time">&#128341; 6:00 PM &nbsp;&middot;&nbsp; Wine Club Building</div>
-          <div class="tasting-cta">Reserve Your Spot</div>
-        </div>
-      </a>
-      <a class="tasting-card" href="#" onclick="event.preventDefault();openRsvp('','','')">
-        <div class="tasting-card-body">
-          <span class="tasting-type">Wine Tasting</span>
-          <div class="tasting-date-row">
-            <div>
-              <div style="display:flex;align-items:baseline;gap:0.35rem;">
-                <span class="tasting-day">12</span>
-                <span class="tasting-month" style="font-size:0.55rem;padding:0.15rem 0.5rem;">NOV</span>
-              </div>
-              <div class="tasting-year">2026</div>
-            </div>
-          </div>
-          <div class="tasting-winery">Trademark Winery</div>
-          <div class="tasting-time">&#128341; 6:00 PM &nbsp;&middot;&nbsp; Wine Club Building</div>
-          <div class="tasting-cta">Reserve Your Spot</div>
-        </div>
-      </a>
-      <a class="tasting-card" href="#" onclick="event.preventDefault();openRsvp('','','')">
-        <div class="tasting-card-body">
-          <span class="tasting-type">Wine Tasting</span>
-          <div class="tasting-date-row">
-            <div>
-              <div style="display:flex;align-items:baseline;gap:0.35rem;">
-                <span class="tasting-day">10</span>
-                <span class="tasting-month" style="font-size:0.55rem;padding:0.15rem 0.5rem;">DEC</span>
-              </div>
-              <div class="tasting-year">2026</div>
-            </div>
-          </div>
-          <div class="tasting-winery">Chateau Winery</div>
-          <div class="tasting-time">&#128341; 6:00 PM &nbsp;&middot;&nbsp; Wine Club Building</div>
-          <div class="tasting-cta">Reserve Your Spot</div>
-        </div>
-      </a>
+    <div class="tastings-grid" id="tastingsGrid">
+      <p style="grid-column:1/-1;text-align:center;color:#999;padding:2rem 0;">Loading upcoming tastings&hellip;</p>
     </div>
+    <script>
+      (function () {
+        var MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+        function fmtTime(hhmm) {
+          var parts = (hhmm || '18:00').split(':');
+          var h = parseInt(parts[0], 10), m = parts[1];
+          var ap = h >= 12 ? 'PM' : 'AM';
+          var h12 = h % 12; if (h12 === 0) h12 = 12;
+          return h12 + (m === '00' ? '' : ':' + m) + ' ' + ap;
+        }
+        function renderTastings(list) {
+          var grid = document.getElementById('tastingsGrid');
+          if (!list.length) {
+            grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#999;padding:2rem 0;">No upcoming tastings scheduled right now &mdash; check back soon.</p>';
+            return;
+          }
+          grid.innerHTML = list.map(function (t) {
+            var d = new Date(t.date + 'T12:00:00');
+            var day = d.getDate();
+            var month = MONTHS[d.getMonth()];
+            var year = d.getFullYear();
+            var timeStr = fmtTime(t.time);
+            var wineryEsc = String(t.winery).replace(/'/g, "\\'");
+            return '' +
+              '<a class="tasting-card" href="#" onclick="event.preventDefault();openRsvp(\'' + wineryEsc + '\',\'' + t.date + '\',\'' + timeStr + '\')">' +
+                '<div class="tasting-card-body">' +
+                  '<span class="tasting-type">Wine Tasting</span>' +
+                  '<div class="tasting-date-row">' +
+                    '<div>' +
+                      '<div style="display:flex;align-items:baseline;gap:0.35rem;">' +
+                        '<span class="tasting-day">' + day + '</span>' +
+                        '<span class="tasting-month" style="font-size:0.55rem;padding:0.15rem 0.5rem;">' + month + '</span>' +
+                      '</div>' +
+                      '<div class="tasting-year">' + year + '</div>' +
+                    '</div>' +
+                  '</div>' +
+                  '<div class="tasting-winery">' + t.winery + '</div>' +
+                  '<div class="tasting-time">&#128341; ' + timeStr + ' &nbsp;&middot;&nbsp; Wine Club Building</div>' +
+                  '<div class="tasting-cta">Reserve Your Spot</div>' +
+                '</div>' +
+              '</a>';
+          }).join('');
+        }
+        fetch('https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/wine_tastings.json?t=' + Date.now())
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            var today = new Date(); today.setHours(0, 0, 0, 0);
+            var upcoming = (data.tastings || []).filter(function (t) {
+              return new Date(t.date + 'T23:59:59') >= today;
+            }).sort(function (a, b) { return a.date < b.date ? -1 : 1; });
+            renderTastings(upcoming);
+          })
+          .catch(function () {
+            document.getElementById('tastingsGrid').innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#999;padding:2rem 0;">Couldn\'t load the schedule right now &mdash; please refresh.</p>';
+          });
+      })();
+    </script>
   </div>
 </div>
 
@@ -893,7 +883,7 @@ async function submitRsvp() {
       body: JSON.stringify({
         name: name,
         email: email,
-        tasting: currentTasting.winery + ' Winery',
+        tasting: currentTasting.winery,
         date: currentTasting.date,
         time: currentTasting.time
       })
@@ -908,7 +898,7 @@ async function submitRsvp() {
           'You already have an RSVP for this tasting, ' + name.split(' ')[0] + '! We\'ll see you there.';
       } else {
         document.getElementById('rsvpSuccessMsg').textContent =
-          'Your RSVP for ' + currentTasting.winery + ' Winery on ' + currentTasting.date +
+          'Your RSVP for ' + currentTasting.winery + ' on ' + currentTasting.date +
           ' at ' + currentTasting.time + ' is confirmed, ' + name.split(' ')[0] + '! We\'ll see you there.';
       }
       document.getElementById('rsvpSuccess').style.display = 'block';
