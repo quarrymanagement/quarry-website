@@ -551,7 +551,7 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
     <a href="#tastings" class="btn-o" onclick="event.preventDefault();document.getElementById('tastings').scrollIntoView({behavior:'smooth'})">Already a Member? RSVP Here</a>
   </div>
   <p style="margin-top:1.25rem;font-size:0.9rem;">
-    Not a member? <a href="/augusta-wineclub" style="color:var(--gold);font-weight:700;text-decoration:underline;">Buy a single admission to the Sept 17 tasting — $39.99 for two →</a>
+    Not a member? <a href="/trademark-wineclub" style="color:var(--gold);font-weight:700;text-decoration:underline;">Buy a single admission to the Oct 15 tasting — $44.99 →</a>
   </p>
 </div>
 
@@ -604,14 +604,14 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
       <div style="font-size:0.7rem;letter-spacing:0.18em;text-transform:uppercase;font-weight:700;margin-bottom:0.6rem;">Not a Member Yet?</div>
       <h3 style="margin:0 0 0.6rem;font-size:1.35rem;">You can still join us for the next tasting.</h3>
       <p style="margin:0 0 1.25rem;font-size:0.95rem;line-height:1.7;">
-        <strong>Thursday, September 17 &middot; 6:00 PM &middot; Chateau Sainte Genevieve.</strong><br>
-        A single <strong>$39.99 admission covers two people</strong> — five to six wines, a food pairing with each,
+        <strong>Thursday, October 15 &middot; 6:00 PM &middot; Trademark Winery.</strong><br>
+        <strong>$44.99 per person</strong> — five to six wines, a food pairing with each,
         and bottles available to buy at the end of the night. No membership required.
       </p>
-      <a href="/augusta-wineclub" class="btn-g">Get Tickets — $39.99 for Two</a>
+      <a href="/trademark-wineclub" class="btn-g">Get Tickets — $44.99</a>
       <p style="margin:1rem 0 0;font-size:0.8rem;opacity:0.75;">
-        Want priority RSVP and member pricing every month?
-        <a href="#member-form" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})" style="font-weight:700;">Join Rock &amp; Vine for $29.99/mo</a>.
+        Want priority RSVP, member pricing, and a guest included every month?
+        <a href="#member-form" onclick="event.preventDefault();document.getElementById('member-form').scrollIntoView({behavior:'smooth'})" style="font-weight:700;">Join Rock &amp; Vine for $29.99/mo — includes 1 guest</a>.
       </p>
     </div>
 
@@ -750,7 +750,7 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
   </div>
   <div class="faq-item">
     <div class="faq-q" onclick="faq(this)">How much does membership cost?</div>
-    <div class="faq-a">Rock &amp; Vine membership is $29.99 per month. No setup fees, no annual commitments — cancel anytime.</div>
+    <div class="faq-a">Rock &amp; Vine membership is $29.99 per month and includes bringing one guest to every tasting at no extra charge. No setup fees, no annual commitments — cancel anytime.</div>
   </div>
   <div class="faq-item">
     <div class="faq-q" onclick="faq(this)">How do I RSVP for wine tasting events?</div>
@@ -762,7 +762,7 @@ footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.62re
   </div>
   <div class="faq-item">
     <div class="faq-q" onclick="faq(this)">What happens after I submit the form?</div>
-    <div class="faq-a">After submitting your profile, our team will reach out to set up your membership in person on your next visit to The Quarry. We&rsquo;ll get your card on file and your $29.99/month membership rolling. Once enrolled, you&rsquo;ll receive a member confirmation email.</div>
+    <div class="faq-a">After submitting your profile, our team will reach out to set up your membership in person on your next visit to The Quarry. We&rsquo;ll get your card on file and your $29.99/month membership rolling (includes 1 guest per tasting). Once enrolled, you&rsquo;ll receive a member confirmation email.</div>
   </div>
   <div class="faq-item">
     <div class="faq-q" onclick="faq(this)">What if my payment fails?</div>
@@ -916,7 +916,7 @@ async function submitRsvp() {
       var guestTicketCta =
         '<span style=\"display:block;margin-top:0.9rem;padding-top:0.9rem;border-top:1px solid rgba(0,0,0,0.15);\">' +
         'You don\'t need a membership to come to this one &mdash; ' +
-        '<a href=\"/augusta-wineclub\" style=\"font-weight:700;text-decoration:underline;\">grab a single admission for $39.99 (covers two people) &rarr;</a>' +
+        '<a href=\"/trademark-wineclub\" style=\"font-weight:700;text-decoration:underline;\">grab a single admission for $44.99 per person &rarr;</a>' +
         '</span>';
       if (data.reason === 'no_account') {
         document.getElementById('rsvpErrorTitle').textContent = 'Email Not Found';
