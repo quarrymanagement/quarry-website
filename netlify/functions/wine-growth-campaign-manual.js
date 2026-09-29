@@ -1,40 +1,51 @@
 // ============================================================================
-// wine-growth-campaign-manual.js
+// wine-growth-campaign.js
 //
-// Identical logic to wine-growth-campaign.js, deployed as a second,
-// UN-scheduled function on purpose: Netlify blocks direct public requests to
-// any function registered with a `schedule` in netlify.toml (403), so the
-// cron-driven one can'''t be hit by URL for manual testing or on-demand
-// sends. This twin has no schedule entry, so it stays callable any time via
-// dry_run=1 / test=1 / force=<milestone> -- exactly the on-demand control
-// staff wanted ("today" for this cycle, "whenever" for the next), with the
-// scheduled twin as the automatic daily backstop if nobody triggers it by
-// hand. Keep both files in sync if the send logic changes.
+// Runs three parallel, per-tasting email cadences off the real schedule in
+// wine_tastings.json -- no hardcoded winery/date anywhere:
 //
-// Runs the 3-email Rock & Vine growth cadence off the real tasting schedule
-// in wine_tastings.json, instead of any hardcoded winery/date:
+//   GUEST GROWTH (non-members, non-ticket-buyers -- the "join us" pitch)
+//     - "invite"    -- ~3 weeks (21 days) before the tasting
+//     - "lastcall"  -- the Monday of tasting week
+//     - "thankyou"  -- the day after the tasting
 //
-//   - "invite"    -- ~3 weeks (21 days) before the tasting
-//   - "lastcall"  -- the Monday of tasting week
-//   - "thankyou"  -- the day after the tasting
+//   TICKET BUYER (people who already bought a $44.99 one-off ticket for THIS
+//   tasting -- pulled from that ticketed event's registrant list, no separate
+//   data store needed)
+//     - "ticket_monday"    -- the Monday of tasting week (logistics only,
+//                              replaces "lastcall" for this audience)
+//     - "ticket_dayafter"  -- the day after the tasting (the membership
+//                              conversion ask, replaces "thankyou")
 //
-// Audience:
-//   invite / lastcall -> every Subscribed contact in subscribers.json who is
-//                         NOT a current Active Wine Club member (blob
-//                         "wine-club-members") -- this is what keeps someone
-//                         who joins mid-campaign from still getting "join us"
-//                         pitches; the moment they're in that roster, this
-//                         exclusion drops them out on the very next send.
-//   thankyou           -> the full Subscribed list, members included -- it's
-//                         a recap/thank-you, not a pitch, so nobody needs to
-//                         be excluded from it.
+//   MEMBER CADENCE (active Wine Club members -- encourages bringing/sharing
+//   their included guest, never a sales pitch at the member themselves)
+//     - "member_dayafter" -- day after THIS tasting, thanks it + teases next
+//                             (only fires once a next tasting exists)
+//     - "member_halfway"  -- midpoint between this tasting and the next one
+//                             (only fires once a next tasting exists)
+//     - "member_monday"   -- the Monday of tasting week
+//     - "member_dayof"    -- the morning of the tasting
 //
-// Idempotent per (tasting id, milestone) via the "wine-growth-sent-log" blob,
-// same pattern as wedding_tour_reminders_sent -- safe to run more than once
-// on the same day.
+// Audience exclusions (all re-checked fresh at send time, so someone who
+// joins mid-campaign or buys a ticket immediately drops out of the wrong
+// track on the very next run):
+//   invite / lastcall / thankyou -> excludes active Wine Club members AND
+//                                    this tasting's ticket buyers (those two
+//                                    groups get their own dedicated tracks
+//                                    instead of the generic guest pitch).
+//   ticket_monday / ticket_dayafter -> this tasting's ticket buyers, minus
+//                                        anyone who has since become an
+//                                        active member.
+//   member_* -> active Wine Club members only.
 //
+// Idempotent per (tasting id, milestone) via the "wine-growth-sent-log" blob.
 // Cron: once daily. See netlify.toml.
 // GET ?dry_run=1 -- reports what WOULD send today without sending or logging.
+// GET ?force=<milestone>&test=1 -- builds+sends one milestone for the
+//   soonest qualifying upcoming tasting, to management@thequarrystl.com only,
+//   without marking it sent. Milestones: invite, lastcall, thankyou,
+//   ticket_monday, ticket_dayafter, member_monday, member_dayof,
+//   member_dayafter, member_halfway.
 // ============================================================================
 
 const https = require('https');
@@ -62,6 +73,14 @@ function mondayOfWeek(yyyymmdd) {
   const dow = dt.getUTCDay(); // 0=Sun..6=Sat
   const back = dow === 0 ? 6 : dow - 1;
   return addDays(yyyymmdd, -back);
+}
+function daysBetween(a, b) {
+  const [y1, m1, d1] = a.split('-').map(Number);
+  const [y2, m2, d2] = b.split('-').map(Number);
+  return Math.round((Date.UTC(y2, m2 - 1, d2) - Date.UTC(y1, m1 - 1, d1)) / 86400000);
+}
+function midpoint(a, b) {
+  return addDays(a, Math.round(daysBetween(a, b) / 2));
 }
 function fmtLongDate(yyyymmdd) {
   const [y, m, d] = yyyymmdd.split('-').map(Number);
@@ -208,13 +227,60 @@ async function ensureTicketEvents(tastingsData, today) {
   }
 
   if (created.length > 0) {
-    const putEvents = await githubPutFile('events.json', eventsFile.content, eventsFile.sha,
+    await githubPutFile('events.json', eventsFile.content, eventsFile.sha,
       'Auto-create ticketed event(s) for upcoming wine tasting(s)\n\n' + created.map((c) => c.tastingId + ' -> ' + c.eventId).join('\n') + '\n\nCo-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>');
     // events.json sha changed; re-fetch tastings sha is still valid since we haven't written it yet
     await githubPutFile('wine_tastings.json', tastingsFile.content, tastingsFile.sha,
       'Link auto-created ticket event(s) back to wine_tastings.json\n\nCo-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>');
   }
   return { created };
+}
+
+// ---------------------------------------------------------------------------
+// Ticket-buyer audience -- pulled straight from the ticketed event's own
+// registrant list in events.json, which the Square checkout webhook already
+// keeps up to date (see event-register.js / square-webhook.js). Merges in
+// the older Stripe-era top-level `registrations` map for completeness, since
+// a handful of past events only recorded buyers there.
+// ---------------------------------------------------------------------------
+function findTicketedEvent(t, eventsData) {
+  if (!t.eventId || !eventsData) return null;
+  return (eventsData.events || []).find((e) => e.id === t.eventId) || null;
+}
+
+function ticketBuyerRecords(t, eventsData) {
+  const ev = findTicketedEvent(t, eventsData);
+  const byEmail = new Map();
+  if (ev && Array.isArray(ev.registrations)) {
+    for (const r of ev.registrations) {
+      if (r.email) byEmail.set(r.email.toLowerCase(), r.name || '');
+    }
+  }
+  const legacy = eventsData && eventsData.registrations && eventsData.registrations[t.eventId];
+  if (Array.isArray(legacy)) {
+    for (const r of legacy) {
+      if (r.email && (!r.status || String(r.status).toUpperCase() === 'PAID')) {
+        byEmail.set(r.email.toLowerCase(), r.name || '');
+      }
+    }
+  }
+  return byEmail; // Map<lowercaseEmail, displayName>
+}
+
+function ticketBuyerEmailSet(t, eventsData) {
+  return new Set(ticketBuyerRecords(t, eventsData).keys());
+}
+
+function ticketBuyerContacts(t, eventsData, subscribedContacts) {
+  const records = ticketBuyerRecords(t, eventsData);
+  if (records.size === 0) return [];
+  const subFirstNameByEmail = new Map(subscribedContacts.map((s) => [s.email.toLowerCase(), s.firstName]));
+  const contacts = [];
+  for (const [email, name] of records) {
+    const firstName = subFirstNameByEmail.get(email) || (name || '').trim().split(/\s+/)[0] || '';
+    contacts.push({ email, firstName });
+  }
+  return contacts;
 }
 
 function sendGridBulk(personalizations, subject, htmlBody) {
@@ -277,9 +343,13 @@ function wrap(inner) {
 }
 const P = 'font-family:Georgia,serif;font-size:15px;line-height:1.7;color:#2C1A0E;';
 const H2 = 'font-family:Georgia,serif;color:#2C1A0E;margin:0 0 14px;';
+const CALLOUT = 'background:#FAF3E7;border-left:4px solid #B8933A;padding:16px 20px;margin:18px 0;font-family:Georgia,serif;font-size:15px;color:#2C1A0E;';
 const BTN_GOLD = 'display:inline-block;background:#B8933A;color:#1A0E08;padding:13px 30px;border-radius:6px;text-decoration:none;font-weight:bold;font-family:Georgia,serif;';
 const BTN_OUTLINE = 'display:inline-block;background:transparent;border:2px solid #B8933A;color:#9A6B2E;padding:11px 28px;border-radius:6px;text-decoration:none;font-weight:bold;font-family:Georgia,serif;';
 
+// ---------------------------------------------------------------------------
+// GUEST GROWTH: invite / lastcall / thankyou
+// ---------------------------------------------------------------------------
 function inviteEmail(t) {
   const dateStr = fmtLongDate(t.date), timeStr = fmtTime(t.time);
   const subject = 'Fall + Wine Deserve Each Other';
@@ -287,7 +357,7 @@ function inviteEmail(t) {
 <h2 style="${H2}">There's no better time to join Rock &amp; Vine than right now.</h2>
 <p style="${P}">Hi {firstName},</p>
 <p style="${P}">Fall at The Quarry means cozy nights, great company, and honestly &mdash; the best wine lineup we run all year. If you've ever thought about joining the Rock &amp; Vine Wine Club, this is the season to do it.</p>
-<div style="background:#FAF3E7;border-left:4px solid #B8933A;padding:16px 20px;margin:18px 0;font-family:Georgia,serif;font-size:15px;color:#2C1A0E;">
+<div style="${CALLOUT}">
 <p style="margin:0 0 10px;line-height:1.6;"><strong>For a discounted $29.99/month, you get:</strong></p>
 <p style="margin:0;line-height:1.9;">🍇 Priority RSVP to every tasting, before they open to the public<br>
 🥂 A discount on wine purchases, every visit<br>
@@ -309,7 +379,7 @@ function lastCallEmail(t) {
 <h2 style="${H2}">This week's the week.</h2>
 <p style="${P}">Hi {firstName},</p>
 <p style="${P}">Just a heads-up &mdash; ${t.winery} is ${dateStr} at ${timeStr}, and seats are going fast. If fall wine nights have been on your mind, this is your sign.</p>
-<div style="background:#FAF3E7;border-left:4px solid #B8933A;padding:16px 20px;margin:18px 0;font-family:Georgia,serif;font-size:15px;color:#2C1A0E;">
+<div style="${CALLOUT}">
 <p style="margin:0 0 10px;line-height:1.6;"><strong>Join Rock &amp; Vine, or just trying us out?</strong> Either way, we'd love to see you.</p>
 <p style="margin:0;line-height:1.7;">🍇 <strong>Join now &mdash; $29.99/mo:</strong> priority seating, a wine discount, and a guest included every month.<br>
 🎟️ <strong>Just trying us out &mdash; $44.99:</strong> covers you and a guest for this tasting only.</p>
@@ -334,6 +404,168 @@ function thankYouEmail(t) {
   return { subject, html };
 }
 
+// ---------------------------------------------------------------------------
+// TICKET BUYER: ticket_monday / ticket_dayafter
+// ---------------------------------------------------------------------------
+function ticketMondayEmail(t) {
+  const dateStr = fmtLongDate(t.date), timeStr = fmtTime(t.time);
+  const subject = `You're All Set for This Week — ${t.winery}`;
+  const html = wrap(`
+<h2 style="${H2}">You're all set for this week.</h2>
+<p style="${P}">Hi {firstName},</p>
+<p style="${P}">Just a friendly reminder &mdash; your spot for <strong>${t.winery}</strong> is confirmed for <strong>${dateStr} at ${timeStr}</strong>. Your ticket covers you and one guest, so bring them along.</p>
+<div style="${CALLOUT}">
+<strong>Date:</strong> ${dateStr}<br>
+<strong>Time:</strong> ${timeStr}<br>
+<strong>Where:</strong> The Quarry, 3960 Highway Z, New Melle, MO
+</div>
+<p style="${P}">Expect five to six wines, a food pairing with each, and bottles available to buy at the end of the night if something catches your palate.</p>
+<p style="${P}">Questions before then? Just reply to this email.</p>
+<p style="${P}">See you soon,<br>The Quarry Wine Team</p>`);
+  return { subject, html };
+}
+
+function ticketDayAfterEmail(t) {
+  const subject = `Loved ${t.winery}? Here's How to Never Miss One`;
+  const html = wrap(`
+<h2 style="${H2}">Glad you came out.</h2>
+<p style="${P}">Hi {firstName},</p>
+<p style="${P}">Thank you for coming out to <strong>${t.winery}</strong> last night &mdash; we hope you and your guest had a great time.</p>
+<p style="${P}">If you liked what you tasted, here's the easiest way to make sure you never miss the next one: join Rock &amp; Vine for $29.99/month and get</p>
+<div style="${CALLOUT}">
+<p style="margin:0;line-height:1.9;">🍇 Priority RSVP to every tasting, before it opens to the public<br>
+🥂 A discount on wine purchases, every visit<br>
+👥 One guest included at every tasting, on us &mdash; no extra ticket needed<br>
+🏡 A community of regulars who show up for the same reason you did last night</p>
+</div>
+<p style="${P}">At $29.99/mo, you're basically covered for the next tasting already &mdash; and every one after that.</p>
+<p style="text-align:center;margin:22px 0;"><a href="https://thequarrystl.com/quarry-wineclub#member-form" style="${BTN_GOLD}">Join Rock &amp; Vine &mdash; $29.99/mo →</a></p>
+<p style="${P}">Hope to see you again soon,<br>The Quarry Wine Team</p>`);
+  return { subject, html };
+}
+
+// ---------------------------------------------------------------------------
+// MEMBER CADENCE: member_dayafter / member_halfway / member_monday / member_dayof
+// ---------------------------------------------------------------------------
+function memberDayAfterEmail(t, next) {
+  const subject = 'Thank You for an Unforgettable Night';
+  const html = wrap(`
+<h2 style="${H2}">Thank you for an unforgettable night.</h2>
+<p style="${P}">Hi {firstName},</p>
+<p style="${P}">${t.winery} was such a great one &mdash; thank you for being part of it. Nights like that are exactly what Rock &amp; Vine is about.</p>
+<div style="${CALLOUT}">Mark your calendar: <strong>${next.winery}</strong> is up next, and we're already excited about this lineup.</div>
+<p style="${P}">If last night reminded you why you joined, do us a favor and bring that lineup to life for someone else too &mdash; your membership already includes a guest at every tasting, so there's no reason not to.</p>
+<p style="${P}">Cheers,<br>The Quarry Wine Team</p>`);
+  return { subject, html };
+}
+
+function memberHalfwayEmail(t, next) {
+  const subject = `Halfway to ${next.winery} — Who Are You Bringing?`;
+  const shareUrl = next.ticketUrl || 'https://thequarrystl.com/quarry-wineclub';
+  const html = wrap(`
+<h2 style="${H2}">Halfway there already.</h2>
+<p style="${P}">Hi {firstName},</p>
+<p style="${P}">We're partway to <strong>${next.winery}</strong>, and we're already looking forward to it. Now's the perfect time to start planning who you're bringing.</p>
+<div style="${CALLOUT}">Your membership includes one guest at no extra charge &mdash; the earlier you invite them, the better the odds they can make it.</div>
+<p style="${P}">Know a few people who'd love a night like this? Copy the link below and send it their way &mdash; it takes them straight to a ticket for this tasting, no membership required.</p>
+<div style="background:#FFFFFF;border:1px solid #E4DACB;border-radius:6px;padding:12px 14px;margin:0 0 18px;">
+<p style="margin:0;font-family:'Courier New',Courier,monospace;font-size:13px;line-height:1.5;color:#5C3A17;word-break:break-all;">${shareUrl}</p>
+</div>
+<p style="${P}">Can't wait,<br>The Quarry Wine Team</p>`);
+  return { subject, html };
+}
+
+function memberMondayEmail(t) {
+  const dateStr = fmtLongDate(t.date), timeStr = fmtTime(t.time);
+  const subject = "We Can't Wait to See You This Week";
+  const html = wrap(`
+<h2 style="${H2}">We can't wait to see you this week.</h2>
+<p style="${P}">Hi {firstName},</p>
+<p style="${P}">${dateStr} is <strong>${t.winery}</strong> night at The Quarry. Doors at ${timeStr} &mdash; come hungry, come thirsty, come ready to talk wine.</p>
+<div style="${CALLOUT}">Bringing your guest? Perfect &mdash; your membership covers you both. Haven't invited anyone yet? There's still time.</div>
+<p style="${P}">And if your guest has a great time, they don't have to wait for an invite next time &mdash; they can join Rock &amp; Vine themselves, or grab their own ticket for a future tasting.</p>
+<p style="text-align:center;margin:22px 0 10px;"><a href="https://thequarrystl.com/quarry-wineclub#member-form" style="${BTN_GOLD}">Share Rock &amp; Vine &mdash; $29.99/mo →</a></p>
+<p style="text-align:center;margin:0 0 10px;font-family:Georgia,serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#9A8B7A;">or</p>
+<p style="text-align:center;margin:0 0 22px;"><a href="${t.ticketUrl}" style="${BTN_OUTLINE}">Share a Ticket for Two &mdash; $44.99 →</a></p>
+<p style="${P}">See you soon,<br>The Quarry Wine Team</p>`);
+  return { subject, html };
+}
+
+function memberDayOfEmail(t) {
+  const timeStr = fmtTime(t.time);
+  const subject = "Tonight's the Night!";
+  const html = wrap(`
+<h2 style="${H2}">Tonight's the night!</h2>
+<p style="${P}">Hi {firstName},</p>
+<p style="${P}"><strong>${t.winery}</strong> is on-site tonight at ${timeStr}. The glasses are out, the pairings are plated, and we're ready for you.</p>
+<div style="${CALLOUT}">Running late or bringing your guest at the last minute? No problem &mdash; just give us a call, we'll have your names at the door either way.</div>
+<p style="${P}">See you at The Quarry tonight &mdash; can't wait.</p>
+<p style="${P}">Cheers,<br>The Quarry Wine Team</p>`);
+  return { subject, html };
+}
+
+const BUILDERS = {
+  invite: (x) => inviteEmail(x.t),
+  lastcall: (x) => lastCallEmail(x.t),
+  thankyou: (x) => thankYouEmail(x.t),
+  ticket_monday: (x) => ticketMondayEmail(x.t),
+  ticket_dayafter: (x) => ticketDayAfterEmail(x.t),
+  member_monday: (x) => memberMondayEmail(x.t),
+  member_dayof: (x) => memberDayOfEmail(x.t),
+  member_dayafter: (x) => memberDayAfterEmail(x.t, x.next),
+  member_halfway: (x) => memberHalfwayEmail(x.t, x.next),
+};
+const NEEDS_NEXT = new Set(['member_dayafter', 'member_halfway']);
+
+function recipientsFor(kind, t, ctx) {
+  const { subscribedContacts, activeMemberEmails, activeMemberContacts, eventsData } = ctx;
+  switch (kind) {
+    case 'invite':
+    case 'lastcall':
+    case 'thankyou': {
+      const ticketBuyers = ticketBuyerEmailSet(t, eventsData);
+      return subscribedContacts.filter((r) => {
+        const e = r.email.toLowerCase();
+        return !activeMemberEmails.has(e) && !ticketBuyers.has(e);
+      });
+    }
+    case 'ticket_monday':
+    case 'ticket_dayafter':
+      return ticketBuyerContacts(t, eventsData, subscribedContacts).filter((r) => !activeMemberEmails.has(r.email.toLowerCase()));
+    case 'member_monday':
+    case 'member_dayof':
+    case 'member_dayafter':
+    case 'member_halfway':
+      return activeMemberContacts;
+    default:
+      return [];
+  }
+}
+
+// Builds every scheduled send across all three cadences for the full
+// tasting list, sorted ascending. member_dayafter/member_halfway only exist
+// once a next tasting is known (nothing to tease before it's on the schedule).
+function buildScheduleItems(allTastingsSorted) {
+  const items = [];
+  for (let i = 0; i < allTastingsSorted.length; i++) {
+    const t = allTastingsSorted[i];
+    const next = allTastingsSorted[i + 1];
+
+    items.push({ key: t.id + ':invite', date: addDays(t.date, -21), kind: 'invite', t });
+    items.push({ key: t.id + ':lastcall', date: mondayOfWeek(t.date), kind: 'lastcall', t });
+    items.push({ key: t.id + ':thankyou', date: addDays(t.date, 1), kind: 'thankyou', t });
+    items.push({ key: t.id + ':ticket_monday', date: mondayOfWeek(t.date), kind: 'ticket_monday', t });
+    items.push({ key: t.id + ':ticket_dayafter', date: addDays(t.date, 1), kind: 'ticket_dayafter', t });
+    items.push({ key: t.id + ':member_monday', date: mondayOfWeek(t.date), kind: 'member_monday', t });
+    items.push({ key: t.id + ':member_dayof', date: t.date, kind: 'member_dayof', t });
+    if (next) {
+      items.push({ key: t.id + ':member_dayafter', date: addDays(t.date, 1), kind: 'member_dayafter', t, next });
+      items.push({ key: t.id + ':member_halfway', date: midpoint(t.date, next.date), kind: 'member_halfway', t, next });
+    }
+  }
+  return items;
+}
+
 async function readSentLog() {
   const data = await readBlob(SENT_LOG_BLOB);
   if (!data || !Array.isArray(data.sent)) return { sent: [] };
@@ -349,9 +581,10 @@ exports.handler = async (event) => {
     const url = new URL(event.rawUrl || ('https://x' + event.path + '?' + (event.rawQuery || '')));
     const dryRun = url.searchParams.get('dry_run') === '1';
 
-    let [tastingsData, subscribers, wineClub, log] = await Promise.all([
+    let [tastingsData, subscribers, eventsData, wineClub, log] = await Promise.all([
       fetchJson(REPO_RAW + '/wine_tastings.json?t=' + Date.now()),
       fetchJson(REPO_RAW + '/subscribers.json?t=' + Date.now()),
+      fetchJson(REPO_RAW + '/events.json?t=' + Date.now()),
       readBlob('wine-club-members'),
       readSentLog(),
     ]);
@@ -365,8 +598,11 @@ exports.handler = async (event) => {
       try {
         provisioned = await ensureTicketEvents(tastingsData, today);
         if (provisioned.created.length > 0) {
-          // Our in-memory copy is now stale (ticketUrl/eventId just changed on GitHub) -- re-fetch.
-          tastingsData = await fetchJson(REPO_RAW + '/wine_tastings.json?t=' + Date.now());
+          // Our in-memory copies are now stale (ticketUrl/eventId, new events.json rows) -- re-fetch both.
+          [tastingsData, eventsData] = await Promise.all([
+            fetchJson(REPO_RAW + '/wine_tastings.json?t=' + Date.now()),
+            fetchJson(REPO_RAW + '/events.json?t=' + Date.now()),
+          ]);
         }
       } catch (e) {
         console.error('ensureTicketEvents failed (continuing with email sends anyway):', e.message);
@@ -376,44 +612,36 @@ exports.handler = async (event) => {
     if (allTastings.length === 0) {
       return json({ ok: true, message: 'no tastings in wine_tastings.json', today });
     }
+    const sortedTastings = [...allTastings].sort((a, b) => a.date.localeCompare(b.date));
 
-    // Compute every tasting's 3 milestone dates. Deliberately NOT filtered to
-    // "date >= today" here -- thank-you fires the day AFTER the tasting, so
-    // by the time that milestone is due, the tasting's own date has already
-    // passed. Filtering it out here would mean thank-you could never fire.
-    // This also lets several tastings be queued up in advance: each one's
-    // milestones are checked independently every day, so nothing needs the
-    // others to finish first.
-    const withMilestones = allTastings.map((t) => ({
-      t,
-      milestones: {
-        invite: addDays(t.date, -21),
-        lastcall: mondayOfWeek(t.date),
-        thankyou: addDays(t.date, 1),
-      },
-    }));
+    // Every scheduled send across all three cadences, for every tasting,
+    // independent of "next upcoming only" -- so several tastings can be
+    // queued in advance and each one's milestones are checked on their own.
+    const scheduleItems = buildScheduleItems(sortedTastings);
 
-    const force = url.searchParams.get('force'); // 'invite' | 'lastcall' | 'thankyou' -- manual override, applies to the single soonest upcoming tasting. Idempotency below still applies.
+    const force = url.searchParams.get('force'); // one of BUILDERS' keys -- manual override, applies to the soonest qualifying upcoming tasting. Idempotency below still applies.
     const testMode = url.searchParams.get('test') === '1';
 
     let dueList;
     if (force) {
-      const upcoming = withMilestones
-        .filter((x) => x.t.date >= today)
-        .sort((a, b) => a.t.date.localeCompare(b.t.date));
-      if (upcoming.length === 0) return json({ ok: true, message: 'no upcoming tasting to force', today });
-      dueList = [{ t: upcoming[0].t, milestone: force }];
-    } else {
-      dueList = [];
-      for (const x of withMilestones) {
-        for (const [name, date] of Object.entries(x.milestones)) {
-          if (date === today) dueList.push({ t: x.t, milestone: name });
-        }
+      if (!BUILDERS[force]) return json({ ok: false, error: 'unknown force milestone: ' + force, validMilestones: Object.keys(BUILDERS) }, 400);
+      const upcoming = sortedTastings.filter((t) => t.date >= today);
+      let chosen = null;
+      for (const t of upcoming) {
+        const idx = sortedTastings.indexOf(t);
+        const next = sortedTastings[idx + 1];
+        if (NEEDS_NEXT.has(force) && !next) continue;
+        chosen = { t, next };
+        break;
       }
+      if (!chosen) return json({ ok: true, message: 'no qualifying upcoming tasting to force ' + force, today });
+      dueList = [{ key: chosen.t.id + ':' + force, date: today, kind: force, t: chosen.t, next: chosen.next }];
+    } else {
+      dueList = scheduleItems.filter((x) => x.date === today);
     }
 
     if (dueList.length === 0) {
-      return json({ ok: true, message: 'nothing due today', today, provisioned, milestonesByTasting: withMilestones.map((x) => ({ id: x.t.id, ...x.milestones })) });
+      return json({ ok: true, message: 'nothing due today', today, provisioned, scheduleItems: scheduleItems.map((x) => ({ key: x.key, date: x.date })) });
     }
 
     const activeMemberEmails = new Set(
@@ -421,27 +649,28 @@ exports.handler = async (event) => {
         .filter((m) => (m.status || '').toLowerCase() === 'active')
         .map((m) => (m.email || '').toLowerCase())
     );
+    const activeMemberContacts = ((wineClub && wineClub.members) || [])
+      .filter((m) => (m.status || '').toLowerCase() === 'active' && m.email)
+      .map((m) => ({ email: m.email, firstName: m.firstName || m.first_name || (m.name || '').split(' ')[0] || '' }));
     const subscribedContacts = (subscribers || [])
       .filter((s) => s.email && s.emailStatus === 'Subscribed')
       .map((s) => ({ email: s.email, firstName: s.firstName || '' }));
 
+    const ctx = { subscribedContacts, activeMemberEmails, activeMemberContacts, eventsData };
+
     const results = [];
-    for (const { t, milestone } of dueList) {
-      const sentKey = t.id + ':' + milestone;
-      if (!testMode && log.sent.some((s) => s.key === sentKey)) {
-        results.push({ tasting: t.id, milestone, skipped: 'already sent' });
+    for (const item of dueList) {
+      const { t, kind, key } = item;
+      if (!testMode && log.sent.some((s) => s.key === key)) {
+        results.push({ tasting: t.id, milestone: kind, skipped: 'already sent' });
         continue;
       }
 
-      let recipients, builder;
-      if (milestone === 'invite') { builder = inviteEmail; recipients = subscribedContacts.filter((r) => !activeMemberEmails.has(r.email.toLowerCase())); }
-      else if (milestone === 'lastcall') { builder = lastCallEmail; recipients = subscribedContacts.filter((r) => !activeMemberEmails.has(r.email.toLowerCase())); }
-      else { builder = thankYouEmail; recipients = subscribedContacts; }
-
-      const { subject, html } = builder(t);
+      const recipients = recipientsFor(kind, t, ctx);
+      const { subject, html } = BUILDERS[kind](item);
 
       if (dryRun) {
-        results.push({ tasting: t.id, milestone, dryRun: true, recipientCount: recipients.length, subject });
+        results.push({ tasting: t.id, milestone: kind, dryRun: true, recipientCount: recipients.length, subject });
         continue;
       }
 
@@ -450,13 +679,13 @@ exports.handler = async (event) => {
       // sent (so the real campaign send afterward still goes out normally).
       if (testMode) {
         const result = await sendBulkEmail([{ email: 'management@thequarrystl.com', firstName: 'Matthew' }], '[TEST] ' + subject, html);
-        results.push({ tasting: t.id, milestone, testMode: true, subject, ...result });
+        results.push({ tasting: t.id, milestone: kind, testMode: true, subject, recipientCountIfReal: recipients.length, ...result });
         continue;
       }
 
       const result = await sendBulkEmail(recipients, subject, html);
-      await markSent(log, sentKey);
-      results.push({ tasting: t.id, milestone, recipientCount: recipients.length, ...result });
+      await markSent(log, key);
+      results.push({ tasting: t.id, milestone: kind, recipientCount: recipients.length, ...result });
     }
 
     return json({ ok: true, today, provisioned, results });
