@@ -232,9 +232,14 @@ exports.handler = async (event) => {
       thankyou: addDays(t.date, 1),
     };
 
+    const force = url.searchParams.get('force'); // 'invite' | 'lastcall' | 'thankyou' -- manual override to send a specific milestone today regardless of its computed date. Idempotency below still applies.
     let dueMilestone = null;
-    for (const [name, date] of Object.entries(milestones)) {
-      if (date === today) { dueMilestone = name; break; }
+    if (force && milestones[force]) {
+      dueMilestone = force;
+    } else {
+      for (const [name, date] of Object.entries(milestones)) {
+        if (date === today) { dueMilestone = name; break; }
+      }
     }
     if (!dueMilestone) {
       return json({ ok: true, message: 'nothing due today', today, nextTasting: t, milestones });
