@@ -467,6 +467,84 @@ function buildFoodTruckOwnerHtml(m, amount, paymentId) {
 }
 
 // ============================================================================
+// Quarry Fest vendor registration ($25 flat fee, Sat Nov 7 2026, 12-4pm).
+// Private/unlisted registration page (quarry-fest-vendors.html) -- staff
+// email the link directly to anyone who reaches out about a vendor spot.
+// Mirrors the food truck pending->booked pattern: quarryfest-vendor-register.js
+// already wrote a "pending_payment" record keyed by vendorId when the vendor
+// submitted the form; this just flips it to "booked" on a completed payment.
+// ============================================================================
+async function handleQuarryFestVendor(meta, amountStr, paymentId) {
+  const m = meta || {};
+  const path = 'quarryfest-vendors/2026-11-07';
+
+  let vendor = null;
+  try {
+    const existing = await readBlob(path) || { vendors: [] };
+    const vendors = existing.vendors || [];
+    const idx = vendors.findIndex(function (v) { return v.vendorId === m.vendorId; });
+    if (idx === -1) {
+      console.error('quarry fest vendor not found for vendorId', m.vendorId);
+    } else {
+      vendors[idx].status = 'booked';
+      vendors[idx].paidAt = new Date().toISOString();
+      vendors[idx].paymentId = paymentId || '';
+      vendors[idx].amountPaid = amountStr;
+      vendor = vendors[idx];
+      await writeBlob(path, { vendors: vendors });
+    }
+  } catch (e) { console.error('quarry fest vendor store:', e.message); }
+
+  const v = vendor || m; // fall back to webhook metadata if the record lookup failed, so emails still go out
+  if (v.customerEmail || v.email) {
+    try {
+      await sendGridEmail(
+        v.customerEmail || v.email,
+        "You're Registered for Quarry Fest! - The Quarry",
+        buildQuarryFestVendorCustomerHtml(v, amountStr),
+        'bookings@thequarrystl.com', 'The Quarry STL', 'quarry-fest-vendor'
+      );
+    } catch (e) { console.error('quarry fest vendor customer email:', e.message); }
+  }
+
+  try {
+    await sendGridEmail(
+      'management@thequarrystl.com',
+      'Quarry Fest Vendor Registered - ' + (v.businessName || m.businessName || '?'),
+      buildQuarryFestVendorOwnerHtml(v, amountStr, paymentId),
+      'bookings@thequarrystl.com', 'The Quarry STL', 'quarry-fest-vendor'
+    );
+  } catch (e) { console.error('quarry fest vendor owner email:', e.message); }
+}
+
+function buildQuarryFestVendorCustomerHtml(v, amount) {
+  return '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">' +
+    '<div style="background:#1A0E08;padding:24px;text-align:center"><h1 style="color:#B8933A;margin:0">The Quarry</h1>' +
+    '<p style="color:#F5F0E8;font-size:0.8rem;letter-spacing:0.15em;margin:4px 0 0">NEW MELLE, MISSOURI</p></div>' +
+    '<div style="padding:32px 24px"><h2 style="color:#2C1A0E">You\'re Registered for Quarry Fest!</h2>' +
+    '<p>Hi ' + (v.contactName || 'there') + ', you\'re confirmed as a vendor for Quarry Fest.</p>' +
+    '<div style="background:#FAF7F2;border-left:4px solid #B8933A;padding:16px 20px;margin:20px 0">' +
+    '<p style="margin:4px 0"><b>Business:</b> ' + (v.businessName || '-') + '</p>' +
+    '<p style="margin:4px 0"><b>Date:</b> Saturday, November 7, 2026</p>' +
+    '<p style="margin:4px 0"><b>Time:</b> 12:00 PM - 4:00 PM</p>' +
+    '<p style="margin:8px 0 4px;color:#B8933A"><b>Total Paid: ' + amount + '</b></p></div>' +
+    '<p>More details (setup time, where to park, load-in) will follow as we get closer to the date. ' +
+    'Questions in the meantime? <a href="tel:6362248257" style="color:#B8933A">636-224-8257</a> or reply to this email.</p></div>' +
+    '<div style="background:#1A0E08;padding:16px;text-align:center">' +
+    '<p style="color:rgba(255,255,255,0.4);font-size:0.75rem;margin:0">3960 Highway Z, New Melle, MO 63385</p></div></div>';
+}
+function buildQuarryFestVendorOwnerHtml(v, amount, paymentId) {
+  return '<h2 style="color:#B8933A">Quarry Fest Vendor Registered</h2>' +
+    '<p><b>Business:</b> ' + (v.businessName || '-') + '</p>' +
+    '<p><b>Contact:</b> ' + (v.contactName || '-') + '</p>' +
+    '<p><b>Email:</b> ' + (v.customerEmail || v.email || '-') + '</p>' +
+    '<p><b>Phone:</b> ' + (v.customerPhone || v.phone || '-') + '</p>' +
+    (v.notes ? '<p><b>Selling/Offering:</b> ' + v.notes + '</p>' : '') +
+    '<p><b>Total:</b> ' + amount + '</p>' +
+    (paymentId ? '<p><b>Square Payment:</b> ' + paymentId + '</p>' : '');
+}
+
+// ============================================================================
 // Event-ticket flow (paid events)
 // ============================================================================
 async function handleEventTicket(meta, amountStr, paymentId) {
@@ -774,6 +852,8 @@ exports.handler = wrap('square-webhook', async function(event) {
           await handlePavilionBooking(meta, amountStr, payment.id);
         } else if (meta.bookingType === 'foodtruck') {
           await handleFoodTruckBooking(meta, amountStr, payment.id);
+        } else if (meta.bookingType === 'quarryfest_vendor') {
+          await handleQuarryFestVendor(meta, amountStr, payment.id);
         } else if (meta.bookingType === 'event' || meta.eventId) {
           await handleEventTicket(meta, amountStr, payment.id);
         } else {
