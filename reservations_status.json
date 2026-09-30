@@ -8120,8 +8120,8 @@
     "6abc6d90234e07fb583b953b": {
       "status": "awaiting_decision",
       "note": "",
-      "updatedAt": "2026-09-30T02:20:22.393Z",
-      "updatedBy": "customer",
+      "updatedAt": "2026-09-30T18:45:23.361Z",
+      "updatedBy": "admin",
       "history": [
         {
           "from": "not_contacted",
@@ -8136,10 +8136,17 @@
           "by": "customer",
           "note": "Customer clicked \"check availability\"",
           "at": "2026-09-30T02:20:22.393Z"
+        },
+        {
+          "from": "visible",
+          "to": "hidden",
+          "by": "admin",
+          "note": "",
+          "at": "2026-09-30T18:45:23.361Z"
         }
       ],
-      "hidden": false
+      "hidden": true
     }
   },
-  "updatedAt": "2026-09-30T14:30:29.857Z"
+  "updatedAt": "2026-09-30T18:45:23.361Z"
 }
