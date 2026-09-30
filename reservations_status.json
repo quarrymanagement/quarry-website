@@ -7670,10 +7670,10 @@
       "hidden": true
     },
     "6ab8001172f35ee287df1889": {
-      "status": "awaiting_customer_confirm",
+      "status": "awaiting_customer_confirm_followedup",
       "note": "",
-      "updatedAt": "2026-09-26T17:25:39.845Z",
-      "updatedBy": "auto-reply",
+      "updatedAt": "2026-09-30T14:30:29.857Z",
+      "updatedBy": "daily-followup",
       "history": [
         {
           "from": "not_contacted",
@@ -7681,15 +7681,22 @@
           "by": "auto-reply",
           "note": "Instant auto-reply sent",
           "at": "2026-09-26T17:25:39.845Z"
+        },
+        {
+          "from": "awaiting_customer_confirm",
+          "to": "awaiting_customer_confirm_followedup",
+          "by": "daily-followup",
+          "note": "3-day reminder sent",
+          "at": "2026-09-30T14:30:29.857Z"
         }
       ],
       "hidden": false
     },
     "6ab820f0b37b0a11ec8d6379": {
-      "status": "awaiting_customer_confirm",
+      "status": "awaiting_customer_confirm_followedup",
       "note": "",
-      "updatedAt": "2026-09-26T19:45:54.839Z",
-      "updatedBy": "auto-reply",
+      "updatedAt": "2026-09-30T14:30:29.857Z",
+      "updatedBy": "daily-followup",
       "history": [
         {
           "from": "not_contacted",
@@ -7697,6 +7704,13 @@
           "by": "auto-reply",
           "note": "Instant auto-reply sent",
           "at": "2026-09-26T19:45:54.839Z"
+        },
+        {
+          "from": "awaiting_customer_confirm",
+          "to": "awaiting_customer_confirm_followedup",
+          "by": "daily-followup",
+          "note": "3-day reminder sent",
+          "at": "2026-09-30T14:30:29.857Z"
         }
       ],
       "hidden": false
@@ -8127,5 +8141,5 @@
       "hidden": false
     }
   },
-  "updatedAt": "2026-09-30T02:20:22.393Z"
+  "updatedAt": "2026-09-30T14:30:29.857Z"
 }
