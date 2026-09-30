@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<title>Quarry Fest Vendor Registration | The Quarry</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --cream: #F5F0E8;
+  --brown-dark: #2C1A0E;
+  --gold: #B8933A;
+  --gold-light: #D4AF6A;
+  --charcoal: #1A1A1A;
+  --border-light: rgba(188,149,106,0.25);
+  --border-mid: rgba(188,149,106,0.5);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Montserrat',sans-serif; background:var(--cream); color:var(--brown-dark); }
+header { background:var(--charcoal); padding:1.5rem; text-align:center; }
+header h1 { font-family:'Playfair Display',serif; color:var(--gold-light); font-size:1.5rem; }
+header p { color:rgba(245,240,232,0.6); font-size:0.7rem; letter-spacing:0.15em; text-transform:uppercase; margin-top:0.25rem; }
+.wrap { max-width:560px; margin:0 auto; padding:2rem 1.25rem 4rem; }
+.intro { text-align:center; margin-bottom:2rem; }
+.intro h2 { font-family:'Playfair Display',serif; font-size:1.6rem; margin-bottom:0.5rem; }
+.intro p { color:#5C3D2E; line-height:1.6; }
+.price-badge { display:inline-block; background:var(--gold); color:var(--charcoal); font-weight:700; padding:0.4rem 1rem; border-radius:999px; font-size:0.85rem; margin-top:0.75rem; }
+.card { background:#fff; border:1px solid var(--border-light); border-radius:10px; padding:1.5rem; margin-bottom:1.25rem; }
+.summary { background:#FAF7F2; border-left:4px solid var(--gold); padding:1rem 1.25rem; border-radius:4px; margin-bottom:1.25rem; font-size:0.9rem; }
+.summary div { margin:0.2rem 0; }
+label { display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.4rem; }
+input[type=text], input[type=email], input[type=tel], textarea {
+  width:100%; padding:0.65rem 0.75rem; border:1px solid var(--border-mid); border-radius:6px; font-size:0.95rem; font-family:inherit; margin-bottom:1rem;
+}
+textarea { resize:vertical; min-height:70px; }
+.msg { padding:0.85rem 1rem; border-radius:6px; font-size:0.85rem; margin-bottom:1rem; display:none; }
+.msg.show { display:block; }
+.msg.warn { background:#3a2a12; color:#f0e6d2; border-left:3px solid var(--gold); }
+#submitBtn { width:100%; background:var(--gold); color:var(--charcoal); border:none; padding:0.9rem; border-radius:6px; font-weight:700; font-size:1rem; cursor:pointer; font-family:inherit; }
+#submitBtn:disabled { opacity:0.5; cursor:not-allowed; }
+#submitBtn:hover:not(:disabled) { background:var(--gold-light); }
+footer { text-align:center; padding:2rem 1rem; color:#8B5E3C; font-size:0.8rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>The Quarry</h1>
+  <p>New Melle, Missouri</p>
+</header>
+
+<div class="wrap">
+  <div class="intro">
+    <h2>Quarry Fest Vendor Registration</h2>
+    <p>Saturday, November 7th &middot; 12 PM &ndash; 4 PM<br>Reserve your vendor spot at The Quarry.</p>
+    <div class="price-badge">$25 Vendor Fee</div>
+  </div>
+
+  <div class="msg warn" id="topMsg"></div>
+
+  <div class="card" id="formCard">
+    <label for="businessName">Business / Vendor Name</label>
+    <input type="text" id="businessName" required>
+    <label for="contactName">Contact Name</label>
+    <input type="text" id="contactName" required>
+    <label for="email">Email</label>
+    <input type="email" id="email" required>
+    <label for="phone">Phone</label>
+    <input type="tel" id="phone">
+    <label for="notes">What will you be selling / offering? (optional)</label>
+    <textarea id="notes"></textarea>
+    <div class="summary">
+      <div><b>Event:</b> Quarry Fest</div>
+      <div><b>Date:</b> Saturday, November 7, 2026</div>
+      <div><b>Time:</b> 12:00 PM &ndash; 4:00 PM</div>
+      <div style="margin-top:0.5rem;color:#B8933A;font-weight:700;">Total: $25.00</div>
+    </div>
+    <button id="submitBtn" onclick="submitVendor()">Register &amp; Pay $25 &rarr;</button>
+  </div>
+</div>
+
+<footer>
+  The Quarry &middot; 3960 Highway Z, New Melle, MO 63385 &middot; 636-224-8257
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var p = new URLSearchParams(window.location.search);
+  if (p.get('success')) {
+    document.querySelector('.intro').innerHTML = '<h2>You\'re Registered!</h2><p>Thanks for signing up for Quarry Fest &mdash; a confirmation email is on its way. We can\'t wait to have you!</p>';
+    document.getElementById('formCard').style.display = 'none';
+    history.replaceState({}, '', '/quarry-fest-vendors.html');
+  } else if (p.get('canceled')) {
+    history.replaceState({}, '', '/quarry-fest-vendors.html');
+  }
+});
+
+function submitVendor() {
+  var businessName = document.getElementById('businessName').value.trim();
+  var contactName = document.getElementById('contactName').value.trim();
+  var email = document.getElementById('email').value.trim();
+  var phone = document.getElementById('phone').value.trim();
+  var notes = document.getElementById('notes').value.trim();
+  var msgEl = document.getElementById('topMsg');
+  msgEl.classList.remove('show');
+
+  if (!businessName) { alert('Please enter your business / vendor name.'); return; }
+  if (!contactName) { alert('Please enter a contact name.'); return; }
+  if (!email || !email.includes('@')) { alert('Please enter a valid email address.'); return; }
+
+  var btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = 'Redirecting to payment…';
+
+  fetch('/.netlify/functions/quarryfest-vendor-register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ businessName: businessName, contactName: contactName, email: email, phone: phone, notes: notes })
+  })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      if (data.error) {
+        msgEl.textContent = data.error;
+        msgEl.classList.add('show');
+        btn.disabled = false; btn.textContent = 'Register & Pay $25 →';
+        return;
+      }
+      window.location.href = data.url;
+    })
+    .catch(function () {
+      msgEl.textContent = 'Something went wrong. Please call (636) 224-8257.';
+      msgEl.classList.add('show');
+      btn.disabled = false; btn.textContent = 'Register & Pay $25 →';
+    });
+}
+</script>
+</body>
+</html>
