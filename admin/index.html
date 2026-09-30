@@ -2728,6 +2728,7 @@
                     <div class="sb-nav-item" data-tab="resInqPending"><span class="sb-ic">🗓️</span><span class="sb-lbl">Pending Approvals</span><span id="resInqPendingBadge" class="sb-badge" style="display:none;">0</span></div>
                     <div class="sb-nav-item" data-tab="confirmed"><span class="sb-ic">✓</span><span class="sb-lbl">Confirmed Bookings</span></div>
                     <div class="sb-nav-item" data-tab="pavilions"><span class="sb-ic">🏕️</span><span class="sb-lbl">Pavilion Bookings</span></div>
+                    <div class="sb-nav-item" data-tab="quarryfest"><span class="sb-ic">🎪</span><span class="sb-lbl">Quarry Fest Vendors</span></div>
                 </div>
 
                 <div class="sb-nav-section">Member App</div>
@@ -4934,6 +4935,46 @@
                 </div>
             </div>
 
+            <!-- ========================================================
+                 QUARRY FEST VENDORS TAB — private, unlisted vendor
+                 registration for the Nov 7 2026 Quarry Fest. $25 flat fee.
+                 Registered via quarry-fest-vendors.html (not linked
+                 anywhere public — staff email the link directly to anyone
+                 who reaches out about a vendor spot). Single fixed event
+                 date, so no date-range picker like pavilions/food trucks.
+                 ======================================================== -->
+            <div id="quarryfestTab" class="tab-content">
+                <div class="section">
+                    <div class="section-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+                        <div>
+                            <div class="section-title">Quarry Fest Vendors</div>
+                            <div style="font-size:0.85rem;color:var(--text-secondary);">Saturday, Nov 7, 2026 &middot; 12–4 PM &middot; $25/vendor &middot; registered via the private link at <a href="/quarry-fest-vendors.html" target="_blank" style="color:var(--gold);">/quarry-fest-vendors.html</a> — not linked anywhere public.</div>
+                        </div>
+                        <button class="btn-secondary" onclick="loadQuarryFestVendors()">Refresh</button>
+                    </div>
+                    <div id="qfStats" style="font-size:0.85rem;color:var(--text-secondary);margin:8px 0 16px;"></div>
+                    <div style="overflow-x:auto;border:1px solid var(--border-subtle);border-radius:8px;background:var(--bg-elevated);">
+                        <table style="width:100%;border-collapse:collapse;font-size:0.85rem;">
+                            <thead>
+                                <tr style="background:var(--bg-secondary);">
+                                    <th style="padding:10px;text-align:left;">Business</th>
+                                    <th style="padding:10px;text-align:left;">Contact</th>
+                                    <th style="padding:10px;text-align:left;">Email</th>
+                                    <th style="padding:10px;text-align:left;">Phone</th>
+                                    <th style="padding:10px;text-align:left;">Selling/Offering</th>
+                                    <th style="padding:10px;text-align:left;">Status</th>
+                                    <th style="padding:10px;text-align:left;">Paid</th>
+                                    <th style="padding:10px;text-align:left;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="qfTableBody">
+                                <tr><td colspan="8" style="text-align:center;color:var(--text-secondary);padding:2rem;">Loading&hellip;</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <div id="foodTruckLeadsTab" class="tab-content">
                 <div class="section">
                     <div class="section-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
@@ -6142,6 +6183,9 @@
             // Load pavilion bookings when switching to that tab
             if (tabName === 'pavilions') {
                 loadPavilionBookings();
+            }
+            if (tabName === 'quarryfest') {
+                loadQuarryFestVendors();
             }
             // Food truck tabs
             if (tabName === 'foodTruckLeads') {
@@ -15227,7 +15271,7 @@ function hashCode(str) {
                         <td style="padding:8px 10px;">${escapeHtml(b.customerPhone || '—')}</td>
                         <td style="padding:8px 10px;">${escapeHtml(b.amountPaid || '—')}</td>
                         <td style="padding:8px 10px;">${b.source === 'admin' ? '<span style="color:#d97706;">Admin block</span>' : 'Square'}</td>
-                        <td style="padding:8px 10px;"><button class="btn-secondary" style="padding:4px 10px;font-size:0.78rem;" onclick="removePavilionBooking('${escapeHtml(b.date)}','${escapeHtml(b.paymentId)}')">Remove</button></td>
+                        <td style="padding:8px 10px;"><button class="btn-secondary" style="padding:4px 10px;font-size:0.78rem;" onclick="removePavilionBooking('${escapeHtml(b.date)}','${escapeHtml(b.paymentId)}', this)">Remove</button></td>
                     </tr>
                 `).join('');
             } catch (e) {
@@ -15282,21 +15326,131 @@ function hashCode(str) {
             }
         };
 
-        window.removePavilionBooking = async function(date, paymentId) {
-            if (!confirm('Remove this pavilion booking? This does not issue a refund -- it only removes the record and frees up the slot.')) return;
+        // Native confirm()/alert() freeze the whole page (and block automated
+        // tools) until dismissed, so every destructive action in this admin
+        // panel uses this in-page double-click-to-confirm pattern instead:
+        // first click relabels the button and arms a 4s window; a second
+        // click inside that window actually runs the action.
+        window.armConfirm = function(btn, label, onConfirm) {
+            if (btn.dataset.armed === '1') {
+                delete btn.dataset.armed;
+                clearTimeout(btn._armTimer);
+                onConfirm();
+                return;
+            }
+            btn.dataset.armed = '1';
+            const original = btn.textContent;
+            btn.textContent = label || 'Click again to confirm';
+            btn._armTimer = setTimeout(() => { delete btn.dataset.armed; btn.textContent = original; }, 4000);
+        };
+
+        window.removePavilionBooking = function(date, paymentId, btn) {
+            armConfirm(btn, 'Confirm remove?', async function() {
+                try {
+                    const token = localStorage.getItem('quarryAdminToken') || '';
+                    const r = await fetch('/.netlify/functions/admin-remove-pavilion-booking', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token, date, paymentId })
+                    });
+                    const body = await r.json();
+                    if (!body.ok) throw new Error(body.error || 'Failed to remove');
+                    await loadPavilionBookings();
+                } catch (e) {
+                    alert('Failed to remove: ' + e.message);
+                }
+            });
+        };
+    })();
+
+        // ================================================================
+        // QUARRY FEST VENDORS
+        // Single fixed event (Sat Nov 7 2026), flat $25/vendor fee. Private,
+        // unlisted registration page (quarry-fest-vendors.html) -- mirrors
+        // the food truck pending->booked pattern, but self-serve (the
+        // vendor registers themselves instead of staff inviting them).
+        // ================================================================
+    (function(){
+        function escapeHtml(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+        }
+
+        window.loadQuarryFestVendors = async function() {
+            const tbody = document.getElementById('qfTableBody');
+            const stats = document.getElementById('qfStats');
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-secondary);padding:2rem;">Loading&hellip;</td></tr>';
+
             try {
                 const token = localStorage.getItem('quarryAdminToken') || '';
-                const r = await fetch('/.netlify/functions/admin-remove-pavilion-booking', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token, date, paymentId })
-                });
+                const r = await fetch(`/.netlify/functions/list-quarryfest-vendors?token=${encodeURIComponent(token)}`);
                 const body = await r.json();
-                if (!body.ok) throw new Error(body.error || 'Failed to remove');
-                await loadPavilionBookings();
+                if (!body.ok) throw new Error(body.error || 'Failed to load');
+                const vendors = body.vendors || [];
+
+                if (!vendors.length) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-secondary);padding:2rem;">No vendor registrations yet.</td></tr>';
+                    stats.textContent = '0 vendors';
+                    return;
+                }
+
+                const booked = vendors.filter(v => v.status === 'booked');
+                const pending = vendors.filter(v => v.status !== 'booked');
+                stats.innerHTML = `<b>${vendors.length}</b> total &nbsp;·&nbsp; <b style="color:#2e7d32;">${booked.length}</b> booked &nbsp;·&nbsp; <b style="color:#d97706;">${pending.length}</b> pending payment &nbsp;·&nbsp; <b>$${(booked.length * 25).toFixed(2)}</b> collected`;
+
+                tbody.innerHTML = vendors.map(v => `
+                    <tr style="border-top:1px solid var(--border-subtle);">
+                        <td style="padding:8px 10px;">${escapeHtml(v.businessName)}</td>
+                        <td style="padding:8px 10px;">${escapeHtml(v.contactName)}</td>
+                        <td style="padding:8px 10px;">${v.email ? `<a href="mailto:${encodeURIComponent(v.email)}" style="color:var(--gold);">${escapeHtml(v.email)}</a>` : '—'}</td>
+                        <td style="padding:8px 10px;">${escapeHtml(v.phone || '—')}</td>
+                        <td style="padding:8px 10px;max-width:220px;">${escapeHtml(v.notes || '—')}</td>
+                        <td style="padding:8px 10px;">${v.status === 'booked' ? '<span style="color:#2e7d32;">Booked</span>' : '<span style="color:#d97706;">Pending payment</span>'}</td>
+                        <td style="padding:8px 10px;">${escapeHtml(v.amountPaid || '—')}</td>
+                        <td style="padding:8px 10px;white-space:nowrap;">
+                            ${v.status !== 'booked' ? `<button class="btn-secondary" style="padding:4px 10px;font-size:0.78rem;margin-right:4px;" onclick="markQuarryFestPaid('${escapeHtml(v.vendorId)}', this)">Mark Paid (comp)</button>` : ''}
+                            <button class="btn-secondary" style="padding:4px 10px;font-size:0.78rem;" onclick="removeQuarryFestVendor('${escapeHtml(v.vendorId)}', this)">Remove</button>
+                        </td>
+                    </tr>
+                `).join('');
             } catch (e) {
-                alert('Failed to remove: ' + e.message);
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#c33;padding:2rem;">Failed to load: ${escapeHtml(e.message)}<br><button class="btn-secondary" onclick="loadQuarryFestVendors()" style="margin-top:0.5rem;">Retry</button></td></tr>`;
             }
+        };
+
+        window.markQuarryFestPaid = function(vendorId, btn) {
+            armConfirm(btn, 'Confirm comp?', async function() {
+                try {
+                    const token = localStorage.getItem('quarryAdminToken') || '';
+                    const r = await fetch('/.netlify/functions/quarryfest-vendor-mark-paid', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token, vendorId })
+                    });
+                    const body = await r.json();
+                    if (!body.ok) throw new Error(body.error || 'Failed to mark paid');
+                    await loadQuarryFestVendors();
+                } catch (e) {
+                    alert('Failed: ' + e.message);
+                }
+            });
+        };
+
+        window.removeQuarryFestVendor = function(vendorId, btn) {
+            armConfirm(btn, 'Confirm remove?', async function() {
+                try {
+                    const token = localStorage.getItem('quarryAdminToken') || '';
+                    const r = await fetch('/.netlify/functions/quarryfest-vendor-remove', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token, vendorId })
+                    });
+                    const body = await r.json();
+                    if (!body.ok) throw new Error(body.error || 'Failed to remove');
+                    await loadQuarryFestVendors();
+                } catch (e) {
+                    alert('Failed to remove: ' + e.message);
+                }
+            });
         };
     })();
 
