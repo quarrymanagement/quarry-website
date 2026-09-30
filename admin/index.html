@@ -4854,8 +4854,62 @@
                             <span style="color:var(--text-secondary);">to</span>
                             <input type="date" id="pavEndDate" style="padding:8px 10px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-elevated);color:var(--text-primary);font-size:0.9rem;">
                             <button class="btn-secondary" onclick="loadPavilionBookings()">Refresh</button>
+                            <button class="btn-primary" onclick="togglePavilionAddForm()">+ Add Booking</button>
                         </div>
                     </div>
+
+                    <!-- Manual override: for a pavilion paid in person (cash/check) rather
+                         than through the Square checkout link, so it still shows up here
+                         and still blocks that slot from being double-booked online. -->
+                    <div id="pavAddForm" style="display:none;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:8px;padding:16px;margin-bottom:16px;">
+                        <div style="font-weight:600;margin-bottom:12px;">Manually Add a Booking</div>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:12px;">
+                            <div>
+                                <label style="display:block;font-size:0.78rem;color:var(--text-secondary);margin-bottom:4px;">Pavilion</label>
+                                <select id="pavAddPavilion" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-secondary);color:var(--text-primary);">
+                                    <option value="1">Pavilion 1</option>
+                                    <option value="2">Pavilion 2</option>
+                                    <option value="3">Pavilion 3</option>
+                                    <option value="4">Pavilion 4</option>
+                                    <option value="5">Pavilion 5</option>
+                                    <option value="6">Pavilion 6</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:0.78rem;color:var(--text-secondary);margin-bottom:4px;">Date</label>
+                                <input type="date" id="pavAddDate" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-secondary);color:var(--text-primary);">
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:0.78rem;color:var(--text-secondary);margin-bottom:4px;">Time Slot</label>
+                                <select id="pavAddTime" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-secondary);color:var(--text-primary);">
+                                    <option value="11:00 AM">11:00 AM &ndash; 4:00 PM</option>
+                                    <option value="5:00 PM">5:00 PM &ndash; Close</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:0.78rem;color:var(--text-secondary);margin-bottom:4px;">Customer Name</label>
+                                <input type="text" id="pavAddName" placeholder="Jane Smith" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-secondary);color:var(--text-primary);">
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:0.78rem;color:var(--text-secondary);margin-bottom:4px;">Email (optional)</label>
+                                <input type="email" id="pavAddEmail" placeholder="jane@example.com" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-secondary);color:var(--text-primary);">
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:0.78rem;color:var(--text-secondary);margin-bottom:4px;">Phone (optional)</label>
+                                <input type="tel" id="pavAddPhone" placeholder="(555) 555-5555" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-secondary);color:var(--text-primary);">
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:0.78rem;color:var(--text-secondary);margin-bottom:4px;">Payment Note</label>
+                                <input type="text" id="pavAddAmount" placeholder="e.g. $100 cash, Check #1234" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-secondary);color:var(--text-primary);">
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:8px;align-items:center;">
+                            <button class="btn-primary" onclick="submitPavilionAdd()">Add Booking</button>
+                            <button class="btn-secondary" onclick="togglePavilionAddForm()">Cancel</button>
+                            <span id="pavAddStatus" style="font-size:0.85rem;color:var(--text-secondary);"></span>
+                        </div>
+                    </div>
+
                     <div id="pavStats" style="font-size:0.85rem;color:var(--text-secondary);margin:8px 0 16px;"></div>
                     <div style="overflow-x:auto;border:1px solid var(--border-subtle);border-radius:8px;background:var(--bg-elevated);">
                         <table style="width:100%;border-collapse:collapse;font-size:0.85rem;">
@@ -4869,10 +4923,11 @@
                                     <th style="padding:10px;text-align:left;">Phone</th>
                                     <th style="padding:10px;text-align:left;">Paid</th>
                                     <th style="padding:10px;text-align:left;">Source</th>
+                                    <th style="padding:10px;text-align:left;"></th>
                                 </tr>
                             </thead>
                             <tbody id="pavTableBody">
-                                <tr><td colspan="8" style="text-align:center;color:var(--text-secondary);padding:2rem;">Loading&hellip;</td></tr>
+                                <tr><td colspan="9" style="text-align:center;color:var(--text-secondary);padding:2rem;">Loading&hellip;</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -15154,7 +15209,7 @@ function hashCode(str) {
                 const bookings = body.bookings || [];
 
                 if (!bookings.length) {
-                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-secondary);padding:2rem;">No pavilion bookings in this range.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-secondary);padding:2rem;">No pavilion bookings in this range.</td></tr>';
                     stats.textContent = '0 bookings';
                     return;
                 }
@@ -15172,10 +15227,75 @@ function hashCode(str) {
                         <td style="padding:8px 10px;">${escapeHtml(b.customerPhone || '—')}</td>
                         <td style="padding:8px 10px;">${escapeHtml(b.amountPaid || '—')}</td>
                         <td style="padding:8px 10px;">${b.source === 'admin' ? '<span style="color:#d97706;">Admin block</span>' : 'Square'}</td>
+                        <td style="padding:8px 10px;"><button class="btn-secondary" style="padding:4px 10px;font-size:0.78rem;" onclick="removePavilionBooking('${escapeHtml(b.date)}','${escapeHtml(b.paymentId)}')">Remove</button></td>
                     </tr>
                 `).join('');
             } catch (e) {
-                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#c33;padding:2rem;">Failed to load: ${escapeHtml(e.message)}<br><button class="btn-secondary" onclick="loadPavilionBookings()" style="margin-top:0.5rem;">Retry</button></td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:#c33;padding:2rem;">Failed to load: ${escapeHtml(e.message)}<br><button class="btn-secondary" onclick="loadPavilionBookings()" style="margin-top:0.5rem;">Retry</button></td></tr>`;
+            }
+        };
+
+        window.togglePavilionAddForm = function() {
+            const form = document.getElementById('pavAddForm');
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+            document.getElementById('pavAddStatus').textContent = '';
+        };
+
+        window.submitPavilionAdd = async function() {
+            const statusEl = document.getElementById('pavAddStatus');
+            const pavilion = document.getElementById('pavAddPavilion').value;
+            const date = document.getElementById('pavAddDate').value;
+            const time = document.getElementById('pavAddTime').value;
+            const customerName = document.getElementById('pavAddName').value.trim();
+            const customerEmail = document.getElementById('pavAddEmail').value.trim();
+            const customerPhone = document.getElementById('pavAddPhone').value.trim();
+            const amountPaid = document.getElementById('pavAddAmount').value.trim() || 'N/A (admin block)';
+
+            if (!date || !customerName) {
+                statusEl.textContent = 'Date and customer name are required.';
+                statusEl.style.color = '#c33';
+                return;
+            }
+
+            statusEl.textContent = 'Saving…';
+            statusEl.style.color = 'var(--text-secondary)';
+            try {
+                const token = localStorage.getItem('quarryAdminToken') || '';
+                const r = await fetch('/.netlify/functions/admin-backfill-pavilion-booking', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token, pavilion, date, time, customerName, customerEmail, customerPhone, amountPaid, source: 'admin' })
+                });
+                const body = await r.json();
+                if (!body.ok) throw new Error(body.error || 'Failed to save');
+                statusEl.textContent = 'Added!';
+                statusEl.style.color = '#2e7d32';
+                document.getElementById('pavAddName').value = '';
+                document.getElementById('pavAddEmail').value = '';
+                document.getElementById('pavAddPhone').value = '';
+                document.getElementById('pavAddAmount').value = '';
+                await loadPavilionBookings();
+                setTimeout(() => { togglePavilionAddForm(); }, 600);
+            } catch (e) {
+                statusEl.textContent = 'Failed: ' + e.message;
+                statusEl.style.color = '#c33';
+            }
+        };
+
+        window.removePavilionBooking = async function(date, paymentId) {
+            if (!confirm('Remove this pavilion booking? This does not issue a refund -- it only removes the record and frees up the slot.')) return;
+            try {
+                const token = localStorage.getItem('quarryAdminToken') || '';
+                const r = await fetch('/.netlify/functions/admin-remove-pavilion-booking', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token, date, paymentId })
+                });
+                const body = await r.json();
+                if (!body.ok) throw new Error(body.error || 'Failed to remove');
+                await loadPavilionBookings();
+            } catch (e) {
+                alert('Failed to remove: ' + e.message);
             }
         };
     })();
