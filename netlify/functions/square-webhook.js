@@ -482,9 +482,24 @@ async function handleQuarryFestVendor(meta, amountStr, paymentId) {
   try {
     const existing = await readBlob(path) || { vendors: [] };
     const vendors = existing.vendors || [];
-    const idx = vendors.findIndex(function (v) { return v.vendorId === m.vendorId; });
+    let idx = m.vendorId ? vendors.findIndex(function (v) { return v.vendorId === m.vendorId; }) : -1;
+    // Fallbacks for paid orders whose metadata Square has discarded: vendorId prefix
+    // from the order reference_id, then the newest pending signup with the buyer's email.
+    if (idx === -1 && m.vendorIdPrefix) {
+      idx = vendors.findIndex(function (v) { return String(v.vendorId || '').indexOf(m.vendorIdPrefix) === 0; });
+    }
+    if (idx === -1 && m.customerEmail) {
+      const em = String(m.customerEmail).toLowerCase();
+      for (let i = vendors.length - 1; i >= 0; i--) {
+        if (String(vendors[i].email || '').toLowerCase() === em && vendors[i].status !== 'booked') { idx = i; break; }
+      }
+    }
+    if (idx !== -1 && vendors[idx].status === 'booked' && vendors[idx].paymentId === paymentId) {
+      console.log('quarry fest vendor already booked for payment', paymentId);
+      return; // redelivery: don't re-send the confirmation emails
+    }
     if (idx === -1) {
-      console.error('quarry fest vendor not found for vendorId', m.vendorId);
+      console.error('quarry fest vendor not found for vendorId', m.vendorId || m.vendorIdPrefix, m.customerEmail);
     } else {
       vendors[idx].status = 'booked';
       vendors[idx].paidAt = new Date().toISOString();
@@ -843,6 +858,17 @@ exports.handler = wrap('square-webhook', async function(event) {
         const orderRes = await squareApi('GET', '/v2/orders/' + payment.order_id);
         const order = orderRes.order || {};
         const meta = order.metadata || {};
+        // Square drops order.metadata once an order is paid, so a paid Quarry Fest
+        // vendor order arrives with no bookingType. reference_id ("quarryfest-<first 8
+        // of vendorId>") and the payment note survive payment, so rebuild it from those.
+        const refId = String(order.reference_id || '');
+        const payNote = String(payment.note || '');
+        if (!meta.bookingType && (refId.indexOf('quarryfest-') === 0 || payNote.indexOf('Quarry Fest Vendor - ') === 0)) {
+          meta.bookingType = 'quarryfest_vendor';
+          if (!meta.vendorId && refId.indexOf('quarryfest-') === 0) meta.vendorIdPrefix = refId.slice('quarryfest-'.length);
+          if (!meta.customerEmail && payment.buyer_email_address) meta.customerEmail = payment.buyer_email_address;
+          if (!meta.businessName && payNote.indexOf('Quarry Fest Vendor - ') === 0) meta.businessName = payNote.slice('Quarry Fest Vendor - '.length).trim();
+        }
         const amountCents = (payment.total_money && payment.total_money.amount) || (payment.amount_money && payment.amount_money.amount) || 0;
         const amountStr = '$' + (amountCents / 100).toFixed(2);
 
