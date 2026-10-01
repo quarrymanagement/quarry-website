@@ -1144,8 +1144,8 @@
       "tableSize": 4,
       "totalCapacity": 34,
       "capacity": 34,
-      "registeredCount": 21,
-      "registered": 21,
+      "registeredCount": 19,
+      "registered": 19,
       "status": "available",
       "slug": "freedombingo",
       "tiers": [],
@@ -1213,14 +1213,6 @@
           "qty": 1,
           "paymentId": "pEyFYYrYoIbp9FVuCcbec4jKGLWZY",
           "registeredAt": "2026-06-28T19:55:05.719Z",
-          "source": "square"
-        },
-        {
-          "name": "jgamache5@gmail.com",
-          "email": "jgamache5@gmail.com",
-          "qty": 2,
-          "paymentId": "9Ca4Wg5Cu9R9BUPlDyw4Mm9ah4LZY",
-          "registeredAt": "2026-07-01T17:18:39.568Z",
           "source": "square"
         },
         {
@@ -1295,6 +1287,18 @@
           "registeredAt": "2026-07-03T22:06:57.370Z",
           "source": "square"
         }
+      ],
+      "refundedRegistrations": [
+        {
+          "name": "jgamache5@gmail.com",
+          "email": "jgamache5@gmail.com",
+          "qty": 2,
+          "paymentId": "9Ca4Wg5Cu9R9BUPlDyw4Mm9ah4LZY",
+          "registeredAt": "2026-07-01T17:18:39.568Z",
+          "source": "square",
+          "refundedAt": "2026-10-01T15:58:43.425Z",
+          "refundedCents": 2000
+        }
       ]
     },
     {
@@ -1368,34 +1372,6 @@
       ],
       "registrations": [
         {
-          "name": "bkgripka@yahoo.com",
-          "email": "bkgripka@yahoo.com",
-          "qty": 4,
-          "paymentId": "BoeB22LX3VylyNCrRf09O3OluhKZY",
-          "registeredAt": "2026-08-04T00:01:31.534Z",
-          "source": "square"
-        },
-        {
-          "name": "kimberly_linneman@yahoo.com",
-          "email": "kimberly_linneman@yahoo.com",
-          "qty": 4,
-          "paymentId": "L3j7dt3SJKbyn0ZJ7tIJLyNwJ7AZY",
-          "registeredAt": "2026-08-04T00:25:16.540Z",
-          "source": "square"
-        },
-        {
-          "name": "lroberts876@yahoo.com",
-          "email": "lroberts876@yahoo.com",
-          "qty": 4,
-          "paymentId": "nTQuHebCKTNEh7NwJyhp5fs6Q4fZY",
-          "registeredAt": "2026-08-04T22:56:21.886Z",
-          "source": "square",
-          "seatingOptionId": "4-top-table",
-          "seatingOptionName": "4-Top Table",
-          "arrivalSlot": "w0830",
-          "arrivalLabel": "8:30 AM"
-        },
-        {
           "name": "c_kubiak@yahoo.com",
           "email": "c_kubiak@yahoo.com",
           "qty": 4,
@@ -1406,6 +1382,20 @@
           "seatingOptionName": "4-Top Table",
           "arrivalSlot": "w0845",
           "arrivalLabel": "8:45 AM"
+        }
+      ],
+      "registeredCount": 4,
+      "registered": 4,
+      "refundedRegistrations": [
+        {
+          "name": "bkgripka@yahoo.com",
+          "email": "bkgripka@yahoo.com",
+          "qty": 4,
+          "paymentId": "BoeB22LX3VylyNCrRf09O3OluhKZY",
+          "registeredAt": "2026-08-04T00:01:31.534Z",
+          "source": "square",
+          "refundedAt": "2026-10-01T15:58:43.425Z",
+          "refundedCents": 10000
         },
         {
           "name": "lisawildschuetz5@gmail.com",
@@ -1417,7 +1407,33 @@
           "seatingOptionId": "4-top-table",
           "seatingOptionName": "4-Top Table",
           "arrivalSlot": "w0830",
-          "arrivalLabel": "8:30 AM"
+          "arrivalLabel": "8:30 AM",
+          "refundedAt": "2026-10-01T15:58:43.425Z",
+          "refundedCents": 10000
+        },
+        {
+          "name": "lroberts876@yahoo.com",
+          "email": "lroberts876@yahoo.com",
+          "qty": 4,
+          "paymentId": "nTQuHebCKTNEh7NwJyhp5fs6Q4fZY",
+          "registeredAt": "2026-08-04T22:56:21.886Z",
+          "source": "square",
+          "seatingOptionId": "4-top-table",
+          "seatingOptionName": "4-Top Table",
+          "arrivalSlot": "w0830",
+          "arrivalLabel": "8:30 AM",
+          "refundedAt": "2026-10-01T15:58:43.425Z",
+          "refundedCents": 10000
+        },
+        {
+          "name": "kimberly_linneman@yahoo.com",
+          "email": "kimberly_linneman@yahoo.com",
+          "qty": 4,
+          "paymentId": "L3j7dt3SJKbyn0ZJ7tIJLyNwJ7AZY",
+          "registeredAt": "2026-08-04T00:25:16.540Z",
+          "source": "square",
+          "refundedAt": "2026-10-01T15:58:43.425Z",
+          "refundedCents": 10000
         },
         {
           "name": "nicolemcmillen9@gmail.com",
@@ -1429,11 +1445,11 @@
           "seatingOptionId": "4-top-table",
           "seatingOptionName": "4-Top Table",
           "arrivalSlot": "w0845",
-          "arrivalLabel": "8:45 AM"
+          "arrivalLabel": "8:45 AM",
+          "refundedAt": "2026-10-01T15:58:43.425Z",
+          "refundedCents": 10000
         }
-      ],
-      "registeredCount": 24,
-      "registered": 24
+      ]
     },
     {
       "id": "event_1787146356282",
@@ -1606,8 +1622,8 @@
         "1st annual"
       ],
       "imageAlt": "Witches at The Quarry — 1st Annual Event flyer, October 16, 2026",
-      "registered": 38,
-      "registeredCount": 38,
+      "registered": 34,
+      "registeredCount": 34,
       "image": "/assets/img/events/witches-at-the-quarry.png",
       "addOnLabel": "Witch Kit",
       "addOnNote": "Pre-order by October 6, 2026.",
@@ -1638,16 +1654,6 @@
         "2XL"
       ],
       "registrations": [
-        {
-          "name": "monica.washburn@sbcglobal.net",
-          "email": "monica.washburn@sbcglobal.net",
-          "qty": 4,
-          "paymentId": "3juH94oIFUGnRLFp6imXRtSnWWUZY",
-          "registeredAt": "2026-09-04T00:13:50.306Z",
-          "source": "square",
-          "seatingOptionId": "table-4",
-          "seatingOptionName": "Table for 4"
-        },
         {
           "name": "seghers4@gmail.com",
           "email": "seghers4@gmail.com",
@@ -1775,6 +1781,20 @@
           "source": "square",
           "seatingOptionId": "table-4",
           "seatingOptionName": "Table for 4"
+        }
+      ],
+      "refundedRegistrations": [
+        {
+          "name": "monica.washburn@sbcglobal.net",
+          "email": "monica.washburn@sbcglobal.net",
+          "qty": 4,
+          "paymentId": "3juH94oIFUGnRLFp6imXRtSnWWUZY",
+          "registeredAt": "2026-09-04T00:13:50.306Z",
+          "source": "square",
+          "seatingOptionId": "table-4",
+          "seatingOptionName": "Table for 4",
+          "refundedAt": "2026-10-01T15:58:43.425Z",
+          "refundedCents": 16000
         }
       ]
     },
@@ -2349,7 +2369,11 @@
       "totalCapacity": 164,
       "image": "/assets/img/events/francis-howell-2029-bingo-fundraiser.png",
       "imageAlt": "Francis Howell 2029 Seniors Bingo Fundraiser at The Quarry, Saturday October 3 2026, doors 5:30 PM, bingo 7 PM, $30 per ticket",
-      "registrations": [
+      "registrations": [],
+      "registeredCount": 0,
+      "registered": 0,
+      "cancelled": true,
+      "refundedRegistrations": [
         {
           "name": "khoefel@msn.com",
           "email": "khoefel@msn.com",
@@ -2358,7 +2382,9 @@
           "registeredAt": "2026-09-16T02:48:06.648Z",
           "source": "square",
           "seatingOptionId": "table-4",
-          "seatingOptionName": "Table for 4"
+          "seatingOptionName": "Table for 4",
+          "refundedAt": "2026-10-01T15:58:43.425Z",
+          "refundedCents": 12000
         },
         {
           "name": "amykatpre@gmail.com",
@@ -2368,7 +2394,9 @@
           "registeredAt": "2026-09-21T23:27:44.999Z",
           "source": "square",
           "seatingOptionId": "table-4",
-          "seatingOptionName": "Table for 4"
+          "seatingOptionName": "Table for 4",
+          "refundedAt": "2026-10-01T15:58:43.425Z",
+          "refundedCents": 12000
         },
         {
           "name": "tayler.cockrell@outlook.com",
@@ -2378,7 +2406,9 @@
           "registeredAt": "2026-09-27T20:49:54.947Z",
           "source": "square",
           "seatingOptionId": "table-4",
-          "seatingOptionName": "Table for 4"
+          "seatingOptionName": "Table for 4",
+          "refundedAt": "2026-10-01T15:58:43.425Z",
+          "refundedCents": 12000
         },
         {
           "name": "josephedmunds23@gmail.com",
@@ -2388,12 +2418,11 @@
           "registeredAt": "2026-09-29T12:52:45.861Z",
           "source": "square",
           "seatingOptionId": "table-4",
-          "seatingOptionName": "Table for 4"
+          "seatingOptionName": "Table for 4",
+          "refundedAt": "2026-10-01T15:58:43.425Z",
+          "refundedCents": 12000
         }
-      ],
-      "registeredCount": 16,
-      "registered": 16,
-      "cancelled": true
+      ]
     },
     {
       "id": "event-augusta-2026-09-17",
@@ -5434,16 +5463,6 @@
         "amount": 10
       },
       {
-        "name": "jgamache5@gmail.com",
-        "email": "jgamache5@gmail.com",
-        "qty": 2,
-        "paymentId": "9Ca4Wg5Cu9R9BUPlDyw4Mm9ah4LZY",
-        "registeredAt": "2026-07-01T17:18:39.568Z",
-        "source": "square",
-        "tickets": 2,
-        "amount": 20
-      },
-      {
         "name": "thetayloz99@gmail.com",
         "email": "thetayloz99@gmail.com",
         "qty": 1,
@@ -5536,73 +5555,11 @@
     ],
     "event_1785779862505": [
       {
-        "name": "bkgripka@yahoo.com",
-        "email": "bkgripka@yahoo.com",
-        "qty": 4,
-        "paymentId": "BoeB22LX3VylyNCrRf09O3OluhKZY",
-        "registeredAt": "2026-08-04T00:01:31.534Z",
-        "source": "square",
-        "tickets": 4,
-        "amount": 100
-      },
-      {
-        "name": "kimberly_linneman@yahoo.com",
-        "email": "kimberly_linneman@yahoo.com",
-        "qty": 4,
-        "paymentId": "L3j7dt3SJKbyn0ZJ7tIJLyNwJ7AZY",
-        "registeredAt": "2026-08-04T00:25:16.540Z",
-        "source": "square",
-        "tickets": 4,
-        "amount": 100
-      },
-      {
-        "name": "lroberts876@yahoo.com",
-        "email": "lroberts876@yahoo.com",
-        "qty": 4,
-        "paymentId": "nTQuHebCKTNEh7NwJyhp5fs6Q4fZY",
-        "registeredAt": "2026-08-04T22:56:21.886Z",
-        "source": "square",
-        "seatingOptionId": "4-top-table",
-        "seatingOptionName": "4-Top Table",
-        "arrivalSlot": "w0830",
-        "arrivalLabel": "8:30 AM",
-        "tickets": 4,
-        "amount": 100
-      },
-      {
         "name": "c_kubiak@yahoo.com",
         "email": "c_kubiak@yahoo.com",
         "qty": 4,
         "paymentId": "leolURSLsqwq2lp7F9BQrsWo9QcZY",
         "registeredAt": "2026-08-06T12:34:03.474Z",
-        "source": "square",
-        "seatingOptionId": "4-top-table",
-        "seatingOptionName": "4-Top Table",
-        "arrivalSlot": "w0845",
-        "arrivalLabel": "8:45 AM",
-        "tickets": 4,
-        "amount": 100
-      },
-      {
-        "name": "lisawildschuetz5@gmail.com",
-        "email": "lisawildschuetz5@gmail.com",
-        "qty": 4,
-        "paymentId": "tW0i6philJLr5peX4x2cX1oJ6vIZY",
-        "registeredAt": "2026-08-07T20:51:32.324Z",
-        "source": "square",
-        "seatingOptionId": "4-top-table",
-        "seatingOptionName": "4-Top Table",
-        "arrivalSlot": "w0830",
-        "arrivalLabel": "8:30 AM",
-        "tickets": 4,
-        "amount": 100
-      },
-      {
-        "name": "nicolemcmillen9@gmail.com",
-        "email": "nicolemcmillen9@gmail.com",
-        "qty": 4,
-        "paymentId": "z9cBuQ99WZPCVFQwHJVjGIP8e5BZY",
-        "registeredAt": "2026-08-17T22:33:52.372Z",
         "source": "square",
         "seatingOptionId": "4-top-table",
         "seatingOptionName": "4-Top Table",
@@ -5625,18 +5582,6 @@
       }
     ],
     "event_1788301739553": [
-      {
-        "name": "monica.washburn@sbcglobal.net",
-        "email": "monica.washburn@sbcglobal.net",
-        "qty": 4,
-        "paymentId": "3juH94oIFUGnRLFp6imXRtSnWWUZY",
-        "registeredAt": "2026-09-04T00:13:50.306Z",
-        "source": "square",
-        "seatingOptionId": "table-4",
-        "seatingOptionName": "Table for 4",
-        "tickets": 4,
-        "amount": 160
-      },
       {
         "name": "seghers4@gmail.com",
         "email": "seghers4@gmail.com",
@@ -5776,56 +5721,7 @@
         "amount": 40
       }
     ],
-    "event_1788726751302": [
-      {
-        "name": "khoefel@msn.com",
-        "email": "khoefel@msn.com",
-        "qty": 4,
-        "paymentId": "P34GVhDC3ebEdT9iU0NUL3hqIeeZY",
-        "registeredAt": "2026-09-16T02:48:06.648Z",
-        "source": "square",
-        "seatingOptionId": "table-4",
-        "seatingOptionName": "Table for 4",
-        "tickets": 4,
-        "amount": 120
-      },
-      {
-        "name": "amykatpre@gmail.com",
-        "email": "amykatpre@gmail.com",
-        "qty": 4,
-        "paymentId": "BCxaDTpRxzzsluRngl7nkoi99Y9YY",
-        "registeredAt": "2026-09-21T23:27:44.999Z",
-        "source": "square",
-        "seatingOptionId": "table-4",
-        "seatingOptionName": "Table for 4",
-        "tickets": 4,
-        "amount": 120
-      },
-      {
-        "name": "tayler.cockrell@outlook.com",
-        "email": "tayler.cockrell@outlook.com",
-        "qty": 4,
-        "paymentId": "ZG1QQ3UyBwE7ot6O0ypzmmPAuCXZY",
-        "registeredAt": "2026-09-27T20:49:54.947Z",
-        "source": "square",
-        "seatingOptionId": "table-4",
-        "seatingOptionName": "Table for 4",
-        "tickets": 4,
-        "amount": 120
-      },
-      {
-        "name": "josephedmunds23@gmail.com",
-        "email": "josephedmunds23@gmail.com",
-        "qty": 4,
-        "paymentId": "9cPIQaRAgBenEpXfzcQ900KU5iUZY",
-        "registeredAt": "2026-09-29T12:52:45.861Z",
-        "source": "square",
-        "seatingOptionId": "table-4",
-        "seatingOptionName": "Table for 4",
-        "tickets": 4,
-        "amount": 120
-      }
-    ],
+    "event_1788726751302": [],
     "event_1790717386242": [
       {
         "name": "christmlnsn@gmail.com",
