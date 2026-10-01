@@ -7829,10 +7829,10 @@
       "hidden": false
     },
     "6ab9aa92e602ff2e1bcee248": {
-      "status": "awaiting_customer_confirm",
+      "status": "awaiting_customer_confirm_followedup",
       "note": "",
-      "updatedAt": "2026-09-27T23:45:24.960Z",
-      "updatedBy": "auto-reply",
+      "updatedAt": "2026-10-01T14:30:32.602Z",
+      "updatedBy": "daily-followup",
       "history": [
         {
           "from": "not_contacted",
@@ -7840,6 +7840,13 @@
           "by": "auto-reply",
           "note": "Instant auto-reply sent",
           "at": "2026-09-27T23:45:24.960Z"
+        },
+        {
+          "from": "awaiting_customer_confirm",
+          "to": "awaiting_customer_confirm_followedup",
+          "by": "daily-followup",
+          "note": "3-day reminder sent",
+          "at": "2026-10-01T14:30:32.602Z"
         }
       ],
       "hidden": false
@@ -8183,5 +8190,5 @@
       "hidden": true
     }
   },
-  "updatedAt": "2026-09-30T20:24:26.726Z"
+  "updatedAt": "2026-10-01T14:30:32.602Z"
 }
