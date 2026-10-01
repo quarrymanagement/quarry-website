@@ -180,8 +180,29 @@ function mergeEventRegistrations(incomingData, currentData) {
     }
 
     // Case 2: event is present in both — union the registrations by paymentId.
-    if (liveRegs.length === 0) return;
+    // Refunds (2026-10-01): the Square webhook moves a fully refunded sale from
+    // registrations[] to refundedRegistrations[] so its seats go back on sale.
+    // A stale admin tab still holds that sale in registrations[]; drop it here
+    // and carry the live refund log forward, or the seats would be re-taken.
     target.registrations = Array.isArray(target.registrations) ? target.registrations : [];
+    const liveRefunded = Array.isArray(liveEvt.refundedRegistrations) ? liveEvt.refundedRegistrations : [];
+    if (liveRefunded.length > 0) {
+      const refundedIds = {};
+      liveRefunded.forEach(function (r) { if (r && r.paymentId) refundedIds[r.paymentId] = true; });
+      const before = target.registrations.length;
+      target.registrations = target.registrations.filter(function (r) { return !(r && r.paymentId && refundedIds[r.paymentId]); });
+      const mergedRefunded = Array.isArray(target.refundedRegistrations) ? target.refundedRegistrations.slice() : [];
+      const haveRefunded = {};
+      mergedRefunded.forEach(function (r) { if (r && r.paymentId) haveRefunded[r.paymentId] = true; });
+      liveRefunded.forEach(function (r) { if (r && r.paymentId && !haveRefunded[r.paymentId]) mergedRefunded.push(r); });
+      target.refundedRegistrations = mergedRefunded;
+      if (target.registrations.length !== before) {
+        const t = sumRegistrations(target.registrations);
+        target.registeredCount = t;
+        target.registered = t;
+      }
+    }
+    if (liveRegs.length === 0) return;
 
     const seen = {};
     target.registrations.forEach(function (r) {
