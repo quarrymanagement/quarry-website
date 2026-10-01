@@ -470,6 +470,41 @@
                 hlContainer.appendChild(span);
             }
 
+            // QuarryFest: public "Vendors in Attendance" list (paid vendors only, fed by
+            // netlify/functions/quarryfest-vendors-public.js). Any event can opt in with
+            // showVendorList: true; QuarryFest is matched by name.
+            if (evt.showVendorList || /quarry\s*fest/i.test(evt.name || '')) {
+                var vBox = document.createElement('div');
+                vBox.className = 'event-additional';
+                vBox.id = 'vendorsAttending';
+                vBox.style.marginTop = '20px';
+                vBox.style.marginBottom = '30px';
+                vBox.innerHTML = '<h3>Vendors in Attendance</h3><p style="margin:0;color:#999;">Loading vendors&hellip;</p>';
+                hlContainer.parentNode.insertBefore(vBox, hlContainer.nextSibling);
+                var vEsc = function (t) { return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); };
+                fetch('/.netlify/functions/quarryfest-vendors-public')
+                    .then(function (r) { return r.json(); })
+                    .then(function (d) {
+                        var list = (d && d.vendors) || [];
+                        var h = '<h3>Vendors in Attendance' + (list.length ? ' <span style="color:#999;font-size:.85rem;font-family:Montserrat,sans-serif;">(' + list.length + ')</span>' : '') + '</h3>';
+                        if (!list.length) {
+                            h += '<p style="margin:0 0 12px;color:#ccc;">Our vendor lineup is coming together. Check back soon!</p>';
+                        } else {
+                            h += '<ul style="list-style:none;margin:0 0 16px;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;">';
+                            for (var vi = 0; vi < list.length; vi++) {
+                                h += '<li style="background:rgba(212,175,55,.06);border:1px solid rgba(212,175,55,.2);border-radius:10px;padding:12px 14px;">' +
+                                     '<strong style="display:block;color:#fff;font-size:.95rem;">' + vEsc(list[vi].name) + '</strong>' +
+                                     (list[vi].offering ? '<span style="color:#aaa;font-size:.82rem;line-height:1.5;">' + vEsc(list[vi].offering) + '</span>' : '') +
+                                     '</li>';
+                            }
+                            h += '</ul>';
+                        }
+                        h += '<p style="margin:0;font-size:.85rem;color:#999;">Want a booth? <a href="/quarry-fest-vendors.html" style="color:#d4af37;text-decoration:underline;">Register as a vendor</a> ($25).</p>';
+                        vBox.innerHTML = h;
+                    })
+                    .catch(function () { vBox.style.display = 'none'; });
+            }
+
             // Wine Club upsell — only on wine-tasting events, pointing anyone buying a
             // one-off ticket at membership instead, where tastings are already included.
             if (Array.isArray(evt.tags) && evt.tags.indexOf('Wine Club') !== -1) {
