@@ -15394,8 +15394,9 @@ function hashCode(str) {
                 }
 
                 const booked = vendors.filter(v => v.status === 'booked');
-                const pending = vendors.filter(v => v.status !== 'booked');
-                stats.innerHTML = `<b>${vendors.length}</b> total &nbsp;·&nbsp; <b style="color:#2e7d32;">${booked.length}</b> booked &nbsp;·&nbsp; <b style="color:#d97706;">${pending.length}</b> pending payment &nbsp;·&nbsp; <b>$${(booked.length * 25).toFixed(2)}</b> collected`;
+                const refunded = vendors.filter(v => v.status === 'refunded');
+                const pending = vendors.filter(v => v.status !== 'booked' && v.status !== 'refunded');
+                stats.innerHTML = `<b>${vendors.length}</b> total &nbsp;·&nbsp; <b style="color:#2e7d32;">${booked.length}</b> booked &nbsp;·&nbsp; <b style="color:#d97706;">${pending.length}</b> pending payment` + (refunded.length ? ` &nbsp;·&nbsp; <b style="color:#c62828;">${refunded.length}</b> refunded` : '') + ` &nbsp;·&nbsp; <b>$${(booked.length * 25).toFixed(2)}</b> collected`;
 
                 tbody.innerHTML = vendors.map(v => `
                     <tr style="border-top:1px solid var(--border-subtle);">
@@ -15404,10 +15405,10 @@ function hashCode(str) {
                         <td style="padding:8px 10px;">${v.email ? `<a href="mailto:${encodeURIComponent(v.email)}" style="color:var(--gold);">${escapeHtml(v.email)}</a>` : '—'}</td>
                         <td style="padding:8px 10px;">${escapeHtml(v.phone || '—')}</td>
                         <td style="padding:8px 10px;max-width:220px;">${escapeHtml(v.notes || '—')}</td>
-                        <td style="padding:8px 10px;">${v.status === 'booked' ? '<span style="color:#2e7d32;">Booked</span>' : '<span style="color:#d97706;">Pending payment</span>'}</td>
+                        <td style="padding:8px 10px;">${v.status === 'booked' ? '<span style="color:#2e7d32;">Booked</span>' : v.status === 'refunded' ? '<span style="color:#c62828;">Refunded</span>' : '<span style="color:#d97706;">Pending payment</span>'}</td>
                         <td style="padding:8px 10px;">${escapeHtml(v.amountPaid || '—')}</td>
                         <td style="padding:8px 10px;white-space:nowrap;">
-                            ${v.status !== 'booked' ? `<button class="btn-secondary" style="padding:4px 10px;font-size:0.78rem;margin-right:4px;" onclick="markQuarryFestPaid('${escapeHtml(v.vendorId)}', this)">Mark Paid (comp)</button>` : ''}
+                            ${v.status !== 'booked' && v.status !== 'refunded' ? `<button class="btn-secondary" style="padding:4px 10px;font-size:0.78rem;margin-right:4px;" onclick="markQuarryFestPaid('${escapeHtml(v.vendorId)}', this)">Mark Paid (comp)</button>` : ''}
                             <button class="btn-secondary" style="padding:4px 10px;font-size:0.78rem;" onclick="removeQuarryFestVendor('${escapeHtml(v.vendorId)}', this)">Remove</button>
                         </td>
                     </tr>
