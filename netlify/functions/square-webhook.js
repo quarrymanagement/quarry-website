@@ -474,6 +474,40 @@ function buildFoodTruckOwnerHtml(m, amount, paymentId) {
 // already wrote a "pending_payment" record keyed by vendorId when the vendor
 // submitted the form; this just flips it to "booked" on a completed payment.
 // ============================================================================
+// Full refund of a vendor fee: mark the vendor 'refunded' (record kept, but off the
+// booked list, so the public Vendors in Attendance list drops them) and tell management.
+async function handleQuarryFestVendorRefund(meta, paymentId, refundedCents) {
+  const m = meta || {};
+  const path = 'quarryfest-vendors/2026-11-07';
+  try {
+    const existing = await readBlob(path) || { vendors: [] };
+    const vendors = existing.vendors || [];
+    let idx = vendors.findIndex(function (v) { return paymentId && v.paymentId === paymentId; });
+    if (idx === -1 && m.vendorId) idx = vendors.findIndex(function (v) { return v.vendorId === m.vendorId; });
+    if (idx === -1 && m.vendorIdPrefix) idx = vendors.findIndex(function (v) { return String(v.vendorId || '').indexOf(m.vendorIdPrefix) === 0; });
+    if (idx === -1) { console.error('quarry fest refund: vendor not found for payment', paymentId); return; }
+    if (vendors[idx].status === 'refunded') { console.log('quarry fest vendor already refunded', paymentId); return; }
+    vendors[idx].status = 'refunded';
+    vendors[idx].refundedAt = new Date().toISOString();
+    vendors[idx].refundedAmount = '$' + (refundedCents / 100).toFixed(2);
+    if (!vendors[idx].paymentId) vendors[idx].paymentId = paymentId || '';
+    await writeBlob(path, { vendors: vendors });
+    const v = vendors[idx];
+    try {
+      await sendGridEmail(
+        'management@thequarrystl.com',
+        'Quarry Fest Vendor Refunded - ' + (v.businessName || '?'),
+        '<h2 style="color:#B8933A">Quarry Fest Vendor Refunded</h2>' +
+        '<p><b>Vendor:</b> ' + (v.businessName || '-') + '</p>' +
+        '<p><b>Contact:</b> ' + (v.contactName || '-') + ' (' + (v.email || '-') + ')</p>' +
+        '<p><b>Refunded:</b> ' + v.refundedAmount + '</p>' +
+        '<p>They have been taken off the Vendors in Attendance list.</p>',
+        'bookings@thequarrystl.com', 'The Quarry STL', 'quarry-fest-vendor'
+      );
+    } catch (e) { console.error('quarry fest refund email:', e.message); }
+  } catch (e) { console.error('quarry fest vendor refund store:', e.message); }
+}
+
 async function handleQuarryFestVendor(meta, amountStr, paymentId) {
   const m = meta || {};
   const path = 'quarryfest-vendors/2026-11-07';
@@ -879,7 +913,14 @@ exports.handler = wrap('square-webhook', async function(event) {
         } else if (meta.bookingType === 'foodtruck') {
           await handleFoodTruckBooking(meta, amountStr, payment.id);
         } else if (meta.bookingType === 'quarryfest_vendor') {
-          await handleQuarryFestVendor(meta, amountStr, payment.id);
+          // A refund arrives as payment.updated with refunded_money set. A full refund
+          // takes the vendor off the booked list instead of (re)booking them.
+          const refundedCents = (payment.refunded_money && payment.refunded_money.amount) || 0;
+          if (refundedCents > 0 && refundedCents >= amountCents) {
+            await handleQuarryFestVendorRefund(meta, payment.id, refundedCents);
+          } else {
+            await handleQuarryFestVendor(meta, amountStr, payment.id);
+          }
         } else if (meta.bookingType === 'event' || meta.eventId) {
           await handleEventTicket(meta, amountStr, payment.id);
         } else {
