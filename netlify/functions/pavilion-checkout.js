@@ -91,6 +91,20 @@ function toE164(p) {
   return null;
 }
 
+// Square shows the line item name in the payment's item list and in sales reports,
+// so it spells out what was bought. "2026-10-03" or "10/3/2026" -> "Sat Oct 3".
+function shortDate(s) {
+  const raw = String(s || '').trim();
+  let y, mo, d, mt;
+  if ((mt = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(raw))) { y = +mt[1]; mo = +mt[2]; d = +mt[3]; }
+  else if ((mt = /^(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(raw))) { y = +mt[3]; mo = +mt[1]; d = +mt[2]; }
+  else return raw;
+  const dt = new Date(Date.UTC(y, mo - 1, d));
+  if (isNaN(dt.getTime())) return raw;
+  return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dt.getUTCDay()] + ' ' +
+    ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][dt.getUTCMonth()] + ' ' + d;
+}
+
 exports.handler = async function (event) {
   const headers = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'Content-Type', 'Content-Type': 'application/json' };
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
@@ -169,7 +183,7 @@ exports.handler = async function (event) {
         reference_id: 'pavilion-' + Date.now(),
         line_items: [{
           uid: 'pavilion-line',
-          name: 'Pavilion ' + pavilion + ' Rental',
+          name: ('Pavilion ' + pavilion + ' Rental - ' + shortDate(date) + (time ? ', ' + time : '')).slice(0, 255),
           note: date + ' from ' + time + ' to ' + slotEndLabel(time) + ' | includes a server',
           quantity: '1',
           base_price_money: { amount: PRICE_CENTS, currency: 'USD' },
