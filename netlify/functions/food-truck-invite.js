@@ -134,6 +134,20 @@ function inviteEmailHtml(leadName, date, time, priceCents, checkoutUrl) {
 
 const CORS = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' };
 
+// Square shows the line item name in the payment's item list and in sales reports,
+// so it spells out what was bought. "2026-10-03" or "10/3/2026" -> "Sat Oct 3".
+function shortDate(s) {
+  const raw = String(s || '').trim();
+  let y, mo, d, mt;
+  if ((mt = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(raw))) { y = +mt[1]; mo = +mt[2]; d = +mt[3]; }
+  else if ((mt = /^(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(raw))) { y = +mt[3]; mo = +mt[1]; d = +mt[2]; }
+  else return raw;
+  const dt = new Date(Date.UTC(y, mo - 1, d));
+  if (isNaN(dt.getTime())) return raw;
+  return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dt.getUTCDay()] + ' ' +
+    ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][dt.getUTCMonth()] + ' ' + d;
+}
+
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: CORS, body: '' };
   if (event.httpMethod !== 'POST') return { statusCode: 405, headers: CORS, body: JSON.stringify({ ok: false, error: 'POST only' }) };
@@ -180,7 +194,7 @@ exports.handler = async (event) => {
         reference_id: 'foodtruck-' + Date.now(),
         line_items: [{
           uid: 'foodtruck-line',
-          name: 'Food Truck Spot - ' + leadName,
+          name: ('Food Truck Spot - ' + leadName + ' - ' + shortDate(date)).slice(0, 255),
           note: date + ' at ' + time,
           quantity: '1',
           base_price_money: { amount: priceCents, currency: 'USD' },
