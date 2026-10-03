@@ -125,7 +125,7 @@ exports.handler = async function (event) {
         reference_id: 'quarryfest-' + vendorId.slice(0, 8),
         line_items: [{
           uid: 'quarryfest-vendor-line',
-          name: 'Quarry Fest Vendor Fee',
+          name: ('Quarry Fest Vendor Fee - ' + businessName).slice(0, 255),
           note: businessName + ' - Sat Nov 7, 2026, 12-4pm',
           quantity: '1',
           base_price_money: { amount: PRICE_CENTS, currency: 'USD' },
