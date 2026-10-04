@@ -1576,7 +1576,7 @@
       "email": "awmrbecker2003@yahoo.com",
       "phone": "6364486539",
       "birthday": "1977-11-13",
-      "passwordHash": "22715dbbdfb6c9d8aad913298a0f44ae:cdea0060e0644a4e48f3a525df73841810ec08baf9803a74273e0ea11c9f6aec0bbb21b83236d840a369b9a0c2cfc8eb71f2ce4040e8c208b6f6295d1361b9da",
+      "passwordHash": "7aaf5b290a40cd4870f7af206c652a29:6aa953eb901c27d02fb1b4dd923bd1934430540838c160c570873f7ffe2d6928fee273c751a1fa3bac34404bc6bee289f313470050de99559a97594ca1f22c49",
       "joinedAt": "2026-07-29T19:43:32.613Z",
       "lastVisitAt": null,
       "tier": "standard",
@@ -1595,6 +1595,12 @@
           "source": "signup",
           "delta": 250,
           "note": "Welcome bonus 250"
+        },
+        {
+          "at": "2026-10-04T00:13:49.512Z",
+          "action": "password-reset",
+          "by": "self",
+          "note": "Password reset via 6-digit email code"
         }
       ],
       "__source": "legacy"
@@ -2649,7 +2655,7 @@
       ]
     }
   ],
-  "lastUpdated": "2026-10-03",
+  "lastUpdated": "2026-10-04",
   "schemaVersion": 1,
   "fields": {
     "id": "Internal stable id (e.g. m_1730468400_3a2)",
