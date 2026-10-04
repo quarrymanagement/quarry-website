@@ -8243,10 +8243,10 @@
       "hidden": false
     },
     "6ac18af8f3c451d44d705644": {
-      "status": "awaiting_decision",
-      "note": "",
-      "updatedAt": "2026-10-03T23:09:14.592Z",
-      "updatedBy": "customer",
+      "status": "needs_followup",
+      "note": "Date not available; asked for an alternate — awaiting a second date from the customer.",
+      "updatedAt": "2026-10-04T21:31:59.071Z",
+      "updatedBy": "owner",
       "history": [
         {
           "from": "not_contacted",
@@ -8261,6 +8261,13 @@
           "by": "customer",
           "note": "Customer clicked \"check availability\"",
           "at": "2026-10-03T23:09:14.592Z"
+        },
+        {
+          "from": "awaiting_decision",
+          "to": "needs_followup",
+          "by": "owner",
+          "note": "Date not available; asked for an alternate — awaiting a second date from the customer.",
+          "at": "2026-10-04T21:31:59.071Z"
         }
       ],
       "hidden": false
@@ -8305,5 +8312,5 @@
       "hidden": false
     }
   },
-  "updatedAt": "2026-10-04T16:24:08.071Z"
+  "updatedAt": "2026-10-04T21:31:59.071Z"
 }
