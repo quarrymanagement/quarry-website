@@ -240,9 +240,8 @@ function fetchEventsData(siteUrl) {
 
 // ---------------------------------------------------------------------------
 // SendGrid contact sync for ticket buyers.
-// Every registrant is upserted into SENDGRID_LIST_ALL (CRM, never mailed).
-// Only buyers who ticked "Yes, keep me in the loop" also go into
-// SENDGRID_LIST_SUBSCRIBED (the list marketing campaigns send to).
+// Every registrant is upserted into SENDGRID_LIST_ALL and, when optIn is true
+// (always, per the privacy policy), SENDGRID_LIST_SUBSCRIBED (the marketing list).
 // Never blocks checkout: 4s timeout, all errors swallowed and logged.
 // ---------------------------------------------------------------------------
 function syncContactToSendGrid({ email, name, phone, optIn }) {
@@ -684,9 +683,9 @@ exports.handler = async function(event) {
       })()
     };
 
-    // Add the buyer to SendGrid (CRM list always, marketing list only if they opted in).
-    const marketingOptIn = body.marketingOptIn === true || body.marketing_opt_in === true ||
-      body.marketing_opt_in === 'yes' || body.marketing_opt_in === 'on';
+    // Add every buyer to SendGrid's marketing list. Per the privacy policy,
+    // providing an email adds you to our list; every email has an unsubscribe link.
+    const marketingOptIn = true;
     const sgSync = await syncContactToSendGrid({ email, name, phone, optIn: marketingOptIn });
     console.log('event-register SendGrid sync:', JSON.stringify({ optIn: marketingOptIn, result: sgSync }));
 

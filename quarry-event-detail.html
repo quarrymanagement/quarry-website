@@ -759,10 +759,8 @@
 
             html += '<div id="detailFormError" style="display:none;color:#e74c3c;font-size:13px;margin-top:8px;"></div>';
 
-            html += '<label style="display:flex;align-items:flex-start;gap:0.6rem;font-size:0.9rem;line-height:1.4;margin:1rem 0;padding:0.85rem;background:#f5efde;border:1px solid #d4c79b;border-radius:6px;cursor:pointer;">';
-            html += '<input type="checkbox" name="marketing_opt_in" value="yes" style="margin-top:0.2rem;flex-shrink:0;width:18px;height:18px;cursor:pointer;accent-color:#9a7b2a;">';
-            html += '<span style="color:#1a2942;"><strong>Yes, keep me in the loop.</strong> Send me occasional emails about upcoming events, live music, wine club tastings, and specials at The Quarry. (Unsubscribe any time.)</span>';
-            html += '</label>';
+            html += '<input type="hidden" name="marketing_opt_in" value="yes">';
+            html += '<p class="marketing-notice" style="font-size:12px;line-height:1.45;color:#999;margin:12px 0;">By registering, you\'ll receive occasional emails from The Quarry about upcoming events, live music, wine club tastings and specials. Unsubscribe anytime. <a href="/privacy.html" style="color:#d4af37;">Privacy Policy</a></p>';
             html += '<button type="submit" class="reg-submit" id="detailSubmitBtn">Proceed to Payment</button>';
             html += '</form>';
 
@@ -1501,7 +1499,7 @@
                 partySize: partySize,
                 ticketTier: ticketTier,
                 couponCode: detailCoupon ? detailCoupon.code : '',
-                marketingOptIn: !!((document.querySelector('#detailRegForm input[name="marketing_opt_in"]') || document.querySelector('input[name="marketing_opt_in"]') || {}).checked),
+                marketingOptIn: true,
                 businessName: (document.getElementById('detailBusinessName') || {}).value || '',
                 businessType: (document.getElementById('detailBusinessType') || {}).value || '',
                 successUrl: window.location.origin + '/quarry-events',

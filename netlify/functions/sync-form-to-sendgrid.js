@@ -48,9 +48,9 @@ function listIdsForForm(formName, marketingOptIn) {
         formName === 'mailing-list') {
         return [LIST_ALL, LIST_SUB].filter(Boolean);
     }
-    // Everything else: respect the explicit checkbox
-    if (marketingOptIn) return [LIST_ALL, LIST_SUB].filter(Boolean);
-    return [LIST_ALL].filter(Boolean);  // CRM only, no marketing
+    // Everything else: per the privacy policy, providing an email adds the
+    // contact to the marketing list (every email carries an unsubscribe link).
+    return [LIST_ALL, LIST_SUB].filter(Boolean);
 }
 
 const SEGMENT_MAP = {
@@ -118,7 +118,7 @@ exports.handler = async (event) => {
         // SendGrid's PUT /v3/marketing/contacts accepts list_ids as a sibling
         // of contacts — does the upsert + list-add in one call.
         // Honor explicit marketing opt-in (checkbox on the form)
-        const marketingOptIn = !!(data.marketing_opt_in === 'yes' || data.marketing_opt_in === true || data.marketing_opt_in === 'on');
+        const marketingOptIn = formName !== 'careers';
         const listIds = listIdsForForm(formName, marketingOptIn);
         const upsertBody = { contacts: [contact] };
         if (listIds.length) upsertBody.list_ids = listIds;
