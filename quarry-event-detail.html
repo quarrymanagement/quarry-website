@@ -482,9 +482,16 @@
                 vBox.innerHTML = '<h3>Vendors in Attendance</h3><p style="margin:0;color:#999;">Loading vendors&hellip;</p>';
                 hlContainer.parentNode.insertBefore(vBox, hlContainer.nextSibling);
                 var vEsc = function (t) { return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); };
-                fetch('/.netlify/functions/quarryfest-vendors-public')
-                    .then(function (r) { return r.json(); })
-                    .then(function (d) {
+                // Logos: images/quarryfest-vendors/manifest.json maps a normalized vendor
+                // name (lowercase, letters/digits only) to a file in that folder. Vendors
+                // without a logo just show the text card.
+                var vKey = function (t) { return String(t || '').toLowerCase().replace(/[^a-z0-9]/g, ''); };
+                Promise.all([
+                    fetch('/.netlify/functions/quarryfest-vendors-public').then(function (r) { return r.json(); }),
+                    fetch('/images/quarryfest-vendors/manifest.json').then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; })
+                ])
+                    .then(function (res) {
+                        var d = res[0], logos = res[1] || {};
                         var list = (d && d.vendors) || [];
                         var h = '<h3>Vendors in Attendance' + (list.length ? ' <span style="color:#999;font-size:.85rem;font-family:Montserrat,sans-serif;">(' + list.length + ')</span>' : '') + '</h3>';
                         if (!list.length) {
@@ -492,7 +499,9 @@
                         } else {
                             h += '<ul style="list-style:none;margin:0 0 16px;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;">';
                             for (var vi = 0; vi < list.length; vi++) {
+                                var vLogo = logos[vKey(list[vi].name)];
                                 h += '<li style="background:rgba(212,175,55,.06);border:1px solid rgba(212,175,55,.2);border-radius:10px;padding:12px 14px;">' +
+                                     (vLogo ? '<div style="background:#fff;border-radius:8px;height:120px;display:flex;align-items:center;justify-content:center;padding:8px;margin-bottom:10px;"><img src="/images/quarryfest-vendors/' + vEsc(vLogo) + '" alt="' + vEsc(list[vi].name) + ' logo" loading="lazy" style="max-width:100%;max-height:100%;object-fit:contain;" onerror="this.parentNode.style.display=\'none\'"></div>' : '') +
                                      '<strong style="display:block;color:#fff;font-size:.95rem;">' + vEsc(list[vi].name) + '</strong>' +
                                      (list[vi].offering ? '<span style="color:#aaa;font-size:.82rem;line-height:1.5;">' + vEsc(list[vi].offering) + '</span>' : '') +
                                      '</li>';
