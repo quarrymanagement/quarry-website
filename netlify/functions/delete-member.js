@@ -127,6 +127,23 @@ async function sgRemoveContact(email) {
   } catch (_) { /* swallow */ }
 }
 
+// Globally unsubscribe the address so no automation (including the 6-hour
+// marketing-list-sync safety net) can ever email them again.
+function sgSuppressGlobally(email) {
+  if (!SENDGRID_KEY || !email) return Promise.resolve();
+  const payload = JSON.stringify({ recipient_emails: [String(email).toLowerCase()] });
+  return new Promise((resolve) => {
+    const req = https.request({
+      hostname: 'api.sendgrid.com', path: '/v3/asm/suppressions/global', method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + SENDGRID_KEY, 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) },
+      timeout: 4000,
+    }, (res) => { res.resume(); res.on('end', resolve); });
+    req.on('timeout', () => { req.destroy(); resolve(); });
+    req.on('error', resolve);
+    req.write(payload); req.end();
+  });
+}
+
 async function sendDeletionConfirmation(email, name) {
   if (!SENDGRID_KEY || !email) return;
   const firstName = (name || email).split(/[\s@]/)[0] || 'Friend';
@@ -224,8 +241,10 @@ exports.handler = wrap('delete-member', async (event) => {
   }
 
   // Fire-and-forget: remove from SendGrid + send confirmation
+  // Confirmation goes out first: a global unsubscribe blocks all mail to the address.
+  await sendDeletionConfirmation(targetEmail, memberName).catch(() => {});
+  await sgSuppressGlobally(targetEmail);
   sgRemoveContact(targetEmail).catch(() => {});
-  sendDeletionConfirmation(targetEmail, memberName).catch(() => {});
 
   return reply(200, {
     ok: true,

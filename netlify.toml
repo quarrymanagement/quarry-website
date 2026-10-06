@@ -48,6 +48,12 @@
 [functions."checklist-nightly-report"]
   schedule = "30 7 * * *"
 
+# Email-list safety net — every 6 hours. Makes sure every customer email
+# (forms, event tickets, golf, Quarry Fest vendors) is on the SendGrid
+# marketing list; emails management@ if the sync ever fails.
+[functions."marketing-list-sync"]
+  schedule = "0 */6 * * *"
+
 # Send-queue poller — every 10 min. Drains 'approved' drafts at scheduledFor.
 [functions."marketing-send"]
   schedule = "*/10 * * * *"
