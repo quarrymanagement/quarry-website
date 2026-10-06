@@ -238,6 +238,38 @@ function fetchEventsData(siteUrl) {
   });
 }
 
+// ---------------------------------------------------------------------------
+// SendGrid contact sync for ticket buyers.
+// Every registrant is upserted into SENDGRID_LIST_ALL (CRM, never mailed).
+// Only buyers who ticked "Yes, keep me in the loop" also go into
+// SENDGRID_LIST_SUBSCRIBED (the list marketing campaigns send to).
+// Never blocks checkout: 4s timeout, all errors swallowed and logged.
+// ---------------------------------------------------------------------------
+function syncContactToSendGrid({ email, name, phone, optIn }) {
+  const key = process.env.SENDGRID_API_KEY;
+  const listAll = process.env.SENDGRID_LIST_ALL || '';
+  const listSub = process.env.SENDGRID_LIST_SUBSCRIBED || '';
+  const addr = String(email || '').trim().toLowerCase();
+  if (!key || !addr || addr.indexOf('@') < 1) return Promise.resolve({ skipped: true });
+  const parts = String(name || '').trim().split(/\s+/);
+  const contact = { email: addr };
+  if (parts[0]) contact.first_name = parts[0];
+  if (parts.length > 1) contact.last_name = parts.slice(1).join(' ');
+  if (phone) contact.phone_number_id = String(phone).trim();
+  const listIds = (optIn ? [listAll, listSub] : [listAll]).filter(Boolean);
+  const payload = JSON.stringify(listIds.length ? { list_ids: listIds, contacts: [contact] } : { contacts: [contact] });
+  return new Promise((resolve) => {
+    const req = https.request({
+      hostname: 'api.sendgrid.com', path: '/v3/marketing/contacts', method: 'PUT',
+      headers: { 'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) },
+      timeout: 4000
+    }, (res) => { res.resume(); res.on('end', () => resolve({ status: res.statusCode })); });
+    req.on('timeout', () => { req.destroy(); resolve({ error: 'timeout' }); });
+    req.on('error', (e) => { console.warn('SendGrid sync failed:', e.message); resolve({ error: e.message }); });
+    req.write(payload); req.end();
+  });
+}
+
 exports.handler = async function(event) {
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -651,6 +683,12 @@ exports.handler = async function(event) {
         return prefix + namePart + tail;
       })()
     };
+
+    // Add the buyer to SendGrid (CRM list always, marketing list only if they opted in).
+    const marketingOptIn = body.marketingOptIn === true || body.marketing_opt_in === true ||
+      body.marketing_opt_in === 'yes' || body.marketing_opt_in === 'on';
+    const sgSync = await syncContactToSendGrid({ email, name, phone, optIn: marketingOptIn });
+    console.log('event-register SendGrid sync:', JSON.stringify({ optIn: marketingOptIn, result: sgSync }));
 
     let result;
     try {

@@ -1501,6 +1501,7 @@
                 partySize: partySize,
                 ticketTier: ticketTier,
                 couponCode: detailCoupon ? detailCoupon.code : '',
+                marketingOptIn: !!((document.querySelector('#detailRegForm input[name="marketing_opt_in"]') || document.querySelector('input[name="marketing_opt_in"]') || {}).checked),
                 businessName: (document.getElementById('detailBusinessName') || {}).value || '',
                 businessType: (document.getElementById('detailBusinessType') || {}).value || '',
                 successUrl: window.location.origin + '/quarry-events',
