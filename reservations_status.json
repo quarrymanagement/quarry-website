@@ -8416,10 +8416,10 @@
       "hidden": false
     },
     "6ac593ae1012eace40b095f1": {
-      "status": "awaiting_customer_confirm",
+      "status": "awaiting_decision",
       "note": "",
-      "updatedAt": "2026-10-07T00:34:57.521Z",
-      "updatedBy": "auto-reply",
+      "updatedAt": "2026-10-07T13:54:55.405Z",
+      "updatedBy": "customer",
       "history": [
         {
           "from": "not_contacted",
@@ -8427,10 +8427,17 @@
           "by": "auto-reply",
           "note": "Instant auto-reply sent",
           "at": "2026-10-07T00:34:57.521Z"
+        },
+        {
+          "from": "awaiting_customer_confirm",
+          "to": "awaiting_decision",
+          "by": "customer",
+          "note": "Customer clicked \"check availability\"",
+          "at": "2026-10-07T13:54:55.405Z"
         }
       ],
       "hidden": false
     }
   },
-  "updatedAt": "2026-10-07T00:34:57.521Z"
+  "updatedAt": "2026-10-07T13:54:55.405Z"
 }
