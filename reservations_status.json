@@ -8555,10 +8555,10 @@
       "hidden": false
     },
     "6ac7d1575fae6d06bd6ebca8": {
-      "status": "awaiting_decision",
+      "status": "confirmed",
       "note": "",
-      "updatedAt": "2026-10-08T18:28:09.761Z",
-      "updatedBy": "customer",
+      "updatedAt": "2026-10-08T20:33:38.122Z",
+      "updatedBy": "admin",
       "history": [
         {
           "from": "not_contacted",
@@ -8573,10 +8573,17 @@
           "by": "customer",
           "note": "Customer clicked \"check availability\"",
           "at": "2026-10-08T18:28:09.761Z"
+        },
+        {
+          "from": "awaiting_decision",
+          "to": "confirmed",
+          "by": "admin",
+          "note": "",
+          "at": "2026-10-08T20:33:38.122Z"
         }
       ],
       "hidden": false
     }
   },
-  "updatedAt": "2026-10-08T20:32:48.218Z"
+  "updatedAt": "2026-10-08T20:33:38.122Z"
 }
