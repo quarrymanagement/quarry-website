@@ -2729,6 +2729,7 @@
                     <div class="sb-nav-item" data-tab="confirmed"><span class="sb-ic">✓</span><span class="sb-lbl">Confirmed Bookings</span></div>
                     <div class="sb-nav-item" data-tab="pavilions"><span class="sb-ic">🏕️</span><span class="sb-lbl">Pavilion Bookings</span></div>
                     <div class="sb-nav-item" data-tab="quarryfest"><span class="sb-ic">🎪</span><span class="sb-lbl">Quarry Fest Vendors</span></div>
+                    <div class="sb-nav-item" data-tab="receiptreview"><span class="sb-ic">🧾</span><span class="sb-lbl">Receipt Review</span></div>
                 </div>
 
                 <div class="sb-nav-section">Member App</div>
@@ -4975,6 +4976,31 @@
                 </div>
             </div>
 
+            <!-- ========================================================
+                 RECEIPT REVIEW TAB — customer rewards receipts the system
+                 could not match to a POS ticket after 3+ days. Customers
+                 are credited provisionally; anything that matches a ticket
+                 verifies itself and never shows up here. Approve keeps the
+                 points; Deny removes them and notifies the customer with
+                 the reason entered here.
+                 ======================================================== -->
+            <div id="receiptreviewTab" class="tab-content">
+                <div class="section">
+                    <div class="section-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+                        <div>
+                            <div class="section-title">Receipt Review</div>
+                            <div style="font-size:0.85rem;color:var(--text-secondary);">Customer receipts that couldn't be matched to a POS ticket. Points were already credited &mdash; approve to keep them, or deny with a reason to remove them and notify the customer.</div>
+                        </div>
+                        <div style="display:flex;gap:8px;">
+                            <button class="btn-secondary" onclick="loadReceiptReview()">Refresh</button>
+                            <button class="btn-secondary" onclick="sendReceiptDigestNow(this)">Email me this list</button>
+                        </div>
+                    </div>
+                    <div id="rrStats" style="font-size:0.85rem;color:var(--text-secondary);margin:8px 0 16px;"></div>
+                    <div id="rrList"><div style="text-align:center;color:var(--text-secondary);padding:2rem;">Loading&hellip;</div></div>
+                </div>
+            </div>
+
             <div id="foodTruckLeadsTab" class="tab-content">
                 <div class="section">
                     <div class="section-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
@@ -6186,6 +6212,9 @@
             }
             if (tabName === 'quarryfest') {
                 loadQuarryFestVendors();
+            }
+            if (tabName === 'receiptreview') {
+                loadReceiptReview();
             }
             // Food truck tabs
             if (tabName === 'foodTruckLeads') {
@@ -15452,6 +15481,115 @@ function hashCode(str) {
                     alert('Failed to remove: ' + e.message);
                 }
             });
+        };
+    })();
+
+        // ================================================================
+        // RECEIPT REVIEW
+        // Customer rewards receipts the system could not match to a POS
+        // ticket. Proxied through receipt-review-admin (owner token only)
+        // to the Supabase "receipt-review" edge function. Approve keeps the
+        // points; Deny removes them and pushes the reason to the customer.
+        // ================================================================
+    (function(){
+        function esc(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+        }
+        async function api(payload) {
+            const token = localStorage.getItem('quarryAdminToken') || '';
+            const r = await fetch('/.netlify/functions/receipt-review-admin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token, ...payload })
+            });
+            let body;
+            try { body = await r.json(); } catch (_) { throw new Error('Server returned an unexpected response (' + r.status + ')'); }
+            return { status: r.status, body };
+        }
+
+        window.loadReceiptReview = async function() {
+            const list = document.getElementById('rrList');
+            const stats = document.getElementById('rrStats');
+            list.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:2rem;">Loading&hellip;</div>';
+            try {
+                const { status, body } = await api({ action: 'list' });
+                if (status === 401) throw new Error('Owner login required for this section.');
+                if (!body.ok) throw new Error(body.error || 'Failed to load');
+                const items = body.needs_decision || [];
+                stats.innerHTML = `<b style="color:${items.length ? '#d97706' : '#2e7d32'};">${items.length}</b> need your decision &nbsp;·&nbsp; <b>${body.waiting_count || 0}</b> still waiting on the POS (these verify automatically)`;
+                if (!items.length) {
+                    list.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:2rem;border:1px solid var(--border-subtle);border-radius:8px;background:var(--bg-elevated);">Nothing needs your decision. 🎉</div>';
+                    return;
+                }
+                list.innerHTML = items.map(i => {
+                    const name = ((i.first_name || '') + ' ' + (i.last_name || '')).trim() || i.email || 'Unknown';
+                    const tickets = (i.closest_pos_tickets || []).map(t => `$${Number(t.pretip).toFixed(2)} <span style="color:var(--text-secondary);">(${esc(t.ticket_name)}, paid ${esc(t.paid_at_ct)})</span>`).join(' &nbsp;·&nbsp; ') || '<span style="color:var(--text-secondary);">No POS tickets found that day</span>';
+                    return `
+                    <div id="rr-${i.id}" style="border:1px solid var(--border-subtle);border-radius:8px;background:var(--bg-elevated);padding:14px 16px;margin-bottom:12px;">
+                        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+                            <div>
+                                <div style="font-weight:600;">${esc(name)} <span style="font-weight:400;color:var(--text-secondary);font-size:0.82rem;">${esc(i.email)}</span></div>
+                                <div style="font-size:0.9rem;margin-top:4px;">Submitted <b>$${Number(i.spend_amount).toFixed(2)}</b> for visit on <b>${esc(i.visit_date)}</b> &mdash; credited <b>${esc(i.points_credited)} pts</b></div>
+                                <div style="font-size:0.82rem;margin-top:6px;">Closest POS tickets that day: ${tickets}</div>
+                            </div>
+                            <div style="display:flex;gap:6px;align-items:flex-start;">
+                                <button class="btn-primary" style="padding:6px 14px;font-size:0.82rem;" onclick="rrApprove(${i.id}, this)">Approve</button>
+                                <button class="btn-secondary" style="padding:6px 14px;font-size:0.82rem;" onclick="rrToggleDeny(${i.id})">Deny…</button>
+                            </div>
+                        </div>
+                        <div id="rr-deny-${i.id}" style="display:none;margin-top:12px;border-top:1px dashed var(--border-subtle);padding-top:12px;">
+                            <label style="display:block;font-size:0.78rem;color:var(--text-secondary);margin-bottom:4px;">Reason (sent to the customer with the notification)</label>
+                            <input type="text" id="rr-note-${i.id}" maxlength="300" placeholder="e.g. We couldn't find a ticket for that amount on that date." style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-secondary);color:var(--text-primary);">
+                            <div style="display:flex;gap:8px;align-items:center;margin-top:8px;">
+                                <button class="btn-secondary" style="padding:6px 14px;font-size:0.82rem;" onclick="rrDeny(${i.id}, this)">Deny &amp; remove points</button>
+                                <span id="rr-msg-${i.id}" style="font-size:0.82rem;color:#c33;"></span>
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('');
+            } catch (e) {
+                list.innerHTML = `<div style="text-align:center;color:#c33;padding:2rem;">Failed to load: ${esc(e.message)}<br><button class="btn-secondary" onclick="loadReceiptReview()" style="margin-top:0.5rem;">Retry</button></div>`;
+            }
+        };
+
+        window.rrToggleDeny = function(id) {
+            const el = document.getElementById('rr-deny-' + id);
+            el.style.display = el.style.display === 'none' ? 'block' : 'none';
+        };
+
+        window.rrApprove = function(id, btn) {
+            armConfirm(btn, 'Confirm approve?', async function() {
+                try {
+                    const { body } = await api({ action: 'resolve', id, decision: 'approve' });
+                    if (!body.ok) throw new Error(body.error || 'Failed');
+                    await loadReceiptReview();
+                } catch (e) { alert('Failed: ' + e.message); }
+            });
+        };
+
+        window.rrDeny = function(id, btn) {
+            const note = (document.getElementById('rr-note-' + id).value || '').trim();
+            const msg = document.getElementById('rr-msg-' + id);
+            if (!note) { msg.textContent = 'A reason is required — the customer will see it.'; return; }
+            msg.textContent = '';
+            armConfirm(btn, 'Confirm deny?', async function() {
+                try {
+                    const { body } = await api({ action: 'resolve', id, decision: 'deny', note });
+                    if (!body.ok) throw new Error(body.error || 'Failed');
+                    await loadReceiptReview();
+                } catch (e) { msg.textContent = 'Failed: ' + e.message; }
+            });
+        };
+
+        window.sendReceiptDigestNow = async function(btn) {
+            const original = btn.textContent;
+            btn.disabled = true; btn.textContent = 'Sending…';
+            try {
+                const { body } = await api({ action: 'digest' });
+                if (!body.ok) throw new Error(body.error || 'Failed');
+                btn.textContent = body.sent ? ('Sent (' + body.count + ')') : 'Nothing to send';
+            } catch (e) { btn.textContent = 'Failed'; }
+            setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 2500);
         };
     })();
 
