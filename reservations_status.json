@@ -8497,8 +8497,8 @@
     "6ac70174dbb967b708774475": {
       "status": "awaiting_decision",
       "note": "",
-      "updatedAt": "2026-10-08T03:04:51.382Z",
-      "updatedBy": "customer",
+      "updatedAt": "2026-10-08T20:32:48.218Z",
+      "updatedBy": "admin",
       "history": [
         {
           "from": "not_contacted",
@@ -8513,9 +8513,16 @@
           "by": "customer",
           "note": "Customer clicked \"check availability\"",
           "at": "2026-10-08T03:04:51.382Z"
+        },
+        {
+          "from": "visible",
+          "to": "hidden",
+          "by": "admin",
+          "note": "",
+          "at": "2026-10-08T20:32:48.218Z"
         }
       ],
-      "hidden": false
+      "hidden": true
     },
     "6ac7cf5fab6ab502cbef1c93": {
       "status": "confirmed",
@@ -8571,5 +8578,5 @@
       "hidden": false
     }
   },
-  "updatedAt": "2026-10-08T20:32:09.156Z"
+  "updatedAt": "2026-10-08T20:32:48.218Z"
 }
