@@ -159,3 +159,6 @@
 # trigger redeploy 2026-09-18T00:15:00Z - Halloween Day of the Dead date fix (Oct 10 ->
 # Oct 30) was another data-only commit skipped by build-ignore.sh; forcing a real build
 # so the public events page actually reflects it this time.
+
+[functions."receipt-review-digest"]
+  schedule = "0 14 * * *"
