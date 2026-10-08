@@ -50,17 +50,28 @@ exports.handler = async (event) => {
       return { statusCode: 400, headers, body: JSON.stringify({ error: 'Name, email, and tasting are required.' }) };
     }
 
+    // 1) The wine club roster (admin Wine Club tab, blob 'wine-club-members') is the
+    //    source of truth. Most members joined on Wix or were added by hand and have
+    //    no Stripe account at all, so a Stripe-only check turned them away.
+    const cleanEmail = String(email).toLowerCase().trim();
+    let hasActive = false;
+    try {
+      const roster = (await _blobs.readBlob('wine-club-members')) || { members: [] };
+      hasActive = (roster.members || []).some((m) =>
+        String(m.email || '').toLowerCase().trim() === cleanEmail &&
+        String(m.status || '').toLowerCase() === 'active');
+    } catch (e) { console.error('roster check failed (falling back to Stripe):', e.message); }
+
+    // 2) Fall back to Stripe for anyone not on the roster yet (e.g. a brand-new
+    //    online signup the webhook hasn't added).
     const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+    const customers = hasActive ? { data: [] } : await stripe.customers.list({ email: cleanEmail, limit: 5 });
 
-    // Search for customers with this email
-    const customers = await stripe.customers.list({ email: email.toLowerCase().trim(), limit: 5 });
-
-    if (!customers.data.length) {
+    if (!hasActive && !customers.data.length) {
       return { statusCode: 200, headers, body: JSON.stringify({ authorized: false, reason: 'no_account' }) };
     }
 
     // Check if any customer has an active Rock & Vine subscription
-    let hasActive = false;
     for (const customer of customers.data) {
       const subs = await stripe.subscriptions.list({
         customer: customer.id,
