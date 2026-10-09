@@ -165,3 +165,9 @@
 
 [functions."receipt-review-admin"]
   timeout = 26
+
+[functions."venue-sync-golf-pavilion"]
+  schedule = "*/10 * * * *"
+
+[functions."venue-sync-admin"]
+  timeout = 26
