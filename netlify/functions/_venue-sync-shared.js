@@ -14,7 +14,7 @@
 // gone. Pavilion rentals also flow on to the shared Google "The Quarry"
 // calendar through the existing venue-calendar outbox; golf deliberately does not.
 // ============================================================================
-const { readBlob, listKeys } = require('./_blobs');
+const { readBlob } = require('./_blobs');
 
 const EDGE_URL = 'https://nkulhtalltbieicvmmad.supabase.co/functions/v1/venue-external-sync';
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -71,14 +71,23 @@ async function readDay(kind, dateKey) {
 }
 
 // Full reconcile for the next ~5 months (plus yesterday). Used by the schedule.
+// Reads each date's blob directly (a missing day is just null) instead of listing
+// keys, so it does not depend on blob-listing support.
 async function syncKind(kind) {
   const from = addDays(todayCT(), -1);
   const to = addDays(todayCT(), 150);
-  const keys = (await listKeys(STORES[kind])).filter((k) => DATE_RE.test(k) && k >= from && k <= to);
-  const days = await Promise.all(keys.map((k) => readDay(kind, k)));
-  const items = days.flat();
+  const dates = [];
+  for (let d = from; d <= to; d = addDays(d, 1)) dates.push(d);
+
+  const items = [];
+  let daysWithBookings = 0;
+  const CHUNK = 25;
+  for (let i = 0; i < dates.length; i += CHUNK) {
+    const batch = await Promise.all(dates.slice(i, i + CHUNK).map((d) => readDay(kind, d)));
+    batch.forEach((day) => { if (day.length) daysWithBookings++; items.push(...day); });
+  }
   const result = await callEdge({ kind, from, to, items });
-  return { ...result, daysRead: keys.length, itemsSent: items.length };
+  return { ...result, daysRead: dates.length, daysWithBookings, itemsSent: items.length };
 }
 
 // Single-date sync for immediate effect right after a booking is saved/removed.
