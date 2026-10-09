@@ -54,6 +54,11 @@
 [functions."marketing-list-sync"]
   schedule = "0 */6 * * *"
 
+# Nightly payment check — 9:15 UTC = 4:15am CDT / 3:15am CST. Adds any event
+# ticket or food truck fee paid in Square that never reached the website.
+[functions."event-payments-reconcile"]
+  schedule = "15 9 * * *"
+
 # Send-queue poller — every 10 min. Drains 'approved' drafts at scheduledFor.
 [functions."marketing-send"]
   schedule = "*/10 * * * *"
