@@ -2729,13 +2729,13 @@
                     <div class="sb-nav-item" data-tab="confirmed"><span class="sb-ic">✓</span><span class="sb-lbl">Confirmed Bookings</span></div>
                     <div class="sb-nav-item" data-tab="pavilions"><span class="sb-ic">🏕️</span><span class="sb-lbl">Pavilion Bookings</span></div>
                     <div class="sb-nav-item" data-tab="quarryfest"><span class="sb-ic">🎪</span><span class="sb-lbl">Quarry Fest Vendors</span></div>
-                    <div class="sb-nav-item" data-tab="receiptreview"><span class="sb-ic">🧾</span><span class="sb-lbl">Receipt Review</span></div>
                 </div>
 
                 <div class="sb-nav-section">Member App</div>
                 <div class="sb-nav-group">
                     <div class="sb-nav-item" data-tab="appOverview"><span class="sb-ic">📱</span><span class="sb-lbl">App Overview</span></div>
                     <div class="sb-nav-item" data-tab="members"><span class="sb-ic">⭐</span><span class="sb-lbl">Rewards Members</span></div>
+                    <div class="sb-nav-item" data-tab="receiptreview"><span class="sb-ic">🧾</span><span class="sb-lbl">Receipt Review</span></div>
                     <div class="sb-nav-item" data-tab="appMenu"><span class="sb-ic">🍽️</span><span class="sb-lbl">Menu</span></div>
                     <div class="sb-nav-item" data-tab="appRewards"><span class="sb-ic">⭐</span><span class="sb-lbl">Rewards Setup</span></div>
                     <div class="sb-nav-item" data-tab="appContent"><span class="sb-ic">🎯</span><span class="sb-lbl">Home Content</span></div>
@@ -15497,13 +15497,21 @@ function hashCode(str) {
         }
         async function api(payload) {
             const token = localStorage.getItem('quarryAdminToken') || '';
-            const r = await fetch('/.netlify/functions/receipt-review-admin', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token, ...payload })
-            });
+            const ctl = new AbortController();
+            const timer = setTimeout(() => ctl.abort(), 45000);
+            let r;
+            try {
+                r = await fetch('/.netlify/functions/receipt-review-admin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token, ...payload }),
+                    signal: ctl.signal
+                });
+            } catch (e) {
+                throw new Error(e.name === 'AbortError' ? 'The database took too long to respond. It is under heavy load right now - please try again in a minute.' : e.message);
+            } finally { clearTimeout(timer); }
             let body;
-            try { body = await r.json(); } catch (_) { throw new Error('Server returned an unexpected response (' + r.status + ')'); }
+            try { body = await r.json(); } catch (_) { throw new Error('The server timed out (' + r.status + '). The database is likely under heavy load - please try again in a minute.'); }
             return { status: r.status, body };
         }
 
@@ -15511,8 +15519,12 @@ function hashCode(str) {
             const list = document.getElementById('rrList');
             const stats = document.getElementById('rrStats');
             list.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:2rem;">Loading&hellip;</div>';
+            const slowHint = setTimeout(() => {
+                if (list.textContent.trim().startsWith('Loading')) list.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:2rem;">Still loading&hellip; the database is slow right now, this can take up to 40 seconds.</div>';
+            }, 6000);
             try {
                 const { status, body } = await api({ action: 'list' });
+                clearTimeout(slowHint);
                 if (status === 401) throw new Error('Owner login required for this section.');
                 if (!body.ok) throw new Error(body.error || 'Failed to load');
                 const items = body.needs_decision || [];
@@ -15548,6 +15560,7 @@ function hashCode(str) {
                     </div>`;
                 }).join('');
             } catch (e) {
+                clearTimeout(slowHint);
                 list.innerHTML = `<div style="text-align:center;color:#c33;padding:2rem;">Failed to load: ${esc(e.message)}<br><button class="btn-secondary" onclick="loadReceiptReview()" style="margin-top:0.5rem;">Retry</button></div>`;
             }
         };
