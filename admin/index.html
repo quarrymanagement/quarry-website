@@ -15549,6 +15549,7 @@ function hashCode(str) {
                                 <button class="btn-secondary" style="padding:6px 14px;font-size:0.82rem;" onclick="rrToggleDeny(${i.id})">Deny…</button>
                             </div>
                         </div>
+                        <div id="rr-status-${i.id}" style="display:none;margin-top:10px;font-size:0.85rem;"></div>
                         <div id="rr-deny-${i.id}" style="display:none;margin-top:12px;border-top:1px dashed var(--border-subtle);padding-top:12px;">
                             <label style="display:block;font-size:0.78rem;color:var(--text-secondary);margin-bottom:4px;">Reason (sent to the customer with the notification)</label>
                             <input type="text" id="rr-note-${i.id}" maxlength="300" placeholder="e.g. We couldn't find a ticket for that amount on that date." style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-secondary);color:var(--text-primary);">
@@ -15570,14 +15571,44 @@ function hashCode(str) {
             el.style.display = el.style.display === 'none' ? 'block' : 'none';
         };
 
+        let rrOpen = 0;
+        function rrSetStats(waiting) {
+            const stats = document.getElementById('rrStats');
+            stats.innerHTML = `<b style="color:${rrOpen ? '#d97706' : '#2e7d32'};">${rrOpen}</b> need your decision &nbsp;·&nbsp; <b>${waiting || 0}</b> still waiting on the POS (these verify automatically)`;
+        }
+        const _origLoad = window.loadReceiptReview;
+        window.loadReceiptReview = async function() {
+            await _origLoad();
+            rrOpen = document.querySelectorAll('#rrList [id^="rr-status-"]').length;
+        };
+
+        // Runs approve/deny with the card locked and visible progress, so slow
+        // responses never look like a dead button and can't be double-submitted.
+        async function rrResolve(id, decision, note) {
+            const card = document.getElementById('rr-' + id);
+            const status = document.getElementById('rr-status-' + id);
+            card.querySelectorAll('button, input').forEach(el => { el.disabled = true; });
+            status.style.display = 'block';
+            status.style.color = 'var(--text-secondary)';
+            status.textContent = 'Working… the database is slow right now, this can take up to 30 seconds. Please do not click again.';
+            try {
+                const { body } = await api({ action: 'resolve', id, decision, note });
+                const already = /ALREADY_RESOLVED|NOT_FOUND/.test(String(body.error || ''));
+                if (!body.ok && !already) throw new Error(body.error || 'Failed');
+                const done = decision === 'approve' ? 'Approved — points kept.' : ('Denied — ' + (body.points_removed != null ? body.points_removed + ' pts removed and the customer was notified.' : 'customer notified.'));
+                card.style.background = decision === 'approve' ? 'rgba(46,125,50,0.08)' : 'rgba(200,50,50,0.08)';
+                card.innerHTML = '<div style="color:' + (decision === 'approve' ? '#2e7d32' : '#c33') + ';font-weight:600;">✓ ' + (already ? 'Already handled.' : done) + '</div>';
+                rrOpen = Math.max(0, rrOpen - 1);
+                rrSetStats();
+            } catch (e) {
+                card.querySelectorAll('button, input').forEach(el => { el.disabled = false; });
+                status.style.color = '#c33';
+                status.textContent = 'Failed: ' + e.message + ' It may still have gone through — press Refresh to check before trying again.';
+            }
+        }
+
         window.rrApprove = function(id, btn) {
-            armConfirm(btn, 'Confirm approve?', async function() {
-                try {
-                    const { body } = await api({ action: 'resolve', id, decision: 'approve' });
-                    if (!body.ok) throw new Error(body.error || 'Failed');
-                    await loadReceiptReview();
-                } catch (e) { alert('Failed: ' + e.message); }
-            });
+            armConfirm(btn, 'Click again to approve', function() { rrResolve(id, 'approve', ''); });
         };
 
         window.rrDeny = function(id, btn) {
@@ -15585,13 +15616,7 @@ function hashCode(str) {
             const msg = document.getElementById('rr-msg-' + id);
             if (!note) { msg.textContent = 'A reason is required — the customer will see it.'; return; }
             msg.textContent = '';
-            armConfirm(btn, 'Confirm deny?', async function() {
-                try {
-                    const { body } = await api({ action: 'resolve', id, decision: 'deny', note });
-                    if (!body.ok) throw new Error(body.error || 'Failed');
-                    await loadReceiptReview();
-                } catch (e) { msg.textContent = 'Failed: ' + e.message; }
-            });
+            armConfirm(btn, 'Click again to deny', function() { rrResolve(id, 'deny', note); });
         };
 
         window.sendReceiptDigestNow = async function(btn) {
