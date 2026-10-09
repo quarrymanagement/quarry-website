@@ -17,7 +17,7 @@ const SB = "https://nkulhtalltbieicvmmad.supabase.co";
 
 const ROLES = {
   bartender: "Bar", server: "Servers", support: "Host & Bus",
-  kitchen: "Kitchen", staff: "Staff Board", closing: "Closing"
+  kitchen: "Kitchen", staff: "Staff Board", manager: "Manager", closing: "Closing"
 };
 
 /* Square job title -> the boards that job is answerable for.
@@ -193,6 +193,7 @@ async function squareCrew(date) {
    if they punched more than one timecard, earliest in to latest out. */
 function crewForBoard(crew, role) {
   const on = role === "closing" ? closingCrew(crew)
+           : role === "manager" ? crew.filter(c => c.lead)
            : crew.filter(c => c.boards.indexOf(role) > -1);
   const byName = {};
   on.forEach(c => {

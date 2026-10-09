@@ -21,6 +21,7 @@
     { id: "support",   label: "Host & Bus" },
     { id: "kitchen",   label: "Kitchen" },
     { id: "staff",     label: "Staff Board" },
+    { id: "manager",   label: "Manager" },
     { id: "closing",   label: "Closing" }
   ];
   var SEGS = [["open","Opening"],["shift","During Shift"],["close","Closing"]];
@@ -177,6 +178,16 @@
     if (!err) setTimeout(function(){ if(m) m.innerHTML=""; }, 3500);
   }
 
+  /* The open form replaces its row, so it is already where you were looking.
+     Nudge it fully into view in case the taller form runs off the bottom.
+     (#checklistsTab is itself the scroll container - div.tab-content with
+     overflow-y:auto - so scrollIntoView on IT does nothing; it has to be
+     called on a descendant.) */
+  function showInView(sel){
+    var el = document.querySelector(sel);
+    if (el && el.scrollIntoView) el.scrollIntoView({ behavior:"smooth", block:"nearest" });
+  }
+
   /* ------------------------------------------------ TASKS view */
   function renderTasks(){
     var mine = TASKS.filter(function(t){ return t.role===role; });
@@ -188,12 +199,34 @@
            + esc(r.label) + ' <span style="opacity:.65;font-weight:500">'+n+'</span></button>';
     }).join("");
 
-    var t = editId ? mine.filter(function(x){ return x.id===editId; })[0] : null;
+    /* The form opens in place of the row you clicked, so editing happens where
+       you are already looking. Only one form is on screen at a time - the "add"
+       card at the top hides while you edit - because the inputs share ids. */
+    var form = editId ? "" : taskForm(null);
+
+    var list = "";
+    SEGS.forEach(function(s){
+      var items = mine.filter(function(x){ return x.segment===s[0]; })
+                      .sort(function(a,b){ return (a.sort_order-b.sort_order) || a.title.localeCompare(b.title); });
+      if (!items.length) return;
+      list += '<div class="ck-h">'+s[1]+'</div>' + items.map(function(x){
+                 return x.id===editId ? taskForm(x) : taskRow(x);
+               }).join("");
+    });
+    if (!list) list = '<div class="ck-card" style="text-align:center;color:var(--text-secondary,#5b6270)">Nothing on this board yet.</div>';
+
+    body.innerHTML = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.3rem">'+chips+'</div>' + form + list;
+  }
+  function hourOpts(sel){
+    var o = "";
+    for (var i=6;i<=23;i++) o += '<option value="'+i+'"'+(i===sel?" selected":"")+'>'+hourName(i)+'</option>';
+    return o;
+  }
+  function taskForm(t){
     var days = t && t.days_of_week ? t.days_of_week : OPEN_DAYS;
     var wks  = t && t.week_of_month ? t.week_of_month : [];
     var hourly = t ? t.recurrence==="hourly" : false;
-
-    var form = '<div class="ck-card" style="padding:1.3rem 1.4rem;margin-bottom:1.6rem;">'
+    return '<div class="ck-card" style="padding:1.3rem 1.4rem;margin-bottom:1.6rem;">'
       + '<div style="font:700 .7rem/1 inherit;letter-spacing:.14em;text-transform:uppercase;color:var(--text-secondary,#5b6270);margin-bottom:1rem;">'
       +   (t ? "Editing — " + esc(roleLabel(role)) : "Add a task to " + esc(roleLabel(role))) + '</div>'
       + '<div class="ck-row">'
@@ -243,23 +276,8 @@
       +   '<button class="ck-btn on" id="ckSave">'+(t?"Save changes":"Add task")+'</button>'
       +   '<button class="ck-btn" id="ckCancel">'+(t?"Cancel":"Clear")+'</button></div>'
       + '</div>';
-
-    var list = "";
-    SEGS.forEach(function(s){
-      var items = mine.filter(function(x){ return x.segment===s[0]; })
-                      .sort(function(a,b){ return (a.sort_order-b.sort_order) || a.title.localeCompare(b.title); });
-      if (!items.length) return;
-      list += '<div class="ck-h">'+s[1]+'</div>' + items.map(taskRow).join("");
-    });
-    if (!list) list = '<div class="ck-card" style="text-align:center;color:var(--text-secondary,#5b6270)">Nothing on this board yet.</div>';
-
-    body.innerHTML = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.3rem">'+chips+'</div>' + form + list;
   }
-  function hourOpts(sel){
-    var o = "";
-    for (var i=6;i<=23;i++) o += '<option value="'+i+'"'+(i===sel?" selected":"")+'>'+hourName(i)+'</option>';
-    return o;
-  }
+
   function taskRow(t){
     var d = dueOf(t.id), off = !t.active, tag = "";
     if (!off){
@@ -500,7 +518,7 @@
     }
     if ((el = e.target.closest(".ck-edit"))){
       editId = el.getAttribute("data-id"); renderTasks();
-      document.getElementById("checklistsTab").scrollIntoView({ behavior:"smooth", block:"start" }); return;
+      showInView("#ckTitle"); return;
     }
     if ((el = e.target.closest(".ck-toggle"))) return toggle(el.getAttribute("data-id"));
     if ((el = e.target.closest(".ck-up")))    return move(el.getAttribute("data-id"), -1);
@@ -513,7 +531,11 @@
       return;
     }
     if (e.target.id === "ckSave")    return save();
-    if (e.target.id === "ckCancel")  { editId = null; renderTasks(); return; }
+    if (e.target.id === "ckCancel")  {
+      var was = editId; editId = null; renderTasks();
+      if (was) showInView('.ck-edit[data-id="'+was+'"]');
+      return;
+    }
     if (e.target.id === "ckRefresh") return load();
     if (e.target.id === "ckAddStaff"){
       var n = document.getElementById("sName").value.trim(),
