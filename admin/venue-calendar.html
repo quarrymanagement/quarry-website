@@ -370,17 +370,23 @@
         anniversary: '#ea580c', reunion: '#78350f', bachelorette: '#c026d3',
         bingo: '#0891b2', market_event: '#65a30d', fundraiser: '#dc2626',
         retirement_party: '#475569', holiday_party: '#b91c1c', pop_up_bar: '#d97706',
-        celebration_of_life: '#4b5563', golf: '#2f6b4f'
+        celebration_of_life: '#4b5563', golf: '#2f6b4f', pavilion_rental: '#8f6f3a'
     };
+    // Bookings that mirror another system are changed there, not here: weddings
+    // in the wedding portal, golf bays and pavilions in their own booking tabs.
+    // Editing/deleting a mirrored row here would just be reverted by the next sync.
+    function isManagedElsewhere(source) { return source === 'wedding portal' || source === 'golf_online' || source === 'pavilion_online'; }
     function colorFor(type) { return EVENT_COLORS[type] || '#9a7b2a'; }
     function labelize(s) { return String(s || '').replace(/_/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); }); }
 
-    var SPACE_ORDER = ['whole-venue', 'building', 'golf', 'bay-1', 'bay-2', 'bay-3', 'bay-4', 'upper-patio', 'lower-patio', 'back-patio', 'step-down', 'turf'];
+    var SPACE_ORDER = ['whole-venue', 'building', 'golf', 'bay-1', 'bay-2', 'bay-3', 'bay-4', 'upper-patio', 'lower-patio', 'back-patio', 'step-down', 'turf', 'pavilion-1', 'pavilion-2', 'pavilion-3', 'pavilion-4', 'pavilion-5', 'pavilion-6'];
     var SPACE_NAMES = {
         'whole-venue': 'Whole Venue (Buyout)', 'building': 'Building (Indoor Dining & Bar)',
         'golf': 'Golf Simulator Area', 'bay-1': 'Golf Bay 1', 'bay-2': 'Golf Bay 2',
         'bay-3': 'Golf Bay 3', 'bay-4': 'Golf Bay 4', 'upper-patio': 'Upper Patio',
-        'lower-patio': 'Lower Patio', 'back-patio': 'Back Patio', 'step-down': 'Step Down Patio', 'turf': 'Turf / Lawn'
+        'lower-patio': 'Lower Patio', 'back-patio': 'Back Patio', 'step-down': 'Step Down Patio', 'turf': 'Turf / Lawn',
+        'pavilion-1': 'Pavilion 1', 'pavilion-2': 'Pavilion 2', 'pavilion-3': 'Pavilion 3',
+        'pavilion-4': 'Pavilion 4', 'pavilion-5': 'Pavilion 5', 'pavilion-6': 'Pavilion 6'
     };
 
     // ---------------- AUTH ----------------
@@ -569,7 +575,7 @@
             }
 
             var billingSection = document.getElementById('billingSection');
-            var editable = booking && booking.source !== 'wedding portal';
+            var editable = booking && !isManagedElsewhere(booking.source);
             if (editable) {
                 billingSection.classList.remove('hidden');
                 document.getElementById('invDueDate').value = addDays(todayStr(), 7);
@@ -994,7 +1000,7 @@
         // Weddings are owned by the wedding_sync_booking trigger and get
         // clobbered on the wedding's next save, so editing them here would
         // silently revert — only offer Edit for bookings made in this form.
-        var editable = b.source !== 'wedding portal';
+        var editable = !isManagedElsewhere(b.source);
         var editBtn = editable ? '<button type="button" class="edit-btn" data-edit-id="' + esc(b.id) + '" title="Edit booking">✎ Edit</button>' : '';
 
         var details = '<div class="details">';
