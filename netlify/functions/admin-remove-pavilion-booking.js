@@ -14,6 +14,7 @@
 
 const crypto = require('crypto');
 const { readBlob, writeBlob } = require('./_blobs');
+const { syncDay } = require('./_venue-sync-shared');
 
 const ADMIN_SECRET = process.env.ADMIN_SESSION_SECRET
   || ('qrr-session-' + (process.env.GITHUB_TOKEN || '').slice(-24));
@@ -64,6 +65,7 @@ exports.handler = async (event) => {
     const before = (existing.bookings || []).length;
     const bookings = (existing.bookings || []).filter((b) => (b.paymentId || '') !== paymentId);
     await writeBlob(path, { bookings });
+    try { await Promise.race([syncDay('pavilion', date), new Promise((r) => setTimeout(r, 6000))]); } catch (_) { /* backstop sync will catch it */ }
     return { statusCode: 200, headers: CORS, body: JSON.stringify({ ok: true, removed: before - bookings.length, remaining: bookings.length }) };
   } catch (e) {
     return { statusCode: 500, headers: CORS, body: JSON.stringify({ ok: false, error: String(e.message || e) }) };
