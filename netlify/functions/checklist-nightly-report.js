@@ -64,7 +64,8 @@ const isLead = title => {
 
 const CSS = {
   ink: "#1A1A1A", cream: "#F5F0E8", gold: "#B8933A", goldLt: "#D4AF6A",
-  green: "#2b6b33", red: "#a33b34", dim: "#6f7681", line: "#e6e8ec"
+  green: "#2b6b33", red: "#a33b34", dim: "#6f7681", line: "#e6e8ec",
+  redSoft: "#fbedeb", faint: "#a2988a"
 };
 
 const esc = s => String(s == null ? "" : s)
@@ -233,7 +234,7 @@ function closingCrew(crew) {
 }
 
 /* ---------------------------------------------------------------- html */
-function buildHtml(date, rows, hourly, crew, crewNote) {
+function buildHtml(date, rows, hourly, crew, crewNote, issues, temps, openOlder) {
   const live = rows.filter(r => r.status !== "upcoming");
   const done = live.filter(r => r.status === "done" || r.status === "na");
   const missed = live.filter(r => r.status === "overdue" || r.status === "due");
@@ -311,6 +312,60 @@ function buildHtml(date, rows, hourly, crew, crewNote) {
     });
   }
 
+  /* Anything staff flagged from the floor. The point of the button is that it
+     reaches someone the same night instead of dying in a closing task. */
+  let issuesHtml = "";
+  if (issues.length) {
+    issuesHtml = issues.map(i => `<div style="margin:0 0 10px;padding:11px 13px;border-radius:9px;border:1px solid ${i.urgent ? CSS.red : CSS.line};background:${i.urgent ? CSS.redSoft : "#fff"}">
+        <div style="font:${i.urgent ? 700 : 600} 14px Arial,sans-serif;color:${i.urgent ? CSS.red : CSS.ink}">
+          ${i.urgent ? "URGENT \u00b7 " : ""}${esc(i.body)}</div>
+        <div style="font:12px Arial,sans-serif;color:${CSS.dim};margin-top:4px">
+          ${[i.area, (ROLES[i.role] || i.role), i.initials || "?"]
+              .filter((v, n, a) => v && a.indexOf(v) === n).map(esc).join(" \u00b7 ")}${i.status === "resolved" ? " \u00b7 resolved" : ""}</div>
+      </div>`).join("");
+    if (openOlder > 0) {
+      issuesHtml += `<div style="font:13px Arial,sans-serif;color:${CSS.dim}">Plus ${openOlder} still open from earlier. Admin \u2192 Checklists \u2192 Issues.</div>`;
+    }
+  } else if (openOlder > 0) {
+    issuesHtml = `<p style="font:14px Arial,sans-serif;color:${CSS.dim};margin:0">Nothing reported tonight. ${openOlder} still open from earlier.</p>`;
+  }
+
+  /* Temperatures: the numbers, by unit, with anything out of range up top.
+     This is the section that matters if the health inspector asks. */
+  let tempHtml = "";
+  if (temps.length) {
+    const bad = temps.filter(t => !t.in_range);
+    const segName = { open: "Open", shift: "Mid", close: "Close" };
+    const byUnit = {};
+    temps.forEach(t => {
+      const u = (t.checklist_temp_units && t.checklist_temp_units.name) || "Unit";
+      (byUnit[u] = byUnit[u] || []).push(t);
+    });
+    if (bad.length) {
+      tempHtml += `<div style="margin:0 0 14px;padding:12px 14px;border-radius:9px;border:1px solid ${CSS.red};background:${CSS.redSoft}">
+        <div style="font:700 14px Arial,sans-serif;color:${CSS.red}">${bad.length} reading${bad.length === 1 ? "" : "s"} out of range</div>
+        ${bad.map(b => `<div style="font:13px/1.6 Arial,sans-serif;color:${CSS.red}">
+            ${esc((b.checklist_temp_units && b.checklist_temp_units.name) || "Unit")} \u2014 <b>${b.reading_f}\u00b0</b>
+            (safe ${b.checklist_temp_units ? b.checklist_temp_units.min_f + "\u00b0 to " + b.checklist_temp_units.max_f + "\u00b0" : ""})
+            ${b.note ? " \u00b7 " + esc(b.note) : " \u00b7 <i>no note</i>"}</div>`).join("")}
+      </div>`;
+    }
+    tempHtml += `<table width="100%" cellpadding="0" cellspacing="0">
+      <tr><th ${th}>Unit</th><th ${th} align="right">Open</th><th ${th} align="right">Mid</th><th ${th} align="right">Close</th></tr>
+      ${Object.keys(byUnit).map(u => {
+        const cell = seg => {
+          const r = byUnit[u].filter(x => x.segment === seg)[0];
+          if (!r) return `<span style="color:${CSS.faint}">\u2014</span>`;
+          return `<b style="color:${r.in_range ? CSS.ink : CSS.red}">${r.reading_f}\u00b0</b>`;
+        };
+        return `<tr><td ${td}>${esc(u)}</td>
+          <td ${td} align="right">${cell("open")}</td>
+          <td ${td} align="right">${cell("shift")}</td>
+          <td ${td} align="right">${cell("close")}</td></tr>`;
+      }).join("")}
+    </table>`;
+  }
+
   const crewHtml = crew.length
     ? `<table width="100%" cellpadding="0" cellspacing="0">
         <tr><th ${th}>Clocked in</th><th ${th}>Role</th><th ${th} align="right">In</th><th ${th} align="right">Out</th></tr>
@@ -344,6 +399,10 @@ function buildHtml(date, rows, hourly, crew, crewNote) {
     ${acctHtml ? `<h3 style="font:700 12px/1 Arial,sans-serif;letter-spacing:.15em;text-transform:uppercase;color:${CSS.gold};margin:34px 0 12px">Who was on the clock for it</h3>${acctHtml}` : ""}
 
     ${hourlyHtml}
+
+    ${issuesHtml ? `<h3 style="font:700 12px/1 Arial,sans-serif;letter-spacing:.15em;text-transform:uppercase;color:${CSS.gold};margin:34px 0 12px">Reported from the floor</h3>${issuesHtml}` : ""}
+
+    ${tempHtml ? `<h3 style="font:700 12px/1 Arial,sans-serif;letter-spacing:.15em;text-transform:uppercase;color:${CSS.gold};margin:34px 0 12px">Temperature log</h3>${tempHtml}` : ""}
 
     <h3 style="font:700 12px/1 Arial,sans-serif;letter-spacing:.15em;text-transform:uppercase;color:${CSS.gold};margin:34px 0 12px">On shift, per Square</h3>
     ${crewHtml}
@@ -399,17 +458,28 @@ exports.handler = async (event) => {
 
     const { crew, note } = await squareCrew(date);
 
+    const [issues, temps, older] = await Promise.all([
+      sb(`checklist_issues?select=*&business_date=eq.${date}&order=urgent.desc,created_at.asc`),
+      sb(`checklist_temp_readings?select=*,checklist_temp_units(name,min_f,max_f)&business_date=eq.${date}&order=taken_at.asc`),
+      sb(`checklist_issues?select=id&status=eq.open&business_date=lt.${date}`)
+    ]);
+
     const live = rows.filter(r => r.status !== "upcoming");
     const missed = live.filter(r => r.status === "overdue" || r.status === "due").length;
-    const subject = missed === 0
+    const badTemps = (temps || []).filter(t => !t.in_range).length;
+    const urgent = (issues || []).filter(i => i.urgent).length;
+    let subject = missed === 0
       ? `Quarry checklist ${date} — all clear`
       : `Quarry checklist ${date} — ${missed} not signed off`;
+    if (badTemps) subject += ` · ${badTemps} temp${badTemps === 1 ? "" : "s"} out of range`;
+    if (urgent)   subject += ` · ${urgent} urgent`;
 
-    await send(subject, buildHtml(date, rows, hourly, crew, note));
+    await send(subject, buildHtml(date, rows, hourly, crew, note, issues || [], temps || [], (older || []).length));
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ ok: true, date, total: live.length, missed, crew: crew.length, squareNote: note })
+      body: JSON.stringify({ ok: true, date, total: live.length, missed, crew: crew.length,
+        issues: (issues||[]).length, badTemps, openOlder: (older||[]).length, squareNote: note })
     };
   } catch (e) {
     console.error("nightly report failed:", e);

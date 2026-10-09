@@ -115,6 +115,25 @@ h2:after{content:''; flex:1; height:1px; background:var(--line)}
 .task.late{border-color:var(--red-line); background:var(--red-soft)}
 .task.late .sub b{color:var(--red)}
 
+/* ---------------- temp readings + problem report ---------------- */
+.temps{display:flex; flex-direction:column; gap:8px}
+.tu{display:flex; align-items:center; gap:12px}
+.tn{flex:1; font-size:14px; font-weight:600}
+.tn i{display:block; font-style:normal; font-size:11.5px; color:var(--faint); font-weight:500; margin-top:2px}
+.tin{width:104px; flex:none; text-align:center; font-size:17px; font-weight:700;
+  padding:13px 8px; border-radius:11px; border:1.5px solid var(--line);
+  background:var(--card); color:var(--text); -moz-appearance:textfield}
+.tin::-webkit-outer-spin-button,.tin::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.tin:focus{outline:none; border-color:var(--gold)}
+.tin.bad{border-color:var(--red); background:var(--red-soft); color:var(--red)}
+.warn{margin-top:12px; padding:11px 13px; border-radius:10px; font-size:13px; line-height:1.5;
+  background:var(--red-soft); border:1px solid var(--red-line); color:var(--red); font-weight:600}
+.warn:empty{display:none}
+#sheet textarea{width:100%; min-height:104px; resize:none; font:inherit; font-size:16px;
+  padding:14px; border-radius:12px; border:1.5px solid var(--line);
+  background:var(--card); color:var(--text)}
+#sheet textarea:focus{outline:none; border-color:var(--gold)}
+
 /* ---------------- restrooms alert ----------------
    Shows on every board. Whoever notices is rarely whoever fixes it. */
 #alert:empty{display:none}
@@ -215,6 +234,7 @@ input[type=text]:focus{outline:none; border-color:var(--gold)}
     <span class="mark">The Quarry</span>
     <span class="day" id="day"></span>
     <span class="sp"></span>
+    <button class="ghost" id="report">Report a problem</button>
     <button class="ghost" id="refresh">Refresh</button>
   </div>
   <div class="tabs" id="tabs"></div>
@@ -250,7 +270,7 @@ const SEGS = [ ['open','Opening'], ['shift','During Shift'], ['close','Closing']
 const CAD  = { daily:'Daily', weekly:'Weekly', biweekly:'Every 2 weeks', monthly:'Monthly',
                interval:'3x a month', quarterly:'Every 3 months' };
 
-let TASKS = [], STAFF = [], SET = {}, active = 'staff', sel = null;
+let TASKS = [], STAFF = [], SET = {}, UNITS = [], READINGS = [], active = 'staff', sel = null;
 
 const $   = s => document.querySelector(s);
 const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -278,13 +298,20 @@ async function api(path, opts){
   return t ? JSON.parse(t) : null;
 }
 async function load(){
-  const [tasks, staff, set] = await Promise.all([
+  const [tasks, staff, set, units, tempTasks, readings] = await Promise.all([
     api('rpc/checklist_due', { method:'POST', body: JSON.stringify({ p_date:null }) }),
     api('checklist_staff?active=eq.true&select=*&order=name'),
-    api('checklist_settings?select=*')
+    api('checklist_settings?select=*'),
+    api('checklist_temp_units?select=*&active=eq.true&order=sort_order'),
+    api('checklist_tasks?select=id&input_type=eq.temps'),
+    api(`checklist_temp_readings?select=*&business_date=eq.${bizDate()}`)
   ]);
-  TASKS = tasks || []; STAFF = staff || [];
+  TASKS = tasks || []; STAFF = staff || []; UNITS = units || []; READINGS = readings || [];
   SET = {}; (set||[]).forEach(s => SET[s.key] = s.value);
+  /* checklist_due doesn't carry input_type, so tag the temp tasks here rather
+     than reshape a function the boards, admin and the nightly report all share. */
+  const temps = (tempTasks||[]).map(r => r.id);
+  TASKS.forEach(t => { if (temps.indexOf(t.task_id) > -1) t.input_type = 'temps'; });
   render();
 }
 
@@ -428,6 +455,97 @@ async function loadHours(){
   hourly.forEach(t => t.hoursDone = (rows||[]).filter(r => r.task_id===t.task_id).map(r => r.slot));
 }
 
+/* ---------------- temperature readings ----------------
+   A tick box saying "temps recorded" is worth nothing to an inspector. These
+   tasks capture the actual number per unit, keep it against the date, and will
+   not let you sign off an out-of-range reading without saying what you did. */
+function tempFields(){
+  const taken = READINGS.filter(r => r.segment === sel.segment);
+  let h = `<div class="lbl">Readings &mdash; &deg;F</div><div class="temps">`;
+  UNITS.forEach(u => {
+    const prev = taken.find(r => r.unit_id === u.id);
+    h += `<label class="tu"><span class="tn">${esc(u.name)}<i>safe ${u.min_f}&deg; to ${u.max_f}&deg;</i></span>`
+       + `<input class="tin" type="number" inputmode="decimal" step="0.1" placeholder="&deg;F"`
+       + ` data-unit="${u.id}" data-min="${u.min_f}" data-max="${u.max_f}"`
+       + ` value="${prev ? prev.reading_f : ''}"></label>`;
+  });
+  return h + `</div><div class="warn" id="tempWarn"></div>`;
+}
+function tempCheck(){
+  const warn = $('#tempWarn'); if (!warn) return [];
+  const bad = [];
+  document.querySelectorAll('.tin').forEach(i => {
+    const v = parseFloat(i.value);
+    const out = i.value.trim() !== '' && (v < parseFloat(i.dataset.min) || v > parseFloat(i.dataset.max));
+    i.classList.toggle('bad', out);
+    if (out) bad.push(i.closest('.tu').querySelector('.tn').childNodes[0].textContent.trim());
+  });
+  warn.textContent = bad.length
+    ? bad.join(', ') + (bad.length === 1 ? ' is' : ' are') + ' out of range \u2014 write what you did about it in the note before signing.'
+    : '';
+  return bad;
+}
+async function signTemps(ini, match){
+  const inputs = [].slice.call(document.querySelectorAll('.tin'));
+  const blank = inputs.filter(i => i.value.trim() === '');
+  if (blank.length) return toast(blank.length + ' unit' + (blank.length>1?'s':'') + ' still blank');
+  const bad = tempCheck();
+  const note = ($('#note') && $('#note').value.trim()) || null;
+  if (bad.length && !note) return toast('Out of range \u2014 add a note saying what you did');
+
+  const rows = inputs.map(i => {
+    const v = parseFloat(i.value);
+    return { business_date: bizDate(), unit_id: i.dataset.unit, task_id: sel.task_id,
+             segment: sel.segment, reading_f: v,
+             in_range: v >= parseFloat(i.dataset.min) && v <= parseFloat(i.dataset.max),
+             note: note, initials: ini, staff_name: match ? match.name : null };
+  });
+  await api('checklist_temp_readings?on_conflict=business_date,unit_id,segment', {
+    method:'POST',
+    headers: Object.assign({}, H, { Prefer:'resolution=merge-duplicates' }),
+    body: JSON.stringify(rows) });
+  return true;
+}
+
+/* ---------------- report a problem ----------------
+   Whoever finds the broken stool at 7pm is not the person who fixes it, and by
+   close they have forgotten. One button, any board, no task required. */
+function openReport(){
+  sel = null;
+  const mine = store('quarry_initials') || '';
+  $('#sheet').innerHTML = `<h3>Report a problem</h3>
+    <div class="note">Broken, leaking, out of stock, unsafe \u2014 anything that needs someone else to deal with it. Goes to the office and into tonight's report.</div>
+    <div class="lbl">What's wrong</div>
+    <textarea id="issueBody" maxlength="500" placeholder="Bar stool by the service end has a cracked leg"></textarea>
+    <div class="lbl">Where</div>
+    <input type="text" id="issueArea" maxlength="40" placeholder="Bar, lower patio, men's room...">
+    <div class="lbl">Your initials</div>
+    <input type="text" id="initials" maxlength="4" autocomplete="off" autocapitalize="characters" value="${esc(mine)}" placeholder="AB">
+    <div class="acts">
+      <button class="btn go" id="issueSend">Send</button>
+      <button class="btn red" id="issueUrgent">Urgent</button>
+    </div>
+    <div class="acts" style="margin-top:8px"><button class="btn q" id="close" style="flex:1">Cancel</button></div>`;
+  $('#scrim').classList.add('on'); $('#sheet').classList.add('on');
+  setTimeout(()=>{ const b=$('#issueBody'); if(b) b.focus(); }, 280);
+}
+async function sendIssue(urgent){
+  const body = ($('#issueBody').value||'').trim();
+  if (!body) return toast('Say what is wrong');
+  const ini = ($('#initials').value||'').trim().toUpperCase();
+  if (!ini) return toast('Enter your initials');
+  const match = STAFF.find(s => s.initials.toUpperCase() === ini);
+  $('#issueSend').disabled = true;
+  try{
+    await api('checklist_issues', { method:'POST', body: JSON.stringify({
+      business_date: bizDate(), role: active, body: body, urgent: !!urgent,
+      area: ($('#issueArea').value||'').trim() || null,
+      initials: ini, staff_name: match ? match.name : null }) });
+    store('quarry_initials', ini);
+    close(); toast(urgent ? 'Flagged urgent \u2014 thank you' : 'Reported \u2014 thank you');
+  }catch(e){ toast('Could not send \u2014 check wifi'); $('#issueSend').disabled = false; }
+}
+
 /* ---------------- sign-off ---------------- */
 function open(id){
   sel = TASKS.find(t => t.task_id === id); if (!sel) return;
@@ -449,6 +567,7 @@ function open(id){
         <div class="note">Rounds run ${hourName(sel.hour_start)} to ${hourName(sel.hour_end)}.</div>
         <div class="acts"><button class="btn q" id="close" style="flex:1">Close</button></div>`;
     } else {
+      if (sel.input_type === 'temps') h += tempFields();
       if (STAFF.length) h += `<div class="lbl">Who did it</div><div class="chips">` +
         STAFF.map(s => `<button class="chip${s.initials===mine?' on':''}" data-i="${esc(s.initials)}">${esc(s.initials)}</button>`).join('') + `</div>`;
       h += `<div class="lbl">Initials</div>
@@ -472,6 +591,15 @@ async function sign(status){
   const ini = ($('#initials').value||'').trim().toUpperCase();
   if (!ini) return toast('Enter your initials');
   const match = STAFF.find(s => s.initials.toUpperCase() === ini);
+
+  /* Readings first: if they don't save, the task must not look done. */
+  if (sel.input_type === 'temps' && status === 'done'){
+    $('#done').disabled = true;
+    let ok;
+    try { ok = await signTemps(ini, match); }
+    catch(e){ toast('Could not save the readings'); $('#done').disabled = false; return; }
+    if (!ok) { $('#done').disabled = false; return; }
+  }
   $('#done').disabled = true;
   const body = {
     task_id: sel.task_id, status, initials: ini,
@@ -510,6 +638,9 @@ document.addEventListener('click', async e => {
   const chip = e.target.closest('.chip');
   if (chip){ document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
              chip.classList.add('on'); $('#initials').value = chip.dataset.i; return; }
+  if (e.target.id === 'report')      return openReport();
+  if (e.target.id === 'issueSend')   return sendIssue(false);
+  if (e.target.id === 'issueUrgent') return sendIssue(true);
   if (e.target.id === 'done')    return sign('done');
   if (e.target.id === 'na')      return sign('na');
   if (e.target.id === 'undo')    return undo();
@@ -517,6 +648,7 @@ document.addEventListener('click', async e => {
   if (e.target.id === 'refresh') return refresh();
 });
 $('#scrim').addEventListener('click', close);
+document.addEventListener('input', e => { if (e.target.classList.contains('tin')) tempCheck(); });
 
 /* ---------------- boot ---------------- */
 const forced = new URLSearchParams(location.search).get('role');

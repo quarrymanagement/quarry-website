@@ -42,6 +42,7 @@
 
   var TASKS = [], DUE = [], STAFF = [];
   var view = "tasks", role = "bartender", editId = null, archiveDate = null;
+  var ISSUES = [], UNITS = [], READINGS = [];
 
   /* ------------------------------------------------ helpers */
   function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;")
@@ -164,7 +165,10 @@
 
   /* ------------------------------------------------ chrome */
   function renderViews(){
-    var v = [["tasks","Tasks"],["day","Today"],["archive","Archive"],["staff","Staff"]];
+    var openCount = ISSUES.filter(function(i){ return i.status === "open"; }).length;
+    var v = [["tasks","Tasks"],["day","Today"],["archive","Archive"],
+             ["issues", "Issues" + (openCount ? " (" + openCount + ")" : "")],
+             ["temps","Temps"],["staff","Staff"]];
     document.getElementById("ckViews").innerHTML = v.map(function(x){
       return '<button class="ck-btn ck-view'+(view===x[0]?" on":"")+'" data-view="'+x[0]+'">'+x[1]+'</button>';
     }).join("") + '<span style="flex:1"></span><button class="ck-btn" id="ckRefresh">Refresh</button>';
@@ -403,6 +407,91 @@
     body.innerHTML = head + '<div class="ck-card">'+sum+'</div>' + hrs + miss + sig + fc;
   }
 
+  /* ------------------------------------------------ ISSUES view */
+  function renderIssues(){
+    var open = ISSUES.filter(function(i){ return i.status === "open"; });
+    var done = ISSUES.filter(function(i){ return i.status === "resolved"; }).slice(0, 40);
+
+    function card(i){
+      var when = new Date(i.created_at).toLocaleString("en-US",
+        { month:"short", day:"numeric", hour:"numeric", minute:"2-digit" });
+      var who = [i.staff_name || i.initials, i.area, roleLabel(i.role || "")].filter(Boolean).join(" \u00b7 ");
+      return '<div class="ck-card" style="display:flex;gap:1rem;align-items:flex-start;flex-wrap:wrap'
+        + (i.urgent && i.status === "open" ? ";border-color:#c0504d" : "") + '">'
+        + '<div style="flex:1 1 320px;min-width:220px">'
+        +   '<div style="font-weight:600;font-size:.92rem'+(i.urgent && i.status==="open"?";color:#c0504d":"")+'">'
+        +     (i.urgent ? '<span class="ck-tag ck-late">urgent</span> ' : '') + esc(i.body) + '</div>'
+        +   '<div class="ck-meta">' + esc(when) + (who ? ' \u00b7 ' + esc(who) : '')
+        +     (i.resolution ? ' \u00b7 <b>' + esc(i.resolution) + '</b>' : '') + '</div>'
+        + '</div>'
+        + '<div style="display:flex;gap:5px">'
+        +   (i.status === "open"
+              ? '<button class="ck-btn sm on ck-resolve" data-id="'+i.id+'">Mark fixed</button>'
+              : '<button class="ck-btn sm ck-reopen" data-id="'+i.id+'">Reopen</button>')
+        + '</div></div>';
+    }
+
+    document.getElementById("ckBody").innerHTML =
+      '<div class="ck-card" style="margin-bottom:1.4rem;font-size:.86rem;color:var(--text-secondary,#5b6270)">'
+      + 'Anyone can file one from the <b>Report a problem</b> button on any iPad. '
+      + 'Everything reported during a shift also lands in that night\u2019s email.</div>'
+      + '<div class="ck-h" style="margin-top:0">Open \u2014 ' + open.length + '</div>'
+      + (open.length ? open.map(card).join("")
+         : '<div class="ck-card" style="text-align:center;color:var(--text-secondary,#5b6270)">Nothing outstanding.</div>')
+      + (done.length ? '<div class="ck-h">Fixed</div>' + done.map(card).join("") : "");
+  }
+
+  /* ------------------------------------------------ TEMPS view */
+  function renderTemps(){
+    var byUnit = {};
+    READINGS.forEach(function(r){ (byUnit[r.unit_id] = byUnit[r.unit_id] || []).push(r); });
+    function cell(uid, seg){
+      var r = (byUnit[uid] || []).filter(function(x){ return x.segment === seg; })[0];
+      if (!r) return '<span style="color:#a2988a">\u2014</span>';
+      return '<b style="color:' + (r.in_range ? "inherit" : "#c0504d") + '">' + r.reading_f + '\u00b0</b>';
+    }
+    var bad = READINGS.filter(function(r){ return !r.in_range; });
+
+    document.getElementById("ckBody").innerHTML =
+      '<div class="ck-card" style="padding:1.3rem 1.4rem;margin-bottom:1.4rem">'
+      + '<div style="font:700 .7rem/1 inherit;letter-spacing:.14em;text-transform:uppercase;color:var(--text-secondary,#5b6270);margin-bottom:1rem">Add a unit</div>'
+      + '<div class="ck-row">'
+      +   '<label style="flex:2 1 220px"><span class="ck-lbl">Name</span><input id="uName" class="ck-in" placeholder="Walk-in cooler"></label>'
+      +   '<label style="flex:1 1 140px"><span class="ck-lbl">Type</span><select id="uKind" class="ck-in">'
+      +     '<option value="cooler">Cooler</option><option value="freezer">Freezer</option>'
+      +     '<option value="hot">Hot hold</option><option value="other">Other</option></select></label>'
+      +   '<label style="flex:0 1 120px"><span class="ck-lbl">Safe low \u00b0F</span><input id="uMin" class="ck-in" type="number" value="33"></label>'
+      +   '<label style="flex:0 1 120px"><span class="ck-lbl">Safe high \u00b0F</span><input id="uMax" class="ck-in" type="number" value="41"></label>'
+      + '</div>'
+      + '<div style="margin-top:1rem"><button class="ck-btn on" id="ckAddUnit">Add unit</button></div>'
+      + '<div style="margin-top:.9rem;font-size:.78rem;color:var(--text-secondary,#5b6270)">'
+      + 'The seeded list is a guess \u2014 rename these to the units you actually have, and delete the ones you don\u2019t. '
+      + 'Coolers are 33\u201341\u00b0F, freezers \u221220\u201310\u00b0F by default.</div></div>'
+
+      + (bad.length ? '<div class="ck-card" style="border-color:#c0504d;color:#c0504d;margin-bottom:1.4rem">'
+          + '<b>' + bad.length + ' reading' + (bad.length===1?"":"s") + ' out of range on this date.</b>'
+          + bad.map(function(r){
+              return '<div style="font-size:.84rem;margin-top:.3rem">'
+                + esc((r.checklist_temp_units && r.checklist_temp_units.name) || "Unit")
+                + ' \u2014 ' + r.reading_f + '\u00b0' + (r.note ? ' \u00b7 ' + esc(r.note) : ' \u00b7 no note') + '</div>';
+            }).join("") + '</div>' : "")
+
+      + (UNITS.length
+          ? '<table><thead><tr><th>Unit</th><th>Safe range</th><th class="n">Open</th><th class="n">Mid</th><th class="n">Close</th><th></th></tr></thead><tbody>'
+            + UNITS.map(function(u){
+                return '<tr'+(u.active?'':' style="opacity:.5"')+'><td style="font-weight:600">'+esc(u.name)+'</td>'
+                  + '<td>'+u.min_f+'\u00b0 to '+u.max_f+'\u00b0</td>'
+                  + '<td class="n">'+cell(u.id,"open")+'</td>'
+                  + '<td class="n">'+cell(u.id,"shift")+'</td>'
+                  + '<td class="n">'+cell(u.id,"close")+'</td>'
+                  + '<td class="n"><button class="ck-btn sm danger ck-delunit" data-id="'+u.id+'">Remove</button></td></tr>';
+              }).join("") + '</tbody></table>'
+          : '<div class="ck-card" style="text-align:center;color:var(--text-secondary,#5b6270)">No units yet.</div>')
+      + '<div style="margin-top:.9rem;font-size:.78rem;color:var(--text-secondary,#5b6270)">'
+      + 'Readings shown are for ' + esc(view === "archive" ? (archiveDate || today()) : today())
+      + '. Use Archive to change the date.</div>';
+  }
+
   /* ------------------------------------------------ STAFF view */
   function renderStaff(){
     document.getElementById("ckBody").innerHTML =
@@ -523,6 +612,42 @@
     if ((el = e.target.closest(".ck-toggle"))) return toggle(el.getAttribute("data-id"));
     if ((el = e.target.closest(".ck-up")))    return move(el.getAttribute("data-id"), -1);
     if ((el = e.target.closest(".ck-down")))  return move(el.getAttribute("data-id"), 1);
+    if ((el = e.target.closest(".ck-resolve"))){
+      var rid = el.getAttribute("data-id");
+      var what = window.prompt("What was done about it? (optional)") || null;
+      api("checklist_issues?id=eq."+rid, { method:"PATCH", body: JSON.stringify({
+        status:"resolved", resolved_at:new Date().toISOString(), resolution: what }) })
+        .then(function(){ msg("Marked fixed."); load(); })
+        .catch(function(err){ msg("Could not update: "+err.message, true); });
+      return;
+    }
+    if ((el = e.target.closest(".ck-reopen"))){
+      api("checklist_issues?id=eq."+el.getAttribute("data-id"), { method:"PATCH",
+        body: JSON.stringify({ status:"open", resolved_at:null, resolution:null }) })
+        .then(function(){ msg("Reopened."); load(); })
+        .catch(function(err){ msg("Could not update: "+err.message, true); });
+      return;
+    }
+    if (e.target.id === "ckAddUnit"){
+      var un = document.getElementById("uName").value.trim();
+      if (!un) return msg("Name the unit first.", true);
+      api("checklist_temp_units", { method:"POST", body: JSON.stringify({
+        name: un,
+        kind: document.getElementById("uKind").value,
+        min_f: Number(document.getElementById("uMin").value),
+        max_f: Number(document.getElementById("uMax").value),
+        sort_order: (UNITS.length + 1) * 10 })})
+        .then(function(){ msg("Unit added."); load(); })
+        .catch(function(err){ msg("Could not add: "+err.message, true); });
+      return;
+    }
+    if ((el = e.target.closest(".ck-delunit"))){
+      if (!window.confirm("Remove this unit? Past readings for it go too.")) return;
+      api("checklist_temp_units?id=eq."+el.getAttribute("data-id"), { method:"DELETE" })
+        .then(function(){ msg("Removed."); load(); })
+        .catch(function(err){ msg("Could not remove: "+err.message, true); });
+      return;
+    }
     if ((el = e.target.closest(".ck-delstaff"))){
       if (!window.confirm("Remove from the roster?")) return;
       api("checklist_staff?id=eq."+el.getAttribute("data-id"), { method:"DELETE" })
@@ -562,6 +687,8 @@
     if (view === "tasks")        renderTasks();
     else if (view === "day")     renderDay(false);
     else if (view === "archive") renderDay(true);
+    else if (view === "issues")  renderIssues();
+    else if (view === "temps")   renderTemps();
     else                         renderStaff();
   }
 
@@ -574,9 +701,14 @@
       api("checklist_tasks?select=*&order=role,segment,sort_order"),
       api("rpc/checklist_due", { method:"POST", body: JSON.stringify({ p_date: date }) }),
       api("checklist_staff?select=*&order=name"),
-      api("checklist_logs?select=task_id,slot&slot=not.is.null&business_date=eq." + (date || today()))
+      api("checklist_logs?select=task_id,slot&slot=not.is.null&business_date=eq." + (date || today())),
+      api("checklist_issues?select=*&order=status.asc,urgent.desc,created_at.desc&limit=200"),
+      api("checklist_temp_units?select=*&order=sort_order"),
+      api("checklist_temp_readings?select=*,checklist_temp_units(name,min_f,max_f)&business_date=eq."
+          + (date || today()) + "&order=taken_at.asc")
     ]).then(function(res){
       TASKS = res[0] || []; DUE = res[1] || []; STAFF = res[2] || [];
+      ISSUES = res[4] || []; UNITS = res[5] || []; READINGS = res[6] || [];
       var slots = res[3] || [];
       DUE.forEach(function(d){
         if (d.recurrence === "hourly")
