@@ -19,6 +19,7 @@
 
 const crypto = require('crypto');
 const { readBlob, writeBlob } = require('./_blobs');
+const { syncDay } = require('./_venue-sync-shared');
 
 const ADMIN_SECRET = process.env.ADMIN_SESSION_SECRET
   || ('qrr-session-' + (process.env.GITHUB_TOKEN || '').slice(-24));
@@ -89,6 +90,10 @@ exports.handler = async (event) => {
       source: m.source || (m.paymentId ? 'square' : 'admin'),
     });
     await writeBlob(path, { bookings });
+
+    // Mirror onto the venue calendar right away (best effort, capped at 6s so a
+    // slow database can never hang this tool; the 10-minute sync is the backstop).
+    try { await Promise.race([syncDay('pavilion', dateKey), new Promise((r) => setTimeout(r, 6000))]); } catch (_) { /* backstop sync will catch it */ }
 
     return { statusCode: 200, headers: CORS, body: JSON.stringify({ ok: true, path, paymentId, bookingCount: bookings.length }) };
   } catch (e) {
