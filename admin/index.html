@@ -4965,6 +4965,7 @@
                                     <th style="padding:10px;text-align:left;">Selling/Offering</th>
                                     <th style="padding:10px;text-align:left;">Status</th>
                                     <th style="padding:10px;text-align:left;">Paid</th>
+                                    <th style="padding:10px;text-align:center;" title="Tick once this vendor has been featured on social media">Social Post</th>
                                     <th style="padding:10px;text-align:left;"></th>
                                 </tr>
                             </thead>
@@ -15407,7 +15408,7 @@ function hashCode(str) {
         window.loadQuarryFestVendors = async function() {
             const tbody = document.getElementById('qfTableBody');
             const stats = document.getElementById('qfStats');
-            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-secondary);padding:2rem;">Loading&hellip;</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-secondary);padding:2rem;">Loading&hellip;</td></tr>';
 
             try {
                 const token = localStorage.getItem('quarryAdminToken') || '';
@@ -15417,7 +15418,7 @@ function hashCode(str) {
                 const vendors = body.vendors || [];
 
                 if (!vendors.length) {
-                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-secondary);padding:2rem;">No vendor registrations yet.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-secondary);padding:2rem;">No vendor registrations yet.</td></tr>';
                     stats.textContent = '0 vendors';
                     return;
                 }
@@ -15425,7 +15426,8 @@ function hashCode(str) {
                 const booked = vendors.filter(v => v.status === 'booked');
                 const refunded = vendors.filter(v => v.status === 'refunded');
                 const pending = vendors.filter(v => v.status !== 'booked' && v.status !== 'refunded');
-                stats.innerHTML = `<b>${vendors.length}</b> total &nbsp;·&nbsp; <b style="color:#2e7d32;">${booked.length}</b> booked &nbsp;·&nbsp; <b style="color:#d97706;">${pending.length}</b> pending payment` + (refunded.length ? ` &nbsp;·&nbsp; <b style="color:#c62828;">${refunded.length}</b> refunded` : '') + ` &nbsp;·&nbsp; <b>$${(booked.length * 25).toFixed(2)}</b> collected`;
+                stats.innerHTML = `<b>${vendors.length}</b> total &nbsp;·&nbsp; <b style="color:#2e7d32;">${booked.length}</b> booked &nbsp;·&nbsp; <b style="color:#d97706;">${pending.length}</b> pending payment` + (refunded.length ? ` &nbsp;·&nbsp; <b style="color:#c62828;">${refunded.length}</b> refunded` : '') + ` &nbsp;·&nbsp; <b>$${(booked.length * 25).toFixed(2)}</b> collected`
+                    + ` &nbsp;·&nbsp; <b style="color:#2e7d32;">${booked.filter(v => v.socialPosted).length}</b>/${booked.length} posted on social`;
 
                 tbody.innerHTML = vendors.map(v => `
                     <tr style="border-top:1px solid var(--border-subtle);">
@@ -15436,6 +15438,7 @@ function hashCode(str) {
                         <td style="padding:8px 10px;max-width:220px;">${escapeHtml(v.notes || '—')}</td>
                         <td style="padding:8px 10px;">${v.status === 'booked' ? '<span style="color:#2e7d32;">Booked</span>' : v.status === 'refunded' ? '<span style="color:#c62828;">Refunded</span>' : '<span style="color:#d97706;">Pending payment</span>'}</td>
                         <td style="padding:8px 10px;">${escapeHtml(v.amountPaid || '—')}</td>
+                        <td style="padding:8px 10px;text-align:center;"><input type="checkbox" ${v.socialPosted ? 'checked' : ''} title="${v.socialPosted && v.socialPostedAt ? 'Posted ' + escapeHtml(new Date(v.socialPostedAt).toLocaleDateString()) : 'Not posted yet'}" onchange="toggleQuarryFestSocial('${escapeHtml(v.vendorId)}', this)" style="width:18px;height:18px;cursor:pointer;accent-color:#2e7d32;"></td>
                         <td style="padding:8px 10px;white-space:nowrap;">
                             ${v.status !== 'booked' && v.status !== 'refunded' ? `<button class="btn-secondary" style="padding:4px 10px;font-size:0.78rem;margin-right:4px;" onclick="markQuarryFestPaid('${escapeHtml(v.vendorId)}', this)">Mark Paid (comp)</button>` : ''}
                             <button class="btn-secondary" style="padding:4px 10px;font-size:0.78rem;" onclick="removeQuarryFestVendor('${escapeHtml(v.vendorId)}', this)">Remove</button>
@@ -15443,7 +15446,7 @@ function hashCode(str) {
                     </tr>
                 `).join('');
             } catch (e) {
-                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#c33;padding:2rem;">Failed to load: ${escapeHtml(e.message)}<br><button class="btn-secondary" onclick="loadQuarryFestVendors()" style="margin-top:0.5rem;">Retry</button></td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:#c33;padding:2rem;">Failed to load: ${escapeHtml(e.message)}<br><button class="btn-secondary" onclick="loadQuarryFestVendors()" style="margin-top:0.5rem;">Retry</button></td></tr>`;
             }
         };
 
@@ -15463,6 +15466,26 @@ function hashCode(str) {
                     alert('Failed: ' + e.message);
                 }
             });
+        };
+
+        window.toggleQuarryFestSocial = async function(vendorId, box) {
+            const posted = box.checked;
+            box.disabled = true;
+            try {
+                const token = localStorage.getItem('quarryAdminToken') || '';
+                const r = await fetch('/.netlify/functions/quarryfest-vendor-social', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token, vendorId, posted })
+                });
+                const body = await r.json();
+                if (!body.ok) throw new Error(body.error || 'Failed to save');
+                await loadQuarryFestVendors();
+            } catch (e) {
+                box.checked = !posted;
+                box.disabled = false;
+                alert('Could not save the social post checkbox: ' + e.message);
+            }
         };
 
         window.removeQuarryFestVendor = function(vendorId, btn) {
