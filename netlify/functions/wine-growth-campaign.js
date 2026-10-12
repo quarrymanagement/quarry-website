@@ -318,7 +318,13 @@ async function sendBulkEmail(recipients, subject, htmlBody) {
     const chunk = recipients.slice(i, i + BATCH_SIZE);
     const personalizations = chunk.map((r) => ({
       to: [{ email: r.email }],
-      substitutions: { '{firstName}': r.firstName || '' },
+      substitutions: { '{firstName}': r.firstName || '', '{unsubEmail}': encodeURIComponent(r.email) },
+      // One-click unsubscribe in Gmail / Outlook / Apple Mail, same endpoint
+      // the footer link uses (SendGrid global suppression).
+      headers: {
+        'List-Unsubscribe': '<' + UNSUB_URL + encodeURIComponent(r.email) + '>, <mailto:management@thequarrystl.com?subject=unsubscribe>',
+        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+      },
     }));
     try {
       await sendGridBulk(personalizations, subject, htmlBody);
@@ -338,8 +344,18 @@ function heroHtml() {
 <div style="font-family:Georgia,serif;color:#F5F0E8;font-size:10px;letter-spacing:3px;text-transform:uppercase;opacity:0.8;margin-top:2px;">New Melle, Missouri</div>
 </div>`;
 }
+const UNSUB_URL = 'https://www.thequarrystl.com/.netlify/functions/unsubscribe?email=';
+// Every wine email needs a visible unsubscribe link (CAN-SPAM, and guests
+// asked for it). {unsubEmail} is filled per recipient in sendBulkEmail.
+function footerHtml() {
+  return `<div style="border-top:1px solid #E4DACB;margin:28px 0 0;padding:18px 10px 6px;text-align:center;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.7;color:#8A7A66;">
+The Quarry &middot; 3960 Highway Z, New Melle, MO 63385<br>
+You're receiving this because you signed up for Rock &amp; Vine Wine Club updates or visited The Quarry.<br>
+<a href="${UNSUB_URL}{unsubEmail}" style="color:#8A7A66;text-decoration:underline;">Unsubscribe</a> &nbsp;&middot;&nbsp; <a href="https://www.thequarrystl.com/privacy.html" style="color:#8A7A66;text-decoration:underline;">Privacy Policy</a>
+</div>`;
+}
 function wrap(inner) {
-  return `<div style="max-width:600px;margin:0 auto;">${heroHtml()}${inner}</div>`;
+  return `<div style="max-width:600px;margin:0 auto;">${heroHtml()}${inner}${footerHtml()}</div>`;
 }
 const P = 'font-family:Georgia,serif;font-size:15px;line-height:1.7;color:#2C1A0E;';
 const H2 = 'font-family:Georgia,serif;color:#2C1A0E;margin:0 0 14px;';
