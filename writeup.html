@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Acknowledge Notice · The Quarry</title>
+<link rel="icon" href="/favicon-32.png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --charcoal:#1A1A1A; --brown:#2C1A0E; --cream:#F5F0E8; --gold:#B8933A; --gold2:#D4AF6A; --ink:#1f1b16; --muted:#7a6e60; --line:#e6dfd3; --bad:#a52a1e; --ok:#176b34; }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;font-family:Montserrat,-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:var(--cream);color:var(--ink);line-height:1.5;}
+  .top{background:var(--charcoal);padding:16px 18px;display:flex;align-items:center;gap:12px;}
+  .top img{width:34px;height:34px;}
+  .top .brand{font-family:'Playfair Display',Georgia,serif;color:var(--gold);letter-spacing:3px;font-size:18px;}
+  .top .tag{margin-left:auto;color:#cfc4b2;font-size:11px;text-transform:uppercase;letter-spacing:1px;text-align:right;}
+  .wrap{max-width:720px;margin:0 auto;padding:18px 16px 60px;}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:14px;}
+  h1{font-family:'Playfair Display',Georgia,serif;font-size:24px;margin:0 0 4px;color:var(--brown);}
+  .sub{color:var(--muted);font-size:13px;}
+  .banner{background:#fff8e6;border:1px solid #f0dca6;color:#6b4e00;border-radius:12px;padding:12px 14px;font-size:14px;margin-bottom:14px;}
+  .kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px 16px;}
+  .kv span{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);}
+  .kv b{font-size:14.5px;font-weight:600;}
+  .lvl{display:inline-block;margin-top:12px;background:var(--brown);color:#fff;border-radius:999px;padding:4px 12px;font-size:12px;font-weight:600;}
+  .sec-l{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--gold);margin:16px 0 4px;border-bottom:1px solid var(--line);padding-bottom:4px;}
+  .sec-l:first-child{margin-top:0;}
+  .txt{white-space:pre-wrap;font-size:15px;margin:6px 0 0;}
+  label.l{display:block;font-weight:600;font-size:13.5px;margin:14px 0 6px;}
+  textarea,input[type=text]{width:100%;border:1px solid #d5cbbb;border-radius:10px;padding:12px;font-size:16px;font-family:inherit;background:#fffdf9;}
+  textarea{min-height:110px;resize:vertical;}
+  textarea:focus,input:focus{outline:2px solid rgba(184,147,58,.4);border-color:var(--gold);}
+  .sig{position:relative;border:1.5px dashed #c9bda9;border-radius:12px;background:#fffdf8;}
+  .sig canvas{display:block;width:100%;height:180px;touch-action:none;}
+  .sig .ph{position:absolute;left:14px;bottom:12px;color:#b9ad99;font-size:12px;pointer-events:none;}
+  .sig .clr{position:absolute;top:8px;right:8px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer;font-family:inherit;}
+  .consent{display:flex;gap:10px;align-items:flex-start;margin-top:16px;font-size:13.5px;color:#3e362c;background:var(--cream);border-radius:10px;padding:12px;}
+  .consent input{width:22px;height:22px;flex:none;margin-top:1px;accent-color:var(--brown);}
+  .btn{display:block;width:100%;margin-top:16px;background:var(--brown);color:#fff;border:0;border-radius:12px;padding:16px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;}
+  .btn:disabled{opacity:.45;cursor:not-allowed;}
+  .note{font-size:12.5px;color:var(--muted);margin-top:10px;}
+  .err{color:var(--bad);font-size:14px;margin-top:10px;min-height:1px;}
+  .state{text-align:center;padding:40px 22px;}
+  .state h2{font-family:'Playfair Display',Georgia,serif;color:var(--brown);margin:8px 0;}
+  .check{width:64px;height:64px;border-radius:50%;background:#dcf5e3;color:var(--ok);display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto;}
+  .spinner{width:34px;height:34px;border:4px solid var(--line);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 12px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .foot{text-align:center;color:var(--muted);font-size:11px;margin-top:20px;}
+</style>
+</head>
+<body>
+<div class="top"><img src="/assets/quarry-q-logo.png" alt=""><span class="brand">THE QUARRY</span><span class="tag">Personnel<br>Notice</span></div>
+<div class="wrap" id="app"><div class="card state"><div class="spinner"></div><p>Loading…</p></div></div>
+<div class="foot">The Quarry · 3960 Highway Z, New Melle, MO · Confidential</div>
+
+<script>
+(function () {
+  'use strict';
+  var FN = 'https://nkulhtalltbieicvmmad.supabase.co/functions/v1/writeups';
+  var KEY = 'sb_publishable_FQK59Bn8P2jV8yGL0nPi7w_jVHFMBSl';
+  var qs = new URLSearchParams(location.search);
+  var TOKEN = qs.get('t') || '';
+  var IN_PERSON = qs.get('in_person') === '1';
+  var app = document.getElementById('app');
+  var pad = null;
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function fmtDate(d) { if (!d) return ''; var dt = new Date(String(d).length <= 10 ? d + 'T12:00:00' : d); return dt.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }); }
+  function call(body) {
+    return fetch(FN, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: KEY, Authorization: 'Bearer ' + KEY }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json(); }).catch(function () { return { error: 'Connection problem — check your signal and try again.' }; });
+  }
+  function stateCard(icon, title, msg) {
+    app.innerHTML = '<div class="card state">' + icon + '<h2>' + esc(title) + '</h2><p class="sub" style="font-size:14.5px">' + msg + '</p></div>';
+  }
+
+  if (!TOKEN) { stateCard('', 'Link incomplete', 'This link is missing part of its address. Open it again from your email or text.'); return; }
+
+  call({ action: 'ack_load', token: TOKEN, in_person: IN_PERSON }).then(function (r) {
+    if (r.error) { stateCard('', r.voided ? 'Document withdrawn' : 'Can’t open this document', esc(r.error) + '<br><br>Questions? Talk to a manager.'); return; }
+    var w = r.writeup;
+    if (w.status === 'acknowledged') { stateCard('<div class="check">✓</div>', 'Already acknowledged', 'You acknowledged this notice on ' + esc(fmtDate(w.acknowledged_at)) + '. A copy was emailed to you if we have your email; otherwise ask a manager for one.'); return; }
+    if (w.status === 'refused') { stateCard('', 'This notice is closed', 'This notice has already been closed out. Talk to a manager if you have questions.'); return; }
+    render(w);
+  });
+
+  function sec(label, val) { return val ? '<div class="sec-l">' + esc(label) + '</div><p class="txt">' + esc(val) + '</p>' : ''; }
+
+  function render(w) {
+    var first = String(w.employee_name || '').split(' ')[0];
+    var h = '';
+    if (IN_PERSON) h += '<div class="banner"><b>Manager:</b> hand this device to ' + esc(first) + ' to read and sign.</div>';
+    h += '<div class="card"><h1>' + esc(w.level) + '</h1><div class="sub">Ref ' + esc(w.ref_no) + ' · Issued ' + esc(fmtDate(w.issued_at)) + ' by ' + esc([w.issued_by_name, w.issued_by_title].filter(Boolean).join(', ')) + '</div>' +
+      '<div class="kv" style="margin-top:16px">' +
+      '<div><span>Employee</span><b>' + esc(w.employee_name) + '</b></div>' +
+      (w.employee_position ? '<div><span>Position</span><b>' + esc(w.employee_position) + '</b></div>' : '') +
+      (w.incident_date ? '<div><span>Date of incident</span><b>' + esc(fmtDate(w.incident_date)) + (w.incident_time ? ' · ' + esc(w.incident_time) : '') + '</b></div>' : '') +
+      (w.incident_location ? '<div><span>Location / shift</span><b>' + esc(w.incident_location) + '</b></div>' : '') +
+      '<div><span>Category</span><b>' + esc(w.category) + '</b></div>' +
+      '</div></div>';
+    h += '<div class="card">' +
+      sec('What happened', w.description) + sec('Policy or expectation', w.policy_violated) + sec('Prior conversations / warnings', w.prior_actions) +
+      sec('Your explanation (as noted by your manager)', w.employee_explanation) + (w.level_key === 'suspension' ? sec('Suspension', w.suspension_days) : '') +
+      sec('What needs to change', w.expected_improvement) + sec('If it isn’t corrected', w.consequences) +
+      (w.review_date ? sec('Follow-up review', fmtDate(w.review_date)) : '') + '</div>';
+
+    h += '<div class="card"><h1 style="font-size:20px">Your acknowledgment</h1>' +
+      '<p class="sub" style="font-size:14px;color:#3e362c">Signing confirms you <b>received and reviewed</b> this notice. <b>It does not mean you agree with it.</b> If you see it differently, say so below — your comments become part of the record.</p>' +
+      '<label class="l" for="cm">Your comments <span style="font-weight:400;color:var(--muted)">(optional)</span></label>' +
+      '<textarea id="cm" maxlength="5000" placeholder="Anything you want on the record."></textarea>' +
+      '<label class="l" for="nm">Type your full name</label>' +
+      '<input type="text" id="nm" autocomplete="name" value="">' +
+      '<label class="l">Sign below</label>' +
+      '<div class="sig"><canvas id="sg"></canvas><span class="ph" id="sgph">Sign with your finger</span><button type="button" class="clr" id="sgc">Clear</button></div>' +
+      '<label class="consent"><input type="checkbox" id="ok"><span>I have received and reviewed this notice. I understand my signature means acknowledgment, not agreement, and I agree to sign electronically.</span></label>' +
+      '<button class="btn" id="go" disabled>Sign &amp; acknowledge</button><div class="err" id="er"></div>' +
+      '<p class="note">We record the date, time, and device used to sign. You’ll get a PDF copy by email if we have your address on file.</p></div>';
+    app.innerHTML = h;
+
+    pad = makePad(document.getElementById('sg'));
+    var nm = document.getElementById('nm'), ok = document.getElementById('ok'), go = document.getElementById('go');
+    function check() { go.disabled = !(nm.value.trim().length >= 2 && ok.checked && !pad.isEmpty()); }
+    nm.oninput = check; ok.onchange = check; pad.onchange = check;
+    document.getElementById('sgc').onclick = function () { pad.clear(); document.getElementById('sgph').style.display = ''; check(); };
+    go.onclick = function () {
+      go.disabled = true; go.textContent = 'Submitting…';
+      document.getElementById('er').textContent = '';
+      call({ action: 'ack_submit', token: TOKEN, in_person: IN_PERSON, signed_name: nm.value.trim(), signature: pad.toDataURL(), comments: document.getElementById('cm').value, consent: ok.checked })
+        .then(function (r) {
+          if (r.error && !r.done) { go.textContent = 'Sign & acknowledge'; check(); document.getElementById('er').textContent = r.error; return; }
+          window.scrollTo(0, 0);
+          stateCard('<div class="check">✓</div>', 'Thanks, ' + first + ' — you’re all set',
+            'Your acknowledgment was recorded.' + (IN_PERSON ? '<br><br><b>Please hand the device back to your manager.</b>' : ' A PDF copy will be emailed to you if we have your address on file.'));
+        });
+    };
+  }
+
+  function makePad(canvas) {
+    var ctx, drawing = false, last = null, dirty = false, api = { onchange: null };
+    function size() {
+      var r = canvas.getBoundingClientRect(), d = window.devicePixelRatio || 1;
+      canvas.width = Math.max(1, r.width * d); canvas.height = Math.max(1, r.height * d);
+      ctx = canvas.getContext('2d'); ctx.scale(d, d);
+      ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#111'; ctx.fillStyle = '#111';
+      dirty = false;
+    }
+    function pt(e) { var r = canvas.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
+    canvas.addEventListener('pointerdown', function (e) {
+      e.preventDefault(); canvas.setPointerCapture(e.pointerId); drawing = true; last = pt(e);
+      ctx.beginPath(); ctx.arc(last.x, last.y, 1.1, 0, Math.PI * 2); ctx.fill();
+      document.getElementById('sgph').style.display = 'none';
+    });
+    canvas.addEventListener('pointermove', function (e) {
+      if (!drawing) return; var p = pt(e);
+      ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(p.x, p.y); ctx.stroke(); last = p;
+      if (!dirty) { dirty = true; if (api.onchange) api.onchange(); }
+    });
+    ['pointerup', 'pointercancel'].forEach(function (ev) { canvas.addEventListener(ev, function () { drawing = false; if (api.onchange) api.onchange(); }); });
+    size();
+    var lastW = canvas.getBoundingClientRect().width;
+    window.addEventListener('resize', function () { var w = canvas.getBoundingClientRect().width; if (Math.abs(w - lastW) > 20 && !dirty) { lastW = w; size(); } });
+    api.clear = size;
+    api.isEmpty = function () { return !dirty; };
+    api.toDataURL = function () { return canvas.toDataURL('image/png'); };
+    return api;
+  }
+})();
+</script>
+</body>
+</html>
