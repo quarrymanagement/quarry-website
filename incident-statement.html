@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Incident Statement · The Quarry</title>
+<link rel="icon" href="/favicon-32.png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --charcoal:#1A1A1A; --brown:#2C1A0E; --cream:#F5F0E8; --gold:#B8933A; --gold2:#D4AF6A; --ink:#1f1b16; --muted:#7a6e60; --line:#e6dfd3; --bad:#a52a1e; --ok:#176b34; }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;font-family:Montserrat,-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:var(--cream);color:var(--ink);line-height:1.5;}
+  .top{background:var(--charcoal);padding:14px 18px;display:flex;align-items:center;gap:12px;}
+  .top img{width:32px;height:32px;}
+  .top .brand{font-family:'Playfair Display',Georgia,serif;color:var(--gold);letter-spacing:3px;font-size:17px;}
+  .top .tag{margin-left:auto;color:#cfc4b2;font-size:11px;text-transform:uppercase;letter-spacing:1px;text-align:right;}
+  .wrap{max-width:700px;margin:0 auto;padding:18px 16px 70px;}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:14px;}
+  h1{font-family:'Playfair Display',Georgia,serif;font-size:24px;margin:0 0 6px;color:var(--brown);line-height:1.2;}
+  h2{font-family:'Playfair Display',Georgia,serif;font-size:19px;margin:0 0 10px;color:var(--brown);}
+  .sub{color:var(--muted);font-size:14px;}
+  .kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px 16px;margin-top:14px;}
+  .kv span{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);}
+  .kv b{font-size:14.5px;font-weight:600;}
+  .rules{background:#fff8e6;border:1px solid #f0dca6;color:#5c4300;border-radius:12px;padding:12px 14px;font-size:14px;}
+  .rules ul{margin:6px 0 0;padding-left:18px;} .rules li{margin:3px 0;}
+  label.l{display:block;font-weight:600;font-size:14.5px;margin:18px 0 6px;}
+  label.l .opt{font-weight:400;color:var(--muted);font-size:13px;}
+  label.l .req{color:var(--bad);}
+  textarea,input[type=text]{width:100%;border:1px solid #d5cbbb;border-radius:10px;padding:12px;font-size:16px;font-family:inherit;background:#fffdf9;}
+  textarea{min-height:110px;resize:vertical;line-height:1.5;}
+  textarea:focus,input:focus{outline:2px solid rgba(184,147,58,.4);border-color:var(--gold);}
+  .seen{display:flex;flex-direction:column;gap:8px;}
+  .seen button{text-align:left;background:#fffdf9;border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;font:inherit;font-size:15px;color:var(--ink);cursor:pointer;}
+  .seen button.on{border-color:var(--brown);background:#faf5ec;font-weight:600;}
+  .photos{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;}
+  .ph{position:relative;width:96px;height:96px;border-radius:10px;overflow:hidden;background:#eee;}
+  .ph img{width:100%;height:100%;object-fit:cover;display:block;}
+  .ph button{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);color:#fff;border:0;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:14px;line-height:24px;padding:0;}
+  .ph .busy{position:absolute;inset:0;background:rgba(255,255,255,.7);display:flex;align-items:center;justify-content:center;font-size:12px;}
+  .addph{width:96px;height:96px;border:1.5px dashed #c9bda9;border-radius:10px;background:#fffdf8;display:flex;align-items:center;justify-content:center;text-align:center;font-size:12.5px;color:var(--muted);cursor:pointer;}
+  .sig{position:relative;border:1.5px dashed #c9bda9;border-radius:12px;background:#fffdf8;}
+  .sig canvas{display:block;width:100%;height:170px;touch-action:none;}
+  .sig .phd{position:absolute;left:14px;bottom:12px;color:#b9ad99;font-size:12px;pointer-events:none;}
+  .sig .clr{position:absolute;top:8px;right:8px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer;font-family:inherit;}
+  .consent{display:flex;gap:10px;align-items:flex-start;margin-top:16px;font-size:14px;color:#3e362c;background:var(--cream);border-radius:10px;padding:12px;}
+  .consent input{width:22px;height:22px;flex:none;margin-top:1px;accent-color:var(--brown);}
+  .btn{display:block;width:100%;margin-top:16px;background:var(--brown);color:#fff;border:0;border-radius:12px;padding:16px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;}
+  .btn:disabled{opacity:.45;cursor:not-allowed;}
+  .err{color:var(--bad);font-size:14px;margin-top:10px;min-height:1px;}
+  .note{font-size:12.5px;color:var(--muted);margin-top:10px;}
+  .state{text-align:center;padding:40px 22px;}
+  .check{width:64px;height:64px;border-radius:50%;background:#dcf5e3;color:var(--ok);display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 8px;}
+  .spinner{width:34px;height:34px;border:4px solid var(--line);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 12px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .foot{text-align:center;color:var(--muted);font-size:11px;margin-top:20px;}
+  @media (prefers-reduced-motion:reduce){.spinner{animation:none}}
+</style>
+</head>
+<body>
+<div class="top"><img src="/assets/quarry-q-logo.png" alt=""><span class="brand">THE QUARRY</span><span class="tag">Incident<br>Statement</span></div>
+<div class="wrap" id="app"><div class="card state"><div class="spinner"></div><p>Loading…</p></div></div>
+<div class="foot">The Quarry · 3960 Highway Z, New Melle, MO · Confidential</div>
+
+<script>
+(function () {
+  'use strict';
+  var FN = 'https://nkulhtalltbieicvmmad.supabase.co/functions/v1/incidents';
+  var KEY = 'sb_publishable_FQK59Bn8P2jV8yGL0nPi7w_jVHFMBSl';
+  var TOKEN = new URLSearchParams(location.search).get('t') || '';
+  var IN_PERSON = new URLSearchParams(location.search).get('in_person') === '1';
+  var app = document.getElementById('app');
+  var D = null, A = { seen: '', photos: [] }, pad = null;
+  var SAVE = 'qis-' + TOKEN.slice(0, 16);
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function fmtDate(d) { if (!d) return ''; var dt = new Date(String(d).length <= 10 ? d + 'T12:00:00' : d); return dt.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }); }
+  function call(b) {
+    return fetch(FN, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: KEY, Authorization: 'Bearer ' + KEY }, body: JSON.stringify(b) })
+      .then(function (r) { return r.json(); }).catch(function () { return { error: 'Connection problem — check your signal and try again.' }; });
+  }
+  function save() { try { localStorage.setItem(SAVE, JSON.stringify(A)); } catch (e) {} }
+  function restore() { try { var s = JSON.parse(localStorage.getItem(SAVE) || 'null'); if (s) A = s; A.photos = A.photos || []; } catch (e) {} }
+  function stateCard(icon, title, msg) { app.innerHTML = '<div class="card state">' + icon + '<h2>' + esc(title) + '</h2><p class="sub">' + msg + '</p></div>'; }
+
+  if (!TOKEN) { stateCard('', 'Link incomplete', 'This link is missing part of its address. Open it again from your email or text.'); return; }
+  call({ action: 'stmt_load', token: TOKEN }).then(function (r) {
+    if (r.error) { stateCard('', r.voided ? 'Request withdrawn' : 'Can’t open this', esc(r.error)); return; }
+    D = r;
+    if (r.status === 'submitted') { stateCard('<div class="check">✓</div>', 'Statement already submitted', 'Your statement was received on ' + esc(fmtDate(r.submitted_at)) + '. Thank you. If you remember something else, tell a manager.'); return; }
+    restore(); render();
+  });
+
+  function render() {
+    var first = String(D.person_name || '').split(' ')[0];
+    var h = '';
+    if (IN_PERSON) h += '<div class="rules" style="margin-bottom:14px"><b>Manager:</b> hand this device to ' + esc(first) + ' to write and sign their statement.</div>';
+    h += '<div class="card"><h1>Your statement, ' + esc(first) + '</h1><p class="sub">Ref ' + esc(D.ref_no) + '</p>' +
+      '<div class="kv"><div><span>What</span><b>' + esc(D.type) + '</b></div><div><span>When</span><b>' + esc(fmtDate(D.date)) + (D.time ? ' · ' + esc(D.time) : '') + '</b></div>' +
+      (D.location ? '<div><span>Where</span><b>' + esc(D.location) + '</b></div>' : '') + '</div></div>';
+    h += '<div class="card"><div class="rules"><b>Before you write</b><ul>' +
+      '<li>Write only what <b>you</b> saw, heard or did. Don’t guess.</li>' +
+      '<li>Don’t compare notes with anyone first — we need your own account.</li>' +
+      '<li>Be specific: times, where people were standing, what was said.</li>' +
+      '<li>Don’t decide who was at fault. Just describe what happened.</li></ul></div>' +
+      '<label class="l">How do you know about it? <span class="req">*</span></label><div class="seen" id="seen">' +
+      Object.keys(D.seen).map(function (k) { return '<button type="button" data-k="' + k + '"' + (A.seen === k ? ' class="on"' : '') + '>' + esc(D.seen[k]) + '</button>'; }).join('') + '</div>';
+    D.questions.forEach(function (q) {
+      h += '<label class="l" for="q_' + q.id + '">' + esc(q.label) + ' ' + (q.req ? '<span class="req">*</span>' : '<span class="opt">(optional)</span>') + '</label>' +
+        '<textarea id="q_' + q.id + '" data-q="' + q.id + '" maxlength="6000">' + esc(A[q.id] || '') + '</textarea>';
+    });
+    h += '<label class="l">Photos <span class="opt">(optional — the area, the floor, any damage)</span></label><div class="photos" id="photos"></div>' +
+      '<input type="file" id="file" accept="image/*" multiple hidden></div>';
+    h += '<div class="card"><h2>Sign your statement</h2>' +
+      '<label class="l" for="nm">Type your full name <span class="req">*</span></label><input type="text" id="nm" autocomplete="name" value="' + esc(A.nm || '') + '">' +
+      '<label class="l">Sign below <span class="req">*</span></label><div class="sig"><canvas id="sg"></canvas><span class="phd" id="sgph">Sign with your finger</span><button type="button" class="clr" id="sgc">Clear</button></div>' +
+      '<label class="consent"><input type="checkbox" id="ok"><span>This statement is true and complete to the best of my knowledge. I agree to sign it electronically.</span></label>' +
+      '<button class="btn" id="go" disabled>Submit my statement</button><div class="err" id="er"></div>' +
+      '<p class="note">We record the date, time and device used. Your answers save on this phone until you submit.</p></div>';
+    app.innerHTML = h;
+
+    Array.prototype.forEach.call(app.querySelectorAll('#seen button'), function (b) {
+      b.onclick = function () { A.seen = b.dataset.k; save(); Array.prototype.forEach.call(app.querySelectorAll('#seen button'), function (x) { x.classList.toggle('on', x === b); }); check(); };
+    });
+    Array.prototype.forEach.call(app.querySelectorAll('textarea[data-q]'), function (t) { t.oninput = function () { A[t.dataset.q] = t.value; save(); check(); }; });
+    var nm = document.getElementById('nm'), ok = document.getElementById('ok'), go = document.getElementById('go');
+    nm.oninput = function () { A.nm = nm.value; save(); check(); }; ok.onchange = check;
+    pad = makePad(document.getElementById('sg')); pad.onchange = check;
+    document.getElementById('sgc').onclick = function () { pad.clear(); document.getElementById('sgph').style.display = ''; check(); };
+    renderPhotos();
+    document.getElementById('file').onchange = function (e) { addPhotos(e.target.files); e.target.value = ''; };
+    go.onclick = submit;
+    check();
+  }
+
+  function missing() {
+    var m = [];
+    if (!A.seen) m.push('how you know about it');
+    D.questions.forEach(function (q) { if (q.req && String(A[q.id] || '').trim().length < 15) m.push('“' + q.label.split('?')[0] + '?”'); });
+    return m;
+  }
+  function check() {
+    var go = document.getElementById('go'); if (!go) return;
+    var m = missing();
+    go.disabled = !!m.length || !(document.getElementById('nm').value.trim().length >= 2) || !document.getElementById('ok').checked || pad.isEmpty() || uploading > 0;
+    document.getElementById('er').textContent = m.length ? 'Still needed: ' + m.join(', ') : '';
+    document.getElementById('er').style.color = m.length ? 'var(--muted)' : '';
+  }
+
+  /* ---- photos: resize on the phone, upload one by one ---- */
+  var uploading = 0, local = {};
+  function renderPhotos() {
+    var box = document.getElementById('photos'); if (!box) return;
+    var h = A.photos.map(function (p, i) { return '<div class="ph"><img src="' + (local[p] || '') + '" alt=""><button type="button" data-i="' + i + '" aria-label="Remove photo">×</button></div>'; }).join('');
+    for (var k = 0; k < uploading; k++) h += '<div class="ph"><div class="busy">Uploading…</div></div>';
+    if (A.photos.length + uploading < D.max_photos) h += '<label class="addph" for="file">+ Add photo</label>';
+    box.innerHTML = h;
+    Array.prototype.forEach.call(box.querySelectorAll('.ph button'), function (b) { b.onclick = function () { A.photos.splice(+b.dataset.i, 1); save(); renderPhotos(); }; });
+  }
+  function resize(file) {
+    return new Promise(function (res, rej) {
+      var img = new Image(), url = URL.createObjectURL(file);
+      img.onload = function () {
+        var s = Math.min(1, 1600 / Math.max(img.width, img.height)), c = document.createElement('canvas');
+        c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+        res(c.toDataURL('image/jpeg', 0.8));
+      };
+      img.onerror = function () { rej(new Error('Could not read that photo.')); };
+      img.src = url;
+    });
+  }
+  function addPhotos(files) {
+    Array.prototype.slice.call(files, 0, D.max_photos - A.photos.length - uploading).forEach(function (f) {
+      uploading++; renderPhotos(); check();
+      resize(f).then(function (data) {
+        return call({ action: 'stmt_photo', token: TOKEN, photo: data, index: A.photos.length }).then(function (r) {
+          if (r.error) throw new Error(r.error);
+          local[r.path] = data; A.photos.push(r.path); save();
+        });
+      }).catch(function (e) { document.getElementById('er').textContent = e.message; })
+        .then(function () { uploading--; renderPhotos(); check(); });
+    });
+  }
+
+  function submit() {
+    var go = document.getElementById('go'); go.disabled = true; go.textContent = 'Submitting…';
+    var answers = { seen: A.seen, photos: A.photos };
+    D.questions.forEach(function (q) { answers[q.id] = A[q.id] || ''; });
+    call({ action: 'stmt_submit', token: TOKEN, answers: answers, signed_name: document.getElementById('nm').value.trim(), signature: pad.toDataURL(), confirm: document.getElementById('ok').checked })
+      .then(function (r) {
+        if (r.error && !r.done) { go.textContent = 'Submit my statement'; check(); var er = document.getElementById('er'); er.style.color = ''; er.textContent = r.error; return; }
+        try { localStorage.removeItem(SAVE); } catch (e) {}
+        window.scrollTo(0, 0);
+        stateCard('<div class="check">✓</div>', 'Thank you — your statement was received',
+          'A manager will read it. If you remember anything else later, tell a manager.' + (IN_PERSON ? '<br><br><b>Please hand the device back to your manager.</b>' : ''));
+      });
+  }
+
+  function makePad(canvas) {
+    var ctx, drawing = false, last = null, dirty = false, api = { onchange: null };
+    function size() {
+      var r = canvas.getBoundingClientRect(), d = window.devicePixelRatio || 1;
+      canvas.width = Math.max(1, r.width * d); canvas.height = Math.max(1, r.height * d);
+      ctx = canvas.getContext('2d'); ctx.scale(d, d);
+      ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#111'; ctx.fillStyle = '#111';
+      dirty = false;
+    }
+    function pt(e) { var r = canvas.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
+    canvas.addEventListener('pointerdown', function (e) {
+      e.preventDefault(); canvas.setPointerCapture(e.pointerId); drawing = true; last = pt(e);
+      ctx.beginPath(); ctx.arc(last.x, last.y, 1.1, 0, Math.PI * 2); ctx.fill();
+      document.getElementById('sgph').style.display = 'none';
+    });
+    canvas.addEventListener('pointermove', function (e) {
+      if (!drawing) return; var p = pt(e);
+      ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(p.x, p.y); ctx.stroke(); last = p;
+      if (!dirty) { dirty = true; if (api.onchange) api.onchange(); }
+    });
+    ['pointerup', 'pointercancel'].forEach(function (ev) { canvas.addEventListener(ev, function () { drawing = false; if (api.onchange) api.onchange(); }); });
+    size();
+    api.clear = size; api.isEmpty = function () { return !dirty; }; api.toDataURL = function () { return canvas.toDataURL('image/png'); };
+    return api;
+  }
+})();
+</script>
+</body>
+</html>
