@@ -8470,9 +8470,9 @@
       "hidden": false
     },
     "6ac55f1c2c0c9f719f8f6c83": {
-      "status": "awaiting_customer_confirm_followedup",
+      "status": "needs_call",
       "note": "",
-      "updatedAt": "2026-10-10T14:30:32.907Z",
+      "updatedAt": "2026-10-13T14:30:40.473Z",
       "updatedBy": "daily-followup",
       "history": [
         {
@@ -8488,6 +8488,13 @@
           "by": "daily-followup",
           "note": "3-day reminder sent",
           "at": "2026-10-10T14:30:32.907Z"
+        },
+        {
+          "from": "awaiting_customer_confirm_followedup",
+          "to": "needs_call",
+          "by": "daily-followup",
+          "note": "No response after reminder — needs a phone call",
+          "at": "2026-10-13T14:30:40.473Z"
         }
       ],
       "hidden": false
@@ -8728,5 +8735,5 @@
       "hidden": false
     }
   },
-  "updatedAt": "2026-10-12T18:39:51.035Z"
+  "updatedAt": "2026-10-13T14:30:40.473Z"
 }
