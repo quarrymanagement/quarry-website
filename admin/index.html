@@ -6028,7 +6028,7 @@
         // Netlify functions) — hiding a sidebar item alone is not a security
         // boundary, it just matches what the account can actually do server-side.
         const ROLE_ALLOWED_TABS = {
-            events_staff: ['dashboard', 'events', 'bands', 'potential', 'resInqPending'],
+            events_staff: ['dashboard', 'events', 'bands', 'potential', 'resInqPending', 'ttinvite', 'ttsubs'],
         };
         const ROLE_ALLOWED_LINKS = {
             events_staff: ['/admin/venue-calendar', '/admin/venue-calendar.html', '/admin/venue-calendar/'],
@@ -16488,5 +16488,6 @@ function hashCode(str) {
 <script src="./notices-admin.js"></script>
 <script src="./checklist-admin.js"></script>
 <script src="./writeups-admin.js"></script>
+<script src="./training-tests-admin.js"></script>
 </body>
 </html>

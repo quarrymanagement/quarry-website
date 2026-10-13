@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Training Test · The Quarry</title>
+<link rel="icon" href="/favicon-32.png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --charcoal:#1A1A1A; --brown:#2C1A0E; --cream:#F5F0E8; --gold:#B8933A; --gold2:#D4AF6A; --ink:#1f1b16; --muted:#7a6e60; --line:#e6dfd3;
+         --bad:#a52a1e; --bad-bg:#fdeeee; --ok:#176b34; --ok-bg:#e7f5ec; --warn:#8a5a00; --warn-bg:#fff4d6; }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;font-family:Montserrat,-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:var(--cream);color:var(--ink);line-height:1.5;}
+  .top{background:var(--charcoal);padding:14px 18px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:5;}
+  .top img{width:32px;height:32px;}
+  .top .brand{font-family:'Playfair Display',Georgia,serif;color:var(--gold);letter-spacing:3px;font-size:17px;}
+  .top .tag{margin-left:auto;color:#cfc4b2;font-size:11px;text-transform:uppercase;letter-spacing:1px;text-align:right;}
+  .prog{height:4px;background:#3a3027;position:sticky;top:60px;z-index:5;} .prog i{display:block;height:100%;background:var(--gold);transition:width .25s;}
+  .wrap{max-width:680px;margin:0 auto;padding:18px 16px 70px;}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:14px;}
+  h1{font-family:'Playfair Display',Georgia,serif;font-size:25px;margin:0 0 6px;color:var(--brown);line-height:1.2;}
+  h2{font-family:'Playfair Display',Georgia,serif;font-size:20px;margin:0 0 8px;color:var(--brown);line-height:1.25;}
+  .eyebrow{font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;}
+  .sub{color:var(--muted);font-size:14px;}
+  .q{font-size:17px;font-weight:600;margin:4px 0 14px;}
+  .opt{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;background:#fffdf9;border:1.5px solid var(--line);border-radius:12px;padding:14px;margin-bottom:10px;font:inherit;font-size:15px;color:var(--ink);cursor:pointer;}
+  .opt .dot{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid #c9bda9;margin-top:1px;}
+  .opt.on{border-color:var(--brown);background:#faf5ec;} .opt.on .dot{border-color:var(--brown);background:radial-gradient(var(--brown) 45%,transparent 50%);}
+  .scene{background:var(--charcoal);color:#f1e9dc;border-radius:12px;padding:14px 16px;font-size:15px;margin-bottom:12px;}
+  .scene b{color:var(--gold2);display:block;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:4px;}
+  textarea{width:100%;min-height:190px;border:1.5px solid #d5cbbb;border-radius:12px;padding:14px;font-size:16px;font-family:inherit;background:#fffdf9;resize:vertical;line-height:1.5;}
+  textarea:focus,.opt:focus-visible,.btn:focus-visible{outline:2px solid rgba(184,147,58,.55);outline-offset:2px;}
+  .wc{font-size:12.5px;color:var(--muted);margin-top:6px;display:flex;justify-content:space-between;gap:8px;}
+  .wc.ok{color:var(--ok);}
+  .tip{background:var(--warn-bg);color:#6b4e00;border-radius:10px;padding:10px 12px;font-size:13.5px;margin-bottom:12px;}
+  .nav{display:flex;gap:10px;margin-top:6px;}
+  .btn{flex:1;background:var(--brown);color:#fff;border:0;border-radius:12px;padding:15px;font-size:15.5px;font-weight:700;font-family:inherit;cursor:pointer;}
+  .btn.sec{background:#fff;color:var(--ink);border:1.5px solid var(--line);flex:0 0 auto;padding:15px 18px;}
+  .btn.gold{background:var(--gold);color:#1a1a1a;}
+  .btn:disabled{opacity:.4;cursor:not-allowed;}
+  .err{color:var(--bad);font-size:14px;margin-top:10px;min-height:1px;}
+  .state{text-align:center;padding:40px 22px;}
+  .spinner{width:34px;height:34px;border:4px solid var(--line);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 12px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .score{display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
+  .score .n{font-family:'Playfair Display',Georgia,serif;font-size:52px;line-height:1;color:var(--brown);font-variant-numeric:tabular-nums;}
+  .pill{display:inline-block;padding:4px 11px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:.3px;}
+  .pill.ok{background:var(--ok-bg);color:var(--ok);} .pill.bad{background:var(--bad-bg);color:var(--bad);} .pill.warn{background:var(--warn-bg);color:var(--warn);}
+  .res{border-top:1px solid var(--line);padding:12px 0;}
+  .res:first-of-type{border-top:0;}
+  .res .rq{font-weight:600;font-size:14.5px;display:flex;gap:8px;}
+  .res .mark{flex:none;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}
+  .mark.y{background:var(--ok-bg);color:var(--ok);} .mark.n{background:var(--bad-bg);color:var(--bad);}
+  .res .ra{font-size:13.5px;color:var(--muted);margin:4px 0 0 30px;}
+  .res .ra b{color:var(--ink);font-weight:600;}
+  .ans{white-space:pre-wrap;background:var(--cream);border-radius:10px;padding:12px;font-size:14.5px;margin:8px 0;}
+  .mnote{border-left:3px solid var(--gold);padding:8px 12px;background:#fffaf0;border-radius:0 8px 8px 0;font-size:14.5px;margin-top:8px;white-space:pre-wrap;}
+  .mnote span{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--gold);margin-bottom:2px;}
+  .checklist{display:flex;flex-direction:column;gap:6px;margin:12px 0;}
+  .checklist div{display:flex;justify-content:space-between;gap:10px;font-size:14px;padding:8px 10px;background:var(--cream);border-radius:8px;}
+  .foot{text-align:center;color:var(--muted);font-size:11px;margin-top:20px;}
+  @media (prefers-reduced-motion:reduce){.prog i{transition:none}.spinner{animation:none}}
+</style>
+</head>
+<body>
+<div class="top"><img src="/assets/quarry-q-logo.png" alt=""><span class="brand">THE QUARRY</span><span class="tag">Training<br>Test</span></div>
+<div class="prog" id="prog" hidden><i id="progBar" style="width:0"></i></div>
+<div class="wrap" id="app"><div class="card state"><div class="spinner"></div><p>Loading your test…</p></div></div>
+<div class="foot">The Quarry · 3960 Highway Z, New Melle, MO</div>
+
+<script>
+(function () {
+  'use strict';
+  var FN = 'https://nkulhtalltbieicvmmad.supabase.co/functions/v1/training-tests';
+  var KEY = 'sb_publishable_FQK59Bn8P2jV8yGL0nPi7w_jVHFMBSl';
+  var TOKEN = new URLSearchParams(location.search).get('t') || '';
+  var app = document.getElementById('app');
+  var D = null;                     // load response
+  var A = { mc: {}, open: {} };     // answers
+  var step = 0;                     // 0 = intro, then mc..., then open..., then review
+  var SAVE_KEY = 'qtt-' + TOKEN.slice(0, 16);
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function words(s) { return String(s || '').trim().split(/\s+/).filter(Boolean).length; }
+  function call(body) {
+    return fetch(FN, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: KEY, Authorization: 'Bearer ' + KEY }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json(); }).catch(function () { return { error: 'Connection problem — check your signal and try again.' }; });
+  }
+  function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ A: A, step: step })); } catch (e) {} }
+  function restore() { try { var s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if (s && s.A) { A = s.A; step = s.step || 0; } } catch (e) {} }
+  function clearSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) {} }
+  function stateCard(title, msg) { document.getElementById('prog').hidden = true; app.innerHTML = '<div class="card state"><h2>' + esc(title) + '</h2><p class="sub">' + msg + '</p></div>'; }
+  function first() { return String(D.employee_name || '').split(' ')[0]; }
+
+  if (!TOKEN) { stateCard('Link incomplete', 'This link is missing part of its address. Open it again from your email or text.'); return; }
+
+  call({ action: 'test_load', token: TOKEN }).then(function (r) {
+    if (r.error) { stateCard(r.voided ? 'Test withdrawn' : 'Can’t open this test', esc(r.error)); return; }
+    D = r;
+    if (r.results) { clearSave(); results(); return; }
+    restore();
+    render();
+  });
+
+  function total() { return 1 + D.test.mc.length + D.test.open.length + 1; }
+  function setProg() {
+    var p = document.getElementById('prog'); p.hidden = step === 0;
+    document.getElementById('progBar').style.width = Math.round(100 * step / (total() - 1)) + '%';
+  }
+  function go(n) { step = n; save(); render(); window.scrollTo(0, 0); }
+
+  function render() {
+    setProg();
+    var nMc = D.test.mc.length, nOpen = D.test.open.length;
+    if (step === 0) return intro();
+    if (step <= nMc) return mcStep(step - 1);
+    if (step <= nMc + nOpen) return openStep(step - 1 - nMc);
+    return review();
+  }
+
+  function intro() {
+    app.innerHTML = '<div class="card"><div class="eyebrow">' + esc(D.ref_no) + '</div><h1>Hi ' + esc(first()) + ' — your ' + esc(D.title) + '</h1>' +
+      '<p class="sub" style="font-size:15px;color:#3e362c">' + esc(D.intro) + '</p>' +
+      '<div class="checklist"><div><span>Part 1 · Multiple choice</span><b>' + D.test.mc.length + ' questions</b></div><div><span>Part 2 · Real situations</span><b>' + D.test.open.length + ' written answers</b></div><div><span>Time</span><b>About 20–30 minutes</b></div></div>' +
+      '<p class="sub">Your answers save on this phone as you go, so you can close it and come back to this link.</p>' +
+      '<div class="nav" style="margin-top:16px"><button class="btn" id="start">' + (Object.keys(A.mc).length ? 'Pick up where I left off' : 'Start') + '</button></div></div>';
+    document.getElementById('start').onclick = function () { go(step || 1); };
+  }
+
+  function mcStep(i) {
+    var q = D.test.mc[i], chosen = A.mc[q.id];
+    app.innerHTML = '<div class="card"><div class="eyebrow">Part 1 · Question ' + (i + 1) + ' of ' + D.test.mc.length + '</div><div class="q">' + esc(q.q) + '</div>' +
+      q.options.map(function (o, k) { return '<button class="opt' + (chosen === k ? ' on' : '') + '" data-k="' + k + '"><span class="dot"></span><span>' + esc(o) + '</span></button>'; }).join('') +
+      '<div class="nav"><button class="btn sec" id="back">Back</button><button class="btn" id="next"' + (chosen == null ? ' disabled' : '') + '>Next</button></div></div>';
+    Array.prototype.forEach.call(app.querySelectorAll('.opt'), function (b) {
+      b.onclick = function () {
+        A.mc[q.id] = +b.dataset.k; save();
+        Array.prototype.forEach.call(app.querySelectorAll('.opt'), function (x) { x.classList.toggle('on', x === b); });
+        document.getElementById('next').disabled = false;
+      };
+    });
+    document.getElementById('back').onclick = function () { go(step - 1); };
+    document.getElementById('next').onclick = function () { go(step + 1); };
+  }
+
+  function openStep(i) {
+    var o = D.test.open[i], min = D.min_words;
+    app.innerHTML = '<div class="card"><div class="eyebrow">Part 2 · Situation ' + (i + 1) + ' of ' + D.test.open.length + '</div><h2>' + esc(o.title) + '</h2>' +
+      '<div class="scene"><b>The situation</b>' + esc(o.scenario) + '</div>' +
+      '<div class="q" style="margin-bottom:10px">' + esc(o.ask) + '</div>' +
+      (i === 0 ? '<div class="tip">Be detailed. Tell us what you do first, what you say to the guest in your own words, and how you follow up. A manager reads every answer.</div>' : '') +
+      '<label for="ta" class="sub" style="display:block;margin-bottom:6px">Your answer</label>' +
+      '<textarea id="ta" placeholder="First I would… Then I’d say…">' + esc(A.open[o.id] || '') + '</textarea>' +
+      '<div class="wc" id="wc"></div>' +
+      '<div class="nav" style="margin-top:12px"><button class="btn sec" id="back">Back</button><button class="btn" id="next">Next</button></div></div>';
+    var ta = document.getElementById('ta'), wc = document.getElementById('wc'), nx = document.getElementById('next');
+    function upd() {
+      var n = words(ta.value); A.open[o.id] = ta.value; save();
+      wc.className = 'wc' + (n >= min ? ' ok' : '');
+      wc.innerHTML = '<span>' + n + ' words</span><span>' + (n >= min ? '✓ Enough detail to submit' : 'At least ' + min + ' words') + '</span>';
+      nx.disabled = n < min;
+    }
+    ta.oninput = upd; upd();
+    document.getElementById('back').onclick = function () { go(step - 1); };
+    nx.onclick = function () { go(step + 1); };
+  }
+
+  function review() {
+    var missMc = D.test.mc.filter(function (q) { return A.mc[q.id] == null; }).length;
+    var short = D.test.open.filter(function (o) { return words(A.open[o.id]) < D.min_words; });
+    app.innerHTML = '<div class="card"><div class="eyebrow">Ready to submit</div><h1>Check your answers</h1>' +
+      '<p class="sub" style="font-size:15px">Once you submit, you can’t change anything. You’ll see your multiple choice score right away. Your written answers go to a manager for review.</p>' +
+      '<div class="checklist"><div><span>Multiple choice answered</span><b>' + (D.test.mc.length - missMc) + ' / ' + D.test.mc.length + '</b></div>' +
+      D.test.open.map(function (o, i) { var n = words(A.open[o.id]); return '<div><span>' + esc(o.title) + '</span><b style="color:' + (n >= D.min_words ? 'var(--ok)' : 'var(--bad)') + '">' + n + ' words</b></div>'; }).join('') + '</div>' +
+      '<div class="nav"><button class="btn sec" id="back">Back</button><button class="btn gold" id="sub"' + (missMc || short.length ? ' disabled' : '') + '>Submit my test</button></div><div class="err" id="er"></div></div>';
+    document.getElementById('back').onclick = function () { go(step - 1); };
+    document.getElementById('sub').onclick = function () {
+      var b = this; b.disabled = true; b.textContent = 'Submitting…';
+      call({ action: 'test_submit', token: TOKEN, mc: A.mc, open: A.open }).then(function (r) {
+        if (r.error && !r.done) { b.disabled = false; b.textContent = 'Submit my test'; document.getElementById('er').textContent = r.error; return; }
+        if (r.done) { location.reload(); return; }
+        clearSave(); D = r; results(); window.scrollTo(0, 0);
+      });
+    };
+  }
+
+  function results() {
+    document.getElementById('prog').hidden = true;
+    var R = D.results, pass = R.mc_pct >= R.pass_mc, reviewed = D.status === 'reviewed';
+    var h = '<div class="card"><div class="eyebrow">' + esc(D.title) + ' · ' + esc(D.ref_no) + '</div>';
+    if (reviewed) {
+      h += '<h1>' + (R.overall_decision === 'passed' ? 'You passed, ' + esc(first()) + '.' : 'Your manager wants you to take this again.') + '</h1>' +
+        '<span class="pill ' + (R.overall_decision === 'passed' ? 'ok' : 'bad') + '">' + (R.overall_decision === 'passed' ? 'Passed' : 'Retake') + '</span>' +
+        (R.overall_note ? '<div class="mnote" style="margin-top:12px"><span>Note from ' + esc(R.reviewed_by || 'your manager') + '</span>' + esc(R.overall_note) + '</div>' : '');
+    } else {
+      h += '<h1>Submitted. Thanks, ' + esc(first()) + '.</h1><p class="sub" style="font-size:15px">Your multiple choice is graded below. Your written answers are <b>in review</b> — open this same link later to see your manager’s notes.</p>';
+    }
+    h += '</div>';
+
+    h += '<div class="card"><div class="eyebrow">Part 1 · Multiple choice</div><div class="score"><div class="n">' + R.mc_pct + '%</div><div><span class="pill ' + (pass ? 'ok' : 'bad') + '">' + (pass ? 'Passed' : 'Below ' + R.pass_mc + '%') + '</span><div class="sub" style="margin-top:6px">' + R.mc_score + ' of ' + R.mc_total + ' correct · pass ' + R.pass_mc + '%</div></div></div>';
+    R.mc.forEach(function (q, i) {
+      h += '<div class="res"><div class="rq"><span class="mark ' + (q.correct ? 'y' : 'n') + '">' + (q.correct ? '✓' : '✗') + '</span><span>' + (i + 1) + '. ' + esc(q.q) + '</span></div>' +
+        (q.correct ? '<div class="ra">' + esc(q.why) + '</div>' :
+          '<div class="ra">You answered: ' + esc(q.options[q.chosen]) + '<br><b>Right answer: ' + esc(q.options[q.answer]) + '</b><br>' + esc(q.why) + '</div>') + '</div>';
+    });
+    h += '</div>';
+
+    h += '<div class="card"><div class="eyebrow">Part 2 · Real situations</div>' + (reviewed ? '' : '<p><span class="pill warn">In review</span></p>');
+    R.open.forEach(function (o) {
+      var rv = o.review;
+      h += '<div class="res"><div class="rq" style="justify-content:space-between"><span>' + esc(o.title) + '</span>' +
+        (rv && rv.decision ? '<span class="pill ' + (rv.decision === 'approved' ? 'ok' : 'bad') + '">' + (rv.decision === 'approved' ? 'Approved' : 'Needs work') + '</span>' : '') + '</div>' +
+        '<div class="ans">' + esc(o.answer) + '</div>' +
+        (rv && rv.note ? '<div class="mnote"><span>Manager note</span>' + esc(rv.note) + '</div>' : '') + '</div>';
+    });
+    h += '</div>';
+    app.innerHTML = h;
+  }
+})();
+</script>
+</body>
+</html>
