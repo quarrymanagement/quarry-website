@@ -8,7 +8,7 @@
 // two apart without a shared session store.
 //
 // POST /.netlify/functions/verify-admin-password { password }
-//   → { ok: true, token, role: 'owner' | 'events_staff' } if correct
+//   → { ok: true, token, role: 'owner' | 'events_staff' | 'server_lead' } if correct
 //   → 401 otherwise
 // POST /.netlify/functions/verify-admin-password { action: 'verify', token }
 //   → { ok: boolean, role } — used to restore a session without re-prompting
@@ -54,6 +54,32 @@ const SESSION_TTL_HOURS = 168; // 7 days
 const STAFF_ACCOUNTS = [
     { username: 'penny', passwordHash: process.env.PENNY_PASSWORD_HASH || '', role: 'events_staff' },
 ];
+
+// Staff logins whose password is set by the owner from Admin > Staff Logins
+// (admin-staff-logins.js) instead of an env var, so nobody has to handle the
+// password but the person typing it. Stored salted (scrypt) in Netlify Blobs.
+// Same single-password-field login as everyone else. If this lookup fails for
+// any reason it is simply skipped -- it can never affect the owner login.
+const DYNAMIC_ACCOUNTS = { maya: 'server_lead' };            // username -> role
+const DYNAMIC_ROLE_USER = { server_lead: 'maya' };           // role -> username
+// Roles that must NOT receive the shared admin secret (ADMIN_PUSH_SECRET) that
+// unlocks Rewards / Members / Golf Jackpot / Notices.
+const NO_PUSH_SECRET_ROLES = ['server_lead'];
+const ACCOUNTS_BLOB = 'admin-staff/accounts';
+
+async function loadDynamicAccounts() {
+    try {
+        const { readBlob } = require('./_blobs');
+        return (await readBlob(ACCOUNTS_BLOB)) || {};
+    } catch (_) { return {}; }
+}
+function scryptMatches(password, rec) {
+    try {
+        const got = crypto.scryptSync(String(password), Buffer.from(rec.salt, 'hex'), 32);
+        const want = Buffer.from(rec.hash, 'hex');
+        return got.length === want.length && crypto.timingSafeEqual(got, want);
+    } catch (_) { return false; }
+}
 
 const CORS = {
     'Access-Control-Allow-Origin': '*',
@@ -134,8 +160,17 @@ exports.handler = async (event) => {
 
     // Allow {action:'verify', token} for session restoration
     if (body.action === 'verify' && body.token) {
-        const result = verifyAnyToken(body.token);
-        return respond(200, { ok: result.ok, role: result.role || null, pushSecret: result.ok ? pushSecret : null });
+        let result = verifyAnyToken(body.token);
+        // A dynamic-role session is only good while that account still exists and
+        // hasn't been reset/removed since the token was issued.
+        if (result.ok && DYNAMIC_ROLE_USER[result.role]) {
+            const accts = await loadDynamicAccounts();
+            const rec = accts[DYNAMIC_ROLE_USER[result.role]];
+            const issued = parseInt(String(body.token).split('.')[0], 10);
+            if (!rec || !rec.hash || !(issued >= (rec.validAfter || 0))) result = { ok: false };
+        }
+        const givePush = result.ok && !NO_PUSH_SECRET_ROLES.includes(result.role);
+        return respond(200, { ok: result.ok, role: result.role || null, pushSecret: givePush ? pushSecret : null });
     }
 
     const password = body.password || '';
@@ -149,6 +184,18 @@ exports.handler = async (event) => {
             const token = makeStaffToken(acct.role);
             if (!token) break; // STAFF_SESSION_SECRET not configured
             return respond(200, { ok: true, token, role: acct.role, pushSecret });
+        }
+    }
+
+    if (password) {
+        const accts = await loadDynamicAccounts();
+        for (const username of Object.keys(DYNAMIC_ACCOUNTS)) {
+            const rec = accts[username];
+            if (rec && rec.hash && rec.salt && scryptMatches(password, rec)) {
+                const token = makeStaffToken(DYNAMIC_ACCOUNTS[username]);
+                if (!token) break; // STAFF_SESSION_SECRET not configured
+                return respond(200, { ok: true, token, role: DYNAMIC_ACCOUNTS[username], pushSecret: null });
+            }
         }
     }
 
