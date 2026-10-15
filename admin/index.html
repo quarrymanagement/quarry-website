@@ -5958,6 +5958,7 @@
                     // See the login-submit handler below for why this rides
                     // along here too, not just on a fresh password entry.
                     if (body.pushSecret) localStorage.setItem('quarryAdminPushSecret', body.pushSecret);
+                    else localStorage.removeItem('quarryAdminPushSecret');
                     app.authenticated = true;
                     const overlay = document.getElementById('loginOverlay');
                     if (overlay) overlay.classList.add('hidden');
@@ -5995,6 +5996,7 @@
                         // hands it back on a real login, so any authenticated session just
                         // has it -- nothing to type in, nothing to forget.
                         if (body.pushSecret) localStorage.setItem('quarryAdminPushSecret', body.pushSecret);
+                    else localStorage.removeItem('quarryAdminPushSecret');
                         sessionStorage.setItem('quarryAuth', 'true');
                         app.authenticated = true;
                         // Force-reveal app so even if showApp/initializeApp throws, user lands on dashboard
@@ -6029,6 +6031,8 @@
         // boundary, it just matches what the account can actually do server-side.
         const ROLE_ALLOWED_TABS = {
             events_staff: ['dashboard', 'events', 'bands', 'potential', 'resInqPending', 'ttinvite', 'ttsubs', 'incidents'],
+            // Server lead (Maya): server-test invites/submissions + the shift Checklists editor. Nothing else.
+            server_lead: ['ttinvite', 'ttsubs', 'checklists'],
         };
         const ROLE_ALLOWED_LINKS = {
             events_staff: ['/admin/venue-calendar', '/admin/venue-calendar.html', '/admin/venue-calendar/'],
@@ -6105,6 +6109,7 @@
             sessionStorage.removeItem('quarryAuth');
             localStorage.removeItem('quarryAdminToken');
             localStorage.removeItem('quarryAdminRole');
+            localStorage.removeItem('quarryAdminPushSecret');
             location.reload();
         });
 
@@ -16490,5 +16495,6 @@ function hashCode(str) {
 <script src="./writeups-admin.js"></script>
 <script src="./incidents-admin.js"></script>
 <script src="./training-tests-admin.js"></script>
+<script src="./staff-logins-admin.js"></script>
 </body>
 </html>
