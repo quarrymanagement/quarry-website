@@ -132,7 +132,7 @@ exports.handler = async function (event) {
     // rules apply (won't double-book an already-taken slot); it's the
     // payment step being skipped, not the conflict checks.
     const auth = verifyAnyToken(body.token);
-    if (auth.ok && body.adminBlock) {
+    if (auth.ok && ['owner', 'events_staff'].includes(auth.role) && body.adminBlock) {
       const dateKey = date.replace(/\//g, '-');
       const path = 'pavilion-bookings/' + dateKey;
       const existing = await readBlob(path) || { bookings: [] };
