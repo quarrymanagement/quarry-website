@@ -388,8 +388,10 @@ function sizeBoard(){
   function hdrFor(s){ return (s < 420 ? 44 : 28) + 10; }      // title + count pills (they wrap on small charts)
   var opts = [];
   for (var c = 1; c <= n; c++){
-    var r = Math.ceil(n / c), sw = (W - gap * (c - 1) - 2) / c, sh = (H - gap * (r - 1)) / r - hdrFor(sw);
-    opts.push({ c: c, r: r, s: Math.floor(Math.min(sw, sh)) });
+    var r = Math.ceil(n / c), sw = (W - gap * (c - 1) - 2) / c, rowH = (H - gap * (r - 1)) / r;
+    var s0 = Math.floor(Math.min(sw, rowH - hdrFor(9999)));          // roomy title row first ...
+    if (s0 < 420) s0 = Math.floor(Math.min(sw, rowH - hdrFor(0)));   // ... charts under 420px get the taller, wrapped title row
+    opts.push({ c: c, r: r, s: s0 });
   }
   var top1 = Math.max.apply(null, opts.map(function(o){ return o.s; }));
   var best = opts.filter(function(o){ return o.s >= top1 * 0.9; }).sort(function(a, b){ return a.r - b.r || b.s - a.s; })[0];   // near-ties: fewer rows reads as one diagram
