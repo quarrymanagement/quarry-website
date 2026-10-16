@@ -28,6 +28,9 @@
   function areaLabel(k) { var a = (ST.areas || []).filter(function (x) { return x.key === k; })[0]; return a ? a.label : k; }
   function eff(t) { return t.draft_areas || t.areas || []; }
   function pending(t) { return !!t.draft_areas; }
+  var evSel = null;
+  function eventAreas() { return (ST.areas || []).filter(function (a) { return /^event_/.test(a.key); }); }
+  function evActive() { return ST.sync && ST.sync.event_area ? ST.sync.event_area : null; }
 
   function injectStyles() {
     if ($('ftvStyles')) return;
@@ -50,7 +53,7 @@
       '.ftv-btn:disabled{opacity:.45;cursor:not-allowed;} .ftv-btn.gold{background:#B8933A;} .ftv-btn.sec{background:var(--bg-elevated,#fff);color:var(--text-primary);border:1px solid var(--border-subtle);}' +
       '.ftv-btn.danger{background:#fff;color:#b42318;border:1px solid #f1c4bf;} .ftv-btn.sm{padding:6px 11px;font-size:12px;}' +
       '.ftv-add{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;} .ftv-add input{flex:1;min-width:200px;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:8px;background:var(--bg-elevated,#fff);color:var(--text-primary);font-size:14px;}' +
-      '.ftv-msg{font-size:13px;min-height:1.3em;margin:4px 0 12px;} .ftv-msg.ok{color:#15803d;} .ftv-msg.bad{color:#b42318;}';
+      '.ftv-event{background:linear-gradient(135deg,#2a1f4d,#3a2a6b);color:#fff;border-radius:12px;padding:16px 18px;margin-bottom:14px;}.ftv-event.on{background:linear-gradient(135deg,#14532d,#166534);}.ftv-event h3{margin:0 0 6px;font-size:15px;letter-spacing:.4px;} .ftv-event p{margin:0 0 10px;font-size:13px;line-height:1.5;opacity:.92;}.ftv-event select{padding:9px 12px;border-radius:8px;border:0;font-size:14px;margin-right:8px;min-width:180px;}.ftv-msg{font-size:13px;min-height:1.3em;margin:4px 0 12px;} .ftv-msg.ok{color:#15803d;} .ftv-msg.bad{color:#b42318;}';
     var st = document.createElement('style'); st.id = 'ftvStyles'; st.textContent = css; document.head.appendChild(st);
   }
 
@@ -83,6 +86,19 @@
     else say((r.data && r.data.error) || fallback || 'Something went wrong. Try again.', false);
   }
 
+  function eventCard() {
+    var evs = eventAreas(); if (!evs.length) return '';
+    var act = evActive(); if (!evSel || !evs.some(function (a) { return a.key === evSel; })) evSel = act || evs[0].key;
+    if (act) {
+      return '<div class="ftv-event on"><h3>EVENT MODE IS ON &mdash; ' + esc(areaLabel(act)) + '</h3><p>Square tickets numbered like this chart\'s tables now light up <b>this</b> chart instead of the regular tables with the same numbers. ' +
+        'Put the event chart on the TVs below (use <b>Event chart only</b> on each TV, then Publish). When the event is over, press End.</p>' +
+        '<button class="ftv-btn gold" data-ftv="evend" data-area="' + esc(act) + '">End event mode</button></div>';
+    }
+    return '<div class="ftv-event"><h3>EVENT MODE</h3><p>Tonight\'s event has its own table layout, and its table numbers overlap the regular ones. Start event mode when the event begins so Square tickets color the event chart. ' +
+      'It never changes anything in Square, and ending it puts everything back.</p><select id="ftvEv">' +
+      evs.map(function (a) { return '<option value="' + esc(a.key) + '"' + (a.key === evSel ? ' selected' : '') + '>' + esc(a.label) + '</option>'; }).join('') +
+      '</select><button class="ftv-btn gold" data-ftv="evstart">Start event mode</button></div>';
+  }
   function render(keepMsg) {
     var box = $('ftvBody'); if (!box || !ST) return;
     var nPending = (ST.tvs || []).filter(pending).length;
@@ -92,14 +108,14 @@
       '<button class="ftv-btn gold" data-ftv="publish"' + (nPending ? '' : ' disabled') + '>Publish to TVs' + (nPending ? ' (' + nPending + ')' : '') + '</button>' +
       '<button class="ftv-btn sec" data-ftv="discard"' + (nPending ? '' : ' disabled') + '>Discard changes</button>' +
       '<button class="ftv-btn sec" data-ftv="refreshall">Refresh all TVs now</button>' +
-      '<span class="ftv-pill ' + (syncOk ? 'ok' : 'warn') + '">' + (syncOk ? 'Live from Square' : 'Square feed: manual') + '</span></div><div id="ftvMsg" class="ftv-msg"></div>';
+      '<span class="ftv-pill ' + (syncOk ? 'ok' : 'warn') + '">' + (syncOk ? 'Live from Square' : 'Square feed: manual') + '</span></div><div id="ftvMsg" class="ftv-msg"></div>' + eventCard();
     (ST.tvs || []).forEach(function (t) {
       var chosen = eff(t);
       h += '<div class="ftv-card' + (pending(t) ? ' draft' : '') + '" data-tv="' + esc(t.tv) + '"><div class="ftv-top"><span class="ftv-name">' + esc(t.label) +
         (pending(t) ? ' <span class="ftv-pill warn">Unpublished changes</span>' : '') + '</span><span>' +
         '<button class="ftv-btn sm" data-ftv="pub1"' + (pending(t) ? '' : ' disabled') + '>Publish</button> ' +
         '<button class="ftv-btn sm sec" data-ftv="discard1"' + (pending(t) ? '' : ' disabled') + '>Discard</button> ' +
-        '<button class="ftv-btn sm sec" data-ftv="refresh1">Refresh TV</button> ' +
+        '<button class="ftv-btn sm sec" data-ftv="refresh1">Refresh TV</button> ' + (evActive() ? '<button class="ftv-btn sm gold" data-ftv="evtv">Event chart only</button> ' : '') +
         '<button class="ftv-btn sm danger" data-ftv="del">Remove</button></span></div>' +
         '<div class="ftv-chips">' + (ST.areas || []).map(function (a) {
           return '<button class="ftv-chip' + (chosen.indexOf(a.key) >= 0 ? ' on' : '') + '" data-ftv="area" data-k="' + esc(a.key) + '">' + esc(a.label) + '</button>';
@@ -133,6 +149,9 @@
       else { cur.push(k); if (cur.length > 3) cur.shift(); }
       return api('admin_draft', { tv: tv, areas: cur }).then(done('Saved as a draft. Press Publish to put it on the TV.'));
     }
+    if (act === 'evstart') { var sel = $('ftvEv'); var area = sel ? sel.value : evSel; evSel = area; el.disabled = true; return api('admin_event_mode', { area: area, on: true }).then(done('Event mode is ON. Now put the event chart on the TVs and Publish.')); }
+    if (act === 'evend') { el.disabled = true; return api('admin_event_mode', { area: el.getAttribute('data-area'), on: false }).then(done('Event mode is OFF. Tickets color the regular tables again.')); }
+    if (act === 'evtv' && t) { return api('admin_draft', { tv: tv, areas: [evActive()] }).then(done('Draft saved: ' + t.label + ' will show only the event chart. Press Publish to put it on the TV.')); }
     if (act === 'publish') { el.disabled = true; return api('admin_publish', {}).then(done('Published. The TVs are updating.')); }
     if (act === 'pub1') { el.disabled = true; return api('admin_publish', { tv: tv }).then(done('Published. That TV is updating.')); }
     if (act === 'discard') return api('admin_discard', {}).then(done('Draft changes discarded.'));
