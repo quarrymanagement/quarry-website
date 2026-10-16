@@ -120,12 +120,24 @@ body.narrow main{overflow:auto}
 /* legend (TV) */
 .legend{display:flex;gap:14px;align-items:center;font-size:12px;color:#c8bba6;white-space:nowrap}
 .legend i{display:inline-block;width:13px;height:13px;border-radius:4px;margin-right:6px;vertical-align:-2px}
+/* TV screens: wrapped titles, a big colour key along the bottom, no words that can't fit inside a tile */
+#tvlegend{display:none}
+body.tv header{height:58px;min-height:58px;flex-wrap:nowrap;padding:0 18px;gap:14px}
+body.tv #tvlegend{display:flex;position:fixed;left:0;right:0;bottom:0;height:48px;gap:6px 24px;align-items:center;justify-content:center;flex-wrap:wrap;padding:0 14px;background:#120e0a;border-top:1px solid var(--line);font-size:16px;font-weight:600;color:#ece3d0;z-index:5}
+#tvlegend span{display:inline-flex;align-items:center;white-space:nowrap}
+#tvlegend i{display:inline-block;width:20px;height:20px;border-radius:6px;margin-right:9px;border:2px solid transparent}
+#tvlegend i.ring{background:transparent;border-radius:50%}
+body.tv main{height:calc(100vh - 58px - 48px)}
+body.tv .chart h2{height:auto;min-height:44px;flex-wrap:wrap;align-content:flex-start;gap:4px 8px;white-space:normal;font-size:14px;letter-spacing:.14em;line-height:1.15}
+body.tv .chart h2 .pl{font-size:11px;padding:2px 8px}
+.tiny .tbl .s{display:none}
 
 /* sheet / modal */
 .scrim{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:60;display:none}
 .scrim.on{display:block}
-.sheet{position:fixed;left:0;right:0;bottom:0;z-index:61;background:var(--brown-dark);border-top:1px solid var(--gold);border-radius:22px 22px 0 0;padding:22px 20px calc(22px + env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .22s ease;max-height:90vh;overflow-y:auto}
-.sheet.on{transform:translateY(0)}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:61;background:var(--brown-dark);border-top:1px solid var(--gold);border-radius:22px 22px 0 0;padding:22px 20px calc(22px + env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .22s ease,visibility 0s linear .22s;max-height:90vh;overflow-y:auto}
+.sheet{visibility:hidden}
+.sheet.on{transform:translateY(0);visibility:visible;transition:transform .22s ease,visibility 0s}
 @media(min-width:760px){.sheet{max-width:640px;margin:0 auto;border-radius:22px;bottom:24px;left:24px;right:24px}}
 .sheet h3{margin:0 0 4px;font-size:21px;font-weight:800}
 .sheet .sub{color:#b6a894;font-size:13px;margin-bottom:14px;line-height:1.5}
@@ -156,8 +168,8 @@ select option{background:#221a13;color:#F5F0E8}
 .tvrow .top{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:8px}
 .tvrow .nm{font-weight:800;font-size:15px}
 .tvrow .url{font-size:11px;color:var(--gray);word-break:break-all;margin-top:8px}
-.toast{position:fixed;left:50%;transform:translateX(-50%) translateY(120%);bottom:26px;z-index:90;background:var(--gold);color:#1A1A1A;padding:13px 22px;border-radius:999px;font-weight:700;font-size:14px;transition:transform .25s ease;box-shadow:0 8px 30px rgba(0,0,0,.5)}
-.toast.on{transform:translateX(-50%) translateY(0)}
+.toast{position:fixed;left:50%;transform:translateX(-50%) translateY(120%);bottom:26px;z-index:90;background:var(--gold);color:#1A1A1A;padding:13px 22px;border-radius:999px;font-weight:700;font-size:14px;transition:transform .25s ease,opacity .25s ease;opacity:0;pointer-events:none;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+.toast.on{transform:translateX(-50%) translateY(0);opacity:1}
 .msg{display:flex;align-items:center;justify-content:center;height:60vh;color:var(--gray);font-size:18px;text-align:center;padding:0 24px;line-height:1.5}
 </style>
 </head>
@@ -255,11 +267,24 @@ function syncPill(){
   if (y.ok && age < 90) return '<span class="pill sync auto">Auto - ' + (y.open_tickets || 0) + ' tickets</span>';
   return '<span class="pill sync manual">Manual</span>';
 }
+function ensureLegend(){
+  if ($('#tvlegend')) return;
+  var d = document.createElement('div'); d.id = 'tvlegend';
+  d.innerHTML = '<span><i style="background:rgba(76,175,80,.55);border-color:#6ec878"></i>Open</span>' +
+    '<span><i style="background:#f1e8cc"></i>Seated</span>' +
+    '<span><i style="background:#8b63d4"></i>Drinks ordered</span>' +
+    '<span><i style="background:#d4ac55"></i>Food ordered</span>' +
+    '<span><i style="background:#d6453b"></i>Closed out</span>' +
+    '<span><i class="ring" style="border-color:#ff8a3d"></i>Food up</span>' +
+    '<span><i class="ring" style="border-color:#3dc2ff"></i>Drinks up</span>';
+  document.body.appendChild(d);
+}
+if (DISPLAY) document.body.className += ' tv';
 function renderHeader(){
   var tvName = '';
   if (DISPLAY){ var c = S && (S.tvs || []).filter(function(t){ return t.tv === TV; })[0]; tvName = c ? c.label : TV; }
   var h = '<h1>The Quarry</h1><span class="tvname">' + esc(DISPLAY ? tvName : 'Floor') + '</span><span class="sp"></span>';
-  if (DISPLAY) h += '<div class="legend"><span><i style="background:rgba(76,175,80,.55)"></i>Open</span><span><i style="background:#f1e8cc"></i>Seated</span><span><i style="background:#8b63d4"></i>Drinks ordered</span><span><i style="background:#d4ac55"></i>Food ordered</span><span><i class="ring"></i>Runner needed</span><span><i style="background:#d6453b"></i>Closed</span></div>';
+  if (DISPLAY) ensureLegend();
   h += syncPill();
   if (!DISPLAY && !RO) h += '<a class="hbtn" href="./" style="text-decoration:none">Checklist</a><button class="hbtn" data-a="resv">Reservations</button>' + (nClear() ? '<button class="hbtn clr" data-a="toclear">To clear (' + nClear() + ')</button>' : '') + '<button class="hbtn' + (token ? ' on' : '') + '" data-a="setup">Setup</button>';
   h += '<span class="clock" id="clock"></span>';
@@ -355,8 +380,9 @@ function sizeBoard(){
   var rl = $('#runlist'), W = wrap.clientWidth, H = wrap.clientHeight, gap = 16;
   var iw = window.innerWidth;
   var cols = DISPLAY ? n : (iw < 720 ? 1 : (iw < 1100 ? Math.min(n, 2) : n));
-  var side = Math.floor(Math.min((W - gap * (cols - 1)) / cols, (!DISPLAY && window.innerWidth < 900) ? 99999 : H - 34));
+  var side = Math.floor(Math.min((W - gap * (cols - 1)) / cols, (!DISPLAY && window.innerWidth < 900) ? 99999 : H - (DISPLAY ? 60 : 34)));
   side = Math.max(160, side);
+  wrap.classList.toggle('tiny', side < 400);
   for (var i = 0; i < charts.length; i++){
     charts[i].style.width = side + 'px';
     var sq = charts[i].querySelector('.sq'); sq.style.width = side + 'px'; sq.style.height = side + 'px';
