@@ -113,7 +113,11 @@ body.ctl main{height:calc(100vh - 58px - 58px)}
 body.narrow main{flex-direction:column}
 body.narrow #side{width:100%;order:-1;flex:0 0 auto}
 body.narrow #resvpanel{max-height:34vh;overflow:auto}
-body.narrow main{overflow:auto}
+body.narrow main{overflow:hidden}
+body.scrollmode main{overflow:auto}
+body.scrollmode #boardwrap{flex:none;overflow:visible}
+#boardwrap{align-content:center}
+body.scrollmode #boardwrap{align-content:flex-start}
 #boardwrap{min-height:0}
 @media(max-width:900px){.chart h2{white-space:normal;flex-wrap:wrap;height:auto;gap:6px 8px;font-size:13px}header{padding:0 10px;gap:8px;flex-wrap:wrap;height:auto;min-height:52px}.legend{flex-wrap:wrap;gap:6px 10px}}
 
@@ -377,14 +381,28 @@ function sizeBoard(){
   document.body.classList.toggle('narrow', !DISPLAY && window.innerWidth < 900);
   var sd = $('#side'), rlv = $('#runlist'), rsv = $('#resvpanel');
   if (sd) sd.style.display = ((rlv && rlv.style.display !== 'none' && rlv.innerHTML) || (rsv && rsv.style.display !== 'none' && rsv.innerHTML)) ? '' : 'none';
-  var rl = $('#runlist'), W = wrap.clientWidth, H = wrap.clientHeight, gap = 16;
-  var iw = window.innerWidth;
-  var cols = DISPLAY ? n : (iw < 720 ? 1 : (iw < 1100 ? Math.min(n, 2) : n));
-  var side = Math.floor(Math.min((W - gap * (cols - 1)) / cols, (!DISPLAY && window.innerWidth < 900) ? 99999 : H - (DISPLAY ? 60 : 34)));
-  side = Math.max(160, side);
+  // Fit every chart on one screen: try each column count, keep the arrangement that gives the biggest charts.
+  document.body.classList.remove('scrollmode'); wrap.style.height = '';
+  var gap = 16, W = wrap.clientWidth, top = wrap.getBoundingClientRect().top;
+  var H = Math.max(160, window.innerHeight - top - 12 - (DISPLAY ? 48 : 0));
+  function hdrFor(s){ return (s < 420 ? 44 : 28) + 10; }      // title + count pills (they wrap on small charts)
+  var opts = [];
+  for (var c = 1; c <= n; c++){
+    var r = Math.ceil(n / c), sw = (W - gap * (c - 1) - 2) / c, sh = (H - gap * (r - 1)) / r - hdrFor(sw);
+    opts.push({ c: c, r: r, s: Math.floor(Math.min(sw, sh)) });
+  }
+  var top1 = Math.max.apply(null, opts.map(function(o){ return o.s; }));
+  var best = opts.filter(function(o){ return o.s >= top1 * 0.9; }).sort(function(a, b){ return a.r - b.r || b.s - a.s; })[0];   // near-ties: fewer rows reads as one diagram
+  var side = best.s, scroll = false;
+  if (side < 200 && W < 700){ side = Math.floor(W); scroll = true; }     // phone: stack and scroll instead of tiny charts
+  side = Math.max(120, side);
+  document.body.classList.toggle('scrollmode', scroll);
+  if (!scroll) wrap.style.height = H + 'px';
   wrap.classList.toggle('tiny', side < 400);
+  var hh = hdrFor(side) - 10;
   for (var i = 0; i < charts.length; i++){
     charts[i].style.width = side + 'px';
+    var h2 = charts[i].querySelector('h2'); if (h2) h2.style.minHeight = hh + 'px';
     var sq = charts[i].querySelector('.sq'); sq.style.width = side + 'px'; sq.style.height = side + 'px';
     charts[i].style.setProperty('--u', (side / 100) + 'px');
   }
