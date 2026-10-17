@@ -445,6 +445,7 @@ function tableSheet(area, num){
   if (tk && tk.items && tk.items.length){
     h += '<div class="lbl">On the ticket' + (tk.ready ? ' - kitchen says READY' : '') + '</div>' + tk.items.map(function(i){ return '<div class="item"><span>' + esc(i.n) + (i.k === 'd' ? ' <small style="color:#b79cf0">drink</small>' : i.k === 'f' ? ' <small style="color:#e6c677">food</small>' : '') + '</span><b>x' + i.q + '</b></div>'; }).join('');
   }
+  if (RO){ h += '<div class="acts"><button class="btn ghost" data-a="close" style="flex:1">Close</button></div>'; return openSheet(h); }
   if (!st || st.status === 'open'){
     h += '<div class="lbl">Seat this table - how many guests?</div><div class="chips">' +
       [1,2,3,4,5,6,7,8,10,12].map(function(n){ return '<button class="chip" data-a="seat" data-area="' + esc(area) + '" data-t="' + esc(num) + '" data-n="' + n + '">' + n + '</button>'; }).join('') + '</div>';
@@ -544,8 +545,9 @@ document.addEventListener('click', function(e){
   var el = e.target.closest('[data-a]');
   if (!el){
     var tb = e.target.closest('.tbl');
-    if (tb && !DISPLAY && !editArea && !RO){
+    if (tb && !DISPLAY && !editArea){
       var ar = tb.closest('.chart').getAttribute('data-area'), nm = tb.getAttribute('data-t');
+      if (RO){ tableSheet(ar, nm); return; }     // other roles: look at the order, no buttons
       if (tb.classList.contains('closed')){
         // a red (closed out) table: double-tap = checked and clear, mark it open; a single tap opens the details after a moment
         var key = ar + '|' + nm, nowT = Date.now();
