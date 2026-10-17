@@ -202,6 +202,7 @@ var EMBED = QS.get('embed') === '1';
 var RO = QS.get('ro') === '1';           // read-only view for every other role: look, don't touch
 if (EMBED) document.documentElement.className += ' embed';
 var ONLY = QS.get('only') === 'reservations';
+var ONEMAP = false;
 var S = null;                 // last state from the server
 var sel = [];                 // control mode: charts being shown (max 3)
 var token = null;             // setup session
@@ -307,7 +308,7 @@ function stageOf(st){
   return (st.ticket && st.ticket.stage) ? st.ticket.stage : 'seated';     // host tapped it (no ticket yet) = seated
 }
 var STAGE_WORD = { seated: 'Seated', drinks: 'Drinks', food: 'Food', ordered: 'Ordered' };
-function tileHtml(t, st, calls, tilePct, editing){
+function tileHtml(t, st, calls, tilePct, editing, vb){
   var food = calls.filter(function(c){ return c.kind === 'food'; })[0], drinks = calls.filter(function(c){ return c.kind === 'drinks'; })[0];
   var ready = !!(st && st.status === 'occupied' && st.ticket && st.ticket.ready);
   var stage = stageOf(st), m = st ? mins(st.seated_at) : null;
@@ -327,7 +328,7 @@ function tileHtml(t, st, calls, tilePct, editing){
   if (Math.min(w, h) < 5.2) sub = '';          // tiny seats (bar stools): colour only
   var fs = Math.max(1.9, Math.min(Math.min(w, h) * 0.5, 4.4));
   var rot = Number(t.rot) || 0;
-  return '<div class="' + cls + '" data-t="' + esc(t.table_num) + '" style="left:' + t.x + '%;top:' + t.y + '%;width:calc(var(--u)*' + w + ');height:calc(var(--u)*' + h + ');--fs:' + fs.toFixed(2) + '">' +
+  return '<div class="' + cls + '" data-t="' + esc(t.table_num) + '" style="left:' + (vb ? ((t.x - vb.minx + vb.pad) / vb.vw * 100).toFixed(3) : t.x) + '%;top:' + (vb ? ((t.y - vb.miny + vb.pad) / vb.vh * 100).toFixed(3) : t.y) + '%;width:calc(var(--u)*' + w + ');height:calc(var(--u)*' + h + ');--fs:' + fs.toFixed(2) + '">' +
     '<i class="bg"' + (rot ? ' style="transform:rotate(' + rot + 'deg)"' : '') + '></i>' +
     '<span class="n">' + esc(t.table_num) + '</span>' + (sub ? '<span class="s">' + esc(sub) + '</span>' : '') + '</div>';
 }
@@ -344,8 +345,15 @@ function chartHtml(a){
     }
     tilePct = Math.max(6, Math.min(tilePct, md * 0.94));
   }
-  return '<div class="chart" data-area="' + esc(a.key) + '"><h2>' + esc(a.label) + '<span class="pl">' + free + ' open</span>' + (occ ? '<span class="pl seat">' + occ + ' seated</span>' : '') + (clr ? '<span class="pl clr">' + clr + ' to clear</span>' : '') + '</h2><div class="sq">' +
-    tables.map(function(t){ return tileHtml(t, stateOf(a.key, t.table_num), callsOf(a.key, t.table_num), tilePct, !!editArea); }).join('') + '</div></div>';
+  var vb = null;
+  if (ONEMAP && tables.length){
+    var x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+    tables.forEach(function(t){ var w = t.w ? Number(t.w) : tilePct, h = t.h ? Number(t.h) : tilePct, rr = Math.max(w, h) > Math.min(w, h) && (Number(t.rot) || 0) % 180 ? Math.max(w, h) : 0;
+      var hw = Math.max(w, rr) / 2, hh = Math.max(h, rr) / 2; x0 = Math.min(x0, t.x - hw); x1 = Math.max(x1, t.x + hw); y0 = Math.min(y0, t.y - hh); y1 = Math.max(y1, t.y + hh); });
+    var pad = 3; vb = { minx: x0, miny: y0, vw: (x1 - x0) + 2 * pad, vh: (y1 - y0) + 2 * pad, pad: pad };
+  }
+  return '<div class="chart" data-area="' + esc(a.key) + '"' + (vb ? ' data-vw="' + vb.vw.toFixed(3) + '" data-vh="' + vb.vh.toFixed(3) + '"' : '') + '><h2>' + esc(a.label) + '<span class="pl">' + free + ' open</span>' + (occ ? '<span class="pl seat">' + occ + ' seated</span>' : '') + (clr ? '<span class="pl clr">' + clr + ' to clear</span>' : '') + '</h2><div class="sq">' +
+    tables.map(function(t){ return tileHtml(t, stateOf(a.key, t.table_num), callsOf(a.key, t.table_num), tilePct, !!editArea, vb); }).join('') + '</div></div>';
 }
 function runEntries(){
   var out = [];
@@ -373,6 +381,7 @@ function render(){
   var wrap = $('#boardwrap'), areas = shownAreas();
   if (areas === null){ wrap.innerHTML = '<div class="msg">This screen (' + esc(TV) + ') isn\'t set up yet.<br>A manager can pick its floor charts in Setup on the host iPad.</div>'; $('#runlist').style.display = 'none'; return; }
   if (!areas.length){ wrap.innerHTML = '<div class="msg">' + (DISPLAY ? 'No charts selected for this screen.' : 'Tap a chart above to show it.') + '</div>'; renderRunList(); return; }
+  ONEMAP = areas.length === 1 && !editArea;
   wrap.innerHTML = areas.map(chartHtml).join('');
   renderRunList(); renderResv(); sizeBoard();
 }
@@ -401,6 +410,21 @@ function sizeBoard(){
   document.body.classList.toggle('scrollmode', scroll);
   if (!scroll) wrap.style.height = H + 'px';
   wrap.classList.toggle('tiny', side < 400);
+  var one = n === 1 && charts[0].getAttribute('data-vw') ? { vw: parseFloat(charts[0].getAttribute('data-vw')), vh: parseFloat(charts[0].getAttribute('data-vh')) } : null;
+  if (one){
+    var asp = one.vw / one.vh, cw, ch;
+    cw = Math.floor(Math.min(W - 2, (H - hdrFor(9999)) * asp));
+    if (cw < 420) cw = Math.floor(Math.min(W - 2, (H - hdrFor(0)) * asp));
+    if (scroll || cw < 160) cw = Math.floor(W - 2);                 // phone: full width, scroll
+    ch = Math.floor(cw / asp);
+    var uu = cw / one.vw, h2o = charts[0].querySelector('h2');
+    if (h2o) h2o.style.minHeight = (hdrFor(cw) - 10) + 'px';
+    charts[0].style.width = cw + 'px';
+    var sq1 = charts[0].querySelector('.sq'); sq1.style.width = cw + 'px'; sq1.style.height = ch + 'px';
+    charts[0].style.setProperty('--u', uu + 'px');
+    wrap.classList.toggle('tiny', uu < 4);
+    return;
+  }
   var hh = hdrFor(side) - 10;
   for (var i = 0; i < charts.length; i++){
     charts[i].style.width = side + 'px';
