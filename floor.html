@@ -135,6 +135,22 @@ body.tv main{height:calc(100vh - 58px - 48px)}
 body.tv .chart h2{height:auto;min-height:44px;flex-wrap:wrap;align-content:flex-start;gap:4px 8px;white-space:normal;font-size:14px;letter-spacing:.14em;line-height:1.15}
 body.tv .chart h2 .pl{font-size:11px;padding:2px 8px}
 .tiny .tbl .s{display:none}
+/* server sections: colour ring on each table, soft outline around the whole section, legend under the chart */
+.tbl.sec:before{content:'';position:absolute;left:calc(var(--u)*-.55);top:calc(var(--u)*-.55);right:calc(var(--u)*-.55);bottom:calc(var(--u)*-.55);border:calc(var(--u)*.4) solid var(--sc);border-radius:calc(var(--u)*1.9);z-index:0;pointer-events:none}
+.tbl.round.sec:before{border-radius:50%}
+.hull{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.seclg{display:flex;flex-wrap:nowrap;gap:4px 12px;align-items:center;height:22px;margin-top:4px;overflow:hidden;white-space:nowrap}
+.seclg .sl{display:inline-flex;align-items:center;font-size:12px;font-weight:700;color:#e9dfca}
+.seclg .sl i{display:inline-block;width:12px;height:12px;border-radius:4px;margin-right:6px;background:var(--sc)}
+.seclg .nm{display:none}.chart.wide .seclg .nm{display:inline}.chart.wide .seclg .ini{display:none}
+body.tv .seclg .sl{font-size:14px}
+#secpanel{position:fixed;left:0;right:0;bottom:0;z-index:70;background:#120e0a;border-top:2px solid var(--gold);padding:8px 10px calc(8px + env(safe-area-inset-bottom));display:flex;gap:8px;align-items:center}
+#secpanel .grp{display:flex;gap:6px;flex:0 0 auto}
+#secpanel .staff{display:flex;gap:6px;overflow-x:auto;flex:1;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+.schip{flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;background:rgba(245,240,232,.07);border:2px solid transparent;color:var(--cream);border-radius:10px;padding:9px 12px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap}
+.schip i{width:14px;height:14px;border-radius:4px;background:var(--sc,#555);border:1px solid rgba(255,255,255,.25)}
+.schip.on{border-color:var(--gold);background:rgba(184,147,58,.25)}
+.hbtn.on2{background:var(--gold);color:#1A1A1A;border-color:var(--gold)}
 
 /* sheet / modal */
 .scrim{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:60;display:none}
@@ -203,6 +219,30 @@ var RO = QS.get('ro') === '1';           // read-only view for every other role:
 if (EMBED) document.documentElement.className += ' embed';
 var ONLY = QS.get('only') === 'reservations';
 var ONEMAP = false;
+var FNS = 'https://nkulhtalltbieicvmmad.supabase.co/functions/v1/floor-sections';
+var SEC = [];                  // today's server sections: {area_key, table_num, staff_id, name, initials, color}
+var SECMODE = false, SECSTAFF = null, SECSEL = null, secArm = 0;
+function secApi(action, body){
+  return fetch(FNS + '?action=' + action, { method:'POST', headers:{ apikey:KEY, 'Content-Type':'application/json' }, body: JSON.stringify(body || {}) })
+    .then(function(r){ return r.json().then(function(d){ return { ok:r.ok, data:d }; }).catch(function(){ return { ok:false, data:{} }; }); });
+}
+function secFor(area, num){ for (var i = 0; i < SEC.length; i++) if (SEC[i].area_key === area && SEC[i].table_num === String(num)) return SEC[i]; return null; }
+function loadSections(){
+  return secApi('read').then(function(r){
+    if (!r.ok || !r.data || !r.data.sections) return;
+    var next = r.data.sections, a = JSON.stringify(next), b = JSON.stringify(SEC);
+    if (a !== b){ SEC = next; if (!editArea) render(); }
+  }).catch(function(){});
+}
+function hull(pts){
+  pts = pts.slice().sort(function(a, b){ return a[0] - b[0] || a[1] - b[1]; });
+  if (pts.length < 3) return pts;
+  function cross(o, a, b){ return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]); }
+  var lo = [], up = [], i;
+  for (i = 0; i < pts.length; i++){ while (lo.length >= 2 && cross(lo[lo.length - 2], lo[lo.length - 1], pts[i]) <= 0) lo.pop(); lo.push(pts[i]); }
+  for (i = pts.length - 1; i >= 0; i--){ while (up.length >= 2 && cross(up[up.length - 2], up[up.length - 1], pts[i]) <= 0) up.pop(); up.push(pts[i]); }
+  up.pop(); lo.pop(); return lo.concat(up);
+}
 var TK = 1;                    // per-chart shrink so no two tables overlap
 var S = null;                 // last state from the server
 var sel = [];                 // control mode: charts being shown (max 3)
@@ -233,7 +273,7 @@ function checkNonce(){
 function load(){
   return api('state').then(function(r){
     if (!r.ok) throw new Error('state');
-    S = r.data; if (DISPLAY) checkNonce(); render();
+    S = r.data; if (DISPLAY) checkNonce(); render(); loadSections();
   }).catch(function(){ var p = $('#hdr .pill.sync'); if (p){ p.className = 'pill sync manual'; p.textContent = 'Offline - retrying'; } });
 }
 function closedList(){ return (S.states || []).filter(function(x){ return x.status === 'closed' || x.status === 'paid'; }).sort(function(a, b){ return new Date(a.paid_at || a.seated_at || 0) - new Date(b.paid_at || b.seated_at || 0); }); }
@@ -292,11 +332,33 @@ function renderHeader(){
   var h = '<h1>The Quarry</h1><span class="tvname">' + esc(DISPLAY ? tvName : 'Floor') + '</span><span class="sp"></span>';
   if (DISPLAY) ensureLegend();
   h += syncPill();
-  if (!DISPLAY && !RO) h += '<a class="hbtn" href="./" style="text-decoration:none">Checklist</a><button class="hbtn" data-a="resv">Reservations</button>' + (nClear() ? '<button class="hbtn clr" data-a="toclear">To clear (' + nClear() + ')</button>' : '') + '<button class="hbtn' + (token ? ' on' : '') + '" data-a="setup">Setup</button>';
+  if (!DISPLAY && !RO) h += '<a class="hbtn" href="./" style="text-decoration:none">Checklist</a><button class="hbtn" data-a="resv">Reservations</button><button class="hbtn' + (SECMODE ? ' on2' : '') + '" data-a="secmode">Sections</button>' + (nClear() ? '<button class="hbtn clr" data-a="toclear">To clear (' + nClear() + ')</button>' : '') + '<button class="hbtn' + (token ? ' on' : '') + '" data-a="setup">Setup</button>';
   h += '<span class="clock" id="clock"></span>';
   $('#hdr').innerHTML = h; tick();
 }
 function tick(){ var c = $('#clock'); if (c) c.textContent = new Date().toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit', timeZone:'America/Chicago' }); }
+function secPanel(){
+  var el = $('#secpanel');
+  if (!SECMODE){ if (el) el.remove(); document.body.classList.remove('secmode'); return; }
+  if (!el){ el = document.createElement('div'); el.id = 'secpanel'; document.body.appendChild(el); }
+  document.body.classList.add('secmode');
+  var colorOf = {}; SEC.forEach(function(r){ colorOf[r.staff_id] = r.color; });
+  var wd = new Date().toLocaleDateString('en-US', { weekday:'long', timeZone:'America/Chicago' });
+  el.innerHTML = '<div class="grp"><button class="hbtn on2" data-a="secdone">Done</button><button class="hbtn" data-a="seccopy">Same as last ' + esc(wd) + '</button><button class="hbtn" data-a="secclear">' + (secArm && Date.now() - secArm < 4000 ? 'Tap again to clear' : 'Clear all') + '</button></div>' +
+    '<div class="staff">' + (SECSTAFF ? SECSTAFF.map(function(m){ return '<button class="schip' + (SECSEL && SECSEL.id === m.id ? ' on' : '') + '" data-a="secpick" data-id="' + esc(m.id) + '" style="' + (colorOf[m.id] ? '--sc:' + esc(colorOf[m.id]) : '') + '"><i></i>' + esc(m.name) + '</button>'; }).join('') : '<span class="hint">Loading staff...</span>') + '</div>';
+}
+function secAssignTap(area, num){
+  if (!SECSEL){ toast('Pick a server below first'); return; }
+  var cur = secFor(area, num), unset = !!(cur && cur.staff_id === SECSEL.id);
+  // show it straight away, then save
+  SEC = SEC.filter(function(r){ return !(r.area_key === area && r.table_num === String(num)); });
+  if (!unset){
+    var col = (SEC.filter(function(r){ return r.staff_id === SECSEL.id; })[0] || {}).color || '#22d3ee';
+    SEC.push({ area_key: area, table_num: String(num), staff_id: SECSEL.id, name: SECSEL.name, initials: SECSEL.initials, color: col });
+  }
+  render(); secPanel();
+  secApi('assign', { area_key: area, tables: [String(num)], staff_id: unset ? null : SECSEL.id }).then(function(){ return loadSections(); }).then(secPanel);
+}
 function renderBar(){
   var bar = $('#bar'); if (DISPLAY){ bar.style.display = 'none'; return; }
   bar.style.display = 'flex'; document.body.classList.add('ctl');
@@ -313,7 +375,8 @@ function tileHtml(t, st, calls, tilePct, editing, vb){
   var food = calls.filter(function(c){ return c.kind === 'food'; })[0], drinks = calls.filter(function(c){ return c.kind === 'drinks'; })[0];
   var ready = !!(st && st.status === 'occupied' && st.ticket && st.ticket.ready);
   var stage = stageOf(st), m = st ? mins(st.seated_at) : null;
-  var cls = 'tbl' + (t.shape === 'round' ? ' round' : '') + (st ? ' ' + st.status : '') + (stage ? ' stg-' + stage : '') + (ready && !food && !drinks ? ' ready' : '');
+  var sc = !editing && t.area_key ? secFor(t.area_key, t.table_num) : null;
+  var cls = 'tbl' + (sc ? ' sec' : '') + (t.shape === 'round' ? ' round' : '') + (st ? ' ' + st.status : '') + (stage ? ' stg-' + stage : '') + (ready && !food && !drinks ? ' ready' : '');
   if (stage === 'seated' && m != null && m >= 6) cls += ' wait';             // seated a while with no order yet
   if (food) cls += ' callfood'; if (drinks) cls += ' calldrinks';
   if (editing){ cls += ' edit'; if (editSel === t.table_num) cls += ' sel'; }
@@ -329,7 +392,7 @@ function tileHtml(t, st, calls, tilePct, editing, vb){
   if (Math.min(w, h) < 5.2) sub = '';          // tiny seats (bar stools): colour only
   var fs = Math.max(1.9, Math.min(Math.min(w, h) * 0.5, 4.4));
   var rot = Number(t.rot) || 0;
-  return '<div class="' + cls + '" data-t="' + esc(t.table_num) + '" style="left:' + (vb ? ((t.x - vb.minx + vb.pad) / vb.vw * 100).toFixed(3) : t.x) + '%;top:' + (vb ? ((t.y - vb.miny + vb.pad) / vb.vh * 100).toFixed(3) : t.y) + '%;width:calc(var(--u)*' + w + ');height:calc(var(--u)*' + h + ');--fs:' + fs.toFixed(2) + '">' +
+  return '<div class="' + cls + '" data-t="' + esc(t.table_num) + '" style="left:' + (vb ? ((t.x - vb.minx + vb.pad) / vb.vw * 100).toFixed(3) : t.x) + '%;top:' + (vb ? ((t.y - vb.miny + vb.pad) / vb.vh * 100).toFixed(3) : t.y) + '%;width:calc(var(--u)*' + w + ');height:calc(var(--u)*' + h + ');--fs:' + fs.toFixed(2) + (sc ? ';--sc:' + sc.color : '') + '">' +
     '<i class="bg"' + (rot ? ' style="transform:rotate(' + rot + 'deg)"' : '') + '></i>' +
     '<span class="n">' + esc(t.table_num) + '</span>' + (sub ? '<span class="s">' + esc(sub) + '</span>' : '') + '</div>';
 }
@@ -368,8 +431,30 @@ function chartHtml(a){
       var hw = Math.max(w, rr) / 2, hh = Math.max(h, rr) / 2; x0 = Math.min(x0, t.x - hw); x1 = Math.max(x1, t.x + hw); y0 = Math.min(y0, t.y - hh); y1 = Math.max(y1, t.y + hh); });
     var pad = 3; vb = { minx: x0, miny: y0, vw: (x1 - x0) + 2 * pad, vh: (y1 - y0) + 2 * pad, pad: pad };
   }
-  return '<div class="chart" data-area="' + esc(a.key) + '"' + (vb ? ' data-vw="' + vb.vw.toFixed(3) + '" data-vh="' + vb.vh.toFixed(3) + '"' : '') + '><h2>' + esc(a.label) + '<span class="pl">' + free + ' open</span>' + (occ ? '<span class="pl seat">' + occ + ' seated</span>' : '') + (clr ? '<span class="pl clr">' + clr + ' to clear</span>' : '') + '</h2><div class="sq">' +
-    tables.map(function(t){ return tileHtml(t, stateOf(a.key, t.table_num), callsOf(a.key, t.table_num), tilePct, !!editArea, vb); }).join('') + '</div></div>';
+  // server sections: soft outline around each server's tables, plus a legend row under the chart
+  var hullSvg = '', legend = '';
+  if (!editArea){
+    var groups = {}, order = [];
+    tables.forEach(function(t){
+      var sc = secFor(a.key, t.table_num); if (!sc) return;
+      if (!groups[sc.staff_id]){ groups[sc.staff_id] = { sc: sc, pts: [] }; order.push(sc.staff_id); }
+      var w = (t.w ? Number(t.w) : tilePct) * TK, h = (t.h ? Number(t.h) : tilePct) * TK;
+      if ((Number(t.rot) || 0) % 90){ w = h = Math.max(w, h); }
+      var ox = vb ? (-vb.minx + vb.pad) : 0, oy = vb ? (-vb.miny + vb.pad) : 0, pd = 1.5;
+      [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(function(c){ groups[sc.staff_id].pts.push([Number(t.x) + ox + c[0] * (w / 2 + pd), Number(t.y) + oy + c[1] * (h / 2 + pd)]); });
+    });
+    if (order.length){
+      var vw = vb ? vb.vw : 100, vh = vb ? vb.vh : 100;
+      hullSvg = '<svg class="hull" viewBox="0 0 ' + vw.toFixed(2) + ' ' + vh.toFixed(2) + '" preserveAspectRatio="none">' + order.map(function(id){
+        var g = groups[id], hp = hull(g.pts).map(function(q){ return q[0].toFixed(2) + ',' + q[1].toFixed(2); }).join(' ');
+        return '<polygon points="' + hp + '" fill="' + esc(g.sc.color) + '" fill-opacity=".13" stroke="' + esc(g.sc.color) + '" stroke-width=".55" stroke-linejoin="round"/>';
+      }).join('') + '</svg>';
+      legend = '<div class="seclg">' + order.map(function(id){ var sc = groups[id].sc, p = String(sc.name || '').split(/\s+/);
+        return '<span class="sl" style="--sc:' + esc(sc.color) + '"><i></i><span class="ini">' + esc(sc.initials || '') + '</span><span class="nm">' + esc(p[0] + (p[1] ? ' ' + p[p.length - 1][0] + '.' : '')) + '</span></span>'; }).join('') + '</div>';
+    }
+  }
+  return '<div class="chart" data-area="' + esc(a.key) + '"' + (vb ? ' data-vw="' + vb.vw.toFixed(3) + '" data-vh="' + vb.vh.toFixed(3) + '"' : '') + '><h2>' + esc(a.label) + '<span class="pl">' + free + ' open</span>' + (occ ? '<span class="pl seat">' + occ + ' seated</span>' : '') + (clr ? '<span class="pl clr">' + clr + ' to clear</span>' : '') + '</h2><div class="sq">' + hullSvg +
+    tables.map(function(t){ return tileHtml(t, stateOf(a.key, t.table_num), callsOf(a.key, t.table_num), tilePct, !!editArea, vb); }).join('') + '</div>' + legend + '</div>';
 }
 function runEntries(){
   var out = [];
@@ -409,13 +494,14 @@ function sizeBoard(){
   // Fit every chart on one screen: try each column count, keep the arrangement that gives the biggest charts.
   document.body.classList.remove('scrollmode'); wrap.style.height = '';
   var gap = 16, W = wrap.clientWidth, top = wrap.getBoundingClientRect().top;
-  var H = Math.max(160, window.innerHeight - top - 12 - (DISPLAY ? 48 : 0));
+  var secExtra = wrap.querySelector('.seclg') ? 26 : 0;
+  var H = Math.max(160, window.innerHeight - top - 12 - (DISPLAY ? 48 : 0) - (SECMODE ? 76 : 0));
   function hdrFor(s){ return (s < 420 ? 44 : 28) + 10; }      // title + count pills (they wrap on small charts)
   var opts = [];
   for (var c = 1; c <= n; c++){
     var r = Math.ceil(n / c), sw = (W - gap * (c - 1) - 2) / c, rowH = (H - gap * (r - 1)) / r;
-    var s0 = Math.floor(Math.min(sw, rowH - hdrFor(9999)));          // roomy title row first ...
-    if (s0 < 420) s0 = Math.floor(Math.min(sw, rowH - hdrFor(0)));   // ... charts under 420px get the taller, wrapped title row
+    var s0 = Math.floor(Math.min(sw, rowH - hdrFor(9999) - secExtra));          // roomy title row first ...
+    if (s0 < 420) s0 = Math.floor(Math.min(sw, rowH - hdrFor(0) - secExtra));   // ... charts under 420px get the taller, wrapped title row
     opts.push({ c: c, r: r, s: s0 });
   }
   var top1 = Math.max.apply(null, opts.map(function(o){ return o.s; }));
@@ -429,13 +515,13 @@ function sizeBoard(){
   var one = n === 1 && charts[0].getAttribute('data-vw') ? { vw: parseFloat(charts[0].getAttribute('data-vw')), vh: parseFloat(charts[0].getAttribute('data-vh')) } : null;
   if (one){
     var asp = one.vw / one.vh, cw, ch;
-    cw = Math.floor(Math.min(W - 2, (H - hdrFor(9999)) * asp));
-    if (cw < 420) cw = Math.floor(Math.min(W - 2, (H - hdrFor(0)) * asp));
+    cw = Math.floor(Math.min(W - 2, (H - hdrFor(9999) - secExtra) * asp));
+    if (cw < 420) cw = Math.floor(Math.min(W - 2, (H - hdrFor(0) - secExtra) * asp));
     if (scroll || cw < 160) cw = Math.floor(W - 2);                 // phone: full width, scroll
     ch = Math.floor(cw / asp);
     var uu = cw / one.vw, h2o = charts[0].querySelector('h2');
     if (h2o) h2o.style.minHeight = (hdrFor(cw) - 10) + 'px';
-    charts[0].style.width = cw + 'px';
+    charts[0].style.width = cw + 'px'; charts[0].classList.toggle('wide', cw >= 480);
     var sq1 = charts[0].querySelector('.sq'); sq1.style.width = cw + 'px'; sq1.style.height = ch + 'px';
     charts[0].style.setProperty('--u', uu + 'px');
     wrap.classList.toggle('tiny', uu < 4);
@@ -443,7 +529,7 @@ function sizeBoard(){
   }
   var hh = hdrFor(side) - 10;
   for (var i = 0; i < charts.length; i++){
-    charts[i].style.width = side + 'px';
+    charts[i].style.width = side + 'px'; charts[i].classList.toggle('wide', side >= 480);
     var h2 = charts[i].querySelector('h2'); if (h2) h2.style.minHeight = hh + 'px';
     var sq = charts[i].querySelector('.sq'); sq.style.width = side + 'px'; sq.style.height = side + 'px';
     charts[i].style.setProperty('--u', (side / 100) + 'px');
@@ -482,6 +568,7 @@ function tableSheet(area, num){
   var a = areaByKey(area), st = stateOf(area, num), calls = callsOf(area, num), tk = st && st.ticket;
   var h = '<h3>Table ' + esc(num) + '</h3><div class="sub">' + esc(a ? a.label : '') + ' &middot; ' +
     (!st || st.status === 'open' ? 'Open' : (st.status === 'closed' || st.status === 'paid') ? 'CLOSED OUT - needs to be cleared' : ({ seated: 'Seated - waiting to order', drinks: 'Drinks ordered', food: 'Food ordered', ordered: 'Ordered' }[stageOf(st)] || 'Seated') + (st.party_size ? ' (' + st.party_size + ' guests)' : '') + (mins(st.seated_at) != null ? ' &middot; ' + mins(st.seated_at) + ' min' : '')) + '</div>';
+  var secRow = secFor(area, num); if (secRow) h += '<div class="sub" style="margin-top:-8px">Server: <b style="color:' + esc(secRow.color) + '">' + esc(secRow.name) + '</b></div>';
   if (tk && tk.items && tk.items.length){
     h += '<div class="lbl">On the ticket' + (tk.ready ? ' - kitchen says READY' : '') + '</div>' + tk.items.map(function(i){ return '<div class="item"><span>' + esc(i.n) + (i.k === 'd' ? ' <small style="color:#b79cf0">drink</small>' : i.k === 'f' ? ' <small style="color:#e6c677">food</small>' : '') + '</span><b>x' + i.q + '</b></div>'; }).join('');
   }
@@ -588,6 +675,7 @@ document.addEventListener('click', function(e){
     if (tb && !DISPLAY && !editArea){
       var ar = tb.closest('.chart').getAttribute('data-area'), nm = tb.getAttribute('data-t');
       if (RO){ tableSheet(ar, nm); return; }     // other roles: look at the order, no buttons
+      if (SECMODE){ secAssignTap(ar, nm); return; }
       if (tb.classList.contains('closed')){
         // a red (closed out) table: double-tap = checked and clear, mark it open; a single tap opens the details after a moment
         var key = ar + '|' + nm, nowT = Date.now();
@@ -606,6 +694,18 @@ document.addEventListener('click', function(e){
   var a = el.getAttribute('data-a'), area = el.getAttribute('data-area'), num = el.getAttribute('data-t');
   if (a === 'close') return closeSheet();
   if (a === 'resv') return resvSheet();
+  if (a === 'secmode'){
+    SECMODE = !SECMODE; SECSEL = null;
+    if (SECMODE && !SECSTAFF) secApi('staff').then(function(r){ SECSTAFF = (r.data && r.data.staff) || []; secPanel(); });
+    render(); secPanel(); return;
+  }
+  if (a === 'secdone'){ SECMODE = false; SECSEL = null; render(); secPanel(); return; }
+  if (a === 'secpick'){ var id = el.getAttribute('data-id'); SECSEL = (SECSTAFF || []).filter(function(m){ return m.id === id; })[0] || null; secPanel(); return; }
+  if (a === 'seccopy') return secApi('copy_last').then(function(r){ if (r.ok) { toast('Copied ' + r.data.copied + ' tables from ' + r.data.from); } else { toast((r.data && r.data.error) || 'Could not copy'); } return loadSections(); }).then(function(){ render(); secPanel(); });
+  if (a === 'secclear'){
+    if (!secArm || Date.now() - secArm > 4000){ secArm = Date.now(); secPanel(); setTimeout(secPanel, 4100); return; }
+    secArm = 0; return secApi('clear', {}).then(function(){ SEC = []; render(); secPanel(); toast('Sections cleared'); });
+  }
   if (a === 'toclear') return toClearSheet();
   if (a === 'openfromlist') return api('set_status', { area_key: area, table_num: num, status: 'open' }).then(function(){ toast('Table ' + num + ' is open'); return load(); }).then(toClearSheet);
   if (a === 'setup') return token ? setupSheet() : unlockSheet();
