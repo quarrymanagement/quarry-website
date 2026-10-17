@@ -203,6 +203,7 @@ var RO = QS.get('ro') === '1';           // read-only view for every other role:
 if (EMBED) document.documentElement.className += ' embed';
 var ONLY = QS.get('only') === 'reservations';
 var ONEMAP = false;
+var TK = 1;                    // per-chart shrink so no two tables overlap
 var S = null;                 // last state from the server
 var sel = [];                 // control mode: charts being shown (max 3)
 var token = null;             // setup session
@@ -316,7 +317,7 @@ function tileHtml(t, st, calls, tilePct, editing, vb){
   if (stage === 'seated' && m != null && m >= 6) cls += ' wait';             // seated a while with no order yet
   if (food) cls += ' callfood'; if (drinks) cls += ' calldrinks';
   if (editing){ cls += ' edit'; if (editSel === t.table_num) cls += ' sel'; }
-  var w = t.w ? Number(t.w) : tilePct, h = t.h ? Number(t.h) : tilePct;
+  var w = (t.w ? Number(t.w) : tilePct) * TK, h = (t.h ? Number(t.h) : tilePct) * TK;
   // one short status line, drawn inside the table (never outside it, so it can't land on a neighbour)
   var sub = '';
   var up = (w >= 9) ? ' up' : '';          // small tables only have room for the short word; the pulsing ring says a runner is needed
@@ -345,10 +346,25 @@ function chartHtml(a){
     }
     tilePct = Math.max(6, Math.min(tilePct, md * 0.94));
   }
+  // shrink the tables a little if any two would touch (rotated tables count by their longer side)
+  TK = 1;
+  (function(){
+    function box(t){ var w = t.w ? Number(t.w) : tilePct, h = t.h ? Number(t.h) : tilePct; if ((Number(t.rot) || 0) % 90){ w = h = Math.max(w, h); } return { x: Number(t.x), y: Number(t.y), hw: w / 2, hh: h / 2 }; }
+    var bx = tables.map(box);
+    function clash(k){
+      for (var i = 0; i < bx.length; i++) for (var j = i + 1; j < bx.length; j++){
+        var a = bx[i], b = bx[j];
+        if (Math.abs(a.x - b.x) < (a.hw + b.hw) * k + 0.4 && Math.abs(a.y - b.y) < (a.hh + b.hh) * k + 0.4) return true;
+      }
+      return false;
+    }
+    var k = 1; while (k > 0.6 && clash(k)) k = Math.round((k - 0.04) * 100) / 100;
+    TK = k;
+  })();
   var vb = null;
   if (ONEMAP && tables.length){
     var x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
-    tables.forEach(function(t){ var w = t.w ? Number(t.w) : tilePct, h = t.h ? Number(t.h) : tilePct, rr = Math.max(w, h) > Math.min(w, h) && (Number(t.rot) || 0) % 180 ? Math.max(w, h) : 0;
+    tables.forEach(function(t){ var w = (t.w ? Number(t.w) : tilePct) * TK, h = (t.h ? Number(t.h) : tilePct) * TK, rr = Math.max(w, h) > Math.min(w, h) && (Number(t.rot) || 0) % 180 ? Math.max(w, h) : 0;
       var hw = Math.max(w, rr) / 2, hh = Math.max(h, rr) / 2; x0 = Math.min(x0, t.x - hw); x1 = Math.max(x1, t.x + hw); y0 = Math.min(y0, t.y - hh); y1 = Math.max(y1, t.y + hh); });
     var pad = 3; vb = { minx: x0, miny: y0, vw: (x1 - x0) + 2 * pad, vh: (y1 - y0) + 2 * pad, pad: pad };
   }
