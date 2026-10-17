@@ -74,6 +74,10 @@ header{
   font-size:12px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; color:var(--dim); cursor:pointer}
 .vseg button.on{background:var(--text); border-color:var(--text); color:#fff}
 .fwrap{border:1px solid var(--line); border-radius:14px; overflow:hidden; background:#14110D}
+.fwrap.full{position:fixed; inset:0; z-index:100; border-radius:0; border:0}
+.fwrap.full iframe{height:100vh; height:100dvh; min-height:0}
+.fexit{display:none}
+.fwrap.full .fexit{display:block; position:fixed; top:calc(10px + env(safe-area-inset-top)); left:10px; z-index:101; padding:10px 16px; border-radius:999px; border:1px solid #D4AF6A; background:#1A1A1A; color:#F5F0E8; font-size:12px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; cursor:pointer}
 .fwrap iframe{display:block; width:100%; height:calc(100vh - 190px); min-height:520px; border:0; background:#14110D}
 .bar{height:3px; background:var(--line-2); margin-top:-1px}
 .bar i{display:block; height:100%; background:var(--gold); width:0; transition:width .45s ease}
@@ -276,7 +280,7 @@ const SEGS = [ ['open','Opening'], ['shift','During Shift'], ['close','Closing']
 const CAD  = { daily:'Daily', weekly:'Weekly', biweekly:'Every 2 weeks', monthly:'Monthly',
                interval:'3x a month', quarterly:'Every 3 months' };
 
-let TASKS = [], STAFF = [], SET = {}, UNITS = [], READINGS = [], active = 'staff', sel = null, view = 'list';
+let TASKS = [], STAFF = [], SET = {}, UNITS = [], READINGS = [], active = 'staff', sel = null, view = 'list', full = false;
 const ROLE_ALIAS = { host:'support', hosts:'support', hostess:'support', bus:'support', busser:'support', bussers:'support',
   'host-bus':'support', hostbus:'support', bar:'bartender', bartenders:'bartender', servers:'server', foh:'support',
   boh:'kitchen', cook:'kitchen', cooks:'kitchen', mgr:'manager', managers:'manager', close:'closing' };
@@ -284,7 +288,8 @@ const FLOOR_CONTROL = ['support','manager'];
 function viewBar(){
   return `<div class="vseg"><button data-view="list" class="${view==='list'?'on':''}">Checklist</button>` +
     `<button data-view="floor" class="${view==='floor'?'on':''}">Floor chart</button>` +
-    `<button data-view="today" class="${view==='today'?'on':''}">Today</button></div>`;
+    `<button data-view="today" class="${view==='today'?'on':''}">Today</button>` +
+    (view !== 'list' ? `<button data-full="1" style="margin-left:auto">Full screen</button>` : '') + `</div>`;
 }
 function floorSrc(){
   if (view === 'today') return '/floor.html?only=reservations&embed=1';
@@ -379,7 +384,7 @@ function render(){
 
   if (view !== 'list'){
     $('#fill').style.width = '0%';
-    $('#main').innerHTML = viewBar() + `<div class="fwrap"><iframe src="${floorSrc()}" title="Floor chart" allow="fullscreen"></iframe></div>`;
+    $('#main').innerHTML = viewBar() + `<div class="fwrap${full?' full':''}"><button class="fexit" data-full="0">Exit full screen</button><iframe src="${floorSrc()}" title="Floor chart" allow="fullscreen"></iframe></div>`;
     renderAlert();
     return;
   }
@@ -656,11 +661,13 @@ async function refresh(){ await load(); await loadHours(); if (view === 'list' |
 /* ---------------- events ---------------- */
 document.addEventListener('click', async e => {
   const tab = e.target.closest('.tab');
+  const fb = e.target.closest('[data-full]');
+  if (fb){ full = fb.dataset.full === '1'; render(); return; }
   const vb = e.target.closest('[data-view]');
-  if (vb){ view = vb.dataset.view; render(); return; }
-  if (tab){ active = tab.dataset.role; view = 'list'; store('quarry_board', active); render(); return; }
+  if (vb){ view = vb.dataset.view; full = false; render(); return; }
+  if (tab){ active = tab.dataset.role; view = 'list'; full = false; store('quarry_board', active); render(); return; }
   const al = e.target.closest('.alrt');
-  if (al){ active = al.dataset.role; view = 'list'; store('quarry_board', active); render(); open(al.dataset.alert); return; }
+  if (al){ active = al.dataset.role; view = 'list'; full = false; store('quarry_board', active); render(); open(al.dataset.alert); return; }
   const task = e.target.closest('.task, .now');
   if (task){ open(task.dataset.id); return; }
   const chip = e.target.closest('.chip');
