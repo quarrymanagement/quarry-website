@@ -9114,10 +9114,10 @@
       "hidden": false
     },
     "6ad5034d8aa37efb02f344d6": {
-      "status": "awaiting_customer_confirm",
+      "status": "awaiting_decision",
       "note": "",
-      "updatedAt": "2026-10-18T17:35:11.797Z",
-      "updatedBy": "auto-reply",
+      "updatedAt": "2026-10-18T17:35:57.846Z",
+      "updatedBy": "customer",
       "history": [
         {
           "from": "not_contacted",
@@ -9125,10 +9125,17 @@
           "by": "auto-reply",
           "note": "Instant auto-reply sent",
           "at": "2026-10-18T17:35:11.797Z"
+        },
+        {
+          "from": "awaiting_customer_confirm",
+          "to": "awaiting_decision",
+          "by": "customer",
+          "note": "Customer clicked \"check availability\"",
+          "at": "2026-10-18T17:35:57.846Z"
         }
       ],
       "hidden": false
     }
   },
-  "updatedAt": "2026-10-18T17:35:11.797Z"
+  "updatedAt": "2026-10-18T17:35:57.846Z"
 }
