@@ -9022,8 +9022,8 @@
     "6ad2175508df6abb620bd540": {
       "status": "awaiting_decision",
       "note": "",
-      "updatedAt": "2026-10-16T12:24:32.573Z",
-      "updatedBy": "customer",
+      "updatedAt": "2026-10-18T22:25:55.861Z",
+      "updatedBy": "admin",
       "history": [
         {
           "from": "not_contacted",
@@ -9038,9 +9038,16 @@
           "by": "customer",
           "note": "Customer clicked \"check availability\"",
           "at": "2026-10-16T12:24:32.573Z"
+        },
+        {
+          "from": "visible",
+          "to": "hidden",
+          "by": "admin",
+          "note": "",
+          "at": "2026-10-18T22:25:55.861Z"
         }
       ],
-      "hidden": false
+      "hidden": true
     },
     "6ad228fbc08a702bb604df9c": {
       "status": "confirmed",
@@ -9151,5 +9158,5 @@
       "hidden": false
     }
   },
-  "updatedAt": "2026-10-18T22:25:39.746Z"
+  "updatedAt": "2026-10-18T22:25:55.861Z"
 }
