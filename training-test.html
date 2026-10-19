@@ -84,6 +84,10 @@
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function words(s) { return String(s || '').trim().split(/\s+/).filter(Boolean).length; }
+  // Written answers are measured in characters when the server says so (min_chars), else words.
+  function amt(s) { return D && D.min_chars ? String(s || '').trim().length : words(s); }
+  function minAmt() { return D.min_chars || D.min_words; }
+  function unit() { return D.min_chars ? 'characters' : 'words'; }
   function call(body) {
     return fetch(FN, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: KEY, Authorization: 'Bearer ' + KEY }, body: JSON.stringify(body) })
       .then(function (r) { return r.json(); }).catch(function () { return { error: 'Connection problem — check your signal and try again.' }; });
@@ -146,7 +150,7 @@
   }
 
   function openStep(i) {
-    var o = D.test.open[i], min = D.min_words;
+    var o = D.test.open[i], min = minAmt();
     app.innerHTML = '<div class="card"><div class="eyebrow">Part 2 · Situation ' + (i + 1) + ' of ' + D.test.open.length + '</div><h2>' + esc(o.title) + '</h2>' +
       '<div class="scene"><b>The situation</b>' + esc(o.scenario) + '</div>' +
       '<div class="q" style="margin-bottom:10px">' + esc(o.ask) + '</div>' +
@@ -157,9 +161,9 @@
       '<div class="nav" style="margin-top:12px"><button class="btn sec" id="back">Back</button><button class="btn" id="next">Next</button></div></div>';
     var ta = document.getElementById('ta'), wc = document.getElementById('wc'), nx = document.getElementById('next');
     function upd() {
-      var n = words(ta.value); A.open[o.id] = ta.value; save();
+      var n = amt(ta.value); A.open[o.id] = ta.value; save();
       wc.className = 'wc' + (n >= min ? ' ok' : '');
-      wc.innerHTML = '<span>' + n + ' words</span><span>' + (n >= min ? '✓ Enough detail to submit' : 'At least ' + min + ' words') + '</span>';
+      wc.innerHTML = '<span>' + n + ' ' + unit() + '</span><span>' + (n >= min ? '✓ Enough detail to submit' : 'At least ' + min + ' ' + unit()) + '</span>';
       nx.disabled = n < min;
     }
     ta.oninput = upd; upd();
@@ -169,11 +173,11 @@
 
   function review() {
     var missMc = D.test.mc.filter(function (q) { return A.mc[q.id] == null; }).length;
-    var short = D.test.open.filter(function (o) { return words(A.open[o.id]) < D.min_words; });
+    var short = D.test.open.filter(function (o) { return amt(A.open[o.id]) < minAmt(); });
     app.innerHTML = '<div class="card"><div class="eyebrow">Ready to submit</div><h1>Check your answers</h1>' +
       '<p class="sub" style="font-size:15px">Once you submit, you can’t change anything. You’ll see your multiple choice score right away. Your written answers go to a manager for review.</p>' +
       '<div class="checklist"><div><span>Multiple choice answered</span><b>' + (D.test.mc.length - missMc) + ' / ' + D.test.mc.length + '</b></div>' +
-      D.test.open.map(function (o, i) { var n = words(A.open[o.id]); return '<div><span>' + esc(o.title) + '</span><b style="color:' + (n >= D.min_words ? 'var(--ok)' : 'var(--bad)') + '">' + n + ' words</b></div>'; }).join('') + '</div>' +
+      D.test.open.map(function (o, i) { var n = amt(A.open[o.id]); return '<div><span>' + esc(o.title) + '</span><b style="color:' + (n >= minAmt() ? 'var(--ok)' : 'var(--bad)') + '">' + n + ' ' + unit() + '</b></div>'; }).join('') + '</div>' +
       '<div class="nav"><button class="btn sec" id="back">Back</button><button class="btn gold" id="sub"' + (missMc || short.length ? ' disabled' : '') + '>Submit my test</button></div><div class="err" id="er"></div></div>';
     document.getElementById('back').onclick = function () { go(step - 1); };
     document.getElementById('sub').onclick = function () {

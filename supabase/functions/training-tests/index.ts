@@ -35,7 +35,7 @@ const SEND_EMAIL_URL = `${SITE}/.netlify/functions/send-email`;
 const TEST_URL = Deno.env.get("TRAINING_TEST_URL") || `${SITE}/training-test.html`;
 const MANAGEMENT_EMAIL = "management@thequarrystl.com";
 const ALLOWED_ROLES = ["owner", "events_staff"];
-const MIN_WORDS = 25;
+const MIN_CHARS = 30; // written answers: at least this many characters
 
 // ---------------------------------------------------------------------------
 // TEST CATALOG — the source of truth. Answers never leave this function until
@@ -61,7 +61,7 @@ const SERVER_TEST: Test = {
     { id: "m6", q: "You're heading into the building and your items aren't ready yet. What do you do?", options: ["Wait in the kitchen until they're up", "Run someone else's food or drinks that are up, then get back to the floor", "Chat at the service station until they're ready", "Go back out and check later"], answer: 1, why: "The building is in and out only. If yours aren't up, run someone else's." },
     { id: "m7", q: "Four drinks are sitting on the bar counter. None of them are yours. What do you do?", options: ["Leave them — their server will grab them", "Tell the bartender they're dying", "Find out where they go and run them", "Run them only if you're not busy"], answer: 2, why: "Drinks on the counter are everyone's. Run them." },
     { id: "m8", q: "You walk past a table that isn't yours, covered in empty plates and glasses. What do you do?", options: ["Tell their server", "Bus it on your way", "Leave it for the busser", "Nothing — it's not your section"], answer: 1, why: "Full hands in, full hands out. \"Not my table\" doesn't exist." },
-    { id: "m9", q: "Walking back into the kitchen with nothing in your hands is…", options: ["Fine if you're just checking on food", "Fine on a slow night", "Never OK — grab empties on the way", "Fine if a manager is around"], answer: 2, why: "Never walk in or out empty-handed." },
+    { id: "m9", q: "Walking back into the restaurant with nothing in your hands is…", options: ["Fine if you're just checking on food", "Fine on a slow night", "Never OK — grab empties on the way", "Fine if a manager is around"], answer: 2, why: "Never walk in or out empty-handed." },
     { id: "m10", q: "A guest at another server's table is upset and flags you down. Whose problem is it?", options: ["Their server's", "The manager's", "Yours — own it, get help, and follow up", "Nobody's until they ask their server"], answer: 2, why: "A frustrated guest is the #1 priority, your table or not." },
     { id: "m11", q: "The kitchen is running 15 minutes behind on your table's food. When do you tell them?", options: ["Before they have to ask", "When they ask", "When the food comes out", "Only if it goes past 20 minutes"], answer: 0, why: "Over-communicate. The guest should never have to ask where their food is." },
     { id: "m12", q: "A guest is angry about their meal. What's the right first move?", options: ["Wait for a manager before going back to the table", "Avoid the table until the food is fixed", "Go to them right away, apologize, own it, and fix it — then go above and beyond", "Explain why the kitchen is behind tonight"], answer: 2, why: "Never hide from an upset table. Kill them with kindness and over-deliver." },
@@ -70,7 +70,7 @@ const SERVER_TEST: Test = {
     { id: "m15", q: "What do you do before leaving the floor for any reason?", options: ["Nothing if it's quick", "Tell another server", "Tell a manager or owner", "Tell the host"], answer: 2, why: "Always tell a manager or owner before you leave the floor." },
   ],
   open: [
-    { id: "o1", title: "Drinks on the counter", scenario: "Friday, 7:15 PM. You're walking back from dropping a check. Four drinks are sitting on the bar counter. They aren't yours and the bartender is buried. Your own Table 23 just sat.", ask: "Walk us through exactly what you do, step by step.", lookFor: ["Runs the drinks — finds out the table", "Still greets Table 23 within 1 minute", "Never walks past drinks on the counter", "Full hands both ways"] },
+    { id: "o1", title: "Drinks on the counter", scenario: "Friday, 7:15 PM. You're walking back from dropping a check. Four drinks are sitting on the bar counter. They aren't yours and the bartender is buried. Your own Table 23 just sat and hasn't been greeted yet.", ask: "Walk us through exactly what you do, step by step.", lookFor: ["Runs the drinks — finds out the table", "Still greets Table 23 within 1 minute", "Never walks past drinks on the counter", "Full hands both ways"] },
     { id: "o2", title: "A table full of dishes", scenario: "You walk past Table 14. It's not your section. It's covered in empty glasses, plates and napkins, and the guests are still sitting there talking.", ask: "What do you do and what do you say to the guests?", lookFor: ["Buses it on the way, without being asked", "Polite, quiet clearing (\"May I take these?\")", "Offers something (another round, waters) or tells their server", "Treats it as their table"] },
     { id: "o3", title: "Another table asks you for something", scenario: "You're carrying food to your table. A guest at another server's table stops you: \"Can we get some ranch and another round?\" Your hands are full.", ask: "How do you handle it, start to finish?", lookFor: ["Acknowledges them right away — never ignores", "Delivers the food, then comes straight back", "Gets the ranch / rings or relays the round", "Tells their server and follows up"] },
     { id: "o4", title: "An angry guest", scenario: "A guest at your Table 31 is upset. Their food took 30 minutes and the order came out wrong. You also have two other tables waiting on you.", ask: "Exactly what do you say and do? Tell us how you turn this table around.", lookFor: ["Goes to the table right away — doesn't hide", "Sincere apology, no excuses", "Fixes it fast and brings in a manager", "Goes above and beyond (kills them with kindness)", "Keeps other tables informed / gets help"] },
@@ -82,6 +82,7 @@ const SERVER_TEST: Test = {
     { id: "o10", title: "Guests move tables", scenario: "Table 12 has drinks and apps on the way. They ask to move outside to the patio, into another server's section.", ask: "How do you handle the move so nothing gets lost: the check, the food, the other server?", lookFor: ["Says yes and helps them move (carries drinks and plates)", "Moves the check to the new table in Square so nothing lands on the wrong ticket", "Tells expo and the kitchen the new table number for anything already fired", "Tells the host so the old table gets reset and the new one isn't double-seated", "Talks to the other server and agrees who keeps the table"] },
     { id: "o11", title: "Tickets stop printing", scenario: "Saturday rush. You send an order and nothing prints in the kitchen. Another server says theirs didn't print at the bar either.", ask: "What do you do, and how do you keep your tables from paying for it?", lookFor: ["Tells a manager immediately", "Walks the order to the kitchen and bar by hand (written or verbal); never assumes it went through", "Confirms the kitchen and bar actually have it and are making it", "Warns the affected tables about a possible delay before they ask", "Keeps hand-walking orders until a manager says printing is fixed"] },
     { id: "o12", title: "Your section is full and you're overwhelmed", scenario: "You have five tables. Two just sat, one wants the check, one is waiting on food, and you can see the host walking another party toward your section.", ask: "What do you do, and exactly what do you tell the host and a manager?", lookFor: ["Tells the host right away that the section is full: hold the next party, put them on the waitlist or seat them elsewhere", "Asks a manager or a teammate for help early, before it falls apart", "Still greets the new tables fast, even just \"I'll be right with you\"", "Prioritizes: greet, drop the check, update the table waiting on food", "Stays calm and gives tables honest timing"] },
+    { id: "o13", title: "Your food goes to the wrong table", scenario: "You see a runner setting your Table 8's entrées down at Table 9. Your guests at Table 8 have been waiting and still don't have their food.", ask: "How do you handle it, with Table 9, with Table 8 and with the kitchen?", lookFor: ["Steps in right away and politely stops it, or apologizes to Table 9 if it's already down", "Never re-serves food that already went to another table: gets a manager and has it remade if needed", "Tells expo and the kitchen right away so Table 8's food gets fired or finished", "Goes straight to Table 8: apologizes, gives an honest time and checks back until it lands", "Makes sure table and seat numbers are right on the ticket so it doesn't happen again"] },
   ],
 };
 const TESTS: Record<string, Test> = { server: SERVER_TEST };
@@ -174,7 +175,7 @@ Deno.serve(async (req: Request) => {
       if (!a) return json({ error: "This link isn't valid." }, 404);
       if (a.status === "voided") return json({ error: "This test was withdrawn. Ask a manager for a new link.", voided: true }, 410);
       const t = TESTS[a.test_key];
-      const head = { ref_no: a.ref_no, employee_name: a.employee_name, status: a.status, title: t.title, intro: t.intro, min_words: MIN_WORDS, submitted_at: a.submitted_at };
+      const head = { ref_no: a.ref_no, employee_name: a.employee_name, status: a.status, title: t.title, intro: t.intro, min_words: 1, min_chars: MIN_CHARS, submitted_at: a.submitted_at };
 
       if (action === "test_load") {
         if (a.status === "submitted" || a.status === "reviewed") return json({ ...head, results: resultsFor(a) });
@@ -206,7 +207,7 @@ Deno.serve(async (req: Request) => {
       const open: Record<string, string> = {};
       for (const o of openFor(t, a)) {
         const txt = String(openIn[o.id] || "").trim().slice(0, 4000);
-        if (words(txt) < MIN_WORDS) return json({ error: `"${o.title}" needs more detail — at least ${MIN_WORDS} words.` }, 400);
+        if (txt.length < MIN_CHARS) return json({ error: `"${o.title}" needs more detail — at least ${MIN_CHARS} characters.` }, 400);
         open[o.id] = txt;
       }
       const now = new Date().toISOString();
@@ -230,7 +231,7 @@ Deno.serve(async (req: Request) => {
     if (!ALLOWED_ROLES.includes(role)) return json({ error: "Your login can't manage training tests." }, 403);
     const actor = role === "owner" ? "admin" : role;
 
-    if (action === "admin_meta") return json({ tests: TESTS, min_words: MIN_WORDS });
+    if (action === "admin_meta") return json({ tests: TESTS, min_chars: MIN_CHARS });
 
     if (action === "admin_list") {
       const { data, error } = await supa.from("training_test_attempts").select(SUMMARY).order("created_at", { ascending: false }).limit(1000);
