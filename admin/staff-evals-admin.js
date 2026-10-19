@@ -15,6 +15,10 @@
  *              standards, leave notes, strengths and a 30-day focus → employee
  *              is emailed, sees both side by side, writes a reflection.
  *   Questions  read-only view of all six forms.
+ *   Weekly     team focus per role for the week, send check-ins to everyone
+ *              with open goals, read the three answers (what they focused on,
+ *              how they'll keep improving, two things they're adding), reply.
+ *              Backend: edge function `staff-checkins`.
  *   Guest feedback  Google reviews (guest_reviews). Add "what we're changing",
  *              tag staff named, hide any. Staff see the last 60 days of shared
  *              reviews at the start of their evaluation, complaints first.
@@ -23,6 +27,7 @@
   'use strict';
 
   var FN = 'https://nkulhtalltbieicvmmad.supabase.co/functions/v1/staff-evals';
+  var FN_CI = 'https://nkulhtalltbieicvmmad.supabase.co/functions/v1/staff-checkins';
   var KEY = 'sb_publishable_FQK59Bn8P2jV8yGL0nPi7w_jVHFMBSl';
 
   var META = null, LIST = [], ROSTER = null;
@@ -32,8 +37,9 @@
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function $(id) { return document.getElementById(id); }
   function tok() { return localStorage.getItem('quarryAdminToken') || ''; }
-  function api(action, extra) {
-    return fetch(FN, {
+  function apiCI(action, extra) { return api(action, extra, FN_CI); }
+  function api(action, extra, url) {
+    return fetch(url || FN, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', apikey: KEY, Authorization: 'Bearer ' + KEY, 'x-admin-token': tok() },
       body: JSON.stringify(Object.assign({ action: action }, extra || {}))
@@ -169,7 +175,7 @@
 
   function shell(inner) {
     $('evBody').innerHTML = '<div class="ev-head"><div><h2>Evaluations</h2><div class="ev-sub">Staff rate themselves on their role’s standards. You rate the same standards and respond. They reflect.</div></div></div>' +
-      '<div class="ev-tabs"><button data-v="send">Send</button><button data-v="responses">Responses</button><button data-v="questions">Questions</button><button data-v="feedback">Guest feedback</button></div><div id="evView">' + inner + '</div>';
+      '<div class="ev-tabs"><button data-v="send">Send</button><button data-v="responses">Responses</button><button data-v="weekly">Weekly</button><button data-v="questions">Questions</button><button data-v="feedback">Guest feedback</button></div><div id="evView">' + inner + '</div>';
     Array.prototype.forEach.call(document.querySelectorAll('.ev-tabs button'), function (b) {
       b.classList.toggle('on', b.dataset.v === VIEW);
       b.onclick = function () { VIEW = b.dataset.v; show(); };
@@ -182,6 +188,7 @@
       if (VIEW === 'send') sendView();
       else if (VIEW === 'questions') questionsView();
       else if (VIEW === 'feedback') feedbackView();
+      else if (VIEW === 'weekly') weeklyView();
       else responsesView();
     });
   }
@@ -442,6 +449,7 @@
       if (e.status === 'acknowledged') h += '<div class="ev-callout ok"><b>' + esc(fn) + '’s reflection</b> · ' + fmtStamp(e.acknowledged_at) + '<div class="ev-text" style="background:#fff">' + esc(e.reflection) + '</div></div>';
 
       h += '<div class="ev-card" id="evNums"><h3>The numbers</h3><div style="color:var(--text-muted);font-size:13px">Loading…</div></div>';
+      h += '<div class="ev-card" id="evGoals"><h3>Goals</h3><div style="color:var(--text-muted);font-size:13px">Loading…</div></div>';
 
       if (has) {
         h += '<div class="ev-card"><h3>Standards · their rating vs yours</h3><p class="ev-sub" style="margin:-4px 0 12px">Rate what you actually see on shift. A gap of 2 or more gets flagged on both sides as something to talk about. Notes go straight to ' + esc(fn) + '.</p>';
@@ -483,6 +491,7 @@
       if (has && canEdit) bindRespond(e, f);
       if (e.metrics_snapshot && (e.status === 'responded' || e.status === 'acknowledged')) renderNums(e.metrics_snapshot, e, true);
       else loadNums(e, 60);
+      loadGoals(e, f);
 
       var act = [];
       if (has) act.push(['Copy employee link', 'sec', function () { copy(r.link); }]);
@@ -536,6 +545,110 @@
     }
     box.innerHTML = h;
     Array.prototype.forEach.call(box.querySelectorAll('button[data-d]'), function (b) { b.onclick = function () { loadNums(e, +b.dataset.d); }; });
+  }
+
+  /* ---------- goals on an evaluation ---------- */
+  var GS = { done: 'Done', dropped: 'Dropped', active: 'Open' };
+  function loadGoals(e, f) {
+    apiCI('admin_goals', { name: e.employee_name }).then(function (r) {
+      var box = $('evGoals'); if (!box) return;
+      if (r.error) { box.innerHTML = '<h3>Goals</h3><div class="ev-callout">' + esc(r.error) + '</div>'; return; }
+      var gs = r.goals || [];
+      var h = '<h3>Goals · what ' + esc(first(e.employee_name)) + ' is working on</h3>';
+      h += gs.length ? gs.map(function (g) {
+        return '<div class="ev-area" data-gid="' + g.id + '" style="' + (g.status === 'active' ? '' : 'opacity:.6') + '"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b style="font-size:13px;color:var(--gold)">' + esc(g.area_title || 'Goal') + (g.set_by === 'mgmt' ? ' · from management' : ' · their goal') + '</b>' +
+          '<span><span class="ev-pill ' + (g.status === 'active' ? 'in_progress' : (g.status === 'done' ? 'acknowledged' : 'voided')) + '">' + GS[g.status] + '</span> ' +
+          (g.status === 'active' ? '<button class="ev-btn sec sm gDone">Mark done</button> <button class="ev-btn sec sm gDrop">Drop</button>' : '<button class="ev-btn sec sm gOpen">Reopen</button>') + '</span></div>' +
+          '<textarea class="ev-ta gTxt" style="margin-top:6px;min-height:50px">' + esc(g.goal) + '</textarea></div>';
+      }).join('') : '<p class="ev-sub">No goals yet. They set 1–2 at the end of their evaluation.</p>';
+      h += '<div style="display:grid;grid-template-columns:200px 1fr auto;gap:8px;align-items:end;margin-top:10px"><div><label class="ev-lbl">Standard</label><select class="ev-in" id="gArea">' + f.areas.map(function (a) { return '<option value="' + esc(a.id) + '">' + esc(a.title) + '</option>'; }).join('') + '</select></div>' +
+        '<div><label class="ev-lbl">Add a goal from management</label><input class="ev-in" id="gNew" placeholder="e.g. Greet every new table within 1 minute on Friday and Saturday"></div><button class="ev-btn gold" id="gAdd">Add</button></div>' +
+        '<p class="ev-hint" style="margin-top:6px">Open goals show up on their weekly check-in until they’re done or let go. Max 4 open at a time.</p>';
+      box.innerHTML = h;
+      function saveG(patch, msg) { apiCI('admin_goal_save', Object.assign({ name: e.employee_name }, patch)).then(function (x) { if (x.error) toast(x.error, true); else { toast(msg); loadGoals(e, f); } }); }
+      Array.prototype.forEach.call(box.querySelectorAll('[data-gid]'), function (row) {
+        var id = row.dataset.gid;
+        var b1 = row.querySelector('.gDone'), b2 = row.querySelector('.gDrop'), b3 = row.querySelector('.gOpen');
+        if (b1) b1.onclick = function () { saveG({ id: id, status: 'done' }, 'Marked done.'); };
+        if (b2) b2.onclick = function () { saveG({ id: id, status: 'dropped' }, 'Dropped.'); };
+        if (b3) b3.onclick = function () { saveG({ id: id, status: 'active' }, 'Reopened.'); };
+        row.querySelector('.gTxt').onchange = function () { saveG({ id: id, goal: this.value }, 'Goal updated.'); };
+      });
+      $('gAdd').onclick = function () {
+        var sel = $('gArea'), a = f.areas.filter(function (x) { return x.id === sel.value; })[0];
+        saveG({ goal: $('gNew').value, area_id: sel.value, area_title: a ? a.title : '', role_key: e.role_key, evaluation_id: e.id }, 'Goal added.');
+      };
+    });
+  }
+
+  /* ================= WEEKLY ================= */
+  var WK = { week: null };
+  function mondayISO(d) { d = new Date(d); var dow = (d.getDay() + 6) % 7; d.setDate(d.getDate() - dow); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function shiftWeek(w, n) { var d = new Date(w + 'T12:00:00'); d.setDate(d.getDate() + 7 * n); return mondayISO(d); }
+  var RLBL = { done: 'Done', partly: 'Partly', not_yet: 'Not yet' };
+  var QUICK = ['Great work. Keep it up.', 'Good goals. I’ll be watching for it this week.', 'Let’s talk on your next shift.', 'Thanks for being honest. What do you need from us?'];
+  function weeklyView() {
+    WK.week = WK.week || mondayISO(new Date());
+    $('evView').innerHTML = '<div class="ev-card" style="color:var(--text-muted)">Loading…</div>';
+    Promise.all([apiCI('admin_focus', { week_of: WK.week }), apiCI('admin_due', { week_of: WK.week }), apiCI('admin_list', { week_of: WK.week })]).then(function (res) {
+      var fo = res[0], du = res[1], li = res[2];
+      if (fo.error || du.error || li.error) { $('evView').innerHTML = '<div class="ev-callout">' + esc(fo.error || du.error || li.error) + '</div>'; return; }
+      var wl = new Date(WK.week + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      var h = '<div style="display:flex;gap:8px;align-items:center;margin-bottom:14px"><button class="ev-btn sec sm" id="wPrev">←</button><b>Week of ' + wl + '</b><button class="ev-btn sec sm" id="wNext">→</button></div>';
+      h += '<div class="ev-card"><h3>1 · This week’s focus, by role</h3><p class="ev-sub" style="margin:-4px 0 12px">One line per role, pulled from a policy you’re pushing. It sits at the top of everyone’s check-in. Leave a role blank to skip it.</p>';
+      fo.roles.forEach(function (rk) {
+        h += '<div class="ev-f"><label class="ev-lbl">' + esc(fo.role_names[rk]) + (fo.last_week[rk] ? ' <span class="ev-hint">· last week: ' + esc(fo.last_week[rk]) + '</span>' : '') + '</label><input class="ev-in wFocus" data-r="' + rk + '" value="' + esc(fo.focus[rk] || '') + '" placeholder="e.g. Every table greeted within 1 minute"></div>';
+      });
+      h += '</div>';
+      h += '<div class="ev-card"><h3>2 · Send check-ins</h3>';
+      if (!du.due.length) h += '<p class="ev-sub">' + (du.already_sent ? 'Everyone with open goals already got this week’s check-in.' : 'Nobody has open goals yet. Goals come from finished evaluations.') + '</p>';
+      else {
+        h += '<p class="ev-sub" style="margin:-4px 0 10px">Everyone with an open goal who hasn’t had this week’s check-in. Set the focus above first; it’s copied into each check-in when you send.</p><div class="ev-people">' +
+          du.due.map(function (p, i) { return '<label class="ev-p"><input type="checkbox" class="wPick" data-i="' + i + '" checked><span><b>' + esc(p.name) + '</b><small>' + esc(p.email || (p.phone ? p.phone + ' · text it' : 'No email or phone · copy link')) + '</small></span><span class="tag">' + p.goals + ' open goal' + (p.goals === 1 ? '' : 's') + '</span></label>'; }).join('') +
+          '</div><div style="margin-top:12px"><button class="ev-btn gold" id="wSend">Send check-ins</button></div>';
+      }
+      h += '</div>';
+      var cis = li.checkins || [];
+      h += '<div class="ev-card"><h3>3 · This week’s check-ins (' + cis.filter(function (c) { return c.status === 'submitted'; }).length + ' of ' + cis.filter(function (c) { return c.status !== 'voided'; }).length + ' in)</h3>';
+      h += cis.length ? cis.map(function (c) {
+        var head = '<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b>' + esc(c.employee_name) + '</b><span>' + (c.status === 'submitted' ? '<span class="ev-pill acknowledged">In</span>' : (c.status === 'voided' ? '<span class="ev-pill voided">Void</span>' : '<span class="ev-pill sent">' + (c.opened_at ? 'Opened' : 'Not opened') + '</span> <button class="ev-btn sec sm wCopy" data-l="' + esc(c.link) + '">Copy link</button>')) + '</span></div>';
+        var body = c.status === 'submitted' ? (c.results || []).map(function (r) {
+          return '<div style="margin-top:8px"><span class="ev-pill ' + (r.result === 'done' ? 'acknowledged' : (r.result === 'partly' ? 'submitted' : 'gap')) + '">' + RLBL[r.result] + '</span> <b style="font-size:13.5px">' + esc(r.goal) + '</b><div class="ev-text" style="margin:4px 0 0">' + esc(r.note) + '</div></div>';
+        }).join('') + (c.focus_note ? '<div style="margin-top:8px"><b style="font-size:12px;color:var(--gold)">ALSO FOCUSED ON</b><div class="ev-text" style="margin:4px 0 0">' + esc(c.focus_note) + '</div></div>' : '') +
+          (c.improve ? '<div style="margin-top:8px"><b style="font-size:12px;color:var(--gold)">HOW THEY’LL KEEP IMPROVING</b><div class="ev-text" style="margin:4px 0 0">' + esc(c.improve) + '</div></div>' : '') +
+          ((c.new_goals || []).length ? '<div style="margin-top:8px"><b style="font-size:12px;color:var(--gold)">TWO THINGS THEY’RE ADDING</b>' + c.new_goals.map(function (g) { return '<div class="ev-text" style="margin:4px 0 0"><b>' + esc(g.area_title || '') + '</b> ' + esc(g.goal) + '</div>'; }).join('') + '</div>' : '') +
+          '<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">' + QUICK.map(function (q) { return '<button class="ev-btn sec sm wQuick" data-id="' + c.id + '">' + esc(q) + '</button>'; }).join('') + '</div>' +
+          '<div style="margin-top:6px"><textarea class="ev-ta wNote" data-id="' + c.id + '" placeholder="Reply to ' + esc(first(c.employee_name)) + '. Tap one above or write your own; they get an email the first time you reply.">' + esc(c.mgr_note || '') + '</textarea></div>' +
+          (c.mgr_at ? '<div class="ev-hint">Replied ' + fmtStamp(c.mgr_at) + (c.mgr_by ? ' by ' + esc(c.mgr_by) : '') + '</div>' : '') : '';
+        return '<div class="ev-ans">' + head + body + '</div>';
+      }).join('') : '<p class="ev-sub">None sent this week yet.</p>';
+      h += '</div>';
+      $('evView').innerHTML = h;
+      $('wPrev').onclick = function () { WK.week = shiftWeek(WK.week, -1); weeklyView(); };
+      $('wNext').onclick = function () { WK.week = shiftWeek(WK.week, 1); weeklyView(); };
+      Array.prototype.forEach.call(document.querySelectorAll('.wFocus'), function (inp) {
+        inp.onchange = function () { apiCI('admin_focus_set', { week_of: WK.week, role_key: inp.dataset.r, text: inp.value, set_by: lastSender() }).then(function (x) { toast(x.error || 'Focus saved.', !!x.error); }); };
+      });
+      Array.prototype.forEach.call(document.querySelectorAll('.wCopy'), function (b) { b.onclick = function () { copy(b.dataset.l); }; });
+      function sendNote(id, text) { return apiCI('admin_note', { id: id, note: text, by: lastSender() }).then(function (x) { toast(x.error || (x.emailed ? 'Reply sent. They were emailed.' : 'Reply saved.'), !!x.error); }); }
+      Array.prototype.forEach.call(document.querySelectorAll('.wNote'), function (ta) { ta.onchange = function () { sendNote(ta.dataset.id, ta.value); }; });
+      Array.prototype.forEach.call(document.querySelectorAll('.wQuick'), function (b) {
+        b.onclick = function () { var ta = document.querySelector('.wNote[data-id="' + b.dataset.id + '"]'); ta.value = ta.value ? ta.value + ' ' + b.textContent : b.textContent; sendNote(b.dataset.id, ta.value); };
+      });
+      if ($('wSend')) $('wSend').onclick = function () {
+        var people = du.due.filter(function (p, i) { var c = document.querySelector('.wPick[data-i="' + i + '"]'); return c && c.checked; });
+        if (!people.length) { toast('Pick at least one person.', true); return; }
+        var m = modal('<h4>Send ' + people.length + ' check-in' + (people.length === 1 ? '' : 's') + '?</h4><p class="ev-sub" style="margin:0 0 14px">' + people.filter(function (p) { return p.email; }).length + ' will be emailed now; the rest get Text / Copy link buttons.</p><div style="display:flex;gap:8px;justify-content:flex-end"><button class="ev-btn sec" id="wX">Cancel</button><button class="ev-btn gold" id="wGo">Send now</button></div>');
+        m.querySelector('#wX').onclick = function () { m.remove(); };
+        m.querySelector('#wGo').onclick = function () {
+          this.disabled = true; this.textContent = 'Sending…';
+          apiCI('admin_send', { week_of: WK.week, sent_by: lastSender(), people: people.map(function (p) { return { name: p.name, email: p.email, phone: p.phone, role_key: p.role_key, evaluation_id: p.evaluation_id }; }) }).then(function (r) {
+            m.remove(); if (r.error) { toast(r.error, true); return; }
+            sentModal(r.results || [], { title: 'Weekly check-in' }); weeklyView();
+          });
+        };
+      };
+    });
   }
 
   function bindRespond(e, f) {

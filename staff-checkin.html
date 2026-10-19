@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Weekly Check-in · The Quarry</title>
+<link rel="icon" href="/favicon-32.png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --charcoal:#1A1A1A; --brown:#2C1A0E; --cream:#F5F0E8; --gold:#B8933A; --gold2:#D4AF6A; --ink:#1f1b16; --muted:#7a6e60; --line:#e6dfd3;
+         --bad:#a52a1e; --bad-bg:#fdeeee; --ok:#176b34; --ok-bg:#e7f5ec; --warn:#8a5a00; --warn-bg:#fff4d6; }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;font-family:Montserrat,-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:var(--cream);color:var(--ink);line-height:1.5;}
+  .top{background:var(--charcoal);padding:14px 18px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:5;}
+  .top img{width:32px;height:32px;}
+  .top .brand{font-family:'Playfair Display',Georgia,serif;color:var(--gold);letter-spacing:3px;font-size:17px;}
+  .top .tag{margin-left:auto;color:#cfc4b2;font-size:11px;text-transform:uppercase;letter-spacing:1px;text-align:right;}
+  .prog{height:4px;background:#3a3027;position:sticky;top:60px;z-index:5;} .prog i{display:block;height:100%;background:var(--gold);transition:width .25s;}
+  .wrap{max-width:680px;margin:0 auto;padding:18px 16px 70px;}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:14px;}
+  h1{font-family:'Playfair Display',Georgia,serif;font-size:25px;margin:0 0 6px;color:var(--brown);line-height:1.2;}
+  h2{font-family:'Playfair Display',Georgia,serif;font-size:20px;margin:0 0 8px;color:var(--brown);line-height:1.25;}
+  .eyebrow{font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;}
+  .sub{color:var(--muted);font-size:14px;}
+  .q{font-size:17px;font-weight:600;margin:4px 0 14px;}
+  .opt{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;background:#fffdf9;border:1.5px solid var(--line);border-radius:12px;padding:14px;margin-bottom:10px;font:inherit;font-size:15px;color:var(--ink);cursor:pointer;}
+  .opt .dot{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid #c9bda9;margin-top:1px;}
+  .opt.on{border-color:var(--brown);background:#faf5ec;} .opt.on .dot{border-color:var(--brown);background:radial-gradient(var(--brown) 45%,transparent 50%);}
+  .scene{background:var(--charcoal);color:#f1e9dc;border-radius:12px;padding:14px 16px;font-size:15px;margin-bottom:12px;}
+  .scene b{color:var(--gold2);display:block;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:4px;}
+  textarea{width:100%;min-height:190px;border:1.5px solid #d5cbbb;border-radius:12px;padding:14px;font-size:16px;font-family:inherit;background:#fffdf9;resize:vertical;line-height:1.5;}
+  textarea:focus,.opt:focus-visible,.btn:focus-visible{outline:2px solid rgba(184,147,58,.55);outline-offset:2px;}
+  .wc{font-size:12.5px;color:var(--muted);margin-top:6px;display:flex;justify-content:space-between;gap:8px;}
+  .wc.ok{color:var(--ok);}
+  .tip{background:var(--warn-bg);color:#6b4e00;border-radius:10px;padding:10px 12px;font-size:13.5px;margin-bottom:12px;}
+  .nav{display:flex;gap:10px;margin-top:6px;}
+  .btn{flex:1;background:var(--brown);color:#fff;border:0;border-radius:12px;padding:15px;font-size:15.5px;font-weight:700;font-family:inherit;cursor:pointer;}
+  .btn.sec{background:#fff;color:var(--ink);border:1.5px solid var(--line);flex:0 0 auto;padding:15px 18px;}
+  .btn.gold{background:var(--gold);color:#1a1a1a;}
+  .btn:disabled{opacity:.4;cursor:not-allowed;}
+  .err{color:var(--bad);font-size:14px;margin-top:10px;min-height:1px;}
+  .state{text-align:center;padding:40px 22px;}
+  .spinner{width:34px;height:34px;border:4px solid var(--line);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 12px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .score{display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
+  .score .n{font-family:'Playfair Display',Georgia,serif;font-size:52px;line-height:1;color:var(--brown);font-variant-numeric:tabular-nums;}
+  .pill{display:inline-block;padding:4px 11px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:.3px;}
+  .pill.ok{background:var(--ok-bg);color:var(--ok);} .pill.bad{background:var(--bad-bg);color:var(--bad);} .pill.warn{background:var(--warn-bg);color:var(--warn);}
+  .res{border-top:1px solid var(--line);padding:12px 0;}
+  .res:first-of-type{border-top:0;}
+  .res .rq{font-weight:600;font-size:14.5px;display:flex;gap:8px;}
+  .res .mark{flex:none;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}
+  .mark.y{background:var(--ok-bg);color:var(--ok);} .mark.n{background:var(--bad-bg);color:var(--bad);}
+  .res .ra{font-size:13.5px;color:var(--muted);margin:4px 0 0 30px;}
+  .res .ra b{color:var(--ink);font-weight:600;}
+  .ans{white-space:pre-wrap;background:var(--cream);border-radius:10px;padding:12px;font-size:14.5px;margin:8px 0;}
+  .mnote{border-left:3px solid var(--gold);padding:8px 12px;background:#fffaf0;border-radius:0 8px 8px 0;font-size:14.5px;margin-top:8px;white-space:pre-wrap;}
+  .mnote span{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--gold);margin-bottom:2px;}
+  .checklist{display:flex;flex-direction:column;gap:6px;margin:12px 0;}
+  .checklist div{display:flex;justify-content:space-between;gap:10px;font-size:14px;padding:8px 10px;background:var(--cream);border-radius:8px;}
+  .foot{text-align:center;color:var(--muted);font-size:11px;margin-top:20px;}
+  @media (prefers-reduced-motion:reduce){.prog i{transition:none}.spinner{animation:none}}
+  /* weekly check-in */
+  .focus{background:var(--charcoal);color:#f1e9dc;border-radius:12px;padding:14px 16px;margin-bottom:14px;}
+  .focus b{display:block;color:var(--gold2);font-size:11px;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:4px;}
+  .goal{border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px;background:#fffdf9;}
+  .goal .area{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gold);}
+  .goal .txt{font-size:15.5px;font-weight:600;margin:4px 0 10px;}
+  .seg{display:flex;gap:8px;margin-bottom:10px;}
+  .seg button{flex:1;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:11px 6px;font:inherit;font-weight:600;font-size:14px;cursor:pointer;color:var(--ink);}
+  .seg button.on.done{background:var(--ok-bg);border-color:var(--ok);color:var(--ok);} .seg button.on.partly{background:var(--warn-bg);border-color:#c99a2e;color:var(--warn);} .seg button.on.not_yet{background:var(--bad-bg);border-color:var(--bad);color:var(--bad);}
+  textarea.short{min-height:90px;}
+  .badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;}
+  .badge.done{background:var(--ok-bg);color:var(--ok);} .badge.partly{background:var(--warn-bg);color:var(--warn);} .badge.not_yet{background:var(--bad-bg);color:var(--bad);}
+</style>
+</head>
+<body>
+<div class="top"><img src="/assets/quarry-q-logo.png" alt=""><span class="brand">THE QUARRY</span><span class="tag">Weekly<br>Check-in</span></div>
+<div class="wrap" id="app"><div class="card state"><div class="spinner"></div><p>Loading your check-in…</p></div></div>
+<div class="foot">The Quarry · 3960 Highway Z, New Melle, MO</div>
+<script>
+(function () {
+  'use strict';
+  var FN = 'https://nkulhtalltbieicvmmad.supabase.co/functions/v1/staff-checkins';
+  var KEY = 'sb_publishable_FQK59Bn8P2jV8yGL0nPi7w_jVHFMBSl';
+  var TOKEN = new URLSearchParams(location.search).get('t') || '';
+  var app = document.getElementById('app');
+  var D = null, S = { R: {}, focus: '', improve: '', ng: [{}, {}] };
+  var SAVE_KEY = 'qci-' + TOKEN.slice(0, 16);
+  var LABEL = { done: 'Done', partly: 'Partly', not_yet: 'Not yet' };
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function words(s) { return String(s || '').trim().split(/\s+/).filter(Boolean).length; }
+  function call(body) {
+    return fetch(FN, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: KEY, Authorization: 'Bearer ' + KEY }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json(); }).catch(function () { return { error: 'Connection problem — check your signal and try again.' }; });
+  }
+  function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }
+  function restore() { try { var s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if (s && s.R) { S = s; S.ng = S.ng || [{}, {}]; } } catch (e) {} }
+  function first() { return String(D.employee_name || '').split(' ')[0]; }
+  function weekLabel(w) { return new Date(w + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
+  function stateCard(t, m) { app.innerHTML = '<div class="card state"><h2>' + esc(t) + '</h2><p class="sub">' + m + '</p></div>'; }
+  function wc(n, min, opt) { return '<span>' + n + ' words</span><span>' + (n >= min ? '✓ Good' : (opt && !n ? 'Optional' : 'At least ' + min + ' words')) + '</span>'; }
+
+  if (!TOKEN) { stateCard('Link incomplete', 'Open it again from your email or text.'); return; }
+  call({ action: 'checkin_load', token: TOKEN }).then(function (r) {
+    if (r.error) { stateCard(r.voided ? 'Check-in withdrawn' : 'Can’t open this check-in', esc(r.error)); return; }
+    D = r; if (r.status === 'submitted') return done(); restore(); form();
+  });
+
+  function form() {
+    var h = '<div class="card"><div class="eyebrow">Week of ' + esc(weekLabel(D.week_of)) + '</div><h1>Hi ' + esc(first()) + '. Quick check-in.</h1>' +
+      '<p class="sub" style="font-size:15px">Three quick questions, about a minute. Be honest: “not yet” is fine.</p></div>';
+    if (D.focus) h += '<div class="focus"><b>This week’s focus for ' + esc(D.role_name || 'the team') + '</b>' + esc(D.focus) + '</div>';
+    if (D.last && D.last.mgr_note) h += '<div class="card"><div class="mnote"><span>Last week, ' + esc(D.last.mgr_by || 'management') + ' said</span>' + esc(D.last.mgr_note) + '</div></div>';
+
+    // 1
+    h += '<div class="card"><div class="eyebrow">1 of 3</div><h2>What are some things you focused on this week?</h2>';
+    if (D.goals.length) {
+      h += '<p class="sub">Tap how each one went and add a line on what you did.</p>';
+      D.goals.forEach(function (g) {
+        var r = S.R[g.id] || {};
+        h += '<div class="goal" data-id="' + g.id + '"><div class="area">' + esc(g.area_title || 'Goal') + (g.set_by === 'mgmt' ? ' · from management' : '') + '</div><div class="txt">' + esc(g.goal) + '</div>' +
+          '<div class="seg">' + ['done', 'partly', 'not_yet'].map(function (k) { return '<button data-v="' + k + '" class="' + k + (r.result === k ? ' on' : '') + '">' + LABEL[k] + '</button>'; }).join('') + '</div>' +
+          '<textarea class="gn" rows="2" style="min-height:0" placeholder="One line: what did you do?">' + esc(r.note || '') + '</textarea><div class="wc"></div>' +
+          '<label class="sub keepw" style="display:' + (r.result && r.result !== 'done' ? 'flex' : 'none') + ';gap:8px;align-items:center;margin-top:8px"><input type="checkbox" class="keep"' + (r.keep === false ? '' : ' checked') + '> Keep working on this next week</label></div>';
+      });
+      h += '<label class="sub" style="display:block;margin:6px 0">Anything else? (optional)</label><textarea id="fn" rows="2" style="min-height:0">' + esc(S.focus) + '</textarea>';
+    } else {
+      h += '<textarea id="fn" rows="2" style="min-height:0" placeholder="What did you work on this week?">' + esc(S.focus) + '</textarea><div class="wc" id="fnwc"></div>';
+    }
+    h += '</div>';
+    // 2
+    h += '<div class="card"><div class="eyebrow">2 of 3</div><h2>What could you do to keep improving on those?</h2>' +
+      '<textarea id="imp" rows="2" style="min-height:0" placeholder="One or two lines">' + esc(S.improve) + '</textarea><div class="wc" id="impwc"></div></div>';
+    // 3
+    h += '<div class="card"><div class="eyebrow">3 of 3</div><h2>What are two things you want to add on?</h2><p class="sub">Two short goals for next week.</p>' +
+      [0, 1].map(function (i) {
+        var g = S.ng[i] || {};
+        return '<div class="goal"><div class="area">New goal ' + (i + 1) + '</div>' +
+          '<select class="ns" data-i="' + i + '" style="width:100%;padding:10px;border:1.5px solid #d5cbbb;border-radius:10px;font:inherit;font-size:14px;background:#fff;margin:6px 0 8px"><option value="">Standard (optional)</option>' +
+          (D.areas || []).map(function (a) { return '<option value="' + esc(a.id) + '"' + (g.area_id === a.id ? ' selected' : '') + '>' + esc(a.title) + '</option>'; }).join('') + '</select>' +
+          '<textarea class="nt" rows="2" style="min-height:0" data-i="' + i + '" placeholder="e.g. Run every drink sitting on the bar">' + esc(g.goal || '') + '</textarea><div class="wc" id="nwc' + i + '"></div></div>';
+      }).join('') + '<div class="err" id="cap"></div></div>';
+    h += '<div class="card"><div class="nav"><button class="btn gold" id="sub" disabled>Send my check-in</button></div><div class="err" id="er"></div></div>';
+    app.innerHTML = h;
+
+    var btn = document.getElementById('sub');
+    function check() {
+      var ok1 = D.goals.length ? D.goals.every(function (g) { var r = S.R[g.id] || {}; return r.result && words(r.note) >= D.min.note; }) : words(S.focus) >= D.min.improve;
+      if (document.getElementById('fnwc')) document.getElementById('fnwc').innerHTML = wc(words(S.focus), D.min.improve);
+      var ni = words(S.improve), iw = document.getElementById('impwc'); iw.className = 'wc' + (ni >= D.min.improve ? ' ok' : ''); iw.innerHTML = wc(ni, D.min.improve);
+      var ok3 = [0, 1].every(function (i) { var g = S.ng[i] || {}, n = words(g.goal), w = document.getElementById('nwc' + i); w.className = 'wc' + (n >= D.min.goal ? ' ok' : ''); w.innerHTML = wc(n, D.min.goal); return n >= D.min.goal; });
+      var kept = D.goals.filter(function (g) { var r = S.R[g.id] || {}; return r.result && r.result !== 'done' && r.keep !== false; }).length;
+      var over = kept + 2 > D.max_open;
+      document.getElementById('cap').textContent = over ? 'That’s ' + (kept + 2) + ' open goals. Keep it to ' + D.max_open + ': untick “keep working on this” on one you’re letting go.' : '';
+      btn.disabled = !(ok1 && ni >= D.min.improve && ok3 && !over);
+      save();
+    }
+    Array.prototype.forEach.call(app.querySelectorAll('.goal[data-id]'), function (box) {
+      var id = box.dataset.id, ta = box.querySelector('.gn'), w = box.querySelector('.wc'), kw = box.querySelector('.keepw'), kb = box.querySelector('.keep');
+      function wupd() { var n = words(ta.value); w.className = 'wc' + (n >= D.min.note ? ' ok' : ''); w.innerHTML = wc(n, D.min.note); }
+      Array.prototype.forEach.call(box.querySelectorAll('.seg button'), function (b) {
+        b.onclick = function () { S.R[id] = S.R[id] || {}; S.R[id].result = b.dataset.v; Array.prototype.forEach.call(box.querySelectorAll('.seg button'), function (x) { x.classList.toggle('on', x === b); }); kw.style.display = b.dataset.v === 'done' ? 'none' : 'flex'; check(); };
+      });
+      ta.oninput = function () { S.R[id] = S.R[id] || {}; S.R[id].note = ta.value; wupd(); check(); }; wupd();
+      kb.onchange = function () { S.R[id] = S.R[id] || {}; S.R[id].keep = kb.checked; check(); };
+    });
+    document.getElementById('fn').oninput = function () { S.focus = this.value; check(); };
+    document.getElementById('imp').oninput = function () { S.improve = this.value; check(); };
+    Array.prototype.forEach.call(app.querySelectorAll('.ns'), function (el) { el.onchange = function () { S.ng[+el.dataset.i].area_id = el.value; check(); }; });
+    Array.prototype.forEach.call(app.querySelectorAll('.nt'), function (el) { el.oninput = function () { S.ng[+el.dataset.i].goal = el.value; check(); }; });
+    check();
+    btn.onclick = function () {
+      btn.disabled = true; btn.textContent = 'Sending…';
+      var ngs = S.ng.map(function (g) { var a = (D.areas || []).filter(function (x) { return x.id === g.area_id; })[0]; return { area_id: g.area_id, area_title: a ? a.title : '', goal: g.goal }; });
+      call({ action: 'checkin_submit', token: TOKEN, results: S.R, focus_note: S.focus, improve: S.improve, new_goals: ngs }).then(function (r) {
+        if (r.error && !r.done) { btn.disabled = false; btn.textContent = 'Send my check-in'; document.getElementById('er').textContent = r.error; return; }
+        if (r.done) { location.reload(); return; }
+        try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
+        D = r; done(); window.scrollTo(0, 0);
+      });
+    };
+  }
+
+  function done() {
+    var h = '<div class="card"><div class="eyebrow">Week of ' + esc(weekLabel(D.week_of)) + '</div><h1>Thanks, ' + esc(first()) + '.</h1><p class="sub" style="font-size:15px">Management reads every check-in. Open this link again later to see their reply.</p></div>';
+    if (D.mgr_note) h += '<div class="card"><div class="mnote"><span>From ' + esc(D.mgr_by || 'management') + '</span>' + esc(D.mgr_note) + '</div></div>';
+    h += '<div class="card"><div class="eyebrow">What you focused on</div>' + (D.results || []).map(function (r) {
+      return '<div class="res"><div class="rq" style="justify-content:space-between"><span>' + esc(r.goal) + '</span><span class="badge ' + r.result + '">' + LABEL[r.result] + '</span></div><div class="ra" style="margin-left:0">' + esc(r.note) + '</div></div>';
+    }).join('') + (D.focus_note ? '<div class="ans">' + esc(D.focus_note) + '</div>' : '') + '</div>';
+    if (D.improve) h += '<div class="card"><div class="eyebrow">How you’ll keep improving</div><div class="ans">' + esc(D.improve) + '</div></div>';
+    h += '<div class="card"><div class="eyebrow">Your goals for next week</div>' + ((D.goals_now || []).map(function (g) { return '<div class="res"><div class="rq">' + esc(g.area_title || 'Goal') + '</div><div class="ans">' + esc(g.goal) + '</div></div>'; }).join('') || '<p class="sub">None open.</p>') + '</div>';
+    app.innerHTML = h;
+  }
+})();
+</script>
+</body>
+</html>

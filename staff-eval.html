@@ -98,22 +98,28 @@
 (function () {
   'use strict';
   var FN = 'https://nkulhtalltbieicvmmad.supabase.co/functions/v1/staff-evals';
+  var FN_GOALS = 'https://nkulhtalltbieicvmmad.supabase.co/functions/v1/staff-checkins';
   var KEY = 'sb_publishable_FQK59Bn8P2jV8yGL0nPi7w_jVHFMBSl';
   var TOKEN = new URLSearchParams(location.search).get('t') || '';
   var app = document.getElementById('app');
   var D = null;
-  var A = { ratings: {}, examples: {}, open: {} };
+  var A = { ratings: {}, examples: {}, open: {}, goals: [{}, {}] };
+  var MIN_GOAL = 6;
   var step = 0;   // 0 intro, 1..nAreas areas, then open questions, then review
   var SAVE_KEY = 'qev-' + TOKEN.slice(0, 16);
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function words(s) { return String(s || '').trim().split(/\s+/).filter(Boolean).length; }
+  function callGoals(body) {
+    return fetch(FN_GOALS, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: KEY, Authorization: 'Bearer ' + KEY }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json(); }).catch(function () { return { error: 'Connection problem — check your signal and try again.' }; });
+  }
   function call(body) {
     return fetch(FN, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: KEY, Authorization: 'Bearer ' + KEY }, body: JSON.stringify(body) })
       .then(function (r) { return r.json(); }).catch(function () { return { error: 'Connection problem — check your signal and try again.' }; });
   }
   function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ A: A, step: step })); } catch (e) {} }
-  function restore() { try { var s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if (s && s.A) { A = s.A; A.open = A.open || {}; step = s.step || 0; } } catch (e) {} }
+  function restore() { try { var s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if (s && s.A) { A = s.A; A.open = A.open || {}; A.goals = A.goals || [{}, {}]; step = s.step || 0; } } catch (e) {} }
   function clearSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) {} }
   function stateCard(title, msg) { document.getElementById('prog').hidden = true; app.innerHTML = '<div class="card state"><h2>' + esc(title) + '</h2><p class="sub">' + msg + '</p></div>'; }
   function first() { return String(D.employee_name || '').split(' ')[0]; }
@@ -143,7 +149,7 @@
   function nF() { return (D.feedback && D.feedback.length) ? 1 : 0; }
   function nA() { return D.form.areas.length; }
   function nO() { return D.form.open.length; }
-  function total() { return 1 + nF() + nA() + nO() + 1; }
+  function total() { return 1 + nF() + nA() + nO() + 1 + 1; }
   function setProg() {
     var p = document.getElementById('prog'); p.hidden = step === 0;
     document.getElementById('progBar').style.width = Math.round(100 * step / (total() - 1)) + '%';
@@ -156,6 +162,7 @@
     var k = step - nF();
     if (k <= nA()) return areaStep(k - 1);
     if (k <= nA() + nO()) return openStep(k - 1 - nA());
+    if (k === nA() + nO() + 1) return goalsStep();
     return review();
   }
 
@@ -228,16 +235,54 @@
     nx.onclick = function () { go(step + 1); };
   }
 
+  function goalsOk() { return [0, 1].every(function (i) { var g = A.goals[i] || {}; return !!g.area_id && words(g.goal) >= MIN_GOAL; }); }
+  function goalsStep() {
+    var areas = D.form.areas;
+    if (!A.goals[0].area_id) {
+      var low = areas.slice().sort(function (a, b) { return (A.ratings[a.id] || 9) - (A.ratings[b.id] || 9); })[0];
+      if (low) A.goals[0].area_id = low.id;
+    }
+    function slot(i) {
+      var g = A.goals[i] || {};
+      return '<div class="card" style="padding:14px;margin-bottom:12px;background:#fffdf9"><div class="eyebrow">Goal ' + (i + 1) + '</div>' +
+        '<label class="sub" style="display:block;margin-bottom:6px">Which standard?</label>' +
+        '<select data-i="' + i + '" class="gsel" style="width:100%;padding:12px;border:1.5px solid #d5cbbb;border-radius:10px;font:inherit;font-size:15px;background:#fff;margin-bottom:10px"><option value="">Pick one</option>' +
+        areas.map(function (a) { return '<option value="' + esc(a.id) + '"' + (g.area_id === a.id ? ' selected' : '') + '>' + esc(a.title) + (A.ratings[a.id] ? ' (you said ' + A.ratings[a.id] + ')' : '') + '</option>'; }).join('') + '</select>' +
+        '<label class="sub" style="display:block;margin-bottom:6px">What exactly will you do next week?</label>' +
+        '<textarea data-i="' + i + '" class="gta short" placeholder="e.g. Greet every new table within a minute, even when I’m slammed, by doing a quick hello before I finish what I’m doing">' + esc(g.goal || '') + '</textarea><div class="wc" id="gwc' + i + '"></div></div>';
+    }
+    app.innerHTML = '<div class="card"><div class="eyebrow">Almost done</div><h2>Your goals for next week</h2>' +
+      '<p class="sub">Pick two standards to work on, and say exactly what you’ll do. Make it something we could see you doing on a shift. Every week you’ll get a two-minute check-in asking how it went.</p>' +
+      slot(0) + slot(1) +
+      '<div class="nav"><button class="btn sec" id="back">Back</button><button class="btn" id="next">Next</button></div></div>';
+    var nx = document.getElementById('next');
+    function upd() {
+      [0, 1].forEach(function (i) { var n = words((A.goals[i] || {}).goal), w = document.getElementById('gwc' + i); if (w) { w.className = 'wc' + (n >= MIN_GOAL ? ' ok' : ''); w.innerHTML = '<span>' + n + ' words</span><span>' + (n >= MIN_GOAL ? '✓ Good' : 'At least ' + MIN_GOAL + ' words') + '</span>'; } });
+      save(); nx.disabled = !goalsOk();
+    }
+    Array.prototype.forEach.call(app.querySelectorAll('.gsel'), function (el) { el.onchange = function () { A.goals[+el.dataset.i].area_id = el.value; upd(); }; });
+    Array.prototype.forEach.call(app.querySelectorAll('.gta'), function (el) { el.oninput = function () { A.goals[+el.dataset.i].goal = el.value; upd(); }; });
+    upd();
+    document.getElementById('back').onclick = function () { go(step - 1); };
+    nx.onclick = function () { go(step + 1); };
+  }
+  function goalsPayload() {
+    return A.goals.filter(function (g) { return g && g.area_id && words(g.goal) >= MIN_GOAL; }).map(function (g) {
+      var a = D.form.areas.filter(function (x) { return x.id === g.area_id; })[0];
+      return { area_id: g.area_id, area_title: a ? a.title : '', goal: g.goal };
+    });
+  }
+
   function review() {
     var areas = D.form.areas;
     var bad = areas.filter(function (a) { return A.ratings[a.id] == null || words(A.examples[a.id]) < D.min.example; }).length +
-      D.form.open.filter(function (o) { return words(A.open[o.id]) < D.min.open; }).length;
+      D.form.open.filter(function (o) { return words(A.open[o.id]) < D.min.open; }).length + (goalsOk() ? 0 : 1);
     app.innerHTML = '<div class="card"><div class="eyebrow">Ready to submit</div><h1>Check your ratings</h1>' +
       '<p class="sub" style="font-size:15px">Once you submit, you can’t change anything. Management will rate the same standards and you’ll see both on this link.</p>' +
       '<div class="checklist">' + areas.map(function (a) {
         var v = A.ratings[a.id];
         return '<div><span>' + esc(a.title) + '</span><b>' + (v ? v + ' · ' + esc(label(v)) : '<span style="color:var(--bad)">Not rated</span>') + '</b></div>';
-      }).join('') + '</div>' +
+      }).join('') + goalsPayload().map(function (g, i) { return '<div><span>Goal ' + (i + 1) + ': ' + esc(g.area_title) + '</span><b>✓</b></div>'; }).join('') + '</div>' +
       '<div class="nav"><button class="btn sec" id="back">Back</button><button class="btn gold" id="sub"' + (bad ? ' disabled' : '') + '>Submit</button></div><div class="err" id="er"></div></div>';
     document.getElementById('back').onclick = function () { go(step - 1); };
     document.getElementById('sub').onclick = function () {
@@ -245,9 +290,29 @@
       call({ action: 'eval_submit', token: TOKEN, ratings: A.ratings, examples: A.examples, open: A.open }).then(function (r) {
         if (r.error && !r.done) { b.disabled = false; b.textContent = 'Submit'; document.getElementById('er').textContent = r.error; return; }
         if (r.done) { location.reload(); return; }
-        clearSave(); D = r; results(); window.scrollTo(0, 0);
+        var gp = goalsPayload();
+        callGoals({ action: 'goals_set', token: TOKEN, goals: gp }).then(function (g) {
+          if (g && g.error) { try { localStorage.setItem(SAVE_KEY + '-g', JSON.stringify(gp)); } catch (e) {} }
+          clearSave(); D = r; results(); window.scrollTo(0, 0);
+        });
       });
     };
+  }
+
+  function loadGoals() {
+    var pending = null; try { pending = JSON.parse(localStorage.getItem(SAVE_KEY + '-g') || 'null'); } catch (e) {}
+    var p = pending && pending.length ? callGoals({ action: 'goals_set', token: TOKEN, goals: pending }).then(function (r) { if (!r.error) { try { localStorage.removeItem(SAVE_KEY + '-g'); } catch (e) {} } return r; }) : callGoals({ action: 'goals_get', token: TOKEN });
+    p.then(function (r) {
+      var box = document.getElementById('goalsCard'); if (!box) return;
+      var gs = (r && r.goals) || [];
+      if (r && r.error && !gs.length) { box.innerHTML = '<div class="eyebrow">Your goals</div><p class="sub">' + esc(r.error) + '</p>'; return; }
+      var act = gs.filter(function (g) { return g.status === 'active'; }), done = gs.filter(function (g) { return g.status === 'done'; });
+      box.innerHTML = '<div class="eyebrow">Your goals for next week</div>' + (act.length ? act.map(function (g) {
+        return '<div class="res"><div class="rq" style="justify-content:space-between"><span>' + esc(g.area_title || 'Goal') + '</span>' + (g.set_by === 'mgmt' ? '<span class="pill warn">From management</span>' : '') + '</div><div class="ans">' + esc(g.goal) + '</div></div>';
+      }).join('') : '<p class="sub">No open goals.</p>') +
+        (done.length ? '<p class="sub" style="margin-top:10px">Done: ' + done.map(function (g) { return esc(g.area_title || g.goal.slice(0, 40)); }).join(' · ') + '</p>' : '') +
+        '<p class="sub" style="margin-top:10px">Each week you’ll get a two-minute check-in: did you do it, what happened, what’s next.</p>';
+    });
   }
 
   function results() {
@@ -289,7 +354,9 @@
       h += '<div class="card"><div class="eyebrow">Your reflection</div><div class="ans">' + esc(V.reflection) + '</div>' +
         '<p class="sub">Acknowledged ' + new Date(V.acknowledged_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + '. Thanks, ' + esc(first()) + '.</p></div>';
     }
+    h += '<div class="card" id="goalsCard"><div class="eyebrow">Your goals</div><p class="sub">Loading…</p></div>';
     app.innerHTML = h;
+    loadGoals();
 
     var ta = document.getElementById('refl');
     if (ta) {

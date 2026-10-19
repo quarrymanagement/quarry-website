@@ -51,3 +51,16 @@ Built 2026-10-19. Table `guest_reviews` (schema `claude/guest-reviews.sql`). Adm
 On the employee's evaluation, the first screen after the intro is **What guests are saying**: shared reviews from the last 60 days, grouped as reviews that name them, then the 5 most recent complaints (3★ or less), then two 5★. Every form (version 2) adds a first open question: pick one complaint, what will you personally do differently. What they saw is frozen on the record (`feedback_snapshot`) and shown on the manager's response screen.
 
 Import: reviews are read from the Business Profile owner view (business.google.com/reviews) in Chrome while signed in as the profile manager. First import 2026-10-19: 83 written reviews since 2025-11-01 (32 at 3★ or less, 9 naming staff). Staging table `guest_reviews_stage` held the batch; its insert policy was dropped right after. Edge action `admin_reviews_import` takes the same rows for future pulls (dedup on source + Google review id).
+
+## Goals and weekly check-ins
+Built 2026-10-19. Edge function `staff-checkins` (source `supabase/functions/staff-checkins/index.ts`), tables `staff_goals`, `staff_checkins`, `staff_weekly_focus` (schema `claude/staff-goals-checkins.sql`). Kept separate from `staff-evals` on purpose.
+
+- **End of the evaluation:** "Your goals for next week": 2 goals, each tied to a standard (the first pre-set to the one they rated lowest) with 6+ words on exactly what they'll do. Saved by `goals_set` right after the evaluation submits; the results page shows them.
+- **Manager:** every evaluation has a **Goals** card: edit wording, mark done, drop, reopen, or add a goal "from management".
+- **Weekly tab:** (1) one-line team focus per role for the week (top of each check-in; last week's shown as a hint); (2) send check-ins to everyone with an open goal who hasn't had one that week; (3) read the three answers and reply: one-tap replies ("Great work. Keep it up.", "Let's talk on your next shift.", etc.) or your own words. They're emailed the first time you reply, and see it on their link and at the top of next week's.
+- **Check-in page** `staff-checkin.html?t=<token>`, Matt's three questions, built to take about a minute:
+  1. *What are some things you focused on this week?* Per open goal: tap Done / Partly / Not yet + one line (3+ words). Free text (5+ words) if they had no goals, optional "anything else" otherwise.
+  2. *What could you do to keep improving on those?* (5+ words)
+  3. *What are two things you want to add on?* Two short new goals (4+ words), standard optional. Standards per role are mirrored in `AREAS` in the function; keep it in step with `FORMS` in `staff-evals`.
+- Done goals close. Unfinished goals carry if "keep working on this" stays ticked (default), otherwise they're dropped. Max 4 open goals; the page and server both enforce it.
+- Weeks run Monday to Sunday, Chicago time. Sending is a button for now (not automatic).
