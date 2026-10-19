@@ -80,6 +80,19 @@ body.ctl main{height:calc(100vh - 58px - 58px)}
 .tbl.callfood .bg{border-color:#ff8a3d;border-width:calc(var(--u)*.7);animation:ringo 1.2s infinite}
 .tbl.calldrinks .bg{border-color:#3dc2ff;border-width:calc(var(--u)*.7);animation:ringb 1.2s infinite}
 .tbl.callfood.calldrinks .bg{border-color:#ff8a3d;animation:ringo 1.2s infinite}
+.tbl.callhelp .bg{border-color:#ff3d9a;border-width:calc(var(--u)*.8);animation:ringp .9s infinite}
+.tbl.callhelp .s{color:#ffd1e6}
+@keyframes ringp{0%,100%{box-shadow:0 calc(var(--u)*.5) calc(var(--u)*1.3) rgba(0,0,0,.45)}50%{box-shadow:0 0 0 calc(var(--u)*1.8) rgba(255,61,154,.7)}}
+.tbl.helped .bg{border-color:#6ee07a;border-width:calc(var(--u)*.7)}
+.tbl .chk{position:absolute;z-index:2;right:calc(var(--u)*-.9);top:calc(var(--u)*-.9);width:calc(var(--u)*3.2);height:calc(var(--u)*3.2);border-radius:50%;background:#3fae49;color:#fff;font-weight:900;font-size:calc(var(--u)*2.2);display:flex;align-items:center;justify-content:center;border:calc(var(--u)*.25) solid #d8f5db;line-height:1}
+#helpbar{position:fixed;left:0;right:0;top:0;z-index:80;display:none;flex-direction:column;gap:0;pointer-events:none}
+#helpbar .hb{pointer-events:auto;display:flex;align-items:center;justify-content:center;gap:14px;padding:6px 16px;line-height:1.1;font-weight:800;font-size:20px;letter-spacing:.02em;background:#d11d78;color:#fff;border-bottom:2px solid #ff8cc3;cursor:pointer;animation:hbpulse 1.2s infinite}
+#helpbar .hb b{font-size:26px}
+#helpbar .hb small{font-size:15px;font-weight:700;opacity:.9}
+#helpbar .hb.ok{background:#2e8b34;border-bottom-color:#8fe096;animation:none;font-size:17px;padding:7px 16px}
+body.tv #helpbar .hb{font-size:24px;padding:6px 20px;line-height:1.1} body.tv #helpbar .hb b{font-size:34px} body.tv #helpbar .hb small{font-size:18px}
+@keyframes hbpulse{0%,100%{background:#d11d78}50%{background:#ff2f94}}
+.run.help{border-left-color:#ff3d9a} .run .k.help{color:#ff7fbd}
 @keyframes ringo{0%,100%{box-shadow:0 calc(var(--u)*.5) calc(var(--u)*1.3) rgba(0,0,0,.45)}50%{box-shadow:0 0 0 calc(var(--u)*1.4) rgba(255,138,61,.6)}}
 @keyframes ringb{0%,100%{box-shadow:0 calc(var(--u)*.5) calc(var(--u)*1.3) rgba(0,0,0,.45)}50%{box-shadow:0 0 0 calc(var(--u)*1.4) rgba(61,194,255,.6)}}
 @keyframes ringy{0%,100%{box-shadow:0 calc(var(--u)*.5) calc(var(--u)*1.3) rgba(0,0,0,.45)}50%{box-shadow:0 0 0 calc(var(--u)*1.1) rgba(255,224,102,.65)}}
@@ -201,6 +214,7 @@ select option{background:#221a13;color:#F5F0E8}
 <div class="scrim" id="scrim"></div>
 <div class="sheet" id="sheet"></div>
 <div class="toast" id="toast"></div>
+<div id="helpbar"></div>
 
 <script>
 /* ==================================================================
@@ -246,7 +260,7 @@ function hull(pts){
 }
 var TK = 1;                    // per-chart shrink so no two tables overlap
 var S = null;                 // last state from the server
-var sel = [];                 // control mode: charts being shown (max 3)
+var sel = [];                 // control mode: charts being shown (max 6)
 var token = null;             // setup session
 var editArea = null, editTables = null, editSel = null;  // layout editor
 var timer = null;
@@ -308,7 +322,7 @@ function shownAreas(){
     else { var cfg = (S.tvs || []).filter(function(t){ return t.tv === TV; })[0]; keys = cfg ? cfg.areas : null; }
   } else keys = sel;
   if (!keys) return null;
-  return keys.map(areaByKey).filter(Boolean).slice(0, 3);
+  return keys.map(areaByKey).filter(Boolean).slice(0, 6);
 }
 
 /* ---------------- render ---------------- */
@@ -330,7 +344,8 @@ function ensureLegend(){
     '<span><i style="background:#d4ac55"></i>Food ordered</span>' +
     '<span><i style="background:#d6453b"></i>Closed out</span>' +
     '<span><i class="ring" style="border-color:#ff8a3d"></i>Food up</span>' +
-    '<span><i class="ring" style="border-color:#3dc2ff"></i>Drinks up</span>';
+    '<span><i class="ring" style="border-color:#3dc2ff"></i>Drinks up</span>' +
+    '<span><i class="ring" style="border-color:#ff3d9a"></i>Guest needs help</span>';
   document.body.appendChild(d);
 }
 if (DISPLAY) document.body.className += ' tv';
@@ -371,7 +386,7 @@ function renderBar(){
   var bar = $('#bar'); if (DISPLAY){ bar.style.display = 'none'; return; }
   bar.style.display = 'flex'; document.body.classList.add('ctl');
   if (editArea){ bar.innerHTML = '<span class="hint">Editing layout - drag tables to move them</span>'; return; }
-  bar.innerHTML = (S.areas || []).map(function(a){ return '<button class="chip' + (sel.indexOf(a.key) >= 0 ? ' on' : '') + '" data-a="area" data-k="' + esc(a.key) + '">' + esc(a.label) + '</button>'; }).join('') + '<span class="hint">show up to 3</span>';
+  bar.innerHTML = (S.areas || []).map(function(a){ return '<button class="chip' + (sel.indexOf(a.key) >= 0 ? ' on' : '') + '" data-a="area" data-k="' + esc(a.key) + '">' + esc(a.label) + '</button>'; }).join('') + '<span class="hint">show up to 6</span>';
 }
 
 function stageOf(st){
@@ -381,18 +396,20 @@ function stageOf(st){
 var STAGE_WORD = { seated: 'Seated', drinks: 'Drinks', food: 'Food', ordered: 'Ordered' };
 function tileHtml(t, st, calls, tilePct, editing, vb){
   var food = calls.filter(function(c){ return c.kind === 'food'; })[0], drinks = calls.filter(function(c){ return c.kind === 'drinks'; })[0];
+  var help = calls.filter(function(c){ return c.kind === 'help'; })[0];
+  var helped = !help && (S.helped || []).some(function(h){ return h.area_key === t.area_key && h.table_num === t.table_num; });
   var ready = !!(st && st.status === 'occupied' && st.ticket && st.ticket.ready);
   var stage = stageOf(st), m = st ? mins(st.seated_at) : null;
   var sc = !editing && t.area_key ? secFor(t.area_key, t.table_num) : null;
   var cls = 'tbl' + (sc ? ' sec' : '') + (t.shape === 'round' ? ' round' : '') + (st ? ' ' + st.status : '') + (stage ? ' stg-' + stage : '') + (ready && !food && !drinks ? ' ready' : '');
   if (stage === 'seated' && m != null && m >= 6) cls += ' wait';             // seated a while with no order yet
-  if (food) cls += ' callfood'; if (drinks) cls += ' calldrinks';
+  if (food) cls += ' callfood'; if (drinks) cls += ' calldrinks'; if (help) cls += ' callhelp'; else if (helped) cls += ' helped';
   if (editing){ cls += ' edit'; if (editSel === t.table_num) cls += ' sel'; }
   var w = (t.w ? Number(t.w) : tilePct) * TK, h = (t.h ? Number(t.h) : tilePct) * TK;
   // one short status line, drawn inside the table (never outside it, so it can't land on a neighbour)
   var sub = '';
   var up = (w >= 9) ? ' up' : '';          // small tables only have room for the short word; the pulsing ring says a runner is needed
-  if (food && drinks) sub = (w >= 9) ? 'Food + drinks up' : 'Both'; else if (food) sub = 'Food' + up; else if (drinks) sub = 'Drinks' + up;
+  if (help) sub = (w >= 9) ? 'Needs help' : 'Help'; else if (food && drinks) sub = (w >= 9) ? 'Food + drinks up' : 'Both'; else if (food) sub = 'Food' + up; else if (drinks) sub = 'Drinks' + up;
   else if (st && st.status === 'closed') sub = 'Closed';
   else if (st && st.status === 'paid') sub = 'Paid';
   else if (ready) sub = 'Ready';
@@ -402,7 +419,7 @@ function tileHtml(t, st, calls, tilePct, editing, vb){
   var rot = Number(t.rot) || 0;
   return '<div class="' + cls + '" data-t="' + esc(t.table_num) + '" style="left:' + (vb ? ((t.x - vb.minx + vb.pad) / vb.vw * 100).toFixed(3) : t.x) + '%;top:' + (vb ? ((t.y - vb.miny + vb.pad) / vb.vh * 100).toFixed(3) : t.y) + '%;width:calc(var(--u)*' + w + ');height:calc(var(--u)*' + h + ');--fs:' + fs.toFixed(2) + (sc ? ';--sc:' + sc.color : '') + '">' +
     '<i class="bg"' + (rot ? ' style="transform:rotate(' + rot + 'deg)"' : '') + '></i>' +
-    '<span class="n">' + esc(t.table_num) + '</span>' + (sub ? '<span class="s">' + esc(sub) + '</span>' : '') + '</div>';
+    '<span class="n">' + esc(t.table_num) + '</span>' + (sub ? '<span class="s">' + esc(sub) + '</span>' : '') + (helped ? '<span class="chk">&#10003;</span>' : '') + '</div>';
 }
 function chartHtml(a){
   var tables = (editArea === a.key && editTables) ? editTables : (S.tables || []).filter(function(t){ return t.area_key === a.key; });
@@ -481,12 +498,52 @@ function renderRunList(){
   rl.innerHTML = '<h3>Run list</h3>' + list.map(function(e){
     var a = areaByKey(e.area), m = mins(e.since);
     return '<div class="run ' + e.kind + '" data-a="run" data-area="' + esc(e.area) + '" data-t="' + esc(e.num) + '"><span class="big">' + esc(e.num) + '</span><span class="who"><div class="k ' + e.kind + '">' +
-      (e.kind === 'food' ? 'Food' : e.kind === 'drinks' ? 'Drinks' : 'Kitchen ready') + '</div><div class="a">' + esc(a ? a.label : '') + '</div></span><span class="m">' + (m == null ? '' : m + 'm') + '</span></div>';
+      (e.kind === 'food' ? 'Food' : e.kind === 'drinks' ? 'Drinks' : e.kind === 'help' ? 'Needs help' : 'Kitchen ready') + '</div><div class="a">' + esc(a ? a.label : '') + '</div></span><span class="m">' + (m == null ? '' : m + 'm') + '</span></div>';
   }).join('');
+}
+/* guest "Need help" requests: banner across every screen + chime on iPads */
+var HELP_SEEN = null, HELP_LAST_CHIME = 0, AC = null;
+function unlockAudio(){
+  try { if (!AC){ var C = window.AudioContext || window.webkitAudioContext; if (C) AC = new C(); } if (AC && AC.state === 'suspended') AC.resume(); } catch (e) {}
+}
+['pointerdown', 'touchstart', 'click', 'keydown'].forEach(function(ev){ document.addEventListener(ev, unlockAudio, { passive: true }); });
+function chime(){
+  try {
+    unlockAudio(); if (!AC || AC.state !== 'running') return;
+    var t0 = AC.currentTime;
+    [[880, 0], [1175, .22], [880, .5], [1175, .72]].forEach(function(n){
+      var o = AC.createOscillator(), g = AC.createGain();
+      o.type = 'sine'; o.frequency.value = n[0]; o.connect(g); g.connect(AC.destination);
+      g.gain.setValueAtTime(0.0001, t0 + n[1]); g.gain.exponentialRampToValueAtTime(0.5, t0 + n[1] + .03); g.gain.exponentialRampToValueAtTime(0.0001, t0 + n[1] + .2);
+      o.start(t0 + n[1]); o.stop(t0 + n[1] + .22);
+    });
+  } catch (e) {}
+}
+function helpCalls(){ return (S && S.calls || []).filter(function(c){ return c.kind === 'help'; }); }
+function renderHelpBar(){
+  var hb = $('#helpbar'); if (!hb || !S || S._cached) return;
+  var list = helpCalls(), done = (S && S.helped || []);
+  var ids = list.map(function(c){ return c.id; });
+  if (HELP_SEEN === null){ HELP_SEEN = ids.slice(); HELP_LAST_CHIME = Date.now(); }      // first real load: don't chime for what was already open
+  if (!list.length && !done.length){ hb.style.display = 'none'; hb.innerHTML = ''; return; }
+  function who(c){ var sc = secFor(c.area_key, c.table_num); return sc ? String(sc.name || '').split(/\s+/)[0] : ''; }
+  hb.innerHTML = list.map(function(c){
+    var m = mins(c.created_at), w = who(c);
+    return '<div class="hb" data-a="run" data-area="' + esc(c.area_key) + '" data-t="' + esc(c.table_num) + '">&#128276; <b>' + esc(c.table_num) + '</b> needs help' + (w ? ' <small>&middot; ' + esc(w) + '</small>' : '') + (m ? ' <small>&middot; ' + m + ' min</small>' : '') + '</div>';
+  }).join('') + done.map(function(c){
+    return '<div class="hb ok">&#10003; ' + esc(c.table_num) + ' helped' + (c.helped_by ? ' by ' + esc(c.helped_by) : '') + '</div>';
+  }).join('');
+  hb.style.display = 'flex';
+  // sound: a new request chimes once, and an unanswered one chimes again every 45 seconds
+  {
+    var fresh = ids.filter(function(i){ return HELP_SEEN.indexOf(i) < 0; });
+    HELP_SEEN = HELP_SEEN.filter(function(i){ return ids.indexOf(i) >= 0; }).concat(fresh);
+    if (fresh.length || (ids.length && Date.now() - HELP_LAST_CHIME > 45000)){ chime(); HELP_LAST_CHIME = Date.now(); }
+  }
 }
 function render(){
   if (!S) return;
-  renderHeader(); renderBar();
+  renderHeader(); renderBar(); renderHelpBar();
   var wrap = $('#boardwrap'), areas = shownAreas();
   if (areas === null){ wrap.innerHTML = '<div class="msg">This screen (' + esc(TV) + ') isn\'t set up yet.<br>A manager can pick its floor charts in Setup on the host iPad.</div>'; $('#runlist').style.display = 'none'; return; }
   if (!areas.length){ wrap.innerHTML = '<div class="msg">' + (DISPLAY ? 'No charts selected for this screen.' : 'Tap a chart above to show it.') + '</div>'; renderRunList(); return; }
@@ -500,25 +557,23 @@ function sizeBoard(){
   var sd = $('#side'), rlv = $('#runlist'), rsv = $('#resvpanel');
   if (sd) sd.style.display = ((rlv && rlv.style.display !== 'none' && rlv.innerHTML) || (rsv && rsv.style.display !== 'none' && rsv.innerHTML)) ? '' : 'none';
   // Fit every chart on one screen: try each column count, keep the arrangement that gives the biggest charts.
-  document.body.classList.remove('scrollmode'); wrap.style.height = '';
+  document.body.classList.remove('scrollmode'); wrap.style.height = ''; wrap.style.maxWidth = ''; wrap.style.margin = '';
   var gap = 16, W = wrap.clientWidth, top = wrap.getBoundingClientRect().top;
   var secExtra = wrap.querySelector('.seclg') ? 26 : 0;
   var H = Math.max(160, window.innerHeight - top - 12 - (DISPLAY ? 48 : 0) - (SECMODE ? 76 : 0));
   function hdrFor(s){ return (s < 420 ? 44 : 28) + 10; }      // title + count pills (they wrap on small charts)
-  var opts = [];
-  for (var c = 1; c <= n; c++){
-    var r = Math.ceil(n / c), sw = (W - gap * (c - 1) - 2) / c, rowH = (H - gap * (r - 1)) / r;
-    var s0 = Math.floor(Math.min(sw, rowH - hdrFor(9999) - secExtra));          // roomy title row first ...
-    if (s0 < 420) s0 = Math.floor(Math.min(sw, rowH - hdrFor(0) - secExtra));   // ... charts under 420px get the taller, wrapped title row
-    opts.push({ c: c, r: r, s: s0 });
-  }
-  var top1 = Math.max.apply(null, opts.map(function(o){ return o.s; }));
-  var best = opts.filter(function(o){ return o.s >= top1 * 0.9; }).sort(function(a, b){ return a.r - b.r || b.s - a.s; })[0];   // near-ties: fewer rows reads as one diagram
+  // Fixed arrangement so it always reads the same: 1 full screen, 2 side by side, 3 across, 4 = 2 + 2, 5 = 3 + 2, 6 = 3 + 3. Never scrolls (phones aside).
+  var cc = { 1: 1, 2: 2, 3: 3, 4: 2, 5: 3, 6: 3 }[n] || 3;
+  var rr = Math.ceil(n / cc), sw0 = (W - gap * (cc - 1) - 2) / cc, rowH0 = (H - gap * (rr - 1)) / rr;
+  var s1 = Math.floor(Math.min(sw0, rowH0 - hdrFor(9999) - secExtra));          // roomy title row first ...
+  if (s1 < 420) s1 = Math.floor(Math.min(sw0, rowH0 - hdrFor(0) - secExtra));   // ... charts under 420px get the taller, wrapped title row
+  var best = { c: cc, r: rr, s: s1 };
   var side = best.s, scroll = false;
   if (side < 200 && W < 700){ side = Math.floor(W); scroll = true; }     // phone: stack and scroll instead of tiny charts
   side = Math.max(120, side);
   document.body.classList.toggle('scrollmode', scroll);
   if (!scroll) wrap.style.height = H + 'px';
+  if (!scroll && n > 1){ wrap.style.maxWidth = (best.c * side + (best.c - 1) * gap + 2) + 'px'; wrap.style.margin = '0 auto'; }   // forces the row breaks (4 = 2+2, 5 = 3+2)
   wrap.classList.toggle('tiny', side < 400);
   var one = n === 1 && charts[0].getAttribute('data-vw') ? { vw: parseFloat(charts[0].getAttribute('data-vw')), vh: parseFloat(charts[0].getAttribute('data-vh')) } : null;
   if (one){
@@ -580,6 +635,11 @@ function tableSheet(area, num){
   if (tk && tk.items && tk.items.length){
     h += '<div class="lbl">On the ticket' + (tk.ready ? ' - kitchen says READY' : '') + '</div>' + tk.items.map(function(i){ return '<div class="item"><span>' + esc(i.n) + (i.k === 'd' ? ' <small style="color:#b79cf0">drink</small>' : i.k === 'f' ? ' <small style="color:#e6c677">food</small>' : '') + '</span><b>x' + i.q + '</b></div>'; }).join('');
   }
+  var hc = calls.filter(function(c){ return c.kind === 'help'; })[0];
+  if (hc){
+    h += '<div class="lbl" style="color:#ff7fbd">Guest asked for help' + (mins(hc.created_at) ? ' - ' + mins(hc.created_at) + ' min ago' : ' - just now') + '</div>' +
+      '<div class="acts" style="margin-top:0"><button class="btn green" style="flex:1;font-size:18px" data-a="helpdone" data-area="' + esc(area) + '" data-t="' + esc(num) + '">&#10003; Got it - I helped them</button></div>';
+  }
   if (RO){ h += '<div class="acts"><button class="btn ghost" data-a="close" style="flex:1">Close</button></div>'; return openSheet(h); }
   if (!st || st.status === 'open'){
     h += '<div class="lbl">Seat this table - how many guests?</div><div class="chips">' +
@@ -592,7 +652,7 @@ function tableSheet(area, num){
             : '<button class="btn ' + k + '" data-a="call" data-area="' + esc(area) + '" data-t="' + esc(num) + '" data-k="' + k + '">' + (k === 'food' ? 'Food up' : 'Drinks up') + '</button>';
   });
   h += '</div><div class="acts">';
-  if (calls.length) h += '<button class="btn green" data-a="clearcall" data-area="' + esc(area) + '" data-t="' + esc(num) + '">Delivered</button>';
+  if (calls.some(function(c){ return c.kind !== 'help'; })) h += '<button class="btn green" data-a="clearcall" data-area="' + esc(area) + '" data-t="' + esc(num) + '">Delivered</button>';
   if (st && (st.status === 'closed' || st.status === 'paid')) h += '<button class="btn green" data-a="open" data-area="' + esc(area) + '" data-t="' + esc(num) + '">Table is clear - mark open</button>';
   else if (st && st.status !== 'open') h += '<button class="btn danger" data-a="open" data-area="' + esc(area) + '" data-t="' + esc(num) + '">Close out - open table</button>';
   h += '<button class="btn ghost" data-a="close">Close</button></div>';
@@ -624,7 +684,7 @@ function unlockSheet(){
 }
 function setupSheet(){
   var base = location.origin + location.pathname;
-  var h = '<h3>Setup</h3><div class="sub">Pick which floor charts each TV shows (1 to 3), and arrange the tables on each chart.</div><div class="lbl">TV screens</div>';
+  var h = '<h3>Setup</h3><div class="sub">Pick which floor charts each TV shows (1 to 6), and arrange the tables on each chart.</div><div class="lbl">TV screens</div>';
   (S.tvs || []).forEach(function(t){
     h += '<div class="tvrow"><div class="top"><span class="nm">' + esc(t.label) + '</span><button class="chip" data-a="deltv" data-tv="' + esc(t.tv) + '" style="padding:6px 12px;font-size:12px">Remove</button></div><div class="chips">' +
       (S.areas || []).map(function(a){ return '<button class="chip' + (t.areas.indexOf(a.key) >= 0 ? ' on' : '') + '" data-a="tvarea" data-tv="' + esc(t.tv) + '" data-k="' + esc(a.key) + '">' + esc(a.label) + '</button>'; }).join('') +
@@ -720,13 +780,14 @@ document.addEventListener('click', function(e){
   if (a === 'lock'){ token = null; store('floor_tok', null); closeSheet(); toast('Setup locked'); return render(); }
   if (a === 'area'){
     var k = el.getAttribute('data-k'), i = sel.indexOf(k);
-    if (i >= 0) sel.splice(i, 1); else { sel.push(k); if (sel.length > 3) sel.shift(); }
+    if (i >= 0) sel.splice(i, 1); else { sel.push(k); if (sel.length > 6) sel.shift(); }
     lstore('floor_sel', JSON.stringify(sel)); return render();
   }
   if (a === 'run') return tableSheet(area, num);
   if (a === 'seat') return api('set_status', { area_key: area, table_num: num, status: 'occupied', party_size: parseInt(el.getAttribute('data-n'), 10) }).then(function(){ closeSheet(); toast('Table ' + num + ' seated'); load(); });
   if (a === 'open') return api('set_status', { area_key: area, table_num: num, status: 'open' }).then(function(){ closeSheet(); toast('Table ' + num + ' is open'); load(); });
   if (a === 'call') return api('call', { area_key: area, table_num: num, kind: el.getAttribute('data-k'), by: lstore('floor_by') || '' }).then(function(){ closeSheet(); toast((el.getAttribute('data-k') === 'food' ? 'Food' : 'Drinks') + ' call sent - table ' + num); load(); });
+  if (a === 'helpdone') return api('help_done', { area_key: area, table_num: num, by: lstore('floor_by') || '' }).then(function(){ closeSheet(); toast('Marked helped - table ' + num); load(); });
   if (a === 'clearcall') return api('clear_call', { area_key: area, table_num: num, kind: el.getAttribute('data-k') || undefined }).then(function(){ closeSheet(); toast('Cleared'); load(); });
   if (a === 'unlock'){
     var who = $('#uWho').value, pin = ($('#uPin').value || '').trim();
@@ -739,7 +800,7 @@ document.addEventListener('click', function(e){
   if (a === 'tvarea'){
     var tv = (S.tvs || []).filter(function(t){ return t.tv === el.getAttribute('data-tv'); })[0]; if (!tv) return;
     var areas = tv.areas.slice(), k2 = el.getAttribute('data-k'), j = areas.indexOf(k2);
-    if (j >= 0){ if (areas.length === 1) return toast('Keep at least one chart'); areas.splice(j, 1); } else { areas.push(k2); if (areas.length > 3) areas.shift(); }
+    if (j >= 0){ if (areas.length === 1) return toast('Keep at least one chart'); areas.splice(j, 1); } else { areas.push(k2); if (areas.length > 6) areas.shift(); }
     return saveTv(tv.tv, tv.label, areas);
   }
   if (a === 'addtv'){
