@@ -47,7 +47,7 @@ type Test = { key: string; version: number; title: string; intro: string; passMc
 
 const SERVER_TEST: Test = {
   key: "server",
-  version: 1,
+  version: 2,
   title: "Server Test",
   intro:
     "Two parts. Part 1 is multiple choice and you'll see your score as soon as you submit. Part 2 is real situations from a busy night at The Quarry. Answer them the way you'd actually handle it on the floor, step by step, in detail. A manager reviews Part 2 and leaves you notes.",
@@ -78,9 +78,16 @@ const SERVER_TEST: Test = {
     { id: "o6", title: "You made a mistake", scenario: "You forgot to ring in a guest's appetizer. Fifteen minutes later they ask where it is.", ask: "What do you say and what do you do?", lookFor: ["Owns the mistake honestly", "Apologizes", "Gets it fired right away / tells the kitchen and a manager", "Over-communicates timing and checks back", "Goes above and beyond to make it right"] },
     { id: "o7", title: "Caught up while a teammate is buried", scenario: "It's a slow stretch and your tables are fine. Another server is clearly in the weeds.", ask: "What do you do for the next 10 minutes? Be specific.", lookFor: ["Stays on the floor — not the service station", "Runs food and drinks, buses, fills waters", "Checks on the other server's tables", "Asks the server what they need"] },
     { id: "o8", title: "Going above and beyond", scenario: "A couple is celebrating an anniversary at one of your tables on a Saturday night.", ask: "What would you do to make it a night they leave a 5-star review about? Be specific to The Quarry.", lookFor: ["Specific, personal touches", "Uses The Quarry — wine, golf, events, the view", "Over-attentive without hovering", "Invites them back"] },
+    { id: "o9", title: "Your handheld dies", scenario: "Friday, 7:00 PM. You're halfway through taking a four-top's order at Table 22 and your handheld goes black. It won't turn back on.", ask: "What do you do right now, and for the rest of the shift?", lookFor: ["Finishes the order on paper so the table isn't left waiting", "Rings it at the terminal right away (the terminal is OK when no handheld is available)", "Checks the order actually printed in the kitchen and bar", "Tells a manager so the handheld gets swapped or charged", "Starts every shift with a charged handheld"] },
+    { id: "o10", title: "Guests move tables", scenario: "Table 12 has drinks and apps on the way. They ask to move outside to the patio, into another server's section.", ask: "How do you handle the move so nothing gets lost: the check, the food, the other server?", lookFor: ["Says yes and helps them move (carries drinks and plates)", "Moves the check to the new table in Square so nothing lands on the wrong ticket", "Tells expo and the kitchen the new table number for anything already fired", "Tells the host so the old table gets reset and the new one isn't double-seated", "Talks to the other server and agrees who keeps the table"] },
+    { id: "o11", title: "Tickets stop printing", scenario: "Saturday rush. You send an order and nothing prints in the kitchen. Another server says theirs didn't print at the bar either.", ask: "What do you do, and how do you keep your tables from paying for it?", lookFor: ["Tells a manager immediately", "Walks the order to the kitchen and bar by hand (written or verbal); never assumes it went through", "Confirms the kitchen and bar actually have it and are making it", "Warns the affected tables about a possible delay before they ask", "Keeps hand-walking orders until a manager says printing is fixed"] },
+    { id: "o12", title: "Your section is full and you're overwhelmed", scenario: "You have five tables. Two just sat, one wants the check, one is waiting on food, and you can see the host walking another party toward your section.", ask: "What do you do, and exactly what do you tell the host and a manager?", lookFor: ["Tells the host right away that the section is full: hold the next party, put them on the waitlist or seat them elsewhere", "Asks a manager or a teammate for help early, before it falls apart", "Still greets the new tables fast, even just \"I'll be right with you\"", "Prioritizes: greet, drop the check, update the table waiting on food", "Stays calm and gives tables honest timing"] },
   ],
 };
 const TESTS: Record<string, Test> = { server: SERVER_TEST };
+// Tests keep the written questions they were sent with: server v1 had o1–o8.
+const V1_OPEN = ["o1", "o2", "o3", "o4", "o5", "o6", "o7", "o8"];
+const openFor = (t: Test, a: any) => (Number(a?.test_version) || 1) >= 2 ? t.open : t.open.filter((o) => V1_OPEN.includes(o.id));
 
 // ---------------------------------------------------------------------------
 const CORS = {
@@ -132,7 +139,7 @@ async function emailInvite(a: any, reminder = false) {
   return await sendEmail([{ email: a.employee_email.trim(), firstName: first }],
     `${reminder ? "Reminder: " : ""}Your ${t.title} — The Quarry`,
     shell(reminder ? "Reminder: your test is waiting" : `Your ${t.title}`,
-      `<p>Hi ${esc(first)},</p><p>Here's your ${esc(t.title.toLowerCase())}. It takes about 20–30 minutes. Part 1 is multiple choice and you'll see your score right away. Part 2 is real situations — answer in detail, the way you'd actually handle it. A manager will review it and leave you notes.</p>${button(link(a.token), "Start the test")}<p style="font-size:12px;color:#888;">This link is just for you.</p>`));
+      `<p>Hi ${esc(first)},</p><p>Here's your ${esc(t.title.toLowerCase())}. It takes about 30–40 minutes. Part 1 is multiple choice and you'll see your score right away. Part 2 is real situations — answer in detail, the way you'd actually handle it. A manager will review it and leave you notes.</p>${button(link(a.token), "Start the test")}<p style="font-size:12px;color:#888;">This link is just for you.</p>`));
 }
 
 // What the employee sees once submitted (MC answers revealed; reviews only once reviewed).
@@ -142,7 +149,7 @@ function resultsFor(a: any) {
   return {
     mc: t.mc.map((q) => ({ id: q.id, q: q.q, options: q.options, chosen: a.mc_answers?.[q.id] ?? null, answer: q.answer, correct: a.mc_answers?.[q.id] === q.answer, why: q.why })),
     mc_score: a.mc_score, mc_total: a.mc_total, mc_pct: a.mc_total ? Math.round((100 * a.mc_score) / a.mc_total) : 0, pass_mc: t.passMc,
-    open: t.open.map((o) => ({
+    open: openFor(t, a).map((o) => ({
       id: o.id, title: o.title, scenario: o.scenario, ask: o.ask, answer: a.open_answers?.[o.id] || "",
       review: reviewed ? (a.reviews?.[o.id] || null) : null,
     })),
@@ -180,7 +187,7 @@ Deno.serve(async (req: Request) => {
           ...head,
           test: {
             mc: t.mc.map((q) => ({ id: q.id, q: q.q, options: q.options })),
-            open: t.open.map((o) => ({ id: o.id, title: o.title, scenario: o.scenario, ask: o.ask })),
+            open: openFor(t, a).map((o) => ({ id: o.id, title: o.title, scenario: o.scenario, ask: o.ask })),
           },
         });
       }
@@ -197,7 +204,7 @@ Deno.serve(async (req: Request) => {
         if (v === q.answer) score++;
       }
       const open: Record<string, string> = {};
-      for (const o of t.open) {
+      for (const o of openFor(t, a)) {
         const txt = String(openIn[o.id] || "").trim().slice(0, 4000);
         if (words(txt) < MIN_WORDS) return json({ error: `"${o.title}" needs more detail — at least ${MIN_WORDS} words.` }, 400);
         open[o.id] = txt;
@@ -211,7 +218,7 @@ Deno.serve(async (req: Request) => {
       const pct = Math.round((100 * score) / t.mc.length);
       await sendEmail([{ email: MANAGEMENT_EMAIL, firstName: "Quarry Management" }],
         `${a.employee_name} submitted the ${t.title} (${a.ref_no}) — ready for review`,
-        shell("Test ready for review", `<p><strong>${esc(a.employee_name)}</strong> submitted the ${esc(t.title)}.</p><p>Multiple choice: <strong>${score}/${t.mc.length} (${pct}%)</strong>. ${t.open.length} written answers are waiting for your review in Admin › Team › Training Tests.</p>${button(SITE + "/admin/", "Open admin")}`));
+        shell("Test ready for review", `<p><strong>${esc(a.employee_name)}</strong> submitted the ${esc(t.title)}.</p><p>Multiple choice: <strong>${score}/${t.mc.length} (${pct}%)</strong>. ${openFor(t, a).length} written answers are waiting for your review in Admin › Team › Training Tests.</p>${button(SITE + "/admin/", "Open admin")}`));
       const { data: fresh } = await supa.from("training_test_attempts").select("*").eq("id", a.id).single();
       return json({ ...head, status: "submitted", submitted_at: now, results: resultsFor(fresh) });
     }
@@ -286,7 +293,7 @@ Deno.serve(async (req: Request) => {
       const t = TESTS[a.test_key];
       const inRev = body.reviews || {};
       const reviews: Record<string, { decision: string | null; note: string }> = {};
-      for (const o of t.open) {
+      for (const o of openFor(t, a)) {
         const r = inRev[o.id] || {};
         const d = ["approved", "needs_work"].includes(r.decision) ? r.decision : null;
         reviews[o.id] = { decision: d, note: String(r.note || "").trim().slice(0, 3000) };
@@ -294,7 +301,7 @@ Deno.serve(async (req: Request) => {
       const finish = !!body.finish;
       const overall = ["passed", "retake"].includes(body.overall_decision) ? body.overall_decision : null;
       if (finish) {
-        const missing = t.open.filter((o) => !reviews[o.id].decision).map((o) => o.title);
+        const missing = openFor(t, a).filter((o) => !reviews[o.id].decision).map((o) => o.title);
         if (missing.length) return json({ error: "Approve or mark needs work on every answer first: " + missing.join(", ") }, 400);
         if (!overall) return json({ error: "Choose Passed or Retake before finishing." }, 400);
       }
