@@ -1,0 +1,46 @@
+# Staff Self-Evaluations
+
+Built 2026-10-18. Admin → **Team › Evaluations** (tab id `staffevals`). Owner login + events_staff.
+
+Not disciplinary. Never feeds Write-Ups. The employee page and email both say so.
+
+## Pieces
+| Piece | Where | Notes |
+|---|---|---|
+| Admin tab | `admin/staff-evals-admin.js` | Self-injecting, loaded from `admin/index.html` after Training Tests. Views: Send · Responses · Questions |
+| Employee page | `staff-eval.html?t=<token>` | noindex, mobile-first, one standard per screen, autosaves in localStorage |
+| Backend | Supabase edge fn `staff-evals` (verify_jwt off, custom auth) | Source `supabase/functions/staff-evals/index.ts`. **The six forms live in `FORMS` here** |
+| Tables | `staff_evaluations`, `staff_evaluation_audit` | RLS on, no policies, anon/authenticated revoked. Migration `staff_evaluations`. Schema: `claude/staff-evals-schema.sql` |
+
+## Forms
+server · host · busser · expo · bartender · kitchen. Each has 7–8 **standards** (the policy, in one or two sentences) and, for each, a 1–5 self-rating plus a required real example (8+ words). Then three shared open questions (15+ words): strongest area, hardest standard and why, what they need from management.
+
+Scale is frequency-anchored so it means the same thing in every role: 1 Not yet · 2 Some shifts · 3 Most shifts · 4 Every shift · 5 I could train it.
+
+Edit wording in `FORMS` and bump that form's `version`; redeploy the function. Existing records keep `form_version`.
+
+## Flow
+1. **Send** — pick a role → the full form is shown → "Questions look good" → roster (Square team + `checklist_staff`). Server/bartender/kitchen are pre-checked by checklist role or Square job title. Host/busser/expo: Square lumps them as Support Staff, so support staff are listed **unchecked** to tick by hand. Anyone with an open eval for that role is flagged and not pre-checked. Email → sent immediately; no email → Text / Copy link per person on the result screen.
+2. Employee opens → `in_progress` → submits → `submitted`. management@ emailed with their average.
+3. **Respond** — rate every standard 1–5 + note, strengths, focus for next 30 days (required), anything else. Gap of 2+ between self and management is flagged both sides. Save draft or Send → `responded`, employee emailed.
+4. Employee's same link shows both ratings side by side + notes, and asks for a reflection (15+ words) → **Acknowledge** → `acknowledged`, management@ emailed the reflection. Locked after that.
+5. **Void** keeps the record, kills the link.
+
+Ref numbers `EV-<year>-<seq>`. `EV-2026-0001` is Claude's end-to-end test (voided).
+
+## Cadence
+30 days after hire, then quarterly.
+
+## The numbers (management only)
+Every evaluation's detail screen has a **The numbers** card: this person vs the average for others in their Square job title (10+ hours in the window), 30/60/90 days. Function `public.staff_eval_metrics(name, days)` (migration `staff_eval_metrics`, source `claude/staff-eval-metrics.sql`), called by edge action `admin_metrics`. Matched on the Square shift name, so the name on the eval must match Square exactly. When you send a response, the 60-day numbers are frozen onto the record (`metrics_snapshot`) so later reviews compare against what you saw. The employee never sees this card.
+
+| Metric | Source | Who it covers |
+|---|---|---|
+| Shifts / hours, shifts over 12h (missed clock-out) | `square_sync.shifts` | everyone |
+| Checks, average check, tips % of sales | `square_sync.order_header` | check-holders (servers, bartenders) |
+| Comps per 100 checks, split by reason (complaint, entry error, changed mind, other) and $ | `square_sync.discount_detail` (employee discounts excluded) | check-holders |
+| Cash tips declared vs cash taken | `order_tips` (CASH) vs `shifts.declared_tips_cents` | check-holders. Flagged under 10% |
+| Checklist sign-offs | `checklist_logs.staff_name` | everyone who signs a board |
+| Latest training test | `training_test_attempts` | anyone who took one |
+
+Not measurable yet: voids (Square line deletions aren't synced; "Entry error" comps are the closest proxy), refires (no KDS data; "Customer complaint" comps are the proxy, attributed to the server, not the cook), handheld vs terminal (device isn't synced), who approved a comp (Square records no approver on any comp in the last 60 days).

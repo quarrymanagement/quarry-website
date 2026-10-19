@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Self-Evaluation · The Quarry</title>
+<link rel="icon" href="/favicon-32.png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --charcoal:#1A1A1A; --brown:#2C1A0E; --cream:#F5F0E8; --gold:#B8933A; --gold2:#D4AF6A; --ink:#1f1b16; --muted:#7a6e60; --line:#e6dfd3;
+         --bad:#a52a1e; --bad-bg:#fdeeee; --ok:#176b34; --ok-bg:#e7f5ec; --warn:#8a5a00; --warn-bg:#fff4d6; }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;font-family:Montserrat,-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:var(--cream);color:var(--ink);line-height:1.5;}
+  .top{background:var(--charcoal);padding:14px 18px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:5;}
+  .top img{width:32px;height:32px;}
+  .top .brand{font-family:'Playfair Display',Georgia,serif;color:var(--gold);letter-spacing:3px;font-size:17px;}
+  .top .tag{margin-left:auto;color:#cfc4b2;font-size:11px;text-transform:uppercase;letter-spacing:1px;text-align:right;}
+  .prog{height:4px;background:#3a3027;position:sticky;top:60px;z-index:5;} .prog i{display:block;height:100%;background:var(--gold);transition:width .25s;}
+  .wrap{max-width:680px;margin:0 auto;padding:18px 16px 70px;}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:14px;}
+  h1{font-family:'Playfair Display',Georgia,serif;font-size:25px;margin:0 0 6px;color:var(--brown);line-height:1.2;}
+  h2{font-family:'Playfair Display',Georgia,serif;font-size:20px;margin:0 0 8px;color:var(--brown);line-height:1.25;}
+  .eyebrow{font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;}
+  .sub{color:var(--muted);font-size:14px;}
+  .q{font-size:17px;font-weight:600;margin:4px 0 14px;}
+  .opt{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;background:#fffdf9;border:1.5px solid var(--line);border-radius:12px;padding:14px;margin-bottom:10px;font:inherit;font-size:15px;color:var(--ink);cursor:pointer;}
+  .opt .dot{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid #c9bda9;margin-top:1px;}
+  .opt.on{border-color:var(--brown);background:#faf5ec;} .opt.on .dot{border-color:var(--brown);background:radial-gradient(var(--brown) 45%,transparent 50%);}
+  .scene{background:var(--charcoal);color:#f1e9dc;border-radius:12px;padding:14px 16px;font-size:15px;margin-bottom:12px;}
+  .scene b{color:var(--gold2);display:block;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:4px;}
+  textarea{width:100%;min-height:190px;border:1.5px solid #d5cbbb;border-radius:12px;padding:14px;font-size:16px;font-family:inherit;background:#fffdf9;resize:vertical;line-height:1.5;}
+  textarea:focus,.opt:focus-visible,.btn:focus-visible{outline:2px solid rgba(184,147,58,.55);outline-offset:2px;}
+  .wc{font-size:12.5px;color:var(--muted);margin-top:6px;display:flex;justify-content:space-between;gap:8px;}
+  .wc.ok{color:var(--ok);}
+  .tip{background:var(--warn-bg);color:#6b4e00;border-radius:10px;padding:10px 12px;font-size:13.5px;margin-bottom:12px;}
+  .nav{display:flex;gap:10px;margin-top:6px;}
+  .btn{flex:1;background:var(--brown);color:#fff;border:0;border-radius:12px;padding:15px;font-size:15.5px;font-weight:700;font-family:inherit;cursor:pointer;}
+  .btn.sec{background:#fff;color:var(--ink);border:1.5px solid var(--line);flex:0 0 auto;padding:15px 18px;}
+  .btn.gold{background:var(--gold);color:#1a1a1a;}
+  .btn:disabled{opacity:.4;cursor:not-allowed;}
+  .err{color:var(--bad);font-size:14px;margin-top:10px;min-height:1px;}
+  .state{text-align:center;padding:40px 22px;}
+  .spinner{width:34px;height:34px;border:4px solid var(--line);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 12px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .score{display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
+  .score .n{font-family:'Playfair Display',Georgia,serif;font-size:52px;line-height:1;color:var(--brown);font-variant-numeric:tabular-nums;}
+  .pill{display:inline-block;padding:4px 11px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:.3px;}
+  .pill.ok{background:var(--ok-bg);color:var(--ok);} .pill.bad{background:var(--bad-bg);color:var(--bad);} .pill.warn{background:var(--warn-bg);color:var(--warn);}
+  .res{border-top:1px solid var(--line);padding:12px 0;}
+  .res:first-of-type{border-top:0;}
+  .res .rq{font-weight:600;font-size:14.5px;display:flex;gap:8px;}
+  .res .mark{flex:none;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}
+  .mark.y{background:var(--ok-bg);color:var(--ok);} .mark.n{background:var(--bad-bg);color:var(--bad);}
+  .res .ra{font-size:13.5px;color:var(--muted);margin:4px 0 0 30px;}
+  .res .ra b{color:var(--ink);font-weight:600;}
+  .ans{white-space:pre-wrap;background:var(--cream);border-radius:10px;padding:12px;font-size:14.5px;margin:8px 0;}
+  .mnote{border-left:3px solid var(--gold);padding:8px 12px;background:#fffaf0;border-radius:0 8px 8px 0;font-size:14.5px;margin-top:8px;white-space:pre-wrap;}
+  .mnote span{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--gold);margin-bottom:2px;}
+  .checklist{display:flex;flex-direction:column;gap:6px;margin:12px 0;}
+  .checklist div{display:flex;justify-content:space-between;gap:10px;font-size:14px;padding:8px 10px;background:var(--cream);border-radius:8px;}
+  .foot{text-align:center;color:var(--muted);font-size:11px;margin-top:20px;}
+  @media (prefers-reduced-motion:reduce){.prog i{transition:none}.spinner{animation:none}}
+  /* self-evaluation additions */
+  .std{background:var(--cream);border-left:3px solid var(--gold);border-radius:0 10px 10px 0;padding:12px 14px;font-size:15px;margin-bottom:14px;}
+  .std b{display:block;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--gold);margin-bottom:3px;}
+  .scale{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+  .rate{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#fffdf9;border:1.5px solid var(--line);border-radius:12px;padding:11px 14px;font:inherit;color:var(--ink);cursor:pointer;}
+  .rate .num{flex:none;width:34px;height:34px;border-radius:50%;border:2px solid #c9bda9;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:var(--muted);}
+  .rate .lb{font-weight:600;font-size:15px;display:block;} .rate .ht{font-size:12.5px;color:var(--muted);display:block;}
+  .rate.on{border-color:var(--brown);background:#faf5ec;} .rate.on .num{background:var(--brown);border-color:var(--brown);color:#fff;}
+  textarea.short{min-height:120px;}
+  .cmp{display:grid;grid-template-columns:1fr auto auto;gap:6px 14px;align-items:center;padding:12px 0;border-top:1px solid var(--line);}
+  .cmp:first-of-type{border-top:0;}
+  .cmp .t{font-weight:600;font-size:14.5px;}
+  .cmp .r{text-align:center;min-width:54px;} .cmp .r small{display:block;font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;}
+  .cmp .r b{font-size:20px;font-family:'Playfair Display',Georgia,serif;color:var(--brown);}
+  .cmp .full{grid-column:1/-1;}
+  .gap{font-size:12px;font-weight:700;color:var(--warn);}
+  .ex{font-size:13.5px;color:#4a4136;white-space:pre-wrap;}
+</style>
+</head>
+<body>
+<div class="top"><img src="/assets/quarry-q-logo.png" alt=""><span class="brand">THE QUARRY</span><span class="tag">Self<br>Evaluation</span></div>
+<div class="prog" id="prog" hidden><i id="progBar" style="width:0"></i></div>
+<div class="wrap" id="app"><div class="card state"><div class="spinner"></div><p>Loading your evaluation…</p></div></div>
+<div class="foot">The Quarry · 3960 Highway Z, New Melle, MO</div>
+
+<script>
+(function () {
+  'use strict';
+  var FN = 'https://nkulhtalltbieicvmmad.supabase.co/functions/v1/staff-evals';
+  var KEY = 'sb_publishable_FQK59Bn8P2jV8yGL0nPi7w_jVHFMBSl';
+  var TOKEN = new URLSearchParams(location.search).get('t') || '';
+  var app = document.getElementById('app');
+  var D = null;
+  var A = { ratings: {}, examples: {}, open: {} };
+  var step = 0;   // 0 intro, 1..nAreas areas, then open questions, then review
+  var SAVE_KEY = 'qev-' + TOKEN.slice(0, 16);
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function words(s) { return String(s || '').trim().split(/\s+/).filter(Boolean).length; }
+  function call(body) {
+    return fetch(FN, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: KEY, Authorization: 'Bearer ' + KEY }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json(); }).catch(function () { return { error: 'Connection problem — check your signal and try again.' }; });
+  }
+  function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ A: A, step: step })); } catch (e) {} }
+  function restore() { try { var s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if (s && s.A) { A = s.A; A.open = A.open || {}; step = s.step || 0; } } catch (e) {} }
+  function clearSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) {} }
+  function stateCard(title, msg) { document.getElementById('prog').hidden = true; app.innerHTML = '<div class="card state"><h2>' + esc(title) + '</h2><p class="sub">' + msg + '</p></div>'; }
+  function first() { return String(D.employee_name || '').split(' ')[0]; }
+  function label(v) { var s = (D.scale || []).filter(function (x) { return x.v === v; })[0]; return s ? s.label : ''; }
+
+  if (!TOKEN) { stateCard('Link incomplete', 'This link is missing part of its address. Open it again from your email or text.'); return; }
+
+  call({ action: 'eval_load', token: TOKEN }).then(function (r) {
+    if (r.error) { stateCard(r.voided ? 'Evaluation withdrawn' : 'Can’t open this evaluation', esc(r.error)); return; }
+    D = r;
+    if (r.view) { clearSave(); results(); return; }
+    restore(); render();
+  });
+
+  function nA() { return D.form.areas.length; }
+  function nO() { return D.form.open.length; }
+  function total() { return 1 + nA() + nO() + 1; }
+  function setProg() {
+    var p = document.getElementById('prog'); p.hidden = step === 0;
+    document.getElementById('progBar').style.width = Math.round(100 * step / (total() - 1)) + '%';
+  }
+  function go(n) { step = n; save(); render(); window.scrollTo(0, 0); }
+  function render() {
+    setProg();
+    if (step === 0) return intro();
+    if (step <= nA()) return areaStep(step - 1);
+    if (step <= nA() + nO()) return openStep(step - 1 - nA());
+    return review();
+  }
+
+  function intro() {
+    var started = Object.keys(A.ratings).length;
+    app.innerHTML = '<div class="card"><div class="eyebrow">' + esc(D.ref_no) + '</div><h1>Hi ' + esc(first()) + ' — your ' + esc(D.title) + '</h1>' +
+      '<p class="sub" style="font-size:15px;color:#3e362c">' + esc(D.intro) + '</p>' +
+      '<div class="checklist"><div><span>Standards to rate</span><b>' + nA() + '</b></div><div><span>Questions at the end</span><b>' + nO() + '</b></div><div><span>Time</span><b>About 10–15 minutes</b></div></div>' +
+      '<p class="sub">Your answers save on this phone as you go, so you can close it and come back to this link.</p>' +
+      '<div class="nav" style="margin-top:16px"><button class="btn" id="start">' + (started ? 'Pick up where I left off' : 'Start') + '</button></div></div>';
+    document.getElementById('start').onclick = function () { go(step || 1); };
+  }
+
+  function areaStep(i) {
+    var a = D.form.areas[i], min = D.min.example, chosen = A.ratings[a.id];
+    app.innerHTML = '<div class="card"><div class="eyebrow">Standard ' + (i + 1) + ' of ' + nA() + '</div><h2>' + esc(a.title) + '</h2>' +
+      '<div class="std"><b>The standard</b>' + esc(a.standard) + '</div>' +
+      '<div class="q" style="margin-bottom:10px">How often do you hit this?</div>' +
+      '<div class="scale">' + D.scale.map(function (s) {
+        return '<button class="rate' + (chosen === s.v ? ' on' : '') + '" data-v="' + s.v + '"><span class="num">' + s.v + '</span><span><span class="lb">' + esc(s.label) + '</span><span class="ht">' + esc(s.hint) + '</span></span></button>';
+      }).join('') + '</div>' +
+      '<label for="ta" class="q" style="display:block;margin-bottom:8px;font-size:15.5px">' + esc(a.prompt) + '</label>' +
+      '<textarea id="ta" class="short" placeholder="A real example from a shift…">' + esc(A.examples[a.id] || '') + '</textarea>' +
+      '<div class="wc" id="wc"></div>' +
+      '<div class="nav" style="margin-top:12px"><button class="btn sec" id="back">Back</button><button class="btn" id="next">Next</button></div></div>';
+    var ta = document.getElementById('ta'), wc = document.getElementById('wc'), nx = document.getElementById('next');
+    function upd() {
+      var n = words(ta.value); A.examples[a.id] = ta.value; save();
+      wc.className = 'wc' + (n >= min ? ' ok' : '');
+      wc.innerHTML = '<span>' + n + ' words</span><span>' + (n >= min ? '✓ Good' : 'At least ' + min + ' words') + '</span>';
+      nx.disabled = n < min || A.ratings[a.id] == null;
+    }
+    Array.prototype.forEach.call(app.querySelectorAll('.rate'), function (b) {
+      b.onclick = function () {
+        A.ratings[a.id] = +b.dataset.v;
+        Array.prototype.forEach.call(app.querySelectorAll('.rate'), function (x) { x.classList.toggle('on', x === b); });
+        upd();
+      };
+    });
+    ta.oninput = upd; upd();
+    document.getElementById('back').onclick = function () { go(step - 1); };
+    nx.onclick = function () { go(step + 1); };
+  }
+
+  function openStep(i) {
+    var o = D.form.open[i], min = D.min.open;
+    app.innerHTML = '<div class="card"><div class="eyebrow">Last part · Question ' + (i + 1) + ' of ' + nO() + '</div>' +
+      '<label for="ta" class="q" style="display:block;margin-bottom:10px">' + esc(o.q) + '</label>' +
+      '<textarea id="ta">' + esc(A.open[o.id] || '') + '</textarea><div class="wc" id="wc"></div>' +
+      '<div class="nav" style="margin-top:12px"><button class="btn sec" id="back">Back</button><button class="btn" id="next">Next</button></div></div>';
+    var ta = document.getElementById('ta'), wc = document.getElementById('wc'), nx = document.getElementById('next');
+    function upd() {
+      var n = words(ta.value); A.open[o.id] = ta.value; save();
+      wc.className = 'wc' + (n >= min ? ' ok' : '');
+      wc.innerHTML = '<span>' + n + ' words</span><span>' + (n >= min ? '✓ Good' : 'At least ' + min + ' words') + '</span>';
+      nx.disabled = n < min;
+    }
+    ta.oninput = upd; upd();
+    document.getElementById('back').onclick = function () { go(step - 1); };
+    nx.onclick = function () { go(step + 1); };
+  }
+
+  function review() {
+    var areas = D.form.areas;
+    var bad = areas.filter(function (a) { return A.ratings[a.id] == null || words(A.examples[a.id]) < D.min.example; }).length +
+      D.form.open.filter(function (o) { return words(A.open[o.id]) < D.min.open; }).length;
+    app.innerHTML = '<div class="card"><div class="eyebrow">Ready to submit</div><h1>Check your ratings</h1>' +
+      '<p class="sub" style="font-size:15px">Once you submit, you can’t change anything. Management will rate the same standards and you’ll see both on this link.</p>' +
+      '<div class="checklist">' + areas.map(function (a) {
+        var v = A.ratings[a.id];
+        return '<div><span>' + esc(a.title) + '</span><b>' + (v ? v + ' · ' + esc(label(v)) : '<span style="color:var(--bad)">Not rated</span>') + '</b></div>';
+      }).join('') + '</div>' +
+      '<div class="nav"><button class="btn sec" id="back">Back</button><button class="btn gold" id="sub"' + (bad ? ' disabled' : '') + '>Submit</button></div><div class="err" id="er"></div></div>';
+    document.getElementById('back').onclick = function () { go(step - 1); };
+    document.getElementById('sub').onclick = function () {
+      var b = this; b.disabled = true; b.textContent = 'Submitting…';
+      call({ action: 'eval_submit', token: TOKEN, ratings: A.ratings, examples: A.examples, open: A.open }).then(function (r) {
+        if (r.error && !r.done) { b.disabled = false; b.textContent = 'Submit'; document.getElementById('er').textContent = r.error; return; }
+        if (r.done) { location.reload(); return; }
+        clearSave(); D = r; results(); window.scrollTo(0, 0);
+      });
+    };
+  }
+
+  function results() {
+    document.getElementById('prog').hidden = true;
+    var V = D.view, h = '';
+    h += '<div class="card"><div class="eyebrow">' + esc(D.title) + ' · ' + esc(D.ref_no) + '</div>';
+    if (!V.responded) {
+      h += '<h1>Submitted. Thanks, ' + esc(first()) + '.</h1><p class="sub" style="font-size:15px">Management is going through your answers and will rate the same standards. Open this same link later to see their response.</p>';
+    } else {
+      h += '<h1>Here’s how we see it, ' + esc(first()) + '</h1><p class="sub" style="font-size:15px">Your rating and management’s rating for each standard, side by side, with notes from ' + esc(V.responded_by || 'management') + '.</p>';
+      if (V.strengths) h += '<div class="mnote" style="margin-top:12px"><span>What you do well</span>' + esc(V.strengths) + '</div>';
+      if (V.focus) h += '<div class="mnote" style="margin-top:10px"><span>Focus for the next 30 days</span>' + esc(V.focus) + '</div>';
+      if (V.overall_note) h += '<div class="mnote" style="margin-top:10px"><span>Note</span>' + esc(V.overall_note) + '</div>';
+    }
+    h += '</div>';
+
+    h += '<div class="card"><div class="eyebrow">The standards</div>';
+    V.areas.forEach(function (a) {
+      var gap = V.responded && a.mgr != null && Math.abs(a.self - a.mgr) >= 2;
+      h += '<div class="cmp"><span class="t">' + esc(a.title) + (gap ? '<div class="gap">We see this differently. Let’s talk.</div>' : '') + '</span>' +
+        '<span class="r"><small>You</small><b>' + esc(a.self) + '</b></span>' +
+        '<span class="r"><small>Mgmt</small><b>' + (V.responded ? esc(a.mgr) : '–') + '</b></span>' +
+        '<div class="full ex">' + esc(a.example) + '</div>' +
+        (a.mgr_note ? '<div class="full mnote"><span>Management note</span>' + esc(a.mgr_note) + '</div>' : '') + '</div>';
+    });
+    h += '<p class="sub" style="margin-top:10px;font-size:12.5px">' + D.scale.map(function (s) { return s.v + ' = ' + esc(s.label); }).join(' · ') + '</p></div>';
+
+    h += '<div class="card"><div class="eyebrow">Your answers</div>' + V.open.map(function (o) {
+      return '<div class="res"><div class="rq">' + esc(o.q) + '</div><div class="ans">' + esc(o.answer) + '</div></div>';
+    }).join('') + '</div>';
+
+    if (V.responded && !V.acknowledged_at) {
+      h += '<div class="card"><div class="eyebrow">Your turn</div><h2>What will you work on?</h2>' +
+        '<p class="sub">Read management’s notes, then tell us in your own words what you’ll change over the next 30 days and anything you disagree with. Disagreeing is fine. Say why.</p>' +
+        '<textarea id="refl" class="short"></textarea><div class="wc" id="rwc"></div>' +
+        '<div class="nav" style="margin-top:12px"><button class="btn gold" id="ack" disabled>I’ve read this. Send my reflection</button></div><div class="err" id="er"></div></div>';
+    } else if (V.acknowledged_at) {
+      h += '<div class="card"><div class="eyebrow">Your reflection</div><div class="ans">' + esc(V.reflection) + '</div>' +
+        '<p class="sub">Acknowledged ' + new Date(V.acknowledged_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + '. Thanks, ' + esc(first()) + '.</p></div>';
+    }
+    app.innerHTML = h;
+
+    var ta = document.getElementById('refl');
+    if (ta) {
+      var rk = SAVE_KEY + '-r', min = D.min.reflect, btn = document.getElementById('ack'), wc = document.getElementById('rwc');
+      try { ta.value = localStorage.getItem(rk) || ''; } catch (e) {}
+      var upd = function () {
+        var n = words(ta.value); try { localStorage.setItem(rk, ta.value); } catch (e) {}
+        wc.className = 'wc' + (n >= min ? ' ok' : ''); wc.innerHTML = '<span>' + n + ' words</span><span>' + (n >= min ? '✓ Good' : 'At least ' + min + ' words') + '</span>';
+        btn.disabled = n < min;
+      };
+      ta.oninput = upd; upd();
+      btn.onclick = function () {
+        btn.disabled = true; btn.textContent = 'Sending…';
+        call({ action: 'eval_ack', token: TOKEN, reflection: ta.value }).then(function (r) {
+          if (r.error && !r.done) { btn.disabled = false; btn.textContent = 'I’ve read this. Send my reflection'; document.getElementById('er').textContent = r.error; return; }
+          if (r.done) { location.reload(); return; }
+          try { localStorage.removeItem(rk); } catch (e) {}
+          D = r; results(); window.scrollTo(0, 0);
+        });
+      };
+    }
+  }
+})();
+</script>
+</body>
+</html>
