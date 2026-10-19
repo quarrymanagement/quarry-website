@@ -1,7 +1,7 @@
 /* ============================================================================
  * The Quarry — Admin "TV Screens"
  * Self-injecting: adds "Team › TV Screens" to the sidebar.
- * Choose which floor charts (1 to 3) each TV shows, then PUBLISH. Published changes go live on the
+ * Choose which floor charts (1 to 6) each TV shows, then PUBLISH. Published changes go live on the
  * TVs within seconds and each changed TV reloads itself.
  *
  * Backend: Supabase edge function `floor-api` (admin_* actions; owner + server_lead logins only).
@@ -74,7 +74,7 @@
     var any = document.querySelector('.tab-content');
     if (!$('floortvTab') && any) {
       var div = document.createElement('div'); div.id = 'floortvTab'; div.className = 'tab-content ftv-panel';
-      div.innerHTML = '<h2>TV Screens</h2><p class="ftv-sub">Choose which floor charts each TV shows (1 to 3). Changes stay as a draft until you press ' +
+      div.innerHTML = '<h2>TV Screens</h2><p class="ftv-sub">Choose which floor charts each TV shows (1 to 6). Changes stay as a draft until you press ' +
         '<b>Publish</b>, then the TVs update and refresh themselves within seconds.</p><div id="ftvBody"><div class="ftv-sub">Loading…</div></div>';
       any.parentNode.appendChild(div);
     }
@@ -146,7 +146,7 @@
     if (act === 'area' && t) {
       var k = el.getAttribute('data-k'), cur = eff(t).slice(), i = cur.indexOf(k);
       if (i >= 0) { if (cur.length === 1) return say('Keep at least one chart on each TV.', false); cur.splice(i, 1); }
-      else { cur.push(k); if (cur.length > 3) cur.shift(); }
+      else { cur.push(k); if (cur.length > 6) cur.shift(); }
       return api('admin_draft', { tv: tv, areas: cur }).then(done('Saved as a draft. Press Publish to put it on the TV.'));
     }
     if (act === 'evstart') { var sel = $('ftvEv'); var area = sel ? sel.value : evSel; evSel = area; el.disabled = true; return api('admin_event_mode', { area: area, on: true }).then(done('Event mode is ON. Now put the event chart on the TVs and Publish.')); }
