@@ -36,3 +36,17 @@ alter table staff_goals enable row level security;
 alter table staff_checkins enable row level security;
 alter table staff_weekly_focus enable row level security;
 revoke all on staff_goals, staff_checkins, staff_weekly_focus from anon, authenticated;
+
+-- Positions worked (migration `staff_checkins_positions_worked`)
+alter table staff_checkins add column if not exists worked jsonb;          -- {roles:[{key,shifts}], support_shifts, from_square}
+alter table staff_checkins add column if not exists support_roles text[];  -- [primary, ...also] picked by the employee
+create or replace function public.staff_week_jobs(p_name text, p_week date)
+returns table (job_title text, shifts bigint, hours numeric)
+language sql stable security definer set search_path = public, square_sync as $$
+  select s.job_title, count(*), round(sum(coalesce(s.hours, 0))::numeric, 1)
+  from square_sync.shifts s
+  where s.deleted_at is null and lower(trim(s.employee_name)) = lower(trim(p_name))
+    and s.business_date >= p_week - 7 and s.business_date < p_week
+  group by s.job_title order by count(*) desc;
+$$;
+revoke all on function public.staff_week_jobs(text, date) from public, anon, authenticated;

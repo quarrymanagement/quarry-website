@@ -12,6 +12,9 @@
 //     3. What are two things you want to add on?   (two new goals)
 //   Done goals close. Unfinished goals carry if they tick "keep working on
 //   this" (default on). Max 4 open goals.
+//   Positions worked come from last week's Square shifts (staff_week_jobs).
+//   Support Staff covers host / busser / expo, so the employee picks their main
+//   one plus any others; every position worked brings its focus and standards.
 // ----------------------------------------------------------------------------
 // verify_jwt = false (custom auth per action).
 //
@@ -45,6 +48,39 @@ const MANAGEMENT_EMAIL = "management@thequarrystl.com";
 const ALLOWED_ROLES = ["owner", "events_staff"];
 const ROLES = ["server", "host", "busser", "expo", "bartender", "kitchen"];
 const ROLE_NAMES: Record<string, string> = { server: "Servers", host: "Hosts", busser: "Bussers", expo: "Expo", bartender: "Bartenders", kitchen: "Kitchen" };
+const ROLE_ONE: Record<string, string> = { server: "Server", host: "Host", busser: "Busser", expo: "Expo", bartender: "Bartender", kitchen: "Kitchen" };
+const SUPPORT_ROLES = ["host", "busser", "expo"];
+// Square job title -> evaluation roles. "support" = Support Staff (employee says which).
+function jobRoles(title: string): string[] {
+  const t = String(title || "").toLowerCase();
+  if (/berver/.test(t)) return ["server", "bartender"];
+  if (/support/.test(t)) return ["support"];
+  const out: string[] = [];
+  if (/server/.test(t)) out.push("server");
+  if (/bartend/.test(t)) out.push("bartender");
+  if (/cook|chef|dish|prep|line|kitchen/.test(t)) out.push("kitchen");
+  if (/host/.test(t)) out.push("host");
+  if (/bus/.test(t)) out.push("busser");
+  if (/expo|runner/.test(t)) out.push("expo");
+  return out;
+}
+async function workedLastWeek(name: string, week: string, fallback: string | null) {
+  const { data } = await supa.rpc("staff_week_jobs", { p_name: name, p_week: week });
+  const counts: Record<string, number> = {};
+  let support = 0;
+  const jobs = (data ?? []).map((r: any) => ({ job: r.job_title, shifts: Number(r.shifts) || 0 }));
+  for (const j of jobs) for (const r of jobRoles(j.job)) { if (r === "support") support += j.shifts; else counts[r] = (counts[r] || 0) + j.shifts; }
+  const roles = Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([key, shifts]) => ({ key, name: ROLE_ONE[key], shifts }));
+  const fromSquare = jobs.length > 0;
+  if (!fromSquare && fallback && fallback !== "support") roles.push({ key: fallback, name: ROLE_ONE[fallback] || fallback, shifts: 0 });
+  return { roles, support_shifts: support, jobs, from_square: fromSquare };
+}
+async function focusAll(week: string) {
+  const { data } = await supa.from("staff_weekly_focus").select("role_key,text").eq("week_of", week);
+  const out: Record<string, string> = {};
+  for (const r of data ?? []) out[r.role_key] = r.text;
+  return out;
+}
 const MIN_GOAL = 6, MIN_NOTE = 3, MIN_IMPROVE = 5, MIN_NEW = 4, NEW_GOALS = 2, MAX_OPEN = 4; // check-ins are meant to take about a minute
 // Standards per role, for tying a new goal to one. Mirrors FORMS in staff-evals (titles only).
 const AREAS: Record<string, [string, string][]> = {
@@ -154,7 +190,10 @@ Deno.serve(async (req: Request) => {
         if (!c.opened_at) await supa.from("staff_checkins").update({ opened_at: new Date().toISOString() }).eq("id", c.id);
         const goals = (await goalsFor(c.employee_name)).map(goalOut);
         const { data: last } = await supa.from("staff_checkins").select("week_of,results,mgr_note,mgr_by").eq("employee_name", c.employee_name).eq("status", "submitted").lt("week_of", c.week_of).order("week_of", { ascending: false }).limit(1);
-        return json({ ...head, status: c.status, goals, last: (last ?? [])[0] || null });
+        const areas_by_role: Record<string, { id: string; title: string }[]> = {};
+        for (const k of ROLES) areas_by_role[k] = AREAS[k].map(([id, title]) => ({ id, title }));
+        return json({ ...head, status: c.status, goals, last: (last ?? [])[0] || null,
+          worked: await workedLastWeek(c.employee_name, c.week_of, c.role_key), focus_by_role: await focusAll(c.week_of), areas_by_role, role_one: ROLE_ONE, support_roles: SUPPORT_ROLES });
       }
       // submit
       if (c.status === "submitted") return json({ error: "Already submitted.", done: true }, 409);
@@ -175,6 +214,9 @@ Deno.serve(async (req: Request) => {
         .map((g: any) => ({ area_id: clean(g.area_id, 40) || null, area_title: clean(g.area_title, 120) || null, goal: clean(g.goal, 1000) })).filter((g: any) => g.goal);
       if (ngs.length < NEW_GOALS) return json({ error: `Add ${NEW_GOALS} things you want to work on next week.` }, 400);
       if (ngs.some((g: any) => words(g.goal) < MIN_NEW)) return json({ error: `Each new goal needs at least ${MIN_NEW} words.` }, 400);
+      const worked = await workedLastWeek(c.employee_name, c.week_of, c.role_key);
+      const sup = (Array.isArray(body.support_roles) ? body.support_roles : []).map((x: unknown) => String(x)).filter((x: string, i: number, a: string[]) => SUPPORT_ROLES.includes(x) && a.indexOf(x) === i);
+      if (worked.support_shifts > 0 && !sup.length) return json({ error: "Pick what you mainly did on your Support Staff shifts." }, 400);
       const kept = results.filter((r) => r.keep).length;
       if (kept + ngs.length > MAX_OPEN) return json({ error: `That would give you ${kept + ngs.length} open goals. Keep it to ${MAX_OPEN}: untick "keep working on this" on one you're letting go.` }, 400);
       const now = new Date().toISOString();
@@ -183,7 +225,7 @@ Deno.serve(async (req: Request) => {
         else if (!r.keep) await supa.from("staff_goals").update({ status: "dropped", closed_at: now, updated_at: now }).eq("id", r.goal_id);
       }
       await supa.from("staff_goals").insert(ngs.map((g: any) => ({ ...g, evaluation_id: c.evaluation_id, employee_name: c.employee_name, role_key: c.role_key, set_by: "employee" })));
-      await supa.from("staff_checkins").update({ status: "submitted", submitted_at: now, results, focus_note: focusNote || null, improve, new_goals: ngs, goals_shown: goals.map(goalOut) }).eq("id", c.id);
+      await supa.from("staff_checkins").update({ status: "submitted", submitted_at: now, results, focus_note: focusNote || null, improve, new_goals: ngs, goals_shown: goals.map(goalOut), worked, support_roles: sup.length ? sup : null }).eq("id", c.id);
       return json({ ...head, status: "submitted", submitted_at: now, results, focus_note: focusNote || null, improve, new_goals: ngs, goals_now: (await goalsFor(c.employee_name)).map(goalOut) });
     }
 

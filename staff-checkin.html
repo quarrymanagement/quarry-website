@@ -73,6 +73,10 @@
   .seg button.on.done{background:var(--ok-bg);border-color:var(--ok);color:var(--ok);} .seg button.on.partly{background:var(--warn-bg);border-color:#c99a2e;color:var(--warn);} .seg button.on.not_yet{background:var(--bad-bg);border-color:var(--bad);color:var(--bad);}
   textarea.short{min-height:90px;}
   .badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 4px;}
+  .chip{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:9px 16px;font:inherit;font-weight:600;font-size:14px;cursor:pointer;color:var(--ink);}
+  .chip.on{background:var(--brown);border-color:var(--brown);color:#fff;} .chip.also.on{background:#faf5ec;color:var(--brown);}
+  .worked{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;} .worked span{background:var(--cream);border-radius:999px;padding:5px 12px;font-size:13.5px;font-weight:600;}
   .badge.done{background:var(--ok-bg);color:var(--ok);} .badge.partly{background:var(--warn-bg);color:var(--warn);} .badge.not_yet{background:var(--bad-bg);color:var(--bad);}
 </style>
 </head>
@@ -87,7 +91,7 @@
   var KEY = 'sb_publishable_FQK59Bn8P2jV8yGL0nPi7w_jVHFMBSl';
   var TOKEN = new URLSearchParams(location.search).get('t') || '';
   var app = document.getElementById('app');
-  var D = null, S = { R: {}, focus: '', improve: '', ng: [{}, {}] };
+  var D = null, S = { R: {}, focus: '', improve: '', ng: [{}, {}], sup: [] };
   var SAVE_KEY = 'qci-' + TOKEN.slice(0, 16);
   var LABEL = { done: 'Done', partly: 'Partly', not_yet: 'Not yet' };
 
@@ -98,7 +102,7 @@
       .then(function (r) { return r.json(); }).catch(function () { return { error: 'Connection problem — check your signal and try again.' }; });
   }
   function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }
-  function restore() { try { var s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if (s && s.R) { S = s; S.ng = S.ng || [{}, {}]; } } catch (e) {} }
+  function restore() { try { var s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if (s && s.R) { S = s; S.ng = S.ng || [{}, {}]; S.sup = S.sup || []; } } catch (e) {} }
   function first() { return String(D.employee_name || '').split(' ')[0]; }
   function weekLabel(w) { return new Date(w + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
   function stateCard(t, m) { app.innerHTML = '<div class="card state"><h2>' + esc(t) + '</h2><p class="sub">' + m + '</p></div>'; }
@@ -110,10 +114,53 @@
     D = r; if (r.status === 'submitted') return done(); restore(); form();
   });
 
+  // Positions that count this week: Square jobs + what they picked for Support Staff.
+  function activeRoles() {
+    var w = D.worked || { roles: [] }, out = w.roles.map(function (r) { return r.key; });
+    S.sup.forEach(function (k) { if (out.indexOf(k) < 0) out.push(k); });
+    if (!out.length && D.role_key) out.push(D.role_key);
+    return out;
+  }
+  function workedCard() {
+    var w = D.worked || { roles: [], support_shifts: 0 };
+    var h = '<div class="card"><div class="eyebrow">Last week you worked</div>';
+    if (w.roles.length) h += '<div class="worked">' + w.roles.map(function (r) { return '<span>' + esc(r.name) + (r.shifts ? ' · ' + r.shifts + ' shift' + (r.shifts === 1 ? '' : 's') : '') + '</span>'; }).join('') + (w.support_shifts ? '<span>Support Staff · ' + w.support_shifts + ' shift' + (w.support_shifts === 1 ? '' : 's') + '</span>' : '') + '</div>';
+    else if (w.support_shifts) h += '<div class="worked"><span>Support Staff · ' + w.support_shifts + ' shift' + (w.support_shifts === 1 ? '' : 's') + '</span></div>';
+    else h += '<p class="sub">We couldn’t find your shifts in Square, so this check-in is for ' + esc((D.role_one || {})[D.role_key] || 'your role') + '.</p>';
+    if (w.support_shifts) {
+      var prim = S.sup[0] || '';
+      h += '<p class="q" style="font-size:15.5px;margin:14px 0 4px">On your Support Staff shift' + (w.support_shifts === 1 ? '' : 's') + ', what was your main job?</p>' +
+        '<div class="chips">' + D.support_roles.map(function (k) { return '<button class="chip prim' + (prim === k ? ' on' : '') + '" data-k="' + k + '">' + esc(D.role_one[k]) + '</button>'; }).join('') + '</div>';
+      if (prim) h += '<p class="sub" style="margin:10px 0 0">Did you do any of these too?</p><div class="chips">' + D.support_roles.filter(function (k) { return k !== prim; }).map(function (k) { return '<button class="chip also' + (S.sup.indexOf(k) > 0 ? ' on' : '') + '" data-k="' + k + '">' + esc(D.role_one[k]) + '</button>'; }).join('') + '</div>';
+    }
+    return h + '</div>';
+  }
+  function bindWorked() {
+    Array.prototype.forEach.call(app.querySelectorAll('.chip.prim'), function (b) { b.onclick = function () { var k = b.dataset.k; S.sup = [k].concat(S.sup.slice(1).filter(function (x) { return x !== k; })); save(); form(); }; });
+    Array.prototype.forEach.call(app.querySelectorAll('.chip.also'), function (b) { b.onclick = function () { var k = b.dataset.k, i = S.sup.indexOf(k); if (i > 0) S.sup.splice(i, 1); else S.sup.push(k); save(); form(); }; });
+  }
+  function focusHtml() {
+    var fb = D.focus_by_role || {}, rows = activeRoles().filter(function (k) { return fb[k]; });
+    if (!rows.length) return D.focus ? '<div class="focus"><b>This week’s focus for ' + esc(D.role_name || 'the team') + '</b>' + esc(D.focus) + '</div>' : '';
+    return rows.map(function (k) { return '<div class="focus"><b>This week’s focus · ' + esc(D.role_one[k]) + '</b>' + esc(fb[k]) + '</div>'; }).join('');
+  }
+  function standardOptions(sel) {
+    var roles = activeRoles(), by = D.areas_by_role || {};
+    if (!roles.some(function (k) { return by[k]; })) return (D.areas || []).map(function (a) { return '<option value="' + esc(a.id) + '"' + (sel === a.id ? ' selected' : '') + '>' + esc(a.title) + '</option>'; }).join('');
+    return roles.filter(function (k) { return by[k]; }).map(function (k) {
+      return '<optgroup label="' + esc(D.role_one[k]) + '">' + by[k].map(function (a) { var v = k + ':' + a.id; return '<option value="' + esc(v) + '"' + (sel === v ? ' selected' : '') + '>' + esc(a.title) + '</option>'; }).join('') + '</optgroup>';
+    }).join('');
+  }
+  function areaTitle(v) {
+    var parts = String(v || '').split(':'), by = D.areas_by_role || {};
+    if (parts.length === 2 && by[parts[0]]) { var a = by[parts[0]].filter(function (x) { return x.id === parts[1]; })[0]; return a ? (D.role_one[parts[0]] + ' · ' + a.title) : ''; }
+    var b = (D.areas || []).filter(function (x) { return x.id === v; })[0]; return b ? b.title : '';
+  }
+
   function form() {
     var h = '<div class="card"><div class="eyebrow">Week of ' + esc(weekLabel(D.week_of)) + '</div><h1>Hi ' + esc(first()) + '. Quick check-in.</h1>' +
-      '<p class="sub" style="font-size:15px">Three quick questions, about a minute. Be honest: “not yet” is fine.</p></div>';
-    if (D.focus) h += '<div class="focus"><b>This week’s focus for ' + esc(D.role_name || 'the team') + '</b>' + esc(D.focus) + '</div>';
+      '<p class="sub" style="font-size:15px">Three quick questions, about a minute. Be honest: “not yet” is fine. Managers and owners read every check-in and will reply with feedback.</p></div>';
+    h += workedCard() + focusHtml();
     if (D.last && D.last.mgr_note) h += '<div class="card"><div class="mnote"><span>Last week, ' + esc(D.last.mgr_by || 'management') + ' said</span>' + esc(D.last.mgr_note) + '</div></div>';
 
     // 1
@@ -141,7 +188,7 @@
         var g = S.ng[i] || {};
         return '<div class="goal"><div class="area">New goal ' + (i + 1) + '</div>' +
           '<select class="ns" data-i="' + i + '" style="width:100%;padding:10px;border:1.5px solid #d5cbbb;border-radius:10px;font:inherit;font-size:14px;background:#fff;margin:6px 0 8px"><option value="">Standard (optional)</option>' +
-          (D.areas || []).map(function (a) { return '<option value="' + esc(a.id) + '"' + (g.area_id === a.id ? ' selected' : '') + '>' + esc(a.title) + '</option>'; }).join('') + '</select>' +
+          standardOptions(g.area_id) + '</select>' +
           '<textarea class="nt" rows="2" style="min-height:0" data-i="' + i + '" placeholder="e.g. Run every drink sitting on the bar">' + esc(g.goal || '') + '</textarea><div class="wc" id="nwc' + i + '"></div></div>';
       }).join('') + '<div class="err" id="cap"></div></div>';
     h += '<div class="card"><div class="nav"><button class="btn gold" id="sub" disabled>Send my check-in</button></div><div class="err" id="er"></div></div>';
@@ -156,7 +203,9 @@
       var kept = D.goals.filter(function (g) { var r = S.R[g.id] || {}; return r.result && r.result !== 'done' && r.keep !== false; }).length;
       var over = kept + 2 > D.max_open;
       document.getElementById('cap').textContent = over ? 'That’s ' + (kept + 2) + ' open goals. Keep it to ' + D.max_open + ': untick “keep working on this” on one you’re letting go.' : '';
-      btn.disabled = !(ok1 && ni >= D.min.improve && ok3 && !over);
+      var supOk = !(D.worked && D.worked.support_shifts) || S.sup.length > 0;
+      btn.disabled = !(ok1 && ni >= D.min.improve && ok3 && !over && supOk);
+      if (!supOk) document.getElementById('cap').textContent = 'Pick your main job on your Support Staff shifts (top of the page).';
       save();
     }
     Array.prototype.forEach.call(app.querySelectorAll('.goal[data-id]'), function (box) {
@@ -172,11 +221,12 @@
     document.getElementById('imp').oninput = function () { S.improve = this.value; check(); };
     Array.prototype.forEach.call(app.querySelectorAll('.ns'), function (el) { el.onchange = function () { S.ng[+el.dataset.i].area_id = el.value; check(); }; });
     Array.prototype.forEach.call(app.querySelectorAll('.nt'), function (el) { el.oninput = function () { S.ng[+el.dataset.i].goal = el.value; check(); }; });
+    bindWorked();
     check();
     btn.onclick = function () {
       btn.disabled = true; btn.textContent = 'Sending…';
-      var ngs = S.ng.map(function (g) { var a = (D.areas || []).filter(function (x) { return x.id === g.area_id; })[0]; return { area_id: g.area_id, area_title: a ? a.title : '', goal: g.goal }; });
-      call({ action: 'checkin_submit', token: TOKEN, results: S.R, focus_note: S.focus, improve: S.improve, new_goals: ngs }).then(function (r) {
+      var ngs = S.ng.map(function (g) { return { area_id: g.area_id ? String(g.area_id).split(':').pop() : '', area_title: areaTitle(g.area_id), goal: g.goal }; });
+      call({ action: 'checkin_submit', token: TOKEN, results: S.R, focus_note: S.focus, improve: S.improve, new_goals: ngs, support_roles: S.sup }).then(function (r) {
         if (r.error && !r.done) { btn.disabled = false; btn.textContent = 'Send my check-in'; document.getElementById('er').textContent = r.error; return; }
         if (r.done) { location.reload(); return; }
         try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
@@ -186,7 +236,7 @@
   }
 
   function done() {
-    var h = '<div class="card"><div class="eyebrow">Week of ' + esc(weekLabel(D.week_of)) + '</div><h1>Thanks, ' + esc(first()) + '.</h1><p class="sub" style="font-size:15px">Management reads every check-in. Open this link again later to see their reply.</p></div>';
+    var h = '<div class="card"><div class="eyebrow">Week of ' + esc(weekLabel(D.week_of)) + '</div><h1>Thanks, ' + esc(first()) + '.</h1><p class="sub" style="font-size:15px">Managers and owners read every check-in and will reply with feedback. You’ll get an email when they do, and it shows on this link.</p></div>';
     if (D.mgr_note) h += '<div class="card"><div class="mnote"><span>From ' + esc(D.mgr_by || 'management') + '</span>' + esc(D.mgr_note) + '</div></div>';
     h += '<div class="card"><div class="eyebrow">What you focused on</div>' + (D.results || []).map(function (r) {
       return '<div class="res"><div class="rq" style="justify-content:space-between"><span>' + esc(r.goal) + '</span><span class="badge ' + r.result + '">' + LABEL[r.result] + '</span></div><div class="ra" style="margin-left:0">' + esc(r.note) + '</div></div>';
