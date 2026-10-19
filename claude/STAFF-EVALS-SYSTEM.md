@@ -44,3 +44,10 @@ Every evaluation's detail screen has a **The numbers** card: this person vs the 
 | Latest training test | `training_test_attempts` | anyone who took one |
 
 Not measurable yet: voids (Square line deletions aren't synced; "Entry error" comps are the closest proxy), refires (no KDS data; "Customer complaint" comps are the proxy, attributed to the server, not the cook), handheld vs terminal (device isn't synced), who approved a comp (Square records no approver on any comp in the last 60 days).
+
+## Guest feedback (Google reviews)
+Built 2026-10-19. Table `guest_reviews` (schema `claude/guest-reviews.sql`). Admin › Team › Evaluations › **Guest feedback**: filter complaints / last 60 days / staff-named / hidden; per review write **"What we're changing"** (staff see it under the review), tag staff first names (auto-tagged on import from `checklist_staff`; confirm by hand), or hide it.
+
+On the employee's evaluation, the first screen after the intro is **What guests are saying**: shared reviews from the last 60 days, grouped as reviews that name them, then the 5 most recent complaints (3★ or less), then two 5★. Every form (version 2) adds a first open question: pick one complaint, what will you personally do differently. What they saw is frozen on the record (`feedback_snapshot`) and shown on the manager's response screen.
+
+Import: reviews are read from the Business Profile owner view (business.google.com/reviews) in Chrome while signed in as the profile manager. First import 2026-10-19: 83 written reviews since 2025-11-01 (32 at 3★ or less, 9 naming staff). Staging table `guest_reviews_stage` held the batch; its insert policy was dropped right after. Edge action `admin_reviews_import` takes the same rows for future pulls (dedup on source + Google review id).

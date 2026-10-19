@@ -79,6 +79,13 @@
   .cmp .full{grid-column:1/-1;}
   .gap{font-size:12px;font-weight:700;color:var(--warn);}
   .ex{font-size:13.5px;color:#4a4136;white-space:pre-wrap;}
+  .rv{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:#fffdf9;}
+  .rv.neg{border-left:4px solid var(--bad);} .rv.pos{border-left:4px solid var(--ok);} .rv.you{border-left:4px solid var(--gold);}
+  .rv .stars{color:var(--gold);font-size:14px;letter-spacing:1px;} .rv .stars i{color:#d9cfbf;font-style:normal;}
+  .rv .meta{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:8px;margin-bottom:6px;}
+  .rv p{margin:0;font-size:14.5px;white-space:pre-wrap;}
+  .rv .fix{margin-top:8px;font-size:13.5px;background:var(--cream);border-radius:8px;padding:8px 10px;} .rv .fix b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--gold);}
+  .grp{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin:14px 0 8px;}
 </style>
 </head>
 <body>
@@ -110,6 +117,18 @@
   function clearSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) {} }
   function stateCard(title, msg) { document.getElementById('prog').hidden = true; app.innerHTML = '<div class="card state"><h2>' + esc(title) + '</h2><p class="sub">' + msg + '</p></div>'; }
   function first() { return String(D.employee_name || '').split(' ')[0]; }
+  function stars(n) { n = +n || 0; return '<span class="stars">' + '★★★★★'.slice(0, n) + '<i>' + '★★★★★'.slice(0, 5 - n) + '</i></span>'; }
+  function reviewsHtml(list) {
+    function card(r) {
+      var cls = r.about_you ? 'you' : ((r.rating || 5) <= 3 ? 'neg' : 'pos');
+      return '<div class="rv ' + cls + '"><div class="meta">' + (r.rating ? stars(r.rating) : '<span></span>') + '<span>' + esc(r.date ? new Date(r.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '') + '</span></div>' +
+        '<p>' + esc(r.body) + '</p>' + (r.note ? '<div class="fix"><b>What we’re changing</b>' + esc(r.note) + '</div>' : '') + '</div>';
+    }
+    var you = list.filter(function (r) { return r.about_you; }), neg = list.filter(function (r) { return !r.about_you && (r.rating || 5) <= 3; }), pos = list.filter(function (r) { return !r.about_you && (r.rating || 5) > 3; });
+    return (you.length ? '<div class="grp">Guests who mentioned you</div>' + you.map(card).join('') : '') +
+      (neg.length ? '<div class="grp">Where we fell short</div>' + neg.map(card).join('') : '') +
+      (pos.length ? '<div class="grp">What guests loved</div>' + pos.map(card).join('') : '');
+  }
   function label(v) { var s = (D.scale || []).filter(function (x) { return x.v === v; })[0]; return s ? s.label : ''; }
 
   if (!TOKEN) { stateCard('Link incomplete', 'This link is missing part of its address. Open it again from your email or text.'); return; }
@@ -121,9 +140,10 @@
     restore(); render();
   });
 
+  function nF() { return (D.feedback && D.feedback.length) ? 1 : 0; }
   function nA() { return D.form.areas.length; }
   function nO() { return D.form.open.length; }
-  function total() { return 1 + nA() + nO() + 1; }
+  function total() { return 1 + nF() + nA() + nO() + 1; }
   function setProg() {
     var p = document.getElementById('prog'); p.hidden = step === 0;
     document.getElementById('progBar').style.width = Math.round(100 * step / (total() - 1)) + '%';
@@ -132,8 +152,10 @@
   function render() {
     setProg();
     if (step === 0) return intro();
-    if (step <= nA()) return areaStep(step - 1);
-    if (step <= nA() + nO()) return openStep(step - 1 - nA());
+    if (nF() && step === 1) return feedbackStep();
+    var k = step - nF();
+    if (k <= nA()) return areaStep(k - 1);
+    if (k <= nA() + nO()) return openStep(k - 1 - nA());
     return review();
   }
 
@@ -141,10 +163,19 @@
     var started = Object.keys(A.ratings).length;
     app.innerHTML = '<div class="card"><div class="eyebrow">' + esc(D.ref_no) + '</div><h1>Hi ' + esc(first()) + ' — your ' + esc(D.title) + '</h1>' +
       '<p class="sub" style="font-size:15px;color:#3e362c">' + esc(D.intro) + '</p>' +
-      '<div class="checklist"><div><span>Standards to rate</span><b>' + nA() + '</b></div><div><span>Questions at the end</span><b>' + nO() + '</b></div><div><span>Time</span><b>About 10–15 minutes</b></div></div>' +
+      '<div class="checklist">' + (nF() ? '<div><span>Guest reviews to read</span><b>' + D.feedback.length + '</b></div>' : '') + '<div><span>Standards to rate</span><b>' + nA() + '</b></div><div><span>Questions at the end</span><b>' + nO() + '</b></div><div><span>Time</span><b>About 10–15 minutes</b></div></div>' +
       '<p class="sub">Your answers save on this phone as you go, so you can close it and come back to this link.</p>' +
       '<div class="nav" style="margin-top:16px"><button class="btn" id="start">' + (started ? 'Pick up where I left off' : 'Start') + '</button></div></div>';
     document.getElementById('start').onclick = function () { go(step || 1); };
+  }
+
+  function feedbackStep() {
+    app.innerHTML = '<div class="card"><div class="eyebrow">Before you start</div><h2>What guests are saying</h2>' +
+      '<p class="sub">Real reviews from the last two months. The complaints matter most. Keep them in mind as you rate yourself; you’ll be asked about one at the end.</p>' +
+      reviewsHtml(D.feedback) +
+      '<div class="nav" style="margin-top:12px"><button class="btn sec" id="back">Back</button><button class="btn" id="next">Got it</button></div></div>';
+    document.getElementById('back').onclick = function () { go(step - 1); };
+    document.getElementById('next').onclick = function () { go(step + 1); };
   }
 
   function areaStep(i) {
@@ -182,6 +213,7 @@
     var o = D.form.open[i], min = D.min.open;
     app.innerHTML = '<div class="card"><div class="eyebrow">Last part · Question ' + (i + 1) + ' of ' + nO() + '</div>' +
       '<label for="ta" class="q" style="display:block;margin-bottom:10px">' + esc(o.q) + '</label>' +
+      (o.id === 'guest' && nF() ? '<details style="margin-bottom:10px"><summary class="sub" style="cursor:pointer">See the reviews again</summary>' + reviewsHtml(D.feedback) + '</details>' : '') +
       '<textarea id="ta">' + esc(A.open[o.id] || '') + '</textarea><div class="wc" id="wc"></div>' +
       '<div class="nav" style="margin-top:12px"><button class="btn sec" id="back">Back</button><button class="btn" id="next">Next</button></div></div>';
     var ta = document.getElementById('ta'), wc = document.getElementById('wc'), nx = document.getElementById('next');
@@ -243,6 +275,7 @@
     });
     h += '<p class="sub" style="margin-top:10px;font-size:12.5px">' + D.scale.map(function (s) { return s.v + ' = ' + esc(s.label); }).join(' · ') + '</p></div>';
 
+    if (V.feedback && V.feedback.length) h += '<div class="card"><div class="eyebrow">What guests were saying</div>' + reviewsHtml(V.feedback) + '</div>';
     h += '<div class="card"><div class="eyebrow">Your answers</div>' + V.open.map(function (o) {
       return '<div class="res"><div class="rq">' + esc(o.q) + '</div><div class="ans">' + esc(o.answer) + '</div></div>';
     }).join('') + '</div>';

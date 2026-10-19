@@ -2,6 +2,8 @@
 
 Exactly what staff see, by role. Source of truth: `FORMS` in `supabase/functions/staff-evals/index.ts`.
 
+**First screen:** What guests are saying: shared Google reviews from the last 60 days (reviews naming them, the 5 most recent complaints, two 5-star), with management's "what we're changing" under each.
+
 **Intro on every form:** This is your self-evaluation. It is not a test and it is not a write-up. For each standard, rate yourself honestly and give us one real example from a shift. Management rates the same standards, then you'll see both side by side and we'll talk about where to go from here. Honest 3s are more useful to us than 5s across the board.
 
 **Rating scale (every standard):** 1 Not yet · 2 Some shifts · 3 Most shifts · 4 Every shift · 5 I could train it
@@ -202,9 +204,10 @@ Example prompt: How do you handle product that's close to its date?
 
 ## Open questions (every role, 15+ words each)
 
-1. Where are you strongest right now? Give us a real example from a recent shift.
-2. Which of these standards is hardest to hit on a busy night, and why? What would make it easier?
-3. What do you need from management (training, tools, scheduling, communication) to do your job better?
+1. Look at what guests have been saying (the reviews at the start, or what you've heard on the floor). Pick one complaint. What will you personally do differently so it doesn't happen at your tables or your station?
+2. Where are you strongest right now? Give us a real example from a recent shift.
+3. Which of these standards is hardest to hit on a busy night, and why? What would make it easier?
+4. What do you need from management (training, tools, scheduling, communication) to do your job better?
 
 ## After management responds
 

@@ -15,6 +15,9 @@
  *              standards, leave notes, strengths and a 30-day focus → employee
  *              is emailed, sees both side by side, writes a reflection.
  *   Questions  read-only view of all six forms.
+ *   Guest feedback  Google reviews (guest_reviews). Add "what we're changing",
+ *              tag staff named, hide any. Staff see the last 60 days of shared
+ *              reviews at the start of their evaluation, complaints first.
  * ==========================================================================*/
 (function () {
   'use strict';
@@ -166,7 +169,7 @@
 
   function shell(inner) {
     $('evBody').innerHTML = '<div class="ev-head"><div><h2>Evaluations</h2><div class="ev-sub">Staff rate themselves on their role’s standards. You rate the same standards and respond. They reflect.</div></div></div>' +
-      '<div class="ev-tabs"><button data-v="send">Send</button><button data-v="responses">Responses</button><button data-v="questions">Questions</button></div><div id="evView">' + inner + '</div>';
+      '<div class="ev-tabs"><button data-v="send">Send</button><button data-v="responses">Responses</button><button data-v="questions">Questions</button><button data-v="feedback">Guest feedback</button></div><div id="evView">' + inner + '</div>';
     Array.prototype.forEach.call(document.querySelectorAll('.ev-tabs button'), function (b) {
       b.classList.toggle('on', b.dataset.v === VIEW);
       b.onclick = function () { VIEW = b.dataset.v; show(); };
@@ -178,6 +181,7 @@
       if (!m) { $('evView').innerHTML = '<div class="ev-callout">Couldn’t load evaluations. Log in again.</div>'; return; }
       if (VIEW === 'send') sendView();
       else if (VIEW === 'questions') questionsView();
+      else if (VIEW === 'feedback') feedbackView();
       else responsesView();
     });
   }
@@ -190,7 +194,7 @@
         '<div class="ev-pr"><b>Rate 1–5, then:</b> ' + esc(a.prompt) + '</div></div>';
     }).join('') + '</div>';
     h += '<div class="ev-scale">' + META.scale.map(function (s) { return '<span>' + s.v + ' · ' + esc(s.label) + '</span>'; }).join('') + '</div>';
-    h += '<h3 style="margin:16px 0 6px">Then three open questions</h3>' + f.open.map(function (o, i) { return '<div class="ev-area"><div class="ev-std">' + (i + 1) + '. ' + esc(o.q) + '</div></div>'; }).join('');
+    h += '<h3 style="margin:16px 0 6px">Then ' + f.open.length + ' open questions</h3>' + f.open.map(function (o, i) { return '<div class="ev-area"><div class="ev-std">' + (i + 1) + '. ' + esc(o.q) + '</div></div>'; }).join('');
     return h;
   }
   function questionsView() {
@@ -205,10 +209,11 @@
     var h = '<div class="ev-steps"><span class="' + (S.step === 1 ? 'on' : 'done') + '">1 · Pick the role</span><span class="' + (S.step === 2 ? 'on' : S.step > 2 ? 'done' : '') + '">2 · Review the questions</span><span class="' + (S.step === 3 ? 'on' : '') + '">3 · Choose who gets it</span></div>';
     h += '<div class="ev-card"><h3>Which role?</h3><div class="ev-roles">' + META.order.map(function (k) {
       var f = form(k);
-      return '<button class="ev-role' + (S.role === k ? ' on' : '') + '" data-k="' + k + '"><b>' + esc(f.who) + '</b><span>' + f.areas.length + ' standards · 3 questions</span></button>';
+      return '<button class="ev-role' + (S.role === k ? ' on' : '') + '" data-k="' + k + '"><b>' + esc(f.who) + '</b><span>' + f.areas.length + ' standards · ' + f.open.length + ' questions</span></button>';
     }).join('') + '</div></div>';
     if (S.role && S.step >= 2) {
       var f = form(S.role);
+      h += '<div class="ev-card" id="evFbPrev"><h3>First screen · what guests are saying</h3><div style="color:var(--text-muted);font-size:13px">Loading…</div></div>';
       h += '<div class="ev-card"><h3>' + esc(f.title) + ' — exactly what they’ll see</h3>' + formHtml(f) +
         (S.step === 2 ? '<div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap"><button class="ev-btn gold" id="evOk">Questions look good → choose who gets it</button><button class="ev-btn sec" id="evNo">Not yet</button></div>' : '') + '</div>';
     }
@@ -221,6 +226,13 @@
     if ($('evOk')) $('evOk').onclick = function () { S.step = 3; sendView(); setTimeout(function () { if ($('evPick')) $('evPick').scrollIntoView({ behavior: 'smooth' }); }, 50); };
     if ($('evNo')) $('evNo').onclick = function () { S.step = 1; S.role = null; sendView(); toast('Nothing sent.'); };
     if (S.step === 3) loadRoster();
+    if ($('evFbPrev')) api('admin_feedback_preview', { name: '' }).then(function (r) {
+      var b = $('evFbPrev'); if (!b) return;
+      var list = (r && r.feedback) || [];
+      b.innerHTML = '<h3>First screen · what guests are saying</h3>' + (list.length ?
+        '<p class="ev-sub" style="margin:-4px 0 10px">Everyone gets these, plus any review that names them. Edit notes or hide reviews under Guest feedback.</p>' + reviewCards(list) :
+        '<p class="ev-sub">No shared reviews from the last 60 days yet, so this screen is skipped. Add reviews under Guest feedback.</p>');
+    });
   }
   function loadRoster() {
     var p = ROSTER ? Promise.resolve({ roster: ROSTER }) : api('admin_roster');
@@ -317,6 +329,52 @@
     m.querySelector('#sDone').onclick = function () { m.remove(); };
   }
 
+  /* ================= GUEST FEEDBACK ================= */
+  function starStr(n) { n = +n || 0; return '<span style="color:var(--gold);letter-spacing:1px">' + '★★★★★'.slice(0, n) + '<span style="color:#d9cfbf">' + '★★★★★'.slice(0, 5 - n) + '</span></span>'; }
+  function reviewCards(list) {
+    return list.map(function (r) {
+      var c = r.about_you ? 'var(--gold)' : ((r.rating || 5) <= 3 ? '#c0392b' : '#2f8a4c');
+      return '<div class="ev-ans" style="border-left:4px solid ' + c + ';padding:12px 14px"><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted);margin-bottom:4px">' + (r.rating ? starStr(r.rating) : '') + '<span>' + esc(r.date || r.review_date || '') + '</span></div>' +
+        '<div style="white-space:pre-wrap;font-size:14px">' + esc(r.body) + '</div>' + ((r.note || r.mgmt_note) ? '<div class="ev-text" style="margin-top:8px"><b style="color:var(--gold);font-size:11px;text-transform:uppercase">What we’re changing</b><br>' + esc(r.note || r.mgmt_note) + '</div>' : '') + '</div>';
+    }).join('');
+  }
+  var RV = { list: [], names: [], filter: 'neg' };
+  function feedbackView() {
+    $('evView').innerHTML = '<div class="ev-card" style="color:var(--text-muted)">Loading reviews…</div>';
+    api('admin_reviews').then(function (r) {
+      if (r.error) { $('evView').innerHTML = '<div class="ev-callout">' + esc(r.error) + '</div>'; return; }
+      RV.list = r.reviews || []; RV.names = r.staff_names || []; renderReviews(r.days);
+    });
+  }
+  function renderReviews(days) {
+    var cut = new Date(Date.now() - (days || 60) * 864e5).toISOString().slice(0, 10);
+    var defs = [['neg', 'Complaints (1–3★)', function (x) { return (x.rating || 5) <= 3; }], ['recent', 'Last ' + (days || 60) + ' days', function (x) { return (x.review_date || '') >= cut; }],
+      ['tagged', 'Name a staff member', function (x) { return (x.staff_mentions || []).length; }], ['hidden', 'Hidden from staff', function (x) { return !x.share; }], ['all', 'All', function () { return true; }]];
+    var cur = defs.filter(function (d) { return d[0] === RV.filter; })[0];
+    var h = '<div class="ev-callout">Staff see shared reviews from the last ' + (days || 60) + ' days on the first screen of their evaluation: reviews that name them, then complaints, then a couple of 5-star ones. Write a short “what we’re changing” on each complaint; that’s the part they’ll remember.</div>';
+    h += '<div class="ev-stats">' + defs.map(function (d) { return '<div class="ev-stat' + (d[0] === RV.filter ? ' on' : '') + '" data-f="' + d[0] + '"><div class="n">' + RV.list.filter(d[2]).length + '</div><div class="l">' + d[1] + '</div></div>'; }).join('') + '</div>';
+    var rows = RV.list.filter(cur[2]);
+    if (!RV.list.length) h += '<div class="ev-card" style="color:var(--text-muted);text-align:center;padding:30px">No reviews loaded yet.</div>';
+    rows.forEach(function (x) {
+      h += '<div class="ev-ans" data-id="' + x.id + '" style="' + (x.share ? '' : 'opacity:.55;') + 'border-left:4px solid ' + ((x.rating || 5) <= 3 ? '#c0392b' : '#2f8a4c') + '">' +
+        '<div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:12.5px;color:var(--text-muted)"><span>' + (x.rating ? starStr(x.rating) : '') + ' · ' + esc(x.author || 'Guest') + ' · ' + esc(x.review_date || '') + (x.url ? ' · <a href="' + esc(x.url) + '" target="_blank" rel="noopener" style="color:var(--gold)">open</a>' : '') + '</span>' +
+        '<label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" class="rvShare"' + (x.share ? ' checked' : '') + '> Show to staff</label></div>' +
+        '<div class="ev-text">' + esc(x.body || '(rating only, no text)') + '</div>' + (x.owner_reply ? '<div class="ev-hint" style="margin:-2px 0 8px">Our reply: ' + esc(x.owner_reply) + '</div>' : '') +
+        '<div class="ev-grid" style="display:grid;grid-template-columns:1fr 260px;gap:10px"><div><label class="ev-lbl">What we’re changing (staff see this)</label><textarea class="ev-ta rvNote" placeholder="e.g. Drinks were slow: bar now calls for help at 6 tickets">' + esc(x.mgmt_note || '') + '</textarea></div>' +
+        '<div><label class="ev-lbl">Staff named</label><input class="ev-in rvTags" value="' + esc((x.staff_mentions || []).join(', ')) + '" placeholder="First names, comma separated" list="evNames"><div class="ev-hint" style="margin-top:4px">Their evaluation shows this review under “Guests who mentioned you.”</div></div></div></div>';
+    });
+    h += '<datalist id="evNames">' + RV.names.map(function (n) { return '<option value="' + esc(n) + '">'; }).join('') + '</datalist>';
+    $('evView').innerHTML = h;
+    Array.prototype.forEach.call(document.querySelectorAll('#evView .ev-stat'), function (el) { el.onclick = function () { RV.filter = el.dataset.f; renderReviews(days); }; });
+    Array.prototype.forEach.call(document.querySelectorAll('#evView .ev-ans[data-id]'), function (card) {
+      var id = card.dataset.id, x = RV.list.filter(function (y) { return y.id === id; })[0];
+      function save(patch, msg) { api('admin_review_update', Object.assign({ id: id }, patch)).then(function (r) { if (r.error) toast(r.error, true); else { Object.assign(x, patch); toast(msg); } }); }
+      card.querySelector('.rvShare').onchange = function () { var v = this.checked; card.style.opacity = v ? '' : '.55'; save({ share: v }, v ? 'Shown to staff.' : 'Hidden from staff.'); };
+      card.querySelector('.rvNote').onchange = function () { save({ mgmt_note: this.value }, 'Note saved.'); };
+      card.querySelector('.rvTags').onchange = function () { save({ staff_mentions: this.value.split(',').map(function (t) { return t.trim(); }).filter(Boolean) }, 'Tags saved.'); };
+    });
+  }
+
   /* ================= RESPONSES ================= */
   var F = { tab: 'need', role: '', q: '' };
   var TABS = [
@@ -399,6 +457,7 @@
         });
         h += '<div class="ev-scale">' + META.scale.map(function (s) { return '<span>' + s.v + ' · ' + esc(s.label) + '</span>'; }).join('') + '</div></div>';
 
+        if ((e.feedback_snapshot || []).length) h += '<div class="ev-card"><h3>Guest reviews they saw</h3>' + reviewCards(e.feedback_snapshot) + '</div>';
         h += '<div class="ev-card"><h3>Their answers</h3>' + f.open.map(function (o) { return '<div class="ev-area"><div class="ev-std"><b>' + esc(o.q) + '</b></div><div class="ev-text">' + esc(e.open_answers[o.id] || '') + '</div></div>'; }).join('') + '</div>';
 
         h += '<div class="ev-card"><h3>Your response</h3>' +

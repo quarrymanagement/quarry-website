@@ -25,13 +25,17 @@
 //     admin_respond    save management ratings/notes (+ finish = notify employee,
 //                      and snapshot the numbers onto the record)
 //     admin_void       void (link stops working, record kept)
+//     admin_reviews    list guest reviews (Google) for the feedback screen
+//     admin_reviews_import  add/refresh reviews (dedup on source+external_id)
+//     admin_review_update   management note ("what we're changing"), share, staff tags
+//     admin_feedback_preview  the guest-feedback block exactly as staff will see it
 //
 //   PUBLIC (token) — /staff-eval.html?t=<token>
 //     eval_load        the form, or their answers + management response
 //     eval_submit      store self-ratings, examples, open answers
 //     eval_ack         store the employee's reflection + acknowledgment
 //
-// Tables: staff_evaluations, staff_evaluation_audit (RLS on, no policies).
+// Tables: staff_evaluations, staff_evaluation_audit, guest_reviews (RLS on, no policies).
 // Secrets: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY (auto), SQUARE_ACCESS_TOKEN.
 // ============================================================================
 
@@ -49,6 +53,8 @@ const ALLOWED_ROLES = ["owner", "events_staff"];
 const MIN_EXAMPLE = 8;   // words per area example
 const MIN_OPEN = 15;     // words per open question
 const MIN_REFLECT = 15;  // words in the final reflection
+const FEEDBACK_DAYS = 60; // guest reviews shown on an evaluation look back this far
+const FEEDBACK_MAX = 8;
 
 // ---------------------------------------------------------------------------
 // RATING SCALE — anchored to how often, so a 4 means the same thing for a
@@ -72,6 +78,7 @@ type Open = { id: string; q: string };
 type Form = { key: string; version: number; title: string; who: string; intro: string; areas: Area[]; open: Open[] };
 
 const OPEN_COMMON: Open[] = [
+  { id: "guest", q: "Look at what guests have been saying (the reviews at the start, or what you've heard on the floor). Pick one complaint. What will you personally do differently so it doesn't happen at your tables or your station?" },
   { id: "strong", q: "Where are you strongest right now? Give us a real example from a recent shift." },
   { id: "hardest", q: "Which of these standards is hardest to hit on a busy night, and why? What would make it easier?" },
   { id: "need", q: "What do you need from management (training, tools, scheduling, communication) to do your job better?" },
@@ -81,7 +88,7 @@ const INTRO =
 
 const FORMS: Record<string, Form> = {
   server: {
-    key: "server", version: 1, title: "Server Self-Evaluation", who: "Servers", intro: INTRO,
+    key: "server", version: 2, title: "Server Self-Evaluation", who: "Servers", intro: INTRO,
     areas: [
       { id: "pace", title: "Greet and pace", standard: "Every new table greeted within 1 minute. Drinks down within 5 minutes. Check back within 2 minutes of food landing.", prompt: "Tell us about a busy stretch: did you hit those times? If not, where did it slip?" },
       { id: "handheld", title: "Handheld ordering", standard: "Every order goes on the handheld at the table. The terminal is only for closing out a check, or when no handheld is available.", prompt: "When was the last time you rang at the terminal instead of the handheld, and why?" },
@@ -96,7 +103,7 @@ const FORMS: Record<string, Form> = {
   },
 
   host: {
-    key: "host", version: 1, title: "Host Self-Evaluation", who: "Hosts", intro: INTRO,
+    key: "host", version: 2, title: "Host Self-Evaluation", who: "Hosts", intro: INTRO,
     areas: [
       { id: "door", title: "Own the door", standard: "Every guest is greeted the moment they walk in. The host stand is never left empty during service without someone covering it.", prompt: "Tell us about a time the door got busy. How fast did guests get greeted?" },
       { id: "rotation", title: "Seating rotation", standard: "Seat sections evenly in rotation. Tell the server every time you seat them. Don't double-seat a section unless that server says they're ready.", prompt: "How do you decide where the next party goes when it's busy?" },
@@ -110,7 +117,7 @@ const FORMS: Record<string, Form> = {
   },
 
   busser: {
-    key: "busser", version: 1, title: "Busser Self-Evaluation", who: "Bussers", intro: INTRO,
+    key: "busser", version: 2, title: "Busser Self-Evaluation", who: "Bussers", intro: INTRO,
     areas: [
       { id: "station", title: "Hold your station", standard: "Station 1 is inside, Station 2 is outside. Stay posted in your area until your break. Tell a manager before you leave it.", prompt: "On your last shift, how much of the night were you actually in your station?" },
       { id: "scout", title: "Scout your tables", standard: "Keep eyes on every table in your area. Clear empties as soon as guests are done with them. No table sits dirty.", prompt: "How do you know a table needs you before the server asks?" },
@@ -124,7 +131,7 @@ const FORMS: Record<string, Form> = {
   },
 
   expo: {
-    key: "expo", version: 1, title: "Expo Self-Evaluation", who: "Expo / food runners", intro: INTRO,
+    key: "expo", version: 2, title: "Expo Self-Evaluation", who: "Expo / food runners", intro: INTRO,
     areas: [
       { id: "check", title: "Check every plate", standard: "Every plate is checked against the ticket before it leaves the window: mods, sides, sauces, and allergies.", prompt: "When did you last catch a mistake before it went out? What was it?" },
       { id: "allergy", title: "Allergy tickets", standard: "Allergy tickets are confirmed with the line and handed off clearly. If anything is unclear, stop and get a manager. Never guess.", prompt: "Walk us through what happens when an allergy ticket comes up." },
@@ -138,7 +145,7 @@ const FORMS: Record<string, Form> = {
   },
 
   bartender: {
-    key: "bartender", version: 1, title: "Bartender Self-Evaluation", who: "Bartenders", intro: INTRO,
+    key: "bartender", version: 2, title: "Bartender Self-Evaluation", who: "Bartenders", intro: INTRO,
     areas: [
       { id: "speed", title: "Bar and service-bar speed", standard: "Bar guests are greeted fast. Server tickets are made promptly. Nothing dies on the counter. If you're buried, call for help.", prompt: "Tell us about the last time you got buried. What happened to the server tickets?" },
       { id: "responsible", title: "Responsible service", standard: "When in doubt, card them. Stop serving a guest who's visibly intoxicated and tell a manager. No overpours.", prompt: "Describe a time you cut someone off or carded someone. How did you handle it?" },
@@ -153,7 +160,7 @@ const FORMS: Record<string, Form> = {
   },
 
   kitchen: {
-    key: "kitchen", version: 1, title: "Kitchen Self-Evaluation", who: "Line, prep and dish", intro: INTRO,
+    key: "kitchen", version: 2, title: "Kitchen Self-Evaluation", who: "Line, prep and dish", intro: INTRO,
     areas: [
       { id: "safety", title: "Food safety", standard: "Temps checked and logged. Everything labeled and dated. First in, first out. Hands washed and gloves changed between tasks.", prompt: "What's one food-safety step you've seen skipped on a busy night?" },
       { id: "allergy", title: "Allergies", standard: "Allergy tickets get a clean surface, clean tools and a fresh pan. If you're not sure, ask the chef. Never guess.", prompt: "Walk us through how you cook an allergy ticket." },
@@ -238,7 +245,37 @@ function viewFor(e: any) {
     strengths: responded ? e.strengths : null, focus: responded ? e.focus : null, overall_note: responded ? e.overall_note : null,
     responded_by: responded ? e.responded_by : null, responded_at: responded ? e.responded_at : null,
     reflection: e.reflection || null, acknowledged_at: e.acknowledged_at || null,
+    feedback: e.feedback_snapshot || [],
   };
+}
+
+// ---------------------------------------------------------------------------
+// Guest feedback: recent shared reviews. Reviews that name this person first,
+// then the most recent complaints (3 stars or fewer), then a couple of 5-star ones.
+// ---------------------------------------------------------------------------
+async function guestFeedback(name: string) {
+  const since = new Date(Date.now() - FEEDBACK_DAYS * 864e5).toISOString().slice(0, 10);
+  const { data } = await supa.from("guest_reviews").select("id,rating,body,review_date,mgmt_note,staff_mentions")
+    .eq("share", true).gte("review_date", since).order("review_date", { ascending: false }).limit(300);
+  const rows = (data ?? []).filter((r: any) => String(r.body || "").trim());
+  const full = String(name || "").trim().toLowerCase(), first = firstName(name).toLowerCase();
+  const isMine = (r: any) => !!full && (r.staff_mentions || []).some((m: string) => { const x = String(m).toLowerCase(); return x === full || x === first; });
+  const mine = rows.filter(isMine);
+  const neg = rows.filter((r: any) => !isMine(r) && (r.rating ?? 5) <= 3); // newest first
+  const pos = rows.filter((r: any) => !isMine(r) && (r.rating ?? 0) >= 5);
+  return [...mine, ...neg.slice(0, 5), ...pos.slice(0, 2)].slice(0, FEEDBACK_MAX).map((r: any) => ({
+    id: r.id, rating: r.rating, body: r.body, date: r.review_date, note: r.mgmt_note || "", about_you: isMine(r),
+  }));
+}
+async function staffFirstNames(): Promise<string[]> {
+  const { data } = await supa.from("checklist_staff").select("name").eq("active", true);
+  const out = new Set<string>();
+  for (const s of data ?? []) { const f = firstName(s.name); if (f.length >= 3) out.add(f); }
+  return [...out];
+}
+function findMentions(body: string, names: string[]): string[] {
+  const t = String(body || "");
+  return names.filter((n) => new RegExp("\\b" + n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b", "i").test(t));
 }
 
 // ---------------------------------------------------------------------------
@@ -331,7 +368,7 @@ Deno.serve(async (req: Request) => {
           await supa.from("staff_evaluations").update({ status: "in_progress", opened_at: now, updated_at: now }).eq("id", e.id).eq("status", "sent");
           await audit(e.id, "opened", "employee", req);
         }
-        return json({ ...head, form: { areas: f.areas.map((a) => ({ id: a.id, title: a.title, standard: a.standard, prompt: a.prompt })), open: f.open } });
+        return json({ ...head, feedback: await guestFeedback(e.employee_name), form: { areas: f.areas.map((a) => ({ id: a.id, title: a.title, standard: a.standard, prompt: a.prompt })), open: f.open } });
       }
 
       if (action === "eval_submit") {
@@ -353,6 +390,7 @@ Deno.serve(async (req: Request) => {
         const now = new Date().toISOString();
         await supa.from("staff_evaluations").update({
           status: "submitted", submitted_at: now, updated_at: now, self_ratings: ratings, self_examples: examples, open_answers: open,
+          feedback_snapshot: await guestFeedback(e.employee_name),
           submit_ip: clientIp(req), submit_user_agent: req.headers.get("user-agent"),
         }).eq("id", e.id).in("status", ["sent", "in_progress"]);
         await audit(e.id, "submitted", "employee", req);
@@ -495,6 +533,46 @@ Deno.serve(async (req: Request) => {
       }
       return json({ ok: true, status: finish ? "responded" : e.status, emailed, link: link(e.token) });
     }
+
+    if (action === "admin_reviews") {
+      const { data, error } = await supa.from("guest_reviews").select("*").order("review_date", { ascending: false, nullsFirst: false }).limit(1000);
+      if (error) return json({ error: error.message }, 500);
+      return json({ reviews: data, staff_names: await staffFirstNames(), days: FEEDBACK_DAYS });
+    }
+
+    if (action === "admin_reviews_import") {
+      const list = Array.isArray(body.reviews) ? body.reviews.slice(0, 1000) : [];
+      const names = await staffFirstNames();
+      let added = 0, updated = 0;
+      for (const r of list) {
+        const ext = String(r.external_id || "").trim().slice(0, 300);
+        const text = String(r.body || "").trim().slice(0, 8000);
+        if (!ext) continue;
+        const rating = Number(r.rating);
+        const fields = {
+          author: String(r.author || "").trim().slice(0, 120) || null, rating: Number.isInteger(rating) && rating >= 1 && rating <= 5 ? rating : null,
+          body: text || null, review_date: /^\d{4}-\d{2}-\d{2}$/.test(String(r.review_date || "")) ? r.review_date : null,
+          owner_reply: String(r.owner_reply || "").trim().slice(0, 8000) || null, url: String(r.url || "").trim().slice(0, 1000) || null, updated_at: new Date().toISOString(),
+        };
+        const source = String(r.source || "google").slice(0, 40);
+        const { data: ex } = await supa.from("guest_reviews").select("id").eq("source", source).eq("external_id", ext).maybeSingle();
+        if (ex) { await supa.from("guest_reviews").update(fields).eq("id", ex.id); updated++; }
+        else { await supa.from("guest_reviews").insert({ ...fields, source, external_id: ext, staff_mentions: findMentions(text, names) }); added++; }
+      }
+      return json({ ok: true, added, updated });
+    }
+
+    if (action === "admin_review_update") {
+      const upd: Record<string, unknown> = { updated_at: new Date().toISOString() };
+      if (typeof body.mgmt_note === "string") upd.mgmt_note = body.mgmt_note.trim().slice(0, 3000) || null;
+      if (typeof body.share === "boolean") upd.share = body.share;
+      if (Array.isArray(body.staff_mentions)) upd.staff_mentions = body.staff_mentions.map((x: unknown) => String(x).trim()).filter(Boolean).slice(0, 20);
+      const { error } = await supa.from("guest_reviews").update(upd).eq("id", body.id);
+      if (error) return json({ error: error.message }, 500);
+      return json({ ok: true });
+    }
+
+    if (action === "admin_feedback_preview") return json({ feedback: await guestFeedback(String(body.name || "")), days: FEEDBACK_DAYS });
 
     if (action === "admin_void") {
       const now = new Date().toISOString();
