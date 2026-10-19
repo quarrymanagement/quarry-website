@@ -471,7 +471,7 @@
 
         h += '<div class="ev-card"><h3>Your response</h3>' +
           '<div class="ev-f"><label class="ev-lbl">What ' + esc(fn) + ' does well</label><textarea class="ev-ta" id="evStr"' + (canEdit ? '' : ' readonly') + '>' + esc(R.strengths) + '</textarea></div>' +
-          '<div class="ev-f"><label class="ev-lbl">Focus for the next 30 days <span class="req">*</span></label><textarea class="ev-ta" id="evFoc" placeholder="One or two specific things"' + (canEdit ? '' : ' readonly') + '>' + esc(R.focus) + '</textarea></div>' +
+          '<div class="ev-f"><label class="ev-lbl">Focus for next week <span class="req">*</span></label><textarea class="ev-ta" id="evFoc" placeholder="One or two specific things"' + (canEdit ? '' : ' readonly') + '>' + esc(R.focus) + '</textarea></div>' +
           '<div class="ev-f"><label class="ev-lbl">Anything else</label><textarea class="ev-ta" id="evOv"' + (canEdit ? '' : ' readonly') + '>' + esc(R.overall) + '</textarea></div>' +
           '<div class="ev-f" style="max-width:300px"><label class="ev-lbl">From</label><input class="ev-in" id="evRb" value="' + esc(R.by) + '"' + (canEdit ? '' : ' readonly') + '></div></div>';
         if (canEdit) h += '<div class="ev-sticky"><span id="evProg" style="margin-right:auto;font-size:13px;color:var(--text-muted);align-self:center"></span><button class="ev-btn sec" id="evSave">Save draft</button><button class="ev-btn gold" id="evFin">' + (e.status === 'responded' ? 'Save & update ' : 'Send to ') + esc(fn) + '</button></div>';

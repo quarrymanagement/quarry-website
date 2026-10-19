@@ -541,9 +541,18 @@ Deno.serve(async (req: Request) => {
       let emailed = false;
       if (finish && isEmail(e.employee_email)) {
         const first = firstName(e.employee_name);
+        const by = String(upd.responded_by || "Management");
+        const box = (label: string, text: unknown) => text ? `<div style="margin:0 0 12px;padding:12px 14px;background:#F5F0E8;border-left:4px solid #B8933A;border-radius:0 8px 8px 0;"><div style="font-size:11px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;color:#B8933A;margin-bottom:4px;">${label}</div><div style="white-space:pre-wrap;">${esc(text)}</div></div>` : "";
+        const areaNotes = f.areas.filter((a) => notes[a.id]).map((a) => `<li style="margin-bottom:6px;"><b>${esc(a.title)}:</b> ${esc(notes[a.id])}</li>`).join("");
+        const answerNotes = f.open.filter((o) => notes["q_" + o.id]).map((o) => `<li style="margin-bottom:6px;"><i>${esc(o.q)}</i><br>${esc(notes["q_" + o.id])}</li>`).join("");
         emailed = await sendEmail([{ email: e.employee_email.trim(), firstName: first }],
-          `Management responded to your evaluation — The Quarry`,
-          shell("Your evaluation response is ready", `<p>Hi ${esc(first)},</p><p>${esc(upd.responded_by || "Management")} went through your self-evaluation and rated the same standards. Open your link to see both side by side, read the notes, and tell us what you'll work on.</p>${button(link(e.token), "See my evaluation")}`));
+          `${by} responded to your self-evaluation — The Quarry`,
+          shell("Your feedback for next week", `<p>Hi ${esc(first)},</p><p>${esc(by)} read your self-evaluation and responded. Here's what we want you to focus on next week.</p>` +
+            box("Focus for next week", upd.focus) + box("What you're doing well", upd.strengths) +
+            (areaNotes ? `<p style="margin:14px 0 6px;font-weight:bold;">Notes on your standards</p><ul style="margin:0 0 12px;padding-left:18px;">${areaNotes}</ul>` : "") +
+            (answerNotes ? `<p style="margin:14px 0 6px;font-weight:bold;">Notes on your answers</p><ul style="margin:0 0 12px;padding-left:18px;">${answerNotes}</ul>` : "") +
+            box("Anything else", upd.overall_note) +
+            `<p>Open your evaluation to see our ratings next to yours, then tell us in a few lines what you'll work on.</p>${button(link(e.token), "See my full evaluation")}`));
         if (emailed) await audit(e.id, "emailed", actor, req, { to: e.employee_email, kind: "response" });
       }
       return json({ ok: true, status: finish ? "responded" : e.status, emailed, link: link(e.token) });

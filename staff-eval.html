@@ -324,7 +324,7 @@
     } else {
       h += '<h1>Here’s how we see it, ' + esc(first()) + '</h1><p class="sub" style="font-size:15px">Your rating and management’s rating for each standard, side by side, with notes from ' + esc(V.responded_by || 'management') + '.</p>';
       if (V.strengths) h += '<div class="mnote" style="margin-top:12px"><span>What you do well</span>' + esc(V.strengths) + '</div>';
-      if (V.focus) h += '<div class="mnote" style="margin-top:10px"><span>Focus for the next 30 days</span>' + esc(V.focus) + '</div>';
+      if (V.focus) h += '<div class="mnote" style="margin-top:10px"><span>Focus for next week</span>' + esc(V.focus) + '</div>';
       if (V.overall_note) h += '<div class="mnote" style="margin-top:10px"><span>Note</span>' + esc(V.overall_note) + '</div>';
     }
     h += '</div>';
@@ -347,7 +347,7 @@
 
     if (V.responded && !V.acknowledged_at) {
       h += '<div class="card"><div class="eyebrow">Your turn</div><h2>What will you work on?</h2>' +
-        '<p class="sub">Read management’s notes, then tell us in your own words what you’ll change over the next 30 days and anything you disagree with. Disagreeing is fine. Say why.</p>' +
+        '<p class="sub">Read management’s notes, then tell us in your own words what you’ll change next week and anything you disagree with. Disagreeing is fine. Say why.</p>' +
         '<textarea id="refl" class="short"></textarea><div class="wc" id="rwc"></div>' +
         '<div class="nav" style="margin-top:12px"><button class="btn gold" id="ack" disabled>I’ve read this. Send my reflection</button></div><div class="err" id="er"></div></div>';
     } else if (V.acknowledged_at) {
