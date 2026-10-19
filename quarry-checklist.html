@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<link rel="preconnect" href="https://nkulhtalltbieicvmmad.supabase.co">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="prefetch" href="/floor.html">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -78,7 +82,9 @@ header{
 .fwrap.full iframe{height:100vh; height:100dvh; min-height:0}
 .fexit{display:none}
 .fwrap.full .fexit{display:block; position:fixed; top:calc(10px + env(safe-area-inset-top)); left:10px; z-index:101; padding:10px 16px; border-radius:999px; border:1px solid #D4AF6A; background:#1A1A1A; color:#F5F0E8; font-size:12px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; cursor:pointer}
-.fwrap iframe{display:block; width:100%; height:calc(100vh - 190px); min-height:520px; border:0; background:#14110D}
+.fwrap{position:relative}
+.fload{position:absolute; left:0; right:0; top:0; bottom:0; display:flex; align-items:center; justify-content:center; color:#D4AF6A; font-size:13px; letter-spacing:.12em; text-transform:uppercase; font-weight:700}
+.fwrap iframe{position:relative; background:transparent !important; display:block; width:100%; height:calc(100vh - 190px); min-height:520px; border:0; background:#14110D}
 .bar{height:3px; background:var(--line-2); margin-top:-1px}
 .bar i{display:block; height:100%; background:var(--gold); width:0; transition:width .45s ease}
 
@@ -384,7 +390,7 @@ function render(){
 
   if (view !== 'list'){
     $('#fill').style.width = '0%';
-    $('#main').innerHTML = viewBar() + `<div class="fwrap${full?' full':''}"><button class="fexit" data-full="0">Exit full screen</button><iframe src="${floorSrc()}" title="Floor chart" allow="fullscreen"></iframe></div>`;
+    $('#main').innerHTML = viewBar() + `<div class="fwrap${full?' full':''}"><button class="fexit" data-full="0">Exit full screen</button><div class="fload">Loading floor chart...</div><iframe src="${floorSrc()}" title="Floor chart" allow="fullscreen"></iframe></div>`;
     renderAlert();
     return;
   }
