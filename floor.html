@@ -135,6 +135,7 @@ body.tv main{height:calc(100vh - 58px - 48px)}
 body.tv .chart h2{height:auto;min-height:44px;flex-wrap:wrap;align-content:flex-start;gap:4px 8px;white-space:normal;font-size:14px;letter-spacing:.14em;line-height:1.15}
 body.tv .chart h2 .pl{font-size:11px;padding:2px 8px}
 .tiny .tbl .s{display:none}
+#boardwrap.stale .chart{opacity:.55}
 /* server sections: colour ring on each table, soft outline around the whole section, legend under the chart */
 .tbl.sec:before{content:'';position:absolute;left:calc(var(--u)*-.55);top:calc(var(--u)*-.55);right:calc(var(--u)*-.55);bottom:calc(var(--u)*-.55);border:calc(var(--u)*.4) solid var(--sc);border-radius:calc(var(--u)*1.9);z-index:0;pointer-events:none}
 .tbl.round.sec:before{border-radius:50%}
@@ -257,7 +258,9 @@ function lstore(k, v){ try { if (v !== undefined) localStorage.setItem(k, v); re
 function toast(m){ var t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast._t); toast._t = setTimeout(function(){ t.classList.remove('on'); }, 2400); }
 
 function api(action, body){
-  return fetch(FN + '?action=' + action, { method:'POST', headers:{ apikey:KEY, 'Content-Type':'application/json' }, body: JSON.stringify(body || {}) })
+  var ac = (typeof AbortController !== 'undefined') ? new AbortController() : null, to = ac ? setTimeout(function(){ ac.abort(); }, 12000) : null;
+  return fetch(FN + '?action=' + action, { method:'POST', headers:{ apikey:KEY, 'Content-Type':'application/json' }, body: JSON.stringify(body || {}), signal: ac ? ac.signal : undefined })
+    .then(function(r){ if (to) clearTimeout(to); return r; }, function(e){ if (to) clearTimeout(to); throw e; })
     .then(function(r){ return r.json().then(function(d){ return { ok:r.ok, status:r.status, data:d }; }).catch(function(){ return { ok:false, status:r.status, data:{} }; }); });
 }
 
@@ -274,7 +277,11 @@ function load(){
   return api('state').then(function(r){
     if (!r.ok) throw new Error('state');
     S = r.data; if (DISPLAY) checkNonce(); render(); loadSections();
-  }).catch(function(){ var p = $('#hdr .pill.sync'); if (p){ p.className = 'pill sync manual'; p.textContent = 'Offline - retrying'; } });
+    try { if (!DISPLAY) lstore('floor_cache', JSON.stringify({ areas: S.areas, tables: S.tables, tvs: S.tvs })); } catch (e) {}
+  }).catch(function(){
+    var p = $('#hdr .pill.sync'); if (p){ p.className = 'pill sync manual'; p.textContent = 'Slow connection - retrying'; }
+    if (!load._retry){ load._retry = setTimeout(function(){ load._retry = null; load(); }, 3000); }   // try again in 3s instead of waiting for the next poll
+  });
 }
 function closedList(){ return (S.states || []).filter(function(x){ return x.status === 'closed' || x.status === 'paid'; }).sort(function(a, b){ return new Date(a.paid_at || a.seated_at || 0) - new Date(b.paid_at || b.seated_at || 0); }); }
 function nClear(){ return S ? closedList().length : 0; }
@@ -306,6 +313,7 @@ function shownAreas(){
 
 /* ---------------- render ---------------- */
 function syncPill(){
+  if (S && S._cached) return '<span class="pill sync manual">Loading live status...</span>';
   var y = S && S.sync;
   if (!y || !y.last_run) return '<span class="pill sync manual">Manual</span>';
   var age = (Date.now() - new Date(y.last_run).getTime()) / 1000;
@@ -883,7 +891,15 @@ if (!DISPLAY){
   try { sel = JSON.parse(lstore('floor_sel') || '[]'); } catch (e) { sel = []; }
   if (!sel.length) sel = ['inside'];
 }
-load().then(function(){ if (!DISPLAY && QS.get('view') === 'reservations') resvSheet(); });
+if (!DISPLAY){
+  var shown = false;
+  try {
+    var c0 = JSON.parse(lstore('floor_cache') || 'null');
+    if (c0 && c0.areas && c0.tables){ S = { now: new Date().toISOString(), areas: c0.areas, tables: c0.tables, states: [], calls: [], tvs: c0.tvs || [], sync: null, _cached: true }; render(); $('#boardwrap').classList.add('stale'); shown = true; }
+  } catch (e) {}
+  if (!shown) $('#boardwrap').innerHTML = '<div class="msg">Loading the floor chart...</div>';
+}
+load().then(function(){ var bw = $('#boardwrap'); if (bw) bw.classList.remove('stale'); if (!DISPLAY && QS.get('view') === 'reservations') resvSheet(); });
 loadResv(); setInterval(loadResv, 120000); setInterval(renderResv, 60000);
 timer = setInterval(function(){ if (!editArea && !$('#sheet').classList.contains('on')) load(); }, DISPLAY ? 6000 : 8000);
 setInterval(tick, 15000);
