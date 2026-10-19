@@ -84,12 +84,15 @@ const OPEN_COMMON: Open[] = [
   { id: "need", q: "What do you need from management (training, tools, scheduling, communication) to do your job better?" },
 ];
 const INTRO =
-  "This is your self-evaluation. It is not a test and it is not a write-up. For each standard, rate yourself honestly and give us one real example from a shift. Management rates the same standards, then you'll see both side by side and we'll talk about where to go from here. Honest 3s are more useful to us than 5s across the board.";
+  "This is your self-evaluation. It is not a test and it is not a write-up. For each standard, rate yourself honestly and give us one real example from a shift. Management rates the same standards, then you'll see both side by side and we'll talk about where to go from here. Honest 3s are more useful to us than 5s across the board. The first few standards are the new \"make every guest feel known\" policy we rolled out this week.";
 
 const FORMS: Record<string, Form> = {
   server: {
-    key: "server", version: 2, title: "Server Self-Evaluation", who: "Servers", intro: INTRO,
+    key: "server", version: 3, title: "Server Self-Evaluation", who: "Servers", intro: INTRO,
     areas: [
+      { id: "known", title: "Know your guests before you greet", standard: "Check the reservation list on the iPad before your shift so you know who's in your section. Use the occasion we collected (\"Who's the birthday girl?\" \"Who's the bride to be?\") and address guests by name.", prompt: "Tell us about a table where you used their name or occasion. How did it go?" },
+      { id: "intro", title: "Introduce yourself, check back on specifics", standard: "Introduce yourself by name at every table. Check back on something specific (\"How's the sangria?\") instead of \"How is everything?\"", prompt: "What do you actually say at the greet and at the check-back? Write it the way you'd say it." },
+      { id: "genuine", title: "Be genuine, fix it fast", standard: "Be genuine. If you like something about a guest (their outfit, their style), tell them, always comfortable and friendly. If something goes wrong, don't argue: listen, apologize, fix it fast and thank them. You're backed up.", prompt: "Tell us about a time you made a guest's night or fixed a problem fast." },
       { id: "pace", title: "Greet and pace", standard: "Every new table greeted within 1 minute. Drinks down within 5 minutes. Check back within 2 minutes of food landing.", prompt: "Tell us about a busy stretch: did you hit those times? If not, where did it slip?" },
       { id: "handheld", title: "Handheld ordering", standard: "Every order goes on the handheld at the table. The terminal is only for closing out a check, or when no handheld is available.", prompt: "When was the last time you rang at the terminal instead of the handheld, and why?" },
       { id: "hands", title: "Full hands, in and out", standard: "Never walk into or out of the building empty-handed. The building is in and out. If your items aren't up, run someone else's.", prompt: "Describe what you carried in and out on your last few trips through the building." },
@@ -103,9 +106,12 @@ const FORMS: Record<string, Form> = {
   },
 
   host: {
-    key: "host", version: 2, title: "Host Self-Evaluation", who: "Hosts", intro: INTRO,
+    key: "host", version: 3, title: "Host Self-Evaluation", who: "Hosts", intro: INTRO,
     areas: [
-      { id: "door", title: "Own the door", standard: "Every guest is greeted the moment they walk in. The host stand is never left empty during service without someone covering it.", prompt: "Tell us about a time the door got busy. How fast did guests get greeted?" },
+      { id: "first", title: "First impression", standard: "You're the first impression of our brand. Hold the door open when guests arrive and when they leave. Greet everyone within a few seconds, even when you're slammed.", prompt: "Tell us about the last time the door got busy. How fast did each party get greeted?" },
+      { id: "talk", title: "Small talk on the way to the table", standard: "Make conversation on the walk to the table: \"Have you been here before?\" Tell them about the new menu and anything new we've got going on.", prompt: "What do you say on the walk to the table? Write it the way you'd say it." },
+      { id: "genuine", title: "Be genuine, fix it fast", standard: "Be genuine. If you like something about a guest (their outfit, their style), tell them, always comfortable and friendly. If something goes wrong, don't argue: listen, apologize, fix it fast and thank them. You're backed up.", prompt: "Tell us about a time you made a guest's night or fixed a problem fast." },
+      { id: "door", title: "Never leave the stand empty", standard: "The host stand is never left empty during service without someone covering it.", prompt: "When did you last have to step away from the stand? Who covered it?" },
       { id: "rotation", title: "Seating rotation", standard: "Seat sections evenly in rotation. Tell the server every time you seat them. Don't double-seat a section unless that server says they're ready.", prompt: "How do you decide where the next party goes when it's busy?" },
       { id: "wait", title: "Wait times and the waitlist", standard: "Quote honest wait times. Check in with waiting guests before they come to you. Know which tables are about to open.", prompt: "Describe the last time you had a wait. What did you quote and how close was it?" },
       { id: "phone", title: "Phone and reservations", standard: "Never book a phone reservation yourself. Point callers to the website, or take their details and pass them to a manager or owner to confirm.", prompt: "What do you say when someone calls to make a reservation?" },
@@ -117,22 +123,25 @@ const FORMS: Record<string, Form> = {
   },
 
   busser: {
-    key: "busser", version: 2, title: "Busser Self-Evaluation", who: "Bussers", intro: INTRO,
+    key: "busser", version: 3, title: "Busser Self-Evaluation", who: "Bussers", intro: INTRO,
     areas: [
+      { id: "touch", title: "Every table touch counts", standard: "Smile, make eye contact and ask before clearing. Offer to refill waters or grab boxes. If you notice something (an empty drink, food barely touched), tell the server.", prompt: "Tell us about the last time you noticed something at a table and told the server. What happened?" },
+      { id: "genuine", title: "Be genuine, fix it fast", standard: "Be genuine. If you like something about a guest (their outfit, their style), tell them, always comfortable and friendly. If something goes wrong, don't argue: listen, apologize, fix it fast and thank them. You're backed up.", prompt: "Tell us about a time you made a guest's night or fixed a problem fast." },
       { id: "station", title: "Hold your station", standard: "Station 1 is inside, Station 2 is outside. Stay posted in your area until your break. Tell a manager before you leave it.", prompt: "On your last shift, how much of the night were you actually in your station?" },
       { id: "scout", title: "Scout your tables", standard: "Keep eyes on every table in your area. Clear empties as soon as guests are done with them. No table sits dirty.", prompt: "How do you know a table needs you before the server asks?" },
       { id: "reset", title: "Fast resets", standard: "When a table leaves: clear, wipe, reset and tell the host it's ready, fast.", prompt: "Walk us through a reset, start to finish." },
       { id: "servers", title: "Back up the servers", standard: "You're the servers' support. Refill waters, pre-bus, run food when it's up, and ask servers what they need.", prompt: "Give an example of something you did that made a server's night easier." },
       { id: "hands", title: "Full hands, in and out", standard: "Never walk into or out of the building empty-handed.", prompt: "What do you carry out to the floor when you head back out?" },
-      { id: "guests", title: "Guest manners", standard: "Clear politely (\"May I take these?\"), never reach over guests, and pass any guest request to their server right away.", prompt: "A guest asks you for something while you're clearing. What do you do?" },
       { id: "checklist", title: "Checklist and closing duties", standard: "Host & Bus board signed off. Closing duties done before you clock out.", prompt: "Which closing duty gets skipped most often, and why?" },
     ],
     open: OPEN_COMMON,
   },
 
   expo: {
-    key: "expo", version: 2, title: "Expo Self-Evaluation", who: "Expo / food runners", intro: INTRO,
+    key: "expo", version: 3, title: "Expo Self-Evaluation", who: "Expo / food runners", intro: INTRO,
     areas: [
+      { id: "celebrate", title: "Flag celebrations, confirm the table", standard: "Flag any celebrations so they get handled. Confirm table numbers AND servers on every run. When you drop food, ask the guest if they need anything else and let them know their server will check in shortly.", prompt: "Tell us about the last celebration you flagged or table you double-checked." },
+      { id: "genuine", title: "Be genuine, fix it fast", standard: "Be genuine. If you like something about a guest (their outfit, their style), tell them, always comfortable and friendly. If something goes wrong, don't argue: listen, apologize, fix it fast and thank them. You're backed up.", prompt: "Tell us about a time you made a guest's night or fixed a problem fast." },
       { id: "check", title: "Check every plate", standard: "Every plate is checked against the ticket before it leaves the window: mods, sides, sauces, and allergies.", prompt: "When did you last catch a mistake before it went out? What was it?" },
       { id: "allergy", title: "Allergy tickets", standard: "Allergy tickets are confirmed with the line and handed off clearly. If anything is unclear, stop and get a manager. Never guess.", prompt: "Walk us through what happens when an allergy ticket comes up." },
       { id: "timing", title: "Timing", standard: "A table's food goes out together. Food doesn't die in the window. Call for runners the moment a table is up.", prompt: "Tell us about a night the window backed up. What did you do?" },
@@ -145,8 +154,10 @@ const FORMS: Record<string, Form> = {
   },
 
   bartender: {
-    key: "bartender", version: 2, title: "Bartender Self-Evaluation", who: "Bartenders", intro: INTRO,
+    key: "bartender", version: 3, title: "Bartender Self-Evaluation", who: "Bartenders", intro: INTRO,
     areas: [
+      { id: "known", title: "Know your bar guests", standard: "Acknowledge everyone at the bar right away, even when you're slammed. Learn names and usual orders.", prompt: "Name a few regulars and what they usually order. How did you learn them?" },
+      { id: "genuine", title: "Be genuine, fix it fast", standard: "Be genuine. If you like something about a guest (their outfit, their style), tell them, always comfortable and friendly. If something goes wrong, don't argue: listen, apologize, fix it fast and thank them. You're backed up.", prompt: "Tell us about a time you made a guest's night or fixed a problem fast." },
       { id: "speed", title: "Bar and service-bar speed", standard: "Bar guests are greeted fast. Server tickets are made promptly. Nothing dies on the counter. If you're buried, call for help.", prompt: "Tell us about the last time you got buried. What happened to the server tickets?" },
       { id: "responsible", title: "Responsible service", standard: "When in doubt, card them. Stop serving a guest who's visibly intoxicated and tell a manager. No overpours.", prompt: "Describe a time you cut someone off or carded someone. How did you handle it?" },
       { id: "recipes", title: "Pours and recipes", standard: "Jigger every pour. Make every cocktail to the recipe as written. Log waste and spills.", prompt: "Which drinks do you free-pour or eyeball, if any?" },
@@ -160,8 +171,11 @@ const FORMS: Record<string, Form> = {
   },
 
   kitchen: {
-    key: "kitchen", version: 2, title: "Kitchen Self-Evaluation", who: "Line, prep and dish", intro: INTRO,
+    key: "kitchen", version: 3, title: "Kitchen Self-Evaluation", who: "Line, prep and dish", intro: INTRO,
     areas: [
+      { id: "eyes", title: "Last set of eyes", standard: "Make sure every plate looks right before it leaves. You're the last set of eyes before the guest. Flag any celebrations so they get handled.", prompt: "When did you last stop a plate or flag a celebration? What was it?" },
+      { id: "floor", title: "Talk to the floor", standard: "Don't be scared to communicate with the floor. If you pass a server, confirm where the food is going. Watch table numbers AND servers so you're a second line of defense, not tunnel vision on the ticket. When you drop food, ask the guest if you can get them anything else: \"I'll let your server know your food's out and they'll check in with you shortly.\"", prompt: "Tell us about a time you caught food headed to the wrong table, or checked with a server to get it right." },
+      { id: "genuine", title: "Be genuine, fix it fast", standard: "Be genuine. If you like something about a guest (their outfit, their style), tell them, always comfortable and friendly. If something goes wrong, don't argue: listen, apologize, fix it fast and thank them. You're backed up.", prompt: "Tell us about a time you made a guest's night or fixed a problem fast." },
       { id: "safety", title: "Food safety", standard: "Temps checked and logged. Everything labeled and dated. First in, first out. Hands washed and gloves changed between tasks.", prompt: "What's one food-safety step you've seen skipped on a busy night?" },
       { id: "allergy", title: "Allergies", standard: "Allergy tickets get a clean surface, clean tools and a fresh pan. If you're not sure, ask the chef. Never guess.", prompt: "Walk us through how you cook an allergy ticket." },
       { id: "spec", title: "Recipes and plating", standard: "Every plate matches the spec: portion, temp, plating. Taste and check before it goes to the window.", prompt: "Which dish is hardest to keep consistent, and why?" },
@@ -240,7 +254,7 @@ function viewFor(e: any) {
       self: e.self_ratings?.[a.id] ?? null, example: e.self_examples?.[a.id] || "",
       mgr: responded ? (e.mgr_ratings?.[a.id] ?? null) : null, mgr_note: responded ? (e.mgr_notes?.[a.id] || "") : "",
     })),
-    open: f.open.map((o) => ({ id: o.id, q: o.q, answer: e.open_answers?.[o.id] || "" })),
+    open: f.open.map((o) => ({ id: o.id, q: o.q, answer: e.open_answers?.[o.id] || "", mgr_note: responded ? (e.mgr_notes?.["q_" + o.id] || "") : "" })),
     responded,
     strengths: responded ? e.strengths : null, focus: responded ? e.focus : null, overall_note: responded ? e.overall_note : null,
     responded_by: responded ? e.responded_by : null, responded_at: responded ? e.responded_at : null,
@@ -501,6 +515,7 @@ Deno.serve(async (req: Request) => {
         ratings[a.id] = Number.isInteger(v) && v >= 1 && v <= 5 ? v : null;
         notes[a.id] = String(nIn[a.id] || "").trim().slice(0, 3000);
       }
+      for (const o of f.open) notes["q_" + o.id] = String(nIn["q_" + o.id] || "").trim().slice(0, 3000); // notes on their written answers
       const finish = !!body.finish;
       const focus = String(body.focus || "").trim().slice(0, 4000);
       if (finish) {

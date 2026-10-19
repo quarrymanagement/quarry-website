@@ -342,7 +342,7 @@
 
     if (V.feedback && V.feedback.length) h += '<div class="card"><div class="eyebrow">What guests were saying</div>' + reviewsHtml(V.feedback) + '</div>';
     h += '<div class="card"><div class="eyebrow">Your answers</div>' + V.open.map(function (o) {
-      return '<div class="res"><div class="rq">' + esc(o.q) + '</div><div class="ans">' + esc(o.answer) + '</div></div>';
+      return '<div class="res"><div class="rq">' + esc(o.q) + '</div><div class="ans">' + esc(o.answer) + '</div>' + (o.mgr_note ? '<div class="mnote" style="margin-top:8px"><span>Management note</span>' + esc(o.mgr_note) + '</div>' : '') + '</div>';
     }).join('') + '</div>';
 
     if (V.responded && !V.acknowledged_at) {

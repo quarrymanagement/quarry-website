@@ -466,7 +466,8 @@
         h += '<div class="ev-scale">' + META.scale.map(function (s) { return '<span>' + s.v + ' · ' + esc(s.label) + '</span>'; }).join('') + '</div></div>';
 
         if ((e.feedback_snapshot || []).length) h += '<div class="ev-card"><h3>Guest reviews they saw</h3>' + reviewCards(e.feedback_snapshot) + '</div>';
-        h += '<div class="ev-card"><h3>Their answers</h3>' + f.open.map(function (o) { return '<div class="ev-area"><div class="ev-std"><b>' + esc(o.q) + '</b></div><div class="ev-text">' + esc(e.open_answers[o.id] || '') + '</div></div>'; }).join('') + '</div>';
+        h += '<div class="ev-card"><h3>Their answers</h3>' + f.open.map(function (o) { return '<div class="ev-area"><div class="ev-std"><b>' + esc(o.q) + '</b></div><div class="ev-text">' + esc(e.open_answers[o.id] || '') + '</div>' +
+          '<textarea class="ev-ta" data-n="q_' + o.id + '" placeholder="Note for ' + esc(fn) + ' on this answer (optional)"' + (canEdit ? '' : ' readonly') + '>' + esc(R.notes['q_' + o.id] || '') + '</textarea></div>'; }).join('') + '</div>';
 
         h += '<div class="ev-card"><h3>Your response</h3>' +
           '<div class="ev-f"><label class="ev-lbl">What ' + esc(fn) + ' does well</label><textarea class="ev-ta" id="evStr"' + (canEdit ? '' : ' readonly') + '>' + esc(R.strengths) + '</textarea></div>' +
