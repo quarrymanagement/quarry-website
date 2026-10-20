@@ -14031,15 +14031,42 @@ function hashCode(str) {
             // (state.current, no explicit inq passed). opts.dateOverride/
             // timeOverride are how "Select Another Date" reuses this same confirm
             // flow with a corrected date instead of the original one.
+            // "6pm", "6:30 pm", "6:30PM", "18:30" -> "6:30 PM". Anything ambiguous (no AM/PM and 12-hour looking, e.g. "6:00") or unparseable -> ''.
+            function normalizeStartTime(v) {
+                const m = String(v == null ? '' : v).trim().match(/^(\d{1,2})(?::(\d{2}))?\s*([ap])\.?(?:m\.?)?$|^(\d{1,2}):(\d{2})$/i);
+                if (!m) return '';
+                let h, min, ap;
+                if (m[4] !== undefined) {            // 24-hour "18:30" (a bare "6:00" is ambiguous, so 1-12 needs AM/PM)
+                    h = parseInt(m[4], 10); min = parseInt(m[5], 10);
+                    if (h > 23 || (h < 13 && h !== 0)) return '';
+                    ap = h >= 12 ? 'PM' : 'AM'; if (h === 0) h = 12; else if (h > 12) h -= 12;
+                } else {
+                    h = parseInt(m[1], 10); min = m[2] ? parseInt(m[2], 10) : 0; ap = m[3].toUpperCase() + 'M';
+                    if (h < 1 || h > 12) return '';
+                }
+                if (min > 59) return '';
+                return h + ':' + String(min).padStart(2, '0') + ' ' + ap;
+            }
             async function decideAuto(decision, inqParam, opts) {
                 const inq = inqParam || state.current;
                 if (!inq) return;
                 opts = opts || {};
                 if (!inq.email) { alert('This inquiry has no email address to send to.'); return; }
                 const useDate = opts.dateOverride || inq.eventDate;
-                const useTime = opts.timeOverride || inq.eventTime;
+                let useTime = opts.timeOverride || inq.eventTime;
                 const label = decision === 'confirm' ? 'Confirm & Auto-Book' : 'Date Conflict';
-                if (!confirm(`${label} for ${inq.name}${useDate ? ' — ' + useDate : ''}? This emails them right away.`)) return;
+                if (decision === 'confirm') {
+                    // A booking must have a real start time. Always show it for a check (and let staff fix it) before anything is booked or emailed.
+                    if (!opts.timeOverride) {
+                        const asked = prompt('Start time for ' + inq.name + (useDate ? ' on ' + useDate : '') + (useTime ? '' : ' (the guest did not give one)') + ':\n\nType the time to book, e.g. 6:00 PM', normalizeStartTime(useTime) || '');
+                        if (asked === null) return;
+                        useTime = asked;
+                    }
+                    const normTime = normalizeStartTime(useTime);
+                    if (!normTime) { alert('Please enter a start time like 6:00 PM (include AM or PM). Nothing was booked or emailed.'); return; }
+                    useTime = normTime;
+                }
+                if (!confirm(`${label} for ${inq.name}${useDate ? ' — ' + useDate : ''}${decision === 'confirm' ? ' at ' + useTime : ''}? This emails them right away.`)) return;
 
                 const inModal = !!(inqParam == null || inqParam === state.current);
                 const statusEl = inModal ? $('resInqAutoStatus') : null;
