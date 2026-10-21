@@ -9110,10 +9110,10 @@
       "hidden": false
     },
     "6ad1b2d8afe05b2c16d3c380": {
-      "status": "awaiting_customer_confirm",
+      "status": "awaiting_customer_confirm_followedup",
       "note": "",
-      "updatedAt": "2026-10-18T02:27:03.774Z",
-      "updatedBy": "admin",
+      "updatedAt": "2026-10-21T14:30:06.572Z",
+      "updatedBy": "daily-followup",
       "history": [
         {
           "from": "not_contacted",
@@ -9121,6 +9121,13 @@
           "by": "auto-reply",
           "note": "Instant auto-reply sent",
           "at": "2026-10-16T05:15:06.237Z"
+        },
+        {
+          "from": "awaiting_customer_confirm",
+          "to": "awaiting_customer_confirm_followedup",
+          "by": "daily-followup",
+          "note": "3-day reminder sent",
+          "at": "2026-10-21T14:30:06.572Z"
         }
       ]
     },
@@ -9360,5 +9367,5 @@
       "hidden": false
     }
   },
-  "updatedAt": "2026-10-20T18:12:50.115Z"
+  "updatedAt": "2026-10-21T14:30:06.572Z"
 }
