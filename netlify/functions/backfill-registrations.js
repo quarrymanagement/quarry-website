@@ -7,6 +7,7 @@
 
 const Stripe = require('stripe');
 const https = require('https');
+const { vaultAndStrip } = require('./_event-pii');
 
 function sendGridEmail(to, subject, htmlBody, fromEmail, fromName) {
   fromEmail = fromEmail || 'management@thequarrystl.com';
@@ -167,6 +168,8 @@ async function batchUpdateEventsJson(parsedRegs) {
   if (!anyAdded) {
     return { committed: false, dispositions, sha: fileSha };
   }
+  // Buyer PII -> Supabase vault; throws (aborting the commit) if unreachable.
+  await vaultAndStrip(eventsData, 'backfill-registrations');
   const encoded = Buffer.from(JSON.stringify(eventsData, null, 2), 'utf-8').toString('base64');
   const putRes = await githubRequest('PUT', '/repos/' + repo + '/contents/events.json', ghToken, {
     message: 'Backfill ' + dispositions.filter(d => d.status === 'added').length + ' missed registration(s)',

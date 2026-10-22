@@ -13,6 +13,7 @@
 // ============================================================================
 
 const fetch = require('node-fetch');
+const { vaultAndStrip } = require('./_event-pii');
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const GITHUB_REPO = 'quarrymanagement/quarry-website';
@@ -112,6 +113,17 @@ exports.handler = async (event) => {
                 content = Buffer.from(JSON.stringify(body.json, null, 2), 'utf8').toString('base64');
             }
             if (!content) return respond(400, { error: 'Body must include content (base64) or json (object).' });
+
+            // 2026-10-22: events.json lives in a PUBLIC repo. Vault buyer PII in
+            // Supabase and strip it before committing (aborts on vault failure).
+            if (file === 'events.json') {
+                let doc;
+                try { doc = JSON.parse(Buffer.from(content, 'base64').toString('utf8')); }
+                catch (_) { return respond(400, { error: 'events.json content is not valid JSON' }); }
+                try { await vaultAndStrip(doc, 'data-store'); }
+                catch (e) { return respond(503, { error: 'PII vault unavailable; events.json not written: ' + e.message }); }
+                content = Buffer.from(JSON.stringify(doc, null, 2), 'utf8').toString('base64');
+            }
 
             const putResp = await fetch(url, {
                 method: 'PUT',

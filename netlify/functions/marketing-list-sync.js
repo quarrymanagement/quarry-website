@@ -24,6 +24,7 @@
 
 const fetch = require('node-fetch');
 const { readBlob, writeBlob, listKeys } = require('./_blobs');
+const { hydrateDoc } = require('./_event-pii');
 
 const SITE_URL = process.env.URL || 'https://thequarrystl.com';
 const ALERT_TO = 'management@thequarrystl.com';
@@ -70,6 +71,8 @@ async function collectContacts(errors) {
     let data;
     try { data = await getJson('https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/events.json'); }
     catch (_) { data = await getJson(SITE_URL + '/events.json'); }
+    // Buyer emails now live in the Supabase vault, not the public file.
+    if (data && !Array.isArray(data)) await hydrateDoc(data);
     const events = Array.isArray(data) ? data : (data.events || []);
     for (const ev of events) {
       for (const r of (ev.registrations || [])) {

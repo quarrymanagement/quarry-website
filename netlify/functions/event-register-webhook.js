@@ -1,6 +1,7 @@
 const Stripe = require('stripe');
 const https = require('https');
 const { readBlob, writeBlob } = require('./_blobs');
+const { vaultAndStrip } = require('./_event-pii');
 
 function sendGridEmail(to, subject, htmlBody, fromEmail, fromName) {
   fromEmail = fromEmail || 'management@thequarrystl.com';
@@ -273,10 +274,12 @@ exports.handler = async (event) => {
             }
           }
 
-          // Push updated file back to GitHub
+          // Push updated file back to GitHub — buyer PII goes to the Supabase
+          // vault, never into the public repo (or its commit messages).
+          await vaultAndStrip(eventsData, 'event-register-webhook');
           const encoded = Buffer.from(JSON.stringify(eventsData, null, 2), 'utf-8').toString('base64');
           const putRes = await githubRequest('PUT', `/repos/${repo}/contents/${filePath}`, ghToken, {
-            message: 'New registration: ' + name + ' for ' + (eventName || eventId),
+            message: 'New registration for ' + (eventName || eventId),
             content: encoded,
             sha: fileSha
           });

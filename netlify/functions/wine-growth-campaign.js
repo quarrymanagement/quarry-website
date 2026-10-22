@@ -50,6 +50,7 @@
 
 const https = require('https');
 const { readBlob, writeBlob } = require('./_blobs');
+const { vaultAndStrip, hydrateDoc } = require('./_event-pii');
 
 const REPO_RAW = 'https://raw.githubusercontent.com/quarrymanagement/quarry-website/main';
 const SENT_LOG_BLOB = 'wine-growth-sent-log';
@@ -151,6 +152,8 @@ async function githubGetFile(path) {
 }
 
 async function githubPutFile(path, dataObj, sha, message) {
+  // events.json is public: buyer PII goes to the Supabase vault, never the repo.
+  if (path === 'events.json') await vaultAndStrip(dataObj, 'wine-growth-campaign');
   const encoded = Buffer.from(JSON.stringify(dataObj, null, 2), 'utf-8').toString('base64');
   const res = await githubRequest('PUT', `/repos/${REPO}/contents/${path}`, { message, content: encoded, sha });
   if (res.status !== 200 && res.status !== 201) throw new Error(`GitHub PUT ${path} -> ${res.status}: ${JSON.stringify(res.data).slice(0, 200)}`);
@@ -609,6 +612,14 @@ exports.handler = async (event) => {
       readSentLog(),
     ]);
 
+    // Buyer names/emails are no longer in the public events.json; re-attach
+    // them from the Supabase vault (best effort: on failure, ticket-buyer
+    // audiences are simply empty this run).
+    async function hydrateEvents() {
+      try { await hydrateDoc(eventsData); } catch (e) { console.error('event-pii hydrate failed:', e.message); }
+    }
+    await hydrateEvents();
+
     const today = todayCT();
 
     // Auto-create a ticketed checkout page for any upcoming tasting that
@@ -623,6 +634,7 @@ exports.handler = async (event) => {
             fetchJson(REPO_RAW + '/wine_tastings.json?t=' + Date.now()),
             fetchJson(REPO_RAW + '/events.json?t=' + Date.now()),
           ]);
+          await hydrateEvents();
         }
       } catch (e) {
         console.error('ensureTicketEvents failed (continuing with email sends anyway):', e.message);

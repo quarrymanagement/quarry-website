@@ -10,9 +10,12 @@
 //
 // Query params:  ?id=<slug-or-id>
 // Response:      { event: {...} }  or  { error: 'Not found' }
+// 2026-10-22: registrations are returned WITHOUT name/email/phone (sanitizeEvent);
+// the public pages only need qty/seating to count seats.
 // ============================================================================
 
 const https = require('https');
+const { sanitizeEvent } = require('./_event-pii');
 
 function fetchJSON(url) {
   return new Promise((resolve, reject) => {
@@ -55,7 +58,7 @@ exports.handler = async (event) => {
     if (!found) {
       return { statusCode: 404, headers, body: JSON.stringify({ error: 'Event not found' }) };
     }
-    return { statusCode: 200, headers, body: JSON.stringify({ event: found }) };
+    return { statusCode: 200, headers, body: JSON.stringify({ event: sanitizeEvent(found) }) };
   } catch (err) {
     return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
   }

@@ -34,6 +34,8 @@
 
 const https = require('https');
 const crypto = require('crypto');
+// 2026-10-22: buyer PII is vaulted in Supabase, never written to the public repo.
+const { vaultAndStrip, regRef } = require('./_event-pii');
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -204,17 +206,19 @@ function mergeEventRegistrations(incomingData, currentData) {
     }
     if (liveRegs.length === 0) return;
 
+    // Key by regRef (ref || paymentId || transactionId || orderNumber || hash) so
+    // rows whose PII was already vaulted still match their hydrated admin copy.
     const seen = {};
     target.registrations.forEach(function (r) {
-      if (r && r.paymentId) seen[r.paymentId] = true;
+      if (r) seen[regRef(r)] = true;
     });
 
     let rescued = 0;
     liveRegs.forEach(function (r) {
       if (!r) return;
-      // No paymentId (legacy/manual rows): fall back to a composite key so we
-      // neither duplicate nor drop them.
-      const key = r.paymentId || [r.email, r.registeredAt, r.qty].join('|');
+      // No paymentId (legacy/manual rows): regRef falls back to the stamped
+      // `ref` or a content hash, so we neither duplicate nor drop them.
+      const key = regRef(r);
       if (!seen[key]) {
         target.registrations.push(r);
         seen[key] = true;
@@ -366,6 +370,19 @@ exports.handler = async (event) => {
           }
         });
       }
+    }
+
+    // ---- PII VAULT (2026-10-22) -----------------------------------------
+    // Move buyer name/email/phone into Supabase and strip them from the copy
+    // we are about to commit to the public repo. If the vault is unreachable
+    // we refuse to save: publishing the PII or silently dropping it are both
+    // worse than asking the admin to retry.
+    try {
+      const v = await vaultAndStrip(incomingData, 'save-events');
+      if (v.vaulted) console.log('PII vaulted for', v.vaulted, 'registration(s)');
+    } catch (e) {
+      console.error('PII vault error:', e.message);
+      return response(503, { error: 'Could not store guest contact details securely. Nothing was saved. Please retry in a minute.' });
     }
 
     const content = JSON.stringify(incomingData, null, 2);

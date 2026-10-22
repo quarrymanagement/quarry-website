@@ -1,4 +1,5 @@
 const fetch = require('node-fetch');
+const { vaultAndStrip } = require('./_event-pii');
 const { isAuthorized } = require('./_admin-auth');
 
 // 2026-10-22: this used to be an OPEN read/write proxy to events.json using the
@@ -54,6 +55,15 @@ exports.handler = async (event) => {
 
         } else if (event.httpMethod === 'PUT') {
             const body = JSON.parse(event.body);
+            // 2026-10-22: vault + strip buyer PII before committing to the public repo.
+            let content = body.content;
+            try {
+                const doc = JSON.parse(Buffer.from(String(content || ''), 'base64').toString('utf8'));
+                await vaultAndStrip(doc, 'github-proxy');
+                content = Buffer.from(JSON.stringify(doc, null, 2), 'utf8').toString('base64');
+            } catch (e) {
+                return { statusCode: 503, headers, body: JSON.stringify({ error: 'Not saved: ' + e.message }) };
+            }
             const resp = await fetch(githubUrl, {
                 method: 'PUT',
                 headers: {
@@ -63,7 +73,7 @@ exports.handler = async (event) => {
                 },
                 body: JSON.stringify({
                     message: body.message || 'Update events data',
-                    content: body.content,
+                    content,
                     sha: body.sha
                 })
             });

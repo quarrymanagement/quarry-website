@@ -24,9 +24,9 @@ exports.handler = async (event) => {
         registrationCount: registrations.length,
         tablesTaken: [...new Set(tablesTaken)],
         barSeatsTaken: [...new Set(barSeatsTaken)],
+        // Public endpoint: seat data only, never buyer name/email (2026-10-22).
         registrations: registrations.map((r) => ({
-          name: r.name, partySize: r.partySize, tableId: r.tableId,
-          barSeats: r.barSeats, email: r.email,
+          partySize: r.partySize, tableId: r.tableId, barSeats: r.barSeats,
         })),
       }),
     };

@@ -1,5 +1,6 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const https = require('https');
+const { vaultAndStrip } = require('./_event-pii');
 // 2026-10-22: was unauthenticated — anyone could cancel/refund a registration
 // by orderNumber. Now requires an owner admin session token (x-admin-token).
 const { isAuthorized } = require('./_admin-auth');
@@ -139,11 +140,13 @@ exports.handler = async (event) => {
       }
     }
 
-    // Push updated events.json
+    // Push updated events.json (PII vaulted + stripped first; never in commit messages)
+    try { await vaultAndStrip(eventsData, 'cancel-registration'); }
+    catch (e) { return { statusCode: 503, headers, body: JSON.stringify({ error: 'PII vault unavailable; nothing changed' }) }; }
     const encoded = Buffer.from(JSON.stringify(eventsData, null, 2), 'utf-8').toString('base64');
     const actionLabel = action === 'refund_and_cancel' ? 'Refund & cancel' : 'Cancel';
     const putRes = await githubRequest('PUT', '/repos/' + repo + '/contents/events.json', ghToken, {
-      message: actionLabel + ': ' + (removedReg.name || 'Unknown') + ' from ' + (eventObj ? eventObj.name : eventId),
+      message: actionLabel + ': order ' + String(orderNumber).slice(-8) + ' from ' + (eventObj ? eventObj.name : eventId),
       content: encoded,
       sha: fileSha
     });
@@ -152,7 +155,7 @@ exports.handler = async (event) => {
       return { statusCode: 500, headers, body: JSON.stringify({ error: 'Failed to update events.json' }) };
     }
 
-    console.log('Registration cancelled:', removedReg.name, 'from', eventId);
+    console.log('Registration cancelled:', orderNumber, 'from', eventId);
 
     return {
       statusCode: 200,

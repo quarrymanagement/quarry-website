@@ -6900,7 +6900,22 @@
                 ]);
 
                 if (eventsRes.ok) {
-                    const eventsData = await eventsRes.json();
+                    let eventsData = await eventsRes.json();
+                    // 2026-10-22: buyer name/email/phone are no longer in the public
+                    // events.json (they live in the Supabase vault). Ask the admin-only
+                    // endpoint for the hydrated copy; fall back to the public file
+                    // (contact details blank) if it is unavailable.
+                    try {
+                        const piiRes = await fetch('/.netlify/functions/admin-event-pii', {
+                            headers: { 'x-admin-token': (localStorage.getItem('quarryAdminToken') || '') }
+                        });
+                        if (piiRes.ok) {
+                            const piiBody = await piiRes.json();
+                            if (piiBody && piiBody.data && Array.isArray(piiBody.data.events)) eventsData = piiBody.data;
+                        } else {
+                            console.warn('admin-event-pii', piiRes.status, '- guest contact details unavailable');
+                        }
+                    } catch (e) { console.warn('admin-event-pii failed:', e); }
                     if (eventsData.events && Array.isArray(eventsData.events)) {
                         app.events = eventsData.events;
                         // Read registrations from each event's per-event array (the source of truth
