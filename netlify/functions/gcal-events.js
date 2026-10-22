@@ -1,9 +1,10 @@
 const { google } = require('googleapis');
+const { isAuthorized } = require('./_admin-auth');
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, x-admin-token',
 };
 
 const response = (statusCode, body) => ({
@@ -15,6 +16,12 @@ const response = (statusCode, body) => ({
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') {
     return response(200, { message: 'OK' });
+  }
+
+  // 2026-10-22: returns guest names/emails/phones — admin session required
+  // (owner or events_staff token in x-admin-token; admin/index.html sends it).
+  if (!isAuthorized(event, null, ['events_staff'])) {
+    return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ success: false, error: 'Admin session required' }) };
   }
 
   if (event.httpMethod !== 'GET') {
@@ -42,16 +49,26 @@ exports.handler = async (event) => {
     timeMaxDate.setMonth(timeMaxDate.getMonth() + 3);
     const timeMax = event.queryStringParameters?.timeMax || timeMaxDate.toISOString();
 
-    const calRes = await calendar.events.list({
-      calendarId: 'primary',
-      timeMin,
-      timeMax,
-      singleEvents: true,
-      orderBy: 'startTime',
-      maxResults: 100,
-    });
-
-    const rawEvents = calRes.data.items || [];
+    // Was a single page of maxResults:100 ordered from 3 months back, so on a
+    // busy calendar the upcoming reservations never made it into the list
+    // (the "stale" view). Page through everything in the window instead,
+    // with a hard cap so one call can't run away.
+    const rawEvents = [];
+    let pageToken;
+    do {
+      const calRes = await calendar.events.list({
+        calendarId: 'primary',
+        timeMin,
+        timeMax,
+        singleEvents: true,
+        orderBy: 'startTime',
+        maxResults: 250,
+        pageToken,
+      });
+      rawEvents.push(...(calRes.data.items || []));
+      pageToken = calRes.data.nextPageToken;
+    } while (pageToken && rawEvents.length < 2500);
+    const truncated = !!pageToken;
 
     // Parse events into a clean format with contact info
     const events = rawEvents.map(evt => {
@@ -88,6 +105,7 @@ exports.handler = async (event) => {
       success: true,
       events,
       total: events.length,
+      truncated,
     });
   } catch (error) {
     console.error('Google Calendar API error:', error.message);
@@ -95,7 +113,7 @@ exports.handler = async (event) => {
     if (error.message.includes('invalid_grant') || error.message.includes('Token')) {
       return response(401, {
         success: false,
-        error: 'Calendar auth error: ' + error.message,
+        error: 'Calendar auth error',
       });
     }
 

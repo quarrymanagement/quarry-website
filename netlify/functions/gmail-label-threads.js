@@ -1,9 +1,10 @@
 const { google } = require('googleapis');
+const { isAuthorized } = require('./_admin-auth');
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, x-admin-token',
 };
 
 const response = (statusCode, body) => ({
@@ -15,6 +16,12 @@ const response = (statusCode, body) => ({
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') {
     return response(200, { message: 'OK' });
+  }
+
+  // 2026-10-22: returns guest names/emails/phones — admin session required
+  // (owner or events_staff token in x-admin-token; admin/index.html sends it).
+  if (!isAuthorized(event, null, ['events_staff'])) {
+    return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ success: false, error: 'Admin session required' }) };
   }
 
   if (event.httpMethod !== 'GET') {

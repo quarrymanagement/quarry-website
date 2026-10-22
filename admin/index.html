@@ -6284,7 +6284,7 @@
             tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#858d9e;padding:2rem;"><div class="spinner" style="width:24px;height:24px;margin:0 auto 0.5rem;"></div>Loading potential reservations from Gmail...</td></tr>';
 
             try {
-                const res = await fetch(`/.netlify/functions/gmail-label-threads?labelId=${POTENTIAL_LABEL_ID}`);
+                const res = await fetch(`/.netlify/functions/gmail-label-threads?labelId=${POTENTIAL_LABEL_ID}`, { headers: { 'x-admin-token': (localStorage.getItem('quarryAdminToken') || '') } });
                 if (!res.ok) throw new Error('Failed to fetch potential reservations');
                 const data = await res.json();
                 if (!data.success) throw new Error(data.error || 'Unknown error');
@@ -6402,7 +6402,7 @@
                 let data;
                 let source = '';
                 try {
-                    const sheetRes = await fetch('/.netlify/functions/gsheet-reservations');
+                    const sheetRes = await fetch('/.netlify/functions/gsheet-reservations', { headers: { 'x-admin-token': (localStorage.getItem('quarryAdminToken') || '') } });
                     if (sheetRes.ok) {
                         const sheetData = await sheetRes.json();
                         if (sheetData.success && sheetData.reservations && sheetData.reservations.length > 0) {
@@ -6446,7 +6446,7 @@
                     console.log('Google Sheet not available, trying Calendar API:', sheetErr.message);
                     // FALLBACK 1: Google Calendar
                     try {
-                        const calRes = await fetch('/.netlify/functions/gcal-events');
+                        const calRes = await fetch('/.netlify/functions/gcal-events', { headers: { 'x-admin-token': (localStorage.getItem('quarryAdminToken') || '') } });
                         if (calRes.ok) {
                             data = await calRes.json();
                             source = 'calendar';
@@ -6457,7 +6457,7 @@
                     } catch (calErr) {
                         console.log('Calendar API not available, falling back to Gmail label');
                         // FALLBACK 2: Gmail label
-                        const gmailRes = await fetch(`/.netlify/functions/gmail-label-threads?labelId=${CONFIRMED_LABEL_ID}`);
+                        const gmailRes = await fetch(`/.netlify/functions/gmail-label-threads?labelId=${CONFIRMED_LABEL_ID}`, { headers: { 'x-admin-token': (localStorage.getItem('quarryAdminToken') || '') } });
                         if (!gmailRes.ok) throw new Error('Failed to fetch confirmed reservations');
                         const gmailData = await gmailRes.json();
                         if (!gmailData.success) throw new Error(gmailData.error || 'Unknown error');
