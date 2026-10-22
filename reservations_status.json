@@ -9110,10 +9110,10 @@
       "hidden": false
     },
     "6ad1b2d8afe05b2c16d3c380": {
-      "status": "awaiting_customer_confirm_followedup",
-      "note": "",
-      "updatedAt": "2026-10-21T14:30:06.572Z",
-      "updatedBy": "daily-followup",
+      "status": "confirmed",
+      "note": "Booked in Venue Calendar: \"Shelby Watson\"",
+      "updatedAt": "2026-10-22T02:36:43.456Z",
+      "updatedBy": "admin",
       "history": [
         {
           "from": "not_contacted",
@@ -9128,8 +9128,16 @@
           "by": "daily-followup",
           "note": "3-day reminder sent",
           "at": "2026-10-21T14:30:06.572Z"
+        },
+        {
+          "from": "awaiting_customer_confirm_followedup",
+          "to": "confirmed",
+          "by": "admin",
+          "note": "Booked in Venue Calendar: \"Shelby Watson\"",
+          "at": "2026-10-22T02:36:43.456Z"
         }
-      ]
+      ],
+      "hidden": false
     },
     "6ad2175508df6abb620bd540": {
       "status": "awaiting_decision",
@@ -9420,5 +9428,5 @@
       "hidden": false
     }
   },
-  "updatedAt": "2026-10-22T02:30:43.683Z"
+  "updatedAt": "2026-10-22T02:36:43.456Z"
 }
