@@ -8967,9 +8967,9 @@
       "hidden": false
     },
     "6acfe410a2eb1e6d22a5d1ef": {
-      "status": "awaiting_customer_confirm_followedup",
+      "status": "needs_call",
       "note": "",
-      "updatedAt": "2026-10-18T14:30:40.385Z",
+      "updatedAt": "2026-10-22T14:30:49.378Z",
       "updatedBy": "daily-followup",
       "history": [
         {
@@ -8985,14 +8985,21 @@
           "by": "daily-followup",
           "note": "3-day reminder sent",
           "at": "2026-10-18T14:30:40.385Z"
+        },
+        {
+          "from": "awaiting_customer_confirm_followedup",
+          "to": "needs_call",
+          "by": "daily-followup",
+          "note": "No response after reminder — needs a phone call",
+          "at": "2026-10-22T14:30:49.378Z"
         }
       ],
       "hidden": false
     },
     "6acff2105db46dfe8410c0c4": {
-      "status": "awaiting_customer_confirm_followedup",
+      "status": "needs_call",
       "note": "",
-      "updatedAt": "2026-10-18T14:30:40.385Z",
+      "updatedAt": "2026-10-22T14:30:49.378Z",
       "updatedBy": "daily-followup",
       "history": [
         {
@@ -9008,6 +9015,13 @@
           "by": "daily-followup",
           "note": "3-day reminder sent",
           "at": "2026-10-18T14:30:40.385Z"
+        },
+        {
+          "from": "awaiting_customer_confirm_followedup",
+          "to": "needs_call",
+          "by": "daily-followup",
+          "note": "No response after reminder — needs a phone call",
+          "at": "2026-10-22T14:30:49.378Z"
         }
       ],
       "hidden": false
@@ -9253,10 +9267,10 @@
       "hidden": false
     },
     "6ad4f3ab69ddeb95e81e717b": {
-      "status": "awaiting_customer_confirm",
+      "status": "awaiting_customer_confirm_followedup",
       "note": "",
-      "updatedAt": "2026-10-18T16:28:29.773Z",
-      "updatedBy": "auto-reply",
+      "updatedAt": "2026-10-22T14:30:49.378Z",
+      "updatedBy": "daily-followup",
       "history": [
         {
           "from": "not_contacted",
@@ -9264,6 +9278,13 @@
           "by": "auto-reply",
           "note": "Instant auto-reply sent",
           "at": "2026-10-18T16:28:29.773Z"
+        },
+        {
+          "from": "awaiting_customer_confirm",
+          "to": "awaiting_customer_confirm_followedup",
+          "by": "daily-followup",
+          "note": "3-day reminder sent",
+          "at": "2026-10-22T14:30:49.378Z"
         }
       ],
       "hidden": false
@@ -9451,5 +9472,5 @@
       "hidden": false
     }
   },
-  "updatedAt": "2026-10-22T14:27:39.327Z"
+  "updatedAt": "2026-10-22T14:30:49.378Z"
 }
