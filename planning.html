@@ -392,9 +392,9 @@ nav.hn.sc .nl{color:#2C2C2C!important}
     <li><a href="planning.html" >Planning</a></li>
     <li><a href="gallery.html" class="active">Gallery</a></li>
     <li><a href="pricing.html" >Pricing</a></li>
-    <li><a href="contact.html" >Contact</a></li>
+    <li><a href="/weddings/contact.html" >Contact</a></li>
   </ul>
-  <a href="contact.html" class="nc">Book a Tour</a>
+  <a href="/weddings/contact.html" class="nc">Book a Tour</a>
 </nav>
 
 <section class="page-hero">
@@ -430,7 +430,7 @@ nav.hn.sc .nl{color:#2C2C2C!important}
   <h2 class="st reveal r1" style="color:#fff">Photos Don't Do It <em>Justice</em></h2>
   <div class="gr reveal r2"></div>
   <p class="sb reveal r2" style="color:rgba(255,255,255,.6);margin:0 auto 40px">The Quarry has to be experienced to be fully appreciated. Schedule a private tour and walk the property yourself.</p>
-  <div class="reveal r3"><a href="contact.html" class="bp">Book a Tour</a></div>
+  <div class="reveal r3"><a href="/weddings/contact.html" class="bp">Book a Tour</a></div>
 </section>
 
 <script>
@@ -461,7 +461,7 @@ document.querySelectorAll('.masonry-item').forEach(item => {
         <li><a href="planning.html">Wedding Planning</a></li>
         <li><a href="gallery.html">Gallery</a></li>
         <li><a href="pricing.html">Pricing</a></li>
-        <li><a href="contact.html">Book a Tour</a></li>
+        <li><a href="/weddings/contact.html">Book a Tour</a></li>
       </ul>
     </div>
     <div>
@@ -498,8 +498,8 @@ document.querySelectorAll('.masonry-item').forEach(item => {
   var overlay=document.createElement('div');overlay.className='moverlay';document.body.appendChild(overlay);
   var mm=document.createElement('nav');mm.className='mmenu';mm.setAttribute('aria-label','Mobile navigation');
   var cb=document.createElement('button');cb.className='mmenu-close';cb.setAttribute('aria-label','Close menu');cb.innerHTML='&times;';mm.appendChild(cb);
-  [['index.html','Home'],['about.html','Our Story'],['planning.html','Planning'],['gallery.html','Gallery'],['pricing.html','Pricing'],['contact.html','Contact']].forEach(function(l){var a=document.createElement('a');a.href=l[0];a.textContent=l[1];mm.appendChild(a);});
-  var cta=document.createElement('a');cta.href='contact.html';cta.textContent='Book a Tour';cta.className='mc';mm.appendChild(cta);
+  [['index.html','Home'],['about.html','Our Story'],['planning.html','Planning'],['gallery.html','Gallery'],['pricing.html','Pricing'],['/weddings/contact.html','Contact']].forEach(function(l){var a=document.createElement('a');a.href=l[0];a.textContent=l[1];mm.appendChild(a);});
+  var cta=document.createElement('a');cta.href='/weddings/contact.html';cta.textContent='Book a Tour';cta.className='mc';mm.appendChild(cta);
   document.body.appendChild(mm);
   function open(){btn.classList.add('op');mm.classList.add('op');overlay.classList.add('op');nav.classList.add('menu-open');document.body.style.overflow='hidden';}
   function close(){btn.classList.remove('op');mm.classList.remove('op');overlay.classList.remove('op');nav.classList.remove('menu-open');document.body.style.overflow='';}
