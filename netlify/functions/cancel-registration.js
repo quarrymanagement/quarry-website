@@ -1,5 +1,8 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const https = require('https');
+// 2026-10-22: was unauthenticated — anyone could cancel/refund a registration
+// by orderNumber. Now requires an owner admin session token (x-admin-token).
+const { isAuthorized } = require('./_admin-auth');
 
 function githubRequest(method, path, token, data) {
   return new Promise((resolve, reject) => {
@@ -41,12 +44,15 @@ function fetchRaw(url) {
 exports.handler = async (event) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Headers': 'Content-Type, x-admin-token',
     'Access-Control-Allow-Methods': 'POST, OPTIONS'
   };
 
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
   if (event.httpMethod !== 'POST') return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method not allowed' }) };
+  let parsed = {};
+  try { parsed = JSON.parse(event.body || '{}'); } catch (_) {}
+  if (!isAuthorized(event, parsed, [])) return { statusCode: 401, headers, body: JSON.stringify({ error: 'Admin session required' }) };
 
   try {
     const { eventId, orderNumber, action } = JSON.parse(event.body);

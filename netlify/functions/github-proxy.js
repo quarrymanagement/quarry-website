@@ -1,4 +1,11 @@
 const fetch = require('node-fetch');
+const { isAuthorized } = require('./_admin-auth');
+
+// 2026-10-22: this used to be an OPEN read/write proxy to events.json using the
+// site's GitHub token — anyone could overwrite the file. It now requires an
+// admin session token (owner or events_staff, same as save-events) in the
+// x-admin-token header. Only known caller: the stray old admin copy at
+// nextjs/src/app/careers/quarry-admin.html (the live admin uses save-events).
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const GITHUB_REPO = 'quarrymanagement/quarry-website';
@@ -7,13 +14,17 @@ const DATA_FILE = 'events.json';
 exports.handler = async (event) => {
     const headers = {
         'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Headers': 'Content-Type, x-admin-token',
         'Access-Control-Allow-Methods': 'GET, PUT, OPTIONS',
         'Content-Type': 'application/json'
     };
 
     if (event.httpMethod === 'OPTIONS') {
         return { statusCode: 200, headers, body: '' };
+    }
+
+    if (!isAuthorized(event, null, ['events_staff'])) {
+        return { statusCode: 401, headers, body: JSON.stringify({ error: 'Admin session required' }) };
     }
 
     if (!GITHUB_TOKEN) {
