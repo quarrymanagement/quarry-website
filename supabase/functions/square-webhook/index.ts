@@ -1,6 +1,6 @@
 // Supabase Edge Function: square-webhook
 //
-// Version 24 — 2026-10-22 (prepared, NOT deployed)
+// Version 24 — 2026-10-22 (deployed 2026-10-22)
 // PII VAULT. Buyer name/email/phone are upserted into public.event_registrant_pii
 // and stripped from events.json before every PUT (see vaultAndStrip). The
 // backfill key moved from a hard-coded literal to the SQUARE_BACKFILL_KEY secret.
