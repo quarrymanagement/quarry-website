@@ -31,6 +31,16 @@
 # served by /.netlify/functions/data-read (allowlisted, PII behind a session).
 # ----------------------------------------------------------------------------
 [[redirects]]
+  from = "/contact.html"
+  to = "/quarry-contact.html"
+  status = 301
+
+[[redirects]]
+  from = "/contact"
+  to = "/quarry-contact.html"
+  status = 301
+
+[[redirects]]
   from = "/subscribers.json"
   to = "/.netlify/functions/data-read?file=__blocked"
   status = 404
