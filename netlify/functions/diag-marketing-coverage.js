@@ -28,6 +28,7 @@
 
 const fetch = require('node-fetch');
 
+const { internalHeaders } = require('./_internal-auth');
 const SITE_URL = process.env.URL || process.env.DEPLOY_URL || 'https://thequarrystl.com';
 const SG_KEY = process.env.SENDGRID_API_KEY;
 const LIST_SUB = process.env.SENDGRID_LIST_SUBSCRIBED;
@@ -48,7 +49,7 @@ function chunk(arr, n) {
 }
 
 async function loadSubscribers() {
-    const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=subscribers.json`);
+    const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=subscribers.json`, { headers: internalHeaders() });
     if (!r.ok) throw new Error('subscribers.json: ' + r.status);
     const d = await r.json();
     return Array.isArray(d.decoded) ? d.decoded : [];

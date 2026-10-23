@@ -22,6 +22,7 @@
 // ============================================================================
 
 const https = require('https');
+const { internalHeaders } = require('./_internal-auth');
 const fetch = require('node-fetch');
 
 const SITE_URL = process.env.URL || process.env.DEPLOY_URL || 'https://thequarrystl.com';
@@ -48,7 +49,7 @@ function uuid() {
 }
 
 async function loadJsonFile(file) {
-    const resp = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=${file}`);
+    const resp = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=${file}`, { headers: internalHeaders() });
     if (!resp.ok) throw new Error(`Failed to load ${file}: ${resp.status}`);
     const data = await resp.json();
     return { data: data.decoded || {}, sha: data.sha };
@@ -57,7 +58,7 @@ async function loadJsonFile(file) {
 async function saveJsonFile(file, json, sha, message) {
     const resp = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=${file}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'x-quarry-key': QUARRY_DATA_KEY },
+        headers: internalHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ json, sha, message })
     });
     if (!resp.ok) {

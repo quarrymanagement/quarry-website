@@ -6899,6 +6899,12 @@
             });
         }
         window.dataRead = dataRead; // used by the setup-tab IIFEs further down
+        // Session-token headers for data-store / save-forms (both require an
+        // admin or staff session since 2026-10-23).
+        function adminHeaders(extra) {
+            return Object.assign({ 'x-admin-token': (localStorage.getItem('quarryAdminToken') || '') }, extra || {});
+        }
+        window.adminHeaders = adminHeaders;
 
         async function loadData() {
             try {
@@ -7139,13 +7145,13 @@
             // Pull live counts from social_drafts.json + marketing_drafts.json + events
             let socialPending = 0, emailPending = 0;
             try {
-                const r = await fetch('/.netlify/functions/data-store?file=social_drafts.json', { cache: 'no-store' });
+                const r = await fetch('/.netlify/functions/data-store?file=social_drafts.json', { cache: 'no-store', headers: window.adminHeaders() });
                 const b = await r.json();
                 const drafts = (b.decoded && b.decoded.drafts) || [];
                 socialPending = drafts.filter((d) => d.status === 'pending').length;
             } catch (_) {}
             try {
-                const r = await fetch('/.netlify/functions/data-store?file=marketing_drafts.json', { cache: 'no-store' });
+                const r = await fetch('/.netlify/functions/data-store?file=marketing_drafts.json', { cache: 'no-store', headers: window.adminHeaders() });
                 const b = await r.json();
                 const drafts = (b.decoded && b.decoded.drafts) || [];
                 emailPending = drafts.filter((d) => d.status === 'pending').length;
@@ -10549,7 +10555,7 @@
             try {
                 var res = await fetch('/.netlify/functions/save-forms', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: window.adminHeaders({ 'Content-Type': 'application/json' }),
                     body: JSON.stringify({ forms: app.forms })
                 });
                 var result = await res.json();
@@ -10576,7 +10582,7 @@
             delete app.formSubmissions[formId];
             fetch('/.netlify/functions/save-forms', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: window.adminHeaders({ 'Content-Type': 'application/json' }),
                 body: JSON.stringify({ forms: app.forms })
             }).then(function() {
                 showSuccess('Form deleted.');
@@ -12475,13 +12481,13 @@ function hashCode(str) {
             const escHtml = (s) => (s == null ? '' : String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])));
             const stripHtml = (s) => (s || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
             async function fetchData(file) {
-                const r = await fetch(`${FN}/data-store?file=${file}`, { cache: 'no-store' });
+                const r = await fetch(`${FN}/data-store?file=${file}`, { cache: 'no-store', headers: window.adminHeaders() });
                 if (!r.ok) throw new Error(`load ${file}: ${r.status}`);
                 const d = await r.json();
                 return { json: d.decoded || {}, sha: d.sha };
             }
             async function putData(file, json, sha, message) {
-                const r = await fetch(`${FN}/data-store?file=${file}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ json, sha, message }) });
+                const r = await fetch(`${FN}/data-store?file=${file}`, { method: 'PUT', headers: window.adminHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify({ json, sha, message }) });
                 const body = await r.json().catch(() => ({}));
                 if (!r.ok) throw new Error(body.error || ('save ' + file + ': ' + r.status));
                 return body;
@@ -12912,13 +12918,13 @@ function hashCode(str) {
                 `<div class="mkt-empty-friendly"><span class="ic">${icon}</span><div class="ttl">${escHtml(title)}</div><div class="sub">${escHtml(subtitle || '')}</div></div>`;
 
             async function fetchData(file) {
-                const r = await fetch(`${FN}/data-store?file=${file}`, { cache: 'no-store' });
+                const r = await fetch(`${FN}/data-store?file=${file}`, { cache: 'no-store', headers: window.adminHeaders() });
                 if (!r.ok) throw new Error(`load ${file}: ${r.status}`);
                 const d = await r.json();
                 return { json: d.decoded || {}, sha: d.sha };
             }
             async function putData(file, json, sha, message) {
-                const r = await fetch(`${FN}/data-store?file=${file}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ json, sha, message }) });
+                const r = await fetch(`${FN}/data-store?file=${file}`, { method: 'PUT', headers: window.adminHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify({ json, sha, message }) });
                 const body = await r.json().catch(() => ({}));
                 if (!r.ok) throw new Error(body.error || ('save ' + file + ': ' + r.status));
                 return body;
@@ -13104,7 +13110,7 @@ function hashCode(str) {
             async function renderLearnings() {
                 const wrap = $('socLearningsList'); if (!wrap) return;
                 try {
-                    const r = await fetch(`${FN}/data-store?file=social_learnings.json`, { cache: 'no-store' });
+                    const r = await fetch(`${FN}/data-store?file=social_learnings.json`, { cache: 'no-store', headers: window.adminHeaders() });
                     const body = await r.json();
                     const learnings = (body.decoded && Array.isArray(body.decoded.learnings)) ? body.decoded.learnings : [];
                     const active = learnings.filter((l) => !l.supersededAt);
@@ -13119,7 +13125,7 @@ function hashCode(str) {
             async function renderAssetLibrary() {
                 const wrap = $('socAssetLibraryStatus'); if (!wrap) return;
                 try {
-                    const r = await fetch(`${FN}/data-store?file=social_assets.json`, { cache: 'no-store' });
+                    const r = await fetch(`${FN}/data-store?file=social_assets.json`, { cache: 'no-store', headers: window.adminHeaders() });
                     const body = await r.json();
                     const assets = (body.decoded && Array.isArray(body.decoded.assets)) ? body.decoded.assets : [];
                     if (!assets.length) {
@@ -13364,7 +13370,7 @@ function hashCode(str) {
 
             async function openLibraryPicker() {
                 try {
-                    const r = await fetch(`${FN}/data-store?file=social_assets.json`, { cache: 'no-store' });
+                    const r = await fetch(`${FN}/data-store?file=social_assets.json`, { cache: 'no-store', headers: window.adminHeaders() });
                     const body = await r.json();
                     const assets = (body.decoded && body.decoded.assets) || [];
                     if (!assets.length) {
@@ -13556,7 +13562,7 @@ function hashCode(str) {
                     const upBody = await upRes.json();
                     if (!upRes.ok || !upBody.success) throw new Error(upBody.error || 'upload failed');
                     // Append to social_assets.json
-                    const cur = await fetch(`${FN}/data-store?file=social_assets.json`, { cache: 'no-store' });
+                    const cur = await fetch(`${FN}/data-store?file=social_assets.json`, { cache: 'no-store', headers: window.adminHeaders() });
                     let json = { assets: [] }, sha = null;
                     try { const d = await cur.json(); json = d.decoded || { assets: [] }; sha = d.sha; } catch (_) {}
                     json.assets = Array.isArray(json.assets) ? json.assets : [];
@@ -13567,7 +13573,7 @@ function hashCode(str) {
                     });
                     json.updatedAt = new Date().toISOString();
                     const saveRes = await fetch(`${FN}/data-store?file=social_assets.json`, {
-                        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                        method: 'PUT', headers: window.adminHeaders({ 'Content-Type': 'application/json' }),
                         body: JSON.stringify({ json, sha, message: `library: add asset "${title}"` })
                     });
                     if (!saveRes.ok) throw new Error('save asset list failed: ' + saveRes.status);

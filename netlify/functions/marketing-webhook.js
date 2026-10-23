@@ -16,6 +16,7 @@
 
 const fetch = require('node-fetch');
 
+const { internalHeaders } = require('./_internal-auth');
 const SITE_URL = process.env.URL || process.env.DEPLOY_URL || 'https://thequarrystl.com';
 const QUARRY_DATA_KEY = process.env.QUARRY_DATA_KEY || '';
 
@@ -29,7 +30,7 @@ const respond = (statusCode, body) => ({ statusCode, headers: { ...CORS, 'Conten
 const MAX_EVENTS_RETAINED = 10000;
 
 async function loadJsonFile(file) {
-    const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=${file}`);
+    const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=${file}`, { headers: internalHeaders() });
     if (!r.ok) throw new Error(`load ${file}: ${r.status}`);
     const d = await r.json();
     return { data: d.decoded || {}, sha: d.sha };
@@ -37,7 +38,7 @@ async function loadJsonFile(file) {
 async function saveJsonFile(file, json, sha, message) {
     const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=${file}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'x-quarry-key': QUARRY_DATA_KEY },
+        headers: internalHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ json, sha, message })
     });
     if (!r.ok) throw new Error(`save ${file}: ${r.status}`);

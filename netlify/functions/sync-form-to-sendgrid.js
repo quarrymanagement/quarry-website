@@ -19,6 +19,7 @@
 
 const fetch = require('node-fetch');
 
+const { internalHeaders } = require('./_internal-auth');
 const SG_KEY = process.env.SENDGRID_API_KEY;
 const SITE_URL = process.env.URL || 'https://thequarrystl.com';
 const FROM_EMAIL = 'management@thequarrystl.com';
@@ -182,7 +183,7 @@ exports.handler = async (event) => {
 // ---------------------------------------------------------------------------
 async function appendToCrmFile({ email, firstName, lastName, phone, source, segmentTag, marketingOptIn, submission }) {
     const url = `${SITE_URL}/.netlify/functions/data-store?file=subscribers.json`;
-    const r = await fetch(url);
+    const r = await fetch(url, { headers: internalHeaders() });
     if (!r.ok) throw new Error('load subscribers.json: ' + r.status);
     const data = await r.json();
     const list = Array.isArray(data.decoded) ? data.decoded : [];
@@ -232,7 +233,7 @@ async function appendToCrmFile({ email, firstName, lastName, phone, source, segm
     }
     const put = await fetch(url, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: internalHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ json: list, sha: data.sha, message: `crm: ${exists ? 'update' : 'add'} ${email} (${source})` })
     });
     if (!put.ok) {

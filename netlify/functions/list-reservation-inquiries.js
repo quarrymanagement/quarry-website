@@ -19,6 +19,7 @@
 // ============================================================================
 
 const fetch = require('node-fetch');
+const { internalHeaders } = require('./_internal-auth');
 const crypto = require('crypto');
 
 // Use the existing NETLIFY_AUTH_TOKEN env var (set in Netlify console).
@@ -97,7 +98,7 @@ async function fetchSubmissions(formId) {
 
 async function loadStatusOverrides() {
     try {
-        const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=reservations_status.json`);
+        const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=reservations_status.json`, { headers: internalHeaders() });
         if (!r.ok) return {};
         const d = await r.json();
         return (d.decoded && d.decoded.overrides) || {};

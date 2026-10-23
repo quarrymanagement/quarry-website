@@ -34,6 +34,7 @@
 // ============================================================================
 
 const https = require('https');
+const { internalHeaders } = require('./_internal-auth');
 const crypto = require('crypto');
 
 const WEBHOOK_SECRET = process.env.RESERVATION_WEBHOOK_SECRET || '';
@@ -184,7 +185,7 @@ async function saveReservationOverride(submissionId, status, historyEntry) {
     let lastErr;
     for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
         try {
-            const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=reservations_status.json`);
+            const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=reservations_status.json`, { headers: internalHeaders() });
             const existing = r.ok ? await r.json() : null;
             const data = (existing && existing.decoded) || { overrides: {} };
             const sha = existing ? existing.sha : null;
@@ -203,7 +204,7 @@ async function saveReservationOverride(submissionId, status, historyEntry) {
             };
             data.updatedAt = now;
             const putRes = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=reservations_status.json`, {
-                method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                method: 'PUT', headers: internalHeaders({ 'Content-Type': 'application/json' }),
                 body: JSON.stringify({ json: data, sha, message: `reservations: ${submissionId.slice(0, 8)} → ${status} (${historyEntry.by})` })
             });
             if (!putRes.ok) {

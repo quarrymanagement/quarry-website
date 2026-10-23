@@ -38,6 +38,7 @@
 
 const fetch = require('node-fetch');
 
+const { internalHeaders } = require('./_internal-auth');
 const SITE_URL = process.env.URL || process.env.DEPLOY_URL || 'https://thequarrystl.com';
 const SG_KEY   = process.env.SENDGRID_API_KEY;
 const SENDER   = process.env.SENDGRID_SENDER_ID;
@@ -73,7 +74,7 @@ function htmlToPlainText(html) {
 }
 
 async function loadDraft(draftId) {
-    const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=marketing_drafts.json`);
+    const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=marketing_drafts.json`, { headers: internalHeaders() });
     if (!r.ok) throw new Error('drafts: ' + r.status);
     const d = await r.json();
     const drafts = (d.decoded.drafts || []).concat(d.decoded.history || []);
@@ -82,12 +83,12 @@ async function loadDraft(draftId) {
 
 async function writeStatus(status) {
     try {
-        const get = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=catchup_status.json`);
+        const get = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=catchup_status.json`, { headers: internalHeaders() });
         let sha = '';
         if (get.ok) { const cur = await get.json(); sha = cur.sha || ''; }
         await fetch(`${SITE_URL}/.netlify/functions/data-store?file=catchup_status.json`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: internalHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify({ json: status, sha, message: `catchup-status: ${status.stage || 'update'}` })
         });
     } catch (_) {}

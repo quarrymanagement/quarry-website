@@ -1,9 +1,10 @@
 const https = require('https');
 const { readRepoText, readRepoJson } = require('./_github-data');
+const { isAuthorized } = require('./_admin-auth');
 
 const HEADERS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, x-admin-token',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
@@ -45,6 +46,14 @@ function fetchRaw(url) {
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: HEADERS, body: '' };
   if (event.httpMethod !== 'POST') return { statusCode: 405, headers: HEADERS, body: JSON.stringify({ error: 'Method not allowed' }) };
+
+  // 2026-10-23: admin session required (owner or events_staff, same roles
+  // data-read allows for forms.json). Token via x-admin-token or body.adminToken.
+  let authBody = null;
+  try { authBody = JSON.parse(event.body || '{}'); } catch (_) { authBody = null; }
+  if (!isAuthorized(event, authBody, ['events_staff'])) {
+    return { statusCode: 401, headers: HEADERS, body: JSON.stringify({ error: 'Admin session required' }) };
+  }
 
   const ghToken = process.env.GITHUB_TOKEN;
   if (!ghToken) return { statusCode: 500, headers: HEADERS, body: JSON.stringify({ error: 'GitHub token not configured' }) };

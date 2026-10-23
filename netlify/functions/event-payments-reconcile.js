@@ -24,6 +24,7 @@
 // ============================================================================
 
 const fetch = require('node-fetch');
+const { internalHeaders } = require('./_internal-auth');
 const { readBlob, writeBlob } = require('./_blobs');
 
 const SITE_URL = process.env.URL || 'https://thequarrystl.com';
@@ -72,7 +73,7 @@ async function listEventPayments() {
 }
 
 async function loadEvents() {
-  const r = await fetch(SITE_URL + '/.netlify/functions/data-store?file=events.json', { timeout: 10000 });
+  const r = await fetch(SITE_URL + '/.netlify/functions/data-store?file=events.json', { headers: internalHeaders(), timeout: 10000 });
   if (!r.ok) throw new Error('load events.json ' + r.status);
   const d = await r.json();
   return { data: d.decoded, sha: d.sha };
@@ -81,7 +82,7 @@ async function loadEvents() {
 async function saveEvents(data, sha, message) {
   const r = await fetch(SITE_URL + '/.netlify/functions/data-store?file=events.json', {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json', 'x-quarry-key': process.env.QUARRY_DATA_KEY || '' },
+    headers: internalHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify({ json: data, sha, message }),
     timeout: 15000
   });

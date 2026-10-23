@@ -102,3 +102,6 @@ exports.handler = async (event) => {
     return err(status, status === 404 ? 'File not found' : 'Upstream read failed');
   }
 };
+
+// Shared with data-store.js so both use one anonymous-read allowlist.
+exports.PUBLIC_FILES = PUBLIC_FILES;

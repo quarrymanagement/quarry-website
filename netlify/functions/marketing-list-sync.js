@@ -23,6 +23,7 @@
 // ============================================================================
 
 const fetch = require('node-fetch');
+const { internalHeaders } = require('./_internal-auth');
 const { readBlob, writeBlob, listKeys } = require('./_blobs');
 const { hydrateDoc } = require('./_event-pii');
 const { readRepoText, readRepoJson } = require('./_github-data');
@@ -38,8 +39,8 @@ function splitName(name) {
   return { first: parts[0] || '', last: parts.slice(1).join(' ') };
 }
 
-async function getJson(url) {
-  const r = await fetch(url, { timeout: 8000 });
+async function getJson(url, headers) {
+  const r = await fetch(url, { timeout: 8000, headers: headers || {} });
   if (!r.ok) throw new Error(url + ' -> ' + r.status);
   return r.json();
 }
@@ -56,7 +57,7 @@ async function collectContacts(errors) {
 
   // 1) CRM (subscribers.json via data-store)
   try {
-    const d = await getJson(SITE_URL + '/.netlify/functions/data-store?file=subscribers.json');
+    const d = await getJson(SITE_URL + '/.netlify/functions/data-store?file=subscribers.json', internalHeaders());
     const list = Array.isArray(d.decoded) ? d.decoded : [];
     for (const s of list) {
       if (String(s.emailStatus || '').toLowerCase() === 'unsubscribed') continue;
