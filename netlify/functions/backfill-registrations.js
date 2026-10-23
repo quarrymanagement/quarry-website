@@ -8,6 +8,7 @@
 const Stripe = require('stripe');
 const https = require('https');
 const { vaultAndStrip } = require('./_event-pii');
+const { readRepoText, readRepoJson } = require('./_github-data');
 
 function sendGridEmail(to, subject, htmlBody, fromEmail, fromName) {
   fromEmail = fromEmail || 'management@thequarrystl.com';
@@ -116,7 +117,7 @@ async function batchUpdateEventsJson(parsedRegs) {
   if (metaRes.data.content && metaRes.data.encoding === 'base64' && metaRes.data.content.length > 0) {
     eventsData = JSON.parse(Buffer.from(metaRes.data.content, 'base64').toString('utf-8'));
   } else {
-    const raw = await fetchRaw('https://raw.githubusercontent.com/' + repo + '/main/events.json');
+    const raw = await readRepoText('events.json', { fresh: true });
     eventsData = JSON.parse(raw);
   }
 

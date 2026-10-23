@@ -713,7 +713,7 @@
 
         async function loadScheduleData() {
             try {
-                const url = `https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/schedule.json?t=${Date.now()}`;
+                const url = `/.netlify/functions/data-read?file=schedule.json`;
                 const response = await fetch(url);
                 if (!response.ok) throw new Error('Failed to load schedule');
                 const data = await response.json();

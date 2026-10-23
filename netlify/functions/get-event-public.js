@@ -4,7 +4,7 @@
 // Returns a single event by id or slug — meant for fast detail-page loads
 // (the full events.json is ~6MB so we can't ship that to every visitor).
 //
-// Reads events.json from raw.githubusercontent.com (the build pipeline writes
+// Reads events.json via the GitHub contents API (_github-data) (the build pipeline writes
 // here) and filters to the requested event. Response is cached at CDN edge
 // for 60 seconds and at the browser for 5 minutes.
 //
@@ -16,6 +16,7 @@
 
 const https = require('https');
 const { sanitizeEvent } = require('./_event-pii');
+const { readRepoText, readRepoJson } = require('./_github-data');
 
 function fetchJSON(url) {
   return new Promise((resolve, reject) => {
@@ -49,8 +50,8 @@ exports.handler = async (event) => {
   }
 
   try {
-    // Pull from GitHub raw — bypasses the 6MB Netlify-served events.json
-    const data = await fetchJSON('https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/events.json');
+    // Authenticated GitHub read (works with a private repo) — bypasses the 6MB Netlify-served events.json
+    const data = await readRepoJson('events.json');
     const events = (data && data.events) || [];
     const found = events.find(function(e) {
       return e.id === want || e.slug === want;

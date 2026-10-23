@@ -229,8 +229,8 @@
         var formDef = null;
         var fileData = {};
 
-        // Fetch forms.json
-        fetch('/forms.json?t=' + Date.now())
+        // Form definitions via data-read (public view: no submissions)
+        fetch('/.netlify/functions/data-read?file=forms.json')
         .then(function(r) { return r.json(); })
         .then(function(data) {
             var forms = data.forms || [];

@@ -25,6 +25,7 @@
 const fetch = require('node-fetch');
 const { readBlob, writeBlob, listKeys } = require('./_blobs');
 const { hydrateDoc } = require('./_event-pii');
+const { readRepoText, readRepoJson } = require('./_github-data');
 
 const SITE_URL = process.env.URL || 'https://thequarrystl.com';
 const ALERT_TO = 'management@thequarrystl.com';
@@ -69,7 +70,7 @@ async function collectContacts(errors) {
   // 2) Event ticket buyers (GitHub copy is always current; site copy can lag)
   try {
     let data;
-    try { data = await getJson('https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/events.json'); }
+    try { data = await readRepoJson('events.json', { fresh: true }); }
     catch (_) { data = await getJson(SITE_URL + '/events.json'); }
     // Buyer emails now live in the Supabase vault, not the public file.
     if (data && !Array.isArray(data)) await hydrateDoc(data);

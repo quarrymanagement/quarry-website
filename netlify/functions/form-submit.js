@@ -1,4 +1,5 @@
 const https = require('https');
+const { readRepoText, readRepoJson } = require('./_github-data');
 
 function sendEmail(to, subject, htmlBody) {
   var toArray = Array.isArray(to) ? to : [to];
@@ -94,7 +95,7 @@ exports.handler = async (event) => {
     // Load forms.json to get form definition
     let formsData;
     try {
-      const raw = await fetchRaw('https://raw.githubusercontent.com/' + repo + '/main/forms.json');
+      const raw = await readRepoText('forms.json', { fresh: true });
       formsData = JSON.parse(raw);
     } catch (e) {
       formsData = { forms: [], submissions: {} };

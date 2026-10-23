@@ -1645,9 +1645,8 @@
          */
         async function loadEventsFromGitHub() {
             try {
-                // Use raw.githubusercontent for fast, no-auth reads (cache busted with timestamp)
-                const cacheBust = '?t=' + Date.now();
-                const resp = await fetch(`https://raw.githubusercontent.com/${GITHUB_REPO}/main/${DATA_FILE}${cacheBust}`);
+                // Authenticated GitHub read via data-read (works with a private repo)
+                const resp = await fetch(`/.netlify/functions/data-read?file=${DATA_FILE}`);
                 if (!resp.ok) throw new Error('Failed to fetch events data');
                 const data = await resp.json();
                 allEvents = (data.events || []).map(evt => {

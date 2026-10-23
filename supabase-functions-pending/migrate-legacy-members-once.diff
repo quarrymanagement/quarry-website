@@ -1,0 +1,22 @@
+--- /workspace/catchup/live/supabase-functions/nkulhtalltbieicvmmad/supabase/functions/migrate-legacy-members-once/index.ts	2026-10-23 08:07:03.383170801 -0500
++++ supabase-functions-pending/migrate-legacy-members-once/index.ts	2026-10-23 11:24:32.649379050 -0500
+@@ -8,6 +8,7 @@
+ const ADMIN_SECRET = Deno.env.get("ADMIN_PUSH_SECRET") ?? "";
+ const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
+ const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
++const GITHUB_TOKEN = Deno.env.get("GITHUB_TOKEN") ?? "";
+ 
+ const CORS = {
+   "Access-Control-Allow-Origin": "*",
+@@ -32,7 +33,10 @@
+   }
+ 
+   try {
+-    const r = await fetch("https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/members.json", { cache: "no-store" });
++    // Authenticated read (repo is going private; anonymous raw URL would 404).
++    const r = await fetch("https://api.github.com/repos/quarrymanagement/quarry-website/contents/members.json?ref=main", {
++      headers: { "Authorization": "token " + GITHUB_TOKEN, "User-Agent": "Quarry-Members-Migrate", "Accept": "application/vnd.github.raw" },
++    });
+     if (!r.ok) {
+       return new Response(JSON.stringify({ error: "fetch-failed", status: r.status }), { status: 500, headers: { ...CORS, "Content-Type": "application/json" } });
+     }
