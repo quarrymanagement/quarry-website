@@ -107,9 +107,22 @@ function stripDoc(doc) {
   return n;
 }
 
+// The vault key is DERIVED from ADMIN_PUSH_SECRET rather than stored as its
+// own env var: this site's function env is at AWS Lambda's 4KB limit, and one
+// more variable makes every deploy fail ("Failed to create function ... exceed
+// the 4KB limit"). EVENT_PII_KEY, if set, still wins. NOTE: rotating
+// ADMIN_PUSH_SECRET requires re-setting the Supabase secret EVENT_PII_KEY to
+// HMAC-SHA256(ADMIN_PUSH_SECRET, 'quarry-event-pii-v1') hex.
+function vaultKey() {
+  if (process.env.EVENT_PII_KEY) return process.env.EVENT_PII_KEY;
+  const base = process.env.ADMIN_PUSH_SECRET || '';
+  if (!base) return '';
+  return require('crypto').createHmac('sha256', base).update('quarry-event-pii-v1').digest('hex');
+}
+
 async function callEdge(payload) {
-  const key = process.env.EVENT_PII_KEY || '';
-  if (!key) throw new Error('EVENT_PII_KEY not configured — refusing to write events.json with buyer PII');
+  const key = vaultKey();
+  if (!key) throw new Error('vault key not configured — refusing to write events.json with buyer PII');
   const r = await fetch(EDGE_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-access-key': key },
