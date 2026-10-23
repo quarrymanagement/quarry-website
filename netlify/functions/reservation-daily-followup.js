@@ -24,6 +24,7 @@
 
 const https = require('https');
 
+const { internalHeaders } = require('./_internal-auth');
 const SITE_URL = process.env.URL || 'https://thequarrystl.com';
 const NETLIFY_TOKEN = process.env.NETLIFY_AUTH_TOKEN || process.env.NETLIFY_API_TOKEN;
 
@@ -100,14 +101,14 @@ function defaultStatus(createdAt) {
 }
 
 async function loadStatusFile() {
-    const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=reservations_status.json`);
+    const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=reservations_status.json`, { headers: internalHeaders() });
     if (!r.ok) return { data: { overrides: {} }, sha: null };
     const d = await r.json();
     return { data: d.decoded || { overrides: {} }, sha: d.sha };
 }
 async function saveStatusFile(json, sha, message) {
     const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=reservations_status.json`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        method: 'PUT', headers: internalHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ json, sha, message }),
     });
     if (!r.ok) throw new Error(`save reservations_status.json: ${r.status} ${(await r.text()).slice(0, 200)}`);

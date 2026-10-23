@@ -10,6 +10,7 @@
 // ============================================================================
 
 const fetch = require('node-fetch');
+const { internalHeaders } = require('./_internal-auth');
 const SITE_URL = process.env.URL || process.env.DEPLOY_URL || 'https://thequarrystl.com';
 
 const CORS = {
@@ -21,14 +22,14 @@ const CORS = {
 const respond = (s, b) => ({ statusCode: s, headers: CORS, body: JSON.stringify(b) });
 
 async function loadDrafts() {
-    const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=social_drafts.json`);
+    const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=social_drafts.json`, { headers: internalHeaders() });
     if (!r.ok) throw new Error(`load social_drafts: ${r.status}`);
     const d = await r.json();
     return { data: d.decoded || {}, sha: d.sha };
 }
 async function saveDrafts(json, sha, message) {
     const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=social_drafts.json`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        method: 'PUT', headers: internalHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ json, sha, message })
     });
     if (!r.ok) throw new Error(`save social_drafts: ${r.status}`);

@@ -23,6 +23,7 @@
 // ============================================================================
 
 const crypto = require('crypto');
+const { internalHeaders } = require('./_internal-auth');
 const https = require('https');
 
 const CONFIRM_SECRET = process.env.RESERVATION_CONFIRM_SECRET || '';
@@ -170,7 +171,7 @@ async function markAwaitingDecision(submissionId) {
     let lastErr;
     for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
         try {
-            const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=reservations_status.json`);
+            const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=reservations_status.json`, { headers: internalHeaders() });
             const existing = r.ok ? await r.json() : null;
             const data = (existing && existing.decoded) || { overrides: {} };
             const sha = existing ? existing.sha : null;
@@ -199,7 +200,7 @@ async function markAwaitingDecision(submissionId) {
             };
             data.updatedAt = now;
             const putRes = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=reservations_status.json`, {
-                method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                method: 'PUT', headers: internalHeaders({ 'Content-Type': 'application/json' }),
                 body: JSON.stringify({ json: data, sha, message: `reservations: ${submissionId.slice(0, 8)} → awaiting_decision (customer confirmed)` })
             });
             if (!putRes.ok) {

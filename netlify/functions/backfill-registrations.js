@@ -1,6 +1,7 @@
 // One-time backfill: reprocesses missed Stripe checkout.session.completed events.
-// Trigger: GET /.netlify/functions/backfill-registrations?key=<BACKFILL_KEY>&sessions=cs_live_a,cs_live_b
-// (or POST { sessions: ["cs_live_a", "cs_live_b"] } with the same auth)
+// Trigger: GET /.netlify/functions/backfill-registrations?sessions=cs_live_a,cs_live_b
+//          with header x-admin-token: <owner admin session token>
+// (or POST { sessions: ["cs_live_a", "cs_live_b"], adminToken } )
 //
 // For each session: writes to Netlify Blobs, appends to events.json on GitHub, sends
 // confirmation emails to customer + owner. Mirrors the production webhook handler.
@@ -9,6 +10,7 @@ const Stripe = require('stripe');
 const https = require('https');
 const { vaultAndStrip } = require('./_event-pii');
 const { readRepoText, readRepoJson } = require('./_github-data');
+const { isAuthorized } = require('./_admin-auth');
 
 function sendGridEmail(to, subject, htmlBody, fromEmail, fromName) {
   fromEmail = fromEmail || 'management@thequarrystl.com';
@@ -246,12 +248,14 @@ async function sendConfirmationEmails(r) {
 }
 
 exports.handler = async (event) => {
-  // Simple shared-secret auth so the function isn't world-callable
-  const expected = process.env.BACKFILL_KEY || 'quarry-backfill-2026';
-  const provided = (event.queryStringParameters && event.queryStringParameters.key)
-    || (event.headers && event.headers['x-backfill-key']);
-  if (provided !== expected) {
-    return { statusCode: 401, body: JSON.stringify({ error: 'unauthorized' }) };
+  // 2026-10-23: owner admin session required (x-admin-token header, ?token=,
+  // or body.adminToken). The old shared key had a hardcoded default in this
+  // public repo, so anyone could re-run the backfill (duplicate registrations
+  // and confirmation emails).
+  let authBody = null;
+  if (event.body) { try { authBody = JSON.parse(event.body); } catch (_) { authBody = null; } }
+  if (!isAuthorized(event, authBody, [])) {
+    return { statusCode: 401, body: JSON.stringify({ error: 'Admin session required' }) };
   }
 
   // Default list = the 5 known missed event sessions (Apr 22 – May 1)

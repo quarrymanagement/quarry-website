@@ -8,8 +8,12 @@
 // Whitelist enforced — only known marketing/operations files are reachable
 // so this can never be used to write arbitrary repo paths.
 //
-// Auth: x-quarry-key header (must match QUARRY_DATA_KEY env var) for writes.
-//       Reads are open (the repo file is publicly readable anyway).
+// Auth (2026-10-23 lockdown):
+//   - Anonymous GET only for files in data-read's PUBLIC_FILES allowlist
+//     (of the files below, that is just events.json).
+//   - Every other GET, and every PUT, needs either an admin/staff session token
+//     (x-admin-token header / ?token= / body.adminToken, see _admin-auth.js) or
+//     the server-to-server key (x-quarry-key, see _internal-auth.js).
 // ============================================================================
 
 const fetch = require('node-fetch');
@@ -17,7 +21,13 @@ const { vaultAndStrip } = require('./_event-pii');
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const GITHUB_REPO = 'quarrymanagement/quarry-website';
-const QUARRY_DATA_KEY = process.env.QUARRY_DATA_KEY || ''; // optional; if blank, writes still require GITHUB_TOKEN to be set
+const { isAuthorized } = require('./_admin-auth');
+const { isInternal } = require('./_internal-auth');
+const { PUBLIC_FILES } = require('./data-read');
+
+// Staff roles allowed in addition to the owner token. events_staff (Penny) has
+// the dashboard tab, which reads the social/marketing draft counts.
+const STAFF_ROLES = ['events_staff'];
 
 const ALLOWED_FILES = new Set([
     'marketing_drafts.json',
@@ -39,7 +49,7 @@ const ALLOWED_FILES = new Set([
 const CORS = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, PUT, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, x-quarry-key',
+    'Access-Control-Allow-Headers': 'Content-Type, x-quarry-key, x-admin-token',
     'Content-Type': 'application/json'
 };
 
@@ -54,7 +64,16 @@ exports.handler = async (event) => {
 
     const file = (event.queryStringParameters && event.queryStringParameters.file) || '';
     if (!ALLOWED_FILES.has(file)) {
-        return respond(400, { error: `File '${file}' is not in the allowed list. Allowed: ${[...ALLOWED_FILES].join(', ')}` });
+        return respond(400, { error: `File '${file}' is not in the allowed list.` });
+    }
+
+    const publicRead = event.httpMethod === 'GET' && PUBLIC_FILES.has(file);
+    if (!publicRead && !isInternal(event)) {
+        let parsedBody = null;
+        if (event.httpMethod === 'PUT') { try { parsedBody = JSON.parse(event.body || '{}'); } catch (_) { parsedBody = null; } }
+        if (!isAuthorized(event, parsedBody, STAFF_ROLES)) {
+            return respond(401, { error: 'Admin session required' });
+        }
     }
 
     const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${file}`;
@@ -98,14 +117,7 @@ exports.handler = async (event) => {
         }
 
         if (event.httpMethod === 'PUT') {
-            // Write protection: require QUARRY_DATA_KEY header match if env var is set
-            if (QUARRY_DATA_KEY) {
-                const provided = event.headers['x-quarry-key'] || event.headers['X-Quarry-Key'] || '';
-                if (provided !== QUARRY_DATA_KEY) {
-                    return respond(401, { error: 'Missing or invalid x-quarry-key header' });
-                }
-            }
-
+            // Auth already enforced above (session token or x-quarry-key).
             const body = JSON.parse(event.body || '{}');
             // Accept either pre-encoded content (base64) OR a JSON object to encode here
             let content = body.content;

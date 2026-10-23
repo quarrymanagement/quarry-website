@@ -27,6 +27,7 @@
 // ============================================================================
 
 const https = require('https');
+const { internalHeaders } = require('./_internal-auth');
 const fetch = require('node-fetch');
 
 const SITE_URL = process.env.URL || process.env.DEPLOY_URL || 'https://thequarrystl.com';
@@ -208,8 +209,8 @@ exports.handler = async (event) => {
     let learnings = [], assetLibrary = [];
     try {
         const [lr, ar] = await Promise.all([
-            fetch(`${SITE_URL}/.netlify/functions/data-store?file=social_learnings.json`).then((r) => r.ok ? r.json() : null).catch(() => null),
-            fetch(`${SITE_URL}/.netlify/functions/data-store?file=social_assets.json`).then((r) => r.ok ? r.json() : null).catch(() => null),
+            fetch(`${SITE_URL}/.netlify/functions/data-store?file=social_learnings.json`, { headers: internalHeaders() }).then((r) => r.ok ? r.json() : null).catch(() => null),
+            fetch(`${SITE_URL}/.netlify/functions/data-store?file=social_assets.json`, { headers: internalHeaders() }).then((r) => r.ok ? r.json() : null).catch(() => null),
         ]);
         if (lr && lr.decoded && Array.isArray(lr.decoded.learnings)) learnings = lr.decoded.learnings;
         if (ar && ar.decoded && Array.isArray(ar.decoded.assets)) assetLibrary = ar.decoded.assets;

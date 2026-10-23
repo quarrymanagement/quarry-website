@@ -32,6 +32,7 @@
 
 const fetch = require('node-fetch');
 
+const { internalHeaders } = require('./_internal-auth');
 const SITE_URL = process.env.URL || process.env.DEPLOY_URL || 'https://thequarrystl.com';
 const SG_KEY   = process.env.SENDGRID_API_KEY;
 const SENDER   = process.env.SENDGRID_SENDER_ID;
@@ -85,7 +86,7 @@ function segmentToListIds(segment) {
 }
 
 async function loadDraftsFile() {
-    const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=marketing_drafts.json`);
+    const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=marketing_drafts.json`, { headers: internalHeaders() });
     if (!r.ok) throw new Error('load drafts: ' + r.status);
     const d = await r.json();
     return { data: d.decoded || {}, sha: d.sha };
@@ -93,7 +94,7 @@ async function loadDraftsFile() {
 async function saveDraftsFile(json, sha, message) {
     const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=marketing_drafts.json`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: internalHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ json, sha, message })
     });
     if (!r.ok) throw new Error('save drafts: ' + r.status);

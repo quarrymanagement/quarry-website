@@ -16,6 +16,7 @@
 // ============================================================================
 
 const fetch = require('node-fetch');
+const { internalHeaders } = require('./_internal-auth');
 const crypto = require('crypto');
 
 const SITE_URL = process.env.URL || 'https://thequarrystl.com';
@@ -86,7 +87,7 @@ const CORS = {
 const respond = (s, b) => ({ statusCode: s, headers: CORS, body: JSON.stringify(b) });
 
 async function loadFile() {
-    const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=reservations_status.json`);
+    const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=reservations_status.json`, { headers: internalHeaders() });
     if (!r.ok) {
         // File may not exist yet — fall through to empty payload
         return { data: { overrides: {} }, sha: null };
@@ -96,7 +97,7 @@ async function loadFile() {
 }
 async function saveFile(json, sha, message) {
     const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=reservations_status.json`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        method: 'PUT', headers: internalHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ json, sha, message })
     });
     if (!r.ok) {

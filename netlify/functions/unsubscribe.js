@@ -17,6 +17,7 @@
 
 const fetch = require('node-fetch');
 
+const { internalHeaders } = require('./_internal-auth');
 const SG_KEY = process.env.SENDGRID_API_KEY;
 const SITE_URL = process.env.URL || process.env.DEPLOY_URL || 'https://thequarrystl.com';
 
@@ -77,7 +78,7 @@ async function logUnsubEvent(email, draftId) {
     // Append to marketing_events.json so the dashboard shows it
     try {
         const url = `${SITE_URL}/.netlify/functions/data-store?file=marketing_events.json`;
-        const r = await fetch(url);
+        const r = await fetch(url, { headers: internalHeaders() });
         if (!r.ok) return;
         const data = await r.json();
         const file = data.decoded || { events: [], aggregates: {} };
@@ -97,7 +98,7 @@ async function logUnsubEvent(email, draftId) {
         file.updatedAt = new Date().toISOString();
         await fetch(url, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: internalHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify({ json: file, sha: data.sha, message: `unsubscribe: ${email}` })
         });
     } catch (_) { /* best-effort log; don't block unsubscribe */ }

@@ -10,20 +10,21 @@
 // ============================================================================
 
 const fetch = require('node-fetch');
+const { internalHeaders } = require('./_internal-auth');
 const SITE_URL = process.env.URL || process.env.DEPLOY_URL || 'https://thequarrystl.com';
 
 const CORS = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'POST, GET, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type', 'Content-Type': 'application/json' };
 const respond = (s, b) => ({ statusCode: s, headers: CORS, body: JSON.stringify(b) });
 
 async function loadFile(file) {
-    const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=${file}`);
+    const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=${file}`, { headers: internalHeaders() });
     if (!r.ok) throw new Error(`load ${file}: ${r.status}`);
     const d = await r.json();
     return { data: d.decoded || {}, sha: d.sha };
 }
 async function saveFile(file, json, sha, message) {
     const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=${file}`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        method: 'PUT', headers: internalHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ json, sha, message })
     });
     if (!r.ok) throw new Error(`save ${file}: ${r.status}`);

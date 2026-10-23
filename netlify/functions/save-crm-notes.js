@@ -16,6 +16,7 @@
 // ============================================================================
 
 const fetch = require('node-fetch');
+const { internalHeaders } = require('./_internal-auth');
 const SITE_URL = process.env.URL || process.env.DEPLOY_URL || 'https://thequarrystl.com';
 const FILE = 'marketing_crm.json';
 
@@ -28,7 +29,7 @@ const CORS = {
 const respond = (s, b) => ({ statusCode: s, headers: CORS, body: JSON.stringify(b) });
 
 async function loadCrm() {
-    const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=${FILE}`);
+    const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=${FILE}`, { headers: internalHeaders() });
     if (r.status === 404 || r.status === 400) {
         return { data: { contacts: {} }, sha: null };
     }
@@ -41,7 +42,7 @@ async function loadCrm() {
 async function saveCrm(json, sha, message) {
     const r = await fetch(`${SITE_URL}/.netlify/functions/data-store?file=${FILE}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: internalHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ json, sha, message })
     });
     if (!r.ok) throw new Error(`save ${FILE}: ${r.status}`);
