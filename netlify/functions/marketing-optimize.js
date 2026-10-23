@@ -163,7 +163,7 @@ OUTPUT FORMAT (strict JSON, no prose outside JSON):
         const userPrompt = `Past 90 days of sends (${summary.totalSent} emails):
 ${JSON.stringify(summary.perDraft.slice(0, 80), null, 2)}
 
-Brand context: Wine, bites, live music, golf. Hours Wed-Sun. Beer garden launching 2026. Wine Club exists. Service area: Wentzville, Lake Saint Louis, O'Fallon, Defiance Wine Country.
+Brand context: Wine, bites, live music, golf. Hours Wed-Sun. Beer garden now open (turf, pavilions, outdoor stage); more updates coming in 2027. Wine Club exists. Service area: Wentzville, Lake Saint Louis, O'Fallon, Defiance Wine Country.
 
 Produce 3-7 learnings (only the ones with real evidence) and 2-4 event ideas. Return ONLY the JSON.`;
 
