@@ -311,7 +311,7 @@ function floorSrc(){
 }
 function floorView(){
   if (FLOOR_FRAMEABLE) return `<div class="fload">Loading floor chart...</div><iframe src="${floorSrc()}" title="Floor chart" allow="fullscreen"></iframe>`;
-  return `<div class="fload" style="flex-direction:column;gap:14px"><span>The floor chart opens in its own page.</span><a href="${esc(floorSrc())}" target="_top" style="color:inherit;border:1px solid currentColor;border-radius:999px;padding:10px 18px;text-decoration:none">Open floor chart</a></div>`;
+  return `<div class="fload" style="position:relative;min-height:320px;flex-direction:column;gap:14px;text-align:center;padding:20px"><span>The floor chart opens in its own page.</span><a href="${esc(floorSrc())}" target="_top" style="color:inherit;border:1px solid currentColor;border-radius:999px;padding:10px 18px;text-decoration:none">Open floor chart</a></div>`;
 }
 
 
