@@ -297,9 +297,21 @@ function viewBar(){
     `<button data-view="today" class="${view==='today'?'on':''}">Today</button>` +
     (view !== 'list' ? `<button data-full="1" style="margin-left:auto">Full screen</button>` : '') + `</div>`;
 }
+// The live floor board is hosted on quarry-checklist.netlify.app, which sends
+// X-Frame-Options: SAMEORIGIN, so it can't be framed from any other host
+// (thequarrystl.com/floor.html is only a redirect stub). Frame it only when
+// we're on that host; otherwise open it full-page instead of a blank iframe.
+const FLOOR_HOST = 'quarry-checklist.netlify.app';
+const FLOOR_FRAMEABLE = location.hostname === FLOOR_HOST;
 function floorSrc(){
-  if (view === 'today') return '/floor.html?only=reservations&embed=1';
-  return '/floor.html?embed=1' + (FLOOR_CONTROL.includes(active) ? '' : '&ro=1');
+  const base = FLOOR_FRAMEABLE ? '/floor.html' : 'https://' + FLOOR_HOST + '/floor.html';
+  if (view === 'today') return base + '?only=reservations' + (FLOOR_FRAMEABLE ? '&embed=1' : '');
+  const q = [FLOOR_FRAMEABLE ? 'embed=1' : '', FLOOR_CONTROL.includes(active) ? '' : 'ro=1'].filter(Boolean).join('&');
+  return base + (q ? '?' + q : '');
+}
+function floorView(){
+  if (FLOOR_FRAMEABLE) return `<div class="fload">Loading floor chart...</div><iframe src="${floorSrc()}" title="Floor chart" allow="fullscreen"></iframe>`;
+  return `<div class="fload" style="flex-direction:column;gap:14px"><span>The floor chart opens in its own page.</span><a href="${esc(floorSrc())}" target="_top" style="color:inherit;border:1px solid currentColor;border-radius:999px;padding:10px 18px;text-decoration:none">Open floor chart</a></div>`;
 }
 
 
@@ -390,7 +402,7 @@ function render(){
 
   if (view !== 'list'){
     $('#fill').style.width = '0%';
-    $('#main').innerHTML = viewBar() + `<div class="fwrap${full?' full':''}"><button class="fexit" data-full="0">Exit full screen</button><div class="fload">Loading floor chart...</div><iframe src="${floorSrc()}" title="Floor chart" allow="fullscreen"></iframe></div>`;
+    $('#main').innerHTML = viewBar() + `<div class="fwrap${full?' full':''}"><button class="fexit" data-full="0">Exit full screen</button>${floorView()}</div>`;
     renderAlert();
     return;
   }
