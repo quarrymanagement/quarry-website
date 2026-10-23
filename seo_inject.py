@@ -237,7 +237,7 @@ PAGES = {
     },
     "quarry-beergarden.html": {
         "title": "Beer Garden | Outdoor Patio & Craft Beer | The Quarry New Melle",
-        "description": "The Quarry's outdoor beer garden — coming 2026. Local craft taps, lakeside patio seating, casual eats, and live music in New Melle, Missouri.",
+        "description": "The Quarry's outdoor beer garden — now open. Local craft taps, lakeside patio seating, casual eats, and live music in New Melle, Missouri.",
         "slug": "quarry-beergarden.html",
         "og_image": None,
         "breadcrumbs": [("Home", "/"), ("Beer Garden", "/quarry-beergarden.html")],
@@ -250,7 +250,7 @@ PAGES = {
             "priceRange": "$$",
             "address": ADDRESS,
             "geo": GEO,
-            "description": "Outdoor lakeside beer garden with local craft taps, casual fare, and live music — opening 2026 at The Quarry in New Melle, Missouri.",
+            "description": "Outdoor lakeside beer garden with local craft taps, casual fare, and live music — now open at The Quarry in New Melle, Missouri.",
         }],
     },
     "quarry-golf.html": {
