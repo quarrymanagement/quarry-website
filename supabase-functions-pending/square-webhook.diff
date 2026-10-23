@@ -1,0 +1,37 @@
+--- /workspace/catchup/live/supabase-functions/nkulhtalltbieicvmmad/supabase/functions/square-webhook/index.ts	2026-10-23 08:07:12.916095481 -0500
++++ supabase-functions-pending/square-webhook/index.ts	2026-10-23 11:24:32.649379050 -0500
+@@ -164,6 +164,16 @@
+   });
+ }
+ 
++// Authenticated raw-media read of events.json (works when the repo is private;
++// the anonymous raw.githubusercontent.com URL 404s then). Same body as before.
++async function ghRawEvents(): Promise<Response> {
++  const r = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/events.json?ref=main`, {
++    headers: { "Authorization": "token " + GITHUB_TOKEN, "User-Agent": "Quarry-Square-Webhook", "Accept": "application/vnd.github.raw" },
++  });
++  if (!r.ok) throw new Error("events.json raw read failed: " + r.status);
++  return r;
++}
++
+ function parseEventPayment(p: any): { eventName: string; qty: number; email: string; paymentId: string; amountCents: number; currency: string } | null {
+   const note: string = p?.note || "";
+   if (!note.startsWith("Event - ")) return null;
+@@ -519,7 +529,7 @@
+       const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+       data = JSON.parse(new TextDecoder("utf-8").decode(bytes));
+     } else {
+-      const raw = await fetch(`https://raw.githubusercontent.com/${GITHUB_REPO}/main/events.json`, { headers: { "User-Agent": "Quarry-Square-Webhook" } });
++      const raw = await ghRawEvents(); // private-repo safe (was anonymous raw.githubusercontent.com)
+       data = JSON.parse(await raw.text());
+     }
+     const list = data.events || [];
+@@ -632,7 +642,7 @@
+     const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+     data = JSON.parse(new TextDecoder("utf-8").decode(bytes));
+   } else {
+-    const raw = await fetch(`https://raw.githubusercontent.com/${GITHUB_REPO}/main/events.json`, { headers: { "User-Agent": "Quarry-Square-Webhook" } });
++    const raw = await ghRawEvents(); // private-repo safe (was anonymous raw.githubusercontent.com)
+     data = JSON.parse(await raw.text());
+   }
+   return { data, sha: meta.sha };

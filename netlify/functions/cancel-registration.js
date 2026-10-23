@@ -1,6 +1,7 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const https = require('https');
 const { vaultAndStrip } = require('./_event-pii');
+const { readRepoText, readRepoJson } = require('./_github-data');
 // 2026-10-22: was unauthenticated — anyone could cancel/refund a registration
 // by orderNumber. Now requires an owner admin session token (x-admin-token).
 const { isAuthorized } = require('./_admin-auth');
@@ -100,8 +101,8 @@ exports.handler = async (event) => {
     }
     const fileSha = metaRes.data.sha;
 
-    // Fetch actual content via raw URL (file is too large for Contents API)
-    const rawContent = await fetchRaw('https://raw.githubusercontent.com/' + repo + '/main/events.json');
+    // Fetch actual content via authenticated raw-media read (file is too large for JSON content)
+    const rawContent = await readRepoText('events.json', { fresh: true });
     const eventsData = JSON.parse(rawContent);
 
     // Find and remove the registration

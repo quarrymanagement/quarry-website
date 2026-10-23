@@ -12,8 +12,8 @@
 #   data-store.js. Each commit triggered a fresh Netlify deploy — ~96
 #   builds/day, eating ~1500 build minutes/month.
 #
-#   But these data files are read directly from raw.githubusercontent.com
-#   by both the public site (events page, bands page) and the admin
+#   But these data files are read live from GitHub (authenticated, via
+#   /.netlify/functions/data-read and _github-data.js) by both the public site (events page, bands page) and the admin
 #   (loads via data-store.js which also reads from GitHub). They never
 #   need to live on the Netlify CDN. Re-deploying the entire site every
 #   time a single CRM record updates is pure waste.

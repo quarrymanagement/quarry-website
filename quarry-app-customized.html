@@ -1911,7 +1911,10 @@ a.account-link:hover .al-arrow { color: var(--gold); }
 
 <script>
 const QUARRY_API   = 'https://thequarrystl.com/.netlify/functions';
-const EVENTS_FEED  = 'https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/events.json';
+// Data feeds go through data-read (repo can be private). Same-origin on the
+// web (incl. deploy previews); absolute URL inside the native app (localhost).
+const DATA_API     = (/^https?:$/.test(location.protocol) && location.hostname !== 'localhost') ? '/.netlify/functions' : QUARRY_API;
+const EVENTS_FEED  = DATA_API + '/data-read?file=events.json';
 
 function escapeHtml(s) {
   return String(s == null ? '' : s).replace(/[&<>"']/g, c => (
@@ -2018,7 +2021,7 @@ function setSyncStatus(state, label) {
 
 async function fetchEvents() {
   try {
-    const url = EVENTS_FEED + '?t=' + Date.now();
+    const url = EVENTS_FEED;
     const res = await fetch(url, { mode: 'cors' });
     if (!res.ok) throw new Error('events.json status ' + res.status);
     const data = await res.json();
@@ -2518,11 +2521,11 @@ function updateEventsMonthLabel() {
 // ─── Native menu rendering (from menu.json) ────────────────────────────
 let _menuData = null;
 let _menuActiveSection = 'all';
-const MENU_FEED = 'https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/menu.json';
+const MENU_FEED = DATA_API + '/data-read?file=menu.json';
 
 async function fetchMenu() {
   try {
-    const r = await fetch(MENU_FEED + '?t=' + Date.now(), { mode: 'cors' });
+    const r = await fetch(MENU_FEED, { mode: 'cors' });
     if (!r.ok) throw new Error('menu HTTP ' + r.status);
     return await r.json();
   } catch (e) {
@@ -3068,7 +3071,7 @@ async function submitParty() {
   // Cached app-content.json (Happy Hour, Staff Pick, greetings) — fetched once per app load
   let appContentCache = null;
   function loadAppContent() {
-    return fetch('https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/app-content.json?t=' + Math.floor(Date.now() / 60000))
+    return fetch(DATA_API + '/data-read?file=app-content.json')
       .then(function(r) { return r.ok ? r.json() : null; })
       .then(function(j) { appContentCache = j; return j; })
       .catch(function() { return null; });
@@ -3101,7 +3104,7 @@ async function submitParty() {
   // Cached rewards.json catalog — fetched once per minute, re-rendered when balance changes
   let rewardsCatalogCache = null;
   function loadRewardsCatalog() {
-    return fetch('https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/rewards.json?t=' + Math.floor(Date.now() / 60000))
+    return fetch(DATA_API + '/data-read?file=rewards.json')
       .then(function(r) { return r.ok ? r.json() : null; })
       .then(function(j) { rewardsCatalogCache = j; return j; })
       .catch(function() { return null; });

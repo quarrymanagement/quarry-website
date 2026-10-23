@@ -18,10 +18,155 @@
   command = "bash build.sh"
   publish = "."
   # Skip the build entirely when only data JSON files changed (these are
-  # read directly from raw.githubusercontent.com — no rebuild needed).
+  # read live from GitHub via /.netlify/functions/data-read — no rebuild needed).
   # See build-ignore.sh for the logic. Was burning ~1500 build minutes/month
   # before this; now should be well under 100.
   ignore = "bash build-ignore.sh"
+
+
+# ----------------------------------------------------------------------------
+# Never serve internal / PII data files from the CDN. publish = "." uploads
+# the whole repo, so without these rules thequarrystl.com/subscribers.json,
+# /members.json, /private/... etc. were publicly downloadable. Public data is
+# served by /.netlify/functions/data-read (allowlisted, PII behind a session).
+# ----------------------------------------------------------------------------
+[[redirects]]
+  from = "/subscribers.json"
+  to = "/.netlify/functions/data-read?file=__blocked"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/members.json"
+  to = "/.netlify/functions/data-read?file=__blocked"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/forms.json"
+  to = "/.netlify/functions/data-read?file=__blocked"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/food-truck-leads.json"
+  to = "/.netlify/functions/data-read?file=__blocked"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/reservations.json"
+  to = "/.netlify/functions/data-read?file=__blocked"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/reservations_status.json"
+  to = "/.netlify/functions/data-read?file=__blocked"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/pending-scans.json"
+  to = "/.netlify/functions/data-read?file=__blocked"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/scanned-flagged.json"
+  to = "/.netlify/functions/data-read?file=__blocked"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/credited-orders.json"
+  to = "/.netlify/functions/data-read?file=__blocked"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/catchup_status.json"
+  to = "/.netlify/functions/data-read?file=__blocked"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/schedule.json"
+  to = "/.netlify/functions/data-read?file=__blocked"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/toast-discount-map.json"
+  to = "/.netlify/functions/data-read?file=__blocked"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/marketing_calendar.json"
+  to = "/.netlify/functions/data-read?file=__blocked"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/marketing_crm.json"
+  to = "/.netlify/functions/data-read?file=__blocked"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/marketing_drafts.json"
+  to = "/.netlify/functions/data-read?file=__blocked"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/marketing_events.json"
+  to = "/.netlify/functions/data-read?file=__blocked"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/marketing_learnings.json"
+  to = "/.netlify/functions/data-read?file=__blocked"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/social_assets.json"
+  to = "/.netlify/functions/data-read?file=__blocked"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/social_calendar.json"
+  to = "/.netlify/functions/data-read?file=__blocked"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/social_drafts.json"
+  to = "/.netlify/functions/data-read?file=__blocked"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/social_events.json"
+  to = "/.netlify/functions/data-read?file=__blocked"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/social_learnings.json"
+  to = "/.netlify/functions/data-read?file=__blocked"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/private/*"
+  to = "/.netlify/functions/data-read?file=__blocked"
+  status = 404
+  force = true
 
 [functions]
   directory = "netlify/functions"

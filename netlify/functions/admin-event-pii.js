@@ -5,7 +5,7 @@
 // events.json; they live in the Supabase vault (event_registrant_pii, see
 // supabase/migrations/20261022120000_event_registrant_pii.sql). The admin
 // dashboard calls this to get the same document it used to read from
-// raw.githubusercontent.com, with PII re-attached.
+// the GitHub contents API (_github-data), with PII re-attached.
 //
 // GET  /.netlify/functions/admin-event-pii      header x-admin-token: <session token>
 //   -> 200 { data: <events.json hydrated>, hydrated: <n> }
@@ -14,8 +14,8 @@
 // ============================================================================
 const { isAuthorized } = require('./_admin-auth');
 const { hydrateDoc } = require('./_event-pii');
+const { readRepoText, readRepoJson } = require('./_github-data');
 
-const RAW = 'https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/events.json';
 const headers = {
   'Content-Type': 'application/json',
   'Cache-Control': 'no-store',
@@ -31,9 +31,7 @@ exports.handler = async (event) => {
     return { statusCode: 401, headers, body: JSON.stringify({ error: 'Admin session required' }) };
   }
   try {
-    const r = await fetch(RAW + '?t=' + Date.now(), { headers: { 'Cache-Control': 'no-cache' } });
-    if (!r.ok) throw new Error('events.json ' + r.status);
-    const data = await r.json();
+    const data = await readRepoJson('events.json', { fresh: true });
     const hydrated = await hydrateDoc(data);
     return { statusCode: 200, headers, body: JSON.stringify({ data, hydrated }) };
   } catch (e) {

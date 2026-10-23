@@ -1673,7 +1673,7 @@
     </footer>
 
     <script>
-        // Dynamic Events Data — loaded from events.json on GitHub
+        // Dynamic Events Data — loaded from events.json via /.netlify/functions/data-read
         const GITHUB_REPO = 'quarrymanagement/quarry-website';
         const DATA_FILE = 'events.json';
         // Statuses that must never show on the public events page.
@@ -1685,9 +1685,9 @@
          */
         async function loadEventsFromGitHub() {
             try {
-                // Use raw.githubusercontent for fast, no-auth reads (cache busted with timestamp)
-                const cacheBust = '?t=' + Date.now();
-                const resp = await fetch(`https://raw.githubusercontent.com/${GITHUB_REPO}/main/${DATA_FILE}${cacheBust}`);
+                // Read through the site's data-read function (works with a private repo;
+                // edge-cached ~30 s so data stays live without a rebuild)
+                const resp = await fetch(`/.netlify/functions/data-read?file=${DATA_FILE}`);
                 if (!resp.ok) throw new Error('Failed to fetch events data');
                 const data = await resp.json();
                 allEvents = (data.events || []).map(evt => {

@@ -1,4 +1,5 @@
 const https = require('https');
+const { readRepoText, readRepoJson } = require('./_github-data');
 
 const HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -62,7 +63,7 @@ exports.handler = async (event) => {
         if (metaRes.data.content && metaRes.data.encoding === 'base64') {
           currentData = JSON.parse(Buffer.from(metaRes.data.content, 'base64').toString('utf-8'));
         } else {
-          currentData = JSON.parse(await fetchRaw('https://raw.githubusercontent.com/' + repo + '/main/forms.json'));
+          currentData = JSON.parse(await readRepoText('forms.json', { fresh: true }));
         }
       }
     } catch (e) {

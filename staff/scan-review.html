@@ -92,10 +92,17 @@ async function login() {
 }
 
 async function loadQueue() {
-  // Load scanned-flagged.json directly from raw GitHub
+  // Load the pending queue through scan-review (password-checked, works with
+  // a private repo).
   try {
-    const r = await fetch('https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/scanned-flagged.json?t=' + Date.now());
+    const r = await fetch('/.netlify/functions/scan-review', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminPassword: adminPass, action: 'list' }),
+    });
+    if (r.status === 401) { showToast('Wrong password', 'err'); return; }
     const data = await r.json();
+    if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
     items = (data.items || []).filter(i => i.status === 'pending');
     renderQueue();
     $('loginPanel').style.display = 'none';

@@ -2,6 +2,7 @@ const Stripe = require('stripe');
 const https = require('https');
 const { readBlob, writeBlob } = require('./_blobs');
 const { vaultAndStrip } = require('./_event-pii');
+const { readRepoText, readRepoJson } = require('./_github-data');
 
 function sendGridEmail(to, subject, htmlBody, fromEmail, fromName) {
   fromEmail = fromEmail || 'management@thequarrystl.com';
@@ -240,20 +241,14 @@ exports.handler = async (event) => {
           let eventsData;
 
           // Contents API returns empty `content` when file > 1MB. events.json is ~6MB,
-          // so fall back to the raw URL whenever content is missing.
+          // so fall back to the raw-media read whenever content is missing.
           if (metaRes.data.content && metaRes.data.encoding === 'base64' && metaRes.data.content.length > 0) {
             eventsData = JSON.parse(Buffer.from(metaRes.data.content, 'base64').toString('utf-8'));
           } else {
-            const blobUrl = 'https://raw.githubusercontent.com/' + repo + '/main/events.json';
-            const rawContent = await new Promise(function(resolve, reject) {
-              https.get(blobUrl, { headers: { 'User-Agent': 'Quarry-Webhook' } }, function(res) {
-                let data = '';
-                res.on('data', function(chunk) { data += chunk; });
-                res.on('end', function() { resolve(data); });
-              }).on('error', reject);
-            });
+            // Authenticated raw-media read (works with a private repo).
+            const rawContent = await readRepoText('events.json', { fresh: true });
             eventsData = JSON.parse(rawContent);
-            console.log('Fetched events.json via raw URL (file too large for Contents API)');
+            console.log('Fetched events.json via contents API raw media (file too large for JSON content)');
           }
 
           // Add registration to the registrations object

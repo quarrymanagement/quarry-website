@@ -2,6 +2,7 @@
 // scan-review.js — admin approve/reject for flagged receipt scans
 //
 // POST { adminPassword, itemId, action }
+//   action: "list"    → { items: [pending flagged scans] } (no itemId needed)
 //   action: "approve" → credit points, mark approved
 //   action: "reject"  → mark rejected (no points), keep in ledger for audit
 //
@@ -89,6 +90,14 @@ exports.handler = async (event) => {
 
   const { adminPassword, itemId, action } = body;
   if (!checkAdmin(adminPassword)) return reply(401, { ok: false, error: 'Invalid admin password' });
+
+  // action "list": the review page's queue read (replaces its anonymous
+  // raw.githubusercontent.com read so the repo can be private).
+  if (action === 'list') {
+    const f = await loadJson('scanned-flagged.json');
+    const items = ((f.json && f.json.items) || []).filter((i) => i.status === 'pending');
+    return reply(200, { ok: true, items });
+  }
   if (!itemId || !['approve','reject'].includes(action)) return reply(400, { ok: false, error: 'Missing itemId or invalid action' });
 
   // Load flagged queue

@@ -51,8 +51,8 @@
 const https = require('https');
 const { readBlob, writeBlob } = require('./_blobs');
 const { vaultAndStrip, hydrateDoc } = require('./_event-pii');
+const { readRepoText, readRepoJson } = require('./_github-data');
 
-const REPO_RAW = 'https://raw.githubusercontent.com/quarrymanagement/quarry-website/main';
 const SENT_LOG_BLOB = 'wine-growth-sent-log';
 const TZ = 'America/Chicago';
 const LOGO_URL = 'https://thequarrystl.com/assets/quarry-q-logo.png';
@@ -605,9 +605,9 @@ exports.handler = async (event) => {
     const dryRun = url.searchParams.get('dry_run') === '1';
 
     let [tastingsData, subscribers, eventsData, wineClub, log] = await Promise.all([
-      fetchJson(REPO_RAW + '/wine_tastings.json?t=' + Date.now()),
-      fetchJson(REPO_RAW + '/subscribers.json?t=' + Date.now()),
-      fetchJson(REPO_RAW + '/events.json?t=' + Date.now()),
+      readRepoJson('wine_tastings.json', { fresh: true }),
+      readRepoJson('subscribers.json', { fresh: true }),
+      readRepoJson('events.json', { fresh: true }),
       readBlob('wine-club-members'),
       readSentLog(),
     ]);
@@ -631,8 +631,8 @@ exports.handler = async (event) => {
         if (provisioned.created.length > 0) {
           // Our in-memory copies are now stale (ticketUrl/eventId, new events.json rows) -- re-fetch both.
           [tastingsData, eventsData] = await Promise.all([
-            fetchJson(REPO_RAW + '/wine_tastings.json?t=' + Date.now()),
-            fetchJson(REPO_RAW + '/events.json?t=' + Date.now()),
+            readRepoJson('wine_tastings.json', { fresh: true }),
+            readRepoJson('events.json', { fresh: true }),
           ]);
           await hydrateEvents();
         }

@@ -6890,13 +6890,23 @@
         // ================================================================
         // DATA LOADING
         // ================================================================
+        // All repo data reads go through data-read (works with a private repo).
+        // Sends the session token (needed for PII files) and bypasses caches
+        // so the panel always shows what was just saved.
+        function dataRead(file) {
+            return fetch('/.netlify/functions/data-read?file=' + encodeURIComponent(file) + '&nocache=' + Date.now(), {
+                headers: { 'x-admin-token': (localStorage.getItem('quarryAdminToken') || '') }
+            });
+        }
+        window.dataRead = dataRead; // used by the setup-tab IIFEs further down
+
         async function loadData() {
             try {
                 const [eventsRes, subscribersRes, formsRes, foodTruckLeadsRes] = await Promise.all([
-                    fetch('https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/events.json?t=' + Date.now()),
-                    fetch('https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/subscribers.json?t=' + Date.now()),
-                    fetch('https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/forms.json?t=' + Date.now()).catch(() => null),
-                    fetch('https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/food-truck-leads.json?t=' + Date.now()).catch(() => null)
+                    dataRead('events.json'),
+                    dataRead('subscribers.json'),
+                    dataRead('forms.json').catch(() => null),
+                    dataRead('food-truck-leads.json').catch(() => null)
                 ]);
 
                 if (eventsRes.ok) {
@@ -9341,7 +9351,7 @@
         // ================================================================
         async function loadScheduleData() {
             try {
-                const response = await fetch(`https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/schedule.json?t=${Date.now()}`);
+                const response = await dataRead('schedule.json');
                 if (response.ok) {
                     const data = await response.json();
                     app.employees = (data.employees || []).map(emp => {
@@ -14235,7 +14245,7 @@ function hashCode(str) {
            Loads + saves rewards.json through save-github-file Netlify fn.
            ================================================================ */
         (function(){
-            const FEED = 'https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/rewards.json';
+            const FEED = 'rewards.json';
             const SAVE_FN = '/.netlify/functions/save-github-file';
             let data = null;
             let dirty = false;
@@ -14260,7 +14270,7 @@ function hashCode(str) {
             async function load() {
                 setStatus('Loading…');
                 try {
-                    const r = await fetch(FEED + '?t=' + Date.now());
+                    const r = await dataRead(FEED);
                     if (!r.ok) throw new Error('HTTP ' + r.status);
                     data = await r.json();
                     render();
@@ -14441,7 +14451,7 @@ function hashCode(str) {
            Sections are reorderable; items have name / price / description.
            ================================================================ */
         (function(){
-            const FEED = 'https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/menu.json';
+            const FEED = 'menu.json';
             const SAVE_FN = '/.netlify/functions/save-github-file';
             let data = null;
             let dirty = false;
@@ -14464,7 +14474,7 @@ function hashCode(str) {
             async function load() {
                 setStatus('Loading…');
                 try {
-                    const r = await fetch(FEED + '?t=' + Date.now());
+                    const r = await dataRead(FEED);
                     if (!r.ok) throw new Error('HTTP ' + r.status);
                     data = await r.json();
                     if (!data.sections) data.sections = [];
@@ -14595,7 +14605,7 @@ function hashCode(str) {
            Loads + saves app-content.json through save-github-file Netlify fn.
            ================================================================ */
         (function(){
-            const FEED = 'https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/app-content.json';
+            const FEED = 'app-content.json';
             const SAVE_FN = '/.netlify/functions/save-github-file';
             let data = null;
             let dirty = false;
@@ -14616,7 +14626,7 @@ function hashCode(str) {
             async function load() {
                 setStatus('Loading…');
                 try {
-                    const r = await fetch(FEED + '?t=' + Date.now());
+                    const r = await dataRead(FEED);
                     if (r.status === 404) {
                         // File doesn't exist yet — start with defaults
                         data = {
@@ -14714,7 +14724,7 @@ function hashCode(str) {
            Loads + saves members.json through save-github-file Netlify fn.
            ================================================================ */
         (function(){
-            const FEED = 'https://raw.githubusercontent.com/quarrymanagement/quarry-website/main/members.json';
+            const FEED = 'members.json';
             const SAVE_FN = '/.netlify/functions/save-github-file';
             let data = null;
 
@@ -14754,7 +14764,7 @@ function hashCode(str) {
                 try {
                     const adminSecret = localStorage.getItem('quarryAdminPushSecret') || '';
                     const [feedRes, sbRes] = await Promise.all([
-                        fetch(FEED + '?t=' + Date.now()).catch(() => null),
+                        dataRead(FEED).catch(() => null),
                         fetch(SB_LIST_URL, { headers: { 'x-admin-secret': adminSecret } }).catch(() => null)
                     ]);
 
