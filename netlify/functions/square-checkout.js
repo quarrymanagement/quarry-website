@@ -135,6 +135,8 @@ exports.handler = async function(event) {
     }
 
     const m = body.metadata || {};
+    const closedMsg = require('./_golf-closed').closedReason(m.date || m.eventDate, m.time || m.eventTime);
+    if (closedMsg) return { statusCode: 409, headers, body: JSON.stringify({ error: closedMsg }) };
     const origin = event.headers.origin || 'https://thequarrystl.com';
 
     // $0 fully comped booking: skip Square entirely, store + email directly
