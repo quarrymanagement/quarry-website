@@ -218,7 +218,24 @@ var NOTICES = [
     });
   }
 
+  /* Date-specific bits of page copy (e.g. one-off holiday hours) carry
+     data-show-from / data-show-until (YYYY-MM-DD, New Melle time) and ship
+     with the `hidden` attribute. Show them only inside their window, so they
+     disappear by themselves after the last day. */
+  function dated() {
+    var now = today();
+    var els = document.querySelectorAll("[data-show-until],[data-show-from]");
+    for (var i = 0; i < els.length; i++) {
+      var from = els[i].getAttribute("data-show-from");
+      var until = els[i].getAttribute("data-show-until");
+      var on = !(from && now < from) && !(until && now > until);
+      if (on) els[i].removeAttribute("hidden");
+      else els[i].setAttribute("hidden", "");
+    }
+  }
+
   function init() {
+    dated();
     loadNotices(function (list) { render(active(list)); });
   }
 
