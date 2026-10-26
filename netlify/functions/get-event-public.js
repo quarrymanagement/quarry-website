@@ -17,6 +17,7 @@
 const https = require('https');
 const { sanitizeEvent } = require('./_event-pii');
 const { readRepoText, readRepoJson } = require('./_github-data');
+const { activeBundles } = require('./_event-bundles');
 
 function fetchJSON(url) {
   return new Promise((resolve, reject) => {
@@ -59,7 +60,12 @@ exports.handler = async (event) => {
     if (!found) {
       return { statusCode: 404, headers, body: JSON.stringify({ error: 'Event not found' }) };
     }
-    return { statusCode: 200, headers, body: JSON.stringify({ event: sanitizeEvent(found) }) };
+    const out = sanitizeEvent(found);
+    // 2026-10-26: limited-time bundles that are on sale right now (computed per
+    // request, so an expired deal drops out within the 60s CDN cache).
+    const bundles = activeBundles(found);
+    if (bundles.length) out.activeBundles = bundles;
+    return { statusCode: 200, headers, body: JSON.stringify({ event: out }) };
   } catch (err) {
     return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
   }

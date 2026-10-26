@@ -33,6 +33,8 @@
 
 const https = require('https');
 const crypto = require('crypto');
+// Limited-time ticket bundles (e.g. Halloween 2-for-$60). Priced + expired server-side.
+const { findActiveBundle } = require('./_event-bundles');
 
 // Coupon table (manual - Square does not have native promo codes for hosted checkout)
 const EVENT_COUPONS = {
@@ -327,9 +329,30 @@ exports.handler = async function(event) {
     if (evData.status === 'sold-out') {
       return { statusCode: 409, headers, body: JSON.stringify({ error: 'Event is sold out' }) };
     }
+    // ---- LIMITED-TIME BUNDLE (e.g. "2 tickets for $60") -------------------
+    // Only when the client asks for one (body.bundleId). Price, ticket count and
+    // expiry come from _event-bundles.js, never from the browser. After the
+    // bundle's expiresAt it is simply not found, so the deal stops being accepted
+    // automatically. Coupons never stack on a bundle.
+    let chosenBundle = null;
+    let bundleCount = 0;
+    if (body.bundleId) {
+      if (lineItemsIn && lineItemsIn.length || (Array.isArray(evData.seatingOptions) && evData.seatingOptions.length)) {
+        return { statusCode: 400, headers, body: JSON.stringify({ error: 'That deal cannot be combined with table seating.' }) };
+      }
+      chosenBundle = findActiveBundle(evData, body.bundleId);
+      if (!chosenBundle) {
+        return { statusCode: 410, headers, body: JSON.stringify({ error: 'Sorry, that deal has ended. Regular tickets are still available.', dealEnded: true }) };
+      }
+      bundleCount = Math.max(1, Math.min(chosenBundle.maxPerOrder || 10, parseInt(body.bundleCount, 10) || 1));
+    }
+
     // Total quantity = sum of line item qtys if provided, otherwise partySize
     let qty = partySize || 1;
-    if (lineItemsIn && lineItemsIn.length) {
+    if (chosenBundle) {
+      // Ticket count is derived from the bundle; any partySize sent is ignored.
+      qty = bundleCount * chosenBundle.qty;
+    } else if (lineItemsIn && lineItemsIn.length) {
       qty = lineItemsIn.reduce(function(s, li) { return s + (parseInt(li.qty, 10) || 0); }, 0) || 1;
     }
 
@@ -439,7 +462,18 @@ exports.handler = async function(event) {
     let unitPrice = evData.pricePerSeat || evData.price || 0;
     let effectiveUnitPrice = unitPrice;
 
-    if (chosenOption && chosenOption.pricePerSeat) {
+    if (chosenBundle) {
+      // Bundle pricing: one Square line per bundle, e.g. "2 x Bring a Friend
+      // 2-Pack" at $60 each = 4 tickets. The payment_note below still ends in
+      // " x<tickets>", so the Square webhook records the right ticket count.
+      tierName = chosenBundle.name;
+      squareLineItems.push({
+        name: chosenBundle.name + ' - ' + (evData.name || ''),
+        note: chosenBundle.qty + ' tickets per pack. ' + (evData.date || '') + ' at The Quarry',
+        quantity: String(bundleCount),
+        base_price_money: { amount: chosenBundle.price, currency: 'USD' }
+      });
+    } else if (chosenOption && chosenOption.pricePerSeat) {
       // Per-option pricing: one Square line per unit booked, priced at
       // seats x pricePerSeat. A guest taking three 4-tops at $25/seat sees
       // "3 x 4-Top Table" at $100 each.
@@ -570,7 +604,9 @@ exports.handler = async function(event) {
     }
 
     // Build Square Payment Link
-    const tierSummary = (chosenOption && chosenOption.pricePerSeat)
+    const tierSummary = chosenBundle
+      ? (bundleCount + 'x ' + chosenBundle.name + ' (' + qty + ' tickets)')
+      : (chosenOption && chosenOption.pricePerSeat)
       ? (units + 'x ' + (chosenOption.name || ''))
       : (lineItemsIn && lineItemsIn.length)
         ? squareLineItems.map(function(li){ return li.quantity + 'x ' + li.name.split(' - ')[0]; }).join(' + ')
@@ -596,7 +632,7 @@ exports.handler = async function(event) {
       arrivalSlot: String(chosenArrivalSlot ? (chosenArrivalSlot.id || '') : '').slice(0, 60),
       arrivalLabel: String(chosenArrivalSlot ? (chosenArrivalSlot.label || '') : '').slice(0, 60),
       ticketTier: String(tierSummary).slice(0, 255),
-      couponCode: String(couponCode).slice(0, 60)
+      couponCode: String(chosenBundle ? '' : couponCode).slice(0, 60)
     };
     // Square rejects empty-string metadata values with MISSING_REQUIRED_PARAMETER,
     // AND caps an order at 10 metadata entries (ARRAY_LENGTH_TOO_LONG). Strip the

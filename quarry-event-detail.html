@@ -554,6 +554,45 @@
             return '$' + (cents / 100).toFixed(2);
         }
 
+        // ─── Limited-time bundles (e.g. "2 tickets for $60") ───
+        // The server (get-event-public) only sends bundles that are on sale now,
+        // and event-register re-prices + re-checks expiry, so this is display only.
+        function detailActiveBundles(evt) {
+            var list = (evt && Array.isArray(evt.activeBundles)) ? evt.activeBundles : [];
+            var now = Date.now();
+            return list.filter(function (b) {
+                var exp = Date.parse(b && b.expiresAt);
+                return b && b.id && (parseInt(b.qty, 10) || 0) >= 2 && (parseInt(b.price, 10) || 0) > 0 && isFinite(exp) && now <= exp;
+            });
+        }
+        function detailBundleMoney(cents) {
+            var c = parseInt(cents, 10) || 0;
+            return '$' + (c % 100 === 0 ? (c / 100).toFixed(0) : (c / 100).toFixed(2));
+        }
+        function detailBundleHeadline(b) {
+            return b.qty + ' tickets for ' + detailBundleMoney(b.price);
+        }
+        function detailEscBundle(t) {
+            return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+        function getDetailSelectedBundle() {
+            var sel = document.getElementById('detailTicketTier');
+            var opt = (sel && sel.selectedIndex >= 0) ? sel.options[sel.selectedIndex] : null;
+            if (!opt || !opt.dataset.bundle) return null;
+            var list = detailActiveBundles(eventData);
+            for (var i = 0; i < list.length; i++) { if (list[i].id === opt.dataset.bundle) return list[i]; }
+            return null;
+        }
+        window.selectDetailBundle = function (id) {
+            var sel = document.getElementById('detailTicketTier');
+            if (!sel) return;
+            for (var i = 0; i < sel.options.length; i++) {
+                if (sel.options[i].dataset.bundle === id) { sel.selectedIndex = i; onDetailTierChange(); break; }
+            }
+            var qty = document.getElementById('detailPartySize');
+            if (qty) qty.focus();
+        };
+
         function renderPricingDetails(evt) {
             var container = document.getElementById('pricingDetails');
             var et = evt.eventType || 'ticketed';
@@ -590,6 +629,10 @@
                     html += '<p style="color:#999;font-size:.85rem;margin-top:8px;"><strong style="color:#ccc;">' + t.name + '</strong><br>' + (t.description || '') + '</p>';
                 }
             }
+            var pdBundles = detailActiveBundles(evt);
+            for (var pb = 0; pb < pdBundles.length; pb++) {
+                html += '<p style="color:#d4af37;font-size:.9rem;line-height:1.6;margin-top:8px;font-weight:600;">' + detailEscBundle(pdBundles[pb].name) + ': ' + detailEscBundle(detailBundleHeadline(pdBundles[pb])) + (pdBundles[pb].note ? '<br><span style="color:#ccc;font-weight:400;">' + detailEscBundle(pdBundles[pb].note) + '</span>' : '') + '</p>';
+            }
             container.innerHTML = html;
         }
 
@@ -618,6 +661,15 @@
             }
 
             var html = '<h3>Register Now</h3>';
+            var regBundles = hasSeating ? [] : detailActiveBundles(evt);
+            for (var rb = 0; rb < regBundles.length; rb++) {
+                html += '<div class="bundle-deal" style="background:rgba(212,175,55,.12);border:1px solid #d4af37;border-radius:10px;padding:12px 14px;margin:0 0 16px;">' +
+                    '<div style="font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#d4af37;">Limited-time deal</div>' +
+                    '<div style="font-size:1.1rem;font-weight:700;color:#fff;margin-top:2px;">' + detailEscBundle(regBundles[rb].name) + ': ' + detailEscBundle(detailBundleHeadline(regBundles[rb])) + '</div>' +
+                    (regBundles[rb].note ? '<div style="font-size:13px;color:#ccc;margin-top:2px;">' + detailEscBundle(regBundles[rb].note) + '</div>' : '') +
+                    '<button type="button" onclick="selectDetailBundle(\'' + detailEscBundle(regBundles[rb].id) + '\')" style="margin-top:8px;padding:8px 14px;background:#d4af37;color:#1a1a1a;border:0;border-radius:6px;font-weight:700;font-size:13px;cursor:pointer;">Use this deal</button>' +
+                    '</div>';
+            }
 
             // Form — matches the main events page modal exactly
             html += '<form class="reg-form" id="detailRegForm" onsubmit="return handleRegistration(event)">';
@@ -646,6 +698,10 @@
                     if (tierSoldOut) tierLabel += ' (SOLD OUT)';
                     html += '<option value="' + t.name + '" data-price="' + t.pricePerPerson + '" data-vendor="' + (t.vendorTier ? '1' : '0') + '" data-capacity="' + (t.capacity || 0) + '" data-registered="' + (t.registeredCount || 0) + '"' + (tierSoldOut ? ' disabled' : '') + '>' + tierLabel + '</option>';
                 }
+            }
+            for (var rbo = 0; rbo < regBundles.length; rbo++) {
+                var bo = regBundles[rbo];
+                html += '<option value="' + detailEscBundle(bo.name) + '" data-bundle="' + detailEscBundle(bo.id) + '" data-bundleqty="' + bo.qty + '" data-price="' + bo.price + '" data-vendor="0" data-capacity="0" data-registered="0">' + detailEscBundle(bo.name) + ' — ' + detailEscBundle(detailBundleHeadline(bo)) + '</option>';
             }
             html += '</select>';
             html += '<div id="detailTierAvailability" style="display:none;font-size:13px;color:#888;margin:-4px 0 12px;"></div>';
@@ -697,7 +753,7 @@
                 html += '</div>';
             } else {
                 // Number of Tickets
-                html += '<label>Number of Tickets *</label>';
+                html += '<label id="detailPartySizeLabel">Number of Tickets *</label>';
                 html += '<input type="number" name="partySize" id="detailPartySize" min="1" max="20" value="1" required onchange="updateDetailSummary()">';
             }
 
@@ -737,7 +793,7 @@
             }
 
             // Coupon Code
-            html += '<div style="margin-top:16px;">';
+            html += '<div id="detailCouponGroup" style="margin-top:16px;">';
             html += '<label>Coupon Code</label>';
             html += '<div style="display:flex;gap:8px;">';
             html += '<input type="text" id="detailCouponCode" placeholder="Enter coupon code" style="flex:1;text-transform:uppercase;">';
@@ -1243,6 +1299,21 @@
                 if (btInput) { btInput.required = false; btInput.value = ''; }
             }
 
+            // Bundle selected: quantity means "how many packs", and coupons don't stack.
+            var bSel = tierHidden ? null : getDetailSelectedBundle();
+            var psLabel = document.getElementById('detailPartySizeLabel');
+            var psInput = document.getElementById('detailPartySize');
+            var cpGroup = document.getElementById('detailCouponGroup');
+            if (psLabel) psLabel.textContent = bSel ? ('Number of ' + bSel.qty + '-Packs *') : 'Number of Tickets *';
+            if (psInput) {
+                psInput.max = bSel ? String(bSel.maxPerOrder || 10) : '20';
+                if (bSel && parseInt(psInput.value, 10) > (bSel.maxPerOrder || 10)) psInput.value = String(bSel.maxPerOrder || 10);
+            }
+            if (cpGroup) {
+                if (bSel && detailCoupon) removeDetailCoupon();
+                cpGroup.style.display = bSel ? 'none' : '';
+            }
+
             if (!tierHidden && selected && parseInt(selected.dataset.capacity) > 0) {
                 var cap = parseInt(selected.dataset.capacity);
                 var reg = parseInt(selected.dataset.registered) || 0;
@@ -1335,9 +1406,17 @@
             } else {
                 var qtyEl = document.getElementById('detailPartySize');
                 numPeople = (qtyEl && parseInt(qtyEl.value, 10)) || 1;
+                var sumBundle = getDetailSelectedBundle();
+                if (sumBundle) {
+                    var packs = Math.max(1, Math.min(sumBundle.maxPerOrder || 10, numPeople));
+                    subtotalCents = sumBundle.price * packs;
+                    html += '<div style="display:flex;justify-content:space-between;gap:12px;"><span>' + detailEscBundle(sumBundle.name) + '</span><span style="white-space:nowrap;">$' + (sumBundle.price / 100).toFixed(2) + ' &times; ' + packs + '</span></div>';
+                    html += '<div style="display:flex;justify-content:space-between;gap:12px;"><span>' + (packs * sumBundle.qty) + ' tickets</span><span>' + detailEscBundle(sumBundle.perks || '') + '</span></div>';
+                } else {
                 subtotalCents = pricePerPerson * numPeople;
                 html += '<div style="display:flex;justify-content:space-between;"><span>' + tierName + '</span><span>$' + (pricePerPerson / 100).toFixed(2) + '/ea</span></div>';
                 html += '<div style="display:flex;justify-content:space-between;"><span>' + numPeople + ' ticket' + (numPeople > 1 ? 's' : '') + '</span><span>&times; ' + numPeople + '</span></div>';
+                }
             }
 
             var discountCents = 0;
@@ -1506,6 +1585,16 @@
                 cancelUrl: window.location.href
             };
 
+            var submitBundle = hasSeating ? null : getDetailSelectedBundle();
+            if (submitBundle) {
+                // Server prices the bundle; we only say which one and how many packs.
+                var packsN = Math.max(1, Math.min(submitBundle.maxPerOrder || 10, partySize));
+                payload.bundleId = submitBundle.id;
+                payload.bundleCount = packsN;
+                payload.partySize = packsN * submitBundle.qty;
+                payload.ticketTier = (eventData.tiers && eventData.tiers[0] && eventData.tiers[0].name) || '';
+                payload.couponCode = '';
+            }
             if (seatingOptionId) {
                 payload.seatingOptionId = seatingOptionId;
             }
@@ -1537,6 +1626,18 @@
             .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
             .then(function(result) {
                 if (!result.ok) {
+                    if (result.data && result.data.dealEnded) {
+                        // Deal expired while the page was open: drop it and fall back to regular tickets.
+                        eventData.activeBundles = [];
+                        var tSel = document.getElementById('detailTicketTier');
+                        if (tSel) {
+                            for (var di = tSel.options.length - 1; di >= 0; di--) { if (tSel.options[di].dataset.bundle) tSel.remove(di); }
+                            tSel.selectedIndex = 0;
+                        }
+                        var deals = document.querySelectorAll('.bundle-deal');
+                        for (var dj = 0; dj < deals.length; dj++) deals[dj].style.display = 'none';
+                        onDetailTierChange();
+                    }
                     throw new Error(result.data.error || 'Registration failed');
                 }
                 if (result.data.checkoutUrl) {
