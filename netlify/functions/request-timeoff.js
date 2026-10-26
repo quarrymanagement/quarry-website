@@ -1,112 +1,43 @@
-const https = require('https');
+// ============================================================================
+// request-timeoff.js — staff time-off request from schedule.html.
+// Needs an employee token (employee-auth.js); the employee id comes from the
+// token, never from the request body. Stored in private Netlify Blobs.
+// ============================================================================
+const { readSchedule, writeSchedule, verifyEmployeeToken, employeeTokenFrom } = require('./_schedule-store');
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
-
-const response = (statusCode, body) => ({
-  statusCode,
-  headers: CORS_HEADERS,
-  body: JSON.stringify(body),
-});
-
-const handleOptions = () => response(200, { message: 'OK' });
-
-// GitHub API helper
-const githubRequest = (method, path, token, data = null) => {
-  return new Promise((resolve, reject) => {
-    const options = {
-      hostname: 'api.github.com',
-      path,
-      method,
-      headers: {
-        'Authorization': `token ${token}`,
-        'User-Agent': 'Quarry-Admin-Panel',
-        'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json',
-      },
-    };
-
-    const req = https.request(options, (res) => {
-      let body = '';
-      res.on('data', (chunk) => body += chunk);
-      res.on('end', () => {
-        try {
-          resolve({ statusCode: res.statusCode, data: JSON.parse(body) });
-        } catch (e) {
-          resolve({ statusCode: res.statusCode, data: body });
-        }
-      });
-    });
-
-    req.on('error', reject);
-    if (data) req.write(JSON.stringify(data));
-    req.end();
-  });
-};
+const response = (statusCode, body) => ({ statusCode, headers: { ...CORS_HEADERS, 'Cache-Control': 'no-store' }, body: JSON.stringify(body) });
 
 exports.handler = async (event) => {
-  if (event.httpMethod === 'OPTIONS') return handleOptions();
+  if (event.httpMethod === 'OPTIONS') return response(200, { message: 'OK' });
   if (event.httpMethod !== 'POST') return response(405, { error: 'Method not allowed' });
-
-  const token = process.env.GITHUB_TOKEN;
-  if (!token) {
-    return response(500, { error: 'GitHub token not configured on server' });
-  }
-
   try {
-    const { employeeId, dates, reason } = JSON.parse(event.body);
-
-    if (!employeeId || !dates || !dates.length || !reason) {
-      return response(400, { error: 'Missing required fields: employeeId, dates, reason' });
+    const body = JSON.parse(event.body || '{}');
+    const employeeId = verifyEmployeeToken(employeeTokenFrom(event, body));
+    if (!employeeId) return response(401, { error: 'Please sign in again' });
+    const { dates, reason } = body;
+    if (!Array.isArray(dates) || !dates.length || dates.length > 31 || !reason) {
+      return response(400, { error: 'Missing required fields: dates, reason' });
     }
-
-    const repo = 'quarrymanagement/quarry-website';
-    const filePath = 'schedule.json';
-
-    // Get current schedule.json
-    const getRes = await githubRequest('GET', `/repos/${repo}/contents/${filePath}`, token);
-    if (getRes.statusCode !== 200) {
-      return response(500, { error: 'Could not read schedule data from GitHub' });
-    }
-
-    const sha = getRes.data.sha;
-    const currentContent = Buffer.from(getRes.data.content, 'base64').toString('utf-8');
-    const scheduleData = JSON.parse(currentContent);
-
-    // Create the time-off request
+    const doc = await readSchedule();
+    if (!doc.employees.some((e) => e.id === employeeId)) return response(401, { error: 'Please sign in again' });
     const newRequest = {
       id: 'to-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6),
       employeeId,
-      dates,
-      reason,
+      dates: dates.map(String).slice(0, 31),
+      reason: String(reason).slice(0, 500),
       status: 'pending',
       requestedAt: new Date().toISOString(),
     };
-
-    // Add to timeOffRequests array
-    if (!scheduleData.timeOffRequests) {
-      scheduleData.timeOffRequests = [];
-    }
-    scheduleData.timeOffRequests.push(newRequest);
-
-    // Save back to GitHub
-    const encoded = Buffer.from(JSON.stringify(scheduleData, null, 2), 'utf-8').toString('base64');
-    const putRes = await githubRequest('PUT', `/repos/${repo}/contents/${filePath}`, token, {
-      message: `Time-off request from ${employeeId}: ${dates[0]}${dates.length > 1 ? ' to ' + dates[dates.length - 1] : ''}`,
-      content: encoded,
-      sha,
-    });
-
-    if (putRes.statusCode === 200 || putRes.statusCode === 201) {
-      return response(200, { success: true, message: 'Time-off request submitted successfully', request: newRequest });
-    } else {
-      return response(putRes.statusCode, { error: putRes.data.message || 'GitHub save failed' });
-    }
+    doc.timeOffRequests.push(newRequest);
+    await writeSchedule(doc);
+    return response(200, { success: true, message: 'Time-off request submitted successfully', request: newRequest });
   } catch (err) {
-    console.error('Request timeoff error:', err);
-    return response(500, { error: err.message || 'Internal server error' });
+    console.error('Request timeoff error:', err && err.message);
+    return response(err && err.status === 503 ? 503 : 500, { error: 'Internal server error' });
   }
 };
