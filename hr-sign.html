@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Review &amp; Sign · The Quarry</title>
+<link rel="icon" href="/favicon-32.png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+  :root{ --charcoal:#1A1A1A; --brown:#2C1A0E; --cream:#F5F0E8; --gold:#B8933A; --ink:#1f1b16; --muted:#7a6e60; --line:#e6dfd3; --bad:#a52a1e; --ok:#176b34; }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;font-family:Montserrat,-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:var(--cream);color:var(--ink);line-height:1.5;}
+  .top{background:var(--charcoal);padding:16px 18px;display:flex;align-items:center;gap:12px;}
+  .top .brand{font-family:'Playfair Display',Georgia,serif;color:var(--gold);letter-spacing:3px;font-size:18px;}
+  .top .tag{margin-left:auto;color:#cfc4b2;font-size:11px;text-transform:uppercase;letter-spacing:1px;text-align:right;}
+  .wrap{max-width:760px;margin:0 auto;padding:18px 16px 60px;}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:14px;}
+  h1{font-family:'Playfair Display',Georgia,serif;font-size:24px;margin:0 0 4px;color:var(--brown);}
+  h2{font-size:13px;letter-spacing:.8px;text-transform:uppercase;color:var(--gold);margin:0 0 10px;}
+  .sub{color:var(--muted);font-size:13px;}
+  .banner{background:#fff8e6;border:1px solid #f0dca6;color:#6b4e00;border-radius:12px;padding:12px 14px;font-size:14px;margin-bottom:14px;}
+  .banner.ok{background:#ecf9f0;border-color:#b9e5c6;color:var(--ok);} .banner.bad{background:#fdeeee;border-color:#f3c3be;color:#8c2318;}
+  label.l{display:block;font-weight:600;font-size:13.5px;margin:14px 0 6px;}
+  textarea,input[type=text],input[type=date],input[type=tel]{width:100%;border:1px solid #d5cbbb;border-radius:10px;padding:12px;font-size:16px;font-family:inherit;background:#fffdf9;}
+  textarea{min-height:90px;resize:vertical;}
+  .btn{display:inline-block;background:var(--brown);color:#fff;border:0;border-radius:10px;padding:14px 20px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;width:100%;margin-top:12px;}
+  .btn:disabled{opacity:.45;} .btn.sec{background:#fff;color:var(--brown);border:1px solid var(--line);} .btn.link{background:none;color:var(--muted);font-weight:500;text-decoration:underline;}
+  .pages{background:#e9e3d8;border-radius:12px;padding:10px;max-height:70vh;overflow:auto;}
+  .pages canvas{display:block;width:100%;height:auto;background:#fff;margin:0 auto 10px;box-shadow:0 2px 8px rgba(0,0,0,.12);}
+  .meta{font-size:11.5px;color:var(--muted);word-break:break-all;margin-top:8px;}
+  .chk{display:flex;gap:10px;align-items:flex-start;font-size:14px;background:var(--cream);border-radius:10px;padding:12px;margin-top:12px;cursor:pointer;}
+  .chk input{width:22px;height:22px;flex:none;margin-top:1px;accent-color:var(--brown);}
+  .seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:6px;}
+  .seg button{flex:1;padding:10px;border:0;background:#fff;font-family:inherit;font-weight:600;cursor:pointer;color:var(--muted);}
+  .seg button.on{background:var(--brown);color:#fff;}
+  .sig{position:relative;border:1.5px dashed #c9bda9;border-radius:12px;background:#fffdf8;margin-top:10px;}
+  .sig canvas{display:block;width:100%;height:170px;touch-action:none;}
+  .sig .clr{position:absolute;top:8px;right:8px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer;}
+  .typed{font-family:'Brush Script MT','Segoe Script',cursive;font-size:34px;padding:14px;min-height:70px;border-bottom:1.5px solid var(--ink);margin-top:10px;}
+  .ackline{font-size:13px;color:var(--ink);font-weight:600;margin-top:8px;}
+  .hidden{display:none;}
+  .err{color:var(--bad);font-size:13.5px;margin-top:8px;min-height:18px;}
+</style>
+</head>
+<body>
+<div class="top"><span class="brand">THE QUARRY</span><span class="tag">Confidential<br>personnel document</span></div>
+<div class="wrap" id="app"><div class="card">Loading…</div></div>
+<script>
+(function () {
+  'use strict';
+  var LOCAL = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+  var FN = LOCAL ? location.origin + '/functions/v1/hr-docs' : 'https://nkulhtalltbieicvmmad.supabase.co/functions/v1/hr-docs';
+  var KEY = 'sb_publishable_FQK59Bn8P2jV8yGL0nPi7w_jVHFMBSl';
+  var T = new URLSearchParams(location.search).get('t') || sessionStorage.getItem('hrT') || '';
+  // keep the private token out of the address bar / history (survives a refresh via sessionStorage)
+  if (T) { sessionStorage.setItem('hrT', T); if (history.replaceState) history.replaceState(null, '', location.pathname); }
+  var S = { session: sessionStorage.getItem('hrS:' + T.slice(0, 12)) || '' };
+  var app = document.getElementById('app');
+  if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function api(action, extra) {
+    return fetch(FN, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: KEY, Authorization: 'Bearer ' + KEY },
+      body: JSON.stringify(Object.assign({ action: action, t: T, session: S.session }, extra || {})) })
+      .then(function (r) { return r.json().then(function (j) { j._status = r.status; return j; }).catch(function () { return { error: 'Something went wrong (' + r.status + ')' }; }); })
+      .catch(function () { return { error: 'No connection. Check your signal and try again.' }; });
+  }
+  function msg(html, cls) { app.innerHTML = '<div class="banner ' + (cls || '') + '">' + html + '</div>'; }
+  function b64ToBytes(b) { var s = atob(b), u = new Uint8Array(s.length); for (var i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; }
+  function download(r) {
+    if (r.error) { alert(r.error); return; }
+    var url = URL.createObjectURL(new Blob([b64ToBytes(r.pdf_base64)], { type: 'application/pdf' }));
+    var a = document.createElement('a'); a.href = url; a.download = r.filename; document.body.appendChild(a); a.click(); a.remove();
+  }
+
+  if (!T) { msg('This link is missing its code. Open the link from your email again.', 'bad'); return; }
+
+  api('s_load').then(function (L) {
+    if (L.error) { msg(esc(L.error), 'bad'); return; }
+    if (S.session) return showDoc(L);
+    verify(L);
+  });
+
+  function verify(L) {
+    var q = { dob: 'Your date of birth', phone4: 'Last 4 digits of your phone number', email_code: 'The 6-digit code we email you' }[L.verify_method];
+    if (L.party === 'guardian' && L.verify_method === 'dob') q = 'The employee\'s date of birth';
+    app.innerHTML = '<div class="card"><h1>Hi ' + esc(L.first_name) + '</h1><div class="sub">' + esc(L.kind_label) + ' · ref ' + esc(L.ref_no) + '</div>' +
+      '<p>' + (L.party === 'guardian' ? 'As parent/guardian you are asked to review and sign this document.' : 'The Quarry sent you a document to review and sign.') +
+      ' First, confirm it\'s you.</p>' +
+      (L.locked ? '<div class="banner bad">Too many tries. Ask a manager to resend your link.</div>' :
+        '<label class="l">' + esc(q) + '</label>' +
+        (L.verify_method === 'dob' ? '<input type="date" id="ans">' : L.verify_method === 'phone4' ? '<input type="tel" inputmode="numeric" maxlength="4" id="ans" placeholder="1234">' :
+          '<button class="btn sec" id="code">Email me a code</button><input type="tel" inputmode="numeric" maxlength="6" id="ans" placeholder="123456" style="margin-top:10px;">') +
+        '<div class="err" id="err"></div><button class="btn" id="go">Continue</button>') + '</div>';
+    var c = document.getElementById('code');
+    if (c) c.onclick = function () { c.disabled = true; api('s_send_code').then(function (r) { document.getElementById('err').textContent = r.error || ('Code sent to ' + r.to_hint + (r.dev_code ? ' (dev: ' + r.dev_code + ')' : '')); c.disabled = false; }); };
+    var g = document.getElementById('go');
+    if (g) g.onclick = function () {
+      g.disabled = true;
+      api('s_verify', { answer: document.getElementById('ans').value }).then(function (r) {
+        g.disabled = false;
+        if (r.error) { document.getElementById('err').textContent = r.error; return; }
+        S.session = r.session; sessionStorage.setItem('hrS:' + T.slice(0, 12), r.session); showDoc(L);
+      });
+    };
+  }
+
+  function showDoc(L) {
+    app.innerHTML = '<div class="card">Loading document…</div>';
+    api('s_doc').then(function (D) {
+      if (D._status === 401) { S.session = ''; sessionStorage.removeItem('hrS:' + T.slice(0, 12)); return verify(L); }
+      if (D.error) { msg(esc(D.error), 'bad'); return; }
+      var done = !D.open;
+      app.innerHTML = '<div class="card"><h1>' + esc(D.title) + '</h1><div class="sub">' + esc(D.kind_label) + ' · ' + esc(D.employee_name) + ' · ref ' + esc(D.ref_no) + '</div></div>' +
+        (done ? '<div class="banner ' + (D.status === 'signed' ? 'ok' : '') + '">' + ({ signed: 'This document is signed. Thank you.', declined: 'You declined to sign this document.', refused_witnessed: 'This document was recorded as refused in person.', awaiting_guardian: L.party === 'employee' ? 'You signed. We\'ve asked your parent/guardian to sign too.' : 'Done.' }[D.status] || 'This document is complete.') +
+          (D.final_ready ? '<button class="btn sec" id="dl">Download your signed copy (PDF)</button>' : '') + '</div>' : '') +
+        (D.employee_signature ? '<div class="banner">Signed by employee ' + esc(D.employee_signature.name) + ' on ' + esc(D.employee_signature.signed_at_ct) + '.</div>' : '') +
+        '<div class="card"><h2>Read the document</h2><div class="pages" id="pages"></div>' +
+        '<div class="meta">' + D.pages + ' page(s) · version ' + D.version + ' · document fingerprint (SHA-256) ' + esc(D.sha256) + '</div></div>' +
+        (done ? '' : signForm(D, L));
+      var dl = document.getElementById('dl'); if (dl) dl.onclick = function () { api('s_download').then(download); };
+      render(D.pdf_base64);
+      if (!done) wire(D, L);
+    });
+  }
+
+  function render(b64) {
+    var host = document.getElementById('pages');
+    if (!window.pdfjsLib) { host.innerHTML = '<div class="sub">Preview unavailable. <a href="#" id="raw">Open the PDF</a></div>'; return; }
+    pdfjsLib.getDocument({ data: b64ToBytes(b64) }).promise.then(function (pdf) {
+      var chain = Promise.resolve();
+      for (var i = 1; i <= pdf.numPages; i++) (function (n) {
+        chain = chain.then(function () { return pdf.getPage(n); }).then(function (p) {
+          var vp = p.getViewport({ scale: 1.6 }), c = document.createElement('canvas'); c.width = vp.width; c.height = vp.height;
+          host.appendChild(c); return p.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
+        });
+      })(i);
+    });
+  }
+
+  function signForm(D, L) {
+    return '<div class="card" id="consentCard"><h2>Step 1 · Agree to sign electronically</h2><p style="font-size:14px;">' + esc(D.consent_statement) + '</p>' +
+      '<label class="chk"><input type="checkbox" id="cons"> I agree to use an electronic signature for this document.</label>' +
+      '<button class="btn" id="consGo">Continue</button></div>' +
+      '<div class="card hidden" id="signCard"><h2>Step 2 · Sign</h2>' +
+      '<label class="l">Comments (optional)</label><textarea id="cmt" placeholder="Anything you want on the record. This will be attached to the document."></textarea>' +
+      '<label class="l">Type your full legal name</label><input type="text" id="nm" autocomplete="name">' +
+      '<div class="seg"><button id="mT" class="on">Use typed name</button><button id="mD">Draw signature</button></div>' +
+      '<div class="typed" id="typed"></div><div class="sig hidden" id="sigBox"><canvas id="pad"></canvas><button class="clr" id="clr">Clear</button></div>' +
+      '<div class="ackline">' + esc(D.ack_statement) + '</div>' +
+      '<label class="chk"><input type="checkbox" id="ack"> I received and reviewed this document. My signature acknowledges receipt, not agreement.</label>' +
+      '<div class="err" id="err2"></div><button class="btn" id="sign">Sign</button>' +
+      (L.party === 'employee' ? '<button class="btn link" id="decl">I don\'t want to sign electronically</button>' : '') + '</div>';
+  }
+
+  function wire(D, L) {
+    var method = 'typed', pad = null;
+    document.getElementById('consGo').onclick = function () {
+      if (!document.getElementById('cons').checked) { alert('Please check the box to agree, or ask a manager for a paper copy.'); return; }
+      var b = this; b.disabled = true;
+      api('s_consent', { consent: true }).then(function (r) {
+        if (r.error) { b.disabled = false; alert(r.error); return; }
+        document.getElementById('consentCard').querySelector('.btn').outerHTML = '<div class="banner ok" style="margin:12px 0 0;">Agreed.</div>';
+        document.getElementById('signCard').classList.remove('hidden');
+        document.getElementById('signCard').scrollIntoView({ behavior: 'smooth' });
+      });
+    };
+    var nm = document.getElementById('nm'), typed = document.getElementById('typed');
+    nm.oninput = function () { typed.textContent = nm.value; };
+    document.getElementById('mT').onclick = function () { method = 'typed'; this.classList.add('on'); document.getElementById('mD').classList.remove('on'); typed.classList.remove('hidden'); document.getElementById('sigBox').classList.add('hidden'); };
+    document.getElementById('mD').onclick = function () {
+      method = 'drawn'; this.classList.add('on'); document.getElementById('mT').classList.remove('on'); typed.classList.add('hidden'); document.getElementById('sigBox').classList.remove('hidden');
+      if (!pad) pad = Pad(document.getElementById('pad'));
+    };
+    document.getElementById('clr').onclick = function () { if (pad) pad.clear(); };
+    document.getElementById('sign').onclick = function () {
+      var err = document.getElementById('err2'); err.textContent = '';
+      if (nm.value.trim().length < 3) { err.textContent = 'Type your full name.'; return; }
+      if (method === 'drawn' && (!pad || pad.empty())) { err.textContent = 'Draw your signature, or use your typed name.'; return; }
+      if (!document.getElementById('ack').checked) { err.textContent = 'Check the acknowledgment box.'; return; }
+      var b = this; b.disabled = true; b.textContent = 'Signing…';
+      api('s_sign', { consent: true, ack: true, signer_name: nm.value.trim(), signature_method: method, signature_image: method === 'drawn' ? pad.data() : null,
+        comments: document.getElementById('cmt').value, doc_sha256: D.sha256 }).then(function (r) {
+        if (r.error) { b.disabled = false; b.textContent = 'Sign'; err.textContent = r.error; return; }
+        showDoc(L);
+      });
+    };
+    var dc = document.getElementById('decl');
+    if (dc) dc.onclick = function () {
+      var why = prompt('Optional: tell us why. A manager will follow up, and you can ask for a paper copy instead.');
+      if (why === null) return;
+      api('s_decline', { reason: why }).then(function (r) { if (r.error) alert(r.error); else showDoc(L); });
+    };
+  }
+
+  function Pad(canvas) {
+    var ctx, drawing = false, last = null, dirty = false;
+    function size() {
+      var r = canvas.getBoundingClientRect(), d = window.devicePixelRatio || 1;
+      canvas.width = Math.max(1, r.width * d); canvas.height = Math.max(1, r.height * d);
+      ctx = canvas.getContext('2d'); ctx.scale(d, d); ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#111'; dirty = false;
+    }
+    function pt(e) { var r = canvas.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
+    canvas.addEventListener('pointerdown', function (e) { e.preventDefault(); canvas.setPointerCapture(e.pointerId); drawing = true; last = pt(e); dirty = true; });
+    canvas.addEventListener('pointermove', function (e) { if (!drawing) return; var p = pt(e); ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(p.x, p.y); ctx.stroke(); last = p; });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (ev) { canvas.addEventListener(ev, function () { drawing = false; }); });
+    size();
+    return { clear: size, empty: function () { return !dirty; }, data: function () { return canvas.toDataURL('image/png'); } };
+  }
+})();
+</script>
+</body>
+</html>

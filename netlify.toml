@@ -30,6 +30,19 @@
 # /members.json, /private/... etc. were publicly downloadable. Public data is
 # served by /.netlify/functions/data-read (allowlisted, PII behind a session).
 # ----------------------------------------------------------------------------
+# HR e-sign module: source, migrations and design notes are never served.
+[[redirects]]
+  from = "/supabase/*"
+  to = "/.netlify/functions/data-read?file=__blocked"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/docs/*"
+  to = "/.netlify/functions/data-read?file=__blocked"
+  status = 404
+  force = true
+
 [[redirects]]
   from = "/contact.html"
   to = "/quarry-contact.html"

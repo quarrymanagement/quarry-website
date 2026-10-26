@@ -1,0 +1,9 @@
+{
+  "nodeModulesDir": "none",
+  "imports": {
+    "pdf-lib": "npm:pdf-lib@1.17.1",
+    "postgres": "npm:postgres@3.4.5",
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@2.45.4"
+  },
+  "lint": { "rules": { "exclude": ["no-explicit-any"] } }
+}
