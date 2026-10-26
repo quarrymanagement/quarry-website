@@ -178,6 +178,55 @@
   status = 404
   force = true
 
+# ----------------------------------------------------------------------------
+# Server-only source folders. publish = "." uploads the whole repo, so the
+# function source, old Next.js/Sanity copies (incl. an old admin page), SQL
+# notes and scripts were downloadable as static files. Nothing on the site
+# links to these paths. /.netlify/functions/* (the real functions) is a
+# different path and is NOT affected by these rules. (Oct 26, 2026)
+# ----------------------------------------------------------------------------
+[[redirects]]
+  from = "/netlify/*"
+  to = "/.netlify/functions/data-read?file=__blocked"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/nextjs/*"
+  to = "/.netlify/functions/data-read?file=__blocked"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/scripts/*"
+  to = "/.netlify/functions/data-read?file=__blocked"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/supabase/*"
+  to = "/.netlify/functions/data-read?file=__blocked"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/supabase-functions-pending/*"
+  to = "/.netlify/functions/data-read?file=__blocked"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/sanity/*"
+  to = "/.netlify/functions/data-read?file=__blocked"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/claude/*"
+  to = "/.netlify/functions/data-read?file=__blocked"
+  status = 404
+  force = true
+
 [functions]
   directory = "netlify/functions"
 
