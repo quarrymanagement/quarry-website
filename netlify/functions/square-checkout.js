@@ -8,7 +8,10 @@
 //   SQUARE_ACCESS_TOKEN, SQUARE_LOCATION_ID, SQUARE_ENVIRONMENT (production)
 //
 // Request body:
-//   { amount: <cents>, coupon?: "CODE", metadata: { customerName, ... } }
+//   { coupon?: "CODE", metadata: { customerName, ..., extraBalls } }
+//   (any client-sent `amount` is ignored; price is computed server-side)
+//
+// Optional env var: GOLF_ADMIN_COMP_CODE (staff comp code; unset = no comps)
 //
 // Response:
 //   { url: "https://checkout.square.site/..." } - drop straight into window.location.href
@@ -18,15 +21,22 @@ const https = require('https');
 const crypto = require('crypto');
 const _blobs = require('./_blobs');
 
-// ---- Coupon table (preserved from Stripe version) -------------------------
+// ---- Coupon table ---------------------------------------------------------
+// Paid-discount promo codes only. There is NO 100%-off / $0 code here on
+// purpose: ADMIN100, TEST1 ($59 flat = free bay) and TESTCODE were removed
+// because this file (and the public GitHub repo) is publicly readable.
+// Staff comps are gated server-side by _golf-comp.js + the
+// GOLF_ADMIN_COMP_CODE env var (unset = comps disabled).
 const COUPONS = {
   'QUARRY10': { pct: 10 },
   'QUARRY20': { pct: 20 },
   'GOLF50':   { pct: 50 },
-  'TESTCODE': { flat: 500 },
-  'TEST1':    { flat: 5900 },
-  'ADMIN100': { pct: 100 },
 };
+
+// ---- Server-side price (never trust a client-sent amount) -----------------
+const BASE_BAY_CENTS = 4000;                       // $40 / bay / 50 min
+const EXTRA_BALL_CENTS = { 0: 0, 25: 1000, 50: 1800 }; // must match quarry-golf.html selectBalls()
+const { isAdminComp } = require('./_golf-comp');
 
 // Sales tax (Missouri / New Melle - configurable via env var)
 const TAX_PERCENT = process.env.SQUARE_TAX_PERCENT || '7.45';
@@ -122,16 +132,33 @@ exports.handler = async function(event) {
 
   try {
     const body = JSON.parse(event.body || '{}');
-    let amountCents = body.amount || 4000;
+    const m0 = body.metadata || {};
+    const balls = parseInt(m0.extraBalls || '0', 10) || 0;
+    if (!Object.prototype.hasOwnProperty.call(EXTRA_BALL_CENTS, balls)) {
+      return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid extra-balls option.' }) };
+    }
+    // Price is computed here; body.amount from the browser is ignored.
+    let amountCents = BASE_BAY_CENTS + EXTRA_BALL_CENTS[balls];
+    let comped = false;
 
     // Apply coupon
     if (body.coupon) {
-      const code = body.coupon.toUpperCase().trim();
-      const c = COUPONS[code];
-      if (!c) return { statusCode: 400, headers, body: JSON.stringify({ error: 'Coupon not found: ' + code }) };
-      amountCents = c.pct !== undefined
-        ? Math.round(amountCents * (1 - c.pct / 100))
-        : Math.max(0, amountCents - c.flat);
+      const raw = String(body.coupon);
+      if (isAdminComp(raw, 'GOLF_ADMIN_COMP_CODE')) {
+        comped = true;
+        amountCents = 0;
+      } else {
+        const code = raw.toUpperCase().trim();
+        const c = COUPONS[code];
+        if (!c) return { statusCode: 400, headers, body: JSON.stringify({ error: 'Coupon not valid.' }) };
+        amountCents = c.pct !== undefined
+          ? Math.round(amountCents * (1 - c.pct / 100))
+          : Math.max(0, amountCents - c.flat);
+      }
+    }
+    // Only a verified staff comp may reach $0; nothing else may go below $1.
+    if (!comped && amountCents < 100) {
+      return { statusCode: 400, headers, body: JSON.stringify({ error: 'Coupon not valid.' }) };
     }
 
     const m = body.metadata || {};
@@ -140,7 +167,7 @@ exports.handler = async function(event) {
     const origin = event.headers.origin || 'https://thequarrystl.com';
 
     // $0 fully comped booking: skip Square entirely, store + email directly
-    if (amountCents === 0) {
+    if (comped && amountCents === 0) {
       await storeBookingDirect(m);
       try { await sendGridEmail('management@thequarrystl.com', 'New Comped Golf Booking - ' + (m.bay||'Bay'), buildOwnerHtml(m, '$0.00')); } catch(_) {}
       if (m.customerEmail) {
@@ -167,8 +194,8 @@ exports.handler = async function(event) {
       eventDate:       String(m.date || '').slice(0, 255),
       eventTime:       String(m.time || '').slice(0, 255),
       players:         String(m.players || '').slice(0, 255),
-      extraBalls:      String(m.extraBalls || 0),
-      extraBallsPrice: String(m.extraBallsPrice || 0),
+      extraBalls:      String(balls),
+      extraBallsPrice: String(EXTRA_BALL_CENTS[balls] / 100),
     };
     // Square rejects empty metadata values (MISSING_REQUIRED_PARAMETER),
     // so strip any blank fields before sending.
@@ -201,7 +228,7 @@ exports.handler = async function(event) {
         line_items: [{
           uid: lineItemUid,
           name: ('Hole-In-One Golf - ' + (m.bay || 'Bay') + (m.date ? ' - ' + shortDate(m.date) : '') + (m.time ? ', ' + m.time : '')).slice(0, 255),
-          note: (m.date || '') + ' at ' + (m.time || '') + ' | ' + (m.duration || '50 min') + ' | ' + (m.players || '2') + ' players' + (body.coupon ? ' | coupon ' + body.coupon : ''),
+          note: (m.date || '') + ' at ' + (m.time || '') + ' | ' + (m.duration || '50 min') + ' | ' + (m.players || '2') + ' players' + (body.coupon ? ' | coupon ' + String(body.coupon).toUpperCase().trim().slice(0, 20) : ''),
           quantity: '1',
           base_price_money: { amount: amountCents, currency: 'USD' },
           applied_taxes: [{ tax_uid: taxUid }]
