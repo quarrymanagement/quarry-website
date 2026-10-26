@@ -29,6 +29,13 @@ const TAX_PERCENT = process.env.SQUARE_TAX_PERCENT || '7.45';
 const EVENT_DATE = '2026-11-07';
 const BOOKINGS_PATH = 'quarryfest-vendors/' + EVENT_DATE;
 
+// REGISTRATION CLOSED (Mon Oct 26, 2026, owner's call). Every POST is rejected with
+// 410 before anything is read, written, or sent to Square, so a cached copy of the
+// old form or a direct POST can't create a sign-up or a payment link. Existing
+// sign-ups and payments are untouched. To reopen, set this to true and deploy.
+const REGISTRATION_OPEN = false;
+const CLOSED_MESSAGE = 'Vendor registration for Quarry Fest is now closed. Thanks to everyone who signed up!';
+
 function squareApi(method, path, body) {
   const env = (process.env.SQUARE_ENVIRONMENT || 'production').toLowerCase();
   const host = env === 'production' ? 'connect.squareup.com' : 'connect.squareupsandbox.com';
@@ -70,6 +77,9 @@ exports.handler = async function (event) {
   const headers = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'Content-Type', 'Content-Type': 'application/json' };
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
   if (event.httpMethod !== 'POST') return { statusCode: 405, headers, body: 'Method Not Allowed' };
+  if (!REGISTRATION_OPEN) {
+    return { statusCode: 410, headers, body: JSON.stringify({ error: CLOSED_MESSAGE, closed: true }) };
+  }
 
   try {
     const body = JSON.parse(event.body || '{}');

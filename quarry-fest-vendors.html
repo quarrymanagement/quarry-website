@@ -43,6 +43,13 @@ textarea { resize:vertical; min-height:70px; }
 #submitBtn { width:100%; background:var(--gold); color:var(--charcoal); border:none; padding:0.9rem; border-radius:6px; font-weight:700; font-size:1rem; cursor:pointer; font-family:inherit; }
 #submitBtn:disabled { opacity:0.5; cursor:not-allowed; }
 #submitBtn:hover:not(:disabled) { background:var(--gold-light); }
+.closed-card { text-align:center; }
+.closed-card h3 { font-family:'Playfair Display',serif; font-size:1.3rem; margin-bottom:0.75rem; }
+.closed-card p { line-height:1.6; margin-bottom:0.9rem; }
+.closed-card p.sub { color:#5C3D2E; font-size:0.85rem; }
+.closed-card a { color:#8B5E3C; }
+.closed-card a.btn { display:inline-block; background:var(--gold); color:var(--charcoal); font-weight:700; padding:0.75rem 1.25rem; border-radius:6px; text-decoration:none; margin:0.25rem 0 1rem; }
+.closed-badge { background:var(--charcoal); color:var(--gold-light); }
 footer { text-align:center; padding:2rem 1rem; color:#8B5E3C; font-size:0.8rem; }
 </style>
 </head>
@@ -56,30 +63,16 @@ footer { text-align:center; padding:2rem 1rem; color:#8B5E3C; font-size:0.8rem; 
 <div class="wrap">
   <div class="intro">
     <h2>Quarry Fest Vendor Registration</h2>
-    <p>Saturday, November 7th &middot; 12 PM &ndash; 4 PM<br>Reserve your vendor spot at The Quarry.</p>
-    <div class="price-badge">$25 Vendor Fee</div>
+    <p>Saturday, November 7th &middot; 12 PM &ndash; 4 PM<br>Thank you to all of our vendors!</p>
+    <div class="price-badge closed-badge">Registration Closed</div>
   </div>
 
-  <div class="msg warn" id="topMsg"></div>
-
-  <div class="card" id="formCard">
-    <label for="businessName">Business / Vendor Name</label>
-    <input type="text" id="businessName" required>
-    <label for="contactName">Contact Name</label>
-    <input type="text" id="contactName" required>
-    <label for="email">Email</label>
-    <input type="email" id="email" required>
-    <label for="phone">Phone</label>
-    <input type="tel" id="phone">
-    <label for="notes">What will you be selling / offering? (optional)</label>
-    <textarea id="notes"></textarea>
-    <div class="summary">
-      <div><b>Event:</b> Quarry Fest</div>
-      <div><b>Date:</b> Saturday, November 7, 2026</div>
-      <div><b>Time:</b> 12:00 PM &ndash; 4:00 PM</div>
-      <div style="margin-top:0.5rem;color:#B8933A;font-weight:700;">Total: $25.00</div>
-    </div>
-    <button id="submitBtn" onclick="submitVendor()">Register &amp; Pay $25 &rarr;</button>
+  <div class="card closed-card" id="closedCard" role="status">
+    <h3>Registration closed</h3>
+    <p>Vendor registration for Quarry Fest is now closed. Thanks to everyone who signed up!</p>
+    <p class="sub">Quarry Fest is Saturday, November 7 from 12&ndash;4 PM. Free admission &middot; 40+ local vendors.</p>
+    <a class="btn" href="/quarry-event-detail.html?id=event_1790812471539">See the event &amp; vendor list &rarr;</a>
+    <p class="sub">Already registered? Questions? Email <a href="mailto:management@thequarrystl.com">management@thequarrystl.com</a>.</p>
   </div>
 </div>
 
@@ -88,54 +81,20 @@ footer { text-align:center; padding:2rem 1rem; color:#8B5E3C; font-size:0.8rem; 
 </footer>
 
 <script>
+// Vendor registration is CLOSED (Quarry Fest 2026). The form and its submit code were
+// removed; quarryfest-vendor-register.js also rejects new sign-ups server-side (410).
+// ?success=1 is still honored for anyone returning from a Square checkout they had
+// already started, so a paid vendor doesn't land on a "closed" message.
 document.addEventListener('DOMContentLoaded', function () {
   var p = new URLSearchParams(window.location.search);
   if (p.get('success')) {
     document.querySelector('.intro').innerHTML = '<h2>You\'re Registered!</h2><p>Thanks for signing up for Quarry Fest &mdash; a confirmation email is on its way. We can\'t wait to have you!</p>';
-    document.getElementById('formCard').style.display = 'none';
+    document.getElementById('closedCard').style.display = 'none';
     history.replaceState({}, '', '/quarry-fest-vendors.html');
   } else if (p.get('canceled')) {
     history.replaceState({}, '', '/quarry-fest-vendors.html');
   }
 });
-
-function submitVendor() {
-  var businessName = document.getElementById('businessName').value.trim();
-  var contactName = document.getElementById('contactName').value.trim();
-  var email = document.getElementById('email').value.trim();
-  var phone = document.getElementById('phone').value.trim();
-  var notes = document.getElementById('notes').value.trim();
-  var msgEl = document.getElementById('topMsg');
-  msgEl.classList.remove('show');
-
-  if (!businessName) { alert('Please enter your business / vendor name.'); return; }
-  if (!contactName) { alert('Please enter a contact name.'); return; }
-  if (!email || !email.includes('@')) { alert('Please enter a valid email address.'); return; }
-
-  var btn = document.getElementById('submitBtn');
-  btn.disabled = true; btn.textContent = 'Redirecting to payment…';
-
-  fetch('/.netlify/functions/quarryfest-vendor-register', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ businessName: businessName, contactName: contactName, email: email, phone: phone, notes: notes })
-  })
-    .then(function (r) { return r.json(); })
-    .then(function (data) {
-      if (data.error) {
-        msgEl.textContent = data.error;
-        msgEl.classList.add('show');
-        btn.disabled = false; btn.textContent = 'Register & Pay $25 →';
-        return;
-      }
-      window.location.href = data.url;
-    })
-    .catch(function () {
-      msgEl.textContent = 'Something went wrong. Please call (636) 224-8257.';
-      msgEl.classList.add('show');
-      btn.disabled = false; btn.textContent = 'Register & Pay $25 →';
-    });
-}
 </script>
 </body>
 </html>
