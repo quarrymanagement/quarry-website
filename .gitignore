@@ -18,3 +18,8 @@ mobile/www/
 .idea/
 *.swp
 *.swo
+
+# Staff schedule + logins live in private Netlify Blobs (staff-schedule store).
+# Never commit a copy back to this public repo.
+schedule.json
+schedule-*.json
