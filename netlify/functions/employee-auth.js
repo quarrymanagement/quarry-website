@@ -1,4 +1,3 @@
-const https = require('https');
 const crypto = require('crypto');
 const { readBlob, writeBlob } = require('./_blobs');
 
@@ -90,304 +89,149 @@ async function rlClearFailures(o) {
 }
 // ---- RL-END ----------------------------------------------------------------
 
+const {
+  readSchedule, readCredentials, writeCredentials,
+  hashPassword, verifyPassword, signEmployeeToken, verifyEmployeeToken, employeeTokenFrom,
+} = require('./_schedule-store');
+const { isAuthorized } = require('./_admin-auth');
+
+// Staff data now lives in private Netlify Blobs (see _schedule-store.js), not
+// in schedule.json in the public GitHub repo.
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-admin-token',
 };
-
 const response = (statusCode, body) => ({
   statusCode,
-  headers: CORS_HEADERS,
+  headers: { ...CORS_HEADERS, 'Cache-Control': 'no-store' },
   body: JSON.stringify(body),
 });
-
 const handleOptions = () => response(200, { message: 'OK' });
 
-// GitHub API helper
-const githubRequest = (method, path, token, data = null) => {
-  return new Promise((resolve, reject) => {
-    const options = {
-      hostname: 'api.github.com',
-      path,
-      method,
-      headers: {
-        'Authorization': `token ${token}`,
-        'User-Agent': 'Quarry-Admin-Panel',
-        'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json',
-      },
-    };
+const publicEmployee = (e, mustChange) => ({
+  id: e.id, name: e.name, email: e.email, primaryRole: e.primaryRole,
+  mustChangePassword: !!mustChange,
+});
 
-    const req = https.request(options, (res) => {
-      let body = '';
-      res.on('data', (chunk) => body += chunk);
-      res.on('end', () => {
-        try {
-          resolve({ statusCode: res.statusCode, data: JSON.parse(body) });
-        } catch (e) {
-          resolve({ statusCode: res.statusCode, data: body });
-        }
-      });
-    });
+function lastNameOf(emp) {
+  return String(emp.lastName || (emp.name || '').split(' ').pop() || '').toLowerCase().trim();
+}
 
-    req.on('error', reject);
-    if (data) req.write(JSON.stringify(data));
-    req.end();
-  });
-};
-
-// Hash password with salt
-const hashPassword = (password, salt = null) => {
-  if (!salt) {
-    salt = crypto.randomBytes(16).toString('hex');
-  }
-  const hash = crypto.createHash('sha256').update(salt + password).digest('hex');
-  return `${salt}:${hash}`;
-};
-
-// Verify password
-const verifyPassword = (password, storedHash) => {
-  if (!storedHash || !storedHash.includes(':')) return false;
-  const [salt, hash] = storedHash.split(':');
-  const testHash = crypto.createHash('sha256').update(salt + password).digest('hex');
-  return testHash === hash;
-};
-
-// Generate session token
-const generateToken = () => {
-  return crypto.randomBytes(32).toString('hex');
-};
-
-// Handle login action
-const handleLogin = async (body, token, clientIp) => {
-  const { email, password } = body;
-  if (!email || !password) {
-    return response(400, { error: 'Email and password required' });
-  }
-
-  // Brute-force guard (login path only) — fails closed.
+// Shared brute-force wrapper for login + lookup (fails closed).
+async function withLimiter(scope, email, clientIp, fn) {
   const rlArgs = {
-    scope: RL_SCOPE, email: String(email).toLowerCase(), ip: clientIp,
-    emailLimit: RL_EMAIL_LIMIT, ipLimit: RL_IP_LIMIT,
-    reason: RL_TOO_MANY_MESSAGE,
+    scope, email: String(email).toLowerCase(), ip: clientIp,
+    emailLimit: RL_EMAIL_LIMIT, ipLimit: RL_IP_LIMIT, reason: RL_TOO_MANY_MESSAGE,
   };
-  let rlGate;
-  try {
-    rlGate = await rlCheckFailures(rlArgs);
-  } catch (e) {
+  let gate;
+  try { gate = await rlCheckFailures(rlArgs); } catch (e) {
     console.error('employee-auth: rate-limit store unavailable:', e && e.message);
     return response(503, { error: RL_STORE_DOWN_MESSAGE });
   }
-  if (!rlGate.allowed) {
-    return response(429, { error: rlGate.reason, rateLimit: true });
-  }
-  const rlFailedLogin = async () => {
-    try {
-      await rlRecordFailure(rlArgs);
-    } catch (e) {
+  if (!gate.allowed) return response(429, { error: gate.reason, rateLimit: true });
+  const fail = async (msg) => {
+    try { await rlRecordFailure(rlArgs); } catch (e) {
       console.error('employee-auth: could not record failed attempt:', e && e.message);
       return response(503, { error: RL_STORE_DOWN_MESSAGE });
     }
-    return response(401, { error: 'Invalid email or password' });
+    return response(401, { error: msg });
   };
+  const ok = async () => { await rlClearFailures(rlArgs); };
+  return fn(fail, ok);
+}
 
-  try {
-    // Fetch schedule.json to get employees list
-    const res = await githubRequest('GET', '/repos/quarrymanagement/quarry-website/contents/schedule.json', token);
-
-    if (res.statusCode !== 200) {
-      return response(500, { error: 'Could not fetch employee data' });
+// action: login  { email, password }  (employee portal /employee/)
+const handleLogin = async (body, clientIp) => {
+  const { email, password } = body;
+  if (!email || !password) return response(400, { error: 'Email and password required' });
+  return withLimiter(RL_SCOPE, email, clientIp, async (fail, ok) => {
+    const doc = await readSchedule();
+    const creds = await readCredentials();
+    const employee = doc.employees.find((emp) => emp.email && emp.email.toLowerCase() === String(email).toLowerCase());
+    const cred = employee && creds[employee.id];
+    const v = cred ? verifyPassword(password, cred.hash) : { ok: false };
+    if (!employee || !v.ok || employee.status === 'inactive') return fail('Invalid email or password');
+    await ok();
+    if (v.legacy) { // upgrade the weak legacy hash in place
+      creds[employee.id] = { ...cred, hash: hashPassword(password), setAt: new Date().toISOString() };
+      await writeCredentials(creds);
     }
-
-    const scheduleContent = Buffer.from(res.data.content, 'base64').toString('utf-8');
-    const scheduleData = JSON.parse(scheduleContent);
-    const employees = scheduleData.employees || [];
-
-    // Find employee by email
-    const employee = employees.find(emp => emp.email && emp.email.toLowerCase() === email.toLowerCase());
-    if (!employee) {
-      return rlFailedLogin();
-    }
-
-    // Verify password
-    if (!employee.passwordHash || !verifyPassword(password, employee.passwordHash)) {
-      return rlFailedLogin();
-    }
-
-    // Correct password — wipe this email's failed-attempt counter.
-    await rlClearFailures(rlArgs);
-
-    // Generate session token
-    const sessionToken = generateToken();
-
     return response(200, {
       success: true,
-      employee: {
-        id: employee.id,
-        name: employee.name,
-        email: employee.email,
-        primaryRole: employee.primaryRole,
-      },
-      token: sessionToken,
+      employee: publicEmployee(employee, cred.mustChange),
+      token: signEmployeeToken(employee.id),
     });
-  } catch (err) {
-    console.error('Login error:', err);
-    return response(500, { error: 'Internal server error' });
-  }
+  });
 };
 
-// Handle change password action
-const handleChangePassword = async (body, token) => {
-  const { employeeId, oldPassword, newPassword } = body;
-  if (!employeeId || !oldPassword || !newPassword) {
-    return response(400, { error: 'employeeId, oldPassword, and newPassword required' });
-  }
-
-  try {
-    // Fetch schedule.json
-    const shaRes = await githubRequest('GET', '/repos/quarrymanagement/quarry-website/contents/schedule.json', token);
-    if (shaRes.statusCode !== 200) {
-      return response(500, { error: 'Could not fetch employee data' });
-    }
-
-    const scheduleContent = Buffer.from(shaRes.data.content, 'base64').toString('utf-8');
-    const scheduleData = JSON.parse(scheduleContent);
-    const employees = scheduleData.employees || [];
-    const sha = shaRes.data.sha;
-
-    // Find employee
-    const employee = employees.find(emp => emp.id === employeeId);
-    if (!employee) {
-      return response(404, { error: 'Employee not found' });
-    }
-
-    // Verify old password
-    if (!employee.passwordHash || !verifyPassword(oldPassword, employee.passwordHash)) {
-      return response(401, { error: 'Current password is incorrect' });
-    }
-
-    // Update password
-    employee.passwordHash = hashPassword(newPassword);
-
-    // Save back to GitHub
-    const updatedContent = JSON.stringify(scheduleData, null, 2);
-    const encoded = Buffer.from(updatedContent, 'utf-8').toString('base64');
-
-    const putData = {
-      message: 'Update employee password',
-      content: encoded,
-      sha,
-    };
-
-    const putRes = await githubRequest('PUT', '/repos/quarrymanagement/quarry-website/contents/schedule.json', token, putData);
-
-    if (putRes.statusCode === 200 || putRes.statusCode === 201) {
-      return response(200, { success: true, message: 'Password updated' });
-    } else {
-      return response(putRes.statusCode, { error: 'Failed to update password' });
-    }
-  } catch (err) {
-    console.error('Change password error:', err);
-    return response(500, { error: 'Internal server error' });
-  }
+// action: lookup  { email, lastName }  (schedule.html — same check it used to
+// do in the browser, now server-side + rate-limited, so the staff list is
+// never downloaded).
+const handleLookup = async (body, clientIp) => {
+  const { email, lastName } = body;
+  if (!email || !lastName) return response(400, { error: 'Email and last name required' });
+  return withLimiter('employee-lookup', email, clientIp, async (fail, ok) => {
+    const doc = await readSchedule();
+    const employee = doc.employees.find((emp) => emp.email && emp.email.toLowerCase() === String(email).toLowerCase().trim()
+      && lastNameOf(emp) === String(lastName).toLowerCase().trim());
+    if (!employee || employee.status === 'inactive') return fail('Invalid email or last name');
+    await ok();
+    return response(200, { success: true, employee: publicEmployee(employee, false), token: signEmployeeToken(employee.id) });
+  });
 };
 
-// Handle register first time action
-const handleRegisterFirstTime = async (body, token) => {
-  const { email, password } = body;
-  if (!email || !password) {
-    return response(400, { error: 'Email and password required' });
+// action: change-password  { oldPassword, newPassword }  + employee token
+const handleChangePassword = async (event, body) => {
+  const empId = verifyEmployeeToken(employeeTokenFrom(event, body));
+  if (!empId) return response(401, { error: 'Please sign in again' });
+  const { oldPassword, newPassword } = body;
+  if (!oldPassword || !newPassword) return response(400, { error: 'oldPassword and newPassword required' });
+  if (String(newPassword).length < 8) return response(400, { error: 'Password must be at least 8 characters' });
+  const creds = await readCredentials();
+  const cred = creds[empId];
+  if (!cred || !verifyPassword(oldPassword, cred.hash).ok) return response(401, { error: 'Current password is incorrect' });
+  creds[empId] = { hash: hashPassword(newPassword), mustChange: false, setAt: new Date().toISOString() };
+  await writeCredentials(creds);
+  return response(200, { success: true, message: 'Password updated' });
+};
+
+// action: admin-set-password  { employeeId, tempPassword }  + OWNER admin token.
+// The only way a password gets set now (resets + new hires). The employee must
+// change it at next sign-in.
+const handleAdminSetPassword = async (event, body) => {
+  if (!isAuthorized(event, body, [])) return response(401, { error: 'Admin session required' });
+  const { employeeId, tempPassword } = body;
+  if (!employeeId || !tempPassword || String(tempPassword).length < 8) {
+    return response(400, { error: 'employeeId and a temporary password of 8+ characters required' });
   }
-
-  try {
-    // Fetch schedule.json
-    const shaRes = await githubRequest('GET', '/repos/quarrymanagement/quarry-website/contents/schedule.json', token);
-    if (shaRes.statusCode !== 200) {
-      return response(500, { error: 'Could not fetch employee data' });
-    }
-
-    const scheduleContent = Buffer.from(shaRes.data.content, 'base64').toString('utf-8');
-    const scheduleData = JSON.parse(scheduleContent);
-    const employees = scheduleData.employees || [];
-    const sha = shaRes.data.sha;
-
-    // Find employee by email
-    const employee = employees.find(emp => emp.email && emp.email.toLowerCase() === email.toLowerCase());
-    if (!employee) {
-      return response(404, { error: 'Employee not found in system' });
-    }
-
-    // Check if already has password
-    if (employee.passwordHash) {
-      return response(400, { error: 'Employee already has a password set' });
-    }
-
-    // Set password
-    employee.passwordHash = hashPassword(password);
-
-    // Save back to GitHub
-    const updatedContent = JSON.stringify(scheduleData, null, 2);
-    const encoded = Buffer.from(updatedContent, 'utf-8').toString('base64');
-
-    const putData = {
-      message: 'Set employee password on first-time registration',
-      content: encoded,
-      sha,
-    };
-
-    const putRes = await githubRequest('PUT', '/repos/quarrymanagement/quarry-website/contents/schedule.json', token, putData);
-
-    if (putRes.statusCode === 200 || putRes.statusCode === 201) {
-      const sessionToken = generateToken();
-      return response(200, {
-        success: true,
-        message: 'Password set successfully',
-        token: sessionToken,
-        employee: {
-          id: employee.id,
-          name: employee.name,
-          email: employee.email,
-          primaryRole: employee.primaryRole,
-        },
-      });
-    } else {
-      return response(putRes.statusCode, { error: 'Failed to set password' });
-    }
-  } catch (err) {
-    console.error('Register first time error:', err);
-    return response(500, { error: 'Internal server error' });
-  }
+  const doc = await readSchedule();
+  if (!doc.employees.some((e) => e.id === employeeId)) return response(404, { error: 'Employee not found' });
+  const creds = await readCredentials();
+  creds[employeeId] = { hash: hashPassword(tempPassword), mustChange: true, setAt: new Date().toISOString() };
+  await writeCredentials(creds);
+  return response(200, { success: true });
 };
 
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return handleOptions();
   if (event.httpMethod !== 'POST') return response(405, { error: 'Method not allowed' });
-
-  const token = process.env.GITHUB_TOKEN;
-  if (!token) {
-    return response(500, { error: 'GitHub token not configured on server' });
-  }
-
-  // Read the source IP the same way request-code.js does.
   const clientIp = rlClientIp(event);
-
   try {
-    const body = JSON.parse(event.body);
-    const action = body.action;
-
-    switch (action) {
-      case 'login':
-        return await handleLogin(body, token, clientIp);
-      case 'change-password':
-        return await handleChangePassword(body, token);
+    const body = JSON.parse(event.body || '{}');
+    switch (body.action) {
+      case 'login': return await handleLogin(body, clientIp);
+      case 'lookup': return await handleLookup(body, clientIp);
+      case 'change-password': return await handleChangePassword(event, body);
+      case 'admin-set-password': return await handleAdminSetPassword(event, body);
       case 'register-first-time':
-        return await handleRegisterFirstTime(body, token);
-      default:
-        return response(400, { error: 'Invalid action' });
+        // Disabled: anyone who knew a staff email could claim an account
+        // that had no password yet. A manager now sets a temporary password.
+        return response(410, { error: 'Ask a manager for a temporary password.' });
+      default: return response(400, { error: 'Invalid action' });
     }
   } catch (err) {
-    console.error('Auth error:', err);
-    return response(500, { error: err.message || 'Internal server error' });
+    console.error('Auth error:', err && err.message);
+    return response(err && err.status === 503 ? 503 : 500, { error: 'Internal server error' });
   }
 };

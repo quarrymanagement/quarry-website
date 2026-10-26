@@ -1,260 +1,65 @@
-const https = require('https');
+// ============================================================================
+// time-off.js — time-off requests for the employee portal (/employee/).
+//   action 'request'          employee token; employee id taken from the token
+//   action 'approve' | 'deny' OWNER admin token
+// Stored in private Netlify Blobs (_schedule-store.js), not GitHub.
+// ============================================================================
 const crypto = require('crypto');
+const { readSchedule, writeSchedule, verifyEmployeeToken, employeeTokenFrom } = require('./_schedule-store');
+const { isAuthorized } = require('./_admin-auth');
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-admin-token',
 };
+const response = (statusCode, body) => ({ statusCode, headers: { ...CORS_HEADERS, 'Cache-Control': 'no-store' }, body: JSON.stringify(body) });
 
-const response = (statusCode, body) => ({
-  statusCode,
-  headers: CORS_HEADERS,
-  body: JSON.stringify(body),
-});
-
-const handleOptions = () => response(200, { message: 'OK' });
-
-// GitHub API helper
-const githubRequest = (method, path, token, data = null) => {
-  return new Promise((resolve, reject) => {
-    const options = {
-      hostname: 'api.github.com',
-      path,
-      method,
-      headers: {
-        'Authorization': `token ${token}`,
-        'User-Agent': 'Quarry-Admin-Panel',
-        'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json',
-      },
-    };
-
-    const req = https.request(options, (res) => {
-      let body = '';
-      res.on('data', (chunk) => body += chunk);
-      res.on('end', () => {
-        try {
-          resolve({ statusCode: res.statusCode, data: JSON.parse(body) });
-        } catch (e) {
-          resolve({ statusCode: res.statusCode, data: body });
-        }
-      });
-    });
-
-    req.on('error', reject);
-    if (data) req.write(JSON.stringify(data));
-    req.end();
+const handleRequest = async (event, body) => {
+  const employeeId = verifyEmployeeToken(employeeTokenFrom(event, body));
+  if (!employeeId) return response(401, { error: 'Please sign in again' });
+  const { dates, reason } = body;
+  if (!Array.isArray(dates) || dates.length === 0 || dates.length > 31) {
+    return response(400, { error: 'dates array and reason required' });
+  }
+  const doc = await readSchedule();
+  if (!doc.employees.some((e) => e.id === employeeId)) return response(401, { error: 'Please sign in again' });
+  const requestId = `timeoff-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
+  doc.timeOffRequests.push({
+    id: requestId, employeeId, dates: dates.map(String), reason: String(reason || '').slice(0, 500),
+    status: 'pending', requestedAt: new Date().toISOString(),
   });
+  await writeSchedule(doc);
+  return response(200, { success: true, message: 'Time-off request submitted', requestId });
 };
 
-// Generate unique request ID
-const generateRequestId = () => {
-  return `timeoff-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
-};
-
-// Handle request action
-const handleRequest = async (body, token) => {
-  const { employeeId, dates, reason } = body;
-  if (!employeeId || !dates || !Array.isArray(dates) || dates.length === 0) {
-    return response(400, { error: 'employeeId, dates array, and reason required' });
-  }
-
-  try {
-    // Fetch schedule.json
-    const shaRes = await githubRequest('GET', '/repos/quarrymanagement/quarry-website/contents/schedule.json', token);
-    if (shaRes.statusCode !== 200) {
-      return response(500, { error: 'Could not fetch schedule data' });
-    }
-
-    const scheduleContent = Buffer.from(shaRes.data.content, 'base64').toString('utf-8');
-    const scheduleData = JSON.parse(scheduleContent);
-    const sha = shaRes.data.sha;
-
-    if (!scheduleData.timeOffRequests) {
-      scheduleData.timeOffRequests = [];
-    }
-
-    // Create new time off request
-    const requestId = generateRequestId();
-    const newRequest = {
-      id: requestId,
-      employeeId,
-      dates,
-      reason: reason || '',
-      status: 'pending',
-      requestedAt: new Date().toISOString(),
-    };
-
-    scheduleData.timeOffRequests.push(newRequest);
-
-    // Save back to GitHub
-    const updatedContent = JSON.stringify(scheduleData, null, 2);
-    const encoded = Buffer.from(updatedContent, 'utf-8').toString('base64');
-
-    const putData = {
-      message: 'Add time-off request',
-      content: encoded,
-      sha,
-    };
-
-    const putRes = await githubRequest('PUT', '/repos/quarrymanagement/quarry-website/contents/schedule.json', token, putData);
-
-    if (putRes.statusCode === 200 || putRes.statusCode === 201) {
-      return response(200, {
-        success: true,
-        message: 'Time-off request submitted',
-        requestId,
-      });
-    } else {
-      return response(putRes.statusCode, { error: 'Failed to save time-off request' });
-    }
-  } catch (err) {
-    console.error('Time-off request error:', err);
-    return response(500, { error: 'Internal server error' });
-  }
-};
-
-// Handle approve action
-const handleApprove = async (body, token) => {
-  const { requestId } = body;
-  if (!requestId) {
-    return response(400, { error: 'requestId required' });
-  }
-
-  try {
-    // Fetch schedule.json
-    const shaRes = await githubRequest('GET', '/repos/quarrymanagement/quarry-website/contents/schedule.json', token);
-    if (shaRes.statusCode !== 200) {
-      return response(500, { error: 'Could not fetch schedule data' });
-    }
-
-    const scheduleContent = Buffer.from(shaRes.data.content, 'base64').toString('utf-8');
-    const scheduleData = JSON.parse(scheduleContent);
-    const sha = shaRes.data.sha;
-
-    if (!scheduleData.timeOffRequests) {
-      scheduleData.timeOffRequests = [];
-    }
-
-    // Find and update request
-    const request = scheduleData.timeOffRequests.find(r => r.id === requestId);
-    if (!request) {
-      return response(404, { error: 'Request not found' });
-    }
-
-    request.status = 'approved';
-    request.approvedAt = new Date().toISOString();
-
-    // Save back to GitHub
-    const updatedContent = JSON.stringify(scheduleData, null, 2);
-    const encoded = Buffer.from(updatedContent, 'utf-8').toString('base64');
-
-    const putData = {
-      message: 'Approve time-off request',
-      content: encoded,
-      sha,
-    };
-
-    const putRes = await githubRequest('PUT', '/repos/quarrymanagement/quarry-website/contents/schedule.json', token, putData);
-
-    if (putRes.statusCode === 200 || putRes.statusCode === 201) {
-      return response(200, {
-        success: true,
-        message: 'Time-off request approved',
-      });
-    } else {
-      return response(putRes.statusCode, { error: 'Failed to approve request' });
-    }
-  } catch (err) {
-    console.error('Approve request error:', err);
-    return response(500, { error: 'Internal server error' });
-  }
-};
-
-// Handle deny action
-const handleDeny = async (body, token) => {
+const handleDecision = async (event, body, status) => {
+  if (!isAuthorized(event, body, [])) return response(401, { error: 'Admin session required' });
   const { requestId, reason } = body;
-  if (!requestId) {
-    return response(400, { error: 'requestId required' });
-  }
-
-  try {
-    // Fetch schedule.json
-    const shaRes = await githubRequest('GET', '/repos/quarrymanagement/quarry-website/contents/schedule.json', token);
-    if (shaRes.statusCode !== 200) {
-      return response(500, { error: 'Could not fetch schedule data' });
-    }
-
-    const scheduleContent = Buffer.from(shaRes.data.content, 'base64').toString('utf-8');
-    const scheduleData = JSON.parse(scheduleContent);
-    const sha = shaRes.data.sha;
-
-    if (!scheduleData.timeOffRequests) {
-      scheduleData.timeOffRequests = [];
-    }
-
-    // Find and update request
-    const request = scheduleData.timeOffRequests.find(r => r.id === requestId);
-    if (!request) {
-      return response(404, { error: 'Request not found' });
-    }
-
-    request.status = 'denied';
-    request.denialReason = reason || '';
-    request.deniedAt = new Date().toISOString();
-
-    // Save back to GitHub
-    const updatedContent = JSON.stringify(scheduleData, null, 2);
-    const encoded = Buffer.from(updatedContent, 'utf-8').toString('base64');
-
-    const putData = {
-      message: 'Deny time-off request',
-      content: encoded,
-      sha,
-    };
-
-    const putRes = await githubRequest('PUT', '/repos/quarrymanagement/quarry-website/contents/schedule.json', token, putData);
-
-    if (putRes.statusCode === 200 || putRes.statusCode === 201) {
-      return response(200, {
-        success: true,
-        message: 'Time-off request denied',
-      });
-    } else {
-      return response(putRes.statusCode, { error: 'Failed to deny request' });
-    }
-  } catch (err) {
-    console.error('Deny request error:', err);
-    return response(500, { error: 'Internal server error' });
-  }
+  if (!requestId) return response(400, { error: 'requestId required' });
+  const doc = await readSchedule();
+  const request = doc.timeOffRequests.find((r) => r.id === requestId);
+  if (!request) return response(404, { error: 'Request not found' });
+  request.status = status;
+  if (status === 'approved') request.approvedAt = new Date().toISOString();
+  else { request.denialReason = reason || ''; request.deniedAt = new Date().toISOString(); }
+  await writeSchedule(doc);
+  return response(200, { success: true, message: `Time-off request ${status}` });
 };
 
 exports.handler = async (event) => {
-  if (event.httpMethod === 'OPTIONS') return handleOptions();
+  if (event.httpMethod === 'OPTIONS') return response(200, { message: 'OK' });
   if (event.httpMethod !== 'POST') return response(405, { error: 'Method not allowed' });
-
-  const token = process.env.GITHUB_TOKEN;
-  if (!token) {
-    return response(500, { error: 'GitHub token not configured on server' });
-  }
-
   try {
-    const body = JSON.parse(event.body);
-    const action = body.action;
-
-    switch (action) {
-      case 'request':
-        return await handleRequest(body, token);
-      case 'approve':
-        return await handleApprove(body, token);
-      case 'deny':
-        return await handleDeny(body, token);
-      default:
-        return response(400, { error: 'Invalid action' });
+    const body = JSON.parse(event.body || '{}');
+    switch (body.action) {
+      case 'request': return await handleRequest(event, body);
+      case 'approve': return await handleDecision(event, body, 'approved');
+      case 'deny': return await handleDecision(event, body, 'denied');
+      default: return response(400, { error: 'Invalid action' });
     }
   } catch (err) {
-    console.error('Time-off error:', err);
-    return response(500, { error: err.message || 'Internal server error' });
+    console.error('Time-off error:', err && err.message);
+    return response(err && err.status === 503 ? 503 : 500, { error: 'Internal server error' });
   }
 };

@@ -1,109 +1,47 @@
-const https = require('https');
+// ============================================================================
+// save-schedule.js — admin panel save for the staff schedule (OWNER only).
+// Writes private Netlify Blobs (_schedule-store.js), not schedule.json on
+// GitHub. MERGES: any field the client leaves out keeps its stored value
+// (the April-21 data-loss fix). Password hashes are never accepted from the
+// browser; they live in a separate credentials key.
+// ============================================================================
+const { readSchedule, writeSchedule } = require('./_schedule-store');
+const { isAuthorized } = require('./_admin-auth');
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, x-admin-token',
 };
-
-const response = (statusCode, body) => ({
-  statusCode,
-  headers: CORS_HEADERS,
-  body: JSON.stringify(body),
-});
-
-const handleOptions = () => response(200, { message: 'OK' });
-
-// GitHub API helper
-const githubRequest = (method, path, token, data = null) => {
-  return new Promise((resolve, reject) => {
-    const options = {
-      hostname: 'api.github.com',
-      path,
-      method,
-      headers: {
-        'Authorization': `token ${token}`,
-        'User-Agent': 'Quarry-Admin-Panel',
-        'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json',
-      },
-    };
-
-    const req = https.request(options, (res) => {
-      let body = '';
-      res.on('data', (chunk) => body += chunk);
-      res.on('end', () => {
-        try {
-          resolve({ statusCode: res.statusCode, data: JSON.parse(body) });
-        } catch (e) {
-          resolve({ statusCode: res.statusCode, data: body });
-        }
-      });
-    });
-
-    req.on('error', reject);
-    if (data) req.write(JSON.stringify(data));
-    req.end();
-  });
-};
+const response = (statusCode, body) => ({ statusCode, headers: { ...CORS_HEADERS, 'Cache-Control': 'no-store' }, body: JSON.stringify(body) });
 
 exports.handler = async (event) => {
-  if (event.httpMethod === 'OPTIONS') return handleOptions();
+  if (event.httpMethod === 'OPTIONS') return response(200, { message: 'OK' });
   if (event.httpMethod !== 'POST') return response(405, { error: 'Method not allowed' });
-
-  const token = process.env.GITHUB_TOKEN;
-  if (!token) {
-    return response(500, { error: 'GitHub token not configured on server' });
-  }
-
+  let body;
+  try { body = JSON.parse(event.body || '{}'); } catch (_) { return response(400, { error: 'Bad JSON' }); }
+  if (!isAuthorized(event, body, [])) return response(401, { error: 'Admin session required' });
   try {
-    const scheduleData = JSON.parse(event.body);
-
-    const repo = 'quarrymanagement/quarry-website';
-    const filePath = 'schedule.json';
-
-    // Get current file (sha + content) so we can MERGE rather than overwrite.
-    // This is critical: the old admin client only sent `schedules`, which was
-    // overwriting the entire file and wiping employees + timeOffRequests every
-    // save. The fix: pull existing data, merge in only the fields the client
-    // actually sent, push it back.
-    const shaRes = await githubRequest('GET', `/repos/${repo}/contents/${filePath}`, token);
-    let sha = '';
-    let existing = { employees: [], schedules: {}, timeOffRequests: [] };
-    if (shaRes.statusCode === 200 && shaRes.data.sha) {
-      sha = shaRes.data.sha;
-      try {
-        const decoded = Buffer.from(shaRes.data.content, 'base64').toString('utf-8');
-        existing = JSON.parse(decoded);
-      } catch (_) { /* fall through with defaults */ }
-    }
-
-    // Merge: prefer client-provided fields, fall back to existing for anything
-    // the client didn't send. Prevents data loss from buggy or partial saves.
+    const existing = await readSchedule();
+    const strip = (emps) => emps.map((e) => { const c = { ...e }; delete c.passwordHash; delete c.hasPassword; return c; });
     const merged = {
-      employees:       Array.isArray(scheduleData.employees)       ? scheduleData.employees       : (existing.employees || []),
-      schedules:       (scheduleData.schedules && typeof scheduleData.schedules === 'object') ? scheduleData.schedules : (existing.schedules || {}),
-      timeOffRequests: Array.isArray(scheduleData.timeOffRequests) ? scheduleData.timeOffRequests : (existing.timeOffRequests || [])
+      employees: Array.isArray(body.employees) ? strip(body.employees) : existing.employees,
+      schedules: (body.schedules && typeof body.schedules === 'object') ? body.schedules : existing.schedules,
+      timeOffRequests: existing.timeOffRequests,
     };
-
-    const content = JSON.stringify(merged, null, 2);
-    const encoded = Buffer.from(content, 'utf-8').toString('base64');
-
-    const putData = {
-      message: 'Update schedule from admin panel',
-      content: encoded,
-    };
-    if (sha) putData.sha = sha;
-
-    const putRes = await githubRequest('PUT', `/repos/${repo}/contents/${filePath}`, token, putData);
-
-    if (putRes.statusCode === 200 || putRes.statusCode === 201) {
-      return response(200, { success: true, message: 'Schedule saved to GitHub' });
-    } else {
-      return response(putRes.statusCode, { error: putRes.data.message || 'GitHub save failed' });
+    if (Array.isArray(body.timeOffRequests)) {
+      // Keep any request an employee filed after the admin panel loaded.
+      const sent = new Set(body.timeOffRequests.map((r) => r && r.id));
+      merged.timeOffRequests = body.timeOffRequests.concat(existing.timeOffRequests.filter((r) => !sent.has(r.id)));
     }
+    // Guard against the April-21 failure mode: a save that would wipe staff.
+    if (existing.employees.length >= 5 && merged.employees.length === 0) {
+      return response(409, { error: 'Refusing to save an empty employee list' });
+    }
+    await writeSchedule(merged);
+    return response(200, { success: true, message: 'Schedule saved' });
   } catch (err) {
-    console.error('Save schedule error:', err);
-    return response(500, { error: err.message || 'Internal server error' });
+    console.error('Save schedule error:', err && err.message);
+    return response(err && err.status === 503 ? 503 : 500, { error: 'Save failed' });
   }
 };
