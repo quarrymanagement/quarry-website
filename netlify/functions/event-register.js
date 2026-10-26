@@ -37,11 +37,11 @@ const crypto = require('crypto');
 const { findActiveBundle } = require('./_event-bundles');
 
 // Coupon table (manual - Square does not have native promo codes for hosted checkout)
+// Paid-discount codes only. ADMIN100 (100% off) and TESTCODE were removed:
+// this file and the public GitHub repo are publicly readable.
 const EVENT_COUPONS = {
   'QUARRY10': { pct: 10 },
   'QUARRY20': { pct: 20 },
-  'TESTCODE': { flat: 500 },
-  'ADMIN100': { pct: 100 },
 };
 
 function squareApi(method, path, body) {
