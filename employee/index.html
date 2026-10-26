@@ -713,8 +713,10 @@
 
         async function loadScheduleData() {
             try {
-                const url = `/.netlify/functions/data-read?file=schedule.json`;
-                const response = await fetch(url);
+                // Private staff data: only this employee's shifts + time-off.
+                const response = await fetch('/.netlify/functions/staff-schedule', {
+                    headers: { 'Authorization': 'Bearer ' + sessionToken }
+                });
                 if (!response.ok) throw new Error('Failed to load schedule');
                 const data = await response.json();
                 allScheduleData = data;
@@ -729,7 +731,7 @@
             try {
                 const response = await fetch('/.netlify/functions/time-off', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sessionToken },
                     body: JSON.stringify({
                         employeeId: currentEmployee.id,
                         dates,
@@ -748,7 +750,7 @@
             try {
                 const response = await fetch('/.netlify/functions/employee-auth', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sessionToken },
                     body: JSON.stringify({
                         employeeId: currentEmployee.id,
                         oldPassword,
@@ -780,6 +782,13 @@
                 sessionToken = result.token;
                 currentEmployee = result.employee;
                 showMainApp();
+                if (currentEmployee.mustChangePassword) {
+                    // Temporary password set by a manager: send them to Profile.
+                    showPage('profile');
+                    document.querySelectorAll('.nav-item').forEach(i => i.classList.toggle('active', i.dataset.page === 'profile'));
+                    const ps = document.getElementById('passwordStatus');
+                    if (ps) { ps.innerHTML = '<div class="form-error">Please choose a new password (your current one is temporary).</div>'; ps.classList.remove('hidden'); }
+                }
             } else {
                 statusDiv.innerHTML = `<div class="login-error">${result.error}</div>`;
             }
@@ -1024,7 +1033,7 @@
                 statusDiv.classList.remove('hidden');
                 document.getElementById('passwordForm').reset();
             } else {
-                statusDiv.innerHTML = `<div class="form-error">${result.error || 'Failed to update password'}</div>`;
+                statusDiv.innerHTML = `<div class="form-error">${(result.data && result.data.error) || result.error || 'Failed to update password'}</div>`;
                 statusDiv.classList.remove('hidden');
             }
         });
