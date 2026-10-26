@@ -26,13 +26,15 @@ const COPY_EMAIL = env("HR_COPY_EMAIL", ""); // optional bcc-style copy of compl
 // Dev mode is only honoured when not pointed at the hosted project.
 const DEV = env("HR_DEV") === "1" && !env("SUPABASE_URL").includes("supabase.co");
 const SIGNING_SECRET = env("HR_SIGNING_SECRET");
+// Key for the date-of-birth HMAC. Lives only in edge-function secrets, never in the DB.
+const DOB_KEY = env("HR_DOB_HMAC_KEY");
 
 // deno-lint-ignore no-explicit-any
 const sql: any = postgres(env("SUPABASE_DB_URL"), {
   prepare: false, // works through the Supabase pooler
   max: 3,
   idle_timeout: 20,
-  // keep DATE columns (dob, due_date) as 'YYYY-MM-DD' strings
+  // keep DATE columns (due_date) as 'YYYY-MM-DD' strings
   types: { date: { to: 1082, from: [1082], serialize: (x: string) => x, parse: (x: string) => x } },
 });
 const store = makeStore(DEV);
@@ -99,8 +101,33 @@ export function ageOn(dob: string | null, on = new Date()): number | null {
   if (ct.getMonth() + 1 < m || (ct.getMonth() + 1 === m && ct.getDate() < d)) age--;
   return age;
 }
-export const isMinor = (e: { dob: string | null; is_minor_override: boolean | null }) =>
-  e.is_minor_override ?? ((ageOn(e.dob) ?? 99) < 18);
+export const isMinor = (e: { is_minor: boolean | null }) => e.is_minor === true;
+
+// ---- date of birth: identity check only; never stored, logged or returned.
+// Accepts YYYY-MM-DD, M/D/YYYY or M-D-YYYY; returns YYYY-MM-DD or null.
+export function normDob(s: unknown): string | null {
+  const t = String(s ?? "").trim();
+  let m = t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  let y: number, mo: number, d: number;
+  if (m) [y, mo, d] = [+m[1], +m[2], +m[3]];
+  else if ((m = t.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/))) [mo, d, y] = [+m[1], +m[2], +m[3]];
+  else return null;
+  const dt = new Date(Date.UTC(y, mo - 1, d));
+  if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== mo - 1 || dt.getUTCDate() !== d) return null;
+  if (y < 1900 || dt.getTime() > Date.now()) return null;
+  return `${y}-${String(mo).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+}
+export const dobKeyConfigured = () => DOB_KEY.length >= 32;
+// v1:<hex HMAC-SHA256(key, "quarry-hr-dob|v1|<employee id>|YYYY-MM-DD")>
+// Bound to the employee id so equal birthdays give different values.
+export async function dobHmac(employeeId: string, dob: string): Promise<string> {
+  if (!dobKeyConfigured()) throw bad("Date of birth checks are not set up (HR_DOB_HMAC_KEY missing).", 500);
+  const k = await crypto.subtle.importKey("raw", new TextEncoder().encode(DOB_KEY), { name: "HMAC", hash: "SHA-256" }, false, [
+    "sign",
+  ]);
+  const mac = await crypto.subtle.sign("HMAC", k, new TextEncoder().encode(`quarry-hr-dob|v1|${employeeId}|${dob}`));
+  return "v1:" + [...new Uint8Array(mac)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
 
 async function audit(
   ev: string,
@@ -245,7 +272,7 @@ function mustAdmin(ctx: Ctx) {
 }
 
 async function loadAssignment(id: string) {
-  const [a] = await sql`select a.*, e.full_name, e.email, e.department, e.dob, e.is_minor_override,
+  const [a] = await sql`select a.*, e.full_name, e.email, e.department, e.dob_hmac is not null as has_dob, e.is_minor,
       d.title, d.kind as doc_kind, d.policy_key, v.version, v.sha256 as doc_sha256, v.storage_path, v.page_count
     from public.hr_assignments a
     join public.hr_employees e on e.id = a.employee_id
@@ -261,8 +288,8 @@ async function assignmentScoped(ctx: Ctx, id: string) {
   return a;
 }
 
-function pickVerify(e: { dob: string | null; phone_last4: string | null }) {
-  return e.dob ? "dob" : e.phone_last4 ? "phone4" : "email_code";
+function pickVerify(e: { dob_hmac: string | null; phone_last4: string | null }) {
+  return e.dob_hmac && dobKeyConfigured() ? "dob" : e.phone_last4 ? "phone4" : "email_code";
 }
 function newRefNo() {
   const d = new Date().toLocaleDateString("en-CA", { timeZone: "America/Chicago" }).replace(/-/g, "").slice(2);
@@ -286,15 +313,14 @@ async function admin(action: string, body: any, req: Request, ctx: Ctx) {
       };
 
     case "employees_list": {
-      const rows = await sql`select id, full_name, email, phone_last4 is not null as has_phone4, dob is not null as has_dob,
-          dob, is_minor_override, guardian_name, guardian_email, department, position, active
+      const rows = await sql`select id, full_name, email, phone_last4 is not null as has_phone4, dob_hmac is not null as has_dob,
+          is_minor, guardian_name, guardian_email, department, position, active
         from public.hr_employees where voided_at is null order by active desc, full_name`;
       return {
         employees: rows
           .filter((r: any) => ctx.isAdmin || ctx.departments.includes(r.department))
           .map((r: any) => ({
             ...r,
-            dob: ctx.isAdmin ? r.dob : undefined,
             minor: isMinor(r),
             guardian_email: ctx.isAdmin ? r.guardian_email : undefined,
           })),
@@ -314,8 +340,7 @@ async function admin(action: string, body: any, req: Request, ctx: Ctx) {
         full_name,
         email: clean(e.email, 200) || null,
         phone_last4: p4,
-        dob: clean(e.dob, 10) || null,
-        is_minor_override: typeof e.is_minor_override === "boolean" ? e.is_minor_override : null,
+        is_minor: e.is_minor === true,
         guardian_name: clean(e.guardian_name, 120) || null,
         guardian_email: clean(e.guardian_email, 200) || null,
         department: clean(e.department, 20) || "FOH",
@@ -323,11 +348,21 @@ async function admin(action: string, body: any, req: Request, ctx: Ctx) {
         active: e.active !== false,
       };
       let id = e.id as string | undefined;
-      if (id) {
+      const isNew = !id;
+      if (!id) id = crypto.randomUUID();
+      // DOB: hash it, use it once to pre-tick "minor", then drop it. Blank = keep what is on file.
+      const dobIn = clean(e.dob, 20);
+      if (dobIn) {
+        const nd = normDob(dobIn);
+        if (!nd) throw bad("Date of birth looks wrong");
+        (row as any).dob_hmac = await dobHmac(id, nd);
+        if ((ageOn(nd) ?? 99) < 18) row.is_minor = true;
+      } else if (e.clear_dob === true) (row as any).dob_hmac = null;
+      if (!isNew) {
         await sql`update public.hr_employees set ${sql(row as any)}, updated_at = now() where id = ${id} and voided_at is null`;
         await audit("employee_updated", ctx.actor, req, { e: id }, { fields: Object.keys(row) });
       } else {
-        [{ id }] = await sql`insert into public.hr_employees ${sql(row as any)} returning id`;
+        await sql`insert into public.hr_employees ${sql({ id, ...row } as any)}`;
         await audit("employee_created", ctx.actor, req, { e: id });
       }
       return { id };
@@ -493,7 +528,7 @@ async function admin(action: string, body: any, req: Request, ctx: Ctx) {
       delete a.token_hash;
       delete a.guardian_token_hash;
       delete a.email_code_hash;
-      delete a.dob;
+      delete a.has_dob;
       return { assignment: a, signatures: sigs, audit: ev };
     }
 
@@ -591,7 +626,7 @@ async function admin(action: string, body: any, req: Request, ctx: Ctx) {
           position: e.position,
           active: e.active,
           minor: isMinor(e),
-          dob: ctx.isAdmin ? e.dob : undefined,
+          has_dob: ctx.isAdmin ? e.dob_hmac != null : undefined,
           guardian_name: ctx.isAdmin ? e.guardian_name : undefined,
           guardian_email: ctx.isAdmin ? e.guardian_email : undefined,
         },
@@ -677,7 +712,7 @@ async function signer(action: string, body: any, req: Request) {
   if (action === "s_load") {
     const { a, party } = await byToken(String(body.t ?? ""));
     if (a.status === "voided") throw bad("This document was withdrawn. No action is needed.", 410);
-    const method = party === "guardian" ? (a.dob ? "dob" : "email_code") : a.verify_method;
+    const method = party === "guardian" ? (a.has_dob && dobKeyConfigured() ? "dob" : "email_code") : a.verify_method;
     // Only non-sensitive info before identity is verified.
     return {
       party,
@@ -693,7 +728,7 @@ async function signer(action: string, body: any, req: Request) {
 
   if (action === "s_send_code") {
     const { a, party } = await byToken(String(body.t ?? ""));
-    const method = party === "guardian" ? (a.dob ? "dob" : "email_code") : a.verify_method;
+    const method = party === "guardian" ? (a.has_dob && dobKeyConfigured() ? "dob" : "email_code") : a.verify_method;
     if (method !== "email_code") throw bad("Not needed");
     if (a.email_code_expires_at && new Date(a.email_code_expires_at).getTime() - 9 * 60_000 > Date.now()) {
       throw bad("A code was just sent. Wait a minute before asking again.", 429);
@@ -722,11 +757,13 @@ async function signer(action: string, body: any, req: Request) {
     if (a[failCol] >= MAX_VERIFY) {
       throw bad("Too many tries. Ask a manager to resend your link.", 423);
     }
-    const method = party === "guardian" ? (a.dob ? "dob" : "email_code") : a.verify_method;
+    const method = party === "guardian" ? (a.has_dob && dobKeyConfigured() ? "dob" : "email_code") : a.verify_method;
     const ans = clean(body.answer, 20);
     let ok = false;
     if (method === "dob") {
-      ok = safeEq(ans, String(a.dob).slice(0, 10));
+      const nd = normDob(ans);
+      const [e] = await sql`select dob_hmac from public.hr_employees where id = ${a.employee_id}`;
+      ok = !!nd && !!e?.dob_hmac && safeEq(await dobHmac(a.employee_id, nd), e.dob_hmac);
     } else if (method === "phone4") {
       const [e] = await sql`select phone_last4 from public.hr_employees where id = ${a.employee_id}`;
       ok = !!e?.phone_last4 && safeEq(ans.replace(/\D/g, ""), e.phone_last4);

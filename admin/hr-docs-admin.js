@@ -319,15 +319,18 @@
       '<div class="hd-f"><label class="hd-lbl">Full legal name</label><input class="hd-in" id="eN" value="' + esc(e.full_name || '') + '"></div>' +
       '<div class="hd-f"><label class="hd-lbl">Email</label><input class="hd-in" id="eE" value="' + esc(e.email || '') + '"></div>' +
       '<div class="hd-f"><label class="hd-lbl">Phone last 4</label><input class="hd-in" id="eP" maxlength="4" placeholder="' + (e.has_phone4 ? 'on file (enter to replace)' : '') + '"></div>' +
-      '<div class="hd-f"><label class="hd-lbl">Date of birth</label><input type="date" class="hd-in" id="eD" value="' + esc(e.dob || '') + '"></div>' +
+      '<div class="hd-f"><label class="hd-lbl">Date of birth (identity check only)</label><input type="text" inputmode="numeric" class="hd-in" id="eD" autocomplete="off" placeholder="MM/DD/YYYY">' +
+        '<div class="hd-hint">' + (e.has_dob ? 'On file as a one-way keyed code; never shown. Enter a date only to replace it. <label><input type="checkbox" id="eDX"> Remove</label>' : 'Saved only as a one-way keyed code; never shown again.') + '</div></div>' +
       '<div class="hd-f"><label class="hd-lbl">Department</label><select class="hd-sel" id="eDp">' + ['FOH', 'BOH', 'Bar', 'Events', 'Management', 'Other'].map(function (d) { return '<option' + (e.department === d ? ' selected' : '') + '>' + d + '</option>'; }).join('') + '</select></div>' +
       '<div class="hd-f"><label class="hd-lbl">Position</label><input class="hd-in" id="eJ" value="' + esc(e.position || '') + '"></div>' +
       '<div class="hd-f"><label class="hd-lbl">Parent/guardian name (minors)</label><input class="hd-in" id="eGN" value="' + esc(e.guardian_name || '') + '"></div>' +
       '<div class="hd-f"><label class="hd-lbl">Parent/guardian email</label><input class="hd-in" id="eGE" value="' + esc(e.guardian_email || '') + '"></div></div>' +
+      '<label style="font-size:13px;"><input type="checkbox" id="eM"' + (e.minor ? ' checked' : '') + '> Minor (under 18): a parent/guardian co-signs. Ticked automatically if the date of birth entered is under 18.</label><br>' +
       '<label style="font-size:13px;"><input type="checkbox" id="eA"' + (e.active === false ? '' : ' checked') + '> Active</label><br><br><button class="hd-btn" id="eGo">Save</button>');
     m.querySelector('#eGo').onclick = function () {
       var v = function (k) { return m.querySelector('#' + k).value; };
-      var payload = { id: e.id, full_name: v('eN'), email: v('eE'), dob: v('eD'), department: v('eDp'), position: v('eJ'), guardian_name: v('eGN'), guardian_email: v('eGE'), active: m.querySelector('#eA').checked };
+      var payload = { id: e.id, full_name: v('eN'), email: v('eE'), dob: v('eD'), department: v('eDp'), position: v('eJ'), guardian_name: v('eGN'), guardian_email: v('eGE'), active: m.querySelector('#eA').checked, is_minor: m.querySelector('#eM').checked };
+      if (m.querySelector('#eDX') && m.querySelector('#eDX').checked && !payload.dob) payload.clear_dob = true;
       if (v('eP')) payload.phone_last4 = v('eP');
       api('employee_save', { employee: payload }).then(function (r) { toast(r.error || 'Saved.', !!r.error); if (!r.error) { m.remove(); open('people'); } });
     };

@@ -17,7 +17,7 @@ no bucket is created, and email is off by default.
    their name or drawing a signature, and can add optional comments.
    The signature block reads: *"By signing, I acknowledge that I received and reviewed this document. My signature
    acknowledges receipt, not agreement."*
-5. If the employee is a minor (by DOB, or a manual flag) and the document needs a guardian, the system emails a second private link
+5. If the employee is flagged as a minor (the admin's "Minor" box, pre-ticked when a DOB entered shows under 18) and the document needs a guardian, the system emails a second private link
    to the parent/guardian. The guardian verifies with the employee's DOB (or an emailed code) and signs.
 6. The server builds a **locked final PDF**:
    - the original pages, unchanged
@@ -43,7 +43,7 @@ no bucket is created, and email is off by default.
 
 ## Data model (migration `supabase/migrations/20261026160000_hr_documents_esign.sql`)
 
-- **`hr_employees`**: the HR roster. Fields: name, email, phone last 4, DOB, a minor override, guardian name/email, department, position, links to the Square/checklist roster.
+- **`hr_employees`**: the HR roster. Fields: name, email, phone last 4, a keyed HMAC of the DOB (`dob_hmac`; the date itself is never stored), a minor flag, guardian name/email, department, position, links to the Square/checklist roster.
 - **`hr_role_scopes`**: which admin role is an HR admin, or which departments a role can manage.
 - **`hr_documents`**: document headers. **`hr_document_versions`** holds the stored PDF path, SHA-256 and page count, and is append-only.
 - **`hr_assignments`**: one row per document per person. Holds the hashed link token, status, guardian fields, outcome, and final PDF path/hash.
@@ -76,7 +76,7 @@ no bucket is created, and email is off by default.
 
 The private emailed link is the first factor. The second factor is picked per person:
 
-1. **DOB** when on file. This is preferred, and DOB is needed anyway to detect minors.
+1. **DOB** when on file. This is preferred. The DOB is used only for this check: it is stored only as `v1:` + HMAC-SHA256(`HR_DOB_HMAC_KEY`, employee id + YYYY-MM-DD), the key lives only in function secrets, and no admin or manager screen, API response, audit entry or PDF ever contains the date or its hash. Admins see only "on file" and can replace or remove it.
 2. **Last 4 of phone** when there's no DOB.
 3. **A 6-digit emailed code** as the fallback.
 
@@ -87,6 +87,7 @@ For people with no email, a manager can open the link with them in person.
 1. Apply the migration to the Supabase project. It creates the tables and the private bucket.
 2. Set function secrets:
    - `HR_SIGNING_SECRET` (random, at least 32 characters)
+   - `HR_DOB_HMAC_KEY` (random, at least 32 characters; keep it safe: if it is lost or changed, DOBs must be re-entered)
    - `HR_EMAIL_MODE=sendgrid` and `SENDGRID_API_KEY`, or leave email `off`
    - `HR_FROM_EMAIL`
    - `SUPABASE_DB_URL` (provided by default)

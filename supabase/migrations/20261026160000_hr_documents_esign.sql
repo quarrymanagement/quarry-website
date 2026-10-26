@@ -34,8 +34,13 @@ create table if not exists public.hr_employees (
   full_name             text not null,
   email                 text,
   phone_last4           text check (phone_last4 is null or phone_last4 ~ '^[0-9]{4}$'),
-  dob                   date,
-  is_minor_override     boolean,               -- null = derive from dob
+  -- Date of birth is NEVER stored. Only a keyed HMAC-SHA256 of the normalized
+  -- date (YYYY-MM-DD) bound to this employee id, keyed by the HR_DOB_HMAC_KEY
+  -- edge-function secret (not in the database). Used only to check the answer
+  -- typed on the signing page; it cannot be shown or reversed without the key.
+  dob_hmac              text check (dob_hmac is null or dob_hmac ~ '^v1:[0-9a-f]{64}$'),
+  -- Set by an HR admin (pre-ticked when a DOB typed in shows under 18 at entry).
+  is_minor              boolean not null default false,
   guardian_name         text,
   guardian_email        text,
   department            text not null default 'FOH'
@@ -50,6 +55,8 @@ create table if not exists public.hr_employees (
   void_reason           text
 );
 create index if not exists hr_employees_active_idx on public.hr_employees (active, department);
+comment on column public.hr_employees.dob_hmac is
+  'Keyed HMAC of the date of birth (identity check only). The date itself is never stored or returned by any view or API.';
 
 -- Which admin-login roles count as HR admins or managers, and which
 -- departments a manager can see. 'owner' (Matt's login) is always full admin
