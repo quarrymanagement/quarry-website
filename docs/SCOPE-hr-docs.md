@@ -12,7 +12,8 @@ no bucket is created, and email is off by default.
    private link that expires in 14 days. Email is optional; with email off, the admin copies the link and sends it themselves.
 3. The employee opens the link and verifies identity (date of birth, last 4 of phone, or a 6-digit emailed code; 5 tries, then locked).
    Only after that do they see the document, its title, or its type. Emails never name the type: every sign request has the subject
-   "Please review & sign - The Quarry ({ref})", and a disciplinary notice's default title is the neutral "Written notice".
+   "Please review & sign - The Quarry ({ref})", every signed-copy email has the subject "Your signed copy - The Quarry ({ref})"
+   (no title), and a disciplinary notice's default title is the neutral "Written notice".
 4. The employee reads the whole PDF and agrees to sign electronically. That E-SIGN consumer disclosure covers the right to paper,
    how to withdraw, and the hardware needed, and the server records it as its own audit event. The employee then signs by typing
    their name or drawing a signature, and can add optional comments.
@@ -61,7 +62,7 @@ no bucket is created, and email is off by default.
   - A completed assignment can only be voided, the void needs a reason, and a void can't be undone.
 - **Access:** RLS is on, with no policies, and all privileges are revoked from `anon`/`authenticated`. Only the edge function (service role) can read the tables.
 - **Storage:** a private bucket `hr-documents` (PDF only, 20 MB) with no storage policies and no public URLs. Files are downloaded only through the function.
-- **Turns 18:** from the first of that month, HR admins see a "Turns 18: review Minor" alert and tag (managers never do). A Netlify scheduled
+- **Turns 18:** from the first of that month, HR admins see the alert "Turns 18 this month. Untick 'Minor' only on or after their birthday." and a "Turns 18" tag (managers never do). A Netlify scheduled
   function (`netlify/functions/hr-minor-check.js`, daily 13:00 UTC = 8 AM CDT / 7 AM CST) calls the function's `cron_minor_check`
   action with the `x-hr-cron-key` header. It writes one "Turns 18 this month" audit entry per person per month and sends no email.
   It does nothing until `HR_CRON_KEY` is set on both sides.

@@ -150,12 +150,14 @@
   }
 
   // HR admins only: minors whose turns-18 month has arrived (the server sends this only to admins, only once due)
+  // Exact wording approved by Legal (Oct 26, 2026). The flag starts on the 1st of the month they turn 18.
+  var T18_ALERT = "Turns 18 this month. Untick 'Minor' only on or after their birthday.";
   function turns18() {
     var due = EMPS.filter(function (e) { return e.turns_18_due; }), el = $('hdT18');
     if (!el) return;
-    el.innerHTML = due.length ? '<div class="hd-callout" id="hdT18c"><b>Turns 18: review Minor.</b> ' + due.map(function (e) {
-      return '<a href="#" data-id="' + e.id + '">' + esc(e.full_name) + '</a> (turns 18 in ' + esc(e.turns_18_month) + ')';
-    }).join(', ') + '. Once they are 18, open their details and untick <b>Minor</b> so a parent/guardian is no longer asked to sign.</div>' : '';
+    el.innerHTML = due.length ? '<div class="hd-callout" id="hdT18c"><b id="hdT18t">' + esc(T18_ALERT) + '</b><div style="margin-top:4px;">' + due.map(function (e) {
+      return '<a href="#" data-id="' + e.id + '">' + esc(e.full_name) + '</a> (' + esc(e.turns_18_month) + ')';
+    }).join(', ') + '</div></div>' : '';
     Array.prototype.forEach.call(el.querySelectorAll('a[data-id]'), function (a) {
       a.onclick = function (ev) { ev.preventDefault(); editEmp(EMPS.find(function (x) { return x.id === a.dataset.id; }) || {}); };
     });
@@ -352,7 +354,7 @@
       '<div class="hd-f"><label class="hd-lbl">Parent/guardian name (minors)</label><input class="hd-in" id="eGN" value="' + esc(e.guardian_name || '') + '"></div>' +
       '<div class="hd-f"><label class="hd-lbl">Parent/guardian email</label><input class="hd-in" id="eGE" value="' + esc(e.guardian_email || '') + '"></div></div>' +
       '<label style="font-size:13px;"><input type="checkbox" id="eM"' + (e.minor ? ' checked' : '') + '> Minor (under 18): a parent/guardian co-signs. Ticked automatically if the date of birth entered is under 18. Unticking it clears the stored turns-18 month.</label>' +
-      (e.turns_18_due ? '<div class="hd-callout" style="margin:6px 0;">Turns 18 in ' + esc(e.turns_18_month) + '. Untick Minor once they are 18.</div>' : '<br>') +
+      (e.turns_18_due ? '<div class="hd-callout" id="eT18" style="margin:6px 0;">' + esc(T18_ALERT) + '</div>' : '<br>') +
       '<label style="font-size:13px;"><input type="checkbox" id="eA"' + (e.active === false ? '' : ' checked') + '> Active</label><br><br><button class="hd-btn" id="eGo">Save</button>');
     m.querySelector('#eGo').onclick = function () {
       var v = function (k) { return m.querySelector('#' + k).value; };

@@ -92,3 +92,24 @@ Deno.test("turns-18 month: first of the month, month + year only", () => {
   assertEquals(H.turns18Month("2008-12-31"), "2026-12-01");
   assertEquals(H.ctMonthStart(new Date("2026-11-01T03:00:00Z")), "2026-10-01"); // still Oct 31 in Chicago
 });
+
+Deno.test("signed-copy email subject: exact, same for every type, never the title", () => {
+  for (const ref of ["HR-261026-ABCD", "HR-261026-Z9Z9"]) {
+    const s = H.signedCopySubject(ref);
+    assertEquals(s, `Your signed copy - The Quarry (${ref})`);
+    assert(!TYPE_WORDS.test(s), "subject names a type");
+    for (const title of ["Written notice", "SAMPLE Alcohol Service Policy Acknowledgment", "SAMPLE Training"]) {
+      assert(!s.includes(title), "subject has title");
+    }
+  }
+  const src = Deno.readTextFileSync(new URL("../handler.ts", import.meta.url));
+  assert(!/Signed copy - \$\{/.test(src), "old title-bearing subject still in handler");
+  assertEquals((src.match(/signedCopySubject\(a\.ref_no\)/g) ?? []).length, 2);
+});
+
+Deno.test("admin turns-18 alert text is exact", () => {
+  const js = Deno.readTextFileSync(new URL("../../../../admin/hr-docs-admin.js", import.meta.url));
+  assert(js.includes(`var T18_ALERT = "Turns 18 this month. Untick 'Minor' only on or after their birthday.";`), "alert text");
+  assertEquals((js.match(/esc\(T18_ALERT\)/g) ?? []).length, 2);
+  assert(!js.includes("Turns 18: review Minor") && !js.includes("Untick Minor once they are 18"), "old alert wording remains");
+});

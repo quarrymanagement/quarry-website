@@ -56,6 +56,8 @@ export const CONSENT_STATEMENT =
   "I agree to receive and sign this document electronically. I understand my electronic signature is the legal equivalent of my handwritten signature (E-SIGN Act and Missouri UETA). I can download a copy of the signed document. I may instead ask a manager for a paper copy to sign, at no cost, and I can withdraw this consent before I sign by telling a manager. To view and sign, I need a device with a current web browser. If I don't have email, a manager can give me my private link and a paper copy of the signed document.";
 // Neutral default title for the discipline type (titles appear in emails; the type never does).
 export const DISCIPLINE_DEFAULT_TITLE = "Written notice";
+// Signed-copy email subject: same for every type and never includes the title.
+export const signedCopySubject = (ref: string) => `Your signed copy - The Quarry (${ref})`;
 // Refusal: was a copy offered? (stored code -> words shown in the admin and PDF)
 export const REFUSAL_COPY: Record<string, string> = {
   provided: "Copy provided",
@@ -1057,10 +1059,10 @@ async function finalize(id: string) {
     }). You can also download it from the same link until it expires.</p>`,
   );
   if (outcome === "signed" && a.email) {
-    await sendEmail(a.email, `Signed copy - ${a.title} (${a.ref_no})`, msg, { a: id, e: a.employee_id }, att);
+    await sendEmail(a.email, signedCopySubject(a.ref_no), msg, { a: id, e: a.employee_id }, att);
   }
   if (outcome === "signed" && a.guardian_required && a.guardian_email) {
-    await sendEmail(a.guardian_email, `Signed copy - ${a.title} (${a.ref_no})`, msg, { a: id, e: a.employee_id }, att);
+    await sendEmail(a.guardian_email, signedCopySubject(a.ref_no), msg, { a: id, e: a.employee_id }, att);
   }
   if (COPY_EMAIL) {
     await sendEmail(
