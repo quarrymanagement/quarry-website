@@ -41,6 +41,11 @@ create table if not exists public.hr_employees (
   dob_hmac              text check (dob_hmac is null or dob_hmac ~ '^v1:[0-9a-f]{64}$'),
   -- Set by an HR admin (pre-ticked when a DOB typed in shows under 18 at entry).
   is_minor              boolean not null default false,
+  -- Minors only: the first day of the month they turn 18 (month + year only;
+  -- the day of birth is not kept). NULL for adults, and cleared when Minor is
+  -- unticked. When this month arrives the admin view flags the person so an HR
+  -- admin can untick Minor; a daily check also logs it in hr_audit.
+  turns_18_month        date,
   guardian_name         text,
   guardian_email        text,
   department            text not null default 'FOH'
@@ -52,9 +57,13 @@ create table if not exists public.hr_employees (
   created_at            timestamptz not null default now(),
   updated_at            timestamptz not null default now(),
   voided_at             timestamptz,
-  void_reason           text
+  void_reason           text,
+  constraint hr_employees_turns_18_minor_only check (
+    turns_18_month is null or (is_minor and extract(day from turns_18_month) = 1))
 );
 create index if not exists hr_employees_active_idx on public.hr_employees (active, department);
+comment on column public.hr_employees.turns_18_month is
+  'Minors only: first day of the month the employee turns 18. NULL for adults. Never the full date of birth.';
 comment on column public.hr_employees.dob_hmac is
   'Keyed HMAC of the date of birth (identity check only). The date itself is never stored or returned by any view or API.';
 
@@ -137,10 +146,13 @@ create table if not exists public.hr_assignments (
   employee_signed_at    timestamptz,
   guardian_signed_at    timestamptz,
   declined_at           timestamptz,
+  declined_by           text check (declined_by is null or declined_by in ('employee','guardian')),
   decline_reason        text,
   refused_at            timestamptz,
   refusal_witness       text,
   refusal_note          text,
+  -- "Copy offered to employee?" (required when a refusal is recorded)
+  refusal_copy          text check (refusal_copy is null or refusal_copy in ('provided','offered_declined','not_provided')),
   refusal_recorded_by   text,
   completed_at          timestamptz,
   final_pdf_path        text,
@@ -153,7 +165,9 @@ create table if not exists public.hr_assignments (
   created_at            timestamptz not null default now(),
   updated_at            timestamptz not null default now(),
   voided_at             timestamptz,
-  void_reason           text
+  void_reason           text,
+  constraint hr_assignments_refusal_copy_required check (refused_at is null or refusal_copy is not null),
+  constraint hr_assignments_declined_by_set check ((declined_at is null) = (declined_by is null))
 );
 create index if not exists hr_assignments_emp_idx on public.hr_assignments (employee_id, created_at desc);
 create index if not exists hr_assignments_doc_idx on public.hr_assignments (document_id, status);
@@ -192,6 +206,7 @@ create table if not exists public.hr_audit (
   created_at     timestamptz not null default now()
 );
 create index if not exists hr_audit_asg_idx on public.hr_audit (assignment_id, created_at);
+create index if not exists hr_audit_emp_event_idx on public.hr_audit (employee_id, event, created_at);
 
 -- ---------------------------------------------------------------------------
 -- Guards: no hard deletes anywhere; append-only tables; signed docs locked.
@@ -223,8 +238,11 @@ begin
        or new.guardian_signed_at is distinct from old.guardian_signed_at
        or new.declined_at is distinct from old.declined_at
        or new.decline_reason is distinct from old.decline_reason
+       or new.declined_by is distinct from old.declined_by
        or new.refused_at is distinct from old.refused_at
        or new.refusal_witness is distinct from old.refusal_witness
+       or new.refusal_note is distinct from old.refusal_note
+       or new.refusal_copy is distinct from old.refusal_copy
        or new.completed_at is distinct from old.completed_at
        or (old.final_pdf_path is not null and new.final_pdf_path is distinct from old.final_pdf_path)
        or (old.final_pdf_sha256 is not null and new.final_pdf_sha256 is distinct from old.final_pdf_sha256)

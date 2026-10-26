@@ -134,9 +134,9 @@ export interface FinalInput {
   docSha256: string;
   employeeName: string;
   outcome: "signed" | "declined" | "refused_witnessed";
-  ackStatement: string;
   signatures: Array<{
     party: string;
+    ack_statement: string;
     signer_name: string;
     signature_method: string;
     signature_image: string | null;
@@ -149,11 +149,18 @@ export interface FinalInput {
     doc_sha256: string;
     signed_at: string;
   }>;
-  decline?: { at: string; reason: string | null };
-  refusal?: { at: string; witness: string; note: string | null; recordedBy: string };
+  decline?: { at: string; reason: string | null; by?: "employee" | "guardian" };
+  refusal?: { at: string; witness: string; note: string | null; recordedBy: string; copy: string };
   audit: Array<{ created_at: string; event: string; actor: string; ip: string | null; user_agent: string | null }>;
   generatedAt: Date;
 }
+
+export const CERT_HEADING = "Electronic Record Audit Certificate";
+// "Signed electronically" only when it was signed; declined / refused records get the neutral line.
+export const certLegalLine = (outcome: FinalInput["outcome"]) =>
+  outcome === "signed"
+    ? "Signed electronically under the federal E-SIGN Act (15 U.S.C. 7001 et seq.) and the Missouri Uniform Electronic Transactions Act (RSMo 432.200-432.295). All times America/Chicago."
+    : "Electronic record created under the federal E-SIGN Act and the Missouri Uniform Electronic Transactions Act (RSMo 432.200-432.295). All times America/Chicago.";
 
 export async function buildFinalPdf(inp: FinalInput): Promise<Uint8Array> {
   const pdf = await PDFDocument.create();
@@ -184,7 +191,7 @@ export async function buildFinalPdf(inp: FinalInput): Promise<Uint8Array> {
 
   for (const s of inp.signatures) {
     w.text(s.party === "guardian" ? "Parent / Guardian signature" : "Employee signature", { size: 12, bold: true });
-    w.text(inp.ackStatement, { size: 10, color: MUTED, gap: 8 });
+    w.text(s.ack_statement, { size: 10, color: MUTED, gap: 8 }); // exact text that signer saw
     if (s.signature_method === "drawn" && s.signature_image?.startsWith("data:image/png;base64,")) {
       try {
         const png = await pdf.embedPng(
@@ -217,7 +224,12 @@ export async function buildFinalPdf(inp: FinalInput): Promise<Uint8Array> {
     w.y -= 6;
   }
   if (inp.decline) {
-    w.text("The employee declined to sign electronically.", { size: 11, bold: true });
+    w.text(
+      inp.decline.by === "guardian"
+        ? "The parent/guardian declined to sign electronically."
+        : "The employee declined to sign electronically.",
+      { size: 11, bold: true },
+    );
     w.kv("Declined at", fmtCT(inp.decline.at));
     w.kv("Reason given", inp.decline.reason?.trim() ? inp.decline.reason : "(none)");
   }
@@ -229,16 +241,14 @@ export async function buildFinalPdf(inp: FinalInput): Promise<Uint8Array> {
     w.kv("Refused at", fmtCT(inp.refusal.at));
     w.kv("Witness", inp.refusal.witness);
     w.kv("Recorded by", inp.refusal.recordedBy);
+    w.kv("Copy offered to employee", inp.refusal.copy);
     w.kv("Note", inp.refusal.note?.trim() ? inp.refusal.note : "(none)");
   }
 
   // ---- Audit page
   const a = new Writer(pdf, font, bold, head);
-  a.text("Electronic Signature Audit Certificate", { size: 15, bold: true, gap: 6 });
-  a.text(
-    "Signed electronically under the federal E-SIGN Act (15 U.S.C. 7001 et seq.) and the Missouri Uniform Electronic Transactions Act (RSMo 432.200-432.295). All times America/Chicago.",
-    { size: 9, color: MUTED, gap: 10 },
-  );
+  a.text(CERT_HEADING, { size: 15, bold: true, gap: 6 });
+  a.text(certLegalLine(inp.outcome), { size: 9, color: MUTED, gap: 10 });
   a.kv("Document", `${inp.title} (version ${inp.version})`);
   a.kv("Reference", inp.refNo);
   a.kv("Original document SHA-256", inp.docSha256);

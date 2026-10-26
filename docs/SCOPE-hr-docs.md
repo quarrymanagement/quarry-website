@@ -11,23 +11,29 @@ no bucket is created, and email is off by default.
 2. The admin (or a scoped manager, policy/training only) assigns it to one or more people. Each person gets a
    private link that expires in 14 days. Email is optional; with email off, the admin copies the link and sends it themselves.
 3. The employee opens the link and verifies identity (date of birth, last 4 of phone, or a 6-digit emailed code; 5 tries, then locked).
-   Only after that do they see the document.
+   Only after that do they see the document, its title, or its type. Emails never name the type: every sign request has the subject
+   "Please review & sign - The Quarry ({ref})", and a disciplinary notice's default title is the neutral "Written notice".
 4. The employee reads the whole PDF and agrees to sign electronically. That E-SIGN consumer disclosure covers the right to paper,
    how to withdraw, and the hardware needed, and the server records it as its own audit event. The employee then signs by typing
    their name or drawing a signature, and can add optional comments.
    The signature block reads: *"By signing, I acknowledge that I received and reviewed this document. My signature
    acknowledges receipt, not agreement."*
 5. If the employee is flagged as a minor (the admin's "Minor" box, pre-ticked when a DOB entered shows under 18) and the document needs a guardian, the system emails a second private link
-   to the parent/guardian. The guardian verifies with the employee's DOB (or an emailed code) and signs.
+   to the parent/guardian. The guardian verifies with the employee's DOB (or an emailed code) and signs. Above their checkbox the guardian sees
+   *"I am the parent or legal guardian of {employee name}. By signing, I acknowledge…"*, and that text is saved with their signature.
+   The guardian can also choose "I don't want to sign electronically"; a manager then follows up on paper.
 6. The server builds a **locked final PDF**:
    - the original pages, unchanged
    - an Acknowledgment page with the signature(s), comments, and any decline or refusal
-   - an **Electronic Signature Audit Certificate** with signer, time (America/Chicago), IP, user agent, the identity check used,
-     the consent time, and the SHA-256 of the version signed, plus the full event log
+   - an **Electronic Record Audit Certificate** (the "Signed electronically under E-SIGN/UETA" line prints only when signed;
+     declined and refused records get the neutral "Electronic record created under…" line) with signer, time (America/Chicago), IP, user agent, the identity check used,
+     the consent time, and the SHA-256 of the version signed, plus the full event log in plain words (Sent, Opened, Identity verified, …).
+     Internal event codes stay in the database only.
 
    The final PDF is stored once (no overwrite), and its SHA-256 is recorded. The employee and guardian can download it from their link.
 7. Statuses: `sent`, `viewed`, `awaiting_guardian`, `signed`, `declined` (employee declines, with an optional reason),
-   `refused_witnessed` (a manager records an in-person refusal with a witness name), and `voided` (admin only, reason required).
+   `refused_witnessed` (a manager records an in-person refusal with a witness name and a required "Copy offered to employee?" answer:
+   Copy provided / Copy offered and declined / Not provided), and `voided` (admin only, reason required).
 
 ## Who sees what
 
@@ -43,7 +49,7 @@ no bucket is created, and email is off by default.
 
 ## Data model (migration `supabase/migrations/20261026160000_hr_documents_esign.sql`)
 
-- **`hr_employees`**: the HR roster. Fields: name, email, phone last 4, a keyed HMAC of the DOB (`dob_hmac`; the date itself is never stored), a minor flag, guardian name/email, department, position, links to the Square/checklist roster.
+- **`hr_employees`**: the HR roster. Fields: name, email, phone last 4, a keyed HMAC of the DOB (`dob_hmac`; the date itself is never stored), a minor flag, `turns_18_month` (minors only: the first of the month they turn 18, computed from the DOB when it is entered; NULL for adults and cleared when Minor is unticked), guardian name/email, department, position, links to the Square/checklist roster.
 - **`hr_role_scopes`**: which admin role is an HR admin, or which departments a role can manage.
 - **`hr_documents`**: document headers. **`hr_document_versions`** holds the stored PDF path, SHA-256 and page count, and is append-only.
 - **`hr_assignments`**: one row per document per person. Holds the hashed link token, status, guardian fields, outcome, and final PDF path/hash.
@@ -55,6 +61,10 @@ no bucket is created, and email is off by default.
   - A completed assignment can only be voided, the void needs a reason, and a void can't be undone.
 - **Access:** RLS is on, with no policies, and all privileges are revoked from `anon`/`authenticated`. Only the edge function (service role) can read the tables.
 - **Storage:** a private bucket `hr-documents` (PDF only, 20 MB) with no storage policies and no public URLs. Files are downloaded only through the function.
+- **Turns 18:** from the first of that month, HR admins see a "Turns 18: review Minor" alert and tag (managers never do). A Netlify scheduled
+  function (`netlify/functions/hr-minor-check.js`, daily 13:00 UTC = 8 AM CDT / 7 AM CST) calls the function's `cron_minor_check`
+  action with the `x-hr-cron-key` header. It writes one "Turns 18 this month" audit entry per person per month and sends no email.
+  It does nothing until `HR_CRON_KEY` is set on both sides.
 - **Rollback:** `...rollback.sql`. It refuses to run once any assignment exists.
 
 ## Code
@@ -90,6 +100,7 @@ For people with no email, a manager can open the link with them in person.
    - `HR_DOB_HMAC_KEY` (random, at least 32 characters; keep it safe: if it is lost or changed, DOBs must be re-entered)
    - `HR_EMAIL_MODE=sendgrid` and `SENDGRID_API_KEY`, or leave email `off`
    - `HR_FROM_EMAIL`
+   - `HR_CRON_KEY` (random, at least 32 characters; the same value in the Netlify env vars, for the daily turns-18 check)
    - `SUPABASE_DB_URL` (provided by default)
 3. Deploy the `hr-docs` function with `--no-verify-jwt`.
 4. Merge the branch so Netlify publishes the admin tab and `hr-sign.html`.

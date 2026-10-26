@@ -303,6 +303,14 @@
 [functions."reservation-daily-followup"]
   schedule = "30 14 * * *"
 
+# ─── HR DOCS ────────────────────────────────────────────────────────────────
+# Minor turns-18 check — 13:00 UTC = 8am CDT / 7am CST. Logs (hr_audit) each
+# minor whose turns-18 month has arrived so an HR admin unticks Minor; the
+# Personnel Docs admin view shows the same list live. No email. Does nothing
+# until HR_CRON_KEY is set in Netlify and as the hr-docs edge-function secret.
+[functions."hr-minor-check"]
+  schedule = "0 13 * * *"
+
 # ─── WINE CLUB GROWTH CAMPAIGN ──────────────────────────────────────────────
 # Daily check — 15:00 UTC = 10am CDT / 9am CST. Reads the next tasting from
 # wine_tastings.json and fires whichever of invite (21 days out) / last-call

@@ -87,7 +87,7 @@
   function verify(L) {
     var q = { dob: 'Your date of birth', phone4: 'Last 4 digits of your phone number', email_code: 'The 6-digit code we email you' }[L.verify_method];
     if (L.party === 'guardian' && L.verify_method === 'dob') q = 'The employee\'s date of birth';
-    app.innerHTML = '<div class="card"><h1>Hi ' + esc(L.first_name) + '</h1><div class="sub">' + esc(L.kind_label) + ' · ref ' + esc(L.ref_no) + '</div>' +
+    app.innerHTML = '<div class="card"><h1>Hi ' + esc(L.first_name) + '</h1><div class="sub">ref ' + esc(L.ref_no) + '</div>' +
       '<p>' + (L.party === 'guardian' ? 'As parent/guardian you are asked to review and sign this document.' : 'The Quarry sent you a document to review and sign.') +
       ' First, confirm it\'s you.</p>' +
       (L.locked ? '<div class="banner bad">Too many tries. Ask a manager to resend your link.</div>' :
@@ -115,8 +115,8 @@
       if (D.error) { msg(esc(D.error), 'bad'); return; }
       var done = !D.open;
       app.innerHTML = '<div class="card"><h1>' + esc(D.title) + '</h1><div class="sub">' + esc(D.kind_label) + ' · ' + esc(D.employee_name) + ' · ref ' + esc(D.ref_no) + '</div></div>' +
-        (done ? '<div class="banner ' + (D.status === 'signed' ? 'ok' : '') + '">' + ({ signed: 'This document is signed. Thank you.', declined: 'You declined to sign this document.', refused_witnessed: 'This document was recorded as refused in person.', awaiting_guardian: L.party === 'employee' ? 'You signed. We\'ve asked your parent/guardian to sign too.' : 'Done.' }[D.status] || 'This document is complete.') +
-          (D.final_ready ? '<button class="btn sec" id="dl">Download your signed copy (PDF)</button>' : '') + '</div>' : '') +
+        (done ? '<div class="banner ' + (D.status === 'signed' ? 'ok' : '') + '">' + ({ signed: 'This document is signed. Thank you.', declined: (D.declined_by && D.declined_by !== L.party ? 'Your parent/guardian declined to sign electronically.' : 'You declined to sign this document.') + ' A manager will follow up with a paper copy.', refused_witnessed: 'This document was recorded as refused in person.', awaiting_guardian: L.party === 'employee' ? 'You signed. We\'ve asked your parent/guardian to sign too.' : 'Done.' }[D.status] || 'This document is complete.') +
+          (D.final_ready ? '<button class="btn sec" id="dl">' + (D.status === 'signed' ? 'Download your signed copy (PDF)' : 'Download a copy of the record (PDF)') + '</button>' : '') + '</div>' : '') +
         (D.employee_signature ? '<div class="banner">Signed by employee ' + esc(D.employee_signature.name) + ' on ' + esc(D.employee_signature.signed_at_ct) + '.</div>' : '') +
         '<div class="card"><h2>Read the document</h2><div class="pages" id="pages"></div>' +
         '<div class="meta">' + D.pages + ' page(s) · version ' + D.version + ' · document fingerprint (SHA-256) ' + esc(D.sha256) + '</div></div>' +
@@ -153,7 +153,7 @@
       '<div class="ackline">' + esc(D.ack_statement) + '</div>' +
       '<label class="chk"><input type="checkbox" id="ack"> I received and reviewed this document. My signature acknowledges receipt, not agreement.</label>' +
       '<div class="err" id="err2"></div><button class="btn" id="sign">Sign</button>' +
-      (L.party === 'employee' ? '<button class="btn link" id="decl">I don\'t want to sign electronically</button>' : '') + '</div>';
+      '<button class="btn link" id="decl">I don\'t want to sign electronically</button></div>';
   }
 
   function wire(D, L) {

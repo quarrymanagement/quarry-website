@@ -139,12 +139,25 @@
         ' for e-signature. Signing means <b>acknowledged receipt, not agreement</b>. ' +
         (m.is_admin ? 'You are an HR admin.' : 'You see policy and training documents for: ' + esc((m.departments || []).join(', ')) + '.') +
         (m.email_mode === 'off' ? ' <b>Email is off</b>: copy the signing link to send it yourself.' : '') + '</div>' +
-        '<div class="hd-tabs">' + tabs.map(function (t) { return '<button data-v="' + t[0] + '" class="' + (view === t[0] ? 'on' : '') + '">' + t[1] + '</button>'; }).join('') + '</div><div id="hdView"></div>';
+        '<div class="hd-tabs">' + tabs.map(function (t) { return '<button data-v="' + t[0] + '" class="' + (view === t[0] ? 'on' : '') + '">' + t[1] + '</button>'; }).join('') + '</div><div id="hdT18"></div><div id="hdView"></div>';
       Array.prototype.forEach.call(body.querySelectorAll('.hd-tabs button'), function (b) { b.onclick = function () { open(b.dataset.v); }; });
       return Promise.all([api('employees_list'), api('documents_list')]).then(function (r) {
         EMPS = r[0].employees || []; DOCS = r[1].documents || [];
+        turns18();
         ({ assign: vAssign, status: vStatus, docs: vDocs, people: vPeople, unsigned: vUnsigned })[view]();
       });
+    });
+  }
+
+  // HR admins only: minors whose turns-18 month has arrived (the server sends this only to admins, only once due)
+  function turns18() {
+    var due = EMPS.filter(function (e) { return e.turns_18_due; }), el = $('hdT18');
+    if (!el) return;
+    el.innerHTML = due.length ? '<div class="hd-callout" id="hdT18c"><b>Turns 18: review Minor.</b> ' + due.map(function (e) {
+      return '<a href="#" data-id="' + e.id + '">' + esc(e.full_name) + '</a> (turns 18 in ' + esc(e.turns_18_month) + ')';
+    }).join(', ') + '. Once they are 18, open their details and untick <b>Minor</b> so a parent/guardian is no longer asked to sign.</div>' : '';
+    Array.prototype.forEach.call(el.querySelectorAll('a[data-id]'), function (a) {
+      a.onclick = function (ev) { ev.preventDefault(); editEmp(EMPS.find(function (x) { return x.id === a.dataset.id; }) || {}); };
     });
   }
 
@@ -223,8 +236,9 @@
           return '<div style="margin-bottom:8px;"><b>' + (s.party === 'guardian' ? 'Parent/guardian' : 'Employee') + ':</b> ' + esc(s.signer_name) + ' · ' + ct(s.signed_at) + ' · IP ' + esc(s.ip) +
             (s.comments ? '<div class="hd-hint">Comments: ' + esc(s.comments) + '</div>' : '') + '</div>';
         }).join('') : '<div class="hd-hint">Not signed yet.</div>') +
-        (a.refusal_witness ? '<div><b>Refused to sign</b>, witnessed by ' + esc(a.refusal_witness) + ' (recorded by ' + esc(a.refusal_recorded_by) + ')</div>' : '') +
-        (a.decline_reason ? '<div><b>Declined:</b> ' + esc(a.decline_reason) + '</div>' : '') + '</div>' +
+        (a.refusal_witness ? '<div><b>Refused to sign</b>, witnessed by ' + esc(a.refusal_witness) + ' (recorded by ' + esc(a.refusal_recorded_by) + ')' +
+          '<div class="hd-hint">Copy offered to employee: ' + esc(a.refusal_copy_label || '—') + (a.refusal_note ? ' · Note: ' + esc(a.refusal_note) : '') + '</div></div>' : '') +
+        (a.declined_at ? '<div><b>Declined by ' + (a.declined_by === 'guardian' ? 'parent/guardian' : 'employee') + '</b>' + (a.decline_reason ? ': ' + esc(a.decline_reason) : '') + '. Follow up with a paper copy.</div>' : '') + '</div>' +
         '<div class="hd-card"><h3>Audit trail (CT)</h3><div class="hd-audit">' + r.audit.map(function (e) { return '<div>' + ct(e.created_at) + ' · ' + esc(e.event) + ' · ' + esc(e.actor) + (e.ip ? ' · ' + esc(e.ip) : '') + '</div>'; }).join('') + '</div>' +
         '<div class="hd-hint">Document SHA-256: ' + esc(a.doc_sha256) + (a.final_pdf_sha256 ? '<br>Signed PDF SHA-256: ' + esc(a.final_pdf_sha256) : '') + '</div></div>' +
         '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
@@ -244,10 +258,13 @@
       if (q('refuse')) q('refuse').onclick = function () {
         m.remove();
         var r2 = modal('<h4>Refused to sign (in person)</h4><div class="hd-sub">Have a second manager present. The document still stands.</div>' +
-          '<div class="hd-f"><label class="hd-lbl">Witness name *</label><input class="hd-in" id="hdW"></div><div class="hd-f"><label class="hd-lbl">Note</label><textarea class="hd-ta" id="hdWn">Document was reviewed with the employee, who declined to sign. A copy was provided.</textarea></div>' +
+          '<div class="hd-f"><label class="hd-lbl">Witness name *</label><input class="hd-in" id="hdW"></div><div class="hd-f"><label class="hd-lbl">Note</label><textarea class="hd-ta" id="hdWn">Document was reviewed with the employee, who declined to sign.</textarea></div>' +
+          '<div class="hd-f"><label class="hd-lbl">Copy offered to employee? *</label><select class="hd-sel" id="hdWc"><option value="">Choose…</option>' +
+          '<option value="provided">Copy provided</option><option value="offered_declined">Copy offered and declined</option><option value="not_provided">Not provided</option></select></div>' +
           '<button class="hd-btn danger" id="hdWgo">Record refusal</button>');
         r2.querySelector('#hdWgo').onclick = function () {
-          api('record_refusal', { id: id, witness: r2.querySelector('#hdW').value, note: r2.querySelector('#hdWn').value }).then(function (x) { toast(x.error || 'Refusal recorded.', !!x.error); if (!x.error) { r2.remove(); open('status'); } });
+          if (!r2.querySelector('#hdWc').value) { toast('Choose whether a copy was offered to the employee.', true); return; }
+          api('record_refusal', { id: id, witness: r2.querySelector('#hdW').value, note: r2.querySelector('#hdWn').value, copy_offered: r2.querySelector('#hdWc').value }).then(function (x) { toast(x.error || 'Refusal recorded.', !!x.error); if (!x.error) { r2.remove(); open('status'); } });
         };
       };
       if (q('void')) q('void').onclick = function () {
@@ -278,6 +295,15 @@
       if (f) { var rd = new FileReader(); rd.onload = function () { payload.pdf_base64 = String(rd.result).split(',')[1]; payload.filename = f.name; go(); }; rd.readAsDataURL(f); }
       else { payload.body_text = $('hdBodyT').value; go(); }
     };
+    // Discipline titles appear in the email, so the default is neutral.
+    var lastDefault = '';
+    function kindDefault() {
+      var t = $('hdT'), disc = $('hdK').value === 'discipline';
+      t.placeholder = disc ? 'Written notice' : 'e.g. Alcohol Service Policy Acknowledgment';
+      if (disc && !t.value) { t.value = 'Written notice'; lastDefault = t.value; }
+      else if (!disc && t.value === lastDefault) { t.value = ''; lastDefault = ''; }
+    }
+    $('hdK').onchange = kindDefault; kindDefault();
   }
 
   /* ================= personnel files ================= */
@@ -288,7 +314,7 @@
     function list() {
       var q = $('hdPQ').value.toLowerCase();
       $('hdPL').innerHTML = EMPS.filter(function (e) { return !q || e.full_name.toLowerCase().indexOf(q) >= 0; }).map(function (e) {
-        return '<div class="hd-pp" data-id="' + e.id + '" style="padding:7px 6px;border-radius:6px;cursor:pointer;font-size:13.5px;">' + esc(e.full_name) + (e.minor ? ' <span class="hd-tag minor">Minor</span>' : '') + (!e.active ? ' <span class="hd-tag">Inactive</span>' : '') + '</div>';
+        return '<div class="hd-pp" data-id="' + e.id + '" style="padding:7px 6px;border-radius:6px;cursor:pointer;font-size:13.5px;">' + esc(e.full_name) + (e.minor ? ' <span class="hd-tag minor">Minor</span>' : '') + (e.turns_18_due ? ' <span class="hd-tag minor">Turns 18</span>' : '') + (!e.active ? ' <span class="hd-tag">Inactive</span>' : '') + '</div>';
       }).join('');
       Array.prototype.forEach.call($('hdPL').querySelectorAll('.hd-pp'), function (d) { d.onclick = function () { file(d.dataset.id); }; });
     }
@@ -325,7 +351,8 @@
       '<div class="hd-f"><label class="hd-lbl">Position</label><input class="hd-in" id="eJ" value="' + esc(e.position || '') + '"></div>' +
       '<div class="hd-f"><label class="hd-lbl">Parent/guardian name (minors)</label><input class="hd-in" id="eGN" value="' + esc(e.guardian_name || '') + '"></div>' +
       '<div class="hd-f"><label class="hd-lbl">Parent/guardian email</label><input class="hd-in" id="eGE" value="' + esc(e.guardian_email || '') + '"></div></div>' +
-      '<label style="font-size:13px;"><input type="checkbox" id="eM"' + (e.minor ? ' checked' : '') + '> Minor (under 18): a parent/guardian co-signs. Ticked automatically if the date of birth entered is under 18.</label><br>' +
+      '<label style="font-size:13px;"><input type="checkbox" id="eM"' + (e.minor ? ' checked' : '') + '> Minor (under 18): a parent/guardian co-signs. Ticked automatically if the date of birth entered is under 18. Unticking it clears the stored turns-18 month.</label>' +
+      (e.turns_18_due ? '<div class="hd-callout" style="margin:6px 0;">Turns 18 in ' + esc(e.turns_18_month) + '. Untick Minor once they are 18.</div>' : '<br>') +
       '<label style="font-size:13px;"><input type="checkbox" id="eA"' + (e.active === false ? '' : ' checked') + '> Active</label><br><br><button class="hd-btn" id="eGo">Save</button>');
     m.querySelector('#eGo').onclick = function () {
       var v = function (k) { return m.querySelector('#' + k).value; };

@@ -9,6 +9,8 @@
 //   anything else             -> 403
 // PUBLIC actions (employee or guardian, by the private token in their link)
 //   s_load, s_send_code, s_verify, s_doc, s_view, s_sign, s_decline, s_download
+// CRON action (header x-hr-cron-key = HR_CRON_KEY secret)
+//   cron_minor_check          -> daily: log minors whose turns-18 month has arrived
 //
 // Nothing is ever deleted. Email is OFF unless HR_EMAIL_MODE is set.
 import postgres from "postgres";
@@ -28,6 +30,8 @@ const DEV = env("HR_DEV") === "1" && !env("SUPABASE_URL").includes("supabase.co"
 const SIGNING_SECRET = env("HR_SIGNING_SECRET");
 // Key for the date-of-birth HMAC. Lives only in edge-function secrets, never in the DB.
 const DOB_KEY = env("HR_DOB_HMAC_KEY");
+// Shared key for the daily scheduled check (Netlify scheduled function -> this function).
+const CRON_KEY = env("HR_CRON_KEY");
 
 // deno-lint-ignore no-explicit-any
 const sql: any = postgres(env("SUPABASE_DB_URL"), {
@@ -46,8 +50,51 @@ export const KIND_LABEL: Record<string, string> = {
 };
 export const ACK_STATEMENT =
   "By signing, I acknowledge that I received and reviewed this document. My signature acknowledges receipt, not agreement.";
+// Guardian-only attestation (shown above the checkbox and saved with the guardian's signature).
+export const guardianAck = (employeeName: string) => `I am the parent or legal guardian of ${employeeName}. ${ACK_STATEMENT}`;
 export const CONSENT_STATEMENT =
-  "I agree to receive and sign this document electronically. I understand my electronic signature is the legal equivalent of my handwritten signature (E-SIGN Act and Missouri UETA). I can download a copy of the signed document. I may instead ask a manager for a paper copy to sign, at no cost, and I can withdraw this consent before I sign by telling a manager. To view and sign I need a device with a current web browser and an email address.";
+  "I agree to receive and sign this document electronically. I understand my electronic signature is the legal equivalent of my handwritten signature (E-SIGN Act and Missouri UETA). I can download a copy of the signed document. I may instead ask a manager for a paper copy to sign, at no cost, and I can withdraw this consent before I sign by telling a manager. To view and sign, I need a device with a current web browser. If I don't have email, a manager can give me my private link and a paper copy of the signed document.";
+// Neutral default title for the discipline type (titles appear in emails; the type never does).
+export const DISCIPLINE_DEFAULT_TITLE = "Written notice";
+// Refusal: was a copy offered? (stored code -> words shown in the admin and PDF)
+export const REFUSAL_COPY: Record<string, string> = {
+  provided: "Copy provided",
+  offered_declined: "Copy offered and declined",
+  not_provided: "Not provided",
+};
+// Plain-word event names for the PDF and admin UI. The internal codes stay in the database only.
+export const EVENT_LABEL: Record<string, string> = {
+  sent: "Sent",
+  viewed: "Opened",
+  identity_verified: "Identity verified",
+  consented: "Agreed to e-sign",
+  signed: "Signed",
+  guardian_signed: "Parent/guardian signed",
+  declined: "Declined",
+  refused_witnessed: "Refused (witnessed)",
+  voided: "Withdrawn",
+  // not in Legal's list; plain words chosen to match
+  code_sent: "Verification code sent",
+  verify_failed: "Identity check failed",
+  guardian_requested: "Parent/guardian asked to sign",
+  guardian_missing_email: "No parent/guardian email on file",
+  link_reissued: "New link issued",
+  downloaded: "Signed copy downloaded",
+  downloaded_by_admin: "Downloaded by a manager",
+  final_pdf_created: "Signed PDF created",
+  integrity_failure: "Document integrity check failed",
+  email_sent: "Email sent",
+  email_failed: "Email failed",
+  email_suppressed: "Email not sent (email is off)",
+  document_created: "Document added",
+  employee_created: "Person added",
+  employee_updated: "Person updated",
+  employees_imported: "Roster imported",
+  minor_turns_18_due: "Turns 18 this month: review Minor",
+};
+export const eventLabel = (ev: string) => EVENT_LABEL[ev] ?? "Other event";
+export const actorLabel = (a: string) =>
+  a === "employee" ? "Employee" : a === "guardian" ? "Parent/guardian" : a === "system" ? "System" : a;
 const MAX_VERIFY = 5;
 const LINK_DAYS = 14;
 const SESSION_MIN = 30;
@@ -102,6 +149,16 @@ export function ageOn(dob: string | null, on = new Date()): number | null {
   return age;
 }
 export const isMinor = (e: { is_minor: boolean | null }) => e.is_minor === true;
+// Minors only: the first day of the month they turn 18 (YYYY-MM-01). Nothing is kept for adults.
+export const turns18Month = (dob: string) => `${Number(dob.slice(0, 4)) + 18}${dob.slice(4, 7)}-01`;
+export const ctMonthStart = (on = new Date()) =>
+  on.toLocaleDateString("en-CA", { timeZone: "America/Chicago" }).slice(0, 7) + "-01";
+const monthLabel = (ym: string) =>
+  new Date(Date.UTC(+ym.slice(0, 4), +ym.slice(5, 7) - 1, 15)).toLocaleDateString("en-US", {
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
 
 // ---- date of birth: identity check only; never stored, logged or returned.
 // Accepts YYYY-MM-DD, M/D/YYYY or M-D-YYYY; returns YYYY-MM-DD or null.
@@ -212,29 +269,38 @@ async function emailSignRequest(
   who: "employee" | "guardian",
   reminder = false,
 ) {
+  const m = signRequestEmail(a.ref_no, doc.title, name, signLink(tok), who, reminder);
+  return await sendEmail(to, m.subject, m.html, { a: a.id, e: a.employee_id });
+}
+
+// Sign-request email. Same subject for every document type; the body never names the type.
+export function signRequestEmail(
+  ref: string,
+  title: string,
+  name: string,
+  link: string,
+  who: "employee" | "guardian",
+  reminder = false,
+): { subject: string; html: string } {
   const first = esc(name.split(" ")[0]);
   const inner = who === "guardian"
     ? `<p>Hi ${first},</p><p>An employee of The Quarry under 18 who lists you as parent/guardian has signed <strong>${
-      esc(doc.title)
-    }</strong> (ref ${esc(a.ref_no)}). Missouri practice is for a parent or guardian to acknowledge it too.</p>
-       <p style="margin:22px 0;"><a href="${
-      signLink(tok)
-    }" style="background:#2C1A0E;color:#fff;padding:12px 22px;border-radius:6px;text-decoration:none;font-weight:bold;">Review &amp; sign</a></p>
+      esc(title)
+    }</strong> (ref ${
+      esc(ref)
+    }). Because the employee is under 18, The Quarry also asks a parent or guardian to review and acknowledge it.</p>
+       <p style="margin:22px 0;"><a href="${link}" style="background:#2C1A0E;color:#fff;padding:12px 22px;border-radius:6px;text-decoration:none;font-weight:bold;">Review &amp; sign</a></p>
        <p style="font-size:12px;color:#888;">This link is private to you and expires in ${LINK_DAYS} days.</p>`
-    : `<p>Hi ${first},</p><p>${reminder ? "A reminder: " : ""}The Quarry sent you a ${
-      esc(KIND_LABEL[doc.kind].toLowerCase())
-    }: <strong>${esc(doc.title)}</strong> (ref ${esc(a.ref_no)}).</p>
+    : `<p>Hi ${first},</p><p>${reminder ? "A reminder: " : ""}The Quarry sent you a document to review: <strong>${
+      esc(title)
+    }</strong> (ref ${esc(ref)}).</p>
        <p>Signing confirms you <strong>received and reviewed</strong> it. It does not mean you agree, and you can add comments.</p>
-       <p style="margin:22px 0;"><a href="${
-      signLink(tok)
-    }" style="background:#2C1A0E;color:#fff;padding:12px 22px;border-radius:6px;text-decoration:none;font-weight:bold;">Review &amp; sign</a></p>
+       <p style="margin:22px 0;"><a href="${link}" style="background:#2C1A0E;color:#fff;padding:12px 22px;border-radius:6px;text-decoration:none;font-weight:bold;">Review &amp; sign</a></p>
        <p style="font-size:12px;color:#888;">This link is private to you and expires in ${LINK_DAYS} days. Questions? Talk to a manager.</p>`;
-  return await sendEmail(
-    to,
-    `${reminder ? "Reminder: " : ""}Please review & sign - The Quarry (${a.ref_no})`,
-    emailShell(who === "guardian" ? "Parent/guardian signature needed" : "Document to review & sign", inner),
-    { a: a.id, e: a.employee_id },
-  );
+  return {
+    subject: `Please review & sign - The Quarry (${ref})`,
+    html: emailShell(who === "guardian" ? "Parent/guardian signature needed" : "Document to review & sign", inner),
+  };
 }
 
 // ---------------------------------------------------------------- admin auth
@@ -314,15 +380,20 @@ async function admin(action: string, body: any, req: Request, ctx: Ctx) {
 
     case "employees_list": {
       const rows = await sql`select id, full_name, email, phone_last4 is not null as has_phone4, dob_hmac is not null as has_dob,
-          is_minor, guardian_name, guardian_email, department, position, active
+          is_minor, guardian_name, guardian_email, department, position, active,
+          (is_minor and turns_18_month is not null and turns_18_month <= ${ctMonthStart()}::date) as turns_18_due,
+          to_char(turns_18_month, 'YYYY-MM') as t18
         from public.hr_employees where voided_at is null order by active desc, full_name`;
       return {
         employees: rows
           .filter((r: any) => ctx.isAdmin || ctx.departments.includes(r.department))
-          .map((r: any) => ({
+          .map(({ t18, turns_18_due, ...r }: any) => ({
             ...r,
             minor: isMinor(r),
             guardian_email: ctx.isAdmin ? r.guardian_email : undefined,
+            // HR admins only, and only once that month has arrived: "turns 18 in <Mon YYYY>"
+            turns_18_due: ctx.isAdmin ? turns_18_due === true : undefined,
+            turns_18_month: ctx.isAdmin && turns_18_due === true ? monthLabel(t18) : undefined,
           })),
       };
     }
@@ -356,8 +427,13 @@ async function admin(action: string, body: any, req: Request, ctx: Ctx) {
         const nd = normDob(dobIn);
         if (!nd) throw bad("Date of birth looks wrong");
         (row as any).dob_hmac = await dobHmac(id, nd);
-        if ((ageOn(nd) ?? 99) < 18) row.is_minor = true;
+        if ((ageOn(nd) ?? 99) < 18) {
+          row.is_minor = true;
+          (row as any).turns_18_month = turns18Month(nd); // month + year only, minors only
+        } else (row as any).turns_18_month = null;
       } else if (e.clear_dob === true) (row as any).dob_hmac = null;
+      // Unticking Minor (or saving as an adult) clears the stored turns-18 month.
+      if (!row.is_minor) (row as any).turns_18_month = null;
       if (!isNew) {
         await sql`update public.hr_employees set ${sql(row as any)}, updated_at = now() where id = ${id} and voided_at is null`;
         await audit("employee_updated", ctx.actor, req, { e: id }, { fields: Object.keys(row) });
@@ -421,7 +497,7 @@ async function admin(action: string, body: any, req: Request, ctx: Ctx) {
       mustAdmin(ctx);
       const kind = clean(body.kind, 20);
       if (!KIND_LABEL[kind]) throw bad("Pick a document type");
-      const title = clean(body.title, 160);
+      const title = clean(body.title, 160) || (kind === "discipline" ? DISCIPLINE_DEFAULT_TITLE : "");
       if (!title) throw bad("Title is required");
       let bytes: Uint8Array, source: "upload" | "created", body_text: string | null = null;
       if (body.pdf_base64) {
@@ -524,12 +600,24 @@ async function admin(action: string, body: any, req: Request, ctx: Ctx) {
         await sql`select party, signer_name, signature_method, comments, ip, user_agent, doc_sha256, signed_at, consent_at, identity_method
         from public.hr_signatures where assignment_id = ${a.id} order by signed_at`;
       const ev =
-        await sql`select event, actor, ip, user_agent, detail, created_at from public.hr_audit where assignment_id = ${a.id} order by id`;
+        await sql`select event, actor, ip, user_agent, created_at from public.hr_audit where assignment_id = ${a.id} order by id`;
       delete a.token_hash;
       delete a.guardian_token_hash;
       delete a.email_code_hash;
       delete a.has_dob;
-      return { assignment: a, signatures: sigs, audit: ev };
+      a.refusal_copy_label = a.refusal_copy ? REFUSAL_COPY[a.refusal_copy] : null;
+      return {
+        assignment: a,
+        signatures: sigs,
+        // plain words only; internal event codes stay in the database
+        audit: ev.map((x: any) => ({
+          event: eventLabel(x.event),
+          actor: actorLabel(x.actor),
+          ip: x.ip,
+          user_agent: x.user_agent,
+          created_at: x.created_at,
+        })),
+      };
     }
 
     case "remind": {
@@ -567,12 +655,14 @@ async function admin(action: string, body: any, req: Request, ctx: Ctx) {
       if (!["sent", "viewed"].includes(a.status)) throw bad("Can't record a refusal when status is " + a.status);
       const witness = clean(body.witness, 120);
       if (!witness) throw bad("Witness name is required");
+      const copy = clean(body.copy_offered, 20);
+      if (!REFUSAL_COPY[copy]) throw bad("Choose whether a copy was offered to the employee");
       if (a.completed_at) throw bad("Already completed");
       await sql`update public.hr_assignments set status = 'refused_witnessed', refused_at = now(), refusal_witness = ${witness},
         refusal_note = ${
         clean(body.note, 1000) || null
-      }, refusal_recorded_by = ${ctx.actor}, completed_at = now() where id = ${a.id}`;
-      await audit("refused_witnessed", ctx.actor, req, { a: a.id, d: a.document_id, e: a.employee_id }, { witness });
+      }, refusal_copy = ${copy}, refusal_recorded_by = ${ctx.actor}, completed_at = now() where id = ${a.id}`;
+      await audit("refused_witnessed", ctx.actor, req, { a: a.id, d: a.document_id, e: a.employee_id }, { witness, copy });
       await finalize(a.id);
       return { ok: true };
     }
@@ -717,7 +807,7 @@ async function signer(action: string, body: any, req: Request) {
     return {
       party,
       first_name: party === "guardian" ? (a.guardian_name || "Parent/Guardian").split(" ")[0] : a.full_name.split(" ")[0],
-      kind_label: KIND_LABEL[a.kind],
+      // no title or document type before identity is verified
       ref_no: a.ref_no,
       status: a.status,
       open: openFor(a, party),
@@ -814,8 +904,9 @@ async function signer(action: string, body: any, req: Request) {
       open: openFor(a, party),
       guardian_required: a.guardian_required,
       employee_signature: emp ? { name: emp.signer_name, signed_at_ct: fmtCT(emp.signed_at) } : null,
-      ack_statement: ACK_STATEMENT,
+      ack_statement: party === "guardian" ? guardianAck(a.full_name) : ACK_STATEMENT,
       consent_statement: CONSENT_STATEMENT,
+      declined_by: a.declined_by ?? null,
       final_ready: !!a.final_pdf_path,
       pdf_base64: b64(bytes),
     };
@@ -854,7 +945,9 @@ async function signer(action: string, body: any, req: Request) {
       await tx`insert into public.hr_signatures (assignment_id, party, signer_name, signature_method, signature_image, comments,
           ack_statement, consent_statement, consent_at, identity_method, ip, user_agent, doc_sha256)
         values (${a.id}, ${party}, ${name}, ${methodSig}, ${img}, ${clean(body.comments, 4000) || null},
-          ${ACK_STATEMENT}, ${CONSENT_STATEMENT}, ${consentAt}, ${idMethodLabel(method)}, ${ipOf(req)}, ${uaOf(req)}, ${hash})`;
+          ${party === "guardian" ? guardianAck(a.full_name) : ACK_STATEMENT}, ${CONSENT_STATEMENT}, ${consentAt}, ${
+        idMethodLabel(method)
+      }, ${ipOf(req)}, ${uaOf(req)}, ${hash})`;
       if (party === "employee") {
         const needG = a.guardian_required;
         await tx`update public.hr_assignments set employee_signed_at = now(),
@@ -899,8 +992,9 @@ async function signer(action: string, body: any, req: Request) {
   }
 
   if (action === "s_decline") {
-    if (party !== "employee" || !openFor(a, party)) throw bad("Nothing to decline.", 409);
-    await sql`update public.hr_assignments set status = 'declined', declined_at = now(),
+    // employee or (after the employee signed) the parent/guardian; either way a manager follows up with paper
+    if (!openFor(a, party)) throw bad("Nothing to decline.", 409);
+    await sql`update public.hr_assignments set status = 'declined', declined_at = now(), declined_by = ${party},
       decline_reason = ${clean(body.reason, 1000) || null}, completed_at = now() where id = ${a.id}`;
     await audit("declined", party, req, { a: a.id, d: a.document_id, e: a.employee_id });
     await finalize(a.id);
@@ -936,13 +1030,18 @@ async function finalize(id: string) {
     docSha256: a.doc_sha256,
     employeeName: a.full_name,
     outcome,
-    ackStatement: ACK_STATEMENT,
     signatures: sigs as any,
-    decline: a.declined_at ? { at: a.declined_at, reason: a.decline_reason } : undefined,
+    decline: a.declined_at ? { at: a.declined_at, reason: a.decline_reason, by: a.declined_by ?? "employee" } : undefined,
     refusal: a.refused_at
-      ? { at: a.refused_at, witness: a.refusal_witness, note: a.refusal_note, recordedBy: a.refusal_recorded_by }
+      ? {
+        at: a.refused_at,
+        witness: a.refusal_witness,
+        note: a.refusal_note,
+        recordedBy: a.refusal_recorded_by,
+        copy: REFUSAL_COPY[a.refusal_copy] ?? "-",
+      }
       : undefined,
-    audit: ev as any,
+    audit: ev.map((x: any) => ({ ...x, event: eventLabel(x.event), actor: actorLabel(x.actor) })),
     generatedAt: new Date(),
   });
   const hash = await sha256(bytes);
@@ -974,6 +1073,24 @@ async function finalize(id: string) {
   }
 }
 
+// ---------------------------------------------------------------- daily check
+// Minors whose turns-18 month has arrived: log it once per person and month so the admin view
+// (which always shows the live list) has a dated record. No email, no automatic change.
+export async function minorCheck(now = new Date()) {
+  const month = ctMonthStart(now);
+  const due = await sql`select id, turns_18_month from public.hr_employees
+    where voided_at is null and is_minor and turns_18_month is not null and turns_18_month <= ${month}::date`;
+  let flagged = 0;
+  for (const e of due) {
+    const [seen] = await sql`select 1 from public.hr_audit where employee_id = ${e.id} and event = 'minor_turns_18_due'
+      and created_at >= (${month}::date::timestamp at time zone 'America/Chicago') limit 1`;
+    if (seen) continue;
+    await audit("minor_turns_18_due", "system", null, { e: e.id });
+    flagged++;
+  }
+  return { due: due.length, flagged };
+}
+
 // ---------------------------------------------------------------- entry
 export async function handle(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
@@ -982,6 +1099,11 @@ export async function handle(req: Request): Promise<Response> {
     const body = await req.json().catch(() => ({}));
     const action = String(body.action ?? "");
     if (action.startsWith("s_")) return json(await signer(action, body, req));
+    if (action === "cron_minor_check") {
+      const k = req.headers.get("x-hr-cron-key") || "";
+      if (CRON_KEY.length < 32 || !safeEq(k, CRON_KEY)) throw bad("Not allowed", 403);
+      return json(await minorCheck());
+    }
     const ctx = await adminCtx(req);
     return json(await admin(action, body, req, ctx));
   } catch (e) {
