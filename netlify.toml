@@ -100,6 +100,8 @@
   status = 404
   force = true
 
+# schedule.json: staff PII + logins. Moved to Netlify Blobs 2026-10-26; keep
+# this rule so a stray copy can never be served from the CDN.
 [[redirects]]
   from = "/schedule.json"
   to = "/.netlify/functions/data-read?file=__blocked"

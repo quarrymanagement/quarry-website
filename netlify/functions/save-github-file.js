@@ -38,7 +38,7 @@ const ALLOWED_FILES = new Set([
   'events.json',
   'forms.json',
   'crm-notes.json',
-  'schedule.json',
+  // 'schedule.json' removed 2026-10-26: staff data lives in Netlify Blobs (save-schedule.js)
   'members.json',     // rewards-members tab edits
   'subscribers.json', // newsletter signups
   'food-truck-leads.json', // food truck lead directory

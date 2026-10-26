@@ -27,11 +27,8 @@ const PUBLIC_FILES = new Set([
   'rewards.json',
   'app-content.json',
   'wine_tastings.json',
-  // schedule.json: staff names/emails/phones. schedule.html does its
-  // email+last-name login client-side BEFORE any token exists, so it must
-  // stay anonymous-readable for now (same exposure as today). Follow-up:
-  // move that login server-side and move this file to PROTECTED_FILES.
-  'schedule.json',
+  // schedule.json removed 2026-10-26: staff data moved to private Netlify
+  // Blobs; read it through /.netlify/functions/staff-schedule (signed in).
 ]);
 
 // value = staff roles allowed in addition to the owner token
