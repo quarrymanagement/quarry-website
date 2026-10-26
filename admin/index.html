@@ -5790,6 +5790,7 @@
             <div class="modal-actions">
                 <button class="modal-btn modal-btn-secondary" id="editEmpCancel">Cancel</button>
                 <button class="modal-btn modal-btn-primary" id="editEmpSave">Save</button>
+                <button class="modal-btn modal-btn-secondary" id="editEmpTempPw" type="button" onclick="setEmployeeTempPassword()">Set temp password</button>
                 <button class="modal-btn modal-btn-secondary" id="editEmpDelete" style="border-color: var(--red); color: var(--red);">Delete</button>
             </div>
         </div>
@@ -9357,7 +9358,8 @@
         // ================================================================
         async function loadScheduleData() {
             try {
-                const response = await dataRead('schedule.json');
+                // Staff schedule lives in private Netlify Blobs (owner session).
+                const response = await fetch('/.netlify/functions/staff-schedule?nocache=' + Date.now(), { headers: adminHeaders() });
                 if (response.ok) {
                     const data = await response.json();
                     app.employees = (data.employees || []).map(emp => {
@@ -9390,7 +9392,7 @@
                 // wiping the employees array (this was the April-21 data-loss bug).
                 const response = await fetch('/.netlify/functions/save-schedule', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: adminHeaders({ 'Content-Type': 'application/json' }),
                     body: JSON.stringify({
                         employees: app.employees || [],
                         schedules: app.editingScheduleData,
@@ -10192,8 +10194,7 @@
                 primaryRole,
                 secondaryRoles: [],
                 hireDate,
-                status: 'active',
-                passwordHash: ''
+                status: 'active'
             };
 
             app.employees.push(emp);
@@ -10268,6 +10269,28 @@
             renderEmployeeList();
             closeModal('employeeModal');
             showToast('Employee updated');
+        }
+
+        // Password resets: the owner sets a temporary password, tells the
+        // employee in person, and the employee must change it at next sign-in.
+        async function setEmployeeTempPassword() {
+            const empId = window.currentEditEmpId;
+            const emp = app.employees.find(e => e.id === empId);
+            if (!emp) return;
+            if (!emp.email) { showToast('Add an email first, then save the schedule'); return; }
+            const pw = prompt('Temporary password for ' + (emp.name || 'this employee') + ' (8+ characters). Tell them in person; they must change it at sign-in.');
+            if (!pw) return;
+            if (pw.length < 8) { showToast('Use at least 8 characters'); return; }
+            try {
+                const r = await fetch('/.netlify/functions/employee-auth', {
+                    method: 'POST',
+                    headers: adminHeaders({ 'Content-Type': 'application/json' }),
+                    body: JSON.stringify({ action: 'admin-set-password', employeeId: empId, tempPassword: pw })
+                });
+                const d = await r.json().catch(() => ({}));
+                if (r.ok) { emp.hasPassword = true; showToast('Temporary password set'); }
+                else showToast(d.error || 'Could not set password (save the schedule first if this is a new employee)');
+            } catch (e) { showToast('Network error'); }
         }
 
         function deleteEmployee() {

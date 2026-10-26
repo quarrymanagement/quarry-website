@@ -818,17 +818,20 @@
         }
 
         // API calls
+        // Staff data is private (Netlify Blobs). Sign in server-side, then read
+        // only this employee's own shifts with the returned token.
+        let employeeToken = null;
+
         async function fetchScheduleData() {
             try {
-                const response = await fetch(
-                    `/.netlify/functions/data-read?file=schedule.json`,
-                    { headers: { 'Accept': 'application/json' } }
-                );
+                const response = await fetch('/.netlify/functions/staff-schedule', {
+                    headers: { 'Accept': 'application/json', 'Authorization': 'Bearer ' + employeeToken }
+                });
                 if (!response.ok) throw new Error('Failed to fetch schedule');
                 return await response.json();
             } catch (error) {
                 console.error('Error fetching schedule:', error);
-                showErrorMessage('Failed to load schedule data. Please try again.', 'login');
+                showErrorMessage('Failed to load schedule data. Please try again.', 'loginError');
                 return null;
             }
         }
@@ -837,7 +840,7 @@
             try {
                 const response = await fetch('/.netlify/functions/request-timeoff', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + employeeToken },
                     body: JSON.stringify({ employeeId, dates, reason })
                 });
 
@@ -861,14 +864,28 @@
 
             clearMessage('loginError');
 
+            let lookup;
+            try {
+                const r = await fetch('/.netlify/functions/employee-auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'lookup', email, lastName })
+                });
+                lookup = await r.json();
+                if (!r.ok || !lookup.token) {
+                    showErrorMessage(lookup.error || 'Invalid email or last name. Please try again.', 'loginError');
+                    return;
+                }
+            } catch (e) {
+                showErrorMessage('Network error. Please try again.', 'loginError');
+                return;
+            }
+            employeeToken = lookup.token;
+
             scheduleData = await fetchScheduleData();
             if (!scheduleData) return;
 
-            const employee = scheduleData.employees.find(emp => {
-                const empEmail = emp.email.toLowerCase();
-                const empLastName = (emp.lastName || emp.name?.split(' ').pop() || '').toLowerCase();
-                return empEmail === email && empLastName === lastName;
-            });
+            const employee = (scheduleData.employees || []).find(emp => emp.id === lookup.employee.id);
 
             if (!employee) {
                 showErrorMessage('Invalid email or last name. Please try again.', 'loginError');
@@ -890,6 +907,7 @@
         function logout() {
             currentUser = null;
             scheduleData = null;
+            employeeToken = null;
             document.getElementById('loginForm').reset();
             document.getElementById('loginSection').classList.remove('hidden');
             document.getElementById('scheduleSection').classList.add('hidden');
