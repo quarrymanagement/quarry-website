@@ -8427,9 +8427,9 @@
       "hidden": false
     },
     "6ac2580abcffd0ff749248de": {
-      "status": "needs_call",
+      "status": "lost",
       "note": "",
-      "updatedAt": "2026-10-27T20:37:03.660Z",
+      "updatedAt": "2026-10-27T20:37:55.266Z",
       "updatedBy": "admin",
       "history": [
         {
@@ -8452,8 +8452,16 @@
           "by": "daily-followup",
           "note": "No response after reminder — needs a phone call",
           "at": "2026-10-11T14:30:29.746Z"
+        },
+        {
+          "from": "needs_call",
+          "to": "lost",
+          "by": "admin",
+          "note": "",
+          "at": "2026-10-27T20:37:55.266Z"
         }
-      ]
+      ],
+      "hidden": false
     },
     "6ac27d8285bb5b17c85179e9": {
       "status": "confirmed",
@@ -9826,5 +9834,5 @@
       "hidden": false
     }
   },
-  "updatedAt": "2026-10-27T20:37:03.660Z"
+  "updatedAt": "2026-10-27T20:37:55.266Z"
 }
