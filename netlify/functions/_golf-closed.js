@@ -16,6 +16,12 @@ function hour24(t) {
   if (!mt) { const h = /^(\d{1,2}):\d{2}$/.exec(String(t || '').trim()); return h ? +h[1] : null; }
   let h = +mt[1] % 12; if (/p/i.test(mt[3])) h += 12; return h;
 }
+// First closed hour (24h) for an early-close date, else null. Shared with
+// _pavilion-shared.js so both use the same EARLY_CLOSE_DATES list.
+function earlyCloseHour(date) {
+  const cut = EARLY_CLOSE_DATES[normDate(date)];
+  return cut === undefined ? null : cut;
+}
 // Returns an error message if the slot is closed, else null.
 function closedReason(date, time) {
   const d = normDate(date);
@@ -25,4 +31,4 @@ function closedReason(date, time) {
   if (h === null || h >= cut) return 'The Quarry closes at 4 PM on ' + d + ', so golf bays aren\'t available from 4 PM on that day. Please choose an earlier time or another date.';
   return null;
 }
-module.exports = { closedReason, EARLY_CLOSE_DATES };
+module.exports = { closedReason, EARLY_CLOSE_DATES, earlyCloseHour, hour24, normDate };

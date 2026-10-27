@@ -23,7 +23,7 @@
 
 const https = require('https');
 const crypto = require('crypto');
-const { isDateBookable, isSlotTaken, slotsForDate, slotEndLabel } = require('./_pavilion-shared');
+const { isDateBookable, isSlotTaken, slotsForDate, slotEndLabel, slotClosedReason } = require('./_pavilion-shared');
 const { writeBlob, readBlob } = require('./_blobs');
 
 const PRICE_CENTS = 10000; // $100 flat
@@ -155,6 +155,12 @@ exports.handler = async function (event) {
     if (!slotsForDate(date).includes(time)) {
       return { statusCode: 400, headers, body: JSON.stringify({ error: 'That is not a valid start time for this date.' }) };
     }
+
+    // Early-close dates (e.g. Sat 10/31/2026, closes 4 PM): no paid booking
+    // for a slot starting at or after the cut hour. Checked before any Square
+    // link is created.
+    const closedEarly = slotClosedReason(date, time);
+    if (closedEarly) return { statusCode: 409, headers, body: JSON.stringify({ error: closedEarly }) };
 
     const origin = event.headers.origin || 'https://thequarrystl.com';
 

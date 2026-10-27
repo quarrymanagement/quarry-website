@@ -156,8 +156,14 @@ function renderSlots(slots) {
     var block = document.createElement('div');
     block.className = 'slot-block';
     var h = document.createElement('h4');
-    h.textContent = slot.time + ' – ' + slotEnd(slot.time);
+    h.textContent = slot.time + ' – ' + slotEnd(slot.time) + (slot.closed ? ' (closed early)' : '');
     block.appendChild(h);
+    if (slot.closed) {
+      var note = document.createElement('p');
+      note.style.cssText = 'color:#8B5E3C;font-size:0.85rem;margin:0 0 0.5rem;';
+      note.textContent = slot.reason || 'Not available on this date.';
+      block.appendChild(note);
+    }
     var grid = document.createElement('div');
     grid.className = 'pav-grid';
     for (var i = 1; i <= 6; i++) {
@@ -166,7 +172,7 @@ function renderSlots(slots) {
         btn.type = 'button';
         btn.className = 'pav-btn';
         btn.textContent = 'Pavilion ' + num;
-        var available = slot.pavilions[String(num)];
+        var available = !slot.closed && slot.pavilions[String(num)];
         if (!available) {
           btn.disabled = true;
         } else {

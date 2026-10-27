@@ -11,7 +11,7 @@
 // ============================================================================
 
 const { readBlob } = require('./_blobs');
-const { isDateBookable, slotsForDate, conflictsWithExisting } = require('./_pavilion-shared');
+const { isDateBookable, slotsForDate, conflictsWithExisting, slotClosedReason } = require('./_pavilion-shared');
 
 const PAVILIONS = ['1', '2', '3', '4', '5', '6'];
 
@@ -41,11 +41,12 @@ exports.handler = async (event) => {
   } catch (_) { /* no bookings yet for this date */ }
 
   const slots = slotsForDate(date).map((time) => {
+    const closed = slotClosedReason(date, time); // early-close date (e.g. 10/31 from 4 PM)
     const pavilions = {};
     for (const p of PAVILIONS) {
-      pavilions[p] = !conflictsWithExisting(existing, p, time);
+      pavilions[p] = !closed && !conflictsWithExisting(existing, p, time);
     }
-    return { time, pavilions };
+    return closed ? { time, pavilions, closed: true, reason: closed } : { time, pavilions };
   });
 
   return { statusCode: 200, headers: CORS, body: JSON.stringify({ ok: true, bookable: true, slots }) };

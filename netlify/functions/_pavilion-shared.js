@@ -18,6 +18,7 @@
 // ============================================================================
 
 const { readBlob } = require('./_blobs');
+const { earlyCloseHour, hour24 } = require('./_golf-closed');
 
 const VENUE_AVAILABILITY_KEY = process.env.VENUE_AVAILABILITY_KEY || '';
 const SUPABASE_FN_URL = 'https://nkulhtalltbieicvmmad.supabase.co/functions/v1/venue-availability';
@@ -66,6 +67,22 @@ function slotEndLabel(time) {
   return time === '11:00 AM' ? '4:00 PM' : 'Close';
 }
 
+// Early-close dates (EARLY_CLOSE_DATES in _golf-closed.js, e.g. Sat Oct 31
+// 2026 closes at 4 PM): any slot starting at or after the cut hour is closed.
+// Returns a guest-facing reason if closed, else null.
+function fmtCut(h) { return (h % 12 === 0 ? 12 : h % 12) + ' ' + (h >= 12 ? 'PM' : 'AM'); }
+function slotClosedReason(date, time) {
+  const cut = earlyCloseHour(date);
+  if (cut == null) return null;
+  const h = hour24(time);
+  if (h !== null && h < cut) return null;
+  const d = new Date(String(date).slice(0, 10) + 'T12:00:00Z');
+  const label = isNaN(d.getTime()) ? String(date) :
+    ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getUTCDay()] + ' ' +
+    ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getUTCMonth()] + ' ' + d.getUTCDate();
+  return 'The Quarry closes early at ' + fmtCut(cut) + ' on ' + label + ', so pavilions are not available from ' + fmtCut(cut) + ' on that day. Please choose an earlier time or another date.';
+}
+
 async function isDateBookable(date) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { ok: false, reason: 'Invalid date.' };
   if (!isOpenDay(date)) return { ok: false, reason: 'The Quarry is closed Mondays and Tuesdays.' };
@@ -90,4 +107,4 @@ async function isSlotTaken(date, pavilion, time) {
   }
 }
 
-module.exports = { isDateBookable, isSlotTaken, isOpenDay, hasWeddingOn, slotsForDate, slotEndLabel, conflictsWithExisting };
+module.exports = { isDateBookable, isSlotTaken, isOpenDay, hasWeddingOn, slotsForDate, slotEndLabel, conflictsWithExisting, slotClosedReason };
