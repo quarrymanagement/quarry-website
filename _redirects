@@ -1,3 +1,35 @@
+# ── Wix migration (2026-10-28) ─────────────────────────────────────────────
+# thequarryweddings.com (old Wix "Weddings at The Quarry" site).
+# These host-specific rules are INERT until thequarryweddings.com (+ www) is
+# added as a domain alias on this Netlify site and DNS is pointed here.
+# They must stay ABOVE the generic path rules below.
+https://thequarryweddings.com/contact-2            https://thequarrystl.com/weddings/contact.html  301!
+https://thequarryweddings.com/contact-8            https://thequarrystl.com/weddings/contact.html  301!
+https://thequarryweddings.com/vowsandvendors       https://thequarrystl.com/weddings/vendors.html  301!
+https://thequarryweddings.com/vowsandvendors/*     https://thequarrystl.com/weddings/vendors.html  301!
+https://thequarryweddings.com/book-online          https://thequarrystl.com/weddings/contact.html  301!
+https://thequarryweddings.com/booking-calendar/*   https://thequarrystl.com/weddings/contact.html  301!
+https://thequarryweddings.com/booking-form         https://thequarrystl.com/weddings/contact.html  301!
+https://thequarryweddings.com/service-page/*       https://thequarrystl.com/weddings/contact.html  301!
+https://thequarryweddings.com/schedule             https://thequarrystl.com/weddings/contact.html  301!
+https://thequarryweddings.com/event-details/*      https://thequarrystl.com/weddings/vendors.html  301!
+https://thequarryweddings.com/about                https://thequarrystl.com/weddings/about.html    301!
+https://thequarryweddings.com/privacy-policy       https://thequarrystl.com/privacy.html           301!
+https://thequarryweddings.com/*                    https://thequarrystl.com/weddings/              301!
+https://www.thequarryweddings.com/contact-2        https://thequarrystl.com/weddings/contact.html  301!
+https://www.thequarryweddings.com/contact-8        https://thequarrystl.com/weddings/contact.html  301!
+https://www.thequarryweddings.com/vowsandvendors   https://thequarrystl.com/weddings/vendors.html  301!
+https://www.thequarryweddings.com/vowsandvendors/* https://thequarrystl.com/weddings/vendors.html  301!
+https://www.thequarryweddings.com/book-online      https://thequarrystl.com/weddings/contact.html  301!
+https://www.thequarryweddings.com/booking-calendar/* https://thequarrystl.com/weddings/contact.html 301!
+https://www.thequarryweddings.com/booking-form     https://thequarrystl.com/weddings/contact.html  301!
+https://www.thequarryweddings.com/service-page/*   https://thequarrystl.com/weddings/contact.html  301!
+https://www.thequarryweddings.com/schedule         https://thequarrystl.com/weddings/contact.html  301!
+https://www.thequarryweddings.com/event-details/*  https://thequarrystl.com/weddings/vendors.html  301!
+https://www.thequarryweddings.com/about            https://thequarrystl.com/weddings/about.html    301!
+https://www.thequarryweddings.com/privacy-policy   https://thequarrystl.com/privacy.html           301!
+https://www.thequarryweddings.com/*                https://thequarrystl.com/weddings/              301!
+
 # Short, shareable URLs for The Quarry events.
 # Format:  /short-path   /actual-page   200  (rewrite, URL bar keeps short path)
 
@@ -39,3 +71,25 @@
 
 # Sunday brunch discontinued 2026-09-22 -- redirect old links/bookmarks to the food menu
 /quarry-brunch.html            /quarry-menu.html      302!
+
+# ── Wix migration (2026-10-28): old Wix paths on thequarrystl.com ──────────
+# Leftover links/QRs/Google results from the old Wix Quarry site. Specific
+# /event-details/<slug> rules above win; anything else lands on events.
+/event-details/*        /quarry-events.html        301
+/events-1               /quarry-events.html        301
+/book-online            /quarry-reservations.html  301
+/booking-calendar/*     /quarry-reservations.html  301
+/service-page/*         /quarry-reservations.html  301
+/plans-pricing          /quarry-wineclub.html      301
+/pricing-plans/*        /quarry-wineclub.html      301
+/wine-club              /quarry-wineclub.html      301
+/rock-and-vine          /quarry-wineclub.html      301
+/join-wine-club         /wine-club-join.html       301
+/gift-card              /quarry-giftcards.html     301
+/gift-cards             /quarry-giftcards.html     301
+/contact-2              /weddings/contact.html     301
+/contact-8              /weddings/contact.html     301
+/vowsandvendors         /weddings/vendors.html     301
+/privacy-policy         /privacy.html              301
+/accessibility-statement /privacy.html             301
+/home                   /                          301

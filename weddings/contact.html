@@ -436,7 +436,7 @@ nav.hn.sc .nl{color:#2C2C2C!important}
       </div>
       <div style="height:16px"></div>
       <div class="fr">
-        <div class="fg"><label>Wedding Date</label><input type="date" name="wedding_date"/></div>
+        <div class="fg"><label>Preferred Date(s)</label><input type="text" name="preferred_dates" placeholder="e.g. June 2027, or 6/12 or 6/19/2027"/></div>
         <div class="fg"><label>Package Interest</label>
           <select name="package_interest">
             <option value="">Select a package...</option>
@@ -448,7 +448,12 @@ nav.hn.sc .nl{color:#2C2C2C!important}
         </div>
       </div>
       <div style="height:16px"></div>
-      <div class="fg"><label>Tell Us About Your Vision</label><textarea name="message" placeholder="Share any details about your dream wedding day, guest count, or questions you have..."></textarea></div>
+      <div class="fr">
+        <div class="fg"><label>Estimated Guest Count</label><input type="text" name="guest_count" inputmode="numeric" placeholder="e.g. 150"/></div>
+        <div class="fg"><label>Budget</label><input type="text" name="budget" placeholder="e.g. $15,000"/></div>
+      </div>
+      <div style="height:16px"></div>
+      <div class="fg"><label>Tell Us About Your Vision</label><textarea name="message" placeholder="Share any details about your dream wedding day, or questions you have..."></textarea></div>
       <button type="submit" class="fsub">Request a Tour →</button>
     </form>
   </div>

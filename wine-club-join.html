@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="robots" content="noindex, follow"/>
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<title>Join Rock &amp; Vine Wine Club | The Quarry</title>
+<meta name="description" content="Sign up for Rock &amp; Vine, The Quarry's monthly wine club in New Melle, Missouri.">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}body{margin:0;font-family:Montserrat,Arial,sans-serif;background:#FAF7F2;color:#2C1A0E}
+  header{background:#1A0E08;padding:22px 20px;text-align:center}
+  header a{color:#B8933A;text-decoration:none;font-family:'Cormorant Garamond',serif;font-size:1.6rem;letter-spacing:.05em}
+  .wrap{max-width:640px;margin:0 auto;padding:40px 20px 60px}
+  h1{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:2.4rem;margin:0 0 8px;text-align:center}
+  .price{text-align:center;color:#B8933A;font-weight:600;letter-spacing:.1em;text-transform:uppercase;font-size:.8rem;margin-bottom:24px}
+  .steps{display:flex;gap:10px;justify-content:center;margin:0 0 28px;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase}
+  .steps span{padding:6px 12px;border:1px solid #d8cdb8;color:#8a8170}.steps span.on{background:#1A0E08;color:#B8933A;border-color:#1A0E08}
+  ul.perks{background:#fff;border-left:4px solid #B8933A;padding:16px 16px 16px 36px;font-size:.88rem;line-height:1.8;margin:0 0 28px}
+  label{display:block;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:#6b5d4a;margin:14px 0 6px}
+  input{width:100%;padding:12px;border:1px solid #d8cdb8;background:#fff;font:inherit}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}.row3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:14px}
+  @media(max-width:560px){.row,.row3{grid-template-columns:1fr}}
+  .btn{display:block;width:100%;margin-top:24px;padding:16px;background:#1A0E08;color:#B8933A;border:0;font:600 .8rem Montserrat,sans-serif;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;text-align:center;text-decoration:none}
+  .btn[disabled]{opacity:.6;cursor:default}
+  .note{font-size:.75rem;color:#8a8170;line-height:1.6;margin-top:14px}
+  #step2{display:none;text-align:center;background:#fff;padding:28px;border:1px solid #e5dccb}
+  .placeholder{display:inline-block;margin-top:10px;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;background:#fff4d6;color:#7a5a00;padding:4px 8px}
+</style>
+</head>
+<body>
+<header><a href="/quarry-wineclub.html">Rock &amp; Vine &middot; The Quarry</a></header>
+<div class="wrap">
+  <h1>Join Rock &amp; Vine</h1>
+  <!-- PRICE: confirm with Matt. Wix plan was $24.99/mo; current site copy says $29.99/mo. -->
+  <div class="price">$29.99 / month &middot; includes 1 guest &middot; cancel anytime</div>
+  <div class="steps"><span class="on" id="s1">1 &middot; Your profile</span><span id="s2">2 &middot; Secure checkout</span></div>
+  <ul class="perks">
+    <li>Member wine tastings at The Quarry (bring one guest free)</li>
+    <li>Member-only events and RSVP access</li>
+    <li>Monthly billing, no setup fee, cancel anytime</li>
+  </ul>
+
+  <form id="joinForm" name="wine-club-registration" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+    <input type="hidden" name="form-name" value="wine-club-registration"/>
+    <input type="hidden" name="signup_source" value="online-join"/>
+    <input type="hidden" name="marketing_opt_in" value="yes"/>
+    <p style="display:none"><label>Don't fill this out: <input name="bot-field"/></label></p>
+    <div class="row">
+      <div><label>First Name *</label><input type="text" name="firstName" required autocomplete="given-name"/></div>
+      <div><label>Last Name *</label><input type="text" name="lastName" required autocomplete="family-name"/></div>
+    </div>
+    <div class="row">
+      <div><label>Email *</label><input type="email" name="email" required autocomplete="email"/></div>
+      <div><label>Phone *</label><input type="tel" name="phone" required autocomplete="tel"/></div>
+    </div>
+    <label>Street Address *</label><input type="text" name="street" required autocomplete="street-address"/>
+    <div class="row3">
+      <div><label>City *</label><input type="text" name="city" required autocomplete="address-level2"/></div>
+      <div><label>State *</label><input type="text" name="state" required maxlength="2" autocomplete="address-level1"/></div>
+      <div><label>Zip *</label><input type="text" name="zip" required autocomplete="postal-code"/></div>
+    </div>
+    <label>Birthdate * (must be 21+)</label><input type="date" name="birthdate" required/>
+    <button type="submit" class="btn" id="joinBtn">Continue to Checkout &rarr;</button>
+    <p class="note">By continuing you'll receive occasional emails from The Quarry about events, tastings and specials. Unsubscribe anytime. <a href="/privacy.html" style="color:#9a7b2a">Privacy Policy</a></p>
+  </form>
+
+  <div id="step2">
+    <h2 style="font-family:'Cormorant Garamond',serif;margin:0 0 8px">Profile received &mdash; last step</h2>
+    <p style="font-size:.88rem;line-height:1.7">Start your monthly membership with secure card checkout powered by Square.</p>
+    <a class="btn" href="/.netlify/functions/wine-club-checkout">Start Membership &mdash; Secure Checkout</a>
+    <div class="placeholder">Placeholder &mdash; Square checkout not connected yet</div>
+  </div>
+</div>
+<script>
+document.getElementById('joinForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  var f=e.target, btn=document.getElementById('joinBtn');
+  btn.disabled=true; btn.textContent='Saving...';
+  fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(new FormData(f)).toString()})
+    .then(function(r){ if(!r.ok) throw new Error(r.status);
+      f.style.display='none'; document.getElementById('step2').style.display='block';
+      document.getElementById('s1').className=''; document.getElementById('s2').className='on'; window.scrollTo(0,0); })
+    .catch(function(){ alert('Something went wrong. Please email management@thequarrystl.com.'); btn.disabled=false; btn.textContent='Continue to Checkout \u2192'; });
+});
+</script>
+</body>
+</html>
