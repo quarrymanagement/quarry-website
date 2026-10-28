@@ -2175,8 +2175,29 @@
                 grid.innerHTML = '<div style="text-align:center;padding:3rem;color:#888;grid-column:1/-1;"><p style="font-size:1.2rem;">No upcoming events at this time. Check back soon!</p></div>';
                 return;
             }
-            grid.innerHTML = allEvents.map(createEventCard).join("");
+            // Christmas Spirits placeholder (10/28): the dated Holiday Pop-Up Bar
+            // listings are set to status "draft" in events.json until the nights
+            // are final. Show one info-only card (no price, no buy button) in
+            // their place, ahead of the first December event. Remove this block
+            // once the real listings are published again.
+            const cards = allEvents.map(createEventCard);
+            const decIdx = allEvents.findIndex(e => String(e.date || '') >= '2026-12-01');
+            const insertAt = decIdx === -1 ? cards.length : decIdx;
+            cards.splice(insertAt, 0, christmasSpiritsPlaceholderCard());
+            grid.innerHTML = cards.join("");
             filterEvents(currentFilter);
+        }
+
+        function christmasSpiritsPlaceholderCard() {
+            return `
+                <div class="event-card cs-placeholder" data-category="Ticketed" style="cursor:default;">
+                    <img src="/assets/social-uploads/christmas-spirits-teaser-1080x1350.png" alt="Christmas Spirits in Whoville at The Quarry" loading="lazy" style="display:block;width:100%;aspect-ratio:1080/1350;object-fit:cover;background:#123322;">
+                    <div class="event-body">
+                        <h3 class="event-name">Christmas Spirits in Whoville</h3>
+                        <p class="event-description">December weekends. Tickets on sale Sunday, Nov 1.</p>
+                    </div>
+                </div>
+            `;
         }
 
         /**

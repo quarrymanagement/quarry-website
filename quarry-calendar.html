@@ -413,16 +413,16 @@ const EVENTS = [
 
   /* ----------------------------- DECEMBER ----------------------------- */
   { date:"2026-12-02", name:"Craft Night", type:["recurring","holiday"], tbd:true, desc:"Holiday make-and-take craft night." },
-  { date:"2026-12-04", name:"Holiday Pop-Up Bar", type:["ticketed","holiday"], price:"$25 per person", desc:"Christmas pop-up bar. Ticketed event.", link:"/quarry-event-detail.html?id=holiday-pop-up-bar" },
-  { date:"2026-12-05", name:"Holiday Pop-Up Bar", type:["ticketed","holiday"], price:"$25 per person", desc:"Christmas pop-up bar. Ticketed event.", link:"/quarry-event-detail.html?id=holiday-pop-up-bar-2" },
+  { hidden:true, date:"2026-12-04", name:"Holiday Pop-Up Bar", type:["ticketed","holiday"], price:"$25 per person", desc:"Christmas pop-up bar. Ticketed event.", link:"/quarry-event-detail.html?id=holiday-pop-up-bar" },
+  { hidden:true, date:"2026-12-05", name:"Holiday Pop-Up Bar", type:["ticketed","holiday"], price:"$25 per person", desc:"Christmas pop-up bar. Ticketed event.", link:"/quarry-event-detail.html?id=holiday-pop-up-bar-2" },
   { date:"2026-12-09", name:"Craft Night", type:["recurring","holiday"], tbd:true, desc:"Holiday make-and-take craft night." },
-  { date:"2026-12-11", name:"Holiday Pop-Up Bar", type:["ticketed","holiday"], time:"Seatings 5–7 PM & 8–11 PM", price:"$25 per person", desc:"Christmas pop-up bar, two seatings. Ticketed event.", link:"/quarry-event-detail.html?id=holiday-pop-up-bar-3" },
-  { date:"2026-12-12", name:"Holiday Pop-Up Bar", type:["ticketed","holiday"], time:"Seatings 5–7 PM & 8–11 PM", price:"$25 per person", desc:"Christmas pop-up bar, two seatings. Ticketed event.", link:"/quarry-event-detail.html?id=holiday-pop-up-bar-4" },
+  { hidden:true, date:"2026-12-11", name:"Holiday Pop-Up Bar", type:["ticketed","holiday"], time:"Seatings 5–7 PM & 8–11 PM", price:"$25 per person", desc:"Christmas pop-up bar, two seatings. Ticketed event.", link:"/quarry-event-detail.html?id=holiday-pop-up-bar-3" },
+  { hidden:true, date:"2026-12-12", name:"Holiday Pop-Up Bar", type:["ticketed","holiday"], time:"Seatings 5–7 PM & 8–11 PM", price:"$25 per person", desc:"Christmas pop-up bar, two seatings. Ticketed event.", link:"/quarry-event-detail.html?id=holiday-pop-up-bar-4" },
   { date:"2026-12-13", name:"Lunch With Santa", type:["ticketed","family","holiday"], time:"12:00 – 4:00 PM", desc:"Lunch, pictures with Santa, games and more. Ticketed event." , link:"/quarry-event-detail.html?id=lunch-with-santa" },
   { date:"2026-12-16", name:"Craft Night", type:["recurring","holiday"], tbd:true, desc:"Holiday make-and-take craft night." },
   { date:"2026-12-17", name:"Rock & Vine Wine Club", type:["recurring","holiday"], desc:"Holiday members' tasting.", link:"/quarry-wineclub" },
-  { date:"2026-12-18", name:"Holiday Pop-Up Bar", type:["ticketed","holiday"], price:"$25 per person", desc:"Christmas pop-up bar. Ticketed event.", link:"/quarry-event-detail.html?id=holiday-pop-up-bar-6" },
-  { date:"2026-12-19", name:"Holiday Pop-Up Bar", type:["ticketed","holiday"], price:"$25 per person", desc:"Christmas pop-up bar. Ticketed event.", link:"/quarry-event-detail.html?id=holiday-pop-up-bar-7" },
+  { hidden:true, date:"2026-12-18", name:"Holiday Pop-Up Bar", type:["ticketed","holiday"], price:"$25 per person", desc:"Christmas pop-up bar. Ticketed event.", link:"/quarry-event-detail.html?id=holiday-pop-up-bar-6" },
+  { hidden:true, date:"2026-12-19", name:"Holiday Pop-Up Bar", type:["ticketed","holiday"], price:"$25 per person", desc:"Christmas pop-up bar. Ticketed event.", link:"/quarry-event-detail.html?id=holiday-pop-up-bar-7" },
   { date:"2026-12-20", name:"Breakfast With Santa", type:["ticketed","family","holiday"], time:"9:00 AM – 2:00 PM", desc:"Breakfast and pictures with Santa. Ticketed event." , link:"/quarry-event-detail.html?id=breakfast-with-santa" },
   { date:"2026-12-31", name:"New Year's Eve with DJ Earl", type:["ticketed","holiday"], desc:"Ring in 2027 at The Quarry with DJ Earl. Ticketed event.", link:"/quarry-event-detail.html?id=new-years-eve-with-dj-earl" },
 ];
@@ -445,6 +445,7 @@ function cls(ev){
 const TODAY = new Date(); TODAY.setHours(0,0,0,0);
 function isPast(ev){ return parse(ev.date) < TODAY; }
 function matches(ev){
+    if (ev.hidden) return false; // hidden:true = kept for later, not shown (pop-up dates, 10/28)
     if (isPast(ev)) return false;
     if (activeFilter === "all") return true;
     return has(ev, activeFilter);
@@ -518,6 +519,16 @@ function render(){
         h += '<div class="month-head"><h2>'+MONTHS[m]+' '+y+'</h2><span class="month-count">'+evs.length+' '+(evs.length===1?'event':'events')+'</span></div>';
         h += buildCalendar(y, m, evs);
         h += '<div class="ev-list">';
+        // Christmas Spirits placeholder (10/28): dated pop-up nights are hidden
+        // above until final. One info-only card, no price, no ticket link.
+        if (y === 2026 && m === 11 && ["all","holiday","ticketed"].indexOf(activeFilter) !== -1) {
+            h += '<article class="ev t-ticketed cs-placeholder" style="align-items:center;">'
+              +   '<div class="ev-date" style="padding:0;overflow:hidden;"><img src="/assets/social-uploads/christmas-spirits-teaser-1080x1350.png" alt="Christmas Spirits in Whoville" loading="lazy" style="display:block;width:100%;height:auto;"></div>'
+              +   '<div><div class="ev-name">Christmas Spirits in Whoville</div>'
+              +     '<div class="ev-desc">December weekends. Tickets on sale Sunday, Nov 1.</div></div>'
+              +   '<div class="ev-cta"></div>'
+              + '</article>';
+        }
         evs.forEach(e=>{
             const dt = parse(e.date);
             h += '<article class="ev '+cls(e)+'">'
