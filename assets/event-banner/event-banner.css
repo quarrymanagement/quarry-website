@@ -1,0 +1,145 @@
+/* ==========================================================================
+   The Quarry — Featured Event banner (reusable template)
+   Three layouts share one markup + one config:
+     .qe-bar   Option A  slim announcement bar under the header
+     .qe-hero  Option B  full-width hero strip (art one side, copy + CTA other)
+     .qe-card  Option C  dismissible floating feature card
+   Re-skin per event with the CSS variables below (set them inline on the
+   .qevent element or from the admin "featured event" row).
+   ========================================================================== */
+@font-face{font-family:"Mountains of Christmas";font-weight:700;src:url("fonts/MountainsofChristmas-Bold.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"QE Montserrat";font-weight:300 700;src:url("fonts/Montserrat.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"QE Playfair";font-weight:400 800;src:url("fonts/PlayfairDisplay.woff2") format("woff2");font-display:swap}
+
+.qevent{
+  /* ---- per-event theme (defaults = Christmas Spirits in Whoville) ---- */
+  --qe-bg:#0c3314;            /* main background            */
+  --qe-bg2:#05200b;           /* gradient / darker edge     */
+  --qe-title:#9be23f;         /* title fill                 */
+  --qe-title-stroke:#0a2a10;  /* title outline              */
+  --qe-title-shadow:#c8102e;  /* title drop shadow          */
+  --qe-accent:#c8102e;        /* CTA background             */
+  --qe-accent-hover:#e0223f;
+  --qe-cta-text:#fff7e6;
+  --qe-kicker:#D4AF6A;        /* site gold                  */
+  --qe-text:#F5F0E8;          /* site cream                 */
+  --qe-rule:rgba(212,175,106,.45);
+  --qe-title-font:"Mountains of Christmas","QE Playfair",Georgia,serif;
+  --qe-body-font:"QE Montserrat","Montserrat",Arial,sans-serif;
+  --qe-lights:1;              /* 0 hides the string-light trim */
+  box-sizing:border-box;font-family:var(--qe-body-font);color:var(--qe-text);
+  -webkit-font-smoothing:antialiased;
+}
+.qevent *,.qevent *::before,.qevent *::after{box-sizing:border-box;margin:0;padding:0}
+.qevent[hidden]{display:none!important}
+.qevent .qe-kicker{display:block;font-weight:600;text-transform:uppercase;letter-spacing:.28em;color:var(--qe-kicker);font-size:.66rem;line-height:1.3}
+.qevent .qe-title{display:block;text-wrap:balance;font-family:var(--qe-title-font);font-weight:700;color:var(--qe-title);line-height:1;
+  -webkit-text-stroke:.09em var(--qe-title-stroke);paint-order:stroke fill;
+  text-shadow:0 .06em 0 var(--qe-title-shadow),0 .1em .25em rgba(0,0,0,.55)}
+.qevent .qe-line{display:block;font-weight:500;color:var(--qe-text);line-height:1.35}
+.qevent .qe-line b{color:var(--qe-title);font-weight:700}
+.qevent .qe-cta{display:inline-flex;align-items:center;justify-content:center;gap:.5em;white-space:nowrap;
+  background:var(--qe-accent);color:var(--qe-cta-text);text-decoration:none;font-weight:700;
+  text-transform:uppercase;letter-spacing:.18em;font-size:.68rem;padding:.95em 1.6em;
+  border:1px solid rgba(255,247,230,.35);transition:background .2s,transform .2s}
+.qevent .qe-cta:hover{background:var(--qe-accent-hover);transform:translateY(-1px)}
+.qevent .qe-cta::after{content:"\2192";font-size:1.1em;letter-spacing:0}
+.qevent .qe-x{background:none;border:0;cursor:pointer;color:rgba(245,240,232,.6);font-size:1rem;line-height:1;padding:6px;transition:color .2s}
+.qevent .qe-x:hover{color:var(--qe-kicker)}
+/* string-light trim (pure CSS, no art needed) */
+.qevent .qe-lights{position:absolute;left:0;right:0;height:10px;opacity:var(--qe-lights);pointer-events:none;
+  background:
+   radial-gradient(circle at 50% 50%,#ff2e43 0 3px,rgba(255,46,67,.35) 4px,transparent 6px) 0 0/48px 10px,
+   radial-gradient(circle at 50% 50%,#9be23f 0 3px,rgba(155,226,63,.35) 4px,transparent 6px) 16px 0/48px 10px,
+   radial-gradient(circle at 50% 50%,#ffd970 0 3px,rgba(255,217,112,.35) 4px,transparent 6px) 32px 0/48px 10px}
+
+/* ------------------------------------------------------------------ A: BAR */
+.qe-bar{position:relative;background:linear-gradient(90deg,var(--qe-bg2),var(--qe-bg) 30%,var(--qe-bg) 70%,var(--qe-bg2));
+  border-bottom:1px solid var(--qe-rule);overflow:hidden}
+.qe-bar .qe-lights{top:0}
+.qe-bar .qe-inner{max-width:1400px;margin:0 auto;padding:16px 2rem 12px;display:flex;align-items:center;gap:1.25rem;min-height:76px}
+.qe-bar .qe-thumb{width:52px;height:52px;border-radius:50%;object-fit:cover;flex-shrink:0;
+  border:2px solid var(--qe-title);box-shadow:0 0 0 2px var(--qe-accent)}
+.qe-bar .qe-copy{display:flex;align-items:center;gap:1.1rem;flex:1;min-width:0;flex-wrap:wrap}
+.qe-bar .qe-stack{display:flex;flex-direction:column;gap:3px}
+.qe-bar .qe-kicker{font-size:.58rem;letter-spacing:.26em}
+.qe-bar .qe-title{font-size:1.85rem}
+.qe-bar .qe-sep{width:1px;align-self:stretch;background:var(--qe-rule);margin:4px .2rem}
+.qe-bar .qe-line{font-size:.86rem}
+.qe-bar .qe-cta{font-size:.62rem;padding:.9em 1.4em;flex-shrink:0}
+.qe-bar .qe-x{flex-shrink:0;margin-left:.25rem}
+@media (max-width:768px){
+  .qe-bar .qe-inner{padding:16px 2.4rem 12px 1rem;gap:.75rem;min-height:0;flex-wrap:wrap}
+  .qe-bar .qe-thumb{width:46px;height:46px}
+  .qe-bar .qe-copy{flex:1 1 0;gap:4px;flex-direction:column;align-items:flex-start}
+  .qe-bar .qe-sep{display:none}
+  .qe-bar .qe-kicker{font-size:.54rem;letter-spacing:.16em}
+  .qe-bar .qe-title{font-size:1.45rem}
+  .qe-bar .qe-line{font-size:.76rem}
+  .qe-bar .qe-cta{width:100%;font-size:.6rem;padding:.85em 1em}
+  .qe-bar .qe-x{position:absolute;top:14px;right:6px}
+}
+
+/* ----------------------------------------------------------------- B: HERO */
+.qe-hero{position:relative;background:var(--qe-bg2);border-top:1px solid var(--qe-rule);border-bottom:1px solid var(--qe-rule);overflow:hidden}
+.qe-hero .qe-lights{bottom:0}
+.qe-hero .qe-inner{position:relative;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);min-height:400px}
+.qe-hero .qe-art{position:relative;background:var(--qe-bg) center 12%/cover no-repeat}
+.qe-hero .qe-art::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 50%,var(--qe-bg2) 99%)}
+.qe-hero .qe-copy{position:relative;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:1rem;
+  padding:3rem 4rem 3.2rem 2.5rem;background:radial-gradient(ellipse 90% 80% at 45% 50%,var(--qe-bg),var(--qe-bg2) 80%)}
+.qe-hero .qe-kicker{font-size:.68rem;letter-spacing:.32em}
+.qe-hero .qe-title{font-size:clamp(3rem,5vw,4.6rem);line-height:.95}
+.qe-hero .qe-divider{width:50px;height:1px;background:var(--qe-kicker)}
+.qe-hero .qe-line{font-size:1.05rem;font-weight:500}
+.qe-hero .qe-meta{text-wrap:balance;font-size:.62rem;letter-spacing:.24em;text-transform:uppercase;color:rgba(245,240,232,.6);font-weight:500}
+.qe-hero .qe-ctas{display:flex;gap:.8rem;flex-wrap:wrap;align-items:center;margin-top:.4rem}
+.qe-hero .qe-cta2{color:var(--qe-kicker);font-size:.66rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;text-decoration:none;
+  border:1px solid var(--qe-kicker);padding:.95em 1.6em}
+.qe-hero .qe-x{position:absolute;top:10px;right:12px;z-index:2}
+@media (max-width:768px){
+  .qe-hero .qe-inner{grid-template-columns:1fr;min-height:0}
+  .qe-hero .qe-art{height:210px;background-position:center 8%}
+  .qe-hero .qe-art::after{background:linear-gradient(180deg,transparent 55%,var(--qe-bg2))}
+  .qe-hero .qe-copy{align-items:center;text-align:center;padding:1.2rem 1.25rem 2.2rem;gap:.8rem;background:var(--qe-bg2)}
+  .qe-hero .qe-kicker{font-size:.56rem;letter-spacing:.22em}
+  .qe-hero .qe-title{font-size:2.6rem}
+  .qe-hero .qe-line{font-size:.92rem}
+  .qe-hero .qe-meta{font-size:.54rem;letter-spacing:.16em}
+  .qe-hero .qe-ctas{justify-content:center;width:100%}
+  .qe-hero .qe-cta,.qe-hero .qe-cta2{flex:1 1 140px}
+  .qe-hero .qe-x{background:rgba(5,32,11,.7);border-radius:50%;width:30px;height:30px;font-size:.85rem}
+}
+
+/* ----------------------------------------------------------------- C: CARD */
+.qe-card{position:fixed;right:24px;bottom:24px;z-index:1100;width:360px;max-width:calc(100vw - 24px);
+  transform:translateY(20px);opacity:0;transition:opacity .45s,transform .45s}
+.qe-card.qe-in{opacity:1;transform:none}
+.qe-card .qe-hand{position:absolute;left:-58px;top:-62px;width:170px;z-index:3;pointer-events:none;
+  transform:rotate(-8deg);filter:drop-shadow(0 6px 10px rgba(0,0,0,.45))}
+.qe-card .qe-box{position:relative;background:var(--qe-bg2);border:1px solid var(--qe-rule);
+  box-shadow:0 0 0 4px var(--qe-bg),0 0 0 5px var(--qe-accent),0 18px 40px rgba(0,0,0,.55);overflow:hidden}
+.qe-card .qe-img{display:block;width:100%;height:190px;object-fit:cover;object-position:center 18%}
+.qe-card .qe-lights{top:184px}
+.qe-card .qe-body{padding:1.2rem 1.4rem 1.4rem;text-align:center;display:flex;flex-direction:column;align-items:center;gap:.55rem}
+.qe-card .qe-kicker{font-size:.56rem;letter-spacing:.24em}
+.qe-card .qe-title{font-size:2.35rem}
+.qe-card .qe-line{font-size:.85rem}
+.qe-card .qe-cta{width:100%;margin-top:.35rem}
+.qe-card .qe-later{background:none;border:0;cursor:pointer;color:rgba(245,240,232,.55);font:500 .6rem var(--qe-body-font);letter-spacing:.16em;text-transform:uppercase}
+.qe-card .qe-later:hover{color:var(--qe-text)}
+.qe-card .qe-x{position:absolute;top:8px;right:8px;z-index:2;background:rgba(5,32,11,.75);border-radius:50%;width:30px;height:30px;font-size:.8rem;color:#fff7e6}
+@media (max-width:768px){
+  .qe-card{left:12px;right:12px;bottom:12px;width:auto;max-width:none}
+  .qe-card .qe-hand{width:118px;left:auto;right:-14px;top:-50px;transform:scaleX(-1) rotate(-6deg)}
+  .qe-card .qe-box{display:grid;grid-template-columns:112px 1fr}
+  .qe-card .qe-img{height:100%;min-height:170px;object-position:62% 30%}
+  .qe-card .qe-lights{display:none}
+  .qe-card .qe-body{padding:.95rem 1rem 1rem;text-align:left;align-items:flex-start;gap:.4rem}
+  .qe-card .qe-kicker{font-size:.54rem;letter-spacing:.14em;padding-right:1.8rem}
+  .qe-card .qe-title{font-size:1.6rem}
+  .qe-card .qe-line{font-size:.74rem}
+  .qe-card .qe-cta{font-size:.58rem;padding:.85em 1em;margin-top:.2rem}
+  .qe-card .qe-later{display:none}
+}
+@media (prefers-reduced-motion:reduce){.qe-card{transition:none}}

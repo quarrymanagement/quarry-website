@@ -1,0 +1,32 @@
+{
+  "_help": [
+    "Homepage featured-event banner. Edit THIS file only; no code change needed. Commit to main and Netlify redeploys (about a minute).",
+    "style: \"b\" = full-width hero strip above the video hero, \"a\" = slim bar under the header (\"c\" = floating card).",
+    "buttonText / buttonUrl: the one button. e.g. \"Learn More\" + \"/quarry-events.html\", later \"Get Tickets\" + the ticket page URL.",
+    "active: false hides it. start / end: first and last day it shows (YYYY-MM-DD, New Melle time).",
+    "line: <b>...</b> is the only HTML allowed. Leave a field empty to drop it.",
+    "id: dismissals are remembered per id. Change the id (e.g. add -tickets) to show it again to people who closed it.",
+    "source: \"json\" uses this file. \"supabase\" reads the site_featured_events table instead (falls back to this file if that fails). Only flip once the table exists.",
+    "First active event inside its start/end window wins."
+  ],
+  "source": "json",
+  "events": [
+    {
+      "id": "christmas-spirits-2026",
+      "active": true,
+      "style": "b",
+      "start": "2026-10-28",
+      "end": "2026-12-20",
+      "kicker": "A Holiday Christmas Pop-Up in New Melle",
+      "title": "Christmas Spirits in Whoville",
+      "line": "Tickets available <b>this Sunday</b>",
+      "meta": "The Quarry \u00b7 3960 Highway Z \u00b7 New Melle, MO",
+      "buttonText": "Learn More",
+      "buttonUrl": "/quarry-events.html",
+      "heroImage": "/assets/event-banner/img/whoville-scene.jpg",
+      "barImage": "/assets/event-banner/img/whoville-tree-thumb.jpg",
+      "alt": "A big lit Christmas tree beside a snowy little village",
+      "theme": {}
+    }
+  ]
+}

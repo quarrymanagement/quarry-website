@@ -206,6 +206,7 @@ var NOTICES = [
     banner.querySelector(".qn-x").addEventListener("click", function () {
       rememberDismiss();
       banner.remove();
+      signal("quarry:notice-removed");
     });
 
     /* Header height and position both change at the 768px breakpoint. */
@@ -234,9 +235,19 @@ var NOTICES = [
     }
   }
 
+  function signal(name) {
+    try { document.dispatchEvent(new CustomEvent(name)); } catch (e) {}
+  }
+
   function init() {
     dated();
-    loadNotices(function (list) { render(active(list)); });
+    loadNotices(function (list) {
+      try { render(active(list)); } catch (e) {}
+      /* Tell anything that stacks under the notice (the featured-event
+         banner) that the notice is settled, shown or not. */
+      window.QUARRY_NOTICE_DONE = true;
+      signal("quarry:notice-ready");
+    });
   }
 
   if (document.readyState === "loading") {
