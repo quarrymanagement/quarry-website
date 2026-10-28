@@ -438,6 +438,9 @@
             } else if (isCover) {
                 badge.textContent = '$' + ((evt.coverCharge || 0) / 100) + ' Cover';
                 badge.className = 'badge badge-available';
+            } else if (isOffsiteRegDetail(evt)) {
+                badge.textContent = evt.statusLabel || 'Sign Up Open';
+                badge.className = 'badge badge-available';
             } else {
                 badge.textContent = 'Tickets Available';
                 badge.className = 'badge badge-available';
@@ -446,7 +449,7 @@
             // Title & Meta
             document.getElementById('eventTitle').textContent = evt.name;
             document.getElementById('metaDate').innerHTML = '&#128197; ' + evt.date;
-            document.getElementById('metaTime').innerHTML = '&#128336; ' + formatTime(evt.time);
+            document.getElementById('metaTime').innerHTML = '&#128336; ' + (evt.timeLabel || formatTime(evt.time));
             document.getElementById('metaLocation').innerHTML = '&#128205; ' + (evt.location || 'The Quarry, New Melle MO');
 
             // Description
@@ -636,8 +639,26 @@
             container.innerHTML = html;
         }
 
+        // 2026-10-28: partner-run events (registrationType 'external' with an
+        // absolute http(s) URL, e.g. a JotForm). The partner sells the tickets, so
+        // no Quarry checkout here, just a button to their sign-up page.
+        function isOffsiteRegDetail(evt) {
+            var u = evt.registrationUrl || evt.externalRegistrationUrl || '';
+            return evt.registrationType === 'external' && /^https?:\/\//i.test(u);
+        }
+        function escAttr(t) { return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
         function renderRegCard(evt, isSoldOut) {
             var card = document.getElementById('regCard');
+            if (isOffsiteRegDetail(evt) && !isSoldOut) {
+                var offUrl = evt.registrationUrl || evt.externalRegistrationUrl;
+                var priceLine = (evt.tiers && evt.tiers[0] && evt.tiers[0].priceLabel) ? '<div class="price-display"><div class="price-option selected"><div class="price-label"><strong>' + escAttr(evt.tiers[0].name || 'Per Person') + '</strong><span>' + escAttr(evt.tiers[0].description || '') + '</span></div><div class="price-amount">' + escAttr(evt.tiers[0].priceLabel) + '</div></div></div>' : '';
+                card.innerHTML = '<h3>' + escAttr(evt.registrationLabel || 'Sign Up') + '</h3>' + priceLine +
+                    '<p style="color:#ccc;line-height:1.8;margin:16px 0 20px;">' + escAttr(evt.registrationNote || 'Sign up with the host') + '.</p>' +
+                    '<a class="reg-submit" href="' + escAttr(offUrl) + '" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none;box-sizing:border-box;">' + escAttr(evt.registrationLabel || 'Sign Up') + '</a>' +
+                    '<a href="/quarry-events" style="display:block;text-align:center;color:#d4af37;margin-top:16px;text-decoration:none;font-size:.85rem;">View All Events &rarr;</a>';
+                return;
+            }
             var et = evt.eventType || 'ticketed';
             var hasSeating = Array.isArray(evt.seatingOptions) && evt.seatingOptions.length > 0;
             var hasArrival = Array.isArray(evt.arrivalSlots) && evt.arrivalSlots.length > 0;

@@ -2104,6 +2104,11 @@ function renderEventList(filter) {
     // Require strong wine-event indicators (no standalone "wine")
     return /\bwine tast|\bwine club|\bvintner|\bsommelier|\bwinery|\bchateau|\bvineyard|\brock & vine\b|\btasting\b/.test(blob);
   };
+  // 2026-10-28: partner sells tickets on its own site (absolute http(s) URL).
+  const isOffsiteReg = (evt) => {
+    const u = evt.registrationUrl || evt.externalRegistrationUrl || '';
+    return evt.registrationType === 'external' && /^https?:\/\//i.test(u);
+  };
   const isFreeEvent = (evt) => {
     // price is in cents (0 = free, > 0 = paid). It's the authoritative indicator.
     // Note: pricePerPerson can be 0 on per-table-priced events like Music Bingo,
@@ -2150,7 +2155,7 @@ function renderEventList(filter) {
       const startD = evt._start;
       const cat = evt.category || categorizeEvent(evt.name);
       const dayLabel = isToday(startD) ? 'Tonight' : isThisWeek(startD) ? fmtDay(startD) : fmtDate(startD);
-      const timeStr = evt.time && /^\d/.test(evt.time) ? `${fmtDay(startD)} · ${evt.time}` : `${fmtDay(startD)} · ${fmtTime(startD)}`;
+      const timeStr = evt.timeLabel ? `${fmtDay(startD)} · ${evt.timeLabel}` : evt.time && /^\d/.test(evt.time) ? `${fmtDay(startD)} · ${evt.time}` : `${fmtDay(startD)} · ${fmtTime(startD)}`;
       const desc = (evt.description || evt.shortDescription || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().substring(0, 200);
       const cap = parseInt(evt.totalCapacity, 10);
       const reg = parseInt(evt.registeredCount, 10) || 0;
@@ -2178,6 +2183,8 @@ function renderEventList(filter) {
         rightBadge = 'Free admission';
       } else if (evt.registrationType === 'email') {
         rightBadge = 'Email RSVP';
+      } else if (isOffsiteReg(evt)) {
+        rightBadge = '';
       } else if (points > 0) {
         rightBadge = '+ ' + points + ' pts RSVP';
       } else {
@@ -2191,6 +2198,13 @@ function renderEventList(filter) {
       } else if (isThisTasting) {
         actionsHtml =
           '<a href="https://thequarrystl.com/quarry-wineclub" target="_blank" rel="noopener" class="btn-primary" style="text-decoration:none">RSVP a Spot</a>' +
+          `<a href="#" data-action="ics" data-event-id="${evtIdAttr}" class="btn-ghost" style="text-decoration:none;display:inline-block">Remind Me</a>`;
+      } else if (isOffsiteReg(evt)) {
+        // 2026-10-28: partner sells the tickets on their own page (e.g. JotForm).
+        // No Quarry checkout, so link straight there.
+        const offUrl = String(evt.registrationUrl || evt.externalRegistrationUrl).replace(/"/g, '&quot;');
+        actionsHtml =
+          `<a href="${offUrl}" target="_blank" rel="noopener" class="btn-primary" style="text-decoration:none">${escapeHtml(evt.registrationLabel || 'Sign Up')}</a>` +
           `<a href="#" data-action="ics" data-event-id="${evtIdAttr}" class="btn-ghost" style="text-decoration:none;display:inline-block">Remind Me</a>`;
       } else if (evt.registrationType === 'email') {
         // Email-registration event (e.g. Yoga with Charity). RSVP by emailing the host.
@@ -2217,7 +2231,7 @@ function renderEventList(filter) {
           `<a href="#" data-action="ics" data-event-id="${evtIdAttr}" class="btn-ghost" style="text-decoration:none;display:inline-block">Remind Me</a>`;
       }
       html += `
-        <div class="event-card" data-event-slug="${escapeHtml(evt.slug || evt.id || '')}" data-is-band="${isBand ? '1' : '0'}" data-is-tasting="${isThisTasting ? '1' : '0'}">
+        <div class="event-card" data-event-slug="${escapeHtml(evt.slug || evt.id || '')}"${isOffsiteReg(evt) ? ` data-offsite-url="${escapeHtml(evt.registrationUrl || evt.externalRegistrationUrl)}"` : ''} data-is-band="${isBand ? '1' : '0'}" data-is-tasting="${isThisTasting ? '1' : '0'}">
           <div class="event-meta-row">
             <div class="event-cat-line"></div>
             <div class="event-cat">${escapeHtml(cat)} · ${escapeHtml(dayLabel)}</div>
@@ -2242,6 +2256,8 @@ function renderEventList(filter) {
     card.style.cursor = 'pointer';
     card.addEventListener('click', (e) => {
       if (e.target.closest('a, [data-action]')) return;
+      const offsite = card.getAttribute('data-offsite-url');
+      if (offsite) { window.open(offsite, '_blank', 'noopener'); return; }
       openWithMember('https://thequarrystl.com/quarry-events?event=' + encodeURIComponent(slug));
     });
   });

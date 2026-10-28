@@ -2032,7 +2032,17 @@
         /**
          * Get status badge info
          */
+        // 2026-10-28: events sold on a partner's own site (absolute http(s)
+        // registrationUrl, e.g. a JotForm). No Quarry ticket, no capacity shown.
+        function isOffsiteReg(event) {
+            const u = event.registrationUrl || event.externalRegistrationUrl || '';
+            return event.registrationType === "external" && /^https?:\/\//i.test(u);
+        }
+
         function getStatusInfo(event) {
+            if (isOffsiteReg(event) && !(event.totalCapacity > 0)) {
+                return { class: "available", text: event.statusLabel || "Sign Up Open" };
+            }
             // Cover-charge walk-up events: no capacity / registration UI, but not free
             if (event.eventType === "cover" && (event.noRegistration || event.registrationType === "none")) {
                 return { class: "available", text: "$" + ((event.coverCharge || 0) / 100) + " Cover" };
@@ -2058,6 +2068,9 @@
          * Get availability text with color class
          */
         function getAvailabilityText(event) {
+            if (isOffsiteReg(event) && !(event.totalCapacity > 0)) {
+                return { text: event.registrationNote || "Sign up with the host", class: "available" };
+            }
             if (event.eventType === "cover" && (event.noRegistration || event.registrationType === "none")) {
                 return { text: "$" + ((event.coverCharge || 0) / 100) + " cover at the door - no registration needed", class: "available" };
             }
@@ -2084,6 +2097,7 @@
         function handleEventCardClick(e, url) {
             if (!url) return;
             if (e && e.target && e.target.closest && e.target.closest('a, button')) return;
+            if (/^https?:\/\//i.test(url)) { window.open(url, '_blank', 'noopener'); return; }
             window.location.href = url;
         }
 
@@ -2097,6 +2111,9 @@
             const isEmailReg   = event.registrationType === "email";
             const isExternalReg = event.registrationType === "external";
             const externalRegUrl = event.registrationUrl || event.externalRegistrationUrl || '';
+            const offsite = isOffsiteReg(event);
+            const extTarget = offsite ? ' target="_blank" rel="noopener"' : '';
+            const extLabel = event.registrationLabel || 'Register Now';
             // Build mailto: link if this event uses external email registration
             let mailtoHref = '';
             if (isEmailReg && event.registrationEmail) {
@@ -2128,7 +2145,7 @@
                         <h3 class="event-name">${event.name}</h3>
                         <div class="event-meta">
                             <span>📅 ${formatDate(event.date)}</span>
-                            <span>🕖 ${formatTime(event.time)}</span>
+                            <span>🕖 ${event.timeLabel || formatTime(event.time)}</span>
                         </div>
                         <p class="event-description">${event.description}</p>
                         <div class="event-tiers">
@@ -2154,7 +2171,7 @@
                             ${event.status === "sold-out" ? `
                                 <button class="event-button" disabled>Sold Out</button>
                             ` : isExternalReg && externalRegUrl ? `
-                                <a class="event-button" href="${externalRegUrl}" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;">Register Now</a>
+                                <a class="event-button" href="${externalRegUrl}"${extTarget} style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;">${extLabel}</a>
                             ` : isEmailReg ? `
                                 <a class="event-button" href="${mailtoHref}" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;">Email to RSVP</a>
                             ` : `
