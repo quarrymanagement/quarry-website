@@ -20,6 +20,7 @@
 // ============================================================================
 const { readRepoText } = require('./_github-data');
 const { isAuthorized } = require('./_admin-auth');
+const { publicEventsDoc } = require('./_event-pii');
 
 const PUBLIC_FILES = new Set([
   'events.json',        // PII vaulted/stripped since 2026-10-22 (_event-pii.js)
@@ -78,13 +79,19 @@ exports.handler = async (event) => {
     return err(401, 'Admin session required');
   }
 
-  const fresh = !!q.nocache && isAuthorized(event, null, ANY_SESSION_ROLES);
+  const session = isAuthorized(event, null, ANY_SESSION_ROLES);
+  const fresh = !!q.nocache && session;
+  // 2026-10-27: anonymous events.json callers get the public projection
+  // (no payment/order ids, amounts, coupons). A signed-in admin/staff session
+  // (admin panel, save-events round trip) still gets the full file.
+  const eventsPublic = file === 'events.json' && !session;
 
   try {
     let text = await readRepoText(file, { fresh });
     if (view) text = JSON.stringify(view(JSON.parse(text)));
+    if (eventsPublic) text = JSON.stringify(publicEventsDoc(JSON.parse(text)));
     const headers = { ...BASE_HEADERS };
-    if ((isPublic || view) && !q.nocache) {
+    if ((isPublic || view) && !q.nocache && !(file === 'events.json' && session)) {
       // Browser 15 s; Netlify edge 30 s + serve-stale while refreshing.
       // Cache key = ?file= only, so cache-busting ?t= params don't defeat it.
       headers['Cache-Control'] = 'public, max-age=15';

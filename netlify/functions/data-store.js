@@ -17,7 +17,7 @@
 // ============================================================================
 
 const fetch = require('node-fetch');
-const { vaultAndStrip } = require('./_event-pii');
+const { vaultAndStrip, publicEventsDoc } = require('./_event-pii');
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const GITHUB_REPO = 'quarrymanagement/quarry-website';
@@ -112,6 +112,13 @@ exports.handler = async (event) => {
                         }
                     }
                 } catch (_) { /* leave decoded null */ }
+            }
+            // 2026-10-27: anonymous events.json reads get the public projection
+            // only (no raw base64, which would carry the full file).
+            if (publicRead && !isInternal(event)) {
+                if (!isAuthorized(event, null, STAFF_ROLES)) {
+                    return respond(200, { sha: data.sha, path: data.path, decoded: publicEventsDoc(decoded) });
+                }
             }
             return respond(200, { sha: data.sha, path: data.path, size: data.size, decoded, raw: data });
         }

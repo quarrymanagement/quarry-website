@@ -180,23 +180,45 @@ async function hydrateDoc(doc, rows) {
 }
 
 // For public responses: a copy of one event with every PII field removed.
+// 2026-10-27: public projection. Browsers only need enough of each sale to
+// count seats/waves (qty + which seating option + which arrival wave), so the
+// public feed drops everything else: Square/Stripe payment + order ids, refs,
+// amounts, coupon codes, refund records and the legacy top-level map.
+// Server-side code that needs the real rows reads the repo directly
+// (_github-data) or through an admin session, never this projection.
+const PUBLIC_REG_FIELDS = ['qty', 'seatingOptionId', 'seatType', 'arrivalSlot'];
+
+function publicReg(r) {
+  if (!r || typeof r !== 'object') return null;
+  const c = {};
+  PUBLIC_REG_FIELDS.forEach((f) => {
+    if (r[f] !== undefined && r[f] !== null && r[f] !== '') c[f] = r[f];
+  });
+  return c;
+}
+
 function sanitizeEvent(ev) {
   if (!ev || typeof ev !== 'object') return ev;
   const out = Object.assign({}, ev);
-  ['registrations', 'refundedRegistrations'].forEach((k) => {
-    if (Array.isArray(ev[k])) {
-      out[k] = ev[k].map((r) => {
-        if (!r || typeof r !== 'object') return r;
-        const c = Object.assign({}, r);
-        PII_FIELDS.forEach((f) => { delete c[f]; });
-        return c;
-      });
-    }
-  });
+  if (Array.isArray(ev.registrations)) out.registrations = ev.registrations.map(publicReg).filter(Boolean);
+  delete out.refundedRegistrations;
+  delete out.bookedBy;
+  return out;
+}
+
+// Whole-document public projection of events.json (data-read, data-store
+// anonymous GET, /events.json). Keeps the document shape so every reader works.
+function publicEventsDoc(doc) {
+  if (!doc || typeof doc !== 'object' || Array.isArray(doc)) return doc;
+  const out = Object.assign({}, doc);
+  if (Array.isArray(doc.events)) out.events = doc.events.map(sanitizeEvent);
+  if (doc.registrations !== undefined) out.registrations = {};
+  if (doc.subscribers !== undefined) out.subscribers = [];
   return out;
 }
 
 module.exports = {
   PII_FIELDS, regRef, hasPii, forEachReg, collectRows, stripDoc,
   vaultAndStrip, upsertRows, listRows, hydrateDoc, sanitizeEvent, indexRows,
+  publicReg, publicEventsDoc,
 };

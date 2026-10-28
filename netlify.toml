@@ -40,6 +40,14 @@
   to = "/quarry-contact.html"
   status = 301
 
+# 2026-10-27: /events.json is the PUBLIC projection (no payment/order ids,
+# amounts or coupon codes), not the raw repo file. See events-feed.js.
+[[redirects]]
+  from = "/events.json"
+  to = "/.netlify/functions/events-feed"
+  status = 200
+  force = true
+
 [[redirects]]
   from = "/subscribers.json"
   to = "/.netlify/functions/data-read?file=__blocked"
