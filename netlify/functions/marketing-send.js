@@ -132,7 +132,9 @@ async function createAndScheduleSingleSend(draft, listIds) {
             // email preferences" footer block. Our /unsubscribe Netlify function
             // suppresses the contact in SendGrid global suppressions, so unsubs are
             // still honored and the user is still removed from future sends.
-            custom_unsubscribe_url: 'https://www.thequarrystl.com/.netlify/functions/unsubscribe?email={email}'
+            // Single Sends use Handlebars merge tags: {{email}} (single braces were sent
+            // literally, so List-Unsubscribe pointed at ?email={email}).
+            custom_unsubscribe_url: 'https://www.thequarrystl.com/.netlify/functions/unsubscribe?email={{email}}'
         },
         categories: ['quarry-marketing', `type:${draft.type || 'manual'}`]
     };
