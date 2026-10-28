@@ -324,6 +324,11 @@ exports.handler = async function(event) {
     if (!evData) {
       return { statusCode: 404, headers, body: JSON.stringify({ error: 'Event not found: ' + eventId }) };
     }
+    // 2026-10-28: hidden (draft) events are not on sale. Reject server-side,
+    // before any pricing or Square call, with the same answer as a missing id.
+    if (String(evData.status || '').toLowerCase() === 'draft') {
+      return { statusCode: 404, headers, body: JSON.stringify({ error: 'Event not found: ' + eventId }) };
+    }
 
     // Capacity check
     if (evData.status === 'sold-out') {

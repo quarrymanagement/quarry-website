@@ -208,10 +208,20 @@ function sanitizeEvent(ev) {
 
 // Whole-document public projection of events.json (data-read, data-store
 // anonymous GET, /events.json). Keeps the document shape so every reader works.
+// 2026-10-28: status 'draft' = hidden (not announced / not on sale). Drafts
+// never leave the server for anonymous callers: not in /events.json, not in
+// get-event-public, not sellable through event-register, not promoted by the
+// social/email generators. Admin sessions still get the full file (data-read,
+// admin-event-pii). 'inactive' (= cancelled) is NOT hidden here on purpose:
+// pages show those as "cancelled".
+function isDraftEvent(e) {
+  return !!e && String(e.status || '').toLowerCase() === 'draft';
+}
+
 function publicEventsDoc(doc) {
   if (!doc || typeof doc !== 'object' || Array.isArray(doc)) return doc;
   const out = Object.assign({}, doc);
-  if (Array.isArray(doc.events)) out.events = doc.events.map(sanitizeEvent);
+  if (Array.isArray(doc.events)) out.events = doc.events.filter((e) => !isDraftEvent(e)).map(sanitizeEvent);
   if (doc.registrations !== undefined) out.registrations = {};
   if (doc.subscribers !== undefined) out.subscribers = [];
   return out;
@@ -220,5 +230,5 @@ function publicEventsDoc(doc) {
 module.exports = {
   PII_FIELDS, regRef, hasPii, forEachReg, collectRows, stripDoc,
   vaultAndStrip, upsertRows, listRows, hydrateDoc, sanitizeEvent, indexRows,
-  publicReg, publicEventsDoc,
+  publicReg, publicEventsDoc, isDraftEvent,
 };

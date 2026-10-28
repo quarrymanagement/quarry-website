@@ -188,6 +188,8 @@ exports.handler = async (event) => {
             else if (Array.isArray(eventsRes.data.events)) events = eventsRes.data.events;
             if (Array.isArray(eventsRes.data.bands)) bands = eventsRes.data.bands;
         }
+        // 2026-10-28: never write email drafts for hidden (status 'draft') events.
+        events = events.filter((e) => !(e && String(e.status || '').toLowerCase() === 'draft'));
         const learnings = (learningsRes.data && Array.isArray(learningsRes.data.learnings)) ? learningsRes.data.learnings : [];
 
         const settings = draftsFile.settings || {};

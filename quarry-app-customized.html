@@ -2048,6 +2048,7 @@ async function fetchEvents() {
 
 function isActive(evt) {
   if (evt.status === 'inactive' || evt.adminStatus === 'Inactive') return false;
+  if (String(evt.status || '').toLowerCase() === 'draft') return false; // hidden (10/28)
   return true;
 }
 

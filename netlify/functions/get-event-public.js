@@ -15,7 +15,7 @@
 // ============================================================================
 
 const https = require('https');
-const { sanitizeEvent } = require('./_event-pii');
+const { sanitizeEvent, isDraftEvent } = require('./_event-pii');
 const { readRepoText, readRepoJson } = require('./_github-data');
 const { activeBundles } = require('./_event-bundles');
 
@@ -57,7 +57,8 @@ exports.handler = async (event) => {
     const found = events.find(function(e) {
       return e.id === want || e.slug === want;
     });
-    if (!found) {
+    // 2026-10-28: hidden (draft) events answer exactly like a missing id.
+    if (!found || isDraftEvent(found)) {
       return { statusCode: 404, headers, body: JSON.stringify({ error: 'Event not found' }) };
     }
     const out = sanitizeEvent(found);

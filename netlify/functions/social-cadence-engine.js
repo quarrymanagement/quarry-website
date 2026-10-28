@@ -229,7 +229,8 @@ function buildSkeletonDrafts(eventsData, existingDrafts, windowDays) {
 
     // ---- Events (ticketed) ----
     const todayKey = todayCT();
-    const events = (eventsData.events || []).filter((e) => e.date >= todayKey);
+    // 2026-10-28: never promote hidden (status 'draft') events.
+    const events = (eventsData.events || []).filter((e) => e && e.date >= todayKey && String(e.status || '').toLowerCase() !== 'draft');
     for (const event of events) {
         const fillPct = event.totalCapacity ? Math.round((event.registeredCount || 0) / event.totalCapacity * 100) : 0;
         for (const step of EVENT_ARC) {
