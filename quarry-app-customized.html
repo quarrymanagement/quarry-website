@@ -2155,7 +2155,7 @@ function renderEventList(filter) {
       const startD = evt._start;
       const cat = evt.category || categorizeEvent(evt.name);
       const dayLabel = isToday(startD) ? 'Tonight' : isThisWeek(startD) ? fmtDay(startD) : fmtDate(startD);
-      const timeStr = evt.time && /^\d/.test(evt.time) ? `${fmtDay(startD)} · ${evt.time}` : `${fmtDay(startD)} · ${fmtTime(startD)}`;
+      const timeStr = evt.timeLabel ? `${fmtDay(startD)} · ${evt.timeLabel}` : evt.time && /^\d/.test(evt.time) ? `${fmtDay(startD)} · ${evt.time}` : `${fmtDay(startD)} · ${fmtTime(startD)}`;
       const desc = (evt.description || evt.shortDescription || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().substring(0, 200);
       const cap = parseInt(evt.totalCapacity, 10);
       const reg = parseInt(evt.registeredCount, 10) || 0;
