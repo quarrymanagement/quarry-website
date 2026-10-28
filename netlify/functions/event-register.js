@@ -330,6 +330,16 @@ exports.handler = async function(event) {
       return { statusCode: 404, headers, body: JSON.stringify({ error: 'Event not found: ' + eventId }) };
     }
 
+    // 2026-10-28: partner-run events (registrationType 'external' with an
+    // absolute http(s) URL, e.g. a JotForm) are sold by the partner, never by
+    // The Quarry. Refuse before any pricing or Square call.
+    {
+      const extUrl = evData.registrationUrl || evData.externalRegistrationUrl || '';
+      if (evData.registrationType === 'external' && /^https?:\/\//i.test(extUrl)) {
+        return { statusCode: 409, headers, body: JSON.stringify({ error: 'This event registers on the host\'s site', registrationUrl: extUrl }) };
+      }
+    }
+
     // Capacity check
     if (evData.status === 'sold-out') {
       return { statusCode: 409, headers, body: JSON.stringify({ error: 'Event is sold out' }) };
