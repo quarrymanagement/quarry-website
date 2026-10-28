@@ -436,7 +436,7 @@ nav.hn.sc .nl{color:#2C2C2C!important}
       </div>
       <div style="height:16px"></div>
       <div class="fr">
-        <div class="fg"><label>Preferred Date(s)</label><input type="text" name="preferred_dates" placeholder="e.g. June 2027, or 6/12 or 6/19/2027"/></div>
+        <div class="fg"><label>Preferred Date</label><input type="date" name="wedding_date"/></div>
         <div class="fg"><label>Package Interest</label>
           <select name="package_interest">
             <option value="">Select a package...</option>
@@ -449,7 +449,11 @@ nav.hn.sc .nl{color:#2C2C2C!important}
       </div>
       <div style="height:16px"></div>
       <div class="fr">
-        <div class="fg"><label>Estimated Guest Count</label><input type="text" name="guest_count" inputmode="numeric" placeholder="e.g. 150"/></div>
+        <div class="fg"><label>Other Dates / Flexibility</label><input type="text" name="preferred_dates" placeholder="e.g. 6/12 or 6/19/2027, any Fall 2027 Saturday"/></div>
+        <div class="fg"><label>Estimated Guest Count</label><input type="number" name="guest_count" min="1" max="1000" inputmode="numeric" placeholder="e.g. 150"/></div>
+      </div>
+      <div style="height:16px"></div>
+      <div class="fr">
         <div class="fg"><label>Budget</label><input type="text" name="budget" placeholder="e.g. $15,000"/></div>
       </div>
       <div style="height:16px"></div>
@@ -558,6 +562,15 @@ nav.hn.sc .nl{color:#2C2C2C!important}
   if(isHero){function upd(){var s=window.scrollY>60;nav.classList.toggle('sc',s);nav.classList.toggle('scrolled',s);}window.addEventListener('scroll',upd,{passive:true});upd();}
   if('IntersectionObserver' in window){var obs=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('visible','vs');obs.unobserve(e.target);}});},{threshold:0.08,rootMargin:'0px 0px -30px 0px'});document.querySelectorAll('.reveal,.rv').forEach(function(el){obs.observe(el);});}
 })();
+</script>
+<script>
+/* Wix-parity fields: the portal lead-parser stores wedding_date/guest_count but not
+   preferred_dates/budget, so fold them into the message before any submit handler reads it. */
+(function(){var f=document.querySelector('form[name="wedding-tour"]');if(!f)return;
+f.addEventListener('submit',function(){var m=f.querySelector('[name="message"]');if(!m||m.dataset.folded)return;
+var x=[];var d=f.querySelector('[name="preferred_dates"]'),b=f.querySelector('[name="budget"]');
+if(d&&d.value.trim())x.push('Other dates / flexibility: '+d.value.trim());if(b&&b.value.trim())x.push('Budget: '+b.value.trim());
+if(x.length){m.value=(m.value?m.value+'\n\n':'')+x.join('\n');m.dataset.folded='1';}});})();
 </script>
 <!-- SERVICE-AREA INTERNAL LINKS (added for SEO + UX) -->
 <section style="background:#0f0f0f;border-top:1px solid rgba(184,147,58,0.25);padding:48px 32px 56px;text-align:center;font-family:Montserrat,sans-serif;">

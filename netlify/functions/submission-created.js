@@ -138,11 +138,7 @@ exports.handler = async (event) => {
     const fullName = (firstName + ' ' + lastName).trim() || 'New Inquiry';
     const email = data.email || '';
     const phone = data.phone || 'N/A';
-    // preferred_dates (free text, matches the old Wix "Preferred Date(s)" field);
-    // wedding_date kept for older cached copies of the form.
-    const weddingDate = data.preferred_dates || data.wedding_date || 'Not specified';
-    const guestCount = data.guest_count || 'Not specified';
-    const budget = data.budget || 'Not specified';
+    const weddingDate = data.wedding_date || 'Not specified';
     const packageInterest = data.package_interest || 'Not specified';
     const message = data.message || '';
 
@@ -151,25 +147,10 @@ exports.handler = async (event) => {
       '<p style="margin:4px 0"><b>Name:</b> ' + escapeHtml(fullName) + '</p>' +
       '<p style="margin:4px 0"><b>Email:</b> ' + escapeHtml(email) + '</p>' +
       '<p style="margin:4px 0"><b>Phone:</b> ' + escapeHtml(phone) + '</p>' +
-      '<p style="margin:4px 0"><b>Preferred Date(s):</b> ' + escapeHtml(weddingDate) + '</p>' +
-      '<p style="margin:4px 0"><b>Estimated Guest Count:</b> ' + escapeHtml(guestCount) + '</p>' +
-      '<p style="margin:4px 0"><b>Budget:</b> ' + escapeHtml(budget) + '</p>' +
+      '<p style="margin:4px 0"><b>Wedding Date:</b> ' + escapeHtml(weddingDate) + '</p>' +
       '<p style="margin:4px 0"><b>Package Interest:</b> ' + escapeHtml(packageInterest) + '</p>' +
       (message ? '<p style="margin:12px 0 4px 0"><b>Vision / Notes:</b></p><p style="margin:0;white-space:pre-wrap">' + escapeHtml(message) + '</p>' : '') +
       '</div>';
-
-    // TEST guard: a submission whose first or last name is "TEST" only notifies
-    // management@ (no Jacqueline, no couple confirmation). Used for QA.
-    const isTest = /^\s*test\s*$/i.test(firstName) || /^\s*test\s*$/i.test(lastName);
-    if (isTest) {
-      await sendEmail({
-        to: 'management@thequarrystl.com',
-        subject: '[TEST] New Wedding Tour Request — ' + fullName,
-        html: buildEmail('[TEST] New Wedding Tour Request', detailBlock +
-          '<p style="font-size:0.85rem;color:#666">TEST submission: Jacqueline and the submitter were NOT emailed.</p>')
-      });
-      return { statusCode: 200, body: 'OK' };
-    }
 
     // 1. Primary notification → Jacqueline
     await sendEmail({

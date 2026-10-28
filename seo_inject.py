@@ -21,7 +21,7 @@ from pathlib import Path
 ROOT = Path(__file__).parent
 SITE = "https://thequarrystl.com"
 SITE_NAME = "The Quarry"
-DEFAULT_OG = "https://static.wixstatic.com/media/f1c1b8_c5a995404a4c4e20aa35de83c9c26bfa~mv2.jpg/v1/fill/w_1200,h_630,al_c,q_85/quarry-og.jpg"
+DEFAULT_OG = "https://thequarrystl.com/images/wix/quarry-events-hero.jpg"
 PHONE = "+1-636-248-0426"
 ADDRESS = {
     "@type": "PostalAddress",
