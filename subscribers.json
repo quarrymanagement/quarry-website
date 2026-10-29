@@ -39967,11 +39967,11 @@
     "birthdate": "",
     "labels": "",
     "created": "2026-01-11 15:00",
-    "emailStatus": "Never subscribed",
+    "emailStatus": "Subscribed",
     "smsStatus": "Never subscribed",
     "source": "Form Submission",
-    "lastActivity": "",
-    "lastActivityDate": "",
+    "lastActivity": "Form: contact",
+    "lastActivityDate": "2026-10-29T16:15:24.936Z",
     "address": {
       "street": "",
       "city": "",
@@ -39979,8 +39979,23 @@
       "zip": "",
       "country": ""
     },
-    "events": [],
-    "tags": []
+    "events": [
+      {
+        "type": "contact",
+        "timestamp": "2026-10-29T16:15:24.936Z",
+        "marketingOptIn": true,
+        "details": {
+          "subject": "Reservations",
+          "message": "Hello,\r\n\r\nI recently purchased two tickets to your Halloween party, and I just saw your advertisement stating that admission is free for guests who come dressed up in costume.\r\n\r\nWhile I understand wanting to encourage people to dress up and participate in the Halloween festivities, I have to admit that it’s disappointing to have already paid for two tickets when others can now attend for free simply by wearing a costume. Which I will be wearing a costume\r\n\r\nWould you be willing to offer a refun…",
+          "ip": "12.1.148.226",
+          "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+          "referrer": "https://thequarrystl.com/quarry-contact"
+        }
+      }
+    ],
+    "tags": [
+      "Subscribed"
+    ]
   },
   {
     "firstName": "Ellie",
