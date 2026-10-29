@@ -2620,7 +2620,8 @@
          */
         function unitNoun(opt, n) {
             const name = String((opt && opt.name) || 'unit').trim();
-            const noun = /^\d+\s*-?\s*top\b/i.test(name) ? 'table' : name.toLowerCase();
+            const noun = (opt && opt.unitNoun) ? String(opt.unitNoun) // 2026-10-29: explicit noun, e.g. "table"
+                : (/^\d+\s*-?\s*top\b/i.test(name) ? 'table' : name.toLowerCase());
             return (n === 1) ? noun : noun + 's';
         }
 

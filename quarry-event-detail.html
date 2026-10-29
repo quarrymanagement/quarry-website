@@ -1101,6 +1101,7 @@
         function detailUnitNoun(opt, n) {
             var name = String((opt && opt.name) || 'unit').trim();
             var noun = /^\d+\s*-?\s*top\b/i.test(name) ? 'table' : name.toLowerCase();
+            if (opt && opt.unitNoun) noun = String(opt.unitNoun); // 2026-10-29: explicit noun, e.g. "table"
             return (n === 1) ? noun : noun + 's';
         }
 
