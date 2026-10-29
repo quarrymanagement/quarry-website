@@ -578,12 +578,22 @@ footer { background:#0F0A07; padding:4.5rem 2rem 2rem; border-top:1px solid var(
 </header>
 <style id="qmobile">
 @media(max-width:768px){
-  .video-container, .hero-video, [class*="video-wrap"], [class*="video-bg"]{
+  .video-container, [class*="video-wrap"], [class*="video-bg"]{
     position:relative; overflow:hidden;
     padding-bottom:56.25%; height:0 !important; max-height:56vw !important;
   }
-  .video-container iframe, .hero-video iframe, [class*="video-wrap"] iframe, [class*="video-bg"] iframe{
+  .video-container iframe, [class*="video-wrap"] iframe, [class*="video-bg"] iframe{
     position:absolute; top:0; left:0; width:100% !important; height:100% !important;
+  }
+  /* Mobile hero: the YouTube background can't cover a phone-shaped hero (16:9 video),
+     so hide it and let the rendering fill the hero edge to edge. Zoom the image and
+     anchor it low so the venue fills the frame instead of the pale sky. */
+  .hero-video{ display:none !important; }
+  .hero-bg{
+    background:
+      linear-gradient(to bottom, rgba(15,10,5,0.45) 0%, rgba(15,10,5,0.3) 35%, rgba(15,10,5,0.35) 65%, rgba(15,10,5,0.75) 100%),
+      url('/assets/img/quarry-hero-1920.jpg') 57% 100% / auto 152% no-repeat,
+      #1a1a1a;
   }
   /* Hamburger menu */
   .nav-toggle, .hamburger, .mobile-menu-btn, button[aria-label*="menu"], button[aria-label*="Menu"]{
