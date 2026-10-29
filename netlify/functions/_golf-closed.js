@@ -2,7 +2,7 @@
 // Helper module only (leading underscore, so it's not deployed as an endpoint).
 // Keep in sync with BLOCKED_DATES / LATE_OPEN_DATES / EARLY_CLOSE_DATES in quarry-golf.html.
 // EARLY_CLOSE_DATES: 'YYYY-MM-DD' -> first hour (24h) that is NOT bookable that day.
-const EARLY_CLOSE_DATES = { '2026-10-31': 16 }; // Halloween: venue closes at 4 PM
+const EARLY_CLOSE_DATES = {}; // none right now (Sat 10/31/2026 4 PM close cancelled Oct 29; open normal hours)
 
 function normDate(s) {
   const raw = String(s || '').trim();

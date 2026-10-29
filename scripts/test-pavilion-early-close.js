@@ -1,5 +1,7 @@
 // node scripts/test-pavilion-early-close.js
-// Offline tests for the 10/31/2026 pavilion early close (4 PM) and golf guard.
+// Offline tests for the early-close mechanism (pavilions + golf guard).
+// The shipped EARLY_CLOSE_DATES is empty (the 10/31/2026 4 PM close was cancelled),
+// so this test injects a test entry for 2026-10-31 at 4 PM to exercise the code path.
 // Stubs _blobs and https so nothing touches Netlify Blobs or Square.
 const assert = require('assert');
 const path = require('path');
@@ -15,6 +17,9 @@ https.request = () => { squareCalls++; throw new Error('network disabled in test
 delete process.env.VENUE_AVAILABILITY_KEY;
 
 const golf = require(fn('_golf-closed.js'));
+assert.deepStrictEqual(Object.keys(golf.EARLY_CLOSE_DATES), [], 'shipped EARLY_CLOSE_DATES should be empty');
+assert.strictEqual(golf.closedReason('2026-10-31', '8:00 PM'), null);
+golf.EARLY_CLOSE_DATES['2026-10-31'] = 16; // test-only injection
 const shared = require(fn('_pavilion-shared.js'));
 const avail = require(fn('pavilion-availability.js'));
 const checkout = require(fn('pavilion-checkout.js'));
