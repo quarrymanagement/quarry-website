@@ -2131,7 +2131,7 @@
 
             return `
                 <div class="event-card" data-category="${event.category}" style="cursor:pointer;" data-href="${cardHref}" onclick="handleEventCardClick(event, this.dataset.href)">
-                    <div class="event-image ${event.imageGradient}"${event.image ? ` style="background-image:url('${event.image}');background-size:cover;background-position:center;background-repeat:no-repeat;"` : ''}>
+                    <div class="event-image ${event.imageGradient}"${event.image ? ` style="background-image:url('${event.cardImage || event.image}');background-size:cover;background-position:center;background-repeat:no-repeat;"` : ''}>
                         ${event.image ? '' : `<div class="event-image-text">${event.imageText}</div>`}
                         <div class="date-badge">${formatDateBadge(event.date)}</div>
                         <div class="status-badge ${statusInfo.class}">${statusInfo.text}</div>
