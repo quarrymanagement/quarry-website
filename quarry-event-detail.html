@@ -619,7 +619,11 @@
                     var soSeats = parseInt(so.seats, 10) || 1;
                     var soPer = parseInt(so.pricePerSeat, 10) || 0;
                     var line = so.name + ' (' + soSeats + ' ' + (soSeats === 1 ? 'seat' : 'seats') + ')';
-                    if (soPer > 0) {
+                    // 2026-10-29: deposit-style options (e.g. $10 per table of 4,
+                    // applied to the bill) show their own price note instead of $/seat.
+                    if (so.priceNote) {
+                        line = escAttr(so.priceNote);
+                    } else if (soPer > 0) {
                         line += ' &mdash; ' + formatPrice(soPer) + ' per seat';
                         if (soSeats > 1) line += ' (' + formatPrice(soPer * soSeats) + ' total)';
                     }
@@ -1379,7 +1383,7 @@
                     // units x seats x pricePerSeat — ticket tiers do not apply.
                     subtotalCents = priced.totalCents;
                     html += '<div style="display:flex;justify-content:space-between;"><span>' + units + ' &times; ' + (optObj.name || 'Seating') + '</span><span>$' + (priced.perUnitCents / 100).toFixed(2) + ' ea</span></div>';
-                    html += '<div style="display:flex;justify-content:space-between;"><span>' + numPeople + ' seat' + (numPeople === 1 ? '' : 's') + '</span><span>$' + (priced.pricePerSeat / 100).toFixed(2) + '/seat</span></div>';
+                    html += '<div style="display:flex;justify-content:space-between;"><span>' + numPeople + ' seat' + (numPeople === 1 ? '' : 's') + '</span><span>' + (optObj.deposit ? 'Deposit, applied to your bill' : '$' + (priced.pricePerSeat / 100).toFixed(2) + '/seat') + '</span></div>';
                     if (submitBtn && !detailAllSeatingSoldOut) submitBtn.disabled = false;
                 } else {
                     var splitRows = document.querySelectorAll('#detailTierSplitRows input[data-tierqty]');

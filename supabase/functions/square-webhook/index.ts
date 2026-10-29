@@ -443,6 +443,9 @@ async function sendRegistrationEmails(pe: PendingEmail): Promise<void> {
   rows.push(`<tr><td style="padding:6px 12px 6px 0;color:#666;">Booked</td><td style="padding:6px 0;"><strong>${esc(booked)}</strong></td></tr>`);
   if (addOnLine) rows.push(`<tr><td style="padding:6px 12px 6px 0;color:#666;">Add-ons</td><td style="padding:6px 0;"><strong>${esc(addOnLine)}</strong></td></tr>`);
   if (paidLine) rows.push(`<tr><td style="padding:6px 12px 6px 0;color:#666;">Paid</td><td style="padding:6px 0;"><strong>${esc(paidLine)}</strong></td></tr>`);
+  // 2026-10-29: optional per-event confirmation note (e.g. "$10 deposit, applied to your bill.").
+  const confirmationNote = String(ev.confirmationNote || "").trim();
+  if (confirmationNote) rows.push(`<tr><td style="padding:6px 12px 6px 0;color:#666;">Note</td><td style="padding:6px 0;"><strong>${esc(confirmationNote)}</strong></td></tr>`);
   if (reference) rows.push(`<tr><td style="padding:6px 12px 6px 0;color:#666;">Reference</td><td style="padding:6px 0;"><span style="font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;">${esc(reference)}</span></td></tr>`);
 
   const guestHtml = `<!doctype html><html><body style="margin:0;padding:0;background:#f5f4f2;">
@@ -470,6 +473,7 @@ async function sendRegistrationEmails(pe: PendingEmail): Promise<void> {
   guestTextLines.push(`Booked: ${booked}`);
   if (addOnLine) guestTextLines.push(`Add-ons: ${addOnLine}`);
   if (paidLine) guestTextLines.push(`Paid: ${paidLine}`);
+  if (confirmationNote) guestTextLines.push(`Note: ${confirmationNote}`);
   if (reference) guestTextLines.push(`Reference: ${reference}`);
   guestTextLines.push("");
   guestTextLines.push("Keep this email as your receipt.");
