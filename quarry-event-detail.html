@@ -785,6 +785,7 @@
                 html += '<div id="detailArrivalGroup" style="margin-top:16px;">';
                 html += '<label>Arrival Time *</label>';
                 html += '<select name="arrivalSlot" id="detailArrivalSlot" required onchange="onDetailArrivalChange()"></select>';
+                html += '<div id="detailArrivalWindow" style="display:none;font-weight:600;margin-top:6px;"></div>';
                 html += '<div id="detailArrivalHint" style="font-size:13px;color:#888;margin-top:6px;">We stagger arrivals so the buffet and bar aren\'t swamped. Please arrive at your chosen time.</div>';
                 html += '</div>';
             }
@@ -1051,9 +1052,31 @@
 
             if (grp) grp.style.display = permitted > 0 ? 'block' : 'none';
             sel.required = permitted > 0;
+            showDetailArrivalWindow();
             detailAllArrivalFull = (permitted > 0 && !anyFits);
             window.detailArrivalLockText = anyOpen ? 'Too many for one arrival time' : 'Arrival times full';
             applyDetailArrivalLock();
+        }
+
+
+        /** "5:05–7:05 PM" for a timed arrival (slot.start + event.arrivalStayMinutes); '' otherwise. */
+        function arrivalWindowText(ev, slot) {
+            if (!slot || !slot.start || !ev || !ev.arrivalStayMinutes) return '';
+            var p = String(slot.start).split(':'); var s = (+p[0]) * 60 + (+p[1] || 0);
+            if (isNaN(s)) return '';
+            var e = s + (parseInt(ev.arrivalStayMinutes, 10) || 120);
+            function f(m) { m = ((m % 1440) + 1440) % 1440; var h = Math.floor(m / 60), mm = m % 60; return { t: ((h % 12) || 12) + ':' + (mm < 10 ? '0' : '') + mm, ap: h < 12 ? 'AM' : 'PM' }; }
+            var a = f(s), b = f(e);
+            return a.ap === b.ap ? (a.t + '\u2013' + b.t + ' ' + b.ap) : (a.t + ' ' + a.ap + '\u2013' + b.t + ' ' + b.ap);
+        }
+
+        function showDetailArrivalWindow() {
+            var el = document.getElementById('detailArrivalWindow'), sel = document.getElementById('detailArrivalSlot');
+            if (!el || !sel) return;
+            var id = sel.value;
+            var slot = ((eventData && eventData.arrivalSlots) || []).find(function (x) { return String(x.id) === String(id); });
+            var w = arrivalWindowText(eventData, slot);
+            el.textContent = w ? 'Your time: ' + w : ''; el.style.display = w ? 'block' : 'none';
         }
 
         /** Every permitted wave full beats whatever the pricing logic decided. */
@@ -1070,6 +1093,7 @@
         }
 
         window.onDetailArrivalChange = function () {
+            showDetailArrivalWindow();
             applyDetailArrivalLock();
             // A different wave may have fewer units left, so the quantity
             // dropdown has to be rebuilt.

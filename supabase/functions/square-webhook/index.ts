@@ -427,11 +427,28 @@ function formatAddOns(addOns: MatchedAddOn[] | undefined): string {
 // Guest confirmation + venue alert. Only ever called for a newly added, non-backfilled
 // registration AFTER the GitHub write succeeded. Each send is isolated so a failure
 // can never prevent — or undo — the registration being recorded.
+// Timed arrivals (Whoville, 2026-10-30): "5:05–7:05 PM" from the slot's start and the
+// event's arrivalStayMinutes. Empty for every other event, so their emails are unchanged.
+function arrivalWindowText(ev: any, arrivalLabel: string): string {
+  if (!ev || !ev.arrivalStayMinutes || !arrivalLabel) return "";
+  const slot = (ev.arrivalSlots || []).find((x: any) => x && String(x.label || "").trim() === String(arrivalLabel).trim());
+  if (!slot || !slot.start) return "";
+  const p = String(slot.start).split(":");
+  const s = (parseInt(p[0], 10) || 0) * 60 + (parseInt(p[1], 10) || 0);
+  const e = s + (parseInt(ev.arrivalStayMinutes, 10) || 120);
+  const f = (m: number) => { m = ((m % 1440) + 1440) % 1440; const h = Math.floor(m / 60), mm = m % 60; return { t: ((h % 12) || 12) + ":" + String(mm).padStart(2, "0"), ap: h < 12 ? "AM" : "PM" }; };
+  const a = f(s), b = f(e);
+  return a.ap === b.ap ? `${a.t}\u2013${b.t} ${b.ap}` : `${a.t} ${a.ap}\u2013${b.t} ${b.ap}`;
+}
+
 async function sendRegistrationEmails(pe: PendingEmail): Promise<void> {
   const ev = pe.ev || {};
   const eventName = String(ev.name || "");
   const dateLine = formatEventDate(ev.date);
-  const timeLine = formatEventTime(ev.time);
+  const windowLine = arrivalWindowText(ev, pe.arrivalLabel);
+  const policyLine = windowLine ? String(ev.arrivalHint || "") : "";
+  // Timed events: the guest's own start and end time replaces the event's opening time.
+  const timeLine = windowLine || formatEventTime(ev.time);
   const booked = formatBooked(pe.qty, pe.seatingOptionName, pe.seats);
   const paidLine = formatAmount(pe.amountCents);
   const reference = String(pe.paymentId || "");
@@ -449,7 +466,8 @@ async function sendRegistrationEmails(pe: PendingEmail): Promise<void> {
 <div style="max-width:560px;margin:0 auto;padding:24px 20px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;line-height:1.55;color:#222;">
   <h1 style="margin:0 0 6px;font-size:22px;line-height:1.3;">You're booked!</h1>
   <p style="margin:0 0 18px;font-size:18px;"><strong>${esc(eventName)}</strong></p>
-  ${pe.arrivalLabel ? `<p style="margin:0 0 18px;padding:12px 14px;background:#fff;border-left:4px solid #7a6a55;border-radius:4px;font-size:17px;"><strong>Please arrive at ${esc(pe.arrivalLabel)}</strong></p>` : ""}
+  ${windowLine ? `<p style="margin:0 0 18px;padding:12px 14px;background:#fff;border-left:4px solid #7a6a55;border-radius:4px;font-size:17px;"><strong>Your time: ${esc(windowLine)}</strong><br>Please arrive at ${esc(pe.arrivalLabel)}</p>${policyLine ? `<p style="margin:0 0 18px;font-size:15px;">${esc(policyLine)}</p>` : ""}`
+    : pe.arrivalLabel ? `<p style="margin:0 0 18px;padding:12px 14px;background:#fff;border-left:4px solid #7a6a55;border-radius:4px;font-size:17px;"><strong>Please arrive at ${esc(pe.arrivalLabel)}</strong></p>` : ""}
   <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;background:#fff;border-radius:6px;padding:4px 14px;margin:0 0 8px;font-size:16px;">
     ${rows.join("")}
   </table>
@@ -464,7 +482,8 @@ async function sendRegistrationEmails(pe: PendingEmail): Promise<void> {
   guestTextLines.push("You're booked!");
   guestTextLines.push("");
   if (eventName) { guestTextLines.push(eventName); guestTextLines.push(""); }
-  if (pe.arrivalLabel) { guestTextLines.push(`Please arrive at ${pe.arrivalLabel}`); guestTextLines.push(""); }
+  if (windowLine) { guestTextLines.push(`Your time: ${windowLine}`); guestTextLines.push(`Please arrive at ${pe.arrivalLabel}`); guestTextLines.push(""); if (policyLine) { guestTextLines.push(policyLine); guestTextLines.push(""); } }
+  else if (pe.arrivalLabel) { guestTextLines.push(`Please arrive at ${pe.arrivalLabel}`); guestTextLines.push(""); }
   if (dateLine) guestTextLines.push(`Date: ${dateLine}`);
   if (timeLine) guestTextLines.push(`Time: ${timeLine}`);
   guestTextLines.push(`Booked: ${booked}`);
@@ -490,7 +509,7 @@ async function sendRegistrationEmails(pe: PendingEmail): Promise<void> {
     <tr><td style="padding:4px 14px 4px 0;color:#666;">Guest email</td><td style="padding:4px 0;">${esc(pe.email)}</td></tr>
     <tr><td style="padding:4px 14px 4px 0;color:#666;">Quantity</td><td style="padding:4px 0;">${esc(pe.qty)}</td></tr>
     <tr><td style="padding:4px 14px 4px 0;color:#666;">Seating option</td><td style="padding:4px 0;">${esc(pe.seatingOptionName || "—")}</td></tr>
-    <tr><td style="padding:4px 14px 4px 0;color:#666;">Arrival wave</td><td style="padding:4px 0;">${esc(pe.arrivalLabel || "—")}</td></tr>
+    <tr><td style="padding:4px 14px 4px 0;color:#666;">Arrival wave</td><td style="padding:4px 0;">${esc(pe.arrivalLabel || "—")}${windowLine ? ` (${esc(windowLine)})` : ""}</td></tr>
     <tr><td style="padding:4px 14px 4px 0;color:#666;">Add-ons</td><td style="padding:4px 0;">${esc(addOnLine || "—")}</td></tr>
     <tr><td style="padding:4px 14px 4px 0;color:#666;">Paid</td><td style="padding:4px 0;">${esc(paidLine || "—")}</td></tr>
     <tr><td style="padding:4px 14px 4px 0;color:#666;">Payment id</td><td style="padding:4px 0;">${esc(pe.paymentId)}</td></tr>
@@ -504,7 +523,7 @@ async function sendRegistrationEmails(pe: PendingEmail): Promise<void> {
     `Guest email: ${pe.email}`,
     `Quantity: ${pe.qty}`,
     `Seating option: ${pe.seatingOptionName || "—"}`,
-    `Arrival wave: ${pe.arrivalLabel || "—"}`,
+    `Arrival wave: ${pe.arrivalLabel || "—"}${windowLine ? ` (${windowLine})` : ""}`,
     `Add-ons: ${addOnLine || "—"}`,
     `Paid: ${paidLine || "—"}`,
     `Payment id: ${pe.paymentId}`,

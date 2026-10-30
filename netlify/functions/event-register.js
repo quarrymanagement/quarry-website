@@ -214,6 +214,18 @@ function countArrivalSlotUsed(evData, slot) {
 // tickets to one time must keep every moment of its stay within the room cap.
 // Only slots that carry a "start" are counted. Events without arrivalRoomCap
 // are untouched. Counts PEOPLE (registration qty), not tables.
+// "5:05–7:05 PM" for a timed arrival, '' otherwise. Shown on the Square ticket line
+// (line-item note), never in payment_note: the webhook matches arrival labels
+// inside payment_note, and an end time like "7:05 PM" is itself a label.
+function arrivalWindowText(evData, slot) {
+  if (!slot || !slot.start || !evData || !evData.arrivalStayMinutes) return '';
+  const s = arrivalClockMinutes(slot.start);
+  if (s == null || isNaN(s)) return '';
+  const e = s + (parseInt(evData.arrivalStayMinutes, 10) || 120);
+  const f = (m) => { m = ((m % 1440) + 1440) % 1440; const h = Math.floor(m / 60), mm = m % 60; return { t: ((h % 12) || 12) + ':' + String(mm).padStart(2, '0'), ap: h < 12 ? 'AM' : 'PM' }; };
+  const a = f(s), b = f(e);
+  return a.ap === b.ap ? (a.t + '\u2013' + b.t + ' ' + b.ap) : (a.t + ' ' + a.ap + '\u2013' + b.t + ' ' + b.ap);
+}
 function arrivalClockMinutes(t) {
   const p = String(t || '').split(':');
   return (parseInt(p[0], 10) || 0) * 60 + (parseInt(p[1], 10) || 0);
@@ -526,6 +538,9 @@ exports.handler = async function(event) {
     }
 
     // Build the Square line_items array.
+    // Timed arrivals: the guest's own start and end time rides on the ticket line.
+    const ticketWindow = arrivalWindowText(evData, chosenArrivalSlot);
+    const ticketWindowNote = ticketWindow ? ' \u00b7 Your time: ' + ticketWindow + ' (' + String(chosenArrivalSlot.label || '') + ' arrival)' : '';
     let squareLineItems = [];
     let tierName = evData.name;
     let unitPrice = evData.pricePerSeat || evData.price || 0;
@@ -554,7 +569,7 @@ exports.handler = async function(event) {
       tierName = chosenOption.name || evData.name;
       squareLineItems.push({
         name: (chosenOption.name || 'Seat') + ' - ' + (evData.name || ''),
-        note: (evData.date || '') + ' at The Quarry',
+        note: (evData.date || '') + ' at The Quarry' + ticketWindowNote,
         quantity: String(units),
         base_price_money: { amount: perUnit, currency: 'USD' }
       });
@@ -577,7 +592,7 @@ exports.handler = async function(event) {
         // the whole order still has to come to something payable — checked below.
         squareLineItems.push({
           name: matched.name + ' - ' + (evData.name || ''),
-          note: (evData.date || '') + ' at The Quarry',
+          note: (evData.date || '') + ' at The Quarry' + ticketWindowNote,
           quantity: String(liQty),
           base_price_money: { amount: liPrice, currency: 'USD' }
         });
@@ -618,7 +633,7 @@ exports.handler = async function(event) {
       }
       squareLineItems.push({
         name: tierName + ' - ' + (evData.name || ''),
-        note: (evData.date || '') + ' at The Quarry',
+        note: (evData.date || '') + ' at The Quarry' + ticketWindowNote,
         quantity: String(qty),
         base_price_money: { amount: effectiveUnitPrice, currency: 'USD' }
       });
@@ -753,7 +768,7 @@ exports.handler = async function(event) {
         metadata: safeMeta
       },
       checkout_options: {
-        redirect_url: (successUrl || siteUrl + '/quarry-events.html') + '?registration=success&event=' + eventId,
+        redirect_url: (successUrl || siteUrl + '/quarry-events.html') + '?registration=success&event=' + eventId + (chosenArrivalSlot && chosenArrivalSlot.start ? '&arrival=' + encodeURIComponent(String(chosenArrivalSlot.id || '')) : ''),
         ask_for_shipping_address: false,
         accepted_payment_methods: {
           apple_pay: true, google_pay: true, cash_app_pay: true

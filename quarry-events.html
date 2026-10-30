@@ -1556,7 +1556,8 @@
 
                     <div class="form-group" id="arrivalGroup" style="display:none;">
                         <label for="arrivalSlot">Arrival Time *</label>
-                        <select id="arrivalSlot" name="arrivalSlot" onchange="applyArrivalLock(); updateUnitCountUI(); renderTierSplit(); updateOrderSummary();"></select>
+                        <select id="arrivalSlot" name="arrivalSlot" onchange="showArrivalWindow(); applyArrivalLock(); updateUnitCountUI(); renderTierSplit(); updateOrderSummary();"></select>
+                        <div id="arrivalWindow" style="display:none;font-weight:600;margin-top:6px;"></div>
                         <div id="arrivalHint" style="font-size:13px;opacity:.75;margin-top:4px;">We stagger arrivals so the buffet and bar aren't swamped. Please arrive at your chosen time.</div>
                     </div>
 
@@ -1723,6 +1724,7 @@
                 // Filter to only Active events (admin can set Inactive to hide)
                 // AND drop events whose date has passed (compare in local time, midnight cutoff).
                 const today = new Date(); today.setHours(0,0,0,0);
+                showTimedConfirmation(allEvents);
                 allEvents = allEvents.filter(evt => {
                     // Hidden from the public site: cancelled/inactive events, and drafts.
                     // "Draft" previously did NOT hide anything, which surprised the owner.
@@ -2610,9 +2612,31 @@
 
             if (grp) grp.style.display = permitted > 0 ? 'block' : 'none';
             sel.required = permitted > 0;
+            showArrivalWindow();
             window.allArrivalFull = (permitted > 0 && !anyFits);
             window.arrivalLockText = anyOpen ? 'Too many for one arrival time' : 'Arrival times full';
             applyArrivalLock();
+        }
+
+
+        /** "5:05–7:05 PM" for a timed arrival (slot.start + event.arrivalStayMinutes); '' otherwise. */
+        function arrivalWindowText(ev, slot) {
+            if (!slot || !slot.start || !ev || !ev.arrivalStayMinutes) return '';
+            var p = String(slot.start).split(':'); var s = (+p[0]) * 60 + (+p[1] || 0);
+            if (isNaN(s)) return '';
+            var e = s + (parseInt(ev.arrivalStayMinutes, 10) || 120);
+            function f(m) { m = ((m % 1440) + 1440) % 1440; var h = Math.floor(m / 60), mm = m % 60; return { t: ((h % 12) || 12) + ':' + (mm < 10 ? '0' : '') + mm, ap: h < 12 ? 'AM' : 'PM' }; }
+            var a = f(s), b = f(e);
+            return a.ap === b.ap ? (a.t + '\u2013' + b.t + ' ' + b.ap) : (a.t + ' ' + a.ap + '\u2013' + b.t + ' ' + b.ap);
+        }
+
+        function showArrivalWindow() {
+            var el = document.getElementById('arrivalWindow'), sel = document.getElementById('arrivalSlot');
+            if (!el || !sel) return;
+            var ev = currentEventForModal || {}, id = sel.value;
+            var slot = (ev.arrivalSlots || []).find(function (x) { return String(x.id) === String(id); });
+            var w = arrivalWindowText(ev, slot);
+            el.textContent = w ? 'Your time: ' + w : ''; el.style.display = w ? 'block' : 'none';
         }
 
         /** Every permitted wave full beats whatever the pricing logic decided. */
@@ -3087,6 +3111,25 @@
             modalFooter.style.display = "none";
         }
 
+        /** After Square checkout for a timed-arrival event: show the guest's own start and end time and the policy. */
+        function showTimedConfirmation(events) {
+            var q = new URLSearchParams(window.location.search);
+            if (q.get('registration') !== 'success' || !q.get('arrival')) return;
+            var ev = (events || []).find(function (e) { return String(e.id) === String(q.get('event')); });
+            var slot = ev && (ev.arrivalSlots || []).find(function (x) { return String(x.id) === String(q.get('arrival')); });
+            var w = arrivalWindowText(ev, slot);
+            var banner = document.getElementById('successBanner');
+            if (!banner) return;
+            banner.textContent = '';
+            var h = document.createElement('div'); h.style.fontWeight = '700';
+            h.textContent = '✓ You\'re booked' + (ev ? ' for ' + ev.name : '') + '!';
+            banner.appendChild(h);
+            if (w) { var t = document.createElement('div'); t.style.cssText = 'font-size:1.15em;font-weight:700;margin:6px 0;'; t.textContent = 'Your time: ' + w; banner.appendChild(t); }
+            if (ev && ev.arrivalHint) { var pp = document.createElement('div'); pp.style.cssText = 'font-weight:400;font-size:.95em;'; pp.textContent = ev.arrivalHint; banner.appendChild(pp); }
+            var m = document.createElement('div'); m.style.cssText = 'font-weight:400;font-size:.9em;margin-top:6px;opacity:.85;'; m.textContent = 'Check your email for your confirmation.'; banner.appendChild(m);
+            banner.style.display = 'block';   // stays up (no auto-hide) so the guest can read their time
+        }
+
         /**
          * Show success banner
          */
@@ -3187,7 +3230,7 @@
         document.addEventListener("DOMContentLoaded", async function() {
             // Check for registration success parameter
             const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get("registered") === "1") {
+            if (urlParams.get("registered") === "1" || (urlParams.get("registration") === "success" && !urlParams.get("arrival"))) {
                 showSuccessBanner();
             }
 
