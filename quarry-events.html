@@ -2803,7 +2803,7 @@
                 </div>
                 <div style="display:flex;justify-content:space-between;">
                     <span>${totalSeats} seat${totalSeats === 1 ? '' : 's'}</span>
-                    <span>${(getSelectedSeatingOption() || {}).deposit ? 'Table hold, credited to your bill' : '$' + (priced.pricePerSeat / 100).toFixed(2) + '/seat'}</span>
+                    <span>${(getSelectedSeatingOption() || {}).deposit ? ((getSelectedSeatingOption() || {}).holdLabel || 'Hold, credited to your bill') : '$' + (priced.pricePerSeat / 100).toFixed(2) + '/seat'}</span>
                 </div>`;
                 totalDiv.textContent = "$" + (priced.totalCents / 100).toFixed(2);
                 summaryDiv.style.display = "block";
