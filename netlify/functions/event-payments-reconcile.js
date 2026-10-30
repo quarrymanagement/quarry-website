@@ -116,6 +116,16 @@ function matchSeating(note, options) {
   for (const o of cands) if (n.includes(String(o.name).trim().toLowerCase())) return o;
   return null;
 }
+// Arrival time, recovered from the payment note the same way the Supabase webhook
+// does (longest label first), so a reconciled ticket still counts toward its
+// arrival time and the room limit. 2026-10-30.
+function matchArrival(note, slots) {
+  const n = String(note || '').toLowerCase();
+  const cands = (Array.isArray(slots) ? slots : []).filter((s) => s && String(s.label || '').trim())
+    .sort((a, b) => String(b.label).length - String(a.label).length);
+  for (const s of cands) if (n.includes(String(s.label).trim().toLowerCase())) return s;
+  return null;
+}
 function matchAddOns(lineItems, defs) {
   const map = new Map();
   for (const d of Array.isArray(defs) ? defs : []) if (d && d.name) map.set(String(d.name).trim().toLowerCase(), String(d.name).trim());
@@ -146,6 +156,7 @@ async function buildRegistration(p, events) {
   }
   if (!ev) return { unmatched: true, payment: p, noteName };
   const seat = matchSeating(p.note, ev.seatingOptions);
+  const arr = (md.arrivalSlot && (ev.arrivalSlots || []).find((x) => x && String(x.id) === String(md.arrivalSlot))) || matchArrival(p.note, ev.arrivalSlots);
   const addOns = matchAddOns(lineItems, ev.addOns);
   const reg = {
     name: md.customerName || p.buyer_email_address || '',
@@ -157,6 +168,7 @@ async function buildRegistration(p, events) {
     source: 'square',
     reconciled: true,
     ...(seat ? { seatingOptionId: String(seat.id || ''), seatingOptionName: String(seat.name) } : {}),
+    ...(arr ? { arrivalSlot: String(arr.id || ''), arrivalLabel: String(arr.label || '') } : {}),
     ...(addOns.length ? { addOns } : {})
   };
   return { ev, reg, amount: (Number(p.amount_money && p.amount_money.amount) || 0) / 100 };

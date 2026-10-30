@@ -1551,7 +1551,7 @@
 
                     <div class="form-group" id="partySizeGroup" style="display:none;">
                         <label for="partySize">Number of Tickets *</label>
-                        <input type="number" id="partySize" name="partySize" min="1" max="10" value="1" required onchange="updateOrderSummary()">
+                        <input type="number" id="partySize" name="partySize" min="1" max="10" value="1" required onchange="renderArrivalSlots(); updateOrderSummary()" oninput="renderArrivalSlots()">
                     </div>
 
                     <div class="form-group" id="arrivalGroup" style="display:none;">
@@ -2328,6 +2328,8 @@
                 seatingSelect.required = false;
                 partySizeInput.required = true;
                 partySizeInput.value = 1;
+                // Per-person events may allow big groups (arrival-time limits still apply).
+                partySizeInput.max = String(parseInt(currentEventForModal.maxTicketsPerOrder, 10) || 10);
             }
 
             // Toggle "Partner / +1 Name" field for events flagged as 2-person admission
@@ -2477,9 +2479,46 @@
         }
 
         /** Units still free in a wave. No capacity means unlimited. */
+
+        // Room limit across overlapping arrival times (mirrors event-register.js
+        // arrivalRoomLeft). Events without arrivalRoomCap are unaffected.
+        function arrivalClockMin(t) { var p = String(t || '').split(':'); return (parseInt(p[0], 10) || 0) * 60 + (parseInt(p[1], 10) || 0); }
+        function arrivalRoomLeftFor(ev, slot) {
+            var cap = parseInt(ev && ev.arrivalRoomCap, 10);
+            if (!cap || !slot || !slot.start) return Infinity;
+            var stay = parseInt(ev.arrivalStayMinutes, 10) || 120;
+            var slots = (ev.arrivalSlots || []).filter(function (s) { return s && s.start; });
+            var people = {};
+            (ev.registrations || []).forEach(function (r) {
+                var id = String((r && r.arrivalSlot) || '').trim().toLowerCase();
+                if (id) people[id] = (people[id] || 0) + (parseInt(r.qty, 10) || 1);
+            });
+            var s0 = arrivalClockMin(slot.start), worst = 0;
+            slots.forEach(function (m) {
+                var mt = arrivalClockMin(m.start);
+                if (mt < s0 || mt >= s0 + stay) return;
+                var inside = 0;
+                slots.forEach(function (o) {
+                    var ot = arrivalClockMin(o.start);
+                    if (ot <= mt && ot > mt - stay) inside += people[String(o.id || '').trim().toLowerCase()] || 0;
+                });
+                if (inside > worst) worst = inside;
+            });
+            return cap - worst;
+        }
+
         function arrivalSlotLeft(slot) {
-            if (!slot || slot.capacity == null || slot.capacity === '') return Infinity;
-            return (parseInt(slot.capacity, 10) || 0) - arrivalUnitsUsed(slot);
+            const room = arrivalRoomLeftFor(currentEventForModal, slot);
+            if (!slot || slot.capacity == null || slot.capacity === '') return room;
+            return Math.min(room, (parseInt(slot.capacity, 10) || 0) - arrivalUnitsUsed(slot));
+        }
+
+        /** Tickets wanted, for events sold per person (no seating options). */
+        function arrivalPartyWanted() {
+            const ev = currentEventForModal;
+            if (!ev || (Array.isArray(ev.seatingOptions) && ev.seatingOptions.length)) return 1;
+            const ps = document.getElementById('partySize');
+            return Math.max(1, parseInt(ps && ps.value, 10) || 1);
         }
 
         /**
@@ -2520,6 +2559,8 @@
             const prev = sel.value;
             let permitted = 0;
             let anyOpen = false;
+            let anyFits = false;
+            const want = arrivalPartyWanted();
             let out = '';
             for (let i = 0; i < slots.length; i++) {
                 const s = slots[i];
@@ -2527,13 +2568,16 @@
                 permitted++;
                 const left = arrivalSlotLeft(s);
                 let label = String(s.label || s.id || '');
+                const tooSmall = left > 0 && left < want;
                 if (left <= 0) {
                     label += ' — full';
                 } else {
                     anyOpen = true;
-                    if (isFinite(left) && left <= 3) label += ' — ' + left + ' left';
+                    if (!tooSmall) anyFits = true;
+                    if (tooSmall) label += ' — only ' + left + ' left';
+                    else if (isFinite(left) && left <= (want > 1 || s.start ? 10 : 3)) label += ' — ' + left + ' left';
                 }
-                out += `<option value="${s.id || ''}" data-i="${i}" data-left="${left}"${left <= 0 ? ' disabled' : ''}>${label}</option>`;
+                out += `<option value="${s.id || ''}" data-i="${i}" data-left="${left}"${(left <= 0 || tooSmall) ? ' disabled' : ''}>${label}</option>`;
             }
             sel.innerHTML = out;
 
@@ -2549,7 +2593,7 @@
                 for (let m = 0; m < sel.options.length; m++) {
                     if (!sel.options[m].disabled && Number(sel.options[m].getAttribute('data-i')) > prevIdx) { pick = m; break; }
                 }
-                if (pick !== -1 && arrivalSlotAllowsOption(slots[prevIdx], opt)) rolledFrom = String(slots[prevIdx].label || '');
+                if (pick !== -1 && arrivalSlotAllowsOption(slots[prevIdx], opt)) rolledFrom = String(slots[prevIdx].label || '') + (want > 1 && arrivalSlotLeft(slots[prevIdx]) > 0 ? ' doesn\'t have room for ' + want : ' just filled up');
             }
             if (pick === -1) {
                 for (let m = 0; m < sel.options.length; m++) {
@@ -2560,13 +2604,14 @@
             const hintEl = document.getElementById('arrivalHint');
             if (hintEl) {
                 const ev = currentEventForModal || {};
-                hintEl.textContent = (rolledFrom ? rolledFrom + ' just filled up, so we moved you to the next open time. ' : '') +
+                hintEl.textContent = (rolledFrom ? rolledFrom + ', so we moved you to the next time that does. ' : (permitted > 0 && anyOpen && !anyFits ? 'No single arrival time has room for ' + want + '. Try fewer tickets, or split your group across two times. ' : '')) +
                     (ev.arrivalHint || "We stagger arrivals so the buffet and bar aren\'t swamped. Please arrive at your chosen time.");
             }
 
             if (grp) grp.style.display = permitted > 0 ? 'block' : 'none';
             sel.required = permitted > 0;
-            window.allArrivalFull = (permitted > 0 && !anyOpen);
+            window.allArrivalFull = (permitted > 0 && !anyFits);
+            window.arrivalLockText = anyOpen ? 'Too many for one arrival time' : 'Arrival times full';
             applyArrivalLock();
         }
 
@@ -2576,8 +2621,8 @@
             if (!btn) return;
             if (window.allArrivalFull) {
                 btn.disabled = true;
-                btn.textContent = 'Arrival times full';
-            } else if (btn.textContent === 'Arrival times full') {
+                btn.textContent = window.arrivalLockText || 'Arrival times full';
+            } else if (btn.textContent === 'Arrival times full' || btn.textContent === 'Too many for one arrival time') {
                 btn.disabled = false;
                 btn.textContent = 'Proceed to Payment';
             }

@@ -202,6 +202,47 @@ function countArrivalSlotUsed(evData, slot) {
   }, 0);
 }
 
+// ---------------------------------------------------------------------------
+// Room limit across overlapping arrival times (2026-10-30, Whoville)
+// ---------------------------------------------------------------------------
+// Optional, per event:
+//     "arrivalRoomCap": 140,        // most guests inside at any moment
+//     "arrivalStayMinutes": 120,    // how long each arrival time stays
+//     "arrivalSlots": [{ "id": "a1705", "label": "5:05 PM", "start": "17:05",
+//                        "capacity": 32 }, ...]
+// Guests from an arrival time count from its start until start + stay. Adding
+// tickets to one time must keep every moment of its stay within the room cap.
+// Only slots that carry a "start" are counted. Events without arrivalRoomCap
+// are untouched. Counts PEOPLE (registration qty), not tables.
+function arrivalClockMinutes(t) {
+  const p = String(t || '').split(':');
+  return (parseInt(p[0], 10) || 0) * 60 + (parseInt(p[1], 10) || 0);
+}
+function arrivalRoomLeft(evData, slot) {
+  const cap = parseInt(evData && evData.arrivalRoomCap, 10);
+  if (!cap || !slot || !slot.start) return Infinity;
+  const stay = parseInt(evData.arrivalStayMinutes, 10) || 120;
+  const slots = getArrivalSlots(evData).filter(function(s) { return s && s.start; });
+  const people = {};
+  (Array.isArray(evData.registrations) ? evData.registrations : []).forEach(function(r) {
+    const id = String((r && r.arrivalSlot) || '').trim().toLowerCase();
+    if (id) people[id] = (people[id] || 0) + (parseInt(r.qty, 10) || 1);
+  });
+  const s0 = arrivalClockMinutes(slot.start);
+  let worst = 0;
+  slots.forEach(function(m) {
+    const mt = arrivalClockMinutes(m.start);
+    if (mt < s0 || mt >= s0 + stay) return;
+    let inside = 0;
+    slots.forEach(function(o) {
+      const ot = arrivalClockMinutes(o.start);
+      if (ot <= mt && ot > mt - stay) inside += people[String(o.id || '').trim().toLowerCase()] || 0;
+    });
+    if (inside > worst) worst = inside;
+  });
+  return cap - worst;
+}
+
 // Fetch events.json straight from the repo via the authenticated Contents API,
 // so checkout always prices against the current data rather than whatever was
 // baked into the last Netlify build. Falls back to the deployed copy on failure,
@@ -456,13 +497,26 @@ exports.handler = async function(event) {
         const slotCap = parseInt(chosenArrivalSlot.capacity, 10) || 0;
         const slotUsed = countArrivalSlotUsed(evData, chosenArrivalSlot);
         const slotLeft = slotCap - slotUsed;
-        // Booking three tables needs three free unit slots in the wave.
-        if (slotLeft < units) {
+        // Booking three tables needs three free unit slots in the wave. With
+        // no seating options a unit is one person, so the whole party counts.
+        const unitsNeeded = chosenOption ? units : qty;
+        if (slotLeft < unitsNeeded) {
           return {
             statusCode: 409, headers,
-            body: JSON.stringify({ error: 'That arrival time is full \u2014 please pick another.' })
+            body: JSON.stringify({ error: slotLeft > 0 && !chosenOption
+              ? 'Only ' + slotLeft + ' tickets left at ' + (chosenArrivalSlot.label || 'that time') + ' \u2014 please pick another time or fewer tickets.'
+              : 'That arrival time is full \u2014 please pick another.' })
           };
         }
+      }
+      const roomLeft = arrivalRoomLeft(evData, chosenArrivalSlot);
+      if (roomLeft < qty) {
+        return {
+          statusCode: 409, headers,
+          body: JSON.stringify({ error: roomLeft > 0
+            ? 'Only ' + roomLeft + ' tickets left at ' + (chosenArrivalSlot.label || 'that time') + ' \u2014 please pick another time or fewer tickets.'
+            : 'That arrival time is full \u2014 please pick another.' })
+        };
       }
     }
 
