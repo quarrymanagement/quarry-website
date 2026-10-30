@@ -56,7 +56,7 @@ delete process.env.VENUE_AVAILABILITY_KEY;
   process.env.SENDGRID_API_KEY = process.env.SENDGRID_API_KEY || 'dummy-test';
   const party = require(fn('party-request.js'));
   const beforeParty = sent.length + fetched.length;
-  res = await party.handler({ httpMethod: 'POST', headers: {}, body: JSON.stringify({ name: 'T', email: 't@example.com', phone: '1', date: '2026-12-12' }) });
+  res = await party.handler({ httpMethod: 'POST', headers: {}, body: JSON.stringify({ name: 'T', email: 't@example.com', phone: '1', date: '2026-12-11' }) });
   assert.strictEqual(res.statusCode, 409); assert.ok(JSON.parse(res.body).blockedDate);
   assert.strictEqual(sent.length + fetched.length, beforeParty, 'party-request blocked before any save/email');
 
