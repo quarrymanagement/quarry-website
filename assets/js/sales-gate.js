@@ -69,6 +69,15 @@
     var cents = qty * off(base) + (ext && mc.extension !== false ? qty * off(extBase) : 0);
     return { pct: pct, cents: cents, label: (mc.label || 'Member') + ' ' + pct + '% off' };
   }
+  /** Extra-2-hours offer text when a member code is applied, e.g. " Wine club price: $20.25." */
+  function extNote(ev) {
+    var g = window.__gate, mc = (ev && ev.memberCode) || {};
+    if (!g || !g.applied || mc.extension === false) return '';
+    var base = (ev.tiers && ev.tiers[0] && ev.tiers[0].pricePerPerson) || ev.pricePerPerson || ev.price || 0;
+    var extBase = Math.round(base * (1 - (parseFloat(ev.arrivalExtendPct) || 0) / 100));
+    var c = Math.round(extBase * (1 - (parseFloat(mc.pct) || 0) / 100));
+    return ' ' + (mc.label || 'Member') + ' price: $' + (c / 100).toFixed(2) + '.';
+  }
   function addDiscountLine(ev, qty, ext, detailsEl, totalEl) {
     if (!detailsEl || !totalEl) return 0;
     var d = discount(ev, qty, ext); if (!d.cents) return 0;
@@ -155,5 +164,5 @@
     if (s && mc.hash) check(ev, s).then(function (ok) { if (ok) { ctrl.applied = true; ctrl.code = s; refresh(true); } else save(''); });
     return ctrl;
   }
-  window.QuarryGate = { now: now, phase: phase, gated: gated, fmtAt: fmtAt, clockHtml: clockHtml, check: check, saved: saved, save: save, discount: discount, addDiscountLine: addDiscountLine, mount: mount, injectCss: injectCss };
+  window.QuarryGate = { now: now, phase: phase, gated: gated, fmtAt: fmtAt, clockHtml: clockHtml, check: check, saved: saved, save: save, discount: discount, addDiscountLine: addDiscountLine, extNote: extNote, mount: mount, injectCss: injectCss };
 })();

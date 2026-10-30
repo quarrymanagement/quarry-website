@@ -849,7 +849,7 @@
 
             card.innerHTML = html;
             if (window.__gate) window.__gate.destroy();
-            window.__gate = window.QuarryGate ? QuarryGate.mount(evt, document.getElementById('detailSalesGate'), { onChange: function () { if (window.updateDetailSummary) window.updateDetailSummary(); } }) : null;
+            window.__gate = window.QuarryGate ? QuarryGate.mount(evt, document.getElementById('detailSalesGate'), { onChange: function () { if (typeof showDetailArrivalWindow === 'function') showDetailArrivalWindow(); if (window.updateDetailSummary) window.updateDetailSummary(); } }) : null;
 
             // Initialize tier change handler and order summary
             onDetailTierChange();
@@ -1020,7 +1020,7 @@
                 if (!ok && cb) cb.checked = false;
                 box.style.display = ok ? 'block' : 'none';
                 var lab = box.querySelector('span');
-                if (lab && ok) lab.textContent = 'Add a second 2-hour block: your time becomes ' + arrivalWindowText(ev, slot, true) + '. $' + (arrivalExtendPrice(ev) / 100).toFixed(2) + ' per ticket (' + ev.arrivalExtendPct + '% off).';
+                if (lab && ok) lab.textContent = 'Add a second 2-hour block: your time becomes ' + arrivalWindowText(ev, slot, true) + '. $' + (arrivalExtendPrice(ev) / 100).toFixed(2) + ' per ticket (' + ev.arrivalExtendPct + '% off).' + (window.QuarryGate && QuarryGate.extNote ? QuarryGate.extNote(ev) : '');
             }
             var ext = !!(ok && cb && cb.checked);
             var w = arrivalWindowText(ev, slot, ext);

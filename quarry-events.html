@@ -2566,7 +2566,7 @@
                 if (!ok && cb) cb.checked = false;
                 box.style.display = ok ? 'block' : 'none';
                 var lab = box.querySelector('span');
-                if (lab && ok) lab.textContent = 'Add a second 2-hour block: your time becomes ' + arrivalWindowText(ev, slot, true) + '. $' + (arrivalExtendPrice(ev) / 100).toFixed(2) + ' per ticket (' + ev.arrivalExtendPct + '% off).';
+                if (lab && ok) lab.textContent = 'Add a second 2-hour block: your time becomes ' + arrivalWindowText(ev, slot, true) + '. $' + (arrivalExtendPrice(ev) / 100).toFixed(2) + ' per ticket (' + ev.arrivalExtendPct + '% off).' + (window.QuarryGate && QuarryGate.extNote ? QuarryGate.extNote(ev) : '');
             }
             var ext = !!(ok && cb && cb.checked);
             var w = arrivalWindowText(ev, slot, ext);
@@ -2942,7 +2942,7 @@
             window.__gate = null;
             var panel = document.getElementById('salesGatePanel');
             if (!panel || !window.QuarryGate || !currentEventForModal) { applySalesGateLock(); return; }
-            window.__gate = QuarryGate.mount(currentEventForModal, panel, { onChange: function () { updateOrderSummary(); } });
+            window.__gate = QuarryGate.mount(currentEventForModal, panel, { onChange: function () { if (typeof showArrivalWindow === 'function') showArrivalWindow(); updateOrderSummary(); } });
             updateOrderSummary();
         }
         function applySalesGateLock() {
