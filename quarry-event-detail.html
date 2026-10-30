@@ -1384,7 +1384,7 @@
                     // units x seats x pricePerSeat — ticket tiers do not apply.
                     subtotalCents = priced.totalCents;
                     html += '<div style="display:flex;justify-content:space-between;"><span>' + units + ' &times; ' + (optObj.name || 'Seating') + '</span><span>$' + (priced.perUnitCents / 100).toFixed(2) + ' ea</span></div>';
-                    html += '<div style="display:flex;justify-content:space-between;"><span>' + numPeople + ' seat' + (numPeople === 1 ? '' : 's') + '</span><span>' + (optObj.deposit ? 'Deposit, applied to your bill' : '$' + (priced.pricePerSeat / 100).toFixed(2) + '/seat') + '</span></div>';
+                    html += '<div style="display:flex;justify-content:space-between;"><span>' + numPeople + ' seat' + (numPeople === 1 ? '' : 's') + '</span><span>' + (optObj.deposit ? 'Table hold, credited to your bill' : '$' + (priced.pricePerSeat / 100).toFixed(2) + '/seat') + '</span></div>';
                     if (submitBtn && !detailAllSeatingSoldOut) submitBtn.disabled = false;
                 } else {
                     var splitRows = document.querySelectorAll('#detailTierSplitRows input[data-tierqty]');
