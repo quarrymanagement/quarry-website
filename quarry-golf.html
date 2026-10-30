@@ -728,7 +728,7 @@ function renderSlots(){
   var note=document.getElementById('golfBlockedMsg');
   if(note){
     if(note.__orig===undefined)note.__orig=note.innerHTML;
-    note.innerHTML=isSharedBlocked(S.date)?window.QuarryBlockedDates.NOTE_HTML:note.__orig;
+    note.innerHTML=isSharedBlocked(S.date)?window.QuarryBlockedDates.noteHtml(S.date):note.__orig;
     note.style.display=dateBlocked?'block':'none';
   }
 }
