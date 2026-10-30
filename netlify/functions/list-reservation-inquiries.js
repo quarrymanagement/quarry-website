@@ -78,6 +78,80 @@ const CORS = {
 };
 const respond = (s, b) => ({ statusCode: s, headers: CORS, body: JSON.stringify(b) });
 
+// ----------------------------------------------------------------------------
+// Call-in reservations (staff iPad form on quarry-checklist.netlify.app).
+// Those rows live in Supabase (public.callin_reservations), not Netlify Forms.
+// They are read through the call-in edge function's existing admin_list action,
+// passing along the SAME admin/staff session token this request was made with
+// (the edge function re-verifies it against verify-admin-password and only
+// allows owner/events_staff). No Supabase key lives on this site and nothing
+// about the website's own form pipeline (submission-created, auto-replies,
+// daily follow-up) changes: call-ins are merged at READ time only.
+// Status changes on a call-in go through update-reservation-status like every
+// other inquiry (override keyed by "callin-<uuid>").
+// TEST rows (is_test, or a name starting with "test") are left out unless the
+// caller asks for them with include_tests=1 (the admin only does that on a
+// preview URL, never on thequarrystl.com).
+// ----------------------------------------------------------------------------
+const CALLIN_FN_URL = process.env.CALLIN_FN_URL || 'https://nkulhtalltbieicvmmad.supabase.co/functions/v1/callin-reservation';
+const isTestCallin = (r) => !!r.is_test || /^test\b/i.test(String(r.guest_name || '').trim());
+
+async function fetchCallins(token) {
+    const r = await fetch(CALLIN_FN_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
+        body: JSON.stringify({ action: 'admin_list' })
+    });
+    const b = await r.json().catch(() => ({}));
+    if (!r.ok || !Array.isArray(b.callins)) throw new Error(`call-ins ${r.status}: ${String(b.error || 'load failed').slice(0, 120)}`);
+    return b.callins;
+}
+
+function fmtCallinTime(t) {
+    const m = /^(\d{1,2}):(\d{2})/.exec(String(t || ''));
+    if (!m) return t || '';
+    let h = +m[1]; const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12;
+    return `${h}:${m[2]} ${ap}`;
+}
+
+function normalizeCallin(c) {
+    const name = String(c.guest_name || '').trim() || '(no name)';
+    const parts = name.split(/\s+/);
+    const notes = [
+        c.notes || '',
+        c.catering && c.catering_notes ? `Catering: ${c.catering_notes}` : '',
+        c.taken_by ? `Taken by ${c.taken_by} on the iPad call-in form${c.ref_no ? ` (#${c.ref_no})` : ''}.` : ''
+    ].filter(Boolean).join('\n');
+    return {
+        id: `callin-${c.id}`,
+        formName: 'call-in',
+        formLabel: '📞 Call-in',
+        source: 'call-in',
+        callinId: c.id,
+        refNo: c.ref_no || null,
+        takenBy: c.taken_by || '',
+        isTest: isTestCallin(c),
+        submittedAt: c.created_at,
+        name,
+        firstName: parts[0] || '',
+        lastName: parts.slice(1).join(' '),
+        email: String(c.guest_email || '').toLowerCase(),
+        phone: c.guest_phone || '',
+        company: '',
+        occasion: 'Call-in reservation',
+        eventDate: c.requested_date || '',
+        eventTime: fmtCallinTime(c.requested_time),
+        guests: c.guest_count != null ? String(c.guest_count) : '',
+        location: '',
+        catering: c.catering ? 'Yes' : '',
+        notes,
+        marketingOptIn: false,
+        netlifyUrl: null,
+        callinStatus: c.status || 'new',
+        rawData: {}
+    };
+}
+
 // Netlify's submissions API caps at 100 per page regardless of the per_page
 // value requested, and gives no total count up front — so a single
 // unbounded request silently truncates to the newest 100 submissions and
@@ -155,8 +229,10 @@ exports.handler = async (event) => {
     if (!NETLIFY_TOKEN) return respond(500, { ok: false, error: 'NETLIFY_AUTH_TOKEN env var not configured' });
 
     try {
-        const [overrides, ...formResults] = await Promise.all([
+        const includeTests = q.include_tests === '1';
+        const [overrides, callinResult, ...formResults] = await Promise.all([
             loadStatusOverrides(),
+            fetchCallins(q.token).then((rows) => ({ rows })).catch((err) => ({ rows: [], error: err.message })),
             ...Object.entries(FORM_IDS).map(([formName, formId]) =>
                 fetchSubmissions(formId).then((subs) => ({ formName, subs })).catch((err) => ({ formName, subs: [], error: err.message }))
             )
@@ -177,6 +253,22 @@ exports.handler = async (event) => {
                 inquiries.push(inq);
             }
         }
+        if (callinResult.error) errors.push({ formName: 'call-in', error: callinResult.error });
+        let callinCount = 0;
+        for (const row of callinResult.rows) {
+            const inq = normalizeCallin(row);
+            if (inq.isTest && !includeTests) continue;
+            const ov = overrides[inq.id] || {};
+            // No admin override yet: a call-in already marked "followed up" in the
+            // call-in log counts as contacted; otherwise same aging rule as forms.
+            inq.status = ov.status || (row.status === 'followed_up' ? 'contacted' : defaultStatus(inq.submittedAt));
+            inq.statusUpdatedAt = ov.updatedAt || row.followed_up_at || inq.submittedAt;
+            inq.statusNote = ov.note || '';
+            inq.statusHistory = ov.history || [];
+            inq.hidden = !!ov.hidden;
+            inquiries.push(inq);
+            callinCount++;
+        }
         // Newest first
         inquiries.sort((a, b) => (b.submittedAt || '').localeCompare(a.submittedAt || ''));
 
@@ -184,6 +276,7 @@ exports.handler = async (event) => {
             ok: true,
             inquiries,
             totalCount: inquiries.length,
+            callinCount,
             errors,
             generatedAt: new Date().toISOString()
         });

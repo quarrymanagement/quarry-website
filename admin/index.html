@@ -3697,13 +3697,14 @@
                 <div class="mkt-header">
                     <div>
                         <h2 style="margin:0;">📥 Reservation Inquiries</h2>
-                        <p class="mkt-sub">Every form submission across reservations, private events, and wedding tours — live from the website. Click any row to email the customer or change their status.</p>
+                        <p class="mkt-sub">Every form submission across reservations, private events, and wedding tours — live from the website — plus 📞 call-ins taken on the staff iPad form. Click any row to email the customer or change their status.</p>
                     </div>
                     <div class="mkt-header-actions">
                         <input type="text" id="resInqSearch" placeholder="🔍 Search by name or email…" style="padding:0.5rem 0.75rem;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:6px;color:var(--text-primary);font-size:0.85rem;min-width:220px;">
                         <select id="resInqFilter" style="padding:0.5rem 0.75rem;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:6px;color:var(--text-primary);font-size:0.85rem;">
                             <option value="needs_attention">Needs my attention</option>
                             <option value="all">All inquiries</option>
+                            <option value="source_callin">📞 Call-ins only</option>
                             <option value="needs_call">📞 Needs a call</option>
                             <option value="awaiting_decision">Awaiting my decision</option>
                             <option value="awaiting_customer_confirm">Awaiting customer</option>
@@ -13662,13 +13663,26 @@ function hashCode(str) {
                 const role = localStorage.getItem('quarryAdminRole') || 'owner';
                 return STAFF_SIGNATURES[role] || 'The Quarry';
             }
+            // Source badge in the Type column. Call-ins (staff iPad form, stored in
+            // Supabase callin_reservations) get a gold phone badge so they stand
+            // out from website form submissions; TEST call-ins are tagged too
+            // (they only ever show on a preview URL).
+            function sourceBadge(i) {
+                if (i.source === 'call-in') {
+                    return `<span style="font-size:0.72rem;background:#B8933A1f;border:1px solid #B8933A66;padding:0.12rem 0.5rem;border-radius:4px;color:#8a6d1f;font-weight:600;white-space:nowrap;">📞 Call-in</span>`
+                        + (i.isTest ? ` <span style="font-size:0.64rem;background:#fff4d6;color:#8a5a00;padding:0.1rem 0.35rem;border-radius:4px;font-weight:700;">TEST</span>` : '');
+                }
+                return `<span style="font-size:0.72rem;background:var(--bg-elevated);padding:0.15rem 0.5rem;border-radius:4px;color:var(--text-muted);">${escHtml(i.formLabel)}</span>`;
+            }
             function statusPill(s) { const c = STATUS_COLORS[s] || '#64748b'; return `<span style="display:inline-block;padding:0.18rem 0.55rem;border-radius:999px;font-size:0.68rem;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;background:${c}1f;color:${c};">${escHtml(STATUS_LABELS[s] || s)}</span>`; }
 
             async function loadAll() {
                 if (state.loading) return;
                 state.loading = true;
                 try {
-                    const r = await fetch(`${FN}/list-reservation-inquiries?token=${encodeURIComponent(localStorage.getItem('quarryAdminToken') || '')}`, { cache: 'no-store' });
+                    // TEST call-ins are only listed on a preview URL, never on the live site.
+                    const withTests = /^(www\.)?thequarrystl\.com$/.test(location.hostname) ? '' : '&include_tests=1';
+                    const r = await fetch(`${FN}/list-reservation-inquiries?token=${encodeURIComponent(localStorage.getItem('quarryAdminToken') || '')}${withTests}`, { cache: 'no-store' });
                     const body = await r.json();
                     if (!body.ok) throw new Error(body.error || 'load failed');
                     state.inquiries = body.inquiries || [];
@@ -13844,12 +13858,15 @@ function hashCode(str) {
                 } else if (search) {
                     list = visible.filter((i) =>
                         (i.name || '').toLowerCase().includes(search) ||
-                        (i.email || '').toLowerCase().includes(search)
+                        (i.email || '').toLowerCase().includes(search) ||
+                        (search.replace(/\D/g, '').length >= 4 && (i.phone || '').replace(/\D/g, '').includes(search.replace(/\D/g, '')))
                     );
                 } else if (filter === 'needs_attention') {
                     list = visible.filter((i) => ['not_contacted', 'needs_followup', 'responded', 'awaiting_decision', 'needs_call'].includes(i.status));
                 } else if (filter === 'all') {
                     list = visible;
+                } else if (filter === 'source_callin') {
+                    list = visible.filter((i) => i.source === 'call-in');
                 } else if (filter === 'contacted') {
                     // Matches the Contacted STAT CARD's definition above (anyone
                     // actually reached out to, at any stage) rather than the
@@ -13885,7 +13902,7 @@ function hashCode(str) {
                 tbody.innerHTML = list.map((i) => `
                     <tr data-inq-id="${escHtml(i.id)}" class="clickable-row" style="cursor:pointer;">
                         <td style="font-weight:500;">${escHtml(i.name)}</td>
-                        <td><span style="font-size:0.72rem;background:var(--bg-elevated);padding:0.15rem 0.5rem;border-radius:4px;color:var(--text-muted);">${escHtml(i.formLabel)}</span></td>
+                        <td>${sourceBadge(i)}</td>
                         <td>${escHtml(i.occasion || '—')}</td>
                         <td>${escHtml(i.eventDate ? fmtDay(i.eventDate) : '—')}</td>
                         <td>${escHtml(i.guests || '—')}</td>
@@ -13933,7 +13950,8 @@ function hashCode(str) {
                     ['Party Size', escHtml(inq.guests || '—')],
                     inq.location ? ['Location', escHtml(inq.location)] : null,
                     inq.catering ? ['Catering', inq.catering === 'Yes' ? '✓ Requested' : 'Not requested'] : null,
-                    ['Marketing Opt-In', inq.marketingOptIn ? '✓ Yes' : '✗ No'],
+                    inq.source === 'call-in' ? ['Source', `📞 Call-in (staff iPad form)${inq.refNo ? ' · #' + escHtml(inq.refNo) : ''}${inq.takenBy ? ' · taken by ' + escHtml(inq.takenBy) : ''}${inq.isTest ? ' · TEST' : ''}`] : null,
+                    inq.source === 'call-in' ? null : ['Marketing Opt-In', inq.marketingOptIn ? '✓ Yes' : '✗ No'],
                     inq.notes ? ['Notes', `<div style="margin-top:0.25rem;padding:0.5rem;background:var(--bg-elevated);border-radius:4px;white-space:pre-wrap;">${escHtml(inq.notes)}</div>`] : null,
                 ].filter(Boolean);
                 $('resInqDetails').innerHTML = fields.map(([k, v]) =>
@@ -13956,10 +13974,11 @@ function hashCode(str) {
                 $('resInqReplyStatus').textContent = '';
                 $('resInqReplyToggle').style.display = inq.email ? '' : 'none';
                 if (inq.email) {
-                    $('resInqReplySubject').value = `Re: Your ${inq.formLabel.toLowerCase()} at The Quarry`;
+                    $('resInqReplySubject').value = inq.source === 'call-in' ? 'Your reservation at The Quarry' : `Re: Your ${inq.formLabel.toLowerCase()} at The Quarry`;
                     $('resInqReplyBody').value = `\n\nWarmly,\n${currentSignature()}`;
                 }
                 $('resInqNetlifyLink').href = inq.netlifyUrl || '#';
+                $('resInqNetlifyLink').style.display = inq.netlifyUrl ? '' : 'none';
                 $('resInqDeleteBtn').classList.toggle('hidden', !!inq.hidden);
                 $('resInqRestoreBtn').classList.toggle('hidden', !inq.hidden);
                 $('resInqSelectDateBox')?.classList.toggle('hidden', inq.status !== 'needs_followup');
