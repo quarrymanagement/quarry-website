@@ -158,7 +158,7 @@ exports.handler = async (event) => {
     // night) that got past the page's date check is flagged for staff only.
     // The lead is kept and the couple's confirmation is unchanged.
     const blockedFlag = sharedBlocked.isBlocked(data.wedding_date)
-      ? '<p style="background:#fff3cd;border-left:4px solid #c0392b;padding:10px 14px;margin:16px 0"><b>Heads up:</b> the requested wedding date is reserved for Christmas Spirits in Whoville (blocked on the website).</p>'
+      ? '<p style="background:#fff3cd;border-left:4px solid #c0392b;padding:10px 14px;margin:16px 0"><b>Heads up:</b> the requested wedding date is reserved for ' + escapeHtml(sharedBlocked.eventName(data.wedding_date)) + ' (blocked on the website).</p>'
       : '';
 
     // 1. Primary notification → Jacqueline

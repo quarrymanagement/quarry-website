@@ -2676,7 +2676,7 @@ async function submitParty() {
   // Shared whole-day blocks (/blocked-dates.js, e.g. Christmas Spirits in
   // Whoville nights); party-request.js rejects the same dates server-side.
   if (window.QuarryBlockedDates && window.QuarryBlockedDates.isBlocked(data.date)) {
-    alert(window.QuarryBlockedDates.MESSAGE);
+    alert(window.QuarryBlockedDates.messageFor(data.date));
     return;
   }
 

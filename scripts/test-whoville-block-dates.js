@@ -35,6 +35,22 @@ delete process.env.VENUE_AVAILABILITY_KEY;
   assert.ok(nh.includes('href="mailto:management@thequarrystl.com?subject=Request%20for%20Friday%2C%20December%204%2C%202026'), nh);
   assert.ok(/href="\/quarry-events\.html"/.test(nh) && /Want to come in\?/.test(nh));
 
+  // Per-date event names (Friendsgiving 11/20, Matt 9:21 AM CT)
+  assert.deepStrictEqual(B.BLOCKED_DATE_LIST,
+    ['2026-11-20', '2026-12-04', '2026-12-05', '2026-12-11', '2026-12-12', '2026-12-18', '2026-12-19']);
+  assert.ok(B.isBlocked('2026-11-20') && B.isBlocked('11/20/2026') && !B.isBlocked('2026-11-19') && !B.isBlocked('2026-11-21'));
+  assert.strictEqual(B.eventName('2026-11-20'), 'Friendsgiving at The Quarry');
+  assert.strictEqual(B.messageFor('2026-11-20'), "This date is reserved for Friendsgiving at The Quarry. Want to come in? Email us at management@thequarrystl.com and we'll see what we can do. See our events page.");
+  for (const d of B.WHOVILLE_BLOCK_DATES) assert.strictEqual(B.messageFor(d), B.MESSAGE, d);
+  assert.strictEqual(B.MESSAGE, "This date is reserved for Christmas Spirits in Whoville. Want to come in? Email us at management@thequarrystl.com and we'll see what we can do. See our events page.");
+  assert.ok(/Friendsgiving at The Quarry/.test(B.blockedReason('2026-11-20')) && !/Whoville/.test(B.blockedReason('2026-11-20')));
+  assert.ok(/^This date is reserved for Friendsgiving at The Quarry\./.test(B.noteHtml('2026-11-20')) && B.noteHtml('2026-11-20').includes('subject=Request%20for%20Friday%2C%20November%2020%2C%202026'));
+  assert.ok(/Friendsgiving/.test(require(fn('_golf-closed.js')).closedReason('2026-11-20', '6:00 PM')));
+  {
+    const h = require(fn('reservation-inquiry-autoreply.js'))._buildBlockedEmail({ firstName: 'T', eventDate: '2026-11-20' });
+    assert.ok(/reserved for <b>Friendsgiving at The Quarry<\/b>/.test(h) && !/Whoville/.test(h), h);
+  }
+
   // Golf (square-checkout uses closedReason)
   const golf = require(fn('_golf-closed.js'));
   assert.ok(/Whoville/.test(golf.closedReason('2026-12-04', '1:00 PM')));

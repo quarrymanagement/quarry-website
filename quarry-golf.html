@@ -716,7 +716,7 @@ function renderSlots(){
     var isBeforeLateOpen=lateOpen&&parseHr(t)<parseHr(lateOpen);
     var isAfterEarlyClose=earlyClose&&parseHr(t)>=parseHr(earlyClose);
     var isTaken=booked.some(function(bk){return bk.time===t&&(!S.bay||bk.bay===S.bay);});
-    if(dateBlocked){btn.classList.add('taken');btn.disabled=true;btn.title=isSharedBlocked(S.date)?'Reserved for Christmas Spirits in Whoville':'Closed for a private event';}
+    if(dateBlocked){btn.classList.add('taken');btn.disabled=true;btn.title=isSharedBlocked(S.date)?'Reserved for '+window.QuarryBlockedDates.eventName(S.date):'Closed for a private event';}
     else if(isBeforeLateOpen){btn.classList.add('taken');btn.disabled=true;btn.title='Opening at '+lateOpen+' that day';}
     else if(isAfterEarlyClose){btn.classList.add('taken');btn.disabled=true;btn.title='Closing at '+earlyClose+' that day';}
     else if(isPast){btn.classList.add('past');btn.disabled=true;btn.title='Time has passed';}
@@ -794,7 +794,7 @@ async function submitBooking(){
   var waiver=document.getElementById('waiverCheck').checked;
   if(!bay){alert('Please select a bay.');return;}
   if(!date){alert('Please select a date.');return;}
-  if(isSharedBlocked(date)){alert(window.QuarryBlockedDates.MESSAGE);return;}
+  if(isSharedBlocked(date)){alert(window.QuarryBlockedDates.messageFor(date));return;}
   if(isBlockedDate(date)){alert('The Quarry is closed to the public that day for a private event, so the golf bays are unavailable. Please choose another date.');return;}
   if(!time){alert('Please select a time slot.');return;}
   var dateLateOpen=lateOpenTime(date);
