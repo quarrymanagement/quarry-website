@@ -28240,8 +28240,8 @@
     "emailStatus": "Subscribed",
     "smsStatus": "",
     "source": "Event RSVP",
-    "lastActivity": "Promoted to Subscribed (catchup batch)",
-    "lastActivityDate": "2026-05-04T23:30:00Z",
+    "lastActivity": "Form: mailing-list",
+    "lastActivityDate": "2026-10-29T14:02:31.249Z",
     "address": {
       "street": "",
       "city": "",
@@ -28256,9 +28256,17 @@
         "details": {
           "reason": "Added to LIST_SUBSCRIBED on owner's instruction (use-unsubs-as-complaints policy 2026-05-04)"
         }
+      },
+      {
+        "type": "mailing-list",
+        "timestamp": "2026-10-29T14:02:31.249Z",
+        "marketingOptIn": true,
+        "details": null
       }
     ],
-    "tags": []
+    "tags": [
+      "Subscribed"
+    ]
   },
   {
     "firstName": "",
@@ -39959,11 +39967,11 @@
     "birthdate": "",
     "labels": "",
     "created": "2026-01-11 15:00",
-    "emailStatus": "Never subscribed",
+    "emailStatus": "Subscribed",
     "smsStatus": "Never subscribed",
     "source": "Form Submission",
-    "lastActivity": "",
-    "lastActivityDate": "",
+    "lastActivity": "Form: contact",
+    "lastActivityDate": "2026-10-29T16:15:24.936Z",
     "address": {
       "street": "",
       "city": "",
@@ -39971,8 +39979,23 @@
       "zip": "",
       "country": ""
     },
-    "events": [],
-    "tags": []
+    "events": [
+      {
+        "type": "contact",
+        "timestamp": "2026-10-29T16:15:24.936Z",
+        "marketingOptIn": true,
+        "details": {
+          "subject": "Reservations",
+          "message": "Hello,\r\n\r\nI recently purchased two tickets to your Halloween party, and I just saw your advertisement stating that admission is free for guests who come dressed up in costume.\r\n\r\nWhile I understand wanting to encourage people to dress up and participate in the Halloween festivities, I have to admit that it’s disappointing to have already paid for two tickets when others can now attend for free simply by wearing a costume. Which I will be wearing a costume\r\n\r\nWould you be willing to offer a refun…",
+          "ip": "12.1.148.226",
+          "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+          "referrer": "https://thequarrystl.com/quarry-contact"
+        }
+      }
+    ],
+    "tags": [
+      "Subscribed"
+    ]
   },
   {
     "firstName": "Ellie",
@@ -66446,6 +66469,92 @@
     ],
     "tags": [
       "Careers"
+    ]
+  },
+  {
+    "firstName": "Chase",
+    "lastName": "Anderson",
+    "email": "canderson@wentzvillefire.org",
+    "phone": "3149522767",
+    "birthdate": "",
+    "labels": "",
+    "created": "2026-10-30T01:19:27.179Z",
+    "emailStatus": "Subscribed",
+    "smsStatus": "Never subscribed",
+    "source": "reservations",
+    "lastActivity": "Form: reservations",
+    "lastActivityDate": "2026-10-30T01:19:27.179Z",
+    "address": {
+      "street": "",
+      "city": "",
+      "state": "",
+      "zip": "",
+      "country": "United States"
+    },
+    "events": [
+      {
+        "type": "reservations",
+        "timestamp": "2026-10-30T01:19:27.179Z",
+        "marketingOptIn": true,
+        "details": {
+          "occasion": "Group Gathering",
+          "date": "2026-12-19",
+          "time": "6:00 PM",
+          "guests": "40",
+          "location": "Inside",
+          "catering": "No",
+          "notes": "This is our end of the year party for Wentzville Fire C shift. I was wondering if there was any availability for this day around this time in the evening for us to come out and have some drinks and food. ",
+          "ip": "153.66.204.238",
+          "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.1 Safari/605.1.15",
+          "referrer": "https://thequarrystl.com/quarry-reservations"
+        }
+      }
+    ],
+    "tags": [
+      "Subscribed"
+    ]
+  },
+  {
+    "firstName": "Shane",
+    "lastName": "Sare",
+    "email": "sare11844@gmail.com",
+    "phone": "6363878265",
+    "birthdate": "",
+    "labels": "",
+    "created": "2026-10-30T03:16:30.115Z",
+    "emailStatus": "Subscribed",
+    "smsStatus": "Never subscribed",
+    "source": "reservations",
+    "lastActivity": "Form: reservations",
+    "lastActivityDate": "2026-10-30T03:16:30.115Z",
+    "address": {
+      "street": "",
+      "city": "",
+      "state": "",
+      "zip": "",
+      "country": "United States"
+    },
+    "events": [
+      {
+        "type": "reservations",
+        "timestamp": "2026-10-30T03:16:30.115Z",
+        "marketingOptIn": true,
+        "details": {
+          "occasion": "Birthday",
+          "date": "2026-12-12",
+          "time": "4:00 PM",
+          "guests": "20",
+          "location": "Inside",
+          "catering": "Yes",
+          "notes": "Was just wondering if you have Gluten Free options? ",
+          "ip": "12.208.203.13",
+          "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 27_0_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/156.0.8078.54 Mobile/15E148 Safari/604.1",
+          "referrer": "https://thequarrystl.com/quarry-reservations"
+        }
+      }
+    ],
+    "tags": [
+      "Subscribed"
     ]
   }
 ]
