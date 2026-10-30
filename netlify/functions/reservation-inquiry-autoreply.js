@@ -169,10 +169,10 @@ function buildBlockedEmail(inq) {
         '<div style="padding:32px 24px"><h2 style="color:#2C1A0E">Thanks for reaching out!</h2>' +
         `<p>Hi ${esc(first)}, thank you for your interest in The Quarry` +
         (inq.occasion ? ` for your ${esc(inq.occasion.toLowerCase())}` : '') + `!</p>` +
-        `<p><b>${esc(fmtDate(inq.eventDate))}</b> is reserved for <b>Christmas Spirits in Whoville</b>, so we can't confirm it through the website, but we'd still love to try to fit you in. ` +
+        `<p><b>${esc(fmtDate(inq.eventDate))}</b> is reserved for <b>${esc(sharedBlocked.eventName(inq.eventDate))}</b>, so we can't confirm it through the website, but we'd still love to try to fit you in. ` +
         `Just reply to this email, or email us at <a href="${sharedBlocked.mailtoHref(inq.eventDate)}" style="color:#B8933A">${sharedBlocked.CONTACT_EMAIL}</a>, ` +
         'with your party size, preferred time and any details, and we\'ll see what we can do.</p>' +
-        `<p>You can also see our <a href="https://thequarrystl.com${sharedBlocked.EVENTS_PATH}" style="color:#B8933A">events page</a> for Christmas Spirits in Whoville details and tickets.</p>` +
+        `<p>You can also see our <a href="https://thequarrystl.com${sharedBlocked.EVENTS_PATH}" style="color:#B8933A">events page</a> for ${esc(sharedBlocked.eventName(inq.eventDate))} details and tickets.</p>` +
         '<p>Questions? Call us at <a href="tel:6362248257" style="color:#B8933A">636-224-8257</a>.</p></div>' +
         '<div style="background:#1A0E08;padding:16px;text-align:center">' +
         '<p style="color:rgba(255,255,255,0.4);font-size:0.75rem;margin:0">3960 Highway Z, New Melle, MO 63385</p></div></div>';
@@ -290,7 +290,7 @@ exports.handler = async (event) => {
             await sendGridEmail(inq.email, 'About your date request at The Quarry', buildBlockedEmail(inq));
             const r = await saveReservationOverride(inq.id, 'date_conflict', {
                 from: 'not_contacted', to: 'date_conflict', by: 'auto-reply',
-                note: 'Auto: requested date is a blocked Christmas Spirits in Whoville night (blocked-dates.js)',
+                note: 'Auto: requested date is blocked for ' + sharedBlocked.eventName(inq.eventDate) + ' (blocked-dates.js)',
             });
             if (!r.ok) console.error('blocked-date status save failed for', inq.id, ':', r.error);
             return respond(200, { ok: true, blockedDate: true, emailed: inq.email });

@@ -7,32 +7,49 @@
  * (netlify/functions/_blocked-dates.js re-exports this file), so a date that
  * can't be picked on a form is also rejected by the server.
  *
- * To UNBLOCK a date: delete its line below. Nothing else needs to change.
+ * To UNBLOCK a date: delete its line in BLOCKED_DATES below. Nothing else needs to change.
  * Added 2026-10-30 (Matt: "can we block off dates for reservations people
  * submitting them on website for these dates?").
  * ========================================================================== */
 (function (root) {
   'use strict';
 
-  // Christmas Spirits in Whoville nights: whole day blocked.
-  var WHOVILLE_BLOCK_DATES = [
-    '2026-12-04', // Fri
-    '2026-12-05', // Sat
-    '2026-12-11', // Fri
-    '2026-12-12', // Sat. PENDING Matt keep-or-drop: delete this line to unblock 12/12
-    '2026-12-18', // Fri
-    '2026-12-19', // Sat
-  ];
+  // Whole-day blocked dates -> the event name shown to guests.
+  // To UNBLOCK a date: delete its line. To block a new one: add a line.
+  var WHOVILLE = 'Christmas Spirits in Whoville';
+  var BLOCKED_DATES = {
+    '2026-11-20': 'Friendsgiving at The Quarry',   // Fri. Matt 2026-10-30 9:21 AM CT
+    '2026-12-04': WHOVILLE, // Fri
+    '2026-12-05': WHOVILLE, // Sat
+    '2026-12-11': WHOVILLE, // Fri
+    '2026-12-12': WHOVILLE, // Sat. PENDING Matt keep-or-drop: delete this line to unblock 12/12
+    '2026-12-18': WHOVILLE, // Fri
+    '2026-12-19': WHOVILLE, // Sat
+  };
+  var BLOCKED_DATE_LIST = Object.keys(BLOCKED_DATES).sort();
+  var WHOVILLE_BLOCK_DATES = BLOCKED_DATE_LIST.filter(function (d) { return BLOCKED_DATES[d] === WHOVILLE; });
 
   var EVENTS_PATH = '/quarry-events.html';
   var EVENTS_URL = 'https://thequarrystl.com' + EVENTS_PATH;
   var CONTACT_EMAIL = 'management@thequarrystl.com';
+
+  // Event name for a blocked date ('' if the date isn't blocked).
+  function eventName(date) {
+    var k = normDate(date);
+    return Object.prototype.hasOwnProperty.call(BLOCKED_DATES, k) ? BLOCKED_DATES[k] : '';
+  }
   // Matt 2026-10-30 9:05 AM CT: "if someone tries to select that date, have the
   // email us for request. So it doesn't push it away." Date stays unbookable
   // online; the note invites an email request instead of turning them away.
-  var MESSAGE = 'This date is reserved for Christmas Spirits in Whoville. Want to come in? ' +
-    'Email us at ' + CONTACT_EMAIL + " and we'll see what we can do. See our events page.";
-  var MESSAGE_WITH_URL = MESSAGE.replace(/\.$/, ': ') + EVENTS_URL;
+  function messageFor(date) {
+    var name = eventName(date) || WHOVILLE;
+    return 'This date is reserved for ' + name + '. Want to come in? ' +
+      'Email us at ' + CONTACT_EMAIL + " and we'll see what we can do. See our events page.";
+  }
+  function messageWithUrl(date) { return messageFor(date).replace(/\.$/, ': ') + EVENTS_URL; }
+  // Back-compat constants (Whoville wording, no date).
+  var MESSAGE = messageFor('');
+  var MESSAGE_WITH_URL = messageWithUrl('');
 
   var DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
@@ -48,15 +65,16 @@
   // mailto: link with a "Request for <date>" subject.
   function mailtoHref(date) {
     var pretty = prettyDate(date);
-    var subject = pretty ? 'Request for ' + pretty : 'Request for a Christmas Spirits in Whoville date';
+    var subject = pretty ? 'Request for ' + pretty : 'Request for a ' + (eventName(date) || WHOVILLE) + ' date';
     var body = pretty ? 'Hi! I\u2019d like to come in on ' + pretty + '. Party size / time / details: ' : '';
     return 'mailto:' + CONTACT_EMAIL + '?subject=' + encodeURIComponent(subject) +
       (body ? '&body=' + encodeURIComponent(body) : '');
   }
   var LINK_STYLE = 'color:inherit;text-decoration:underline;font-weight:600';
-  // Note HTML for a date (mailto subject names the date); NOTE_HTML is the generic one.
+  function escHtml(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  // Note HTML for a date (event name + mailto subject naming the date); NOTE_HTML is the generic one.
   function noteHtml(date) {
-    return 'This date is reserved for Christmas Spirits in Whoville. Want to come in? ' +
+    return 'This date is reserved for ' + escHtml(eventName(date) || WHOVILLE) + '. Want to come in? ' +
       'Email us at <a class="qbd-mail" href="' + mailtoHref(date) + '" style="' + LINK_STYLE + '">' + CONTACT_EMAIL + '</a>' +
       " and we'll see what we can do. See our " +
       '<a class="qbd-events" href="' + EVENTS_PATH + '" style="' + LINK_STYLE + '">events page</a>.';
@@ -73,9 +91,9 @@
   }
   function pad(n) { n = String(n); return n.length < 2 ? '0' + n : n; }
 
-  function isBlocked(date) { return !!date && WHOVILLE_BLOCK_DATES.indexOf(normDate(date)) !== -1; }
+  function isBlocked(date) { return !!date && !!eventName(date); }
   // Guest-facing reason (plain text, with the events URL) or null.
-  function blockedReason(date) { return isBlocked(date) ? MESSAGE_WITH_URL : null; }
+  function blockedReason(date) { return isBlocked(date) ? messageWithUrl(date) : null; }
 
   // Browser helper: wire a <input type="date"> so a blocked date shows the
   // note (with the events link), is marked invalid, and can't be submitted.
@@ -98,7 +116,7 @@
       var bad = isBlocked(input.value);
       if (bad) note.innerHTML = noteHtml(input.value);
       note.style.display = bad ? 'block' : 'none';
-      try { input.setCustomValidity(bad ? MESSAGE : ''); } catch (_) {}
+      try { input.setCustomValidity(bad ? messageFor(input.value) : ''); } catch (_) {}
       if (opts.onChange) opts.onChange(bad);
       return bad;
     }
@@ -120,7 +138,12 @@
   }
 
   var api = {
+    BLOCKED_DATES: BLOCKED_DATES,
+    BLOCKED_DATE_LIST: BLOCKED_DATE_LIST,
     WHOVILLE_BLOCK_DATES: WHOVILLE_BLOCK_DATES,
+    eventName: eventName,
+    messageFor: messageFor,
+    messageWithUrl: messageWithUrl,
     MESSAGE: MESSAGE,
     MESSAGE_WITH_URL: MESSAGE_WITH_URL,
     NOTE_HTML: NOTE_HTML,

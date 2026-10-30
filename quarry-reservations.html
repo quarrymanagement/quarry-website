@@ -620,7 +620,7 @@ nav { display:flex; align-items:center; }
     if (whovilleMsg) whovilleMsg.style.display = shared ? 'block' : 'none';
     if (shared) {
       if (blockedMsg) blockedMsg.style.display = 'none';
-      dateInput.setCustomValidity(QBD.MESSAGE);
+      dateInput.setCustomValidity(QBD.messageFor(v));
     } else if (blocked) {
       if (blockedMsg) blockedMsg.style.display = 'block';
       dateInput.setCustomValidity('This date is fully booked for reservations — walk-ins welcome. Please select another date.');
