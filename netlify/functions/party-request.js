@@ -8,6 +8,7 @@
 // ENV: GITHUB_TOKEN, SENDGRID_API_KEY
 // ============================================================================
 const https = require('https');
+const sharedBlocked = require('./_blocked-dates');
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN || '';
 const GITHUB_REPO = 'quarrymanagement/quarry-website';
@@ -95,6 +96,11 @@ exports.handler = async (event) => {
   const { name, phone, email, date, time, partySize, occasion, seating, notes, source } = body;
   if (!name || !email || !phone) {
     return reply(400, { ok: false, error: 'Name, email, and phone are required.' });
+  }
+  // Shared whole-day blocked dates (/blocked-dates.js, e.g. Christmas Spirits
+  // in Whoville nights): reject before anything is saved or emailed.
+  if (sharedBlocked.isBlocked(date)) {
+    return reply(409, { ok: false, blockedDate: true, error: sharedBlocked.blockedReason(date) });
   }
 
   // Save to reservations.json

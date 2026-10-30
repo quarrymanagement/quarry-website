@@ -6,6 +6,7 @@
 //   - wedding-tour             -> couple confirmation + Jacqueline + management
 
 const https = require('https');
+const sharedBlocked = require('./_blocked-dates');
 
 function sendGridEmail(to, subject, htmlBody, fromEmail, fromName) {
   fromEmail = fromEmail || 'management@thequarrystl.com';
@@ -152,11 +153,19 @@ exports.handler = async (event) => {
       (message ? '<p style="margin:12px 0 4px 0"><b>Vision / Notes:</b></p><p style="margin:0;white-space:pre-wrap">' + escapeHtml(message) + '</p>' : '') +
       '</div>';
 
+    // Netlify Forms can't refuse a submission, so a wedding date on the shared
+    // blocked list (/blocked-dates.js, e.g. a Christmas Spirits in Whoville
+    // night) that got past the page's date check is flagged for staff only.
+    // The lead is kept and the couple's confirmation is unchanged.
+    const blockedFlag = sharedBlocked.isBlocked(data.wedding_date)
+      ? '<p style="background:#fff3cd;border-left:4px solid #c0392b;padding:10px 14px;margin:16px 0"><b>Heads up:</b> the requested wedding date is reserved for Christmas Spirits in Whoville (blocked on the website).</p>'
+      : '';
+
     // 1. Primary notification → Jacqueline
     await sendEmail({
       to: 'jacqueline@thequarrystl.com',
       subject: 'New Wedding Tour Request — ' + fullName,
-      html: buildEmail('New Wedding Tour Request', detailBlock +
+      html: buildEmail('New Wedding Tour Request', blockedFlag + detailBlock +
         '<p>Reply directly to ' + (email ? '<a href="mailto:' + escapeHtml(email) + '" style="color:#B8933A">' + escapeHtml(email) + '</a>' : 'this couple') + ' to schedule their walkthrough.</p>')
     });
 
@@ -164,7 +173,7 @@ exports.handler = async (event) => {
     await sendEmail({
       to: 'management@thequarrystl.com',
       subject: 'New Wedding Tour Request — ' + fullName,
-      html: buildEmail('New Wedding Tour Request', detailBlock +
+      html: buildEmail('New Wedding Tour Request', blockedFlag + detailBlock +
         '<p style="font-size:0.85rem;color:#666">Jacqueline has been notified separately and will follow up directly.</p>')
     });
 

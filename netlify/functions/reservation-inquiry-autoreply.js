@@ -36,6 +36,7 @@
 const https = require('https');
 const { internalHeaders } = require('./_internal-auth');
 const crypto = require('crypto');
+const sharedBlocked = require('./_blocked-dates');
 
 const WEBHOOK_SECRET = process.env.RESERVATION_WEBHOOK_SECRET || '';
 const CONFIRM_SECRET = process.env.RESERVATION_CONFIRM_SECRET || '';
@@ -155,6 +156,27 @@ function buildEmail(inq, confirmUrl) {
         '<p style="color:rgba(255,255,255,0.4);font-size:0.75rem;margin:0">3960 Highway Z, New Melle, MO 63385</p></div></div>';
 }
 
+// Sent INSTEAD of the "let me double-check" email when the requested date is
+// on the shared whole-day blocked list (/blocked-dates.js, e.g. a Christmas
+// Spirits in Whoville night). Netlify Forms can't refuse a submission, so this
+// is the server-side backstop for anyone who gets past the page's date check.
+// No confirm link: the inquiry goes straight to date_conflict.
+function buildBlockedEmail(inq) {
+    const first = inq.firstName || (inq.name || '').trim().split(/\s+/)[0] || 'there';
+    return '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">' +
+        '<div style="background:#1A0E08;padding:24px;text-align:center"><h1 style="color:#B8933A;margin:0">The Quarry</h1>' +
+        '<p style="color:#F5F0E8;font-size:0.8rem;letter-spacing:0.15em;margin:4px 0 0">NEW MELLE, MISSOURI</p></div>' +
+        '<div style="padding:32px 24px"><h2 style="color:#2C1A0E">Thanks for reaching out!</h2>' +
+        `<p>Hi ${esc(first)}, thank you for your interest in The Quarry` +
+        (inq.occasion ? ` for your ${esc(inq.occasion.toLowerCase())}` : '') + `!</p>` +
+        `<p><b>${esc(fmtDate(inq.eventDate))}</b> is reserved for <b>Christmas Spirits in Whoville</b>, so we aren't taking reservations or party requests that day. ` +
+        `See our <a href="https://thequarrystl.com${sharedBlocked.EVENTS_PATH}" style="color:#B8933A">events page</a> for details and tickets.</p>` +
+        '<p>We\'d love to host you on another date. Just reply to this email with a different date, or submit a new request on our website.</p>' +
+        '<p>Questions? Call us at <a href="tel:6362248257" style="color:#B8933A">636-224-8257</a>.</p></div>' +
+        '<div style="background:#1A0E08;padding:16px;text-align:center">' +
+        '<p style="color:rgba(255,255,255,0.4);font-size:0.75rem;margin:0">3960 Highway Z, New Melle, MO 63385</p></div></div>';
+}
+
 function normalize(submission, formName) {
     const d = (submission && submission.data) || {};
     return {
@@ -261,6 +283,21 @@ exports.handler = async (event) => {
 
     const inq = normalize(submission, formName);
     if (!inq.email || !inq.id) return respond(200, { ok: true, skipped: true, reason: 'missing email or id' });
+
+    if (sharedBlocked.isBlocked(inq.eventDate)) {
+        try {
+            await sendGridEmail(inq.email, 'About your date request at The Quarry', buildBlockedEmail(inq));
+            const r = await saveReservationOverride(inq.id, 'date_conflict', {
+                from: 'not_contacted', to: 'date_conflict', by: 'auto-reply',
+                note: 'Auto: requested date is a blocked Christmas Spirits in Whoville night (blocked-dates.js)',
+            });
+            if (!r.ok) console.error('blocked-date status save failed for', inq.id, ':', r.error);
+            return respond(200, { ok: true, blockedDate: true, emailed: inq.email });
+        } catch (err) {
+            console.error('reservation-inquiry-autoreply blocked-date error:', err.message);
+            return respond(500, { ok: false, error: err.message });
+        }
+    }
 
     try {
         const subject = 'Thanks for reaching out to The Quarry!';

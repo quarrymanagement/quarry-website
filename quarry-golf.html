@@ -411,6 +411,7 @@ body{font-family:'Montserrat',sans-serif;background:var(--cream);color:var(--bro
 #successScreen a{color:var(--gold);}
 footer{background:var(--black);text-align:center;padding:1.5rem;font-size:0.65rem;color:rgba(255,255,255,0.35);letter-spacing:0.05em;}
 </style>
+<script src="/blocked-dates.js"></script>
 </head>
 <body>
 <!-- Netlify form for golf booking notifications -->
@@ -621,7 +622,9 @@ var booked=[];
 
 // Dates the bays are unavailable (private events, closures). Format 'YYYY-MM-DD'.
 var BLOCKED_DATES=['2026-08-15','2026-08-21','2026-09-18'];
-function isBlockedDate(d){return !!d&&BLOCKED_DATES.indexOf(d)!==-1;}
+// Shared whole-day blocks (/blocked-dates.js, e.g. Christmas Spirits in Whoville nights)
+function isSharedBlocked(d){return !!(d&&window.QuarryBlockedDates&&window.QuarryBlockedDates.isBlocked(d));}
+function isBlockedDate(d){return !!d&&(BLOCKED_DATES.indexOf(d)!==-1||isSharedBlocked(d));}
 
 // Dates open, but later than the normal 11 AM start. Format 'YYYY-MM-DD': 'H:MM AM/PM'
 // (must match a HOURS entry exactly). Slots before this time are disabled that day.
@@ -713,7 +716,7 @@ function renderSlots(){
     var isBeforeLateOpen=lateOpen&&parseHr(t)<parseHr(lateOpen);
     var isAfterEarlyClose=earlyClose&&parseHr(t)>=parseHr(earlyClose);
     var isTaken=booked.some(function(bk){return bk.time===t&&(!S.bay||bk.bay===S.bay);});
-    if(dateBlocked){btn.classList.add('taken');btn.disabled=true;btn.title='Closed for a private event';}
+    if(dateBlocked){btn.classList.add('taken');btn.disabled=true;btn.title=isSharedBlocked(S.date)?'Reserved for Christmas Spirits in Whoville':'Closed for a private event';}
     else if(isBeforeLateOpen){btn.classList.add('taken');btn.disabled=true;btn.title='Opening at '+lateOpen+' that day';}
     else if(isAfterEarlyClose){btn.classList.add('taken');btn.disabled=true;btn.title='Closing at '+earlyClose+' that day';}
     else if(isPast){btn.classList.add('past');btn.disabled=true;btn.title='Time has passed';}
@@ -723,7 +726,11 @@ function renderSlots(){
     grid.appendChild(btn);
   });
   var note=document.getElementById('golfBlockedMsg');
-  if(note)note.style.display=dateBlocked?'block':'none';
+  if(note){
+    if(note.__orig===undefined)note.__orig=note.innerHTML;
+    note.innerHTML=isSharedBlocked(S.date)?window.QuarryBlockedDates.NOTE_HTML:note.__orig;
+    note.style.display=dateBlocked?'block':'none';
+  }
 }
 
 function parseHr(t){if(!t||typeof t!=='string')return 99;var m=t.match(/(\d+):(\d+) ([AP]M)/);if(!m)return 99;var h=parseInt(m[1]);if(m[3]==='PM'&&h!==12)h+=12;if(m[3]==='AM'&&h===12)h=0;return h;}
@@ -787,6 +794,7 @@ async function submitBooking(){
   var waiver=document.getElementById('waiverCheck').checked;
   if(!bay){alert('Please select a bay.');return;}
   if(!date){alert('Please select a date.');return;}
+  if(isSharedBlocked(date)){alert(window.QuarryBlockedDates.MESSAGE);return;}
   if(isBlockedDate(date)){alert('The Quarry is closed to the public that day for a private event, so the golf bays are unavailable. Please choose another date.');return;}
   if(!time){alert('Please select a time slot.');return;}
   var dateLateOpen=lateOpenTime(date);
