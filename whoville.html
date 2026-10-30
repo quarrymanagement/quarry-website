@@ -404,7 +404,7 @@ body{background:#0c2414;color:#fff7e6;font-family:'Montserrat',system-ui,sans-se
 </header>
 
 <main class="wv">
-  <div class="wv-top" id="wineclub"><div id="wvGate"></div></div>
+  <div class="wv-top" id="code"><div id="wvGate"></div></div>
   <div class="wv-grid">
     <img class="wv-flyer" id="wvFlyer" src="/assets/social-uploads/christmas-spirits-tickets-onsale-1080x1350.jpg" alt="Christmas Spirits in Whoville at The Quarry: $25 a person, 2-hour reservations, arrivals from 4:30 PM, December 4, 5, 11, 12, 18 and 19" width="1080" height="1350">
     <div>
@@ -455,14 +455,14 @@ body{background:#0c2414;color:#fff7e6;font-family:'Montserrat',system-ui,sans-se
         box.classList.toggle('wv-locked', !!g.locked);
         Array.prototype.forEach.call(box.querySelectorAll('a.wv-date[href]'), function (a) {
           var sm = a.querySelector('small'); a.classList.toggle('wv-wait', !!g.locked);
-          sm.textContent = !g.locked ? 'Choose a time' : (g.phase === 'early' ? 'Wine club early access \u2014 enter code' : 'On sale ' + QuarryGate.fmtAt(first.onSaleAt).replace(' at ', ', '));
+          sm.textContent = !g.locked ? 'Choose a time' : (g.phase === 'early' ? 'Early access \u2014 code needed' : 'On sale ' + QuarryGate.fmtAt(first.onSaleAt).replace(' at ', ', '));
           a.onclick = g.locked ? function (e) { e.preventDefault(); if (g.phase === 'early' && window.__wvGate && window.__wvGate.focusCode) window.__wvGate.focusCode(); } : null;
         });
         var fl = document.getElementById('wvFlyer');
         if (g.phase === 'open' || g.phase === 'none') fl.src = '/assets/social-uploads/christmas-spirits-tickets-now-1080x1350.jpg';
       } });
       window.__wvGate = gate;
-      if (location.hash === '#wineclub' && gate.focusCode) setTimeout(gate.focusCode, 400);
+      if (location.hash === '#code' && gate.focusCode) setTimeout(gate.focusCode, 400);
     }
   }
   fetch('/events.json?t=' + Date.now()).then(function (r) { return r.json(); })

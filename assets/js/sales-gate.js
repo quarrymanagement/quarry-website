@@ -73,16 +73,16 @@
     var extBase = Math.round(base * (1 - (parseFloat(ev.arrivalExtendPct) || 0) / 100));
     var off = function (c) { return c - Math.round(c * (1 - pct / 100)); };
     var cents = qty * off(base) + (ext && mc.extension !== false ? qty * off(extBase) : 0);
-    return { pct: pct, cents: cents, label: (mc.label || 'Member') + ' ' + pct + '% off' };
+    return { pct: pct, cents: cents, label: 'Code discount (' + pct + '% off)' };  /* UI wording stays neutral (Matt 11:24); mc.label is only for the Square note */
   }
-  /** Extra-2-hours offer text when a member code is applied, e.g. " Wine club price: $20.25." */
+  /** Extra-2-hours offer text when a code is applied, e.g. " With your code: $20.25." */
   function extNote(ev) {
     var g = window.__gate, mc = (ev && ev.memberCode) || {};
     if (!g || !g.applied || mc.extension === false) return '';
     var base = (ev.tiers && ev.tiers[0] && ev.tiers[0].pricePerPerson) || ev.pricePerPerson || ev.price || 0;
     var extBase = Math.round(base * (1 - (parseFloat(ev.arrivalExtendPct) || 0) / 100));
     var c = Math.round(extBase * (1 - (parseFloat(mc.pct) || 0) / 100));
-    return ' ' + (mc.label || 'Member') + ' price: $' + (c / 100).toFixed(2) + '.';
+    return ' With your code: $' + (c / 100).toFixed(2) + '.';
   }
   function addDiscountLine(ev, qty, ext, detailsEl, totalEl) {
     if (!detailsEl || !totalEl) return 0;
@@ -111,6 +111,7 @@
     + '.qg-code{display:flex;gap:8px;margin-top:10px}.qg-code input{flex:1;min-width:0;padding:10px;border-radius:8px;border:2px solid #9be23f;font-size:16px;text-transform:uppercase;background:#fff;color:#111}'
     + '.qg-code button{padding:10px 14px;border:0;border-radius:8px;background:#c8102e;color:#fff;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap}'
     + '.qg-msg{font-size:13px;margin-top:6px;min-height:1em}.qg-ok{color:#9be23f}.qg-bad{color:#ff8a8a}'
+    + '.qg-link{display:inline-block;margin:10px 0 2px;color:#d9ffb0!important;font-size:13px;text-decoration:underline!important;opacity:.9}.qg [hidden]{display:none!important}'
     + '.qg-lbl{display:block;font-size:13px;margin-top:10px;color:#fff7e6;text-transform:none;letter-spacing:normal}';
   function injectCss() { if (document.getElementById('qg-css')) return; var s = document.createElement('style'); s.id = 'qg-css'; s.textContent = CSS; document.head.appendChild(s); }
 
@@ -125,7 +126,7 @@
     if (!el) return ctrl;
     if (!gated(ev)) { el.style.display = 'none'; el.innerHTML = ''; el.classList.remove('qg'); return ctrl; }
     injectCss(); el.classList.add('qg'); el.style.display = 'block';
-    var mc = ev.memberCode || {}, label = mc.label || 'Member', pct = parseFloat(mc.pct) || 0, lastKey = '', timer = null;
+    var mc = ev.memberCode || {}, pct = parseFloat(mc.pct) || 0, lastKey = '', timer = null;
     function lockState() { var p = phase(ev); return p === 'soon' || (p === 'early' && !ctrl.applied); }
     function draw() {
       var p = phase(ev), t = now(), html = '';
@@ -134,24 +135,20 @@
         html += '<div class="qg-title">Countdown to Whoville tickets</div>';
         html += '<div class="qg-clock" data-qg-clock="onSaleAt">' + clockHtml(ts(ev.onSaleAt) - t) + '</div>';
         html += '<p class="qg-when">Tickets go on sale ' + fmtAt(ev.onSaleAt) + '</p>';
-        if (mc.earlyAccess && ts(ev.earlyAccessAt)) html += '<p>' + label + ' members: early booking opens ' + fmtAt(ev.earlyAccessAt) + '.</p>';
       } else if (p === 'early') {
         html += '<div class="qg-title">Countdown to Whoville tickets</div>';
         html += '<div class="qg-clock" data-qg-clock="onSaleAt">' + clockHtml(ts(ev.onSaleAt) - t) + '</div>';
         html += '<p class="qg-when">Public tickets go on sale ' + fmtAt(ev.onSaleAt) + '</p>';
-        html += ctrl.applied ? '' : '<a href="#qgCode" class="qg-cta" data-qg-cta>' + label + ' members: book now with your code</a>'
-          + '<p class="qg-sub">' + label + ' early booking is open' + (pct ? ' \u2014 and you save ' + pct + '%' : '') + '.</p>';
-      } else {
-        html += '<h4 style="font-size:15px">' + label + ' member?</h4>';
       }
       if (hasCode(mc)) {
         if (ctrl.applied) {
-          html += '<p class="qg-ok">\u2713 ' + label + ' code applied' + (pct ? ' \u2014 ' + pct + '% off' : '') + (p === 'soon' ? '. You can book as soon as early booking opens.' : '') + ' <a href="#" data-qg-remove style="color:#ff8a8a;font-size:12px;margin-left:6px">Remove</a></p>';
+          html += '<p class="qg-ok">\u2713 Code applied' + (pct ? ' \u2014 ' + pct + '% off' : '') + (p === 'soon' ? '. You can book as soon as early booking opens.' : '') + ' <a href="#" data-qg-remove style="color:#ff8a8a;font-size:12px;margin-left:6px">Remove</a></p>';
         } else {
-          html += '<label class="qg-lbl" for="qgCode">' + label + ' code' + (pct ? ' (' + pct + '% off)' : '') + '</label>';
-          html += '<div class="qg-code"><input id="qgCode" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Enter code"><button type="button" data-qg-apply>Apply</button></div>';
+          html += '<a href="#qgCode" class="qg-link" data-qg-cta>Have an early access code?</a><div data-qg-box' + (ctrl.boxOpen ? '' : ' hidden') + '>';
+          html += '<label class="qg-lbl" for="qgCode">Early access code</label>';
+          html += '<div class="qg-code"><input id="qgCode" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Enter code"><button type="button" data-qg-apply>Apply</button></div><div class="qg-msg" data-qg-msg></div></div>';
         }
-        html += '<div class="qg-msg" data-qg-msg></div>';
+        if (ctrl.applied) html += '<div class="qg-msg" data-qg-msg></div>';
       }
       el.innerHTML = html;
       var ap = el.querySelector('[data-qg-apply]'), inp = el.querySelector('#qgCode'), rm = el.querySelector('[data-qg-remove]');
@@ -161,7 +158,7 @@
       if (cta) cta.onclick = function (e) { e.preventDefault(); focusCode(); };
       if (rm) rm.onclick = function (e) { e.preventDefault(); ctrl.applied = false; ctrl.code = ''; save(''); refresh(true); };
     }
-    function focusCode() { var i = el.querySelector('#qgCode'); if (i) { i.scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(function () { try { i.focus({ preventScroll: true }); } catch (e) { i.focus(); } }, 350); } }
+    function focusCode() { var bx = el.querySelector('[data-qg-box]'); if (bx) { bx.hidden = false; ctrl.boxOpen = true; } var i = el.querySelector('#qgCode'); if (i) { i.scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(function () { try { i.focus({ preventScroll: true }); } catch (e) { i.focus(); } }, 350); } }
     ctrl.focusCode = focusCode;
     function msg(text, ok) { var m = el.querySelector('[data-qg-msg]'); if (m) { m.textContent = text; m.className = 'qg-msg ' + (ok ? 'qg-ok' : 'qg-bad'); } }
     function apply(code) {

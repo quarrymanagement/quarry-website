@@ -1536,7 +1536,7 @@
             if (!btn) return;
             if (locked) {
                 btn.dataset.qgLocked = '1'; btn.disabled = true;
-                btn.textContent = g.phase === 'soon' ? 'Tickets aren\u2019t on sale yet' : 'Enter your wine club code to book';
+                btn.textContent = g.phase === 'soon' ? 'Tickets aren\u2019t on sale yet' : 'Early access: enter your code above';
             } else if (btn.dataset.qgLocked) {
                 delete btn.dataset.qgLocked; btn.disabled = false; btn.textContent = 'Proceed to Payment';
                 if (typeof applyDetailArrivalLock === 'function') applyDetailArrivalLock();
