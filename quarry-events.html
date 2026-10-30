@@ -2533,7 +2533,9 @@
                 bar.disabled = want > max;
                 bar.textContent = want > max ? 'Bar seating (groups of ' + max + ' or fewer)' : 'Bar seating (up to ' + max + ' per arrival time)';
             }
-            if (sel.value === 'bar' && want > max) { sel.value = 'table'; msg = 'Bar seating is for groups of ' + max + ' or fewer, so we switched you to a table.'; }
+            if (sel.value === 'bar' && want > max) { sel.value = 'table'; sel.dataset.switched = '1'; }
+            if (want <= max) sel.dataset.switched = '';
+            if (sel.dataset.switched && sel.value === 'table') msg = 'Bar seating is for groups of ' + max + ' or fewer, so we switched you to a table.';
             if (note) { note.textContent = msg; note.style.display = msg ? 'block' : 'none'; }
             return sel.value || 'table';
         }
