@@ -2533,7 +2533,7 @@
                     anyOpen = true;
                     if (isFinite(left) && left <= 3) label += ' — ' + left + ' left';
                 }
-                out += `<option value="${s.id || ''}" data-left="${left}"${left <= 0 ? ' disabled' : ''}>${label}</option>`;
+                out += `<option value="${s.id || ''}" data-i="${i}" data-left="${left}"${left <= 0 ? ' disabled' : ''}>${label}</option>`;
             }
             sel.innerHTML = out;
 
@@ -2541,12 +2541,28 @@
             for (let k = 0; k < sel.options.length; k++) {
                 if (sel.options[k].value === prev && !sel.options[k].disabled) { pick = k; break; }
             }
+            // If the time they had picked is now full, roll forward to the NEXT open
+            // time (not back to the earliest) and say so.
+            let rolledFrom = '';
+            const prevIdx = prev ? slots.findIndex(function (x) { return String(x.id) === prev; }) : -1;
+            if (pick === -1 && prevIdx >= 0) {
+                for (let m = 0; m < sel.options.length; m++) {
+                    if (!sel.options[m].disabled && Number(sel.options[m].getAttribute('data-i')) > prevIdx) { pick = m; break; }
+                }
+                if (pick !== -1 && arrivalSlotAllowsOption(slots[prevIdx], opt)) rolledFrom = String(slots[prevIdx].label || '');
+            }
             if (pick === -1) {
                 for (let m = 0; m < sel.options.length; m++) {
                     if (!sel.options[m].disabled) { pick = m; break; }
                 }
             }
             sel.selectedIndex = pick >= 0 ? pick : 0;
+            const hintEl = document.getElementById('arrivalHint');
+            if (hintEl) {
+                const ev = currentEventForModal || {};
+                hintEl.textContent = (rolledFrom ? rolledFrom + ' just filled up, so we moved you to the next open time. ' : '') +
+                    (ev.arrivalHint || "We stagger arrivals so the buffet and bar aren\'t swamped. Please arrive at your chosen time.");
+            }
 
             if (grp) grp.style.display = permitted > 0 ? 'block' : 'none';
             sel.required = permitted > 0;
