@@ -1555,6 +1555,11 @@
                     </div>
 
                     <div class="form-group" id="arrivalGroup" style="display:none;">
+                        <div id="arrivalPoolWrap" style="display:none;margin-bottom:12px;">
+                            <label for="arrivalPool">Seating *</label>
+                            <select id="arrivalPool" onchange="window.__arrivalRoll = null; renderArrivalSlots(); applyArrivalLock(); updateOrderSummary();"><option value="table">Table</option><option value="bar">Bar seating</option></select>
+                            <div id="arrivalPoolNote" style="display:none;font-size:13px;color:#c9a227;margin-top:6px;"></div>
+                        </div>
                         <label for="arrivalSlot">Arrival Time *</label>
                         <select id="arrivalSlot" name="arrivalSlot" onchange="window.__arrivalRoll = null; renderArrivalSlots(); applyArrivalLock(); updateUnitCountUI(); renderTierSplit(); updateOrderSummary();"></select>
                         <div id="arrivalWindow" style="display:none;font-weight:600;margin-top:6px;"></div>
@@ -2487,12 +2492,18 @@
         // arrivalRoomLeft). Events without arrivalRoomCap are unaffected.
         function arrivalClockMin(t) { var p = String(t || '').split(':'); return (parseInt(p[0], 10) || 0) * 60 + (parseInt(p[1], 10) || 0); }
         function arrivalRoomLeftFor(ev, slot, wantStay) {
+            // Bar stagger: slots carry pool "table"/"bar" and each pool has its own cap (arrivalPoolCaps).
+            var pools = ev && ev.arrivalPoolCaps, pool = slot && slot.pool;
+            var room = arrivalRoomLeftIn(ev, slot, wantStay, parseInt(ev && ev.arrivalRoomCap, 10), null);
+            if (pools && pool && pools[pool] != null) room = Math.min(room, arrivalRoomLeftIn(ev, slot, wantStay, parseInt(pools[pool], 10), pool));
+            return room;
+        }
+        function arrivalRoomLeftIn(ev, slot, wantStay, cap, pool) {
             // Each booking holds its spot from arrival for the stay, or twice that with the extra 2 hours (extraStay).
-            var cap = parseInt(ev && ev.arrivalRoomCap, 10);
             if (!cap || !slot || !slot.start) return Infinity;
             var stay = parseInt(ev.arrivalStayMinutes, 10) || 120, reset = Math.max(0, parseInt(ev.arrivalResetMinutes, 10) || 0);
             var want = (wantStay || stay) + reset, startOf = {}, groups = [];   // seats free up at start + stay + table reset
-            (ev.arrivalSlots || []).forEach(function (x) { if (x && x.start) startOf[String(x.id || '').trim().toLowerCase()] = arrivalClockMin(x.start); });
+            (ev.arrivalSlots || []).forEach(function (x) { if (x && x.start && (!pool || (x.pool || 'table') === pool)) startOf[String(x.id || '').trim().toLowerCase()] = arrivalClockMin(x.start); });
             (ev.registrations || []).forEach(function (r) {
                 var st = startOf[String((r && r.arrivalSlot) || '').trim().toLowerCase()];
                 if (st === undefined) return;
@@ -2508,6 +2519,24 @@
             return cap - worst;
         }
 
+        /** Bar stagger: which pool (table/bar) the guest chose; '' when the event has no pools. */
+        function arrivalPoolsOn(ev) { return !!(ev && ev.arrivalPoolCaps && (ev.arrivalSlots || []).some(function (x) { return x && x.pool === 'bar'; })); }
+        function arrivalBarMax(ev) { var m = 0; (ev.arrivalSlots || []).forEach(function (x) { if (x && x.pool === 'bar') m = Math.max(m, parseInt(x.capacity, 10) || 0); }); return m; }
+        /** Shows the Table / Bar seating picker and returns the chosen pool. Bar is greyed out for groups bigger than a bar time holds. */
+        function syncArrivalPool(ev, want, wrapId, selId, noteId) {
+            var wrap = document.getElementById(wrapId), sel = document.getElementById(selId), note = document.getElementById(noteId);
+            if (!arrivalPoolsOn(ev)) { if (wrap) wrap.style.display = 'none'; return ''; }
+            if (!wrap || !sel) return 'table';
+            wrap.style.display = 'block';
+            var max = arrivalBarMax(ev), bar = sel.querySelector('option[value="bar"]'), msg = '';
+            if (bar) {
+                bar.disabled = want > max;
+                bar.textContent = want > max ? 'Bar seating (groups of ' + max + ' or fewer)' : 'Bar seating (up to ' + max + ' per arrival time)';
+            }
+            if (sel.value === 'bar' && want > max) { sel.value = 'table'; msg = 'Bar seating is for groups of ' + max + ' or fewer, so we switched you to a table.'; }
+            if (note) { note.textContent = msg; note.style.display = msg ? 'block' : 'none'; }
+            return sel.value || 'table';
+        }
         /** Second 2-hour block: only when offered, it ends by the cut-off, and the room has space for the whole party all 4 hours. */
         function arrivalExtendOk(ev, slot, qty) {
             var pct = parseFloat(ev && ev.arrivalExtendPct);
@@ -2603,10 +2632,12 @@
             let anyOpen = false;
             let anyFits = false;
             const want = arrivalPartyWanted();
+            const pool = syncArrivalPool(currentEventForModal, want, 'arrivalPoolWrap', 'arrivalPool', 'arrivalPoolNote');
             let out = '';
             for (let i = 0; i < slots.length; i++) {
                 const s = slots[i];
                 if (!arrivalSlotAllowsOption(s, opt)) continue;
+                if (pool && (s.pool || 'table') !== pool) continue;
                 permitted++;
                 const left = arrivalSlotLeft(s);
                 let label = String(s.label || s.id || '');
@@ -3176,7 +3207,7 @@
             var h = document.createElement('div'); h.style.fontWeight = '700';
             h.textContent = '✓ You\'re booked' + (ev ? ' for ' + ev.name : '') + '!';
             banner.appendChild(h);
-            if (w) { var t = document.createElement('div'); t.style.cssText = 'font-size:1.15em;font-weight:700;margin:6px 0;'; t.textContent = 'Your time: ' + w; banner.appendChild(t); }
+            if (w) { var t = document.createElement('div'); t.style.cssText = 'font-size:1.15em;font-weight:700;margin:6px 0;'; t.textContent = 'Your time: ' + w + (slot && slot.pool === 'bar' ? ' (bar seating)' : ''); banner.appendChild(t); }
             if (ev && ev.arrivalHint) { var pp = document.createElement('div'); pp.style.cssText = 'font-weight:400;font-size:.95em;'; pp.textContent = ev.arrivalHint; banner.appendChild(pp); }
             var m = document.createElement('div'); m.style.cssText = 'font-weight:400;font-size:.9em;margin-top:6px;opacity:.85;'; m.textContent = 'Check your email for your confirmation.'; banner.appendChild(m);
             banner.style.display = 'block';   // stays up (no auto-hide) so the guest can read their time

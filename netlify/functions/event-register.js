@@ -235,14 +235,23 @@ function arrivalClockMinutes(t) {
 // Each booking holds its spot from its arrival time for the stay (2 hours), or
 // twice that when the guest added the second 2-hour block (registration
 // extraStay: true). wantStay = how long the NEW booking would stay.
+// Bar stagger (optional): slots carry "pool": "table" | "bar" and the event sets
+// "arrivalPoolCaps": { "table": 116, "bar": 20 }. Each pool is limited to its own
+// cap (only its own bookings count), and the whole room still to arrivalRoomCap.
 function arrivalRoomLeft(evData, slot, wantStay) {
-  const cap = parseInt(evData && evData.arrivalRoomCap, 10);
+  const pools = evData && evData.arrivalPoolCaps;
+  const pool = slot && slot.pool;
+  let room = arrivalRoomLeftIn(evData, slot, wantStay, parseInt(evData && evData.arrivalRoomCap, 10), null);
+  if (pools && pool && pools[pool] != null) room = Math.min(room, arrivalRoomLeftIn(evData, slot, wantStay, parseInt(pools[pool], 10), pool));
+  return room;
+}
+function arrivalRoomLeftIn(evData, slot, wantStay, cap, pool) {
   if (!cap || !slot || !slot.start) return Infinity;
   const stay = parseInt(evData.arrivalStayMinutes, 10) || 120;
   const reset = Math.max(0, parseInt(evData.arrivalResetMinutes, 10) || 0);
   const want = (wantStay || stay) + reset;
   const startOf = {};
-  getArrivalSlots(evData).forEach(function(x) { if (x && x.start) startOf[String(x.id || '').trim().toLowerCase()] = arrivalClockMinutes(x.start); });
+  getArrivalSlots(evData).forEach(function(x) { if (x && x.start && (!pool || (x.pool || 'table') === pool)) startOf[String(x.id || '').trim().toLowerCase()] = arrivalClockMinutes(x.start); });
   const groups = [];
   (Array.isArray(evData.registrations) ? evData.registrations : []).forEach(function(r) {
     const st = startOf[String((r && r.arrivalSlot) || '').trim().toLowerCase()];
@@ -532,6 +541,13 @@ exports.handler = async function(event) {
         // Booking three tables needs three free unit slots in the wave. With
         // no seating options a unit is one person, so the whole party counts.
         const unitsNeeded = chosenOption ? units : qty;
+        // Bar stagger: a bar time holds only a few guests, so a bigger group can't book bar seating at all.
+        if (chosenArrivalSlot.pool === 'bar' && !chosenOption && qty > slotCap) {
+          return {
+            statusCode: 409, headers,
+            body: JSON.stringify({ error: 'Bar seating is for groups of ' + slotCap + ' or fewer — please choose a table, or split into smaller groups.' })
+          };
+        }
         if (slotLeft < unitsNeeded) {
           return {
             statusCode: 409, headers,
