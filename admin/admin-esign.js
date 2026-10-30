@@ -203,6 +203,7 @@
     renderRecips();
     renderPalette();
     document.getElementById('esFile').onchange = onFile;
+    document.getElementById('esTitle').oninput = validate;
   }
 
   const FIELD_TYPES = [
@@ -329,7 +330,7 @@
     const btns = document.querySelectorAll('#esSaveDraft,#esSaveSend'); btns.forEach(b => b.disabled = true);
     const res = await api('admin_create', {
       title, message, filename: S._fname, page_count: S.pageCount,
-      pdf_base64: S.pdfBase64, recipients: S.recipients,
+      pdf_base64: S.pdfBase64, recipients: S.recipients.map((r, i) => ({ ...r, order: i + 1 })),
       fields: S.fields.map(f => ({ type: f.type, page: f.page, x: f.x, y: f.y, w: f.w, h: f.h, recipient_index: f.recipient_index, font_size: f.font_size, required: true })),
     });
     if (res.error) { alert('Error: ' + res.error); btns.forEach(b => b.disabled = false); return; }
@@ -343,10 +344,20 @@
   /* public API */
   window.EsignUI = {
     onTabSwitch() { showDashboard(); },
-    dash: showDashboard, openDoc, send, download, remind, voidDoc,
+    dash: showDashboard, openDoc, send, download, remind, voidDoc, save,
     addRecip() { S.recipients.push({ name: '', email: '' }); renderRecips(); },
     delRecip(i) { S.recipients.splice(i, 1); if (S.activeRecip >= S.recipients.length) S.activeRecip = 0; S.fields = S.fields.filter(f => f.recipient_index !== i).map(f => { if (f.recipient_index > i) f.recipient_index--; return f; }); renderRecips(); drawFields(); },
-    recip(i, k, v) { S.recipients[i][k] = v; if (k === 'name') { renderRecips(); drawFields(); } validate(); },
+    recip(i, k, v) {
+      S.recipients[i][k] = v;
+      if (k === 'name') {
+        // Update the signer dropdown label in place; re-rendering the rows here
+        // replaced the input on every keystroke and dropped focus.
+        const sel = document.getElementById('esActiveRecip');
+        if (sel && sel.options[i]) sel.options[i].textContent = v || ('Signer ' + (i + 1));
+        drawFields();
+      }
+      validate();
+    },
     setActive(v) { S.activeRecip = +v; },
   };
 
