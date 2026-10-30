@@ -143,3 +143,8 @@
   .qe-card .qe-later{display:none}
 }
 @media (prefers-reduced-motion:reduce){.qe-card{transition:none}}
+
+/* Countdown line (featured-event.json countdownTo) */
+.qevent .qe-count{font-weight:700;letter-spacing:.04em;font-variant-numeric:tabular-nums;color:var(--qe-accent,#9be23f);margin:.35em 0 0}
+.qe-bar .qe-count{margin:0 0 0 .8em;white-space:nowrap}
+@media(max-width:640px){.qe-bar .qe-count{display:block;margin:.2em 0 0}}

@@ -170,6 +170,7 @@ async function buildRegistration(p, events) {
     ...(seat ? { seatingOptionId: String(seat.id || ''), seatingOptionName: String(seat.name) } : {}),
     ...(arr ? { arrivalSlot: String(arr.id || ''), arrivalLabel: String(arr.label || '') } : {}),
     ...(arr && /\+ extra 2 hours/i.test(String(p.note || '')) ? { extraStay: true } : {}),
+    ...((/\[([^\[\]]*\d+% off)\]/.exec(String(p.note || '')) || [])[1] ? { memberPromo: /\[([^\[\]]*\d+% off)\]/.exec(String(p.note || ''))[1].trim() } : {}),
     ...(addOns.length ? { addOns } : {})
   };
   return { ev, reg, amount: (Number(p.amount_money && p.amount_money.amount) || 0) / 100 };

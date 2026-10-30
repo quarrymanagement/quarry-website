@@ -279,6 +279,11 @@ function matchSeatingOption(note: string, options: any[]): { seatingOptionId: st
   return null;
 }
 
+function memberPromoFromNote(note: string): string {
+  const m = /\[([^\[\]]*\d+% off)\]/.exec(String(note || ""));
+  return m ? m[1].trim() : "";
+}
+
 function matchArrivalSlot(note: string, slots: any[]): { arrivalSlot: string; arrivalLabel: string } | null {
   const n = String(note || "").toLowerCase();
   if (!n) return null;
@@ -412,7 +417,7 @@ async function sendEmail(to: string, subject: string, html: string, replyTo?: st
 
 type PendingEmail = {
   ev: any; email: string; qty: number; paymentId: string;
-  seatingOptionName: string; seats: number; arrivalLabel: string; extraStay?: boolean;
+  seatingOptionName: string; seats: number; arrivalLabel: string; extraStay?: boolean; memberPromo?: string;
   amountCents?: number; currency?: string;
   addOns?: MatchedAddOn[];
 };
@@ -460,6 +465,7 @@ async function sendRegistrationEmails(pe: PendingEmail): Promise<void> {
   if (timeLine) rows.push(`<tr><td style="padding:6px 12px 6px 0;color:#666;">Time</td><td style="padding:6px 0;"><strong>${esc(timeLine)}</strong></td></tr>`);
   rows.push(`<tr><td style="padding:6px 12px 6px 0;color:#666;">Booked</td><td style="padding:6px 0;"><strong>${esc(booked)}</strong></td></tr>`);
   if (addOnLine) rows.push(`<tr><td style="padding:6px 12px 6px 0;color:#666;">Add-ons</td><td style="padding:6px 0;"><strong>${esc(addOnLine)}</strong></td></tr>`);
+  if (pe.memberPromo) rows.push(`<tr><td style="padding:6px 12px 6px 0;color:#666;">Discount</td><td style="padding:6px 0;"><strong>${esc(pe.memberPromo)}</strong></td></tr>`);
   if (paidLine) rows.push(`<tr><td style="padding:6px 12px 6px 0;color:#666;">Paid</td><td style="padding:6px 0;"><strong>${esc(paidLine)}</strong></td></tr>`);
   if (reference) rows.push(`<tr><td style="padding:6px 12px 6px 0;color:#666;">Reference</td><td style="padding:6px 0;"><span style="font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;">${esc(reference)}</span></td></tr>`);
 
@@ -489,6 +495,7 @@ async function sendRegistrationEmails(pe: PendingEmail): Promise<void> {
   if (timeLine) guestTextLines.push(`Time: ${timeLine}`);
   guestTextLines.push(`Booked: ${booked}`);
   if (addOnLine) guestTextLines.push(`Add-ons: ${addOnLine}`);
+  if (pe.memberPromo) guestTextLines.push(`Discount: ${pe.memberPromo}`);
   if (paidLine) guestTextLines.push(`Paid: ${paidLine}`);
   if (reference) guestTextLines.push(`Reference: ${reference}`);
   guestTextLines.push("");
@@ -512,6 +519,7 @@ async function sendRegistrationEmails(pe: PendingEmail): Promise<void> {
     <tr><td style="padding:4px 14px 4px 0;color:#666;">Seating option</td><td style="padding:4px 0;">${esc(pe.seatingOptionName || "—")}</td></tr>
     <tr><td style="padding:4px 14px 4px 0;color:#666;">Arrival wave</td><td style="padding:4px 0;">${esc(pe.arrivalLabel || "—")}${windowLine ? ` (${esc(windowLine)})` : ""}</td></tr>
     <tr><td style="padding:4px 14px 4px 0;color:#666;">Add-ons</td><td style="padding:4px 0;">${esc(addOnLine || "—")}</td></tr>
+    <tr><td style="padding:4px 14px 4px 0;color:#666;">Discount</td><td style="padding:4px 0;">${esc(pe.memberPromo || "—")}</td></tr>
     <tr><td style="padding:4px 14px 4px 0;color:#666;">Paid</td><td style="padding:4px 0;">${esc(paidLine || "—")}</td></tr>
     <tr><td style="padding:4px 14px 4px 0;color:#666;">Payment id</td><td style="padding:4px 0;">${esc(pe.paymentId)}</td></tr>
     <tr><td style="padding:4px 14px 4px 0;color:#666;">Running total</td><td style="padding:4px 0;"><strong>${esc(ev.registeredCount ?? "?")} / ${esc(ev.totalCapacity ?? "?")}</strong></td></tr>
@@ -526,6 +534,7 @@ async function sendRegistrationEmails(pe: PendingEmail): Promise<void> {
     `Seating option: ${pe.seatingOptionName || "—"}`,
     `Arrival wave: ${pe.arrivalLabel || "—"}${windowLine ? ` (${windowLine})` : ""}`,
     `Add-ons: ${addOnLine || "—"}`,
+    `Discount: ${pe.memberPromo || "—"}`,
     `Paid: ${paidLine || "—"}`,
     `Payment id: ${pe.paymentId}`,
     `Running total: ${ev.registeredCount ?? "?"} / ${ev.totalCapacity ?? "?"}`,
@@ -653,6 +662,8 @@ async function applyRegistrations(regs: Reg[]): Promise<any[]> {
       }
       // Timed arrivals: "+ extra 2 hours" in the note = guest added the second 2-hour block.
       const extraStay = !!arrivalSlot && /\+ extra 2 hours/i.test(reg.note || "");
+      // Member code (e.g. "[Wine club 10% off]") added by event-register.js before the trailing " xN".
+      const memberPromo = memberPromoFromNote(reg.note || "");
       const optForEmail = seatingOptionId ? (ev.seatingOptions || []).find((o: any) => o && String(o.id) === seatingOptionId) : null;
       const seats = Number(optForEmail && optForEmail.seats) || (seatMatch ? seatMatch.seats : 0) || 0;
 
@@ -682,6 +693,7 @@ async function applyRegistrations(regs: Reg[]): Promise<any[]> {
         ...(arrivalSlot ? { arrivalSlot } : {}),
         ...(arrivalLabel ? { arrivalLabel } : {}),
         ...(extraStay ? { extraStay: true } : {}),
+        ...(memberPromo ? { memberPromo } : {}),
         ...(addOnMatches.length ? { addOns: addOnMatches } : {}),
         ...(reg.backfilled ? { backfilled: true } : {}),
       });
@@ -691,7 +703,7 @@ async function applyRegistrations(regs: Reg[]): Promise<any[]> {
       // Queue the emails: newly added only (never "already_recorded" — Square redelivers
       // payment.updated), and never on a backfill run.
       if (!reg.backfilled && reg.email) {
-        pendingEmails.push({ ev, email: reg.email, qty: reg.qty, paymentId: reg.paymentId, seatingOptionName, seats, arrivalLabel, extraStay, amountCents: Number(reg.amountCents) || 0, currency: reg.currency || "USD", addOns: addOnMatches });
+        pendingEmails.push({ ev, email: reg.email, qty: reg.qty, paymentId: reg.paymentId, seatingOptionName, seats, arrivalLabel, extraStay, memberPromo, amountCents: Number(reg.amountCents) || 0, currency: reg.currency || "USD", addOns: addOnMatches });
       }
     }
     if (!changed) return statuses;

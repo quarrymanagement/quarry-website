@@ -52,6 +52,30 @@
     if (!t) return "";
     return '<a class="' + (n === 2 ? "qe-cta2" : "qe-cta") + '" href="' + esc(h || "/") + '">' + esc(t) + "</a>";
   }
+  /* Optional countdown (countdownTo ISO time, countdownLabel, countdownDone). Ticks every second;
+     at the time it swaps to countdownDone (or disappears when that is empty). No redeploy needed. */
+  function nowMs() {
+    var h = location.hostname, m = /[?&]gateNow=([^&]+)/.exec(location.search);
+    if (m && (h === "localhost" || h === "127.0.0.1" || h.indexOf("--") > 0)) { var t = Date.parse(decodeURIComponent(m[1])); if (!isNaN(t)) return t + (Date.now() - LOADED); }
+    return Date.now();
+  }
+  var LOADED = Date.now();
+  function countText(d) {
+    var to = d.countdown ? Date.parse(d.countdown) : NaN;
+    if (isNaN(to)) return "";
+    var ms = to - nowMs();
+    if (ms <= 0) return d.countdownDone || "";
+    var s = Math.floor(ms / 1000), dd = Math.floor(s / 86400), hh = Math.floor(s % 86400 / 3600), mm = Math.floor(s % 3600 / 60), ss = s % 60;
+    var z = function (n) { return (n < 10 ? "0" : "") + n; };
+    return (d.countdownLabel ? d.countdownLabel + " " : "") + (dd ? dd + "d " : "") + z(hh) + "h " + z(mm) + "m " + z(ss) + "s";
+  }
+  function countEl(d, tag) { return d.countdown ? "<" + tag + ' class="qe-count" data-qe-count>' + esc(countText(d)) + "</" + tag + ">" : ""; }
+  function tick(el, d) {
+    var c = el.querySelector("[data-qe-count]");
+    if (!c) return;
+    var go = function () { if (!el.isConnected) return clearInterval(iv); var t = countText(d); c.textContent = t; c.hidden = !t; };
+    var iv = setInterval(go, 1000); go();
+  }
   var X = '<button class="qe-x" type="button" aria-label="Close">&#10005;</button>';
 
   var LAYOUT = {
@@ -60,13 +84,13 @@
         (d.image ? '<img class="qe-thumb" src="' + esc(d.image) + '" alt="">' : "") +
         '<div class="qe-copy"><div class="qe-stack">' + part("qe-kicker", d.kicker) + part("qe-title", d.title, "strong") + "</div>" +
         (d.line ? '<span class="qe-sep" aria-hidden="true"></span>' + part("qe-line", d.line, "span", true) : "") +
-        "</div>" + cta(d, 1) + X + "</div>";
+        countEl(d, "span") + "</div>" + cta(d, 1) + X + "</div>";
     },
     hero: function (d) {
       return '<div class="qe-inner"><div class="qe-art" role="img" aria-label="' + esc(d.alt || d.title) + '"' +
         (d.image ? ' style="background-image:url(\'' + esc(d.image) + '\')"' : "") + "></div>" +
         '<div class="qe-copy">' + part("qe-kicker", d.kicker) + part("qe-title", d.title, "h2") +
-        '<span class="qe-divider" aria-hidden="true"></span>' + part("qe-line", d.line, "p", true) + part("qe-meta", d.meta, "p") +
+        '<span class="qe-divider" aria-hidden="true"></span>' + part("qe-line", d.line, "p", true) + countEl(d, "p") + part("qe-meta", d.meta, "p") +
         '<div class="qe-ctas">' + cta(d, 1) + cta(d, 2) + "</div></div></div>" +
         '<span class="qe-lights" aria-hidden="true"></span>' + X;
     },
@@ -75,7 +99,7 @@
         '<div class="qe-box">' + X +
         (d.image ? '<img class="qe-img" src="' + esc(d.image) + '" alt="">' : "") +
         '<span class="qe-lights" aria-hidden="true"></span><div class="qe-body">' +
-        part("qe-kicker", d.kicker) + part("qe-title", d.title, "h2") + part("qe-line", d.line, "p", true) +
+        part("qe-kicker", d.kicker) + part("qe-title", d.title, "h2") + part("qe-line", d.line, "p", true) + countEl(d, "p") +
         cta(d, 1) + '<button class="qe-later" type="button">Maybe later</button></div></div>';
     }
   };
@@ -102,6 +126,7 @@
     el.innerHTML = (LAYOUT[v] || LAYOUT.bar)(d);
     var close = function () { dismiss(d); el.remove(); };
     Array.prototype.forEach.call(el.querySelectorAll(".qe-x,.qe-later"), function (b) { b.addEventListener("click", close); });
+    tick(el, d);
     if (d.place === "after-header") {
       place(el);
       var t; window.addEventListener("resize", function () { clearTimeout(t); t = setTimeout(function () { place(el); }, 120); });
@@ -118,7 +143,7 @@
   function fromConfig(c) {
     var el = document.createElement("div");
     el.className = "qevent";
-    ["variant","id","kicker","title","line","cta","href","cta2","href2","image","hand","alt","meta","from","to","delay"].forEach(function (k) {
+    ["variant","id","kicker","title","line","cta","href","cta2","href2","image","hand","alt","meta","from","to","delay","countdown","countdownLabel","countdownDone"].forEach(function (k) {
       if (c[k] != null && c[k] !== "") el.dataset[k] = c[k];
     });
     Object.keys(c.theme || {}).forEach(function (k) { el.style.setProperty("--qe-" + k, c.theme[k]); });

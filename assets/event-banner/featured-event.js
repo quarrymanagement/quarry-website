@@ -37,7 +37,8 @@
     return { variant: v, id: e.id, kicker: e.kicker, title: e.title, line: e.line,
       meta: v === "hero" ? e.meta : "", cta: e.buttonText, href: e.buttonUrl,
       image: v === "bar" ? (e.barImage || e.heroImage) : (e.heroImage || e.barImage),
-      alt: e.alt, from: e.start, to: e.end, theme: e.theme || {} };
+      alt: e.alt, from: e.start, to: e.end, theme: e.theme || {},
+      countdown: e.countdownTo, countdownLabel: e.countdownLabel, countdownDone: e.countdownDone };
   }
   function load() {
     return getJSON(CONFIG_URL, { cache: "no-cache" }).then(function (cfg) {

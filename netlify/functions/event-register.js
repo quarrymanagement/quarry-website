@@ -44,6 +44,50 @@ const EVENT_COUPONS = {
   'QUARRY20': { pct: 20 },
 };
 
+// ---------------------------------------------------------------------------
+// On-sale gate + member code (Christmas Spirits in Whoville, 2026-10-30).
+// Only for events that carry these fields; every other event is untouched.
+//   earlyAccessAt / onSaleAt : ISO times with offset. Before earlyAccessAt nobody
+//     can book; between the two only a valid member code can; after onSaleAt anyone.
+//   memberCode : { hash, salt, pct, label, earlyAccess, extension }. hash is the
+//     SHA-256 hex of salt + code.trim().toLowerCase(), so the code itself is never
+//     in this (public) repo or in events.json. Checked here, case-insensitive.
+// EVENT_NOW_OVERRIDE lets the offline tests move the clock; never set it on the site.
+// ---------------------------------------------------------------------------
+function gateNow() {
+  const o = process.env.EVENT_NOW_OVERRIDE ? Date.parse(process.env.EVENT_NOW_OVERRIDE) : NaN;
+  return isNaN(o) ? Date.now() : o;
+}
+function gateTs(v) { const t = v ? Date.parse(v) : NaN; return isNaN(t) ? null : t; }
+function memberCodeOk(ev, code) {
+  const mc = ev && ev.memberCode;
+  const c = String(code || '').trim().toLowerCase();
+  if (!mc || !mc.hash || !c) return false;
+  const h = crypto.createHash('sha256').update(String(mc.salt || '') + c).digest('hex');
+  const want = String(mc.hash).toLowerCase();
+  return h.length === want.length && crypto.timingSafeEqual(Buffer.from(h), Buffer.from(want));
+}
+function gateWhen(iso) {
+  const t = gateTs(iso); if (t == null) return '';
+  const d = new Date(t);
+  return d.toLocaleDateString('en-US', { timeZone: 'America/Chicago', weekday: 'short', month: 'short', day: 'numeric' })
+    + ' at ' + d.toLocaleTimeString('en-US', { timeZone: 'America/Chicago', hour: 'numeric', minute: '2-digit' }) + ' CT';
+}
+/** null when the booking may go ahead, else { status, error }. */
+function salesGateRefusal(ev, memberOk, t) {
+  const on = gateTs(ev.onSaleAt);
+  if (!on || t >= on) return null;
+  const early = gateTs(ev.earlyAccessAt);
+  const mc = ev.memberCode || {};
+  const label = mc.label || 'Member';
+  if (early && mc.earlyAccess && t >= early) {
+    if (memberOk) return null;
+    return { status: 403, error: label + ' early booking only right now. Public tickets go on sale ' + gateWhen(ev.onSaleAt) + '.' };
+  }
+  return { status: 403, error: 'Tickets go on sale ' + gateWhen(ev.onSaleAt) + '.'
+    + (early && mc.earlyAccess ? ' ' + label + ' members can book from ' + gateWhen(ev.earlyAccessAt) + '.' : '') };
+}
+
 function squareApi(method, path, body) {
   const env = (process.env.SQUARE_ENVIRONMENT || 'production').toLowerCase();
   const host = env === 'production' ? 'connect.squareup.com' : 'connect.squareupsandbox.com';
@@ -426,6 +470,17 @@ exports.handler = async function(event) {
     if (evData.status === 'sold-out') {
       return { statusCode: 409, headers, body: JSON.stringify({ error: 'Event is sold out' }) };
     }
+    // ---- ON-SALE GATE + MEMBER CODE (see salesGateRefusal) ----------------
+    const memberCodeIn = String(body.memberCode || '').slice(0, 60);
+    const memberOk = memberCodeOk(evData, memberCodeIn);
+    if (memberCodeIn.trim() && !memberOk) {
+      return { statusCode: 400, headers, body: JSON.stringify({ error: 'That code isn\u2019t valid. Check the spelling and try again.' }) };
+    }
+    {
+      const refusal = salesGateRefusal(evData, memberOk, gateNow());
+      if (refusal) return { statusCode: refusal.status, headers, body: JSON.stringify({ error: refusal.error, notOnSale: true }) };
+    }
+    const memberPromo = memberOk ? { pct: parseFloat(evData.memberCode.pct) || 0, label: String(evData.memberCode.label || 'Member'), extension: evData.memberCode.extension !== false } : null;
     // ---- LIMITED-TIME BUNDLE (e.g. "2 tickets for $60") -------------------
     // Only when the client asks for one (body.bundleId). Price, ticket count and
     // expiry come from _event-bundles.js, never from the browser. After the
@@ -668,7 +723,7 @@ exports.handler = async function(event) {
       }
       // Apply coupon (server-side, on per-seat price)
       effectiveUnitPrice = unitPrice;
-      if (couponCode) {
+      if (couponCode && !evData.memberCode) {   // member-code events: the member code is the only discount
         const code = couponCode.toUpperCase().trim();
         const c = EVENT_COUPONS[code];
         if (c) {
@@ -695,6 +750,25 @@ exports.handler = async function(event) {
         quantity: String(qty),
         base_price_money: { amount: Math.round(base * (1 - extraStay.pct / 100)), currency: 'USD' }
       });
+    }
+
+    // ---- MEMBER CODE DISCOUNT ---------------------------------------------
+    // Ticket lines (and the extra 2 hours, unless memberCode.extension === false)
+    // are re-priced per unit and renamed so the discount shows on Square's page,
+    // e.g. $25.00 -> $22.50 and $22.50 -> $20.25. Add-ons are never discounted.
+    if (memberPromo && memberPromo.pct > 0) {
+      const ticketLines = squareLineItems.length;
+      for (let i = 0; i < ticketLines; i++) {
+        const li = squareLineItems[i];
+        const isExt = /^Extra 2 hours/.test(li.name);
+        if (isExt && !memberPromo.extension) continue;
+        const was = li.base_price_money.amount;
+        li.base_price_money = { amount: Math.round(was * (1 - memberPromo.pct / 100)), currency: 'USD' };
+        li.name = isExt
+          ? li.name.replace(/% off\) - /, '% off + ' + memberPromo.label + ' ' + memberPromo.pct + '% off) - ')
+          : li.name.replace(/ - /, ' (' + memberPromo.label + ' ' + memberPromo.pct + '% off) - ');
+        li.note = (li.note ? li.note + ' \u00b7 ' : '') + memberPromo.label + ' code: was $' + (was / 100).toFixed(2) + ' each';
+      }
     }
 
     // ---- OPTIONAL ADD-ONS (e.g. merch) -----------------------------------
@@ -774,7 +848,7 @@ exports.handler = async function(event) {
       arrivalSlot: String(chosenArrivalSlot ? (chosenArrivalSlot.id || '') : '').slice(0, 60),
       arrivalLabel: String(chosenArrivalSlot ? (chosenArrivalSlot.label || '') : '').slice(0, 60),
       ticketTier: String(tierSummary).slice(0, 255),
-      couponCode: String(chosenBundle ? '' : couponCode).slice(0, 60)
+      couponCode: String(memberPromo ? memberPromo.label + ' ' + memberPromo.pct + '% off' : (chosenBundle ? '' : couponCode)).slice(0, 60)
     };
     // Square rejects empty-string metadata values with MISSING_REQUIRED_PARAMETER,
     // AND caps an order at 10 metadata entries (ARRAY_LENGTH_TOO_LONG). Strip the
@@ -826,7 +900,7 @@ exports.handler = async function(event) {
         metadata: safeMeta
       },
       checkout_options: {
-        redirect_url: (successUrl || siteUrl + '/quarry-events.html') + '?registration=success&event=' + eventId + (chosenArrivalSlot && chosenArrivalSlot.start ? '&arrival=' + encodeURIComponent(String(chosenArrivalSlot.id || '')) + (extraStay ? '&ext=1' : '') : ''),
+        redirect_url: (successUrl || siteUrl + '/quarry-events.html') + '?registration=success&event=' + eventId + (chosenArrivalSlot && chosenArrivalSlot.start ? '&arrival=' + encodeURIComponent(String(chosenArrivalSlot.id || '')) + (extraStay ? '&ext=1' : '') : '') + (memberPromo ? '&promo=' + encodeURIComponent(String(memberPromo.pct)) : ''),
         ask_for_shipping_address: false,
         accepted_payment_methods: {
           apple_pay: true, google_pay: true, cash_app_pay: true
@@ -852,6 +926,7 @@ exports.handler = async function(event) {
         var tail = ((chosenOption && chosenOption.name) ? ' - ' + chosenOption.name : '')
           + ((chosenArrivalSlot && chosenArrivalSlot.label) ? ' - ' + chosenArrivalSlot.label + ' arrival' : '')
           + (extraStay ? ' + extra 2 hours' : '')   // webhook/reconcile record extraStay from this
+          + (memberPromo ? ' [' + memberPromo.label + ' ' + memberPromo.pct + '% off]' : '')   // webhook/reconcile record the member discount from this
           + ' x' + qty;
         var namePart = String(evData.name || '');
         var budget = MAX_NOTE - prefix.length - tail.length;

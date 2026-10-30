@@ -159,6 +159,8 @@
         .modal p { color: #ccc; font-size: .9rem; line-height: 1.6; margin-bottom: 20px; }
         .modal button { padding: 12px 30px; background: #d4af37; border: none; border-radius: 8px; color: #0a0a0a; font-weight: 600; cursor: pointer; font-family: 'Montserrat', sans-serif; }
     </style>
+<script src="/assets/js/sales-gate.js"></script>
+<style>#detailRegForm.qg-locked > *:not(#detailSalesGate):not(#detailSubmitBtn){display:none!important}</style>
 </head>
 <body>
     <!-- NAV -->
@@ -694,6 +696,7 @@
 
             // Form — matches the main events page modal exactly
             html += '<form class="reg-form" id="detailRegForm" onsubmit="return handleRegistration(event)">';
+            html += '<div id="detailSalesGate" style="display:none"></div>';
 
             html += '<label>Full Name *</label>';
             html += '<input type="text" name="fullName" id="detailFullName" required placeholder="Your full name">';
@@ -817,7 +820,7 @@
             }
 
             // Coupon Code
-            html += '<div id="detailCouponGroup" style="margin-top:16px;">';
+            html += '<div id="detailCouponGroup" style="margin-top:16px;' + (evt.memberCode ? 'display:none;' : '') + '">';
             html += '<label>Coupon Code</label>';
             html += '<div style="display:flex;gap:8px;">';
             html += '<input type="text" id="detailCouponCode" placeholder="Enter coupon code" style="flex:1;text-transform:uppercase;">';
@@ -845,6 +848,8 @@
             html += '</form>';
 
             card.innerHTML = html;
+            if (window.__gate) window.__gate.destroy();
+            window.__gate = window.QuarryGate ? QuarryGate.mount(evt, document.getElementById('detailSalesGate'), { onChange: function () { if (window.updateDetailSummary) window.updateDetailSummary(); } }) : null;
 
             // Initialize tier change handler and order summary
             onDetailTierChange();
@@ -1160,7 +1165,7 @@
         /** Every permitted wave full beats whatever the pricing logic decided. */
         function applyDetailArrivalLock() {
             var btn = document.getElementById('detailSubmitBtn');
-            if (!btn) return;
+            if (!btn || btn.dataset.qgLocked) return;   // the on-sale gate owns the button while locked
             if (detailAllArrivalFull) {
                 btn.disabled = true;
                 btn.textContent = window.detailArrivalLockText || 'Arrival times full';
@@ -1520,7 +1525,23 @@
         window.updateDetailSummary = function() {
             updateDetailSummaryBase();
             if (eventData && window.detailArrivalExtendChosen && window.detailArrivalExtendChosen()) addExtendToSummary(eventData, window.detailArrivalPartyWantedG(), document.getElementById('detailSummaryDetails'), document.getElementById('detailSummaryTotal'));
+            if (eventData && window.__gate && window.__gate.applied && window.QuarryGate) QuarryGate.addDiscountLine(eventData, window.detailArrivalPartyWantedG(), !!(window.detailArrivalExtendChosen && window.detailArrivalExtendChosen()), document.getElementById('detailSummaryDetails'), document.getElementById('detailSummaryTotal'));
+            applyDetailSalesGateLock();
         };
+        /* On-sale gate + wine club code (assets/js/sales-gate.js). No-op for events without onSaleAt/memberCode. */
+        function applyDetailSalesGateLock() {
+            var form = document.getElementById('detailRegForm'), btn = document.getElementById('detailSubmitBtn');
+            var g = window.__gate, locked = !!(g && g.locked);
+            if (form) form.classList.toggle('qg-locked', locked);
+            if (!btn) return;
+            if (locked) {
+                btn.dataset.qgLocked = '1'; btn.disabled = true;
+                btn.textContent = g.phase === 'soon' ? 'Tickets aren\u2019t on sale yet' : 'Enter your wine club code to book';
+            } else if (btn.dataset.qgLocked) {
+                delete btn.dataset.qgLocked; btn.disabled = false; btn.textContent = 'Proceed to Payment';
+                if (typeof applyDetailArrivalLock === 'function') applyDetailArrivalLock();
+            }
+        }
         var updateDetailSummaryBase = function() {
             if (!eventData) return;
             var detailsDiv = document.getElementById('detailSummaryDetails');
@@ -1711,6 +1732,7 @@
             var form = document.getElementById('detailRegForm');
             var btn = document.getElementById('detailSubmitBtn');
             var errorDiv = document.getElementById('detailFormError');
+            if (window.__gate && window.__gate.locked) return false;
             btn.disabled = true;
             btn.textContent = 'Processing...';
             errorDiv.style.display = 'none';
@@ -1776,6 +1798,7 @@
             };
 
             if (window.detailArrivalExtendChosen && window.detailArrivalExtendChosen()) payload.extendStay = true;
+            if (window.__gate && window.__gate.applied) { payload.memberCode = window.__gate.code; payload.couponCode = ''; }
             var submitBundle = hasSeating ? null : getDetailSelectedBundle();
             if (submitBundle) {
                 // Server prices the bundle; we only say which one and how many packs.

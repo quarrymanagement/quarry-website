@@ -1386,6 +1386,8 @@
             }
         }
     </style>
+<script src="/assets/js/sales-gate.js"></script>
+<style>#registrationForm.qg-locked > *:not(#salesGatePanel){display:none!important}</style>
 </head>
 <body>
     <!-- Header -->
@@ -1402,6 +1404,7 @@
                         <a href="/quarry-brunch">Brunch Menu</a>
                     </div>
                 </div>
+                <div class="nav-item"><a href="/whoville" class="nav-link" style="color:#9fe870;">Whoville</a></div>
                 <div class="nav-item"><a href="/quarry-golf" class="nav-link">Hole-In-One Golf</a></div>
                 <div class="nav-item">
                     <a href="#" class="nav-link">Entertainment ▾</a>
@@ -1506,6 +1509,7 @@
                     <p style="font-size:14px;color:#666;">Complete your registration details.</p>
                 </div>
                 <form id="registrationForm" onsubmit="handleFormSubmit(event)">
+                    <div id="salesGatePanel" style="display:none"></div>
                     <div class="form-group">
                         <label for="fullName">Full Name *</label>
                         <input type="text" id="fullName" name="fullName" required>
@@ -2208,20 +2212,21 @@
             const cards = allEvents.map(createEventCard);
             const decIdx = allEvents.findIndex(e => String(e.date || '') >= '2026-12-01');
             const insertAt = decIdx === -1 ? cards.length : decIdx;
-            cards.splice(insertAt, 0, christmasSpiritsPlaceholderCard());
+            // Hidden automatically once the Whoville nights are published (status "available").
+            if (!allEvents.some(e => /^evt-whoville-/.test(String(e.id || '')))) cards.splice(insertAt, 0, christmasSpiritsPlaceholderCard());
             grid.innerHTML = cards.join("");
             filterEvents(currentFilter);
         }
 
         function christmasSpiritsPlaceholderCard() {
             return `
-                <div class="event-card cs-placeholder" data-category="Ticketed" style="cursor:default;">
-                    <img src="/assets/social-uploads/christmas-spirits-teaser-1080x1350.png" alt="Christmas Spirits in Whoville at The Quarry" loading="lazy" style="display:block;width:100%;aspect-ratio:1080/1350;object-fit:cover;background:#123322;">
+                <a href="/whoville" class="event-card cs-placeholder" data-category="Ticketed" style="display:block;color:inherit;text-decoration:none;">
+                    <img src="/assets/social-uploads/christmas-spirits-tickets-onsale-1080x1350.jpg" alt="Christmas Spirits in Whoville at The Quarry" loading="lazy" style="display:block;width:100%;aspect-ratio:1080/1350;object-fit:cover;background:#123322;">
                     <div class="event-body">
                         <h3 class="event-name">Christmas Spirits in Whoville</h3>
-                        <p class="event-description">December weekends. Tickets on sale Sunday, Nov 1.</p>
+                        <p class="event-description">$25 a person &middot; 2-hour reservations &middot; arrivals from 4:30 PM. Dec 4, 5, 11, 12, 18 &amp; 19. Tickets on sale Sun, Nov 1 at 10 AM.</p>
                     </div>
-                </div>
+                </a>
             `;
         }
 
@@ -2434,6 +2439,7 @@
         // registration log, never from a stored counter. Events with no
         // arrivalSlots behave exactly as they always did.
 
+        (function () { var orig = openModal; openModal = function (i) { var r = orig.apply(this, arguments); mountSalesGate(); return r; }; })();
         function arrivalSlotsForModal() {
             const ev = currentEventForModal;
             return (ev && Array.isArray(ev.arrivalSlots)) ? ev.arrivalSlots : [];
@@ -2722,7 +2728,7 @@
         /** Every permitted wave full beats whatever the pricing logic decided. */
         function applyArrivalLock() {
             const btn = document.getElementById('submitBtn');
-            if (!btn) return;
+            if (!btn || btn.dataset.qgLocked) return;   // the on-sale gate owns the button while locked
             if (window.allArrivalFull) {
                 btn.disabled = true;
                 btn.textContent = window.arrivalLockText || 'Arrival times full';
@@ -2927,6 +2933,30 @@
         function updateOrderSummary() {
             updateOrderSummaryBase();
             if (currentEventForModal && arrivalExtendChosen()) addExtendToSummary(currentEventForModal, arrivalPartyWanted(), document.getElementById('summaryDetails'), document.getElementById('summaryTotal'));
+            if (currentEventForModal && window.__gate && window.__gate.applied && window.QuarryGate) QuarryGate.addDiscountLine(currentEventForModal, arrivalPartyWanted(), arrivalExtendChosen(), document.getElementById('summaryDetails'), document.getElementById('summaryTotal'));
+            applySalesGateLock();
+        }
+        /* On-sale gate + wine club code (assets/js/sales-gate.js). No-op for events without onSaleAt/memberCode. */
+        function mountSalesGate() {
+            if (window.__gate) window.__gate.destroy();
+            window.__gate = null;
+            var panel = document.getElementById('salesGatePanel');
+            if (!panel || !window.QuarryGate || !currentEventForModal) { applySalesGateLock(); return; }
+            window.__gate = QuarryGate.mount(currentEventForModal, panel, { onChange: function () { updateOrderSummary(); } });
+            updateOrderSummary();
+        }
+        function applySalesGateLock() {
+            var form = document.getElementById('registrationForm'), btn = document.getElementById('submitBtn');
+            var g = window.__gate, locked = !!(g && g.locked);
+            if (form) form.classList.toggle('qg-locked', locked);
+            if (!btn) return;
+            if (locked) {
+                btn.dataset.qgLocked = '1'; btn.disabled = true;
+                btn.textContent = g.phase === 'soon' ? 'Tickets aren\u2019t on sale yet' : 'Enter your wine club code to book';
+            } else if (btn.dataset.qgLocked) {
+                delete btn.dataset.qgLocked; btn.disabled = false; btn.textContent = 'Proceed to Payment';
+                if (typeof applyArrivalLock === 'function') applyArrivalLock();
+            }
         }
         function updateOrderSummaryBase() {
             if (!currentEventForModal) return;
@@ -3133,6 +3163,8 @@
                     payload.seatingOptionId = seatingOptionId;
                 }
                 if (arrivalExtendChosen()) payload.extendStay = true;
+                if (window.__gate && window.__gate.locked) throw new Error('Tickets aren\u2019t on sale yet.');
+                if (window.__gate && window.__gate.applied) payload.memberCode = window.__gate.code;
                 const arrivalSel = document.getElementById("arrivalSlot");
                 if (arrivalSel && arrivalSel.value) {
                     payload.arrivalSlot = arrivalSel.value;
@@ -3210,6 +3242,7 @@
             h.textContent = '✓ You\'re booked' + (ev ? ' for ' + ev.name : '') + '!';
             banner.appendChild(h);
             if (w) { var t = document.createElement('div'); t.style.cssText = 'font-size:1.15em;font-weight:700;margin:6px 0;'; t.textContent = 'Your time: ' + w + (slot && slot.pool === 'bar' ? ' (bar seating)' : ''); banner.appendChild(t); }
+            if (q.get('promo')) { var dp = document.createElement('div'); dp.style.cssText = 'font-weight:600;margin:4px 0;'; dp.textContent = (ev && ev.memberCode && ev.memberCode.label || 'Member') + ' ' + q.get('promo').replace(/[^0-9.]/g, '') + '% off applied'; banner.appendChild(dp); }
             if (ev && ev.arrivalHint) { var pp = document.createElement('div'); pp.style.cssText = 'font-weight:400;font-size:.95em;'; pp.textContent = ev.arrivalHint; banner.appendChild(pp); }
             var m = document.createElement('div'); m.style.cssText = 'font-weight:400;font-size:.9em;margin-top:6px;opacity:.85;'; m.textContent = 'Check your email for your confirmation.'; banner.appendChild(m);
             banner.style.display = 'block';   // stays up (no auto-hide) so the guest can read their time

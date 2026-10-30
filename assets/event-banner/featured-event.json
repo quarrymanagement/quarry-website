@@ -7,7 +7,8 @@
     "line: <b>...</b> is the only HTML allowed. Leave a field empty to drop it.",
     "id: dismissals are remembered per id. Change the id (e.g. add -tickets) to show it again to people who closed it.",
     "source: \"json\" uses this file. \"supabase\" reads the site_featured_events table instead (falls back to this file if that fails). Only flip once the table exists.",
-    "First active event inside its start/end window wins."
+    "First active event inside its start/end window wins.",
+    "countdownTo (optional): ISO time with offset, e.g. \"2026-11-01T10:00:00-06:00\". Shows countdownLabel + a live d/h/m/s clock; at that time it shows countdownDone instead (empty = hide). No edit needed when it passes."
   ],
   "source": "json",
   "events": [
@@ -19,14 +20,17 @@
       "end": "2026-12-20",
       "kicker": "A Holiday Christmas Pop-Up in New Melle",
       "title": "Christmas Spirits in Whoville",
-      "line": "Tickets available <b>this Sunday</b>",
-      "meta": "The Quarry \u00b7 3960 Highway Z \u00b7 New Melle, MO",
-      "buttonText": "Learn More",
-      "buttonUrl": "/quarry-events.html",
+      "line": "<b>$25</b> a person \u00b7 2-hour reservations \u00b7 arrivals from 4:30 PM",
+      "meta": "Dec 4, 5, 11, 12, 18 & 19 \u00b7 Table or bar seating \u00b7 The Quarry, New Melle",
+      "buttonText": "Get Tickets",
+      "buttonUrl": "/whoville",
       "heroImage": "/assets/event-banner/img/whoville-scene.jpg",
       "barImage": "/assets/event-banner/img/whoville-tree-thumb.jpg",
       "alt": "A big lit Christmas tree beside a snowy little village",
-      "theme": {}
+      "theme": {},
+      "countdownTo": "2026-11-01T10:00:00-06:00",
+      "countdownLabel": "Tickets on sale in",
+      "countdownDone": "Tickets on sale now"
     }
   ]
 }
