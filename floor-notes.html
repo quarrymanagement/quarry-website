@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Your floor notes · The Quarry</title>
+<link rel="icon" href="/favicon-32.png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --charcoal:#1A1A1A; --brown:#2C1A0E; --cream:#F5F0E8; --gold:#B8933A; --gold2:#D4AF6A; --ink:#1f1b16; --muted:#7a6e60; --line:#e6dfd3;
+         --bad:#a52a1e; --bad-bg:#fdeeee; --ok:#176b34; --ok-bg:#e7f5ec; }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;font-family:Montserrat,-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:var(--cream);color:var(--ink);line-height:1.5;}
+  .top{background:var(--charcoal);padding:14px 18px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:5;}
+  .top .brand{font-family:'Playfair Display',Georgia,serif;color:var(--gold);letter-spacing:3px;font-size:17px;}
+  .top .tag{margin-left:auto;color:#cfc4b2;font-size:11px;text-transform:uppercase;letter-spacing:1px;}
+  .wrap{max-width:680px;margin:0 auto;padding:18px 16px calc(90px + env(safe-area-inset-bottom));}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px;}
+  h1{font-family:'Playfair Display',Georgia,serif;font-size:25px;margin:0 0 6px;color:var(--brown);line-height:1.2;}
+  .eyebrow{font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--gold);margin-bottom:8px;}
+  .sub{color:var(--muted);font-size:14px;margin:0;}
+  .it{border:1px solid var(--line);border-left:5px solid #3a9a5b;border-radius:10px;padding:12px 14px;margin-bottom:10px;background:#fff;}
+  .it.fix{border-left-color:#c0392b;}
+  .it .m{font-size:12.5px;color:var(--muted);margin-bottom:4px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+  .it .n{font-size:15px;white-space:pre-wrap;}
+  .it .c{margin-top:8px;border-left:3px solid var(--gold);padding:7px 11px;background:#fffaf0;border-radius:0 8px 8px 0;font-size:14px;white-space:pre-wrap;}
+  .it .c span{display:block;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--gold);}
+  .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:700;}
+  .pill.win{background:var(--ok-bg);color:var(--ok);} .pill.fix{background:var(--bad-bg);color:var(--bad);} .pill.fu{background:var(--brown);color:#fff;}
+  .score{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .score div{background:var(--cream);border-radius:12px;padding:12px 6px;text-align:center;}
+  .score b{display:block;font-family:'Playfair Display',Georgia,serif;font-size:32px;line-height:1.1;}
+  .score span{font-size:11px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);}
+  .rep{margin-top:10px;background:var(--bad-bg);color:#8f1f14;border-radius:10px;padding:10px 12px;font-size:14px;}
+  .bar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom));z-index:6;}
+  .bar .in{max-width:680px;margin:0 auto;}
+  .btn{width:100%;background:var(--brown);color:#fff;border:0;border-radius:12px;padding:15px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;}
+  .btn:disabled{opacity:.5;}
+  .done{background:var(--ok-bg);color:var(--ok);border-radius:12px;padding:14px;text-align:center;font-weight:700;}
+  .state{text-align:center;padding:40px 22px;}
+  .spinner{width:34px;height:34px;border:4px solid var(--line);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 12px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .more{background:none;border:0;color:var(--brown);font:600 14px Montserrat,sans-serif;text-decoration:underline;cursor:pointer;padding:6px 0;}
+</style>
+</head>
+<body>
+<div class="top"><span class="brand">THE QUARRY</span><span class="tag">Floor notes · private</span></div>
+<div class="wrap" id="app"><div class="card state"><div class="spinner"></div><div class="sub">Loading your notes…</div></div></div>
+<div class="bar" id="bar" style="display:none"><div class="in" id="barIn"></div></div>
+<script>
+(function(){
+  var FN='https://nkulhtalltbieicvmmad.supabase.co/functions/v1/floor-observations';
+  var KEY='sb_publishable_FQK59Bn8P2jV8yGL0nPi7w_jVHFMBSl';
+  var t=new URLSearchParams(location.search).get('t')||'';
+  try{ if(t) history.replaceState(null,'',location.pathname+'?t='+encodeURIComponent(t)); }catch(_){}
+  var app=document.getElementById('app'), bar=document.getElementById('bar'), barIn=document.getElementById('barIn');
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function day(d){return d?new Date(d+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}):'';}
+  function call(action){return fetch(FN,{method:'POST',headers:{'Content-Type':'application/json',apikey:KEY,Authorization:'Bearer '+KEY},body:JSON.stringify({action:action,token:t})}).then(function(r){return r.json();});}
+  function fail(msg){bar.style.display='none';app.innerHTML='<div class="card state"><h1>Hmm.</h1><p class="sub">'+esc(msg)+'</p></div>';}
+  function it(r,fu){
+    return '<div class="it '+r.kind+'"><div class="m"><span class="pill '+r.kind+'">'+(r.kind==='win'?'WIN':'FIX')+'</span><b style="color:var(--brown)">'+esc(r.category_label)+'</b><span>· '+esc(day(r.observed_on))+(r.shift?' · '+esc(r.shift):'')+'</span>'+(fu?'<span class="pill fu">Follow-up</span>':'')+'</div>'+
+      '<div class="n">'+esc(r.note)+'</div>'+(r.comment?'<div class="c"><span>Manager comment</span>'+esc(r.comment)+'</div>':'')+'</div>';
+  }
+  function render(d){
+    var sb=d.scoreboard, fuIds={}; (d.followups||[]).forEach(function(r){fuIds[r.id]=1;});
+    var upd=(d.update||[]).filter(function(r){return !fuIds[r.id];});
+    var h='<div class="card"><div class="eyebrow">Floor notes</div><h1>Hi '+esc(d.first_name)+'.</h1><p class="sub">Notes from managers who watched your shifts. Wins are things to keep doing; fixes are things to work on. This page is private to you.</p></div>';
+    if(d.followups&&d.followups.length) h+='<div class="card"><div class="eyebrow">Follow-up from last week</div><p class="sub" style="margin-bottom:10px">A manager marked '+(d.followups.length===1?'this note':'these notes')+' to check in on again.</p>'+d.followups.map(function(r){return it(r,true);}).join('')+'</div>';
+    if(upd.length) h+='<div class="card"><div class="eyebrow">'+(d.acknowledged?'Latest note':'This update')+'</div>'+upd.map(function(r){return it(r);}).join('')+'</div>';
+    h+='<div class="card"><div class="eyebrow">Your scoreboard</div><div class="score"><div><b style="color:var(--ok)">'+sb.wins+'</b><span>Wins</span></div><div><b style="color:var(--bad)">'+sb.fixes+'</b><span>Fixes</span></div><div><b style="color:'+(sb.repeats.length?'var(--bad)':'var(--muted)')+'">'+sb.repeats.length+'</b><span>Repeating</span></div></div>'+
+      (sb.repeats.length?'<div class="rep"><b>Repeating:</b> '+sb.repeats.map(function(x){return esc(x.label)+' ('+x.count+' in '+d.repeat_rule.days+' days)';}).join(', ')+'</div>':'<p class="sub" style="margin-top:10px">No repeating fixes right now.</p>')+'</div>';
+    var hist=d.history||[], N=8;
+    h+='<div class="card"><div class="eyebrow">Full history · newest first</div><div id="hist">'+hist.slice(0,N).map(function(r){return it(r);}).join('')+'</div>'+(hist.length>N?'<button class="more" id="more">Show all '+hist.length+'</button>':'')+'</div>';
+    app.innerHTML=h;
+    var m=document.getElementById('more'); if(m) m.onclick=function(){document.getElementById('hist').innerHTML=hist.map(function(r){return it(r);}).join('');m.remove();};
+    bar.style.display='';
+    if(d.acknowledged){ barIn.innerHTML='<div class="done">✓ You\'ve read and acknowledged these notes.</div>'; }
+    else{
+      barIn.innerHTML='<button class="btn" id="ack">I\'ve read these notes</button>';
+      document.getElementById('ack').onclick=function(){
+        var b=this; b.disabled=true; b.textContent='Saving…';
+        call('notes_ack').then(function(r){ if(r.error){b.disabled=false;b.textContent='Try again';alert(r.error);return;} barIn.innerHTML='<div class="done">✓ Thanks, '+esc(d.first_name)+'. Your manager can see you\'ve read these.</div>'; })
+          .catch(function(){b.disabled=false;b.textContent='Try again';});
+      };
+    }
+  }
+  if(!t){fail('This link is missing its code. Open it from your email again.');return;}
+  call('notes_load').then(function(d){ if(d.error) fail(d.error); else render(d); }).catch(function(){fail('Couldn\'t load. Check your connection and try again.');});
+})();
+</script>
+</body>
+</html>
