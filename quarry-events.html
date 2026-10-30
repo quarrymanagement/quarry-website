@@ -1386,6 +1386,8 @@
             }
         }
     </style>
+<script src="/assets/js/sales-gate.js"></script>
+<style>#registrationForm.qg-locked > *:not(#salesGatePanel){display:none!important}</style>
 </head>
 <body>
     <!-- Header -->
@@ -1402,6 +1404,7 @@
                         <a href="/quarry-brunch">Brunch Menu</a>
                     </div>
                 </div>
+                <div class="nav-item"><a href="/whoville" class="nav-link" style="color:#9fe870;">Whoville</a></div>
                 <div class="nav-item"><a href="/quarry-golf" class="nav-link">Hole-In-One Golf</a></div>
                 <div class="nav-item">
                     <a href="#" class="nav-link">Entertainment ▾</a>
@@ -1506,6 +1509,7 @@
                     <p style="font-size:14px;color:#666;">Complete your registration details.</p>
                 </div>
                 <form id="registrationForm" onsubmit="handleFormSubmit(event)">
+                    <div id="salesGatePanel" style="display:none"></div>
                     <div class="form-group">
                         <label for="fullName">Full Name *</label>
                         <input type="text" id="fullName" name="fullName" required>
@@ -1551,12 +1555,19 @@
 
                     <div class="form-group" id="partySizeGroup" style="display:none;">
                         <label for="partySize">Number of Tickets *</label>
-                        <input type="number" id="partySize" name="partySize" min="1" max="10" value="1" required onchange="updateOrderSummary()">
+                        <input type="number" id="partySize" name="partySize" min="1" max="10" value="1" required onchange="renderArrivalSlots(); updateOrderSummary()" oninput="renderArrivalSlots(); updateOrderSummary()">
                     </div>
 
                     <div class="form-group" id="arrivalGroup" style="display:none;">
+                        <div id="arrivalPoolWrap" style="display:none;margin-bottom:12px;">
+                            <label for="arrivalPool">Seating *</label>
+                            <select id="arrivalPool" onchange="window.__arrivalRoll = null; renderArrivalSlots(); applyArrivalLock(); updateOrderSummary();"><option value="table">Table</option><option value="bar">Bar seating</option></select>
+                            <div id="arrivalPoolNote" style="display:none;font-size:13px;color:#c9a227;margin-top:6px;"></div>
+                        </div>
                         <label for="arrivalSlot">Arrival Time *</label>
-                        <select id="arrivalSlot" name="arrivalSlot" onchange="applyArrivalLock(); updateUnitCountUI(); renderTierSplit(); updateOrderSummary();"></select>
+                        <select id="arrivalSlot" name="arrivalSlot" onchange="window.__arrivalRoll = null; renderArrivalSlots(); applyArrivalLock(); updateUnitCountUI(); renderTierSplit(); updateOrderSummary();"></select>
+                        <div id="arrivalWindow" style="display:none;font-weight:600;margin-top:6px;"></div>
+                        <label id="arrivalExtendBox" style="display:none;margin-top:8px;font-size:14px;cursor:pointer;text-transform:none;letter-spacing:normal;"><input type="checkbox" id="arrivalExtend" onchange="showArrivalWindow(); updateOrderSummary();" style="width:auto;margin-right:6px;"><span></span></label>
                         <div id="arrivalHint" style="font-size:13px;opacity:.75;margin-top:4px;">We stagger arrivals so the buffet and bar aren't swamped. Please arrive at your chosen time.</div>
                     </div>
 
@@ -1723,6 +1734,7 @@
                 // Filter to only Active events (admin can set Inactive to hide)
                 // AND drop events whose date has passed (compare in local time, midnight cutoff).
                 const today = new Date(); today.setHours(0,0,0,0);
+                showTimedConfirmation(allEvents);
                 allEvents = allEvents.filter(evt => {
                     // Hidden from the public site: cancelled/inactive events, and drafts.
                     // "Draft" previously did NOT hide anything, which surprised the owner.
@@ -2200,20 +2212,21 @@
             const cards = allEvents.map(createEventCard);
             const decIdx = allEvents.findIndex(e => String(e.date || '') >= '2026-12-01');
             const insertAt = decIdx === -1 ? cards.length : decIdx;
-            cards.splice(insertAt, 0, christmasSpiritsPlaceholderCard());
+            // Hidden automatically once the Whoville nights are published (status "available").
+            if (!allEvents.some(e => /^evt-whoville-/.test(String(e.id || '')))) cards.splice(insertAt, 0, christmasSpiritsPlaceholderCard());
             grid.innerHTML = cards.join("");
             filterEvents(currentFilter);
         }
 
         function christmasSpiritsPlaceholderCard() {
             return `
-                <div class="event-card cs-placeholder" data-category="Ticketed" style="cursor:default;">
-                    <img src="/assets/social-uploads/christmas-spirits-teaser-1080x1350.png" alt="Christmas Spirits in Whoville at The Quarry" loading="lazy" style="display:block;width:100%;aspect-ratio:1080/1350;object-fit:cover;background:#123322;">
+                <a href="/whoville" class="event-card cs-placeholder" data-category="Ticketed" style="display:block;color:inherit;text-decoration:none;">
+                    <img src="/assets/social-uploads/christmas-spirits-tickets-onsale-1080x1350.jpg" alt="Christmas Spirits in Whoville at The Quarry" loading="lazy" style="display:block;width:100%;aspect-ratio:1080/1350;object-fit:cover;background:#123322;">
                     <div class="event-body">
                         <h3 class="event-name">Christmas Spirits in Whoville</h3>
-                        <p class="event-description">December weekends. Tickets on sale Sunday, Nov 1.</p>
+                        <p class="event-description">$25 a person &middot; 2-hour reservations &middot; arrivals from 4:30 PM. Dec 4, 5, 11, 12, 18 &amp; 19. Tickets on sale Sun, Nov 1 at 10 AM.</p>
                     </div>
-                </div>
+                </a>
             `;
         }
 
@@ -2328,6 +2341,8 @@
                 seatingSelect.required = false;
                 partySizeInput.required = true;
                 partySizeInput.value = 1;
+                // Per-person events may allow big groups (arrival-time limits still apply).
+                partySizeInput.max = String(parseInt(currentEventForModal.maxTicketsPerOrder, 10) || 10);
             }
 
             // Toggle "Partner / +1 Name" field for events flagged as 2-person admission
@@ -2424,6 +2439,7 @@
         // registration log, never from a stored counter. Events with no
         // arrivalSlots behave exactly as they always did.
 
+        (function () { var orig = openModal; openModal = function (i) { var r = orig.apply(this, arguments); mountSalesGate(); return r; }; })();
         function arrivalSlotsForModal() {
             const ev = currentEventForModal;
             return (ev && Array.isArray(ev.arrivalSlots)) ? ev.arrivalSlots : [];
@@ -2477,9 +2493,111 @@
         }
 
         /** Units still free in a wave. No capacity means unlimited. */
+
+        // Room limit across overlapping arrival times (mirrors event-register.js
+        // arrivalRoomLeft). Events without arrivalRoomCap are unaffected.
+        function arrivalClockMin(t) { var p = String(t || '').split(':'); return (parseInt(p[0], 10) || 0) * 60 + (parseInt(p[1], 10) || 0); }
+        function arrivalRoomLeftFor(ev, slot, wantStay) {
+            // Bar stagger: slots carry pool "table"/"bar" and each pool has its own cap (arrivalPoolCaps).
+            var pools = ev && ev.arrivalPoolCaps, pool = slot && slot.pool;
+            var room = arrivalRoomLeftIn(ev, slot, wantStay, parseInt(ev && ev.arrivalRoomCap, 10), null);
+            if (pools && pool && pools[pool] != null) room = Math.min(room, arrivalRoomLeftIn(ev, slot, wantStay, parseInt(pools[pool], 10), pool));
+            return room;
+        }
+        function arrivalRoomLeftIn(ev, slot, wantStay, cap, pool) {
+            // Each booking holds its spot from arrival for the stay, or twice that with the extra 2 hours (extraStay).
+            if (!cap || !slot || !slot.start) return Infinity;
+            var stay = parseInt(ev.arrivalStayMinutes, 10) || 120, reset = Math.max(0, parseInt(ev.arrivalResetMinutes, 10) || 0);
+            var want = (wantStay || stay) + reset, startOf = {}, groups = [];   // seats free up at start + stay + table reset
+            (ev.arrivalSlots || []).forEach(function (x) { if (x && x.start && (!pool || (x.pool || 'table') === pool)) startOf[String(x.id || '').trim().toLowerCase()] = arrivalClockMin(x.start); });
+            (ev.registrations || []).forEach(function (r) {
+                var st = startOf[String((r && r.arrivalSlot) || '').trim().toLowerCase()];
+                if (st === undefined) return;
+                groups.push({ s: st, e: st + (r.extraStay ? 2 * stay : stay) + reset, q: parseInt(r.qty, 10) || 1 });
+            });
+            var s0 = arrivalClockMin(slot.start), worst = 0;
+            var moments = [s0].concat(groups.map(function (g) { return g.s; }).filter(function (t) { return t > s0 && t < s0 + want; }));
+            moments.forEach(function (m) {
+                var inside = 0;
+                groups.forEach(function (g) { if (g.s <= m && m < g.e) inside += g.q; });
+                if (inside > worst) worst = inside;
+            });
+            return cap - worst;
+        }
+
+        /** Bar stagger: which pool (table/bar) the guest chose; '' when the event has no pools. */
+        function arrivalPoolsOn(ev) { return !!(ev && ev.arrivalPoolCaps && (ev.arrivalSlots || []).some(function (x) { return x && x.pool === 'bar'; })); }
+        function arrivalBarMax(ev) { var m = 0; (ev.arrivalSlots || []).forEach(function (x) { if (x && x.pool === 'bar') m = Math.max(m, parseInt(x.capacity, 10) || 0); }); return m; }
+        /** Shows the Table / Bar seating picker and returns the chosen pool. Bar is greyed out for groups bigger than a bar time holds. */
+        function syncArrivalPool(ev, want, wrapId, selId, noteId) {
+            var wrap = document.getElementById(wrapId), sel = document.getElementById(selId), note = document.getElementById(noteId);
+            if (!arrivalPoolsOn(ev)) { if (wrap) wrap.style.display = 'none'; return ''; }
+            if (!wrap || !sel) return 'table';
+            wrap.style.display = 'block';
+            var max = arrivalBarMax(ev), bar = sel.querySelector('option[value="bar"]'), msg = '';
+            if (bar) {
+                bar.disabled = want > max;
+                bar.textContent = want > max ? 'Bar seating (groups of ' + max + ' or fewer)' : 'Bar seating (groups up to ' + max + ')';
+            }
+            if (sel.value === 'bar' && want > max) { sel.value = 'table'; sel.dataset.switched = '1'; }
+            if (want <= max) sel.dataset.switched = '';
+            if (sel.dataset.switched && sel.value === 'table') msg = 'Bar seating is for groups of ' + max + ' or fewer, so we switched you to a table.';
+            if (note) { note.textContent = msg; note.style.display = msg ? 'block' : 'none'; }
+            return sel.value || 'table';
+        }
+        /** Second 2-hour block: only when offered, it ends by the cut-off, and the room has space for the whole party all 4 hours. */
+        function arrivalExtendOk(ev, slot, qty) {
+            var pct = parseFloat(ev && ev.arrivalExtendPct);
+            if (!(pct >= 0) || !slot || !slot.start || !ev.arrivalRoomCap) return false;
+            var stay = parseInt(ev.arrivalStayMinutes, 10) || 120, latest = ev.arrivalExtendLatestEnd || ev.endTime;
+            if (latest && arrivalClockMin(slot.start) + 2 * stay > arrivalClockMin(latest)) return false;
+            return arrivalRoomLeftFor(ev, slot, 2 * stay) >= qty;
+        }
+        function arrivalExtendPrice(ev) {
+            var base = (ev.tiers && ev.tiers[0] && ev.tiers[0].pricePerPerson) || ev.price || 0;
+            return Math.round(base * (1 - (parseFloat(ev.arrivalExtendPct) || 0) / 100));
+        }
+        /** Shows/hides the extra-2-hours checkbox and keeps "Your time" in step. */
+        function renderArrivalExtend(ev, slot, qty, boxId, windowId) {
+            var box = document.getElementById(boxId), win = document.getElementById(windowId);
+            var ok = arrivalExtendOk(ev, slot, qty);
+            var cb = box && box.querySelector('input');
+            if (box) {
+                if (!ok && cb) cb.checked = false;
+                box.style.display = ok ? 'block' : 'none';
+                var lab = box.querySelector('span');
+                if (lab && ok) lab.textContent = 'Add a second 2-hour block: your time becomes ' + arrivalWindowText(ev, slot, true) + '. $' + (arrivalExtendPrice(ev) / 100).toFixed(2) + ' per ticket (' + ev.arrivalExtendPct + '% off).' + (window.QuarryGate && QuarryGate.extNote ? QuarryGate.extNote(ev) : '');
+            }
+            var ext = !!(ok && cb && cb.checked);
+            var w = arrivalWindowText(ev, slot, ext);
+            if (win) { win.textContent = w ? 'Your time: ' + w : ''; win.style.display = w ? 'block' : 'none'; }
+            return ext;
+        }
+        /** Adds the extra-2-hours line to an already-rendered order summary. */
+        function addExtendToSummary(ev, qty, detailsEl, totalEl) {
+            if (!detailsEl || !totalEl) return;
+            var cents = arrivalExtendPrice(ev) * qty;
+            var line = document.createElement('div'); line.className = 'summary-line'; line.setAttribute('data-extend', '1');
+            line.style.cssText = 'display:flex;justify-content:space-between;';
+            var a = document.createElement('span'); a.textContent = 'Extra 2 hours (' + ev.arrivalExtendPct + '% off) \u00d7 ' + qty;
+            var b = document.createElement('span'); b.textContent = '$' + (cents / 100).toFixed(2);
+            line.appendChild(a); line.appendChild(b); detailsEl.appendChild(line);
+            var cur = parseFloat(String(totalEl.textContent).replace(/[^0-9.]/g, '')) || 0;
+            totalEl.textContent = '$' + (cur + cents / 100).toFixed(2);
+        }
+
         function arrivalSlotLeft(slot) {
-            if (!slot || slot.capacity == null || slot.capacity === '') return Infinity;
-            return (parseInt(slot.capacity, 10) || 0) - arrivalUnitsUsed(slot);
+            const room = arrivalRoomLeftFor(currentEventForModal, slot);
+            if (!slot || slot.capacity == null || slot.capacity === '') return room;
+            return Math.min(room, (parseInt(slot.capacity, 10) || 0) - arrivalUnitsUsed(slot));
+        }
+
+        /** Tickets wanted, for events sold per person (no seating options). */
+        function arrivalPartyWanted() {
+            const ev = currentEventForModal;
+            if (!ev || (Array.isArray(ev.seatingOptions) && ev.seatingOptions.length)) return 1;
+            const ps = document.getElementById('partySize');
+            return Math.max(1, parseInt(ps && ps.value, 10) || 1);
         }
 
         /**
@@ -2520,20 +2638,27 @@
             const prev = sel.value;
             let permitted = 0;
             let anyOpen = false;
+            let anyFits = false;
+            const want = arrivalPartyWanted();
+            const pool = syncArrivalPool(currentEventForModal, want, 'arrivalPoolWrap', 'arrivalPool', 'arrivalPoolNote');
             let out = '';
             for (let i = 0; i < slots.length; i++) {
                 const s = slots[i];
                 if (!arrivalSlotAllowsOption(s, opt)) continue;
+                if (pool && (s.pool || 'table') !== pool) continue;
                 permitted++;
                 const left = arrivalSlotLeft(s);
                 let label = String(s.label || s.id || '');
+                const tooSmall = left > 0 && left < want;
                 if (left <= 0) {
                     label += ' — full';
                 } else {
                     anyOpen = true;
-                    if (isFinite(left) && left <= 3) label += ' — ' + left + ' left';
+                    if (!tooSmall) anyFits = true;
+                    if (tooSmall) label += ' — only ' + left + ' left';
+                    else if (isFinite(left) && left <= (want > 1 || s.start ? 10 : 3)) label += ' — ' + left + ' left';
                 }
-                out += `<option value="${s.id || ''}" data-left="${left}"${left <= 0 ? ' disabled' : ''}>${label}</option>`;
+                out += `<option value="${s.id || ''}" data-i="${i}" data-left="${left}"${(left <= 0 || tooSmall) ? ' disabled' : ''}>${label}</option>`;
             }
             sel.innerHTML = out;
 
@@ -2541,27 +2666,73 @@
             for (let k = 0; k < sel.options.length; k++) {
                 if (sel.options[k].value === prev && !sel.options[k].disabled) { pick = k; break; }
             }
+            // If the time they had picked is now full, roll forward to the NEXT open
+            // time (not back to the earliest) and say so.
+            let rolledFrom = '';
+            const prevIdx = prev ? slots.findIndex(function (x) { return String(x.id) === prev && (!pool || (x.pool || 'table') === pool); }) : -1;   // switching Table/Bar is not a roll
+            if (pick === -1 && prevIdx >= 0) {
+                for (let m = 0; m < sel.options.length; m++) {
+                    if (!sel.options[m].disabled && Number(sel.options[m].getAttribute('data-i')) > prevIdx) { pick = m; break; }
+                }
+                if (pick !== -1 && arrivalSlotAllowsOption(slots[prevIdx], opt)) rolledFrom = String(slots[prevIdx].label || '') + (want > 1 && arrivalSlotLeft(slots[prevIdx]) > 0 ? ' doesn\'t have room for ' + want : ' just filled up');
+            }
             if (pick === -1) {
                 for (let m = 0; m < sel.options.length; m++) {
                     if (!sel.options[m].disabled) { pick = m; break; }
                 }
             }
             sel.selectedIndex = pick >= 0 ? pick : 0;
+            // Keep the "we moved you" note through repeat renders (typing, blur) until the guest picks a time.
+            if (rolledFrom) window.__arrivalRoll = { to: sel.value, msg: rolledFrom };
+            else if (window.__arrivalRoll && window.__arrivalRoll.to === sel.value) rolledFrom = window.__arrivalRoll.msg;
+            else window.__arrivalRoll = null;
+            const hintEl = document.getElementById('arrivalHint');
+            if (hintEl) {
+                const ev = currentEventForModal || {};
+                hintEl.textContent = (rolledFrom ? rolledFrom + ', so we moved you to the next time that does. ' : (permitted > 0 && anyOpen && !anyFits ? 'No single arrival time has room for ' + want + '. Try fewer tickets, or split your group across two times. ' : '')) +
+                    (ev.arrivalHint || "We stagger arrivals so the buffet and bar aren\'t swamped. Please arrive at your chosen time.");
+            }
 
             if (grp) grp.style.display = permitted > 0 ? 'block' : 'none';
             sel.required = permitted > 0;
-            window.allArrivalFull = (permitted > 0 && !anyOpen);
+            showArrivalWindow();
+            window.allArrivalFull = (permitted > 0 && !anyFits);
+            window.arrivalLockText = anyOpen ? 'Too many for one arrival time' : 'Arrival times full';
             applyArrivalLock();
+        }
+
+
+        /** "5:05–7:05 PM" for a timed arrival (slot.start + event.arrivalStayMinutes); '' otherwise. */
+        function arrivalWindowText(ev, slot, extended) {
+            if (!slot || !slot.start || !ev || !ev.arrivalStayMinutes) return '';
+            var p = String(slot.start).split(':'); var s = (+p[0]) * 60 + (+p[1] || 0);
+            if (isNaN(s)) return '';
+            var e = s + (parseInt(ev.arrivalStayMinutes, 10) || 120) * (extended ? 2 : 1);
+            function f(m) { m = ((m % 1440) + 1440) % 1440; var h = Math.floor(m / 60), mm = m % 60; return { t: ((h % 12) || 12) + ':' + (mm < 10 ? '0' : '') + mm, ap: h < 12 ? 'AM' : 'PM' }; }
+            var a = f(s), b = f(e);
+            return a.ap === b.ap ? (a.t + '\u2013' + b.t + ' ' + b.ap) : (a.t + ' ' + a.ap + '\u2013' + b.t + ' ' + b.ap);
+        }
+
+        function showArrivalWindow() {
+            var sel = document.getElementById('arrivalSlot');
+            if (!sel) return false;
+            var ev = currentEventForModal || {}, id = sel.value;
+            var slot = (ev.arrivalSlots || []).find(function (x) { return String(x.id) === String(id); });
+            return renderArrivalExtend(ev, slot, arrivalPartyWanted(), 'arrivalExtendBox', 'arrivalWindow');
+        }
+        function arrivalExtendChosen() {
+            var box = document.getElementById('arrivalExtendBox'), cb = document.getElementById('arrivalExtend');
+            return !!(box && cb && box.style.display !== 'none' && cb.checked);
         }
 
         /** Every permitted wave full beats whatever the pricing logic decided. */
         function applyArrivalLock() {
             const btn = document.getElementById('submitBtn');
-            if (!btn) return;
+            if (!btn || btn.dataset.qgLocked) return;   // the on-sale gate owns the button while locked
             if (window.allArrivalFull) {
                 btn.disabled = true;
-                btn.textContent = 'Arrival times full';
-            } else if (btn.textContent === 'Arrival times full') {
+                btn.textContent = window.arrivalLockText || 'Arrival times full';
+            } else if (btn.textContent === 'Arrival times full' || btn.textContent === 'Too many for one arrival time') {
                 btn.disabled = false;
                 btn.textContent = 'Proceed to Payment';
             }
@@ -2760,6 +2931,34 @@
          * Update order summary based on selections
          */
         function updateOrderSummary() {
+            updateOrderSummaryBase();
+            if (currentEventForModal && arrivalExtendChosen()) addExtendToSummary(currentEventForModal, arrivalPartyWanted(), document.getElementById('summaryDetails'), document.getElementById('summaryTotal'));
+            if (currentEventForModal && window.__gate && window.__gate.applied && window.QuarryGate) QuarryGate.addDiscountLine(currentEventForModal, arrivalPartyWanted(), arrivalExtendChosen(), document.getElementById('summaryDetails'), document.getElementById('summaryTotal'));
+            applySalesGateLock();
+        }
+        /* On-sale gate + wine club code (assets/js/sales-gate.js). No-op for events without onSaleAt/memberCode. */
+        function mountSalesGate() {
+            if (window.__gate) window.__gate.destroy();
+            window.__gate = null;
+            var panel = document.getElementById('salesGatePanel');
+            if (!panel || !window.QuarryGate || !currentEventForModal) { applySalesGateLock(); return; }
+            window.__gate = QuarryGate.mount(currentEventForModal, panel, { onChange: function () { if (typeof showArrivalWindow === 'function') showArrivalWindow(); updateOrderSummary(); } });
+            updateOrderSummary();
+        }
+        function applySalesGateLock() {
+            var form = document.getElementById('registrationForm'), btn = document.getElementById('submitBtn');
+            var g = window.__gate, locked = !!(g && g.locked);
+            if (form) form.classList.toggle('qg-locked', locked);
+            if (!btn) return;
+            if (locked) {
+                btn.dataset.qgLocked = '1'; btn.disabled = true;
+                btn.textContent = g.phase === 'soon' ? 'Tickets aren\u2019t on sale yet' : 'Early access: enter your code above';
+            } else if (btn.dataset.qgLocked) {
+                delete btn.dataset.qgLocked; btn.disabled = false; btn.textContent = 'Proceed to Payment';
+                if (typeof applyArrivalLock === 'function') applyArrivalLock();
+            }
+        }
+        function updateOrderSummaryBase() {
             if (!currentEventForModal) return;
 
             const summaryDiv = document.getElementById("orderSummary");
@@ -2963,6 +3162,9 @@
                 if (seatingOptionId) {
                     payload.seatingOptionId = seatingOptionId;
                 }
+                if (arrivalExtendChosen()) payload.extendStay = true;
+                if (window.__gate && window.__gate.locked) throw new Error('Tickets aren\u2019t on sale yet.');
+                if (window.__gate && window.__gate.applied) payload.memberCode = window.__gate.code;
                 const arrivalSel = document.getElementById("arrivalSlot");
                 if (arrivalSel && arrivalSel.value) {
                     payload.arrivalSlot = arrivalSel.value;
@@ -3024,6 +3226,26 @@
             `;
 
             modalFooter.style.display = "none";
+        }
+
+        /** After Square checkout for a timed-arrival event: show the guest's own start and end time and the policy. */
+        function showTimedConfirmation(events) {
+            var q = new URLSearchParams(window.location.search);
+            if (q.get('registration') !== 'success' || !q.get('arrival')) return;
+            var ev = (events || []).find(function (e) { return String(e.id) === String(q.get('event')); });
+            var slot = ev && (ev.arrivalSlots || []).find(function (x) { return String(x.id) === String(q.get('arrival')); });
+            var w = arrivalWindowText(ev, slot, q.get('ext') === '1');
+            var banner = document.getElementById('successBanner');
+            if (!banner) return;
+            banner.textContent = '';
+            var h = document.createElement('div'); h.style.fontWeight = '700';
+            h.textContent = '✓ You\'re booked' + (ev ? ' for ' + ev.name : '') + '!';
+            banner.appendChild(h);
+            if (w) { var t = document.createElement('div'); t.style.cssText = 'font-size:1.15em;font-weight:700;margin:6px 0;'; t.textContent = 'Your time: ' + w + (slot && slot.pool === 'bar' ? ' (bar seating)' : ''); banner.appendChild(t); }
+            if (q.get('promo')) { var dp = document.createElement('div'); dp.style.cssText = 'font-weight:600;margin:4px 0;'; dp.textContent = (ev && ev.memberCode && ev.memberCode.label || 'Member') + ' ' + q.get('promo').replace(/[^0-9.]/g, '') + '% off applied'; banner.appendChild(dp); }
+            if (ev && ev.arrivalHint) { var pp = document.createElement('div'); pp.style.cssText = 'font-weight:400;font-size:.95em;'; pp.textContent = ev.arrivalHint; banner.appendChild(pp); }
+            var m = document.createElement('div'); m.style.cssText = 'font-weight:400;font-size:.9em;margin-top:6px;opacity:.85;'; m.textContent = 'Check your email for your confirmation.'; banner.appendChild(m);
+            banner.style.display = 'block';   // stays up (no auto-hide) so the guest can read their time
         }
 
         /**
@@ -3126,7 +3348,7 @@
         document.addEventListener("DOMContentLoaded", async function() {
             // Check for registration success parameter
             const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get("registered") === "1") {
+            if (urlParams.get("registered") === "1" || (urlParams.get("registration") === "success" && !urlParams.get("arrival"))) {
                 showSuccessBanner();
             }
 

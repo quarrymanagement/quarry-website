@@ -279,6 +279,11 @@ function matchSeatingOption(note: string, options: any[]): { seatingOptionId: st
   return null;
 }
 
+function memberPromoFromNote(note: string): string {
+  const m = /\[([^\[\]]*\d+% off)\]/.exec(String(note || ""));
+  return m ? m[1].trim() : "";
+}
+
 function matchArrivalSlot(note: string, slots: any[]): { arrivalSlot: string; arrivalLabel: string } | null {
   const n = String(note || "").toLowerCase();
   if (!n) return null;
@@ -412,7 +417,7 @@ async function sendEmail(to: string, subject: string, html: string, replyTo?: st
 
 type PendingEmail = {
   ev: any; email: string; qty: number; paymentId: string;
-  seatingOptionName: string; seats: number; arrivalLabel: string;
+  seatingOptionName: string; seats: number; arrivalLabel: string; extraStay?: boolean; memberPromo?: string;
   amountCents?: number; currency?: string;
   addOns?: MatchedAddOn[];
 };
@@ -427,11 +432,29 @@ function formatAddOns(addOns: MatchedAddOn[] | undefined): string {
 // Guest confirmation + venue alert. Only ever called for a newly added, non-backfilled
 // registration AFTER the GitHub write succeeded. Each send is isolated so a failure
 // can never prevent — or undo — the registration being recorded.
+// Timed arrivals (Whoville, 2026-10-30): "5:05–7:05 PM" from the slot's start and the
+// event's arrivalStayMinutes. Empty for every other event, so their emails are unchanged.
+function arrivalWindowText(ev: any, arrivalLabel: string, extraStay = false): string {
+  if (!ev || !ev.arrivalStayMinutes || !arrivalLabel) return "";
+  const slot = (ev.arrivalSlots || []).find((x: any) => x && String(x.label || "").trim() === String(arrivalLabel).trim());
+  if (!slot || !slot.start) return "";
+  const p = String(slot.start).split(":");
+  const s = (parseInt(p[0], 10) || 0) * 60 + (parseInt(p[1], 10) || 0);
+  const e = s + (parseInt(ev.arrivalStayMinutes, 10) || 120) * (extraStay ? 2 : 1);
+  const f = (m: number) => { m = ((m % 1440) + 1440) % 1440; const h = Math.floor(m / 60), mm = m % 60; return { t: ((h % 12) || 12) + ":" + String(mm).padStart(2, "0"), ap: h < 12 ? "AM" : "PM" }; };
+  const a = f(s), b = f(e);
+  return a.ap === b.ap ? `${a.t}\u2013${b.t} ${b.ap}` : `${a.t} ${a.ap}\u2013${b.t} ${b.ap}`;
+}
+
 async function sendRegistrationEmails(pe: PendingEmail): Promise<void> {
   const ev = pe.ev || {};
   const eventName = String(ev.name || "");
   const dateLine = formatEventDate(ev.date);
-  const timeLine = formatEventTime(ev.time);
+  const baseWindow = arrivalWindowText(ev, pe.arrivalLabel, !!pe.extraStay);
+  const windowLine = baseWindow && pe.extraStay ? baseWindow + " (includes your extra 2 hours)" : baseWindow;
+  const policyLine = windowLine ? String(ev.arrivalHint || "") : "";
+  // Timed events: the guest's own start and end time replaces the event's opening time.
+  const timeLine = windowLine || formatEventTime(ev.time);
   const booked = formatBooked(pe.qty, pe.seatingOptionName, pe.seats);
   const paidLine = formatAmount(pe.amountCents);
   const reference = String(pe.paymentId || "");
@@ -442,6 +465,7 @@ async function sendRegistrationEmails(pe: PendingEmail): Promise<void> {
   if (timeLine) rows.push(`<tr><td style="padding:6px 12px 6px 0;color:#666;">Time</td><td style="padding:6px 0;"><strong>${esc(timeLine)}</strong></td></tr>`);
   rows.push(`<tr><td style="padding:6px 12px 6px 0;color:#666;">Booked</td><td style="padding:6px 0;"><strong>${esc(booked)}</strong></td></tr>`);
   if (addOnLine) rows.push(`<tr><td style="padding:6px 12px 6px 0;color:#666;">Add-ons</td><td style="padding:6px 0;"><strong>${esc(addOnLine)}</strong></td></tr>`);
+  if (pe.memberPromo) rows.push(`<tr><td style="padding:6px 12px 6px 0;color:#666;">Discount</td><td style="padding:6px 0;"><strong>${esc(pe.memberPromo)}</strong></td></tr>`);
   if (paidLine) rows.push(`<tr><td style="padding:6px 12px 6px 0;color:#666;">Paid</td><td style="padding:6px 0;"><strong>${esc(paidLine)}</strong></td></tr>`);
   if (reference) rows.push(`<tr><td style="padding:6px 12px 6px 0;color:#666;">Reference</td><td style="padding:6px 0;"><span style="font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;">${esc(reference)}</span></td></tr>`);
 
@@ -449,7 +473,8 @@ async function sendRegistrationEmails(pe: PendingEmail): Promise<void> {
 <div style="max-width:560px;margin:0 auto;padding:24px 20px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;line-height:1.55;color:#222;">
   <h1 style="margin:0 0 6px;font-size:22px;line-height:1.3;">You're booked!</h1>
   <p style="margin:0 0 18px;font-size:18px;"><strong>${esc(eventName)}</strong></p>
-  ${pe.arrivalLabel ? `<p style="margin:0 0 18px;padding:12px 14px;background:#fff;border-left:4px solid #7a6a55;border-radius:4px;font-size:17px;"><strong>Please arrive at ${esc(pe.arrivalLabel)}</strong></p>` : ""}
+  ${windowLine ? `<p style="margin:0 0 18px;padding:12px 14px;background:#fff;border-left:4px solid #7a6a55;border-radius:4px;font-size:17px;"><strong>Your time: ${esc(windowLine)}</strong><br>Please arrive at ${esc(pe.arrivalLabel)}</p>${policyLine ? `<p style="margin:0 0 18px;font-size:15px;">${esc(policyLine)}</p>` : ""}`
+    : pe.arrivalLabel ? `<p style="margin:0 0 18px;padding:12px 14px;background:#fff;border-left:4px solid #7a6a55;border-radius:4px;font-size:17px;"><strong>Please arrive at ${esc(pe.arrivalLabel)}</strong></p>` : ""}
   <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;background:#fff;border-radius:6px;padding:4px 14px;margin:0 0 8px;font-size:16px;">
     ${rows.join("")}
   </table>
@@ -464,11 +489,13 @@ async function sendRegistrationEmails(pe: PendingEmail): Promise<void> {
   guestTextLines.push("You're booked!");
   guestTextLines.push("");
   if (eventName) { guestTextLines.push(eventName); guestTextLines.push(""); }
-  if (pe.arrivalLabel) { guestTextLines.push(`Please arrive at ${pe.arrivalLabel}`); guestTextLines.push(""); }
+  if (windowLine) { guestTextLines.push(`Your time: ${windowLine}`); guestTextLines.push(`Please arrive at ${pe.arrivalLabel}`); guestTextLines.push(""); if (policyLine) { guestTextLines.push(policyLine); guestTextLines.push(""); } }
+  else if (pe.arrivalLabel) { guestTextLines.push(`Please arrive at ${pe.arrivalLabel}`); guestTextLines.push(""); }
   if (dateLine) guestTextLines.push(`Date: ${dateLine}`);
   if (timeLine) guestTextLines.push(`Time: ${timeLine}`);
   guestTextLines.push(`Booked: ${booked}`);
   if (addOnLine) guestTextLines.push(`Add-ons: ${addOnLine}`);
+  if (pe.memberPromo) guestTextLines.push(`Discount: ${pe.memberPromo}`);
   if (paidLine) guestTextLines.push(`Paid: ${paidLine}`);
   if (reference) guestTextLines.push(`Reference: ${reference}`);
   guestTextLines.push("");
@@ -490,8 +517,9 @@ async function sendRegistrationEmails(pe: PendingEmail): Promise<void> {
     <tr><td style="padding:4px 14px 4px 0;color:#666;">Guest email</td><td style="padding:4px 0;">${esc(pe.email)}</td></tr>
     <tr><td style="padding:4px 14px 4px 0;color:#666;">Quantity</td><td style="padding:4px 0;">${esc(pe.qty)}</td></tr>
     <tr><td style="padding:4px 14px 4px 0;color:#666;">Seating option</td><td style="padding:4px 0;">${esc(pe.seatingOptionName || "—")}</td></tr>
-    <tr><td style="padding:4px 14px 4px 0;color:#666;">Arrival wave</td><td style="padding:4px 0;">${esc(pe.arrivalLabel || "—")}</td></tr>
+    <tr><td style="padding:4px 14px 4px 0;color:#666;">Arrival wave</td><td style="padding:4px 0;">${esc(pe.arrivalLabel || "—")}${windowLine ? ` (${esc(windowLine)})` : ""}</td></tr>
     <tr><td style="padding:4px 14px 4px 0;color:#666;">Add-ons</td><td style="padding:4px 0;">${esc(addOnLine || "—")}</td></tr>
+    <tr><td style="padding:4px 14px 4px 0;color:#666;">Discount</td><td style="padding:4px 0;">${esc(pe.memberPromo || "—")}</td></tr>
     <tr><td style="padding:4px 14px 4px 0;color:#666;">Paid</td><td style="padding:4px 0;">${esc(paidLine || "—")}</td></tr>
     <tr><td style="padding:4px 14px 4px 0;color:#666;">Payment id</td><td style="padding:4px 0;">${esc(pe.paymentId)}</td></tr>
     <tr><td style="padding:4px 14px 4px 0;color:#666;">Running total</td><td style="padding:4px 0;"><strong>${esc(ev.registeredCount ?? "?")} / ${esc(ev.totalCapacity ?? "?")}</strong></td></tr>
@@ -504,8 +532,9 @@ async function sendRegistrationEmails(pe: PendingEmail): Promise<void> {
     `Guest email: ${pe.email}`,
     `Quantity: ${pe.qty}`,
     `Seating option: ${pe.seatingOptionName || "—"}`,
-    `Arrival wave: ${pe.arrivalLabel || "—"}`,
+    `Arrival wave: ${pe.arrivalLabel || "—"}${windowLine ? ` (${windowLine})` : ""}`,
     `Add-ons: ${addOnLine || "—"}`,
+    `Discount: ${pe.memberPromo || "—"}`,
     `Paid: ${paidLine || "—"}`,
     `Payment id: ${pe.paymentId}`,
     `Running total: ${ev.registeredCount ?? "?"} / ${ev.totalCapacity ?? "?"}`,
@@ -631,6 +660,10 @@ async function applyRegistrations(regs: Reg[]): Promise<any[]> {
         const s = (ev.arrivalSlots || []).find((x: any) => x && String(x.id) === arrivalSlot);
         if (s && s.label) arrivalLabel = String(s.label);
       }
+      // Timed arrivals: "+ extra 2 hours" in the note = guest added the second 2-hour block.
+      const extraStay = !!arrivalSlot && /\+ extra 2 hours/i.test(reg.note || "");
+      // Member code (e.g. "[Wine club 10% off]") added by event-register.js before the trailing " xN".
+      const memberPromo = memberPromoFromNote(reg.note || "");
       const optForEmail = seatingOptionId ? (ev.seatingOptions || []).find((o: any) => o && String(o.id) === seatingOptionId) : null;
       const seats = Number(optForEmail && optForEmail.seats) || (seatMatch ? seatMatch.seats : 0) || 0;
 
@@ -659,6 +692,8 @@ async function applyRegistrations(regs: Reg[]): Promise<any[]> {
         // Staggered arrival wave, when the event offers one.
         ...(arrivalSlot ? { arrivalSlot } : {}),
         ...(arrivalLabel ? { arrivalLabel } : {}),
+        ...(extraStay ? { extraStay: true } : {}),
+        ...(memberPromo ? { memberPromo } : {}),
         ...(addOnMatches.length ? { addOns: addOnMatches } : {}),
         ...(reg.backfilled ? { backfilled: true } : {}),
       });
@@ -668,7 +703,7 @@ async function applyRegistrations(regs: Reg[]): Promise<any[]> {
       // Queue the emails: newly added only (never "already_recorded" — Square redelivers
       // payment.updated), and never on a backfill run.
       if (!reg.backfilled && reg.email) {
-        pendingEmails.push({ ev, email: reg.email, qty: reg.qty, paymentId: reg.paymentId, seatingOptionName, seats, arrivalLabel, amountCents: Number(reg.amountCents) || 0, currency: reg.currency || "USD", addOns: addOnMatches });
+        pendingEmails.push({ ev, email: reg.email, qty: reg.qty, paymentId: reg.paymentId, seatingOptionName, seats, arrivalLabel, extraStay, memberPromo, amountCents: Number(reg.amountCents) || 0, currency: reg.currency || "USD", addOns: addOnMatches });
       }
     }
     if (!changed) return statuses;

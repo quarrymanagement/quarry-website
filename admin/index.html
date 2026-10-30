@@ -7809,7 +7809,7 @@
                         dollars: s.pricePerSeat != null ? (s.pricePerSeat / 100) : null
                     }));
                     waves = ((ev && ev.arrivalSlots) || []).map(w => ({
-                        id: w.id || '', label: w.label || '',
+                        id: w.id || '', label: w.label || '', start: w.start || '', pool: w.pool || '',
                         capacity: w.capacity != null ? w.capacity : null,
                         appliesTo: Array.isArray(w.appliesTo) ? w.appliesTo.slice() : []
                     }));
@@ -7840,6 +7840,9 @@
                         // slug() does not turn the colon into a stray dash.
                         const label = String(w.label).trim();
                         const o = { id: w.id || slug(label.replace(/[:.]/g, '')), label: label };
+                        // Keep the clock time the room limit (arrivalRoomCap) counts from.
+                        if (w.start) o.start = w.start;
+                        if (w.pool) o.pool = w.pool;   // Whoville bar stagger: table/bar pool
                         // Blank capacity means unlimited, so omit the key entirely.
                         const cap = parseInt(w.capacity, 10);
                         if (w.capacity != null && w.capacity !== '' && !isNaN(cap)) o.capacity = cap;

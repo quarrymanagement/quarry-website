@@ -159,6 +159,8 @@
         .modal p { color: #ccc; font-size: .9rem; line-height: 1.6; margin-bottom: 20px; }
         .modal button { padding: 12px 30px; background: #d4af37; border: none; border-radius: 8px; color: #0a0a0a; font-weight: 600; cursor: pointer; font-family: 'Montserrat', sans-serif; }
     </style>
+<script src="/assets/js/sales-gate.js"></script>
+<style>#detailRegForm.qg-locked > *:not(#detailSalesGate):not(#detailSubmitBtn){display:none!important}</style>
 </head>
 <body>
     <!-- NAV -->
@@ -694,6 +696,7 @@
 
             // Form — matches the main events page modal exactly
             html += '<form class="reg-form" id="detailRegForm" onsubmit="return handleRegistration(event)">';
+            html += '<div id="detailSalesGate" style="display:none"></div>';
 
             html += '<label>Full Name *</label>';
             html += '<input type="text" name="fullName" id="detailFullName" required placeholder="Your full name">';
@@ -775,7 +778,7 @@
             } else {
                 // Number of Tickets
                 html += '<label id="detailPartySizeLabel">Number of Tickets *</label>';
-                html += '<input type="number" name="partySize" id="detailPartySize" min="1" max="20" value="1" required onchange="updateDetailSummary()">';
+                html += '<input type="number" name="partySize" id="detailPartySize" min="1" max="' + (parseInt(evt.maxTicketsPerOrder, 10) || 20) + '" value="1" required onchange="renderDetailArrivalSlots(); updateDetailSummary()" oninput="renderDetailArrivalSlots(); updateDetailSummary()">';
             }
 
             // ─── Staggered arrival wave ───
@@ -783,8 +786,11 @@
             // permitted set depends on which seating option is chosen.
             if (hasArrival) {
                 html += '<div id="detailArrivalGroup" style="margin-top:16px;">';
+                html += '<div id="detailArrivalPoolWrap" style="display:none;margin-bottom:12px;"><label>Seating *</label><select id="detailArrivalPool" onchange="window.__detailArrivalRoll = null; renderDetailArrivalSlots(); showDetailArrivalWindow(); updateDetailSummary();"><option value="table">Table</option><option value="bar">Bar seating</option></select><div id="detailArrivalPoolNote" style="display:none;font-size:13px;color:#c9a227;margin-top:6px;"></div></div>';
                 html += '<label>Arrival Time *</label>';
                 html += '<select name="arrivalSlot" id="detailArrivalSlot" required onchange="onDetailArrivalChange()"></select>';
+                html += '<div id="detailArrivalWindow" style="display:none;font-weight:600;margin-top:6px;"></div>';
+                html += '<label id="detailArrivalExtendBox" style="display:none;margin-top:8px;font-size:14px;cursor:pointer;text-transform:none;letter-spacing:normal;"><input type="checkbox" id="detailArrivalExtend" onchange="showDetailArrivalWindow(); updateDetailSummary();" style="width:auto;margin-right:6px;"><span></span></label>';
                 html += '<div id="detailArrivalHint" style="font-size:13px;color:#888;margin-top:6px;">We stagger arrivals so the buffet and bar aren\'t swamped. Please arrive at your chosen time.</div>';
                 html += '</div>';
             }
@@ -814,7 +820,7 @@
             }
 
             // Coupon Code
-            html += '<div id="detailCouponGroup" style="margin-top:16px;">';
+            html += '<div id="detailCouponGroup" style="margin-top:16px;' + (evt.memberCode ? 'display:none;' : '') + '">';
             html += '<label>Coupon Code</label>';
             html += '<div style="display:flex;gap:8px;">';
             html += '<input type="text" id="detailCouponCode" placeholder="Enter coupon code" style="flex:1;text-transform:uppercase;">';
@@ -842,6 +848,8 @@
             html += '</form>';
 
             card.innerHTML = html;
+            if (window.__gate) window.__gate.destroy();
+            window.__gate = window.QuarryGate ? QuarryGate.mount(evt, document.getElementById('detailSalesGate'), { onChange: function () { if (typeof showDetailArrivalWindow === 'function') showDetailArrivalWindow(); if (window.updateDetailSummary) window.updateDetailSummary(); } }) : null;
 
             // Initialize tier change handler and order summary
             onDetailTierChange();
@@ -939,9 +947,110 @@
         }
 
         /** Units still free in a wave. No capacity means unlimited. */
+
+        // Room limit across overlapping arrival times (mirrors event-register.js
+        // arrivalRoomLeft). Events without arrivalRoomCap are unaffected.
+        function arrivalClockMin(t) { var p = String(t || '').split(':'); return (parseInt(p[0], 10) || 0) * 60 + (parseInt(p[1], 10) || 0); }
+        function arrivalRoomLeftFor(ev, slot, wantStay) {
+            // Bar stagger: slots carry pool "table"/"bar" and each pool has its own cap (arrivalPoolCaps).
+            var pools = ev && ev.arrivalPoolCaps, pool = slot && slot.pool;
+            var room = arrivalRoomLeftIn(ev, slot, wantStay, parseInt(ev && ev.arrivalRoomCap, 10), null);
+            if (pools && pool && pools[pool] != null) room = Math.min(room, arrivalRoomLeftIn(ev, slot, wantStay, parseInt(pools[pool], 10), pool));
+            return room;
+        }
+        function arrivalRoomLeftIn(ev, slot, wantStay, cap, pool) {
+            // Each booking holds its spot from arrival for the stay, or twice that with the extra 2 hours (extraStay).
+            if (!cap || !slot || !slot.start) return Infinity;
+            var stay = parseInt(ev.arrivalStayMinutes, 10) || 120, reset = Math.max(0, parseInt(ev.arrivalResetMinutes, 10) || 0);
+            var want = (wantStay || stay) + reset, startOf = {}, groups = [];   // seats free up at start + stay + table reset
+            (ev.arrivalSlots || []).forEach(function (x) { if (x && x.start && (!pool || (x.pool || 'table') === pool)) startOf[String(x.id || '').trim().toLowerCase()] = arrivalClockMin(x.start); });
+            (ev.registrations || []).forEach(function (r) {
+                var st = startOf[String((r && r.arrivalSlot) || '').trim().toLowerCase()];
+                if (st === undefined) return;
+                groups.push({ s: st, e: st + (r.extraStay ? 2 * stay : stay) + reset, q: parseInt(r.qty, 10) || 1 });
+            });
+            var s0 = arrivalClockMin(slot.start), worst = 0;
+            var moments = [s0].concat(groups.map(function (g) { return g.s; }).filter(function (t) { return t > s0 && t < s0 + want; }));
+            moments.forEach(function (m) {
+                var inside = 0;
+                groups.forEach(function (g) { if (g.s <= m && m < g.e) inside += g.q; });
+                if (inside > worst) worst = inside;
+            });
+            return cap - worst;
+        }
+
+        /** Bar stagger: which pool (table/bar) the guest chose; '' when the event has no pools. */
+        function arrivalPoolsOn(ev) { return !!(ev && ev.arrivalPoolCaps && (ev.arrivalSlots || []).some(function (x) { return x && x.pool === 'bar'; })); }
+        function arrivalBarMax(ev) { var m = 0; (ev.arrivalSlots || []).forEach(function (x) { if (x && x.pool === 'bar') m = Math.max(m, parseInt(x.capacity, 10) || 0); }); return m; }
+        /** Shows the Table / Bar seating picker and returns the chosen pool. Bar is greyed out for groups bigger than a bar time holds. */
+        function syncArrivalPool(ev, want, wrapId, selId, noteId) {
+            var wrap = document.getElementById(wrapId), sel = document.getElementById(selId), note = document.getElementById(noteId);
+            if (!arrivalPoolsOn(ev)) { if (wrap) wrap.style.display = 'none'; return ''; }
+            if (!wrap || !sel) return 'table';
+            wrap.style.display = 'block';
+            var max = arrivalBarMax(ev), bar = sel.querySelector('option[value="bar"]'), msg = '';
+            if (bar) {
+                bar.disabled = want > max;
+                bar.textContent = want > max ? 'Bar seating (groups of ' + max + ' or fewer)' : 'Bar seating (groups up to ' + max + ')';
+            }
+            if (sel.value === 'bar' && want > max) { sel.value = 'table'; sel.dataset.switched = '1'; }
+            if (want <= max) sel.dataset.switched = '';
+            if (sel.dataset.switched && sel.value === 'table') msg = 'Bar seating is for groups of ' + max + ' or fewer, so we switched you to a table.';
+            if (note) { note.textContent = msg; note.style.display = msg ? 'block' : 'none'; }
+            return sel.value || 'table';
+        }
+        /** Second 2-hour block: only when offered, it ends by the cut-off, and the room has space for the whole party all 4 hours. */
+        function arrivalExtendOk(ev, slot, qty) {
+            var pct = parseFloat(ev && ev.arrivalExtendPct);
+            if (!(pct >= 0) || !slot || !slot.start || !ev.arrivalRoomCap) return false;
+            var stay = parseInt(ev.arrivalStayMinutes, 10) || 120, latest = ev.arrivalExtendLatestEnd || ev.endTime;
+            if (latest && arrivalClockMin(slot.start) + 2 * stay > arrivalClockMin(latest)) return false;
+            return arrivalRoomLeftFor(ev, slot, 2 * stay) >= qty;
+        }
+        function arrivalExtendPrice(ev) {
+            var base = (ev.tiers && ev.tiers[0] && ev.tiers[0].pricePerPerson) || ev.price || 0;
+            return Math.round(base * (1 - (parseFloat(ev.arrivalExtendPct) || 0) / 100));
+        }
+        /** Shows/hides the extra-2-hours checkbox and keeps "Your time" in step. */
+        function renderArrivalExtend(ev, slot, qty, boxId, windowId) {
+            var box = document.getElementById(boxId), win = document.getElementById(windowId);
+            var ok = arrivalExtendOk(ev, slot, qty);
+            var cb = box && box.querySelector('input');
+            if (box) {
+                if (!ok && cb) cb.checked = false;
+                box.style.display = ok ? 'block' : 'none';
+                var lab = box.querySelector('span');
+                if (lab && ok) lab.textContent = 'Add a second 2-hour block: your time becomes ' + arrivalWindowText(ev, slot, true) + '. $' + (arrivalExtendPrice(ev) / 100).toFixed(2) + ' per ticket (' + ev.arrivalExtendPct + '% off).' + (window.QuarryGate && QuarryGate.extNote ? QuarryGate.extNote(ev) : '');
+            }
+            var ext = !!(ok && cb && cb.checked);
+            var w = arrivalWindowText(ev, slot, ext);
+            if (win) { win.textContent = w ? 'Your time: ' + w : ''; win.style.display = w ? 'block' : 'none'; }
+            return ext;
+        }
+        /** Adds the extra-2-hours line to an already-rendered order summary. */
+        function addExtendToSummary(ev, qty, detailsEl, totalEl) {
+            if (!detailsEl || !totalEl) return;
+            var cents = arrivalExtendPrice(ev) * qty;
+            var line = document.createElement('div'); line.className = 'summary-line'; line.setAttribute('data-extend', '1');
+            line.style.cssText = 'display:flex;justify-content:space-between;';
+            var a = document.createElement('span'); a.textContent = 'Extra 2 hours (' + ev.arrivalExtendPct + '% off) \u00d7 ' + qty;
+            var b = document.createElement('span'); b.textContent = '$' + (cents / 100).toFixed(2);
+            line.appendChild(a); line.appendChild(b); detailsEl.appendChild(line);
+            var cur = parseFloat(String(totalEl.textContent).replace(/[^0-9.]/g, '')) || 0;
+            totalEl.textContent = '$' + (cur + cents / 100).toFixed(2);
+        }
+
         function detailArrivalLeft(slot) {
-            if (!slot || slot.capacity == null || slot.capacity === '') return Infinity;
-            return (parseInt(slot.capacity, 10) || 0) - detailArrivalUnitsUsed(slot);
+            var room = arrivalRoomLeftFor(eventData, slot);
+            if (!slot || slot.capacity == null || slot.capacity === '') return room;
+            return Math.min(room, (parseInt(slot.capacity, 10) || 0) - detailArrivalUnitsUsed(slot));
+        }
+
+        /** Tickets wanted, for events sold per person (no seating options). */
+        function detailArrivalPartyWanted() {
+            if (!eventData || (Array.isArray(eventData.seatingOptions) && eventData.seatingOptions.length)) return 1;
+            var ps = document.getElementById('detailPartySize');
+            return Math.max(1, parseInt(ps && ps.value, 10) || 1);
         }
 
         /**
@@ -964,20 +1073,27 @@
             var out = '';
             var permitted = 0;
             var anyOpen = false;
+            var anyFits = false;
+            var want = detailArrivalPartyWanted();
+            var pool = syncArrivalPool(eventData || {}, want, 'detailArrivalPoolWrap', 'detailArrivalPool', 'detailArrivalPoolNote');
             for (var i = 0; i < slots.length; i++) {
                 var s = slots[i];
                 if (!detailArrivalAllowsOption(s, opt)) continue;
+                if (pool && (s.pool || 'table') !== pool) continue;
                 permitted++;
                 var left = detailArrivalLeft(s);
                 var label = String(s.label || s.id || '');
+                var tooSmall = left > 0 && left < want;
                 if (left <= 0) {
                     label += ' — full';
                 } else {
                     anyOpen = true;
-                    if (isFinite(left) && left <= 3) label += ' — ' + left + ' left';
+                    if (!tooSmall) anyFits = true;
+                    if (tooSmall) label += ' — only ' + left + ' left';
+                    else if (isFinite(left) && left <= (want > 1 || s.start ? 10 : 3)) label += ' — ' + left + ' left';
                 }
-                out += '<option value="' + (s.id || '') + '" data-left="' + left + '"' +
-                       (left <= 0 ? ' disabled' : '') + '>' + label + '</option>';
+                out += '<option value="' + (s.id || '') + '" data-i="' + i + '" data-left="' + left + '"' +
+                       ((left <= 0 || tooSmall) ? ' disabled' : '') + '>' + label + '</option>';
             }
             sel.innerHTML = out;
 
@@ -985,33 +1101,87 @@
             for (var k = 0; k < sel.options.length; k++) {
                 if (sel.options[k].value === prev && !sel.options[k].disabled) { pick = k; break; }
             }
+            // If the time they had picked is now full, roll forward to the NEXT open
+            // time (not back to the earliest) and say so.
+            var rolledFrom = '';
+            var prevIdx = -1;
+            for (var q = 0; prev && q < slots.length; q++) { if (String(slots[q].id) === prev && (!pool || (slots[q].pool || 'table') === pool)) { prevIdx = q; break; } }
+            if (pick === -1 && prevIdx >= 0) {
+                for (var r = 0; r < sel.options.length; r++) {
+                    if (!sel.options[r].disabled && Number(sel.options[r].getAttribute('data-i')) > prevIdx) { pick = r; break; }
+                }
+                if (pick !== -1 && detailArrivalAllowsOption(slots[prevIdx], opt)) rolledFrom = String(slots[prevIdx].label || '') + (want > 1 && detailArrivalLeft(slots[prevIdx]) > 0 ? ' doesn\'t have room for ' + want : ' just filled up');
+            }
             if (pick === -1) {
                 for (var m = 0; m < sel.options.length; m++) {
                     if (!sel.options[m].disabled) { pick = m; break; }
                 }
             }
             sel.selectedIndex = pick >= 0 ? pick : 0;
+            // Keep the "we moved you" note through repeat renders (typing, blur) until the guest picks a time.
+            if (rolledFrom) window.__arrivalRoll = { to: sel.value, msg: rolledFrom };
+            else if (window.__arrivalRoll && window.__arrivalRoll.to === sel.value) rolledFrom = window.__arrivalRoll.msg;
+            else window.__arrivalRoll = null;
+            var hintEl = document.getElementById('detailArrivalHint');
+            if (hintEl) {
+                hintEl.textContent = (rolledFrom ? rolledFrom + ', so we moved you to the next time that does. ' : (permitted > 0 && anyOpen && !anyFits ? 'No single arrival time has room for ' + want + '. Try fewer tickets, or split your group across two times. ' : '')) +
+                    ((eventData && eventData.arrivalHint) || "We stagger arrivals so the buffet and bar aren't swamped. Please arrive at your chosen time.");
+            }
 
             if (grp) grp.style.display = permitted > 0 ? 'block' : 'none';
             sel.required = permitted > 0;
-            detailAllArrivalFull = (permitted > 0 && !anyOpen);
+            showDetailArrivalWindow();
+            detailAllArrivalFull = (permitted > 0 && !anyFits);
+            window.detailArrivalLockText = anyOpen ? 'Too many for one arrival time' : 'Arrival times full';
             applyDetailArrivalLock();
         }
+
+
+        /** "5:05–7:05 PM" for a timed arrival (slot.start + event.arrivalStayMinutes); '' otherwise. */
+        function arrivalWindowText(ev, slot, extended) {
+            if (!slot || !slot.start || !ev || !ev.arrivalStayMinutes) return '';
+            var p = String(slot.start).split(':'); var s = (+p[0]) * 60 + (+p[1] || 0);
+            if (isNaN(s)) return '';
+            var e = s + (parseInt(ev.arrivalStayMinutes, 10) || 120) * (extended ? 2 : 1);
+            function f(m) { m = ((m % 1440) + 1440) % 1440; var h = Math.floor(m / 60), mm = m % 60; return { t: ((h % 12) || 12) + ':' + (mm < 10 ? '0' : '') + mm, ap: h < 12 ? 'AM' : 'PM' }; }
+            var a = f(s), b = f(e);
+            return a.ap === b.ap ? (a.t + '\u2013' + b.t + ' ' + b.ap) : (a.t + ' ' + a.ap + '\u2013' + b.t + ' ' + b.ap);
+        }
+
+        function showDetailArrivalWindow() {
+            var sel = document.getElementById('detailArrivalSlot');
+            if (!sel) return false;
+            var slot = ((eventData && eventData.arrivalSlots) || []).find(function (x) { return String(x.id) === String(sel.value); });
+            return renderArrivalExtend(eventData || {}, slot, detailArrivalPartyWanted(), 'detailArrivalExtendBox', 'detailArrivalWindow');
+        }
+        window.showDetailArrivalWindow = showDetailArrivalWindow;
+        function detailArrivalExtendChosen() {
+            var box = document.getElementById('detailArrivalExtendBox'), cb = document.getElementById('detailArrivalExtend');
+            return !!(box && cb && box.style.display !== 'none' && cb.checked);
+        }
+        window.detailArrivalExtendChosen = detailArrivalExtendChosen;
+        window.detailArrivalPartyWantedG = function () { return detailArrivalPartyWanted(); };
 
         /** Every permitted wave full beats whatever the pricing logic decided. */
         function applyDetailArrivalLock() {
             var btn = document.getElementById('detailSubmitBtn');
-            if (!btn) return;
+            if (!btn || btn.dataset.qgLocked) return;   // the on-sale gate owns the button while locked
             if (detailAllArrivalFull) {
                 btn.disabled = true;
-                btn.textContent = 'Arrival times full';
-            } else if (btn.textContent === 'Arrival times full') {
+                btn.textContent = window.detailArrivalLockText || 'Arrival times full';
+            } else if (btn.textContent === 'Arrival times full' || btn.textContent === 'Too many for one arrival time') {
                 btn.disabled = false;
                 btn.textContent = 'Proceed to Payment';
             }
         }
 
+        // Inline oninput/onchange on the ticket count call this, so it must be global.
+        window.renderDetailArrivalSlots = renderDetailArrivalSlots;
         window.onDetailArrivalChange = function () {
+            window.__arrivalRoll = null;
+            var h = document.getElementById('detailArrivalHint');
+            if (h && eventData && eventData.arrivalHint) h.textContent = eventData.arrivalHint;
+            showDetailArrivalWindow();
             applyDetailArrivalLock();
             // A different wave may have fewer units left, so the quantity
             // dropdown has to be rebuilt.
@@ -1327,7 +1497,7 @@
             var cpGroup = document.getElementById('detailCouponGroup');
             if (psLabel) psLabel.textContent = bSel ? ('Number of ' + bSel.qty + '-Packs *') : 'Number of Tickets *';
             if (psInput) {
-                psInput.max = bSel ? String(bSel.maxPerOrder || 10) : '20';
+                psInput.max = bSel ? String(bSel.maxPerOrder || 10) : String((eventData && parseInt(eventData.maxTicketsPerOrder, 10)) || 20);
                 if (bSel && parseInt(psInput.value, 10) > (bSel.maxPerOrder || 10)) psInput.value = String(bSel.maxPerOrder || 10);
             }
             if (cpGroup) {
@@ -1353,6 +1523,26 @@
 
         // ─── Update order summary ───
         window.updateDetailSummary = function() {
+            updateDetailSummaryBase();
+            if (eventData && window.detailArrivalExtendChosen && window.detailArrivalExtendChosen()) addExtendToSummary(eventData, window.detailArrivalPartyWantedG(), document.getElementById('detailSummaryDetails'), document.getElementById('detailSummaryTotal'));
+            if (eventData && window.__gate && window.__gate.applied && window.QuarryGate) QuarryGate.addDiscountLine(eventData, window.detailArrivalPartyWantedG(), !!(window.detailArrivalExtendChosen && window.detailArrivalExtendChosen()), document.getElementById('detailSummaryDetails'), document.getElementById('detailSummaryTotal'));
+            applyDetailSalesGateLock();
+        };
+        /* On-sale gate + wine club code (assets/js/sales-gate.js). No-op for events without onSaleAt/memberCode. */
+        function applyDetailSalesGateLock() {
+            var form = document.getElementById('detailRegForm'), btn = document.getElementById('detailSubmitBtn');
+            var g = window.__gate, locked = !!(g && g.locked);
+            if (form) form.classList.toggle('qg-locked', locked);
+            if (!btn) return;
+            if (locked) {
+                btn.dataset.qgLocked = '1'; btn.disabled = true;
+                btn.textContent = g.phase === 'soon' ? 'Tickets aren\u2019t on sale yet' : 'Early access: enter your code above';
+            } else if (btn.dataset.qgLocked) {
+                delete btn.dataset.qgLocked; btn.disabled = false; btn.textContent = 'Proceed to Payment';
+                if (typeof applyDetailArrivalLock === 'function') applyDetailArrivalLock();
+            }
+        }
+        var updateDetailSummaryBase = function() {
             if (!eventData) return;
             var detailsDiv = document.getElementById('detailSummaryDetails');
             var totalDiv = document.getElementById('detailSummaryTotal');
@@ -1542,6 +1732,7 @@
             var form = document.getElementById('detailRegForm');
             var btn = document.getElementById('detailSubmitBtn');
             var errorDiv = document.getElementById('detailFormError');
+            if (window.__gate && window.__gate.locked) return false;
             btn.disabled = true;
             btn.textContent = 'Processing...';
             errorDiv.style.display = 'none';
@@ -1606,6 +1797,8 @@
                 cancelUrl: window.location.href
             };
 
+            if (window.detailArrivalExtendChosen && window.detailArrivalExtendChosen()) payload.extendStay = true;
+            if (window.__gate && window.__gate.applied) { payload.memberCode = window.__gate.code; payload.couponCode = ''; }
             var submitBundle = hasSeating ? null : getDetailSelectedBundle();
             if (submitBundle) {
                 // Server prices the bundle; we only say which one and how many packs.

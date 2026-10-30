@@ -186,7 +186,7 @@ async function hydrateDoc(doc, rows) {
 // amounts, coupon codes, refund records and the legacy top-level map.
 // Server-side code that needs the real rows reads the repo directly
 // (_github-data) or through an admin session, never this projection.
-const PUBLIC_REG_FIELDS = ['qty', 'seatingOptionId', 'seatType', 'arrivalSlot'];
+const PUBLIC_REG_FIELDS = ['qty', 'seatingOptionId', 'seatType', 'arrivalSlot', 'extraStay'];
 
 function publicReg(r) {
   if (!r || typeof r !== 'object') return null;

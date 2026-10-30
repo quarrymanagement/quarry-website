@@ -44,6 +44,63 @@ const EVENT_COUPONS = {
   'QUARRY20': { pct: 20 },
 };
 
+// ---------------------------------------------------------------------------
+// On-sale gate + member code (Christmas Spirits in Whoville, 2026-10-30).
+// Only for events that carry these fields; every other event is untouched.
+//   earlyAccessAt / onSaleAt : ISO times with offset. Before earlyAccessAt nobody
+//     can book; between the two only a valid member code can; after onSaleAt anyone.
+//   memberCode : { hash, salt, pct, label, earlyAccess, extension }. hash is the
+//     SHA-256 hex of salt + code.trim().toLowerCase(), so the code itself is never
+//     in this (public) repo or in events.json. Checked here, case-insensitive.
+// EVENT_NOW_OVERRIDE lets the offline tests move the clock; never set it on the site.
+// ---------------------------------------------------------------------------
+function gateNow() {
+  const o = process.env.EVENT_NOW_OVERRIDE ? Date.parse(process.env.EVENT_NOW_OVERRIDE) : NaN;
+  return isNaN(o) ? Date.now() : o;
+}
+function gateTs(v) { const t = v ? Date.parse(v) : NaN; return isNaN(t) ? null : t; }
+// memberCode.codeEnv (preferred, 10/30 11:20): the code lives in a Netlify env var (name must start
+// MEMBER_CODE_), so nothing guessable is in the public events.json. Fallback: legacy salt+hash.
+// Missing env var + no hash = every code refused (fails closed).
+function memberCodeEnvOk(envName, code) {
+  const c = String(code || '').trim().toLowerCase();
+  if (!c || !/^MEMBER_CODE_[A-Z0-9_]+$/.test(String(envName || ''))) return false;
+  const want = String(process.env[envName] || '').trim().toLowerCase();
+  if (!want) return false;
+  const a = crypto.createHash('sha256').update(c).digest(), b = crypto.createHash('sha256').update(want).digest();
+  return crypto.timingSafeEqual(a, b);
+}
+function memberCodeOk(ev, code) {
+  const mc = ev && ev.memberCode;
+  const c = String(code || '').trim().toLowerCase();
+  if (!mc || !c) return false;
+  if (mc.codeEnv && process.env[mc.codeEnv]) return memberCodeEnvOk(mc.codeEnv, c);
+  if (!mc.hash) return false;
+  const h = crypto.createHash('sha256').update(String(mc.salt || '') + c).digest('hex');
+  const want = String(mc.hash).toLowerCase();
+  return h.length === want.length && crypto.timingSafeEqual(Buffer.from(h), Buffer.from(want));
+}
+function gateWhen(iso) {
+  const t = gateTs(iso); if (t == null) return '';
+  const d = new Date(t);
+  return d.toLocaleDateString('en-US', { timeZone: 'America/Chicago', weekday: 'short', month: 'short', day: 'numeric' })
+    + ' at ' + d.toLocaleTimeString('en-US', { timeZone: 'America/Chicago', hour: 'numeric', minute: '2-digit' }) + ' CT';
+}
+/** null when the booking may go ahead, else { status, error }. */
+function salesGateRefusal(ev, memberOk, t) {
+  const on = gateTs(ev.onSaleAt);
+  if (!on || t >= on) return null;
+  const early = gateTs(ev.earlyAccessAt);
+  const mc = ev.memberCode || {};
+  const label = mc.label || 'Member';
+  if (early && mc.earlyAccess && t >= early) {
+    if (memberOk) return null;
+    return { status: 403, error: label + ' early booking only right now. Public tickets go on sale ' + gateWhen(ev.onSaleAt) + '.' };
+  }
+  return { status: 403, error: 'Tickets go on sale ' + gateWhen(ev.onSaleAt) + '.'
+    + (early && mc.earlyAccess ? ' ' + label + ' members can book from ' + gateWhen(ev.earlyAccessAt) + '.' : '') };
+}
+
 function squareApi(method, path, body) {
   const env = (process.env.SQUARE_ENVIRONMENT || 'production').toLowerCase();
   const host = env === 'production' ? 'connect.squareup.com' : 'connect.squareupsandbox.com';
@@ -202,6 +259,87 @@ function countArrivalSlotUsed(evData, slot) {
   }, 0);
 }
 
+// ---------------------------------------------------------------------------
+// Room limit across overlapping arrival times (2026-10-30, Whoville)
+// ---------------------------------------------------------------------------
+// Optional, per event:
+//     "arrivalRoomCap": 140,        // most guests inside at any moment
+//     "arrivalStayMinutes": 120,    // how long each arrival time stays
+//     "arrivalResetMinutes": 3,     // table reset after a group leaves; its seats
+//                                   // free up at start + stay + reset
+//     "arrivalSlots": [{ "id": "a1705", "label": "5:05 PM", "start": "17:05",
+//                        "capacity": 32 }, ...]
+// Guests from an arrival time count from its start until start + stay. Adding
+// tickets to one time must keep every moment of its stay within the room cap.
+// Only slots that carry a "start" are counted. Events without arrivalRoomCap
+// are untouched. Counts PEOPLE (registration qty), not tables.
+// "5:05–7:05 PM" for a timed arrival, '' otherwise. Shown on the Square ticket line
+// (line-item note), never in payment_note: the webhook matches arrival labels
+// inside payment_note, and an end time like "7:05 PM" is itself a label.
+function arrivalWindowText(evData, slot, extended) {
+  if (!slot || !slot.start || !evData || !evData.arrivalStayMinutes) return '';
+  const s = arrivalClockMinutes(slot.start);
+  if (s == null || isNaN(s)) return '';
+  const e = s + (parseInt(evData.arrivalStayMinutes, 10) || 120) * (extended ? 2 : 1);
+  const f = (m) => { m = ((m % 1440) + 1440) % 1440; const h = Math.floor(m / 60), mm = m % 60; return { t: ((h % 12) || 12) + ':' + String(mm).padStart(2, '0'), ap: h < 12 ? 'AM' : 'PM' }; };
+  const a = f(s), b = f(e);
+  return a.ap === b.ap ? (a.t + '\u2013' + b.t + ' ' + b.ap) : (a.t + ' ' + a.ap + '\u2013' + b.t + ' ' + b.ap);
+}
+function arrivalClockMinutes(t) {
+  const p = String(t || '').split(':');
+  return (parseInt(p[0], 10) || 0) * 60 + (parseInt(p[1], 10) || 0);
+}
+// Each booking holds its spot from its arrival time for the stay (2 hours), or
+// twice that when the guest added the second 2-hour block (registration
+// extraStay: true). wantStay = how long the NEW booking would stay.
+// Bar stagger (optional): slots carry "pool": "table" | "bar" and the event sets
+// "arrivalPoolCaps": { "table": 116, "bar": 20 }. Each pool is limited to its own
+// cap (only its own bookings count), and the whole room still to arrivalRoomCap.
+function arrivalRoomLeft(evData, slot, wantStay) {
+  const pools = evData && evData.arrivalPoolCaps;
+  const pool = slot && slot.pool;
+  let room = arrivalRoomLeftIn(evData, slot, wantStay, parseInt(evData && evData.arrivalRoomCap, 10), null);
+  if (pools && pool && pools[pool] != null) room = Math.min(room, arrivalRoomLeftIn(evData, slot, wantStay, parseInt(pools[pool], 10), pool));
+  return room;
+}
+function arrivalRoomLeftIn(evData, slot, wantStay, cap, pool) {
+  if (!cap || !slot || !slot.start) return Infinity;
+  const stay = parseInt(evData.arrivalStayMinutes, 10) || 120;
+  const reset = Math.max(0, parseInt(evData.arrivalResetMinutes, 10) || 0);
+  const want = (wantStay || stay) + reset;
+  const startOf = {};
+  getArrivalSlots(evData).forEach(function(x) { if (x && x.start && (!pool || (x.pool || 'table') === pool)) startOf[String(x.id || '').trim().toLowerCase()] = arrivalClockMinutes(x.start); });
+  const groups = [];
+  (Array.isArray(evData.registrations) ? evData.registrations : []).forEach(function(r) {
+    const st = startOf[String((r && r.arrivalSlot) || '').trim().toLowerCase()];
+    if (st === undefined) return;
+    groups.push({ s: st, e: st + (r.extraStay ? 2 * stay : stay) + reset, q: parseInt(r.qty, 10) || 1 });
+  });
+  const s0 = arrivalClockMinutes(slot.start);
+  const moments = [s0].concat(groups.map(function(g) { return g.s; }).filter(function(t) { return t > s0 && t < s0 + want; }));
+  let worst = 0;
+  moments.forEach(function(m) {
+    let inside = 0;
+    groups.forEach(function(g) { if (g.s <= m && m < g.e) inside += g.q; });
+    if (inside > worst) worst = inside;
+  });
+  return cap - worst;
+}
+
+// "Want to keep the party going?" second 2-hour block at a discount. Offered only
+// when the event sets arrivalExtendPct, the longer stay ends by
+// arrivalExtendLatestEnd (default: the event's endTime), and the room limit has
+// space for the whole party for all 4 hours.
+function arrivalExtendCheck(evData, slot, qty) {
+  const pct = parseFloat(evData && evData.arrivalExtendPct);
+  if (!(pct >= 0) || !slot || !slot.start || !evData.arrivalRoomCap) return { ok: false, why: 'not offered' };
+  const stay = parseInt(evData.arrivalStayMinutes, 10) || 120;
+  const latest = evData.arrivalExtendLatestEnd || evData.endTime;
+  if (latest && arrivalClockMinutes(slot.start) + 2 * stay > arrivalClockMinutes(latest)) return { ok: false, why: 'too late' };
+  const left = arrivalRoomLeft(evData, slot, 2 * stay);
+  return left >= qty ? { ok: true, pct: pct } : { ok: false, why: 'no room', left: left };
+}
+
 // Fetch events.json straight from the repo via the authenticated Contents API,
 // so checkout always prices against the current data rather than whatever was
 // baked into the last Netlify build. Falls back to the deployed copy on failure,
@@ -298,6 +436,7 @@ exports.handler = async function(event) {
     const seatingOptionId = body.seatingOptionId || '';
     // Optional: staggered arrival wave, for events that define arrivalSlots.
     const arrivalSlotId = body.arrivalSlot || '';
+    const wantsExtraStay = body.extendStay === true || body.extendStay === 'true';
     // Optional: multi-line cart for events that mix tiers in one checkout
     const lineItemsIn = Array.isArray(body.lineItems) ? body.lineItems : null;
 
@@ -344,6 +483,17 @@ exports.handler = async function(event) {
     if (evData.status === 'sold-out') {
       return { statusCode: 409, headers, body: JSON.stringify({ error: 'Event is sold out' }) };
     }
+    // ---- ON-SALE GATE + MEMBER CODE (see salesGateRefusal) ----------------
+    const memberCodeIn = String(body.memberCode || '').slice(0, 60);
+    const memberOk = memberCodeOk(evData, memberCodeIn);
+    if (memberCodeIn.trim() && !memberOk) {
+      return { statusCode: 400, headers, body: JSON.stringify({ error: 'That code isn\u2019t valid. Check the spelling and try again.' }) };
+    }
+    {
+      const refusal = salesGateRefusal(evData, memberOk, gateNow());
+      if (refusal) return { statusCode: refusal.status, headers, body: JSON.stringify({ error: refusal.error, notOnSale: true }) };
+    }
+    const memberPromo = memberOk ? { pct: parseFloat(evData.memberCode.pct) || 0, label: String(evData.memberCode.label || 'Member'), extension: evData.memberCode.extension !== false } : null;
     // ---- LIMITED-TIME BUNDLE (e.g. "2 tickets for $60") -------------------
     // Only when the client asks for one (body.bundleId). Price, ticket count and
     // expiry come from _event-bundles.js, never from the browser. After the
@@ -456,22 +606,55 @@ exports.handler = async function(event) {
         const slotCap = parseInt(chosenArrivalSlot.capacity, 10) || 0;
         const slotUsed = countArrivalSlotUsed(evData, chosenArrivalSlot);
         const slotLeft = slotCap - slotUsed;
-        // Booking three tables needs three free unit slots in the wave.
-        if (slotLeft < units) {
+        // Booking three tables needs three free unit slots in the wave. With
+        // no seating options a unit is one person, so the whole party counts.
+        const unitsNeeded = chosenOption ? units : qty;
+        // Bar stagger: a bar time holds only a few guests, so a bigger group can't book bar seating at all.
+        if (chosenArrivalSlot.pool === 'bar' && !chosenOption && qty > slotCap) {
           return {
             statusCode: 409, headers,
-            body: JSON.stringify({ error: 'That arrival time is full \u2014 please pick another.' })
+            body: JSON.stringify({ error: 'Bar seating is for groups of ' + slotCap + ' or fewer — please choose a table, or split into smaller groups.' })
+          };
+        }
+        if (slotLeft < unitsNeeded) {
+          return {
+            statusCode: 409, headers,
+            body: JSON.stringify({ error: slotLeft > 0 && !chosenOption
+              ? 'Only ' + slotLeft + ' tickets left at ' + (chosenArrivalSlot.label || 'that time') + ' \u2014 please pick another time or fewer tickets.'
+              : 'That arrival time is full \u2014 please pick another.' })
           };
         }
       }
+      const roomLeft = arrivalRoomLeft(evData, chosenArrivalSlot);
+      if (roomLeft < qty) {
+        return {
+          statusCode: 409, headers,
+          body: JSON.stringify({ error: roomLeft > 0
+            ? 'Only ' + roomLeft + ' tickets left at ' + (chosenArrivalSlot.label || 'that time') + ' \u2014 please pick another time or fewer tickets.'
+            : 'That arrival time is full \u2014 please pick another.' })
+        };
+      }
     }
 
+    let extraStay = null;
+    if (wantsExtraStay) {
+      const xc = arrivalExtendCheck(evData, chosenArrivalSlot, qty);
+      if (!xc.ok) {
+        return { statusCode: 409, headers, body: JSON.stringify({ error: xc.why === 'not offered'
+          ? 'The extra 2 hours is not offered for this event.'
+          : 'The extra 2 hours isn\u2019t available at ' + ((chosenArrivalSlot && chosenArrivalSlot.label) || 'that time') + ' \u2014 please remove it or pick an earlier time.' }) };
+      }
+      extraStay = xc;
+    }
     const remaining = (evData.totalCapacity || 0) - (evData.registeredCount || 0);
     if (evData.totalCapacity && remaining < qty) {
       return { statusCode: 409, headers, body: JSON.stringify({ error: 'Not enough seats. Only ' + remaining + ' remaining.' }) };
     }
 
     // Build the Square line_items array.
+    // Timed arrivals: the guest's own start and end time rides on the ticket line.
+    const ticketWindow = arrivalWindowText(evData, chosenArrivalSlot, !!extraStay);
+    const ticketWindowNote = ticketWindow ? ' \u00b7 Your time: ' + ticketWindow + ' (' + String(chosenArrivalSlot.label || '') + ' arrival)' : '';
     let squareLineItems = [];
     let tierName = evData.name;
     let unitPrice = evData.pricePerSeat || evData.price || 0;
@@ -500,7 +683,7 @@ exports.handler = async function(event) {
       tierName = chosenOption.name || evData.name;
       squareLineItems.push({
         name: (chosenOption.name || 'Seat') + ' - ' + (evData.name || ''),
-        note: (evData.date || '') + ' at The Quarry',
+        note: (evData.date || '') + ' at The Quarry' + ticketWindowNote,
         quantity: String(units),
         base_price_money: { amount: perUnit, currency: 'USD' }
       });
@@ -523,7 +706,7 @@ exports.handler = async function(event) {
         // the whole order still has to come to something payable — checked below.
         squareLineItems.push({
           name: matched.name + ' - ' + (evData.name || ''),
-          note: (evData.date || '') + ' at The Quarry',
+          note: (evData.date || '') + ' at The Quarry' + ticketWindowNote,
           quantity: String(liQty),
           base_price_money: { amount: liPrice, currency: 'USD' }
         });
@@ -553,7 +736,7 @@ exports.handler = async function(event) {
       }
       // Apply coupon (server-side, on per-seat price)
       effectiveUnitPrice = unitPrice;
-      if (couponCode) {
+      if (couponCode && !evData.memberCode) {   // member-code events: the member code is the only discount
         const code = couponCode.toUpperCase().trim();
         const c = EVENT_COUPONS[code];
         if (c) {
@@ -564,10 +747,41 @@ exports.handler = async function(event) {
       }
       squareLineItems.push({
         name: tierName + ' - ' + (evData.name || ''),
-        note: (evData.date || '') + ' at The Quarry',
+        note: (evData.date || '') + ' at The Quarry' + ticketWindowNote,
         quantity: String(qty),
         base_price_money: { amount: effectiveUnitPrice, currency: 'USD' }
       });
+    }
+
+    // ---- SECOND 2-HOUR BLOCK (timed arrivals) -----------------------------
+    // Its own line so the discount is visible; priced off the per-person ticket.
+    if (extraStay) {
+      const base = (evData.tiers && evData.tiers[0] && evData.tiers[0].pricePerPerson) || evData.price || 0;
+      squareLineItems.push({
+        name: 'Extra 2 hours (' + extraStay.pct + '% off) - ' + (evData.name || ''),
+        note: (evData.date || '') + ' \u00b7 Your time: ' + ticketWindow,
+        quantity: String(qty),
+        base_price_money: { amount: Math.round(base * (1 - extraStay.pct / 100)), currency: 'USD' }
+      });
+    }
+
+    // ---- MEMBER CODE DISCOUNT ---------------------------------------------
+    // Ticket lines (and the extra 2 hours, unless memberCode.extension === false)
+    // are re-priced per unit and renamed so the discount shows on Square's page,
+    // e.g. $25.00 -> $22.50 and $22.50 -> $20.25. Add-ons are never discounted.
+    if (memberPromo && memberPromo.pct > 0) {
+      const ticketLines = squareLineItems.length;
+      for (let i = 0; i < ticketLines; i++) {
+        const li = squareLineItems[i];
+        const isExt = /^Extra 2 hours/.test(li.name);
+        if (isExt && !memberPromo.extension) continue;
+        const was = li.base_price_money.amount;
+        li.base_price_money = { amount: Math.round(was * (1 - memberPromo.pct / 100)), currency: 'USD' };
+        li.name = isExt
+          ? li.name.replace(/% off\) - /, '% off + ' + memberPromo.label + ' ' + memberPromo.pct + '% off) - ')
+          : li.name.replace(/ - /, ' (' + memberPromo.label + ' ' + memberPromo.pct + '% off) - ');
+        li.note = (li.note ? li.note + ' \u00b7 ' : '') + memberPromo.label + ' code: was $' + (was / 100).toFixed(2) + ' each';
+      }
     }
 
     // ---- OPTIONAL ADD-ONS (e.g. merch) -----------------------------------
@@ -647,7 +861,7 @@ exports.handler = async function(event) {
       arrivalSlot: String(chosenArrivalSlot ? (chosenArrivalSlot.id || '') : '').slice(0, 60),
       arrivalLabel: String(chosenArrivalSlot ? (chosenArrivalSlot.label || '') : '').slice(0, 60),
       ticketTier: String(tierSummary).slice(0, 255),
-      couponCode: String(chosenBundle ? '' : couponCode).slice(0, 60)
+      couponCode: String(memberPromo ? memberPromo.label + ' ' + memberPromo.pct + '% off' : (chosenBundle ? '' : couponCode)).slice(0, 60)
     };
     // Square rejects empty-string metadata values with MISSING_REQUIRED_PARAMETER,
     // AND caps an order at 10 metadata entries (ARRAY_LENGTH_TOO_LONG). Strip the
@@ -699,7 +913,7 @@ exports.handler = async function(event) {
         metadata: safeMeta
       },
       checkout_options: {
-        redirect_url: (successUrl || siteUrl + '/quarry-events.html') + '?registration=success&event=' + eventId,
+        redirect_url: (successUrl || siteUrl + '/quarry-events.html') + '?registration=success&event=' + eventId + (chosenArrivalSlot && chosenArrivalSlot.start ? '&arrival=' + encodeURIComponent(String(chosenArrivalSlot.id || '')) + (extraStay ? '&ext=1' : '') : '') + (memberPromo ? '&promo=' + encodeURIComponent(String(memberPromo.pct)) : ''),
         ask_for_shipping_address: false,
         accepted_payment_methods: {
           apple_pay: true, google_pay: true, cash_app_pay: true
@@ -724,6 +938,8 @@ exports.handler = async function(event) {
         var prefix = 'Event - ';
         var tail = ((chosenOption && chosenOption.name) ? ' - ' + chosenOption.name : '')
           + ((chosenArrivalSlot && chosenArrivalSlot.label) ? ' - ' + chosenArrivalSlot.label + ' arrival' : '')
+          + (extraStay ? ' + extra 2 hours' : '')   // webhook/reconcile record extraStay from this
+          + (memberPromo ? ' [' + memberPromo.label + ' ' + memberPromo.pct + '% off]' : '')   // webhook/reconcile record the member discount from this
           + ' x' + qty;
         var namePart = String(evData.name || '');
         var budget = MAX_NOTE - prefix.length - tail.length;
@@ -775,3 +991,5 @@ exports.handler = async function(event) {
     return { statusCode: 500, headers, body: JSON.stringify({ error: friendly, _raw: raw }) };
   }
 };
+
+module.exports.memberCodeEnvOk = memberCodeEnvOk;
