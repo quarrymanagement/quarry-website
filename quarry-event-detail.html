@@ -1092,6 +1092,8 @@
             }
         }
 
+        // Inline oninput/onchange on the ticket count call this, so it must be global.
+        window.renderDetailArrivalSlots = renderDetailArrivalSlots;
         window.onDetailArrivalChange = function () {
             showDetailArrivalWindow();
             applyDetailArrivalLock();
