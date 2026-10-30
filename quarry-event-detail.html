@@ -1044,6 +1044,10 @@
                 }
             }
             sel.selectedIndex = pick >= 0 ? pick : 0;
+            // Keep the "we moved you" note through repeat renders (typing, blur) until the guest picks a time.
+            if (rolledFrom) window.__arrivalRoll = { to: sel.value, msg: rolledFrom };
+            else if (window.__arrivalRoll && window.__arrivalRoll.to === sel.value) rolledFrom = window.__arrivalRoll.msg;
+            else window.__arrivalRoll = null;
             var hintEl = document.getElementById('detailArrivalHint');
             if (hintEl) {
                 hintEl.textContent = (rolledFrom ? rolledFrom + ', so we moved you to the next time that does. ' : (permitted > 0 && anyOpen && !anyFits ? 'No single arrival time has room for ' + want + '. Try fewer tickets, or split your group across two times. ' : '')) +
@@ -1095,6 +1099,9 @@
         // Inline oninput/onchange on the ticket count call this, so it must be global.
         window.renderDetailArrivalSlots = renderDetailArrivalSlots;
         window.onDetailArrivalChange = function () {
+            window.__arrivalRoll = null;
+            var h = document.getElementById('detailArrivalHint');
+            if (h && eventData && eventData.arrivalHint) h.textContent = eventData.arrivalHint;
             showDetailArrivalWindow();
             applyDetailArrivalLock();
             // A different wave may have fewer units left, so the quantity

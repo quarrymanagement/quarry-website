@@ -1556,7 +1556,7 @@
 
                     <div class="form-group" id="arrivalGroup" style="display:none;">
                         <label for="arrivalSlot">Arrival Time *</label>
-                        <select id="arrivalSlot" name="arrivalSlot" onchange="showArrivalWindow(); applyArrivalLock(); updateUnitCountUI(); renderTierSplit(); updateOrderSummary();"></select>
+                        <select id="arrivalSlot" name="arrivalSlot" onchange="window.__arrivalRoll = null; renderArrivalSlots(); applyArrivalLock(); updateUnitCountUI(); renderTierSplit(); updateOrderSummary();"></select>
                         <div id="arrivalWindow" style="display:none;font-weight:600;margin-top:6px;"></div>
                         <div id="arrivalHint" style="font-size:13px;opacity:.75;margin-top:4px;">We stagger arrivals so the buffet and bar aren't swamped. Please arrive at your chosen time.</div>
                     </div>
@@ -2603,6 +2603,10 @@
                 }
             }
             sel.selectedIndex = pick >= 0 ? pick : 0;
+            // Keep the "we moved you" note through repeat renders (typing, blur) until the guest picks a time.
+            if (rolledFrom) window.__arrivalRoll = { to: sel.value, msg: rolledFrom };
+            else if (window.__arrivalRoll && window.__arrivalRoll.to === sel.value) rolledFrom = window.__arrivalRoll.msg;
+            else window.__arrivalRoll = null;
             const hintEl = document.getElementById('arrivalHint');
             if (hintEl) {
                 const ev = currentEventForModal || {};
