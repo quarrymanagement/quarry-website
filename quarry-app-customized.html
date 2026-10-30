@@ -1200,6 +1200,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
 }
 
 </style>
+<script src="/blocked-dates.js"></script>
 </head>
 <body>
 
@@ -1573,7 +1574,7 @@ a.account-link:hover .al-arrow { color: var(--gold); }
       <div class="form-row">
         <div class="form-block">
           <label class="form-label">Date</label>
-          <input class="form-input" type="date" style="color-scheme:dark" />
+          <input class="form-input" type="date" id="partyDate" style="color-scheme:dark" />
         </div>
         <div class="form-block">
           <label class="form-label">Start Time</label>
@@ -2670,6 +2671,12 @@ async function submitParty() {
 
   if (!data.name || !data.email || !data.phone) {
     alert('Please fill in your name, email, and phone before submitting.');
+    return;
+  }
+  // Shared whole-day blocks (/blocked-dates.js, e.g. Christmas Spirits in
+  // Whoville nights); party-request.js rejects the same dates server-side.
+  if (window.QuarryBlockedDates && window.QuarryBlockedDates.isBlocked(data.date)) {
+    alert(window.QuarryBlockedDates.MESSAGE);
     return;
   }
 
@@ -4245,5 +4252,11 @@ async function submitParty() {
 
 <script>/* one-off dated hours lines: show only through data-show-until (Chicago date) */
 (function(){try{var t=new Date().toLocaleDateString("en-CA",{timeZone:"America/Chicago"});document.querySelectorAll("[data-show-until]").forEach(function(e){if(t<=e.getAttribute("data-show-until"))e.removeAttribute("hidden");});}catch(e){}})();</script>
+<script>
+/* Shared whole-day blocked dates (/blocked-dates.js): note + events link under the party-request date */
+(function(){
+  if (window.QuarryBlockedDates) window.QuarryBlockedDates.attach(document.getElementById('partyDate'));
+})();
+</script>
 </body>
 </html>

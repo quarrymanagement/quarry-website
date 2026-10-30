@@ -19,6 +19,7 @@
 
 const { readBlob } = require('./_blobs');
 const { earlyCloseHour, hour24 } = require('./_golf-closed');
+const sharedBlocked = require('./_blocked-dates');
 
 const VENUE_AVAILABILITY_KEY = process.env.VENUE_AVAILABILITY_KEY || '';
 const SUPABASE_FN_URL = 'https://nkulhtalltbieicvmmad.supabase.co/functions/v1/venue-availability';
@@ -83,9 +84,13 @@ function slotClosedReason(date, time) {
   return 'The Quarry closes early at ' + fmtCut(cut) + ' on ' + label + ', so pavilions are not available from ' + fmtCut(cut) + ' on that day. Please choose an earlier time or another date.';
 }
 
-async function isDateBookable(date) {
+// opts.staffBlock: an authenticated staff admin block may still hold a
+// pavilion on a shared whole-day-blocked date (e.g. for the Whoville event
+// itself); public bookings may not.
+async function isDateBookable(date, opts) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { ok: false, reason: 'Invalid date.' };
   if (!isOpenDay(date)) return { ok: false, reason: 'The Quarry is closed Mondays and Tuesdays.' };
+  if (!(opts && opts.staffBlock) && sharedBlocked.isBlocked(date)) return { ok: false, reason: sharedBlocked.blockedReason(date), blockedDate: true };
   if (await hasWeddingOn(date)) return { ok: false, reason: 'That date is unavailable -- a private wedding is booked.' };
   return { ok: true };
 }

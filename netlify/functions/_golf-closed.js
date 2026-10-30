@@ -1,6 +1,9 @@
 // _golf-closed.js: server-side guard for golf bay slots the venue is closed for.
 // Helper module only (leading underscore, so it's not deployed as an endpoint).
 // Keep in sync with BLOCKED_DATES / LATE_OPEN_DATES / EARLY_CLOSE_DATES in quarry-golf.html.
+// Whole-day blocks shared with every public booking form (e.g. the Christmas
+// Spirits in Whoville nights) come from /blocked-dates.js via _blocked-dates.js.
+const sharedBlocked = require('./_blocked-dates');
 // EARLY_CLOSE_DATES: 'YYYY-MM-DD' -> first hour (24h) that is NOT bookable that day.
 const EARLY_CLOSE_DATES = {}; // none right now (Sat 10/31/2026 4 PM close cancelled Oct 29; open normal hours)
 
@@ -25,6 +28,7 @@ function earlyCloseHour(date) {
 // Returns an error message if the slot is closed, else null.
 function closedReason(date, time) {
   const d = normDate(date);
+  if (sharedBlocked.isBlocked(d)) return sharedBlocked.blockedReason(d);
   const cut = EARLY_CLOSE_DATES[d];
   if (cut === undefined) return null;
   const h = hour24(time);

@@ -275,6 +275,7 @@ nav { display:flex; align-items:center; }
 
 
 
+<script src="/blocked-dates.js"></script>
 </head>
 <body>
 
@@ -416,6 +417,7 @@ nav { display:flex; align-items:center; }
         <label class="form-label">Preferred Date <span>*</span></label>
         <input type="date" name="date" id="reservationDate" required>
         <div id="dateBlockedMsg" style="display:none;color:#a02020;font-size:0.78rem;margin-top:0.4rem;font-weight:500;">This date is fully booked for reservations — walk-ins welcome that day. Please select another date for a reserved table.</div>
+        <div id="dateWhovilleMsg" role="alert" style="display:none;color:#a02020;font-size:0.78rem;margin-top:0.4rem;font-weight:500;"></div>
       </div>
 
       <!-- PREFERRED TIME -->
@@ -604,10 +606,21 @@ nav { display:flex; align-items:center; }
   }
   try { dateInput.setAttribute('min', todayCtYmd()); } catch(_) {}
 
+  // Shared whole-day blocks (/blocked-dates.js, e.g. Christmas Spirits in Whoville nights)
+  var QBD = window.QuarryBlockedDates;
+  var whovilleMsg = document.getElementById('dateWhovilleMsg');
+  if (whovilleMsg && QBD) whovilleMsg.innerHTML = QBD.NOTE_HTML;
+  function isShared(v){ return !!(QBD && QBD.isBlocked(v)); }
+
   function checkDate(){
     var v = dateInput.value;
     var blocked = v && BLOCKED_DATES.indexOf(v) !== -1;
-    if (blocked) {
+    var shared = !blocked && isShared(v);
+    if (whovilleMsg) whovilleMsg.style.display = shared ? 'block' : 'none';
+    if (shared) {
+      if (blockedMsg) blockedMsg.style.display = 'none';
+      dateInput.setCustomValidity(QBD.MESSAGE);
+    } else if (blocked) {
       if (blockedMsg) blockedMsg.style.display = 'block';
       dateInput.setCustomValidity('This date is fully booked for reservations — walk-ins welcome. Please select another date.');
     } else {
@@ -623,9 +636,10 @@ nav { display:flex; align-items:center; }
   if (form) {
     form.addEventListener('submit', function(e){
       checkDate();
-      if (BLOCKED_DATES.indexOf(dateInput.value) !== -1) {
+      if (BLOCKED_DATES.indexOf(dateInput.value) !== -1 || isShared(dateInput.value)) {
         e.preventDefault();
-        if (blockedMsg) blockedMsg.style.display = 'block';
+        e.stopImmediatePropagation();
+        if (blockedMsg && !isShared(dateInput.value)) blockedMsg.style.display = 'block';
         dateInput.focus();
         try { dateInput.scrollIntoView({ behavior:'smooth', block:'center' }); } catch(_) {}
       }

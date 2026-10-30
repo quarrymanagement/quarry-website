@@ -120,7 +120,9 @@ exports.handler = async function (event) {
     if (!pavilion || !/^[1-6]$/.test(pavilion)) return { statusCode: 400, headers, body: JSON.stringify({ error: 'pavilion must be 1-6' }) };
     if (!date || !time) return { statusCode: 400, headers, body: JSON.stringify({ error: 'date and time required' }) };
 
-    const bookable = await isDateBookable(date);
+    const authEarly = verifyAnyToken(body.token);
+    const staffBlock = !!(authEarly.ok && ['owner', 'events_staff'].includes(authEarly.role) && body.adminBlock);
+    const bookable = await isDateBookable(date, { staffBlock });
     if (!bookable.ok) return { statusCode: 409, headers, body: JSON.stringify({ error: bookable.reason }) };
 
     const taken = await isSlotTaken(date, pavilion, time);

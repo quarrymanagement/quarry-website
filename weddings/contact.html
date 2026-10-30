@@ -384,6 +384,7 @@ nav.hn.sc .nl{color:#2C2C2C!important}
 }
 
 </style>
+<script src="/blocked-dates.js"></script>
 </head>
 <body>
 <div style="background:#1a1a1a;padding:0.75rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:9999;border-bottom:1px solid rgba(184,147,58,0.3);">
@@ -566,5 +567,12 @@ nav.hn.sc .nl{color:#2C2C2C!important}
     <a href="/blog/wedding-venues-near-defiance-wine-country.html" style="color:#D4AF6A;text-decoration:none;border-bottom:1px solid rgba(212,175,106,0.3);padding-bottom:2px;">Wine Country Wedding Guide</a>
   </div>
 </section>
+<script>
+/* Shared whole-day blocked dates (/blocked-dates.js, e.g. Christmas Spirits in Whoville nights) */
+(function(){
+  if (!window.QuarryBlockedDates) return;
+  window.QuarryBlockedDates.attach(document.querySelector('form[name="wedding-tour"] input[name="wedding_date"]'));
+})();
+</script>
 </body>
 </html>

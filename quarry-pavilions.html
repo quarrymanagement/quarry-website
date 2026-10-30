@@ -54,6 +54,7 @@ input[type=date], input[type=text], input[type=email], input[type=tel] {
 #submitBtn:hover:not(:disabled) { background:var(--gold-light); }
 footer { text-align:center; padding:2rem 1rem; color:#8B5E3C; font-size:0.8rem; }
 </style>
+<script src="/blocked-dates.js"></script>
 </head>
 <body>
 
@@ -128,6 +129,16 @@ function loadAvailability(date) {
   var msgEl = document.getElementById('dateMsg');
   var slotsArea = document.getElementById('slotsArea');
   msgEl.classList.remove('show');
+  // Shared whole-day blocks (/blocked-dates.js, e.g. Christmas Spirits in
+  // Whoville nights). The server (pavilion-availability / pavilion-checkout)
+  // enforces the same list; this just shows the note with the events link.
+  var QBD = window.QuarryBlockedDates;
+  if (QBD && QBD.isBlocked(date)) {
+    slotsArea.innerHTML = '';
+    msgEl.innerHTML = QBD.NOTE_HTML;
+    msgEl.classList.add('show');
+    return;
+  }
   slotsArea.innerHTML = '<p style="color:#8B5E3C;font-size:0.9rem;">Checking availability&hellip;</p>';
 
   fetch('/.netlify/functions/pavilion-availability?date=' + encodeURIComponent(date))
@@ -136,7 +147,8 @@ function loadAvailability(date) {
       if (!body.ok) throw new Error(body.error || 'Could not check availability');
       if (!body.bookable) {
         slotsArea.innerHTML = '';
-        msgEl.textContent = body.reason || 'That date is not available.';
+        if (body.blockedDate && QBD) msgEl.innerHTML = QBD.NOTE_HTML;
+        else msgEl.textContent = body.reason || 'That date is not available.';
         msgEl.classList.add('show');
         return;
       }

@@ -31,7 +31,7 @@ exports.handler = async (event) => {
 
   const bookable = await isDateBookable(date);
   if (!bookable.ok) {
-    return { statusCode: 200, headers: CORS, body: JSON.stringify({ ok: true, bookable: false, reason: bookable.reason, slots: [] }) };
+    return { statusCode: 200, headers: CORS, body: JSON.stringify({ ok: true, bookable: false, reason: bookable.reason, blockedDate: !!bookable.blockedDate, slots: [] }) };
   }
 
   let existing = [];
