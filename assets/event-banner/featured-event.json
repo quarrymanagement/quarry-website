@@ -8,7 +8,8 @@
     "id: dismissals are remembered per id. Change the id (e.g. add -tickets) to show it again to people who closed it.",
     "source: \"json\" uses this file. \"supabase\" reads the site_featured_events table instead (falls back to this file if that fails). Only flip once the table exists.",
     "First active event inside its start/end window wins.",
-    "countdownTo (optional): ISO time with offset, e.g. \"2026-11-01T10:00:00-06:00\". Shows countdownLabel + a live d/h/m/s clock; at that time it shows countdownDone instead (empty = hide). No edit needed when it passes."
+    "countdownTo (optional): ISO time with offset, e.g. \"2026-11-01T10:00:00-06:00\". Shows countdownLabel + a live d/h/m/s clock; at that time it shows countdownDone instead (empty = hide). No edit needed when it passes.",
+    "countdownTitle / countdownNote / countdownNoteUrl (optional): big tile countdown heading and a link under it (hero + card styles). The slim bar (style a) keeps the one-line countdownLabel text."
   ],
   "source": "json",
   "events": [
@@ -30,7 +31,10 @@
       "theme": {},
       "countdownTo": "2026-11-01T10:00:00-06:00",
       "countdownLabel": "Tickets on sale in",
-      "countdownDone": "Tickets on sale now"
+      "countdownDone": "Tickets on sale now",
+      "countdownTitle": "Countdown to Whoville tickets",
+      "countdownNote": "Wine club members: book now with your code",
+      "countdownNoteUrl": "/whoville#wineclub"
     }
   ]
 }

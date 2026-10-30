@@ -38,7 +38,7 @@
       meta: v === "hero" ? e.meta : "", cta: e.buttonText, href: e.buttonUrl,
       image: v === "bar" ? (e.barImage || e.heroImage) : (e.heroImage || e.barImage),
       alt: e.alt, from: e.start, to: e.end, theme: e.theme || {},
-      countdown: e.countdownTo, countdownLabel: e.countdownLabel, countdownDone: e.countdownDone };
+      countdown: e.countdownTo, countdownLabel: e.countdownLabel, countdownDone: e.countdownDone, countdownTitle: e.countdownTitle, countdownNote: e.countdownNote, countdownNoteUrl: e.countdownNoteUrl };
   }
   function load() {
     return getJSON(CONFIG_URL, { cache: "no-cache" }).then(function (cfg) {

@@ -148,3 +148,18 @@
 .qevent .qe-count{font-weight:700;letter-spacing:.04em;font-variant-numeric:tabular-nums;color:var(--qe-accent,#9be23f);margin:.35em 0 0}
 .qe-bar .qe-count{margin:0 0 0 .8em;white-space:nowrap}
 @media(max-width:640px){.qe-bar .qe-count{display:block;margin:.2em 0 0}}
+/* 10/30 11:20: Whoville countdown board (hero + card). Whimsical, CSS + the self-hosted Mountains of Christmas font only. */
+.qevent .qe-board{margin:.9em auto .2em;max-width:420px;width:100%;box-sizing:border-box;text-align:center;padding:12px 10px 12px;border-radius:18px;
+  background:radial-gradient(120% 90% at 50% 0%,#1d5a22 0%,#0b2f12 70%);border:3px solid #9be23f;box-shadow:0 0 0 4px #c8102e,0 10px 24px rgba(0,0,0,.4);position:relative;overflow:hidden}
+.qevent .qe-board:before{content:"";position:absolute;left:0;right:0;top:0;height:7px;background:repeating-linear-gradient(-45deg,#c8102e 0 10px,#fff7e6 10px 20px)}
+.qevent .qe-board-title{font-family:"Mountains of Christmas",cursive;font-weight:700;font-size:clamp(24px,7vw,34px);line-height:1.02;color:#9be23f;
+  text-shadow:2px 2px 0 #c8102e,4px 4px 0 rgba(0,0,0,.35);margin:6px 0 10px;transform:rotate(-1.5deg)}
+.qevent .qe-tiles{display:flex;justify-content:center;gap:clamp(5px,1.8vw,10px)}
+.qevent .qe-tile{flex:1 1 0;min-width:0;max-width:86px;display:flex;flex-direction:column;align-items:center;padding:6px 2px 5px;border-radius:14px 14px 10px 10px;
+  background:linear-gradient(180deg,#e0263f 0%,#a70d24 100%);border:3px solid #9be23f;box-shadow:0 4px 0 #5f0614,0 6px 12px rgba(0,0,0,.35);transform:rotate(-2deg)}
+.qevent .qe-tile:nth-child(even){transform:rotate(2deg) translateY(2px)}
+.qevent .qe-tile b{font-family:"Mountains of Christmas",cursive;font-weight:700;font-size:clamp(30px,9vw,42px);line-height:1;color:#fff;text-shadow:2px 2px 0 rgba(0,0,0,.35);font-variant-numeric:tabular-nums}
+.qevent .qe-tile i{font-style:normal;font-weight:700;font-size:clamp(9px,2.5vw,11px);letter-spacing:.08em;text-transform:uppercase;color:#d9ffb0;margin-top:2px}
+.qevent .qe-board-note{display:inline-block;margin:12px 0 0;padding:9px 14px;border-radius:999px;background:#9be23f;color:#0b2f12;font-weight:800;font-size:14px;line-height:1.2;text-decoration:none;box-shadow:0 3px 0 #5b8f1f}
+.qevent .qe-board-done{font-family:"Mountains of Christmas",cursive;font-weight:700;font-size:clamp(24px,7vw,32px);color:#9be23f;text-shadow:2px 2px 0 #c8102e}
+.qevent .qe-board [hidden],.qevent .qe-board[hidden]{display:none!important}

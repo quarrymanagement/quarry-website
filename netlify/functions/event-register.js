@@ -59,10 +59,23 @@ function gateNow() {
   return isNaN(o) ? Date.now() : o;
 }
 function gateTs(v) { const t = v ? Date.parse(v) : NaN; return isNaN(t) ? null : t; }
+// memberCode.codeEnv (preferred, 10/30 11:20): the code lives in a Netlify env var (name must start
+// MEMBER_CODE_), so nothing guessable is in the public events.json. Fallback: legacy salt+hash.
+// Missing env var + no hash = every code refused (fails closed).
+function memberCodeEnvOk(envName, code) {
+  const c = String(code || '').trim().toLowerCase();
+  if (!c || !/^MEMBER_CODE_[A-Z0-9_]+$/.test(String(envName || ''))) return false;
+  const want = String(process.env[envName] || '').trim().toLowerCase();
+  if (!want) return false;
+  const a = crypto.createHash('sha256').update(c).digest(), b = crypto.createHash('sha256').update(want).digest();
+  return crypto.timingSafeEqual(a, b);
+}
 function memberCodeOk(ev, code) {
   const mc = ev && ev.memberCode;
   const c = String(code || '').trim().toLowerCase();
-  if (!mc || !mc.hash || !c) return false;
+  if (!mc || !c) return false;
+  if (mc.codeEnv && process.env[mc.codeEnv]) return memberCodeEnvOk(mc.codeEnv, c);
+  if (!mc.hash) return false;
   const h = crypto.createHash('sha256').update(String(mc.salt || '') + c).digest('hex');
   const want = String(mc.hash).toLowerCase();
   return h.length === want.length && crypto.timingSafeEqual(Buffer.from(h), Buffer.from(want));
@@ -978,3 +991,5 @@ exports.handler = async function(event) {
     return { statusCode: 500, headers, body: JSON.stringify({ error: friendly, _raw: raw }) };
   }
 };
+
+module.exports.memberCodeEnvOk = memberCodeEnvOk;

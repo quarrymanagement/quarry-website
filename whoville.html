@@ -337,6 +337,10 @@ body{background:#0c2414;color:#fff7e6;font-family:'Montserrat',system-ui,sans-se
 .wv-date.off{background:#3a3a3a;border-color:#555;pointer-events:none;opacity:.7;}
 .wv-note{font-size:.85rem;line-height:1.6;opacity:.85;margin-top:16px;}
 #wvGate:empty{display:none;}
+.wv-top{max-width:560px;margin:0 auto 18px;scroll-margin-top:90px;}
+.wv-date.wv-wait{background:#0f3a17;}
+.wv-date.wv-wait small{color:#d9ffb0;}
+#wvDates .wv-date small b{font-variant-numeric:tabular-nums;}
 </style>
 <script src="/assets/js/sales-gate.js"></script>
 </head>
@@ -400,6 +404,7 @@ body{background:#0c2414;color:#fff7e6;font-family:'Montserrat',system-ui,sans-se
 </header>
 
 <main class="wv">
+  <div class="wv-top" id="wineclub"><div id="wvGate"></div></div>
   <div class="wv-grid">
     <img class="wv-flyer" id="wvFlyer" src="/assets/social-uploads/christmas-spirits-tickets-onsale-1080x1350.jpg" alt="Christmas Spirits in Whoville at The Quarry: $25 a person, 2-hour reservations, arrivals from 4:30 PM, December 4, 5, 11, 12, 18 and 19" width="1080" height="1350">
     <div>
@@ -412,7 +417,6 @@ body{background:#0c2414;color:#fff7e6;font-family:'Montserrat',system-ui,sans-se
         <li><b>Table or bar seating</b> &middot; bar seating for groups of 4 or fewer</li>
         <li>Want more time? Add a second 2 hours at checkout for 10% off, when space allows</li>
       </ul>
-      <div id="wvGate"></div>
       <h2>Pick your night</h2>
       <div class="wv-dates" id="wvDates">
         <a class="wv-date off">Fri, Dec 4</a><a class="wv-date off">Sat, Dec 5</a><a class="wv-date off">Fri, Dec 11</a>
@@ -449,10 +453,16 @@ body{background:#0c2414;color:#fff7e6;font-family:'Montserrat',system-ui,sans-se
     if (first && window.QuarryGate) {
       var gate = QuarryGate.mount(first, document.getElementById('wvGate'), { onChange: function (g) {
         box.classList.toggle('wv-locked', !!g.locked);
-        Array.prototype.forEach.call(box.querySelectorAll('a.wv-date[href] small'), function (s) { s.textContent = g.locked ? 'See times' : 'Choose a time'; });
+        Array.prototype.forEach.call(box.querySelectorAll('a.wv-date[href]'), function (a) {
+          var sm = a.querySelector('small'); a.classList.toggle('wv-wait', !!g.locked);
+          sm.textContent = !g.locked ? 'Choose a time' : (g.phase === 'early' ? 'Wine club early access \u2014 enter code' : 'On sale ' + QuarryGate.fmtAt(first.onSaleAt).replace(' at ', ', '));
+          a.onclick = g.locked ? function (e) { e.preventDefault(); if (g.phase === 'early' && window.__wvGate && window.__wvGate.focusCode) window.__wvGate.focusCode(); } : null;
+        });
         var fl = document.getElementById('wvFlyer');
         if (g.phase === 'open' || g.phase === 'none') fl.src = '/assets/social-uploads/christmas-spirits-tickets-now-1080x1350.jpg';
       } });
+      window.__wvGate = gate;
+      if (location.hash === '#wineclub' && gate.focusCode) setTimeout(gate.focusCode, 400);
     }
   }
   fetch('/events.json?t=' + Date.now()).then(function (r) { return r.json(); })

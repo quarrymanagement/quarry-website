@@ -70,7 +70,32 @@
     return (d.countdownLabel ? d.countdownLabel + " " : "") + (dd ? dd + "d " : "") + z(hh) + "h " + z(mm) + "m " + z(ss) + "s";
   }
   function countEl(d, tag) { return d.countdown ? "<" + tag + ' class="qe-count" data-qe-count>' + esc(countText(d)) + "</" + tag + ">" : ""; }
+  /* 10/30 11:20: whimsical Whoville countdown board (stacked tiles) for the hero and card layouts. */
+  function boardParts(d) {
+    var to = d.countdown ? Date.parse(d.countdown) : NaN; if (isNaN(to)) return null;
+    var ms = to - nowMs(); if (ms <= 0) return null;
+    var s = Math.floor(ms / 1000);
+    return [Math.floor(s / 86400), Math.floor(s % 86400 / 3600), Math.floor(s % 3600 / 60), s % 60];
+  }
+  function boardEl(d) {
+    if (!d.countdown) return "";
+    var z = function (n) { return (n < 10 ? "0" : "") + n; }, L = ["Days", "Hours", "Minutes", "Seconds"];
+    var cells = L.map(function (l, i) { return '<span class="qe-tile"><b data-qe-t="' + i + '">' + (i ? "00" : "0") + "</b><i>" + l + "</i></span>"; }).join("");
+    return '<div class="qe-board" data-qe-board><div class="qe-board-title">' + esc(d.countdownTitle || d.countdownLabel || "Countdown") + '</div><div class="qe-tiles">' + cells +
+      '</div>' + (d.countdownNote ? '<a class="qe-board-note" href="' + esc(d.countdownNoteUrl || d.href || "#") + '">' + esc(d.countdownNote) + "</a>" : "") + '<div class="qe-board-done" hidden>' + esc(d.countdownDone || "") + "</div></div>";
+  }
   function tick(el, d) {
+    var bd = el.querySelector("[data-qe-board]");
+    if (bd) {
+      var z2 = function (n) { return (n < 10 ? "0" : "") + n; }, bs = bd.querySelectorAll("[data-qe-t]"), tl = bd.querySelector(".qe-tiles"), dn = bd.querySelector(".qe-board-done"), tt = bd.querySelector(".qe-board-title");
+      var gob = function () {
+        if (!el.isConnected) return clearInterval(ivb);
+        var p = boardParts(d);
+        if (!p) { tl.hidden = true; tt.hidden = true; var nt = bd.querySelector(".qe-board-note"); if (nt) nt.hidden = true; dn.hidden = !dn.textContent; bd.hidden = !dn.textContent; return; }
+        for (var i = 0; i < 4; i++) bs[i].textContent = i ? z2(p[i]) : p[i];
+      };
+      var ivb = setInterval(gob, 1000); gob();
+    }
     var c = el.querySelector("[data-qe-count]");
     if (!c) return;
     var go = function () { if (!el.isConnected) return clearInterval(iv); var t = countText(d); c.textContent = t; c.hidden = !t; };
@@ -90,7 +115,7 @@
       return '<div class="qe-inner"><div class="qe-art" role="img" aria-label="' + esc(d.alt || d.title) + '"' +
         (d.image ? ' style="background-image:url(\'' + esc(d.image) + '\')"' : "") + "></div>" +
         '<div class="qe-copy">' + part("qe-kicker", d.kicker) + part("qe-title", d.title, "h2") +
-        '<span class="qe-divider" aria-hidden="true"></span>' + part("qe-line", d.line, "p", true) + countEl(d, "p") + part("qe-meta", d.meta, "p") +
+        '<span class="qe-divider" aria-hidden="true"></span>' + part("qe-line", d.line, "p", true) + part("qe-meta", d.meta, "p") + boardEl(d) +
         '<div class="qe-ctas">' + cta(d, 1) + cta(d, 2) + "</div></div></div>" +
         '<span class="qe-lights" aria-hidden="true"></span>' + X;
     },
@@ -143,7 +168,7 @@
   function fromConfig(c) {
     var el = document.createElement("div");
     el.className = "qevent";
-    ["variant","id","kicker","title","line","cta","href","cta2","href2","image","hand","alt","meta","from","to","delay","countdown","countdownLabel","countdownDone"].forEach(function (k) {
+    ["variant","id","kicker","title","line","cta","href","cta2","href2","image","hand","alt","meta","from","to","delay","countdown","countdownLabel","countdownDone","countdownTitle","countdownNote","countdownNoteUrl"].forEach(function (k) {
       if (c[k] != null && c[k] !== "") el.dataset[k] = c[k];
     });
     Object.keys(c.theme || {}).forEach(function (k) { el.style.setProperty("--qe-" + k, c.theme[k]); });
