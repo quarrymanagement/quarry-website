@@ -2531,7 +2531,7 @@
             var max = arrivalBarMax(ev), bar = sel.querySelector('option[value="bar"]'), msg = '';
             if (bar) {
                 bar.disabled = want > max;
-                bar.textContent = want > max ? 'Bar seating (groups of ' + max + ' or fewer)' : 'Bar seating (up to ' + max + ' per arrival time)';
+                bar.textContent = want > max ? 'Bar seating (groups of ' + max + ' or fewer)' : 'Bar seating (groups up to ' + max + ')';
             }
             if (sel.value === 'bar' && want > max) { sel.value = 'table'; sel.dataset.switched = '1'; }
             if (want <= max) sel.dataset.switched = '';
@@ -2663,7 +2663,7 @@
             // If the time they had picked is now full, roll forward to the NEXT open
             // time (not back to the earliest) and say so.
             let rolledFrom = '';
-            const prevIdx = prev ? slots.findIndex(function (x) { return String(x.id) === prev; }) : -1;
+            const prevIdx = prev ? slots.findIndex(function (x) { return String(x.id) === prev && (!pool || (x.pool || 'table') === pool); }) : -1;   // switching Table/Bar is not a roll
             if (pick === -1 && prevIdx >= 0) {
                 for (let m = 0; m < sel.options.length; m++) {
                     if (!sel.options[m].disabled && Number(sel.options[m].getAttribute('data-i')) > prevIdx) { pick = m; break; }

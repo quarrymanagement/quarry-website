@@ -986,7 +986,7 @@
             var max = arrivalBarMax(ev), bar = sel.querySelector('option[value="bar"]'), msg = '';
             if (bar) {
                 bar.disabled = want > max;
-                bar.textContent = want > max ? 'Bar seating (groups of ' + max + ' or fewer)' : 'Bar seating (up to ' + max + ' per arrival time)';
+                bar.textContent = want > max ? 'Bar seating (groups of ' + max + ' or fewer)' : 'Bar seating (groups up to ' + max + ')';
             }
             if (sel.value === 'bar' && want > max) { sel.value = 'table'; sel.dataset.switched = '1'; }
             if (want <= max) sel.dataset.switched = '';
@@ -1100,7 +1100,7 @@
             // time (not back to the earliest) and say so.
             var rolledFrom = '';
             var prevIdx = -1;
-            for (var q = 0; prev && q < slots.length; q++) { if (String(slots[q].id) === prev) { prevIdx = q; break; } }
+            for (var q = 0; prev && q < slots.length; q++) { if (String(slots[q].id) === prev && (!pool || (slots[q].pool || 'table') === pool)) { prevIdx = q; break; } }
             if (pick === -1 && prevIdx >= 0) {
                 for (var r = 0; r < sel.options.length; r++) {
                     if (!sel.options[r].disabled && Number(sel.options[r].getAttribute('data-i')) > prevIdx) { pick = r; break; }
