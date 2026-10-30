@@ -135,7 +135,7 @@ function loadAvailability(date) {
   var QBD = window.QuarryBlockedDates;
   if (QBD && QBD.isBlocked(date)) {
     slotsArea.innerHTML = '';
-    msgEl.innerHTML = QBD.NOTE_HTML;
+    msgEl.innerHTML = QBD.noteHtml(date);
     msgEl.classList.add('show');
     return;
   }
@@ -147,7 +147,7 @@ function loadAvailability(date) {
       if (!body.ok) throw new Error(body.error || 'Could not check availability');
       if (!body.bookable) {
         slotsArea.innerHTML = '';
-        if (body.blockedDate && QBD) msgEl.innerHTML = QBD.NOTE_HTML;
+        if (body.blockedDate && QBD) msgEl.innerHTML = QBD.noteHtml(date);
         else msgEl.textContent = body.reason || 'That date is not available.';
         msgEl.classList.add('show');
         return;

@@ -27,6 +27,13 @@ delete process.env.VENUE_AVAILABILITY_KEY;
   for (const d of ['2026-12-10', '2026-12-03', '2026-12-13', '2026-12-20', '', null, undefined]) assert.ok(!B.isBlocked(d), String(d));
   assert.ok(/Christmas Spirits in Whoville/.test(B.blockedReason('2026-12-04')) && /quarry-events\.html/.test(B.blockedReason('2026-12-04')));
   assert.ok(/href="\/quarry-events\.html"/.test(B.NOTE_HTML));
+  // Request-by-email wording (Matt 9:05 AM CT): mailto with a dated subject + events link.
+  assert.ok(/Want to come in\? Email us at management@thequarrystl\.com and we'll see what we can do\. See our events page\./.test(B.MESSAGE));
+  assert.strictEqual(B.prettyDate('2026-12-04'), 'Friday, December 4, 2026');
+  assert.strictEqual(B.prettyDate('12/19/2026'), 'Saturday, December 19, 2026');
+  const nh = B.noteHtml('2026-12-04');
+  assert.ok(nh.includes('href="mailto:management@thequarrystl.com?subject=Request%20for%20Friday%2C%20December%204%2C%202026'), nh);
+  assert.ok(/href="\/quarry-events\.html"/.test(nh) && /Want to come in\?/.test(nh));
 
   // Golf (square-checkout uses closedReason)
   const golf = require(fn('_golf-closed.js'));
@@ -71,6 +78,12 @@ delete process.env.VENUE_AVAILABILITY_KEY;
   assert.strictEqual(res.statusCode, 500);
   assert.ok(sent.some((s) => /sendgrid/.test(s)));
   assert.ok(!fetched.some((u) => /confirm-interest/.test(u)));
+  // Softened decline: invites a reply / email request instead of turning them away.
+  const html = auto._buildBlockedEmail({ firstName: 'T', eventDate: '2026-12-18' });
+  {
+    assert.ok(/reply to this email/.test(html) && /mailto:management@thequarrystl\.com\?subject=Request%20for%20Friday%2C%20December%2018/.test(html), html);
+    assert.ok(!/aren't taking reservations/.test(html) && /see what we can do/.test(html));
+  }
 
   // Whole client+server source sanity: every public page loads the shared list.
   const fs = require('fs');

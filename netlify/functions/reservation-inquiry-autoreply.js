@@ -169,9 +169,10 @@ function buildBlockedEmail(inq) {
         '<div style="padding:32px 24px"><h2 style="color:#2C1A0E">Thanks for reaching out!</h2>' +
         `<p>Hi ${esc(first)}, thank you for your interest in The Quarry` +
         (inq.occasion ? ` for your ${esc(inq.occasion.toLowerCase())}` : '') + `!</p>` +
-        `<p><b>${esc(fmtDate(inq.eventDate))}</b> is reserved for <b>Christmas Spirits in Whoville</b>, so we aren't taking reservations or party requests that day. ` +
-        `See our <a href="https://thequarrystl.com${sharedBlocked.EVENTS_PATH}" style="color:#B8933A">events page</a> for details and tickets.</p>` +
-        '<p>We\'d love to host you on another date. Just reply to this email with a different date, or submit a new request on our website.</p>' +
+        `<p><b>${esc(fmtDate(inq.eventDate))}</b> is reserved for <b>Christmas Spirits in Whoville</b>, so we can't confirm it through the website, but we'd still love to try to fit you in. ` +
+        `Just reply to this email, or email us at <a href="${sharedBlocked.mailtoHref(inq.eventDate)}" style="color:#B8933A">${sharedBlocked.CONTACT_EMAIL}</a>, ` +
+        'with your party size, preferred time and any details, and we\'ll see what we can do.</p>' +
+        `<p>You can also see our <a href="https://thequarrystl.com${sharedBlocked.EVENTS_PATH}" style="color:#B8933A">events page</a> for Christmas Spirits in Whoville details and tickets.</p>` +
         '<p>Questions? Call us at <a href="tel:6362248257" style="color:#B8933A">636-224-8257</a>.</p></div>' +
         '<div style="background:#1A0E08;padding:16px;text-align:center">' +
         '<p style="color:rgba(255,255,255,0.4);font-size:0.75rem;margin:0">3960 Highway Z, New Melle, MO 63385</p></div></div>';
@@ -312,3 +313,6 @@ exports.handler = async (event) => {
         return respond(500, { ok: false, error: err.message });
     }
 };
+
+// Exposed for scripts/test-whoville-block-dates.js
+exports._buildBlockedEmail = buildBlockedEmail;

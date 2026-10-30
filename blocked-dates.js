@@ -25,10 +25,43 @@
   ];
 
   var EVENTS_PATH = '/quarry-events.html';
-  var MESSAGE = 'This date is reserved for Christmas Spirits in Whoville \u2014 see our events page.';
-  var MESSAGE_WITH_URL = MESSAGE + ' https://thequarrystl.com' + EVENTS_PATH;
-  var NOTE_HTML = 'This date is reserved for Christmas Spirits in Whoville \u2014 see our ' +
-    '<a href="' + EVENTS_PATH + '" style="color:inherit;text-decoration:underline;font-weight:600">events page</a>.';
+  var EVENTS_URL = 'https://thequarrystl.com' + EVENTS_PATH;
+  var CONTACT_EMAIL = 'management@thequarrystl.com';
+  // Matt 2026-10-30 9:05 AM CT: "if someone tries to select that date, have the
+  // email us for request. So it doesn't push it away." Date stays unbookable
+  // online; the note invites an email request instead of turning them away.
+  var MESSAGE = 'This date is reserved for Christmas Spirits in Whoville. Want to come in? ' +
+    'Email us at ' + CONTACT_EMAIL + " and we'll see what we can do. See our events page.";
+  var MESSAGE_WITH_URL = MESSAGE.replace(/\.$/, ': ') + EVENTS_URL;
+
+  var DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
+    'September', 'October', 'November', 'December'];
+  // '2026-12-04' -> 'Friday, December 4, 2026' (no timezone math).
+  function prettyDate(date) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(normDate(date));
+    if (!m) return '';
+    var y = +m[1], mo = +m[2], d = +m[3];
+    var dow = new Date(Date.UTC(y, mo - 1, d)).getUTCDay();
+    return DAYS[dow] + ', ' + MONTHS[mo - 1] + ' ' + d + ', ' + y;
+  }
+  // mailto: link with a "Request for <date>" subject.
+  function mailtoHref(date) {
+    var pretty = prettyDate(date);
+    var subject = pretty ? 'Request for ' + pretty : 'Request for a Christmas Spirits in Whoville date';
+    var body = pretty ? 'Hi! I\u2019d like to come in on ' + pretty + '. Party size / time / details: ' : '';
+    return 'mailto:' + CONTACT_EMAIL + '?subject=' + encodeURIComponent(subject) +
+      (body ? '&body=' + encodeURIComponent(body) : '');
+  }
+  var LINK_STYLE = 'color:inherit;text-decoration:underline;font-weight:600';
+  // Note HTML for a date (mailto subject names the date); NOTE_HTML is the generic one.
+  function noteHtml(date) {
+    return 'This date is reserved for Christmas Spirits in Whoville. Want to come in? ' +
+      'Email us at <a class="qbd-mail" href="' + mailtoHref(date) + '" style="' + LINK_STYLE + '">' + CONTACT_EMAIL + '</a>' +
+      " and we'll see what we can do. See our " +
+      '<a class="qbd-events" href="' + EVENTS_PATH + '" style="' + LINK_STYLE + '">events page</a>.';
+  }
+  var NOTE_HTML = noteHtml('');
 
   // Accepts 'YYYY-MM-DD', 'YYYY-M-D', 'M/D/YYYY' or an ISO timestamp.
   function normDate(s) {
@@ -63,6 +96,7 @@
 
     function check() {
       var bad = isBlocked(input.value);
+      if (bad) note.innerHTML = noteHtml(input.value);
       note.style.display = bad ? 'block' : 'none';
       try { input.setCustomValidity(bad ? MESSAGE : ''); } catch (_) {}
       if (opts.onChange) opts.onChange(bad);
@@ -91,6 +125,11 @@
     MESSAGE_WITH_URL: MESSAGE_WITH_URL,
     NOTE_HTML: NOTE_HTML,
     EVENTS_PATH: EVENTS_PATH,
+    EVENTS_URL: EVENTS_URL,
+    CONTACT_EMAIL: CONTACT_EMAIL,
+    prettyDate: prettyDate,
+    mailtoHref: mailtoHref,
+    noteHtml: noteHtml,
     normDate: normDate,
     isBlocked: isBlocked,
     blockedReason: blockedReason,

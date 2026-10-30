@@ -616,6 +616,7 @@ nav { display:flex; align-items:center; }
     var v = dateInput.value;
     var blocked = v && BLOCKED_DATES.indexOf(v) !== -1;
     var shared = !blocked && isShared(v);
+    if (whovilleMsg && shared) whovilleMsg.innerHTML = QBD.noteHtml(v);
     if (whovilleMsg) whovilleMsg.style.display = shared ? 'block' : 'none';
     if (shared) {
       if (blockedMsg) blockedMsg.style.display = 'none';
