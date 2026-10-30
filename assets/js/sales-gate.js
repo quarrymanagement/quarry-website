@@ -111,8 +111,8 @@
     opts = opts || {};
     var ctrl = { phase: phase(ev), locked: false, applied: false, code: '', destroy: function () { clearInterval(timer); } };
     if (!el) return ctrl;
-    if (!gated(ev)) { el.style.display = 'none'; el.innerHTML = ''; return ctrl; }
-    injectCss(); el.style.display = 'block';
+    if (!gated(ev)) { el.style.display = 'none'; el.innerHTML = ''; el.classList.remove('qg'); return ctrl; }
+    injectCss(); el.classList.add('qg'); el.style.display = 'block';
     var mc = ev.memberCode || {}, label = mc.label || 'Member', pct = parseFloat(mc.pct) || 0, lastKey = '', timer = null;
     function lockState() { var p = phase(ev); return p === 'soon' || (p === 'early' && !ctrl.applied); }
     function draw() {
