@@ -169,6 +169,7 @@ async function buildRegistration(p, events) {
     reconciled: true,
     ...(seat ? { seatingOptionId: String(seat.id || ''), seatingOptionName: String(seat.name) } : {}),
     ...(arr ? { arrivalSlot: String(arr.id || ''), arrivalLabel: String(arr.label || '') } : {}),
+    ...(arr && /\+ extra 2 hours/i.test(String(p.note || '')) ? { extraStay: true } : {}),
     ...(addOns.length ? { addOns } : {})
   };
   return { ev, reg, amount: (Number(p.amount_money && p.amount_money.amount) || 0) / 100 };

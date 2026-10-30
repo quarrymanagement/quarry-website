@@ -775,7 +775,7 @@
             } else {
                 // Number of Tickets
                 html += '<label id="detailPartySizeLabel">Number of Tickets *</label>';
-                html += '<input type="number" name="partySize" id="detailPartySize" min="1" max="' + (parseInt(evt.maxTicketsPerOrder, 10) || 20) + '" value="1" required onchange="renderDetailArrivalSlots(); updateDetailSummary()" oninput="renderDetailArrivalSlots()">';
+                html += '<input type="number" name="partySize" id="detailPartySize" min="1" max="' + (parseInt(evt.maxTicketsPerOrder, 10) || 20) + '" value="1" required onchange="renderDetailArrivalSlots(); updateDetailSummary()" oninput="renderDetailArrivalSlots(); updateDetailSummary()">';
             }
 
             // ─── Staggered arrival wave ───
@@ -786,6 +786,7 @@
                 html += '<label>Arrival Time *</label>';
                 html += '<select name="arrivalSlot" id="detailArrivalSlot" required onchange="onDetailArrivalChange()"></select>';
                 html += '<div id="detailArrivalWindow" style="display:none;font-weight:600;margin-top:6px;"></div>';
+                html += '<label id="detailArrivalExtendBox" style="display:none;margin-top:8px;font-size:14px;cursor:pointer;"><input type="checkbox" id="detailArrivalExtend" onchange="showDetailArrivalWindow(); updateDetailSummary();" style="width:auto;margin-right:6px;"><span></span></label>';
                 html += '<div id="detailArrivalHint" style="font-size:13px;color:#888;margin-top:6px;">We stagger arrivals so the buffet and bar aren\'t swamped. Please arrive at your chosen time.</div>';
                 html += '</div>';
             }
@@ -944,28 +945,67 @@
         // Room limit across overlapping arrival times (mirrors event-register.js
         // arrivalRoomLeft). Events without arrivalRoomCap are unaffected.
         function arrivalClockMin(t) { var p = String(t || '').split(':'); return (parseInt(p[0], 10) || 0) * 60 + (parseInt(p[1], 10) || 0); }
-        function arrivalRoomLeftFor(ev, slot) {
+        function arrivalRoomLeftFor(ev, slot, wantStay) {
+            // Each booking holds its spot from arrival for the stay, or twice that with the extra 2 hours (extraStay).
             var cap = parseInt(ev && ev.arrivalRoomCap, 10);
             if (!cap || !slot || !slot.start) return Infinity;
-            var stay = parseInt(ev.arrivalStayMinutes, 10) || 120;
-            var slots = (ev.arrivalSlots || []).filter(function (s) { return s && s.start; });
-            var people = {};
+            var stay = parseInt(ev.arrivalStayMinutes, 10) || 120, reset = Math.max(0, parseInt(ev.arrivalResetMinutes, 10) || 0);
+            var want = (wantStay || stay) + reset, startOf = {}, groups = [];   // seats free up at start + stay + table reset
+            (ev.arrivalSlots || []).forEach(function (x) { if (x && x.start) startOf[String(x.id || '').trim().toLowerCase()] = arrivalClockMin(x.start); });
             (ev.registrations || []).forEach(function (r) {
-                var id = String((r && r.arrivalSlot) || '').trim().toLowerCase();
-                if (id) people[id] = (people[id] || 0) + (parseInt(r.qty, 10) || 1);
+                var st = startOf[String((r && r.arrivalSlot) || '').trim().toLowerCase()];
+                if (st === undefined) return;
+                groups.push({ s: st, e: st + (r.extraStay ? 2 * stay : stay) + reset, q: parseInt(r.qty, 10) || 1 });
             });
             var s0 = arrivalClockMin(slot.start), worst = 0;
-            slots.forEach(function (m) {
-                var mt = arrivalClockMin(m.start);
-                if (mt < s0 || mt >= s0 + stay) return;
+            var moments = [s0].concat(groups.map(function (g) { return g.s; }).filter(function (t) { return t > s0 && t < s0 + want; }));
+            moments.forEach(function (m) {
                 var inside = 0;
-                slots.forEach(function (o) {
-                    var ot = arrivalClockMin(o.start);
-                    if (ot <= mt && ot > mt - stay) inside += people[String(o.id || '').trim().toLowerCase()] || 0;
-                });
+                groups.forEach(function (g) { if (g.s <= m && m < g.e) inside += g.q; });
                 if (inside > worst) worst = inside;
             });
             return cap - worst;
+        }
+
+        /** Second 2-hour block: only when offered, it ends by the cut-off, and the room has space for the whole party all 4 hours. */
+        function arrivalExtendOk(ev, slot, qty) {
+            var pct = parseFloat(ev && ev.arrivalExtendPct);
+            if (!(pct >= 0) || !slot || !slot.start || !ev.arrivalRoomCap) return false;
+            var stay = parseInt(ev.arrivalStayMinutes, 10) || 120, latest = ev.arrivalExtendLatestEnd || ev.endTime;
+            if (latest && arrivalClockMin(slot.start) + 2 * stay > arrivalClockMin(latest)) return false;
+            return arrivalRoomLeftFor(ev, slot, 2 * stay) >= qty;
+        }
+        function arrivalExtendPrice(ev) {
+            var base = (ev.tiers && ev.tiers[0] && ev.tiers[0].pricePerPerson) || ev.price || 0;
+            return Math.round(base * (1 - (parseFloat(ev.arrivalExtendPct) || 0) / 100));
+        }
+        /** Shows/hides the extra-2-hours checkbox and keeps "Your time" in step. */
+        function renderArrivalExtend(ev, slot, qty, boxId, windowId) {
+            var box = document.getElementById(boxId), win = document.getElementById(windowId);
+            var ok = arrivalExtendOk(ev, slot, qty);
+            var cb = box && box.querySelector('input');
+            if (box) {
+                if (!ok && cb) cb.checked = false;
+                box.style.display = ok ? 'block' : 'none';
+                var lab = box.querySelector('span');
+                if (lab && ok) lab.textContent = 'Add a second 2-hour block: your time becomes ' + arrivalWindowText(ev, slot, true) + '. $' + (arrivalExtendPrice(ev) / 100).toFixed(2) + ' per ticket (' + ev.arrivalExtendPct + '% off).';
+            }
+            var ext = !!(ok && cb && cb.checked);
+            var w = arrivalWindowText(ev, slot, ext);
+            if (win) { win.textContent = w ? 'Your time: ' + w : ''; win.style.display = w ? 'block' : 'none'; }
+            return ext;
+        }
+        /** Adds the extra-2-hours line to an already-rendered order summary. */
+        function addExtendToSummary(ev, qty, detailsEl, totalEl) {
+            if (!detailsEl || !totalEl) return;
+            var cents = arrivalExtendPrice(ev) * qty;
+            var line = document.createElement('div'); line.className = 'summary-line'; line.setAttribute('data-extend', '1');
+            line.style.cssText = 'display:flex;justify-content:space-between;';
+            var a = document.createElement('span'); a.textContent = 'Extra 2 hours (' + ev.arrivalExtendPct + '% off) \u00d7 ' + qty;
+            var b = document.createElement('span'); b.textContent = '$' + (cents / 100).toFixed(2);
+            line.appendChild(a); line.appendChild(b); detailsEl.appendChild(line);
+            var cur = parseFloat(String(totalEl.textContent).replace(/[^0-9.]/g, '')) || 0;
+            totalEl.textContent = '$' + (cur + cents / 100).toFixed(2);
         }
 
         function detailArrivalLeft(slot) {
@@ -1064,24 +1104,29 @@
 
 
         /** "5:05–7:05 PM" for a timed arrival (slot.start + event.arrivalStayMinutes); '' otherwise. */
-        function arrivalWindowText(ev, slot) {
+        function arrivalWindowText(ev, slot, extended) {
             if (!slot || !slot.start || !ev || !ev.arrivalStayMinutes) return '';
             var p = String(slot.start).split(':'); var s = (+p[0]) * 60 + (+p[1] || 0);
             if (isNaN(s)) return '';
-            var e = s + (parseInt(ev.arrivalStayMinutes, 10) || 120);
+            var e = s + (parseInt(ev.arrivalStayMinutes, 10) || 120) * (extended ? 2 : 1);
             function f(m) { m = ((m % 1440) + 1440) % 1440; var h = Math.floor(m / 60), mm = m % 60; return { t: ((h % 12) || 12) + ':' + (mm < 10 ? '0' : '') + mm, ap: h < 12 ? 'AM' : 'PM' }; }
             var a = f(s), b = f(e);
             return a.ap === b.ap ? (a.t + '\u2013' + b.t + ' ' + b.ap) : (a.t + ' ' + a.ap + '\u2013' + b.t + ' ' + b.ap);
         }
 
         function showDetailArrivalWindow() {
-            var el = document.getElementById('detailArrivalWindow'), sel = document.getElementById('detailArrivalSlot');
-            if (!el || !sel) return;
-            var id = sel.value;
-            var slot = ((eventData && eventData.arrivalSlots) || []).find(function (x) { return String(x.id) === String(id); });
-            var w = arrivalWindowText(eventData, slot);
-            el.textContent = w ? 'Your time: ' + w : ''; el.style.display = w ? 'block' : 'none';
+            var sel = document.getElementById('detailArrivalSlot');
+            if (!sel) return false;
+            var slot = ((eventData && eventData.arrivalSlots) || []).find(function (x) { return String(x.id) === String(sel.value); });
+            return renderArrivalExtend(eventData || {}, slot, detailArrivalPartyWanted(), 'detailArrivalExtendBox', 'detailArrivalWindow');
         }
+        window.showDetailArrivalWindow = showDetailArrivalWindow;
+        function detailArrivalExtendChosen() {
+            var box = document.getElementById('detailArrivalExtendBox'), cb = document.getElementById('detailArrivalExtend');
+            return !!(box && cb && box.style.display !== 'none' && cb.checked);
+        }
+        window.detailArrivalExtendChosen = detailArrivalExtendChosen;
+        window.detailArrivalPartyWantedG = function () { return detailArrivalPartyWanted(); };
 
         /** Every permitted wave full beats whatever the pricing logic decided. */
         function applyDetailArrivalLock() {
@@ -1444,6 +1489,10 @@
 
         // ─── Update order summary ───
         window.updateDetailSummary = function() {
+            updateDetailSummaryBase();
+            if (eventData && window.detailArrivalExtendChosen && window.detailArrivalExtendChosen()) addExtendToSummary(eventData, window.detailArrivalPartyWantedG(), document.getElementById('detailSummaryDetails'), document.getElementById('detailSummaryTotal'));
+        };
+        var updateDetailSummaryBase = function() {
             if (!eventData) return;
             var detailsDiv = document.getElementById('detailSummaryDetails');
             var totalDiv = document.getElementById('detailSummaryTotal');
@@ -1697,6 +1746,7 @@
                 cancelUrl: window.location.href
             };
 
+            if (window.detailArrivalExtendChosen && window.detailArrivalExtendChosen()) payload.extendStay = true;
             var submitBundle = hasSeating ? null : getDetailSelectedBundle();
             if (submitBundle) {
                 // Server prices the bundle; we only say which one and how many packs.

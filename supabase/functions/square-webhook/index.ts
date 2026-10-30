@@ -412,7 +412,7 @@ async function sendEmail(to: string, subject: string, html: string, replyTo?: st
 
 type PendingEmail = {
   ev: any; email: string; qty: number; paymentId: string;
-  seatingOptionName: string; seats: number; arrivalLabel: string;
+  seatingOptionName: string; seats: number; arrivalLabel: string; extraStay?: boolean;
   amountCents?: number; currency?: string;
   addOns?: MatchedAddOn[];
 };
@@ -429,13 +429,13 @@ function formatAddOns(addOns: MatchedAddOn[] | undefined): string {
 // can never prevent — or undo — the registration being recorded.
 // Timed arrivals (Whoville, 2026-10-30): "5:05–7:05 PM" from the slot's start and the
 // event's arrivalStayMinutes. Empty for every other event, so their emails are unchanged.
-function arrivalWindowText(ev: any, arrivalLabel: string): string {
+function arrivalWindowText(ev: any, arrivalLabel: string, extraStay = false): string {
   if (!ev || !ev.arrivalStayMinutes || !arrivalLabel) return "";
   const slot = (ev.arrivalSlots || []).find((x: any) => x && String(x.label || "").trim() === String(arrivalLabel).trim());
   if (!slot || !slot.start) return "";
   const p = String(slot.start).split(":");
   const s = (parseInt(p[0], 10) || 0) * 60 + (parseInt(p[1], 10) || 0);
-  const e = s + (parseInt(ev.arrivalStayMinutes, 10) || 120);
+  const e = s + (parseInt(ev.arrivalStayMinutes, 10) || 120) * (extraStay ? 2 : 1);
   const f = (m: number) => { m = ((m % 1440) + 1440) % 1440; const h = Math.floor(m / 60), mm = m % 60; return { t: ((h % 12) || 12) + ":" + String(mm).padStart(2, "0"), ap: h < 12 ? "AM" : "PM" }; };
   const a = f(s), b = f(e);
   return a.ap === b.ap ? `${a.t}\u2013${b.t} ${b.ap}` : `${a.t} ${a.ap}\u2013${b.t} ${b.ap}`;
@@ -445,7 +445,8 @@ async function sendRegistrationEmails(pe: PendingEmail): Promise<void> {
   const ev = pe.ev || {};
   const eventName = String(ev.name || "");
   const dateLine = formatEventDate(ev.date);
-  const windowLine = arrivalWindowText(ev, pe.arrivalLabel);
+  const baseWindow = arrivalWindowText(ev, pe.arrivalLabel, !!pe.extraStay);
+  const windowLine = baseWindow && pe.extraStay ? baseWindow + " (includes your extra 2 hours)" : baseWindow;
   const policyLine = windowLine ? String(ev.arrivalHint || "") : "";
   // Timed events: the guest's own start and end time replaces the event's opening time.
   const timeLine = windowLine || formatEventTime(ev.time);
@@ -650,6 +651,8 @@ async function applyRegistrations(regs: Reg[]): Promise<any[]> {
         const s = (ev.arrivalSlots || []).find((x: any) => x && String(x.id) === arrivalSlot);
         if (s && s.label) arrivalLabel = String(s.label);
       }
+      // Timed arrivals: "+ extra 2 hours" in the note = guest added the second 2-hour block.
+      const extraStay = !!arrivalSlot && /\+ extra 2 hours/i.test(reg.note || "");
       const optForEmail = seatingOptionId ? (ev.seatingOptions || []).find((o: any) => o && String(o.id) === seatingOptionId) : null;
       const seats = Number(optForEmail && optForEmail.seats) || (seatMatch ? seatMatch.seats : 0) || 0;
 
@@ -678,6 +681,7 @@ async function applyRegistrations(regs: Reg[]): Promise<any[]> {
         // Staggered arrival wave, when the event offers one.
         ...(arrivalSlot ? { arrivalSlot } : {}),
         ...(arrivalLabel ? { arrivalLabel } : {}),
+        ...(extraStay ? { extraStay: true } : {}),
         ...(addOnMatches.length ? { addOns: addOnMatches } : {}),
         ...(reg.backfilled ? { backfilled: true } : {}),
       });
@@ -687,7 +691,7 @@ async function applyRegistrations(regs: Reg[]): Promise<any[]> {
       // Queue the emails: newly added only (never "already_recorded" — Square redelivers
       // payment.updated), and never on a backfill run.
       if (!reg.backfilled && reg.email) {
-        pendingEmails.push({ ev, email: reg.email, qty: reg.qty, paymentId: reg.paymentId, seatingOptionName, seats, arrivalLabel, amountCents: Number(reg.amountCents) || 0, currency: reg.currency || "USD", addOns: addOnMatches });
+        pendingEmails.push({ ev, email: reg.email, qty: reg.qty, paymentId: reg.paymentId, seatingOptionName, seats, arrivalLabel, extraStay, amountCents: Number(reg.amountCents) || 0, currency: reg.currency || "USD", addOns: addOnMatches });
       }
     }
     if (!changed) return statuses;

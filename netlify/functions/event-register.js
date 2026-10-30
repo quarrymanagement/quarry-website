@@ -208,6 +208,8 @@ function countArrivalSlotUsed(evData, slot) {
 // Optional, per event:
 //     "arrivalRoomCap": 140,        // most guests inside at any moment
 //     "arrivalStayMinutes": 120,    // how long each arrival time stays
+//     "arrivalResetMinutes": 3,     // table reset after a group leaves; its seats
+//                                   // free up at start + stay + reset
 //     "arrivalSlots": [{ "id": "a1705", "label": "5:05 PM", "start": "17:05",
 //                        "capacity": 32 }, ...]
 // Guests from an arrival time count from its start until start + stay. Adding
@@ -217,11 +219,11 @@ function countArrivalSlotUsed(evData, slot) {
 // "5:05–7:05 PM" for a timed arrival, '' otherwise. Shown on the Square ticket line
 // (line-item note), never in payment_note: the webhook matches arrival labels
 // inside payment_note, and an end time like "7:05 PM" is itself a label.
-function arrivalWindowText(evData, slot) {
+function arrivalWindowText(evData, slot, extended) {
   if (!slot || !slot.start || !evData || !evData.arrivalStayMinutes) return '';
   const s = arrivalClockMinutes(slot.start);
   if (s == null || isNaN(s)) return '';
-  const e = s + (parseInt(evData.arrivalStayMinutes, 10) || 120);
+  const e = s + (parseInt(evData.arrivalStayMinutes, 10) || 120) * (extended ? 2 : 1);
   const f = (m) => { m = ((m % 1440) + 1440) % 1440; const h = Math.floor(m / 60), mm = m % 60; return { t: ((h % 12) || 12) + ':' + String(mm).padStart(2, '0'), ap: h < 12 ? 'AM' : 'PM' }; };
   const a = f(s), b = f(e);
   return a.ap === b.ap ? (a.t + '\u2013' + b.t + ' ' + b.ap) : (a.t + ' ' + a.ap + '\u2013' + b.t + ' ' + b.ap);
@@ -230,29 +232,46 @@ function arrivalClockMinutes(t) {
   const p = String(t || '').split(':');
   return (parseInt(p[0], 10) || 0) * 60 + (parseInt(p[1], 10) || 0);
 }
-function arrivalRoomLeft(evData, slot) {
+// Each booking holds its spot from its arrival time for the stay (2 hours), or
+// twice that when the guest added the second 2-hour block (registration
+// extraStay: true). wantStay = how long the NEW booking would stay.
+function arrivalRoomLeft(evData, slot, wantStay) {
   const cap = parseInt(evData && evData.arrivalRoomCap, 10);
   if (!cap || !slot || !slot.start) return Infinity;
   const stay = parseInt(evData.arrivalStayMinutes, 10) || 120;
-  const slots = getArrivalSlots(evData).filter(function(s) { return s && s.start; });
-  const people = {};
+  const reset = Math.max(0, parseInt(evData.arrivalResetMinutes, 10) || 0);
+  const want = (wantStay || stay) + reset;
+  const startOf = {};
+  getArrivalSlots(evData).forEach(function(x) { if (x && x.start) startOf[String(x.id || '').trim().toLowerCase()] = arrivalClockMinutes(x.start); });
+  const groups = [];
   (Array.isArray(evData.registrations) ? evData.registrations : []).forEach(function(r) {
-    const id = String((r && r.arrivalSlot) || '').trim().toLowerCase();
-    if (id) people[id] = (people[id] || 0) + (parseInt(r.qty, 10) || 1);
+    const st = startOf[String((r && r.arrivalSlot) || '').trim().toLowerCase()];
+    if (st === undefined) return;
+    groups.push({ s: st, e: st + (r.extraStay ? 2 * stay : stay) + reset, q: parseInt(r.qty, 10) || 1 });
   });
   const s0 = arrivalClockMinutes(slot.start);
+  const moments = [s0].concat(groups.map(function(g) { return g.s; }).filter(function(t) { return t > s0 && t < s0 + want; }));
   let worst = 0;
-  slots.forEach(function(m) {
-    const mt = arrivalClockMinutes(m.start);
-    if (mt < s0 || mt >= s0 + stay) return;
+  moments.forEach(function(m) {
     let inside = 0;
-    slots.forEach(function(o) {
-      const ot = arrivalClockMinutes(o.start);
-      if (ot <= mt && ot > mt - stay) inside += people[String(o.id || '').trim().toLowerCase()] || 0;
-    });
+    groups.forEach(function(g) { if (g.s <= m && m < g.e) inside += g.q; });
     if (inside > worst) worst = inside;
   });
   return cap - worst;
+}
+
+// "Want to keep the party going?" second 2-hour block at a discount. Offered only
+// when the event sets arrivalExtendPct, the longer stay ends by
+// arrivalExtendLatestEnd (default: the event's endTime), and the room limit has
+// space for the whole party for all 4 hours.
+function arrivalExtendCheck(evData, slot, qty) {
+  const pct = parseFloat(evData && evData.arrivalExtendPct);
+  if (!(pct >= 0) || !slot || !slot.start || !evData.arrivalRoomCap) return { ok: false, why: 'not offered' };
+  const stay = parseInt(evData.arrivalStayMinutes, 10) || 120;
+  const latest = evData.arrivalExtendLatestEnd || evData.endTime;
+  if (latest && arrivalClockMinutes(slot.start) + 2 * stay > arrivalClockMinutes(latest)) return { ok: false, why: 'too late' };
+  const left = arrivalRoomLeft(evData, slot, 2 * stay);
+  return left >= qty ? { ok: true, pct: pct } : { ok: false, why: 'no room', left: left };
 }
 
 // Fetch events.json straight from the repo via the authenticated Contents API,
@@ -351,6 +370,7 @@ exports.handler = async function(event) {
     const seatingOptionId = body.seatingOptionId || '';
     // Optional: staggered arrival wave, for events that define arrivalSlots.
     const arrivalSlotId = body.arrivalSlot || '';
+    const wantsExtraStay = body.extendStay === true || body.extendStay === 'true';
     // Optional: multi-line cart for events that mix tiers in one checkout
     const lineItemsIn = Array.isArray(body.lineItems) ? body.lineItems : null;
 
@@ -532,6 +552,16 @@ exports.handler = async function(event) {
       }
     }
 
+    let extraStay = null;
+    if (wantsExtraStay) {
+      const xc = arrivalExtendCheck(evData, chosenArrivalSlot, qty);
+      if (!xc.ok) {
+        return { statusCode: 409, headers, body: JSON.stringify({ error: xc.why === 'not offered'
+          ? 'The extra 2 hours is not offered for this event.'
+          : 'The extra 2 hours isn\u2019t available at ' + ((chosenArrivalSlot && chosenArrivalSlot.label) || 'that time') + ' \u2014 please remove it or pick an earlier time.' }) };
+      }
+      extraStay = xc;
+    }
     const remaining = (evData.totalCapacity || 0) - (evData.registeredCount || 0);
     if (evData.totalCapacity && remaining < qty) {
       return { statusCode: 409, headers, body: JSON.stringify({ error: 'Not enough seats. Only ' + remaining + ' remaining.' }) };
@@ -539,7 +569,7 @@ exports.handler = async function(event) {
 
     // Build the Square line_items array.
     // Timed arrivals: the guest's own start and end time rides on the ticket line.
-    const ticketWindow = arrivalWindowText(evData, chosenArrivalSlot);
+    const ticketWindow = arrivalWindowText(evData, chosenArrivalSlot, !!extraStay);
     const ticketWindowNote = ticketWindow ? ' \u00b7 Your time: ' + ticketWindow + ' (' + String(chosenArrivalSlot.label || '') + ' arrival)' : '';
     let squareLineItems = [];
     let tierName = evData.name;
@@ -636,6 +666,18 @@ exports.handler = async function(event) {
         note: (evData.date || '') + ' at The Quarry' + ticketWindowNote,
         quantity: String(qty),
         base_price_money: { amount: effectiveUnitPrice, currency: 'USD' }
+      });
+    }
+
+    // ---- SECOND 2-HOUR BLOCK (timed arrivals) -----------------------------
+    // Its own line so the discount is visible; priced off the per-person ticket.
+    if (extraStay) {
+      const base = (evData.tiers && evData.tiers[0] && evData.tiers[0].pricePerPerson) || evData.price || 0;
+      squareLineItems.push({
+        name: 'Extra 2 hours (' + extraStay.pct + '% off) - ' + (evData.name || ''),
+        note: (evData.date || '') + ' \u00b7 Your time: ' + ticketWindow,
+        quantity: String(qty),
+        base_price_money: { amount: Math.round(base * (1 - extraStay.pct / 100)), currency: 'USD' }
       });
     }
 
@@ -768,7 +810,7 @@ exports.handler = async function(event) {
         metadata: safeMeta
       },
       checkout_options: {
-        redirect_url: (successUrl || siteUrl + '/quarry-events.html') + '?registration=success&event=' + eventId + (chosenArrivalSlot && chosenArrivalSlot.start ? '&arrival=' + encodeURIComponent(String(chosenArrivalSlot.id || '')) : ''),
+        redirect_url: (successUrl || siteUrl + '/quarry-events.html') + '?registration=success&event=' + eventId + (chosenArrivalSlot && chosenArrivalSlot.start ? '&arrival=' + encodeURIComponent(String(chosenArrivalSlot.id || '')) + (extraStay ? '&ext=1' : '') : ''),
         ask_for_shipping_address: false,
         accepted_payment_methods: {
           apple_pay: true, google_pay: true, cash_app_pay: true
@@ -793,6 +835,7 @@ exports.handler = async function(event) {
         var prefix = 'Event - ';
         var tail = ((chosenOption && chosenOption.name) ? ' - ' + chosenOption.name : '')
           + ((chosenArrivalSlot && chosenArrivalSlot.label) ? ' - ' + chosenArrivalSlot.label + ' arrival' : '')
+          + (extraStay ? ' + extra 2 hours' : '')   // webhook/reconcile record extraStay from this
           + ' x' + qty;
         var namePart = String(evData.name || '');
         var budget = MAX_NOTE - prefix.length - tail.length;
