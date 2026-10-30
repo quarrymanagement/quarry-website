@@ -92,7 +92,7 @@
         if (!el.isConnected) return clearInterval(ivb);
         var p = boardParts(d);
         if (!p) { tl.hidden = true; tt.hidden = true; var nt = bd.querySelector(".qe-board-note"); if (nt) nt.hidden = true; dn.hidden = !dn.textContent; bd.hidden = !dn.textContent; return; }
-        for (var i = 0; i < 4; i++) bs[i].textContent = i ? z2(p[i]) : p[i];
+        for (var i = 0; i < 4; i++) bs[i].textContent = i ? z2(p[i]) : p[i]; var dl = bs[0].nextSibling; if (dl) dl.textContent = p[0] === 1 ? "Day" : "Days";
       };
       var ivb = setInterval(gob, 1000); gob();
     }
