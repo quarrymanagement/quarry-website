@@ -45,6 +45,7 @@ const RESTAURANT_KEYWORDS = [
   'the quarry',
   'new melle',
   '63365',
+  '63385',       // correct zip (Matt, Oct 30); 63365 kept for older receipts
   'highway z',
   'hwy z',
   '3960',          // street number

@@ -161,7 +161,7 @@ async function sendDeletionConfirmation(email, name) {
           '<p style="font-size:0.95rem;color:rgba(245,240,232,0.85);line-height:1.7;">As requested, your Quarry Rewards account and all associated data — your points balance, visit history, and contact details — have been permanently removed. You will not receive any more rewards emails or notifications from us.</p>' +
           '<p style="font-size:0.95rem;color:rgba(245,240,232,0.85);line-height:1.7;">If this was a mistake, you are welcome to sign up again any time at <a href="https://thequarrystl.com/quarry-app-customized.html" style="color:#D4AF6A;">thequarrystl.com</a>. A new account will start fresh — prior points cannot be restored.</p>' +
           '<p style="font-size:0.95rem;color:rgba(245,240,232,0.85);line-height:1.7;margin-top:24px;">Thanks for being a Quarry guest.</p>' +
-          '<div style="margin-top:36px;padding-top:18px;border-top:1px solid rgba(196,149,106,0.15);font-size:0.7rem;color:rgba(245,240,232,0.4);text-align:center;">3960 Highway Z · New Melle, MO 63365 · (636) 224-8257</div>' +
+          '<div style="margin-top:36px;padding-top:18px;border-top:1px solid rgba(196,149,106,0.15);font-size:0.7rem;color:rgba(245,240,232,0.4);text-align:center;">3960 Highway Z · New Melle, MO 63385 · (636) 224-8257</div>' +
         '</div>',
     }],
   });

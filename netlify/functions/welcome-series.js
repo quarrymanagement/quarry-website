@@ -101,7 +101,7 @@ function brandedShell(title, bodyHtml) {
       '<div style="text-align:center;font-size:0.7rem;letter-spacing:0.32em;color:#B8933A;margin-bottom:22px;">THE QUARRY · NEW MELLE · MO</div>' +
       '<h1 style="font-size:1.45rem;text-align:center;color:#F5F0E8;font-weight:600;margin-bottom:18px;">' + title + '</h1>' +
       bodyHtml +
-      '<div style="margin-top:36px;padding-top:18px;border-top:1px solid rgba(196,149,106,0.15);font-size:0.7rem;color:rgba(245,240,232,0.4);text-align:center;font-family:Arial,sans-serif;">3960 Highway Z · New Melle, MO 63365 · (636) 224-8257</div>' +
+      '<div style="margin-top:36px;padding-top:18px;border-top:1px solid rgba(196,149,106,0.15);font-size:0.7rem;color:rgba(245,240,232,0.4);text-align:center;font-family:Arial,sans-serif;">3960 Highway Z · New Melle, MO 63385 · (636) 224-8257</div>' +
     '</div>'
   );
 }

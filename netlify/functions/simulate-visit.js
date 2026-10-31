@@ -173,7 +173,7 @@ async function sendVisitEmail({ member, visitAmount, basePoints, birthdayBonus, 
         '<a href="https://thequarrystl.com/quarry-app-customized.html" style="display:inline-block;padding:14px 32px;background:#1A1A1A;border:1px solid #1A1A1A;color:#D4AF6A;font-size:0.78rem;letter-spacing:0.22em;text-transform:uppercase;text-decoration:none;font-family:Arial,sans-serif;">View Your Rewards</a>' +
       '</div>' +
       '<div style="margin-top:24px;font-size:0.7rem;color:#999999;text-align:center;font-style:italic;">[Test email triggered via /simulate-visit · safe to ignore]</div>' +
-      '<div style="margin-top:18px;padding-top:18px;border-top:1px solid #E8E0D0;font-size:0.7rem;color:#888888;text-align:center;font-family:Arial,sans-serif;">3960 Highway Z · New Melle, MO 63365 · (636) 224-8257</div>' +
+      '<div style="margin-top:18px;padding-top:18px;border-top:1px solid #E8E0D0;font-size:0.7rem;color:#888888;text-align:center;font-family:Arial,sans-serif;">3960 Highway Z · New Melle, MO 63385 · (636) 224-8257</div>' +
     '</div>';
 
   const payload = JSON.stringify({

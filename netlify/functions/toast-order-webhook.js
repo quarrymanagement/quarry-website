@@ -186,7 +186,7 @@ async function sendTierEmail(email, name, tier) {
           '<div style="text-align:center;font-style:italic;color:rgba(245,240,232,0.6);margin-bottom:28px;">You have been promoted.</div>' +
           '<div style="font-size:0.95rem;line-height:1.7;color:rgba(245,240,232,0.85);margin-bottom:24px;font-family:Georgia,serif;">' + data.blurb + '</div>' +
           '<div style="text-align:center;margin-top:36px;"><a href="https://thequarrystl.com/quarry-app-customized.html" style="display:inline-block;padding:14px 32px;border:1px solid #B8933A;color:#D4AF6A;font-size:0.78rem;letter-spacing:0.22em;text-transform:uppercase;text-decoration:none;font-family:Arial,sans-serif;">Open the App</a></div>' +
-          '<div style="margin-top:36px;padding-top:18px;border-top:1px solid rgba(196,149,106,0.15);font-size:0.7rem;color:rgba(245,240,232,0.4);text-align:center;">3960 Highway Z · New Melle, MO 63365 · (636) 224-8257</div>' +
+          '<div style="margin-top:36px;padding-top:18px;border-top:1px solid rgba(196,149,106,0.15);font-size:0.7rem;color:rgba(245,240,232,0.4);text-align:center;">3960 Highway Z · New Melle, MO 63385 · (636) 224-8257</div>' +
         '</div>',
     }],
   });
@@ -288,7 +288,7 @@ async function sendVisitEmail({ member, visitAmount, basePoints, birthdayBonus, 
             '<a href="https://thequarrystl.com/quarry-app-customized.html" style="display:inline-block;padding:14px 32px;background:#1A1A1A;border:1px solid #1A1A1A;color:#D4AF6A;font-size:0.78rem;letter-spacing:0.22em;text-transform:uppercase;text-decoration:none;font-family:Arial,sans-serif;">View Your Rewards</a>' +
           '</div>' +
 
-          '<div style="margin-top:36px;padding-top:18px;border-top:1px solid #E8E0D0;font-size:0.7rem;color:#888888;text-align:center;font-family:Arial,sans-serif;">3960 Highway Z · New Melle, MO 63365 · (636) 224-8257</div>' +
+          '<div style="margin-top:36px;padding-top:18px;border-top:1px solid #E8E0D0;font-size:0.7rem;color:#888888;text-align:center;font-family:Arial,sans-serif;">3960 Highway Z · New Melle, MO 63385 · (636) 224-8257</div>' +
         '</div>',
     }],
   });
